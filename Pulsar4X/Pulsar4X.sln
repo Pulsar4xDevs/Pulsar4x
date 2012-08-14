@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.WinForms", "Pulsar4X.WinForms\Pulsar4X.WinForms.csproj", "{CA0207F7-84BE-7940-BA35-3B35E1DF6595}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18} = {F11F8C89-F20E-E44C-A40B-3051E1877D18}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Lib", "Pulsar4X.Lib\Pulsar4X.Lib.csproj", "{F11F8C89-F20E-E44C-A40B-3051E1877D18}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CA0207F7-84BE-7940-BA35-3B35E1DF6595}.Release|x86.ActiveCfg = Release|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{F11F8C89-F20E-E44C-A40B-3051E1877D18}.Release|x86.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
