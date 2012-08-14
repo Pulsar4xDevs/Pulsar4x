@@ -16,7 +16,7 @@ solution "Pulsar4X"
 			"System.Windows.Forms",
 			"System.Drawing"
 			}
-		files { "Pulsar4X/Pulsar4X.WinForms/*.cs" }
+		files { "Pulsar4X/Pulsar4X.WinForms/**.cs" }
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
@@ -38,7 +38,9 @@ solution "Pulsar4X"
 			"System.Data",
 			"System.Xml"
 			}
-		files { "Pulsar4X/Pulsar4X.Lib/*.cs" }
+		files { 
+			"Pulsar4X/Pulsar4X.Lib/**.cs",
+			}
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.Lib/bin/Debug"
