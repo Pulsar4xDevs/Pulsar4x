@@ -9,7 +9,6 @@ solution "Pulsar4X"
 		language "C#"
 		location "Pulsar4X/Pulsar4X.WinForms"
 		objdir "Pulsar4X/Pulsar4X.WinForms/obj"
-		targetdir "Pulsar4X/
 		links { -- Add any needed references here
 			"Pulsar4X.Lib",
 			"System",
