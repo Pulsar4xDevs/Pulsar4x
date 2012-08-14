@@ -3,6 +3,20 @@ solution "Pulsar4X"
 	configurations { "Debug", "Release" }
 	location "Pulsar4X"
 	
+-- Find the required log4net library
+function log4netlib()
+	if (os.isdir("Pulsar4X/deps/log4net-1.2.11")) then -- Have the log4net binaries
+		if (_ACTION ~= "vs2010") then
+			-- Assume mono 2.0
+			return "Pulsar4X/deps/log4net-1.2.11/bin/mono/2.0/release/log4net.dll"
+		else
+			-- .net 4.0 Compact Framework
+			return "Pulsar4X/deps/log4net-1.2.11/bin/net-cp/4.0/release/log4net.dll"
+		end
+	end
+end
+	
+	
 	-- WinForms Project, main UI project
 	project "Pulsar4X.WinForms"
 		kind "WindowedApp"
@@ -14,7 +28,8 @@ solution "Pulsar4X"
 			"System",
 			"System.Data",
 			"System.Windows.Forms",
-			"System.Drawing"
+			"System.Drawing",
+			log4netlib()
 			}
 		files { "Pulsar4X/Pulsar4X.WinForms/**.cs" }
 		
@@ -36,7 +51,8 @@ solution "Pulsar4X"
 		links { -- Add any needed references here
 			"System",
 			"System.Data",
-			"System.Xml"
+			"System.Xml",
+			log4netlib()
 			}
 		files { 
 			"Pulsar4X/Pulsar4X.Lib/**.cs",
@@ -52,6 +68,7 @@ solution "Pulsar4X"
 			flags { "Optimize" }
 			
 			
+
 			
 function defaultaction(osName, actionName)
    if (actionName == nil) then
