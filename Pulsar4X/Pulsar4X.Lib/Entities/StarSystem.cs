@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.Entities
 {
-    public class Star
+    public class StarSystem
     {
     }
 }

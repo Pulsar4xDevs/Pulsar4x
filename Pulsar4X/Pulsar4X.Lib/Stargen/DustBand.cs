@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Pulsar4X
+namespace Pulsar4X.Stargen
 {
-    public class Class1
+    class DustBand
     {
     }
 }
