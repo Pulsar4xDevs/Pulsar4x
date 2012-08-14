@@ -2,16 +2,18 @@
 solution "Pulsar4X"
 	configurations { "Debug", "Release" }
 	location "Pulsar4X"
+	framework "4.0"
+
 	
 -- Find the required log4net library
 function log4netlib()
 	if (os.isdir("Pulsar4X/deps/log4net-1.2.11")) then -- Have the log4net binaries
-		if (_ACTION ~= "vs2010") then
-			-- Assume mono 2.0
+		if (_OPTIONS.dotnet == "mono") then
+			-- Assume Mono 2.0
 			return "Pulsar4X/deps/log4net-1.2.11/bin/mono/2.0/release/log4net.dll"
 		else
-			-- .net 4.0 Compact Framework
-			return "Pulsar4X/deps/log4net-1.2.11/bin/net-cp/4.0/release/log4net.dll"
+			-- .NET 4.0
+			return "Pulsar4X/deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll"
 		end
 	end
 end
@@ -66,17 +68,16 @@ end
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.Lib/bin/Release"
 			flags { "Optimize" }
-			
-			
 
 			
+-- defaultaction setup
 function defaultaction(osName, actionName)
-   if (actionName == nil) then
-     _ACTION = _ACTION or osName
-   end	   
-   if os.is(osName) then
-      _ACTION = _ACTION or actionName
-   end
+	if (actionName == nil) then
+		_ACTION = _ACTION or osName
+	end	   
+	if os.is(osName) then
+		_ACTION = _ACTION or actionName
+	end
 end
 
 defaultaction "vs2010"
