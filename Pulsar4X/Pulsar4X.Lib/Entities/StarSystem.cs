@@ -8,6 +8,13 @@ namespace Pulsar4X.Entities
 {
     public class StarSystem
     {
+        public string Name { get; set; }
         public ObservableCollection<Star> Stars { get; set; }
+        
+        public StarSystem(string name)
+        {
+            Name = name;
+            Stars = new ObservableCollection<Star>();
+        }
     }
 }

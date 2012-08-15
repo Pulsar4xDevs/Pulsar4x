@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{CA0207F7-84BE-7940-BA35-3B35E1DF6595}</ProjectGuid>
+    <ProjectGuid>{3FE32331-A11C-8847-B211-079AE052A954}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pulsar4X.WinForms</RootNamespace>
@@ -34,14 +34,14 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
-      <Project>{F11F8C89-F20E-E44C-A40B-3051E1877D18}</Project>
+      <Project>{BFACB427-75C8-1742-9A08-EF98EA441626}</Project>
       <Name>Pulsar4X.Lib</Name>
     </ProjectReference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
-    <Reference Include="C:\Users\Charl\workspace\Pulsar4x\Pulsar4X\deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll" />
+    <Reference Include="C:\Source\zzzSandbox\GitHub\Pulsar4x\Pulsar4X\deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Form1.Designer.cs">

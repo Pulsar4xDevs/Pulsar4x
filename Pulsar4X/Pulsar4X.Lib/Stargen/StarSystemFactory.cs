@@ -1,21 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Pulsar4X.Entities;
+﻿using Pulsar4X.Entities;
 
 namespace Pulsar4X.Stargen
 {
     public class StarSystemFactory
     {
-        public StarSystem Create()
-        {
-            throw new NotImplementedException();
-        }
+        private readonly double _minimumStellarAge;
+        private readonly double _maximumStellarAge;
+        private readonly bool _generateMoons;
 
-        public StarSystem CreateSol()
+
+        public StarSystemFactory(double minStellarAge, double maxStellarAge,  bool genMoons)
         {
-            throw new NotImplementedException();
+            _minimumStellarAge = minStellarAge;
+            _maximumStellarAge = maxStellarAge;
+            _generateMoons = genMoons;
+        }
+        
+        public StarSystem Create(string name)
+        {
+            var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge,  _generateMoons);
+            var ss = accrete.Create(name);
+
+            return ss;
         }
     }
 }

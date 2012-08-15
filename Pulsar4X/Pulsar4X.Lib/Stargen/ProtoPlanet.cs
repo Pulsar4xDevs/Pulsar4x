@@ -1,12 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Pulsar4X.Entities;
-
-namespace Pulsar4X.Stargen
+﻿namespace Pulsar4X.Stargen
 {
-    class ProtoPlanet : Planet
+    public class ProtoPlanet
     {
+        public double SemiMajorAxis { get; set; }
+        public double Eccentricity { get; set; }
+        public double Mass { get; set; }
+        public double DustMass { get; set; }
+        public double GasMass { get; set; }
+        //public double MassToCollectGas { get; set; }
+
+        public ProtoPlanet(double a, double e, double mass)
+        {
+            SemiMajorAxis = a;
+            Eccentricity = e;
+            Mass = mass;
+            DustMass = 0;
+            GasMass = 0.0;
+        }
+
+        
     }
 }
