@@ -17,7 +17,13 @@ function log4netlib()
 		end
 	end
 end
-	
+
+-- Find the required nunit library
+function nunitlib()
+	if (os.isdir("Pulsar4X/deps/NUnit-2.6.1")) then -- Have the log4net binaries
+		return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
+	end
+end
 	
 	-- WinForms Project, main UI project
 	project "Pulsar4X.WinForms"
@@ -69,6 +75,31 @@ end
 			targetdir "Pulsar4X/Pulsar4X.Lib/bin/Release"
 			flags { "Optimize" }
 
+	-- Unit Test Project, contains unit tests
+	project "Pulsar4X.Tests"
+		kind "SharedLib"
+		language "C#"
+		location "Pulsar4X/Pulsar4X.Tests"
+		objdir "Pulsar4X/Pulsar4X.Tests/obj"
+		links { -- Add any needed references here
+			"Pulsar4X.Lib",
+			"System",
+			"System.Data",
+			"System.Xml",
+			nunitlib()
+			}
+		files { 
+			"Pulsar4X/Pulsar4X.Tests/**.cs",
+			}
+		
+		configuration "Debug"
+			targetdir "Pulsar4X/Pulsar4X.Tests/bin/Debug"
+			defines { "DEBUG" }
+			flags { "Symbols" }
+			
+		configuration "Release"
+			targetdir "Pulsar4X/Pulsar4X.Tests/bin/Release"
+			flags { "Optimize" }
 			
 -- defaultaction setup
 function defaultaction(osName, actionName)

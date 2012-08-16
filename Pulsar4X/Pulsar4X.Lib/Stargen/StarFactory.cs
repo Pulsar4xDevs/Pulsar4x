@@ -15,11 +15,19 @@ namespace Pulsar4X.Stargen
             _maximumAge = maxAge;
         }
 
-        public List<Star> Create(string name)
+        /// <summary>
+        /// Creates a collection of stars for use in a StarSystem. By default, it will generate a 
+        /// weighted random number of stars between 1 and 3. If the overrideNumberOfStars parameter 
+        /// is set to a value greater than 0, it will generate that many stars.
+        /// </summary>
+        /// <param name="name">The name the star or collection of stars should derive from</param>
+        /// <param name="overrideNumberOfStars">0 by default to allow for a weighted random number of stars, set to a value if a specific number of stars are needed</param>
+        /// <returns>List<Star></Star></returns>
+        public List<Star> Create(string name, int overrideNumberOfStars = 0)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name cannot be null or empty.");
 
-            var numberOfStars = GetNumberOfStars();
+            int numberOfStars = overrideNumberOfStars > 0 ? overrideNumberOfStars : GetNumberOfStars();
             var stars = new List<Star>();
             for (var i = 1; i <= numberOfStars; i++)
             {
@@ -47,19 +55,19 @@ namespace Pulsar4X.Stargen
             switch (spectrum)
             {
                 case StarSpectrum.O:
-                    return  MathUtilities.Random.NextDouble(16.0, 150.0);
+                    return MathUtilities.Random.NextDouble(16.0, 150.0);
                 case StarSpectrum.B:
-                    return  MathUtilities.Random.NextDouble(2.1, 16.0);
+                    return MathUtilities.Random.NextDouble(2.1, 16.0);
                 case StarSpectrum.A:
-                    return  MathUtilities.Random.NextDouble(1.4, 2.1);
+                    return MathUtilities.Random.NextDouble(1.4, 2.1);
                 case StarSpectrum.F:
-                    return  MathUtilities.Random.NextDouble(1.04, 1.4);
+                    return MathUtilities.Random.NextDouble(1.04, 1.4);
                 case StarSpectrum.G:
-                    return  MathUtilities.Random.NextDouble(.8, 1.04);
+                    return MathUtilities.Random.NextDouble(.8, 1.04);
                 case StarSpectrum.K:
-                    return  MathUtilities.Random.NextDouble(.45, .8);
+                    return MathUtilities.Random.NextDouble(.45, .8);
                 case StarSpectrum.M:
-                    return  MathUtilities.Random.NextDouble(.07, .45);
+                    return MathUtilities.Random.NextDouble(.07, .45);
                 default:
                     throw new ArgumentException(string.Format("Unknown Spectrum: {0}", spectrum.ToString()));
             }
@@ -162,17 +170,8 @@ namespace Pulsar4X.Stargen
 
         private string GetPostfix(int i)
         {
-            switch (i)
-            {
-                case 1:
-                    return "A";
-                case 2:
-                    return "B";
-                case 3:
-                    return "C";
-                default:
-                    throw new ArgumentException("Unexpected number of stars.");
-            }
+            var c = (char)(65 + (i - 1));
+            return c.ToString();
         }
     }
 }

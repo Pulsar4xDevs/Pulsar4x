@@ -1,4 +1,5 @@
-﻿using Pulsar4X.Entities;
+﻿using System;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.Stargen
 {
@@ -18,6 +19,8 @@ namespace Pulsar4X.Stargen
         
         public StarSystem Create(string name)
         {
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name cannot be null or empty.");
+
             var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge,  _generateMoons);
             var ss = accrete.Create(name);
 
