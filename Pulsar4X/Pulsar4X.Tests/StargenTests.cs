@@ -18,12 +18,16 @@ namespace Pulsar4X.Tests
         public void Stargen_Default_StarSystem_With_Moons()
         {
             var ssf = new StarSystemFactory(MinAge, MaxAge, true);
-            var ss = ssf.Create("Proxima");
+            StarSystem ss = null;
+            for (int i = 0; i < 200; i++)
+            {
+                ss = ssf.Create("Proxima");
 
-            Assert.IsNotNull(ss);
-            Assert.AreEqual("Proxima", ss.Name);
-            Assert.IsNotNull(ss.Stars);
-            Assert.GreaterOrEqual(ss.Stars.Count, 1);
+                Assert.IsNotNull(ss);
+                Assert.AreEqual("Proxima", ss.Name);
+                Assert.IsNotNull(ss.Stars);
+                Assert.GreaterOrEqual(ss.Stars.Count, 1);
+            }
 
             PrintSummary(ss);
         }
@@ -32,12 +36,16 @@ namespace Pulsar4X.Tests
         public void Stargen_Default_StarSystem_Without_Moons()
         {
             var ssf = new StarSystemFactory(MinAge, MaxAge, false);
-            var ss = ssf.Create("Proxima");
+            StarSystem ss = null;
+            for (int i = 0; i < 200; i++)
+            {
+                ss = ssf.Create("Proxima");
 
-            Assert.IsNotNull(ss);
-            Assert.AreEqual("Proxima", ss.Name);
-            Assert.IsNotNull(ss.Stars);
-            Assert.GreaterOrEqual(ss.Stars.Count, 1);
+                Assert.IsNotNull(ss);
+                Assert.AreEqual("Proxima", ss.Name);
+                Assert.IsNotNull(ss.Stars);
+                Assert.GreaterOrEqual(ss.Stars.Count, 1);
+            }
 
             PrintSummary(ss);
         }
@@ -46,12 +54,14 @@ namespace Pulsar4X.Tests
         public void Stargen_Default_StarSystem_With_No_Name_Throws()
         {
             var ssf = new StarSystemFactory(MinAge, MaxAge, true);
+
             var ss = ssf.Create("");
 
             Assert.IsNotNull(ss);
             Assert.AreEqual("", ss.Name);
             Assert.IsNotNull(ss.Stars);
             Assert.GreaterOrEqual(ss.Stars.Count, 1);
+
 
             PrintSummary(ss);
         }

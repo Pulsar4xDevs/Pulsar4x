@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using Pulsar4X.Stargen;
 
 namespace Pulsar4X.WinForms
 {
@@ -13,9 +14,21 @@ namespace Pulsar4X.WinForms
         [STAThread]
         static void Main()
         {
+
+            var test = Constants.Gasses.H.Name;
+            /*
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
+
+            */
+
+            double MinAge = 1.0E9;
+            double MaxAge = 6.0E9;
+
+            var ssf = new StarSystemFactory(MinAge, MaxAge, true);
+            var ss = ssf.Create("Proxima");
+
         }
     }
 }

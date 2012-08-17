@@ -290,80 +290,81 @@ namespace Pulsar4X.Stargen
         {
             if (planet.SurfacePressure > 0)
             {
-                var amount = new List<double>();
+                //var amounts = new List<double>();
                 double totamount = 0;
                 var pressure = planet.SurfacePressure / Constants.Units.MILLIBARS_PER_BAR;
-                bool gasesExist = false;
-                for (int i = 0; i < ElementalTable.Instance.Count; i++)
+                //bool gasesExist = false;
+                
+                foreach(Molecule gas in Constants.Gasses.GasLookup.Values)
+                //for (int i = 0; i < ElementalTable.Instance.Count; i++)
                 {
-                    double yp = ElementalTable.Instance[i].BoilingPoint /
+                    double yp = gas.BoilingPoint /
                                      (373.0 * ((Math.Log((pressure) + 0.001) / -5050.5) + (1.0 / 373.0)));
 
-                    if ((yp >= 0 && yp < planet.LowTemperature) && (ElementalTable.Instance[i].AtomicWeight >= planet.MolecularWeightRetained))
+                    if ((yp >= 0 && yp < planet.LowTemperature) && (gas.AtomicWeight >= planet.MolecularWeightRetained))
                     {
-                        var vrms = EnviroUtilities.RootMeanSquareVelocity(ElementalTable.Instance[i].AtomicWeight, planet.ExoSphericTemperature);
+                        var vrms = EnviroUtilities.RootMeanSquareVelocity(gas.AtomicWeight, planet.ExoSphericTemperature);
                         var pvrms = Math.Pow(1 / (1 + vrms / planet.EscapeVelocity), planet.Primary.Age / 1e9);
-                        var abund = ElementalTable.Instance[i].AbundanceS; 				/* gases[i].abunde */
+                        var abund = gas.AbundanceS; 				/* gases[i].abunde */
                         var react = 1.0D;
                         var fract = 1.0D;
                         var pres2 = 1.0D;
 
-                        if (ElementalTable.Instance[i].Symbol == "Ar")
+                        if (gas.Symbol == "Ar")
                         {
                             react = .15 * planet.Primary.Age / 4e9;
                         }
-                        else if (ElementalTable.Instance[i].Symbol == "He")
+                        else if (gas.Symbol == "He")
                         {
                             abund = abund * (0.001 + (planet.MassOfGas / planet.Mass));
                             pres2 = (0.75 + pressure);
-                            react = Math.Pow(1 / (1 + ElementalTable.Instance[i].Reactivity), planet.Primary.Age / 2e9 * pres2);
+                            react = Math.Pow(1 / (1 + gas.Reactivity), planet.Primary.Age / 2e9 * pres2);
                         }
-                        else if (((ElementalTable.Instance[i].Symbol == "O") || (ElementalTable.Instance[i].Symbol == "O2")) && (planet.Primary.Age > 2e9) && (planet.SurfaceTemperature > 270 && planet.SurfaceTemperature < 400))
+                        else if (((gas.Symbol == "O") || (gas.Symbol == "O2")) && (planet.Primary.Age > 2e9) && (planet.SurfaceTemperature > 270 && planet.SurfaceTemperature < 400))
                         {
                             /*	pres2 = (0.65 + pressure/2);			Breathable - M: .55-1.4 	*/
                             pres2 = (0.89 + pressure / 4);		/*	Breathable - M: .6 -1.8 	*/
-                            react = Math.Pow(1 / (1 + ElementalTable.Instance[i].Reactivity), Math.Pow(planet.Primary.Age / 2e9, 0.25) * pres2);
+                            react = Math.Pow(1 / (1 + gas.Reactivity), Math.Pow(planet.Primary.Age / 2e9, 0.25) * pres2);
                         }
-                        else if ((ElementalTable.Instance[i].Symbol == "CO2") && (planet.Primary.Age > 2e9) && (planet.SurfaceTemperature > 270 && planet.SurfaceTemperature < 400))
+                        else if ((gas.Symbol == "CO2") && (planet.Primary.Age > 2e9) && (planet.SurfaceTemperature > 270 && planet.SurfaceTemperature < 400))
                         {
                             pres2 = (0.75 + pressure);
-                            react = Math.Pow(1 / (1 + ElementalTable.Instance[i].Reactivity), Math.Pow(planet.Primary.Age / 2e9, 0.5) * pres2);
+                            react = Math.Pow(1 / (1 + gas.Reactivity), Math.Pow(planet.Primary.Age / 2e9, 0.5) * pres2);
                             react *= 1.5;
                         }
                         else
                         {
                             pres2 = (0.75 + pressure);
-                            react = Math.Pow(1 / (1 + ElementalTable.Instance[i].Reactivity), planet.Primary.Age / 2e9 * pres2);
+                            react = Math.Pow(1 / (1 + gas.Reactivity), planet.Primary.Age / 2e9 * pres2);
                         }
 
-                        fract = (1 - (planet.MolecularWeightRetained / ElementalTable.Instance[i].AtomicWeight));
-                        amount.Add(abund * pvrms * react * fract);
+                        fract = (1 - (planet.MolecularWeightRetained / gas.AtomicWeight));
+                        double amount = abund * pvrms * react * fract;
 
-                        totamount += amount[i];
-                        if (amount[i] > 0.0)
-                            gasesExist = true;
-                    }
-                    else
-                        amount.Add(0.0);
-                }
-
-                if (gasesExist)
-                {
-                    if (planet.Gases == null)
-                        planet.Gases = new ObservableCollection<Gas>();
-
-                    for (int i = 0; i < ElementalTable.Instance.Count; i++)
-                    {
-                        if (amount[i] > 0.0)
+                        totamount += amount;
+                        if (amount > 0.0)
                         {
+
+                            if (planet.Gases == null)
+                                planet.Gases = new ObservableCollection<Gas>();
                             planet.Gases.Add(new Gas()
                             {
-                                ElementId = ElementalTable.Instance[i].Id,
-                                SurfacePressure = planet.SurfacePressure * amount[i] / totamount
+                                ElementId = gas.Id,
+                                SurfacePressure = planet.SurfacePressure * amount
                             });
                         }
                     }
+
                 }
+
+                if (planet.Gases != null)
+                {
+                    foreach (Gas gas in planet.Gases)
+                    {
+                        gas.SurfacePressure /= totamount;
+                    }
+                }
+
 
             }
         }
