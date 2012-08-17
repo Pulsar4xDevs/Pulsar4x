@@ -15,5 +15,6 @@ namespace Pulsar4X.WinForms.Controls
         {
             InitializeComponent();
         }
+
     }
 }
