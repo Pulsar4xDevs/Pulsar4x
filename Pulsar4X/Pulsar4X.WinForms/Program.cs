@@ -15,7 +15,8 @@ namespace Pulsar4X.WinForms
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Pulsar4X.WinForms.Controls.UIController UIComponentControler = new Controls.UIController();
+            Application.Run(Controls.UIController.g_aMainForm);
         }
     }
 }

@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Pulsar4X
+namespace Pulsar4X.WinForms.Controls
 {
-    public partial class Form1 : Form
+    public partial class SystemGenAndDisplay : UserControl
     {
-        public Form1()
+        public SystemGenAndDisplay()
         {
             InitializeComponent();
         }

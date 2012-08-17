@@ -1,11 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{BFACB427-75C8-1742-9A08-EF98EA441626}</ProjectGuid>
+    <ProjectGuid>{01E9E4EE-41EF-C44F-B7F6-F4AE71939D65}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pulsar4X.Lib</RootNamespace>
@@ -28,8 +28,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants></DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -37,7 +36,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="C:\Source\zzzSandbox\GitHub\Pulsar4x\Pulsar4X\deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll" />
+    <Reference Include="C:\Users\SnopyDogy\Documents\GitHub\Pulsar4x\Pulsar4X\deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
@@ -56,7 +55,6 @@
     <Compile Include="Stargen\Accrete.cs" />
     <Compile Include="Stargen\AccretionBand.cs" />
     <Compile Include="Stargen\Breathability.cs" />
-    <Compile Include="Stargen\Constants.cs" />
     <Compile Include="Stargen\Helpers\AccreteUtilities.cs" />
     <Compile Include="Stargen\Helpers\EnviroUtilities.cs" />
     <Compile Include="Stargen\ProtoPlanet.cs" />

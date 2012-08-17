@@ -1,6 +1,6 @@
-﻿namespace Pulsar4X
+﻿namespace Pulsar4X.WinForms.Forms
 {
-    partial class Form1
+    partial class SubForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,12 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.MainPanel = new System.Windows.Forms.Panel();
+            this.SuspendLayout();
+            // 
+            // MainPanel
+            // 
+            this.MainPanel.Location = new System.Drawing.Point(13, 13);
+            this.MainPanel.Name = "MainPanel";
+            this.MainPanel.Size = new System.Drawing.Size(759, 537);
+            this.MainPanel.TabIndex = 0;
+            // 
+            // SubForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Text = "Form1";
+            this.ClientSize = new System.Drawing.Size(784, 562);
+            this.Controls.Add(this.MainPanel);
+            this.Name = "SubForm";
+            this.Text = "SubForm";
+            this.Load += new System.EventHandler(this.SubForm_Load);
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.Panel MainPanel;
     }
 }
-
