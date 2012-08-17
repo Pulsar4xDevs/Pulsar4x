@@ -182,7 +182,7 @@ namespace Pulsar4X
             }
         }
 
-        public static class Gasses
+        public static class Gases
         {
 
             public static Molecule H = new Molecule
@@ -287,7 +287,7 @@ namespace Pulsar4X
                 AbundanceE = 1e-10,
                 AbundanceS = 4.4978e-05,
                 Reactivity = 0,
-                MaximumInspiredPartialPressure = Constants.Gasses.InspiredPartialPressure.MAX_KR_IPP
+                MaximumInspiredPartialPressure = Constants.Gases.InspiredPartialPressure.MAX_KR_IPP
             };
 
             public static Molecule Xe = new Molecule

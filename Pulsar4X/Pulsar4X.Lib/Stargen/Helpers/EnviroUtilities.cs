@@ -407,7 +407,7 @@ namespace Pulsar4X.Stargen
         /// <returns></returns>
         public static double CloudFraction(double surfTemp, double smallestMwRetained, double equatRadius, double hydroFraction)
         {
-            if (smallestMwRetained > Constants.Gasses.H2O.AtomicWeight)
+            if (smallestMwRetained > Constants.Gases.H2O.AtomicWeight)
                 return 0.0;
 
             double surfArea = 4.0 * Math.PI * Math.Pow(equatRadius, 2.0);
@@ -764,7 +764,7 @@ namespace Pulsar4X.Stargen
                 planet.HydrosphereCover = 0.0;
                 boilOff = true;
 
-                if (planet.MolecularWeightRetained > Constants.Gasses.MolecularWeights.WATER_VAPOR)
+                if (planet.MolecularWeightRetained > Constants.Gases.MolecularWeights.WATER_VAPOR)
                     planet.CloudCover = 0.0;
                 else
                     planet.CloudCover = 1.0;
@@ -830,7 +830,7 @@ namespace Pulsar4X.Stargen
         public static double InspiredPartialPressure(double surfPressure, double gasPressure)
         {
             var fraction = gasPressure / surfPressure;
-            return (surfPressure - Constants.Gasses.InspiredPartialPressure.H20_ASSUMED_PRESSURE) * fraction;
+            return (surfPressure - Constants.Gases.InspiredPartialPressure.H20_ASSUMED_PRESSURE) * fraction;
         }
         
         /// <summary>
@@ -853,15 +853,15 @@ namespace Pulsar4X.Stargen
 
             for (index = 0; index < planet.Gases.Count; index++)
             {
-                Molecule gas = Constants.Gasses.GasLookup[planet.Gases[index].ElementId];
+                Molecule gas = Constants.Gases.GasLookup[planet.Gases[index].ElementId];
 
                 double ipp = InspiredPartialPressure(planet.SurfacePressure, planet.Gases[index].SurfacePressure);
 
                 if (ipp > gas.MaximumInspiredPartialPressure)
                     return Breathability.Poisonous;
 
-                if (gas.Id == Constants.Gasses.O.Id)
-                    oxygenOk = ((ipp >= Constants.Gasses.InspiredPartialPressure.MIN_O2_IPP) && (ipp <= Constants.Gasses.InspiredPartialPressure.MAX_O2_IPP));
+                if (gas.Id == Constants.Gases.O.Id)
+                    oxygenOk = ((ipp >= Constants.Gases.InspiredPartialPressure.MIN_O2_IPP) && (ipp <= Constants.Gases.InspiredPartialPressure.MAX_O2_IPP));
             }
 
             if (oxygenOk)

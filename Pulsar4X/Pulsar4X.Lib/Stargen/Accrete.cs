@@ -86,7 +86,7 @@ namespace Pulsar4X.Stargen
             planet.AxialTilt = EnviroUtilities.Inclination(planet.SemiMajorAxis);
 
             planet.ExoSphericTemperature = Constants.Sol.Earth.EXOSPHERE_TEMP / Math.Pow(planet.SemiMajorAxis / planet.Primary.EcoSphereRadius, 2.0);
-            planet.RootMeanSquaredVelocity = EnviroUtilities.RootMeanSquareVelocity(Constants.Gasses.MolecularWeights.MOL_NITROGEN, planet.ExoSphericTemperature);
+            planet.RootMeanSquaredVelocity = EnviroUtilities.RootMeanSquareVelocity(Constants.Gases.MolecularWeights.MOL_NITROGEN, planet.ExoSphericTemperature);
             planet.RadiusOfCore = EnviroUtilities.KothariRadius(planet.MassOfDust, false, planet.OrbitZone);
 
             // Calculate the radius as a gas giant, to verify it will retain gas.
@@ -122,8 +122,8 @@ namespace Pulsar4X.Stargen
                     double h2Mass = planet.MassOfGas * 0.85;
                     double heMass = (planet.MassOfGas - h2Mass) * 0.999;
 
-                    double h2Life = EnviroUtilities.GasLife(Constants.Gasses.MolecularWeights.MOL_HYDROGEN, planet);
-                    double heLife = EnviroUtilities.GasLife(Constants.Gasses.MolecularWeights.HELIUM, planet);
+                    double h2Life = EnviroUtilities.GasLife(Constants.Gases.MolecularWeights.MOL_HYDROGEN, planet);
+                    double heLife = EnviroUtilities.GasLife(Constants.Gases.MolecularWeights.HELIUM, planet);
 
                     if (h2Life < planet.Primary.Age)
                     {
@@ -295,7 +295,7 @@ namespace Pulsar4X.Stargen
                 var pressure = planet.SurfacePressure / Constants.Units.MILLIBARS_PER_BAR;
                 //bool gasesExist = false;
                 
-                foreach(Molecule gas in Constants.Gasses.GasLookup.Values)
+                foreach(Molecule gas in Constants.Gases.GasLookup.Values)
                 //for (int i = 0; i < ElementalTable.Instance.Count; i++)
                 {
                     double yp = gas.BoilingPoint /
