@@ -12,6 +12,9 @@ namespace Pulsar4X.Entities
         public ObservableCollection<Gas> Gases { get; set; } //gases in atmosphere
         public Star Primary { get; set; }
 
+        public long XSystem { get; set; }
+        public long YSystem { get; set; }
+
         //TODO: Currently Id is only unique in the star it belongs to, not unique across multiple stars
         public int Id { get; set; }
         public string Name { get; set; }

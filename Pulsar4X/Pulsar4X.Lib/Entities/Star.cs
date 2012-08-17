@@ -10,6 +10,12 @@ namespace Pulsar4X.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
+        public long XGalactic { get; set; }
+        public long YGalactic { get; set; }
+        public long XSystem { get; set; }
+        public long YSystem { get; set; }
+
         public double Luminosity { get; set; }
         public double Mass { get; set; }
         public double Life { get; set; }

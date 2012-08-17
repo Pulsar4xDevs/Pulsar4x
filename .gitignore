@@ -2,6 +2,8 @@ Pulsar4X/Pulsar4X.Lib/obj
 Pulsar4X/Pulsar4X.Lib/bin
 Pulsar4X/Pulsar4X.WinForms/obj
 Pulsar4X/Pulsar4X.WinForms/bin
+Pulsar4X/Pulsar4X.Tests/obj
+Pulsar4X/Pulsar4X.Tests/bin
 *.suo
 *.user
 Pulsar4X/_ReSharper.Pulsar4X
