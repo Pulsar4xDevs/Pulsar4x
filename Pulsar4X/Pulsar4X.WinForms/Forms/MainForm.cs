@@ -70,5 +70,18 @@ namespace Pulsar4X
             this.Activate();
         }
 
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            Size newSize = this.Size;
+            newSize.Width -= 42;            // Adjust size width to keet boarders
+            newSize.Height -= 63;           // Adjust size height to keep boarders.
+            MainPanel.Size = newSize;       // Set new MainPanel Size
+
+            foreach (Control control in MainPanel.Controls)
+            {
+                control.Size = newSize; // this will edit the size of any sub forms. there will generall only be the one DraggableTabControl.
+            }
+        }
+
     }
 }

@@ -186,16 +186,17 @@
             // 
             // MainPanel
             // 
+            this.MainPanel.AutoScroll = true;
             this.MainPanel.Location = new System.Drawing.Point(13, 28);
             this.MainPanel.Name = "MainPanel";
-            this.MainPanel.Size = new System.Drawing.Size(1315, 537);
+            this.MainPanel.Size = new System.Drawing.Size(1315, 706);
             this.MainPanel.TabIndex = 2;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1340, 577);
+            this.ClientSize = new System.Drawing.Size(1340, 746);
             this.Controls.Add(this.MainPanel);
             this.Controls.Add(this.MainMenu);
             this.MainMenuStrip = this.MainMenu;
@@ -208,6 +209,7 @@
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseDown);
             this.MouseEnter += new System.EventHandler(this.MainForm_MakeActive);
             this.MouseHover += new System.EventHandler(this.MainForm_MakeActive);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
             this.ResumeLayout(false);
