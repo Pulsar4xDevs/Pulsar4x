@@ -16,12 +16,13 @@ namespace Pulsar4X.WinForms
         {
 
             var test = Constants.Gasses.H.Name;
-            /*
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Pulsar4X.WinForms.Controls.UIController UIComponentControler = new Controls.UIController();
+            Application.Run(Controls.UIController.g_aMainForm);
 
-            */
+            
 
             double MinAge = 1.0E9;
             double MaxAge = 6.0E9;
