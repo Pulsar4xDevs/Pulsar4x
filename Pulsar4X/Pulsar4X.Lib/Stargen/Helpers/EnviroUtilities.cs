@@ -407,7 +407,7 @@ namespace Pulsar4X.Stargen
         /// <returns></returns>
         public static double CloudFraction(double surfTemp, double smallestMwRetained, double equatRadius, double hydroFraction)
         {
-            if (smallestMwRetained > Constants.Gasses.MolecularWeights.WATER_VAPOR)
+            if (smallestMwRetained > Constants.Gasses.H2O.AtomicWeight)
                 return 0.0;
 
             double surfArea = 4.0 * Math.PI * Math.Pow(equatRadius, 2.0);
@@ -844,6 +844,7 @@ namespace Pulsar4X.Stargen
         /// <returns></returns>
         public static Breathability Breathable(Planet planet)
         {
+            // TODO: Not all races breathe the same, each race should have a check, not one on the planet
             bool oxygenOk = false;
             int index;
 
@@ -852,21 +853,14 @@ namespace Pulsar4X.Stargen
 
             for (index = 0; index < planet.Gases.Count; index++)
             {
-                int n;
-                int gasNo = 0;
+                Molecule gas = Constants.Gasses.GasLookup[planet.Gases[index].ElementId];
 
                 double ipp = InspiredPartialPressure(planet.SurfacePressure, planet.Gases[index].SurfacePressure);
 
-                for (n = 0; n < ElementalTable.Instance.Count; n++)
-                {
-                    if (ElementalTable.Instance[n].Id == planet.Gases[index].ElementId)
-                        gasNo = n;
-                }
-
-                if (ipp > ElementalTable.Instance[gasNo].MaximumInspiredPartialPressure)
+                if (ipp > gas.MaximumInspiredPartialPressure)
                     return Breathability.Poisonous;
 
-                if (planet.Gases[index].ElementId == Constants.Gasses.AtomicNumbers.AN_O)
+                if (gas.Id == Constants.Gasses.O.Id)
                     oxygenOk = ((ipp >= Constants.Gasses.InspiredPartialPressure.MIN_O2_IPP) && (ipp <= Constants.Gasses.InspiredPartialPressure.MAX_O2_IPP));
             }
 

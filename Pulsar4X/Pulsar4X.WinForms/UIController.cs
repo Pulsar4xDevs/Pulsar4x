@@ -40,6 +40,7 @@ namespace Pulsar4X.WinForms.Controls
                 {
                     g_aTabPages[i].Name = UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_NAME; // Set tab Name.
                     g_aTabPages[i].Text = UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_NAME; // Set Tab Title
+                    g_aTabPages[i].AutoScroll = true;
                     Controls.SystemGenAndDisplay SystemGenAndDis = new SystemGenAndDisplay();    // Create System Gen and Display Control.
                     g_aTabPages[i].Controls.Add(SystemGenAndDis);                                // Add Control to tab.
                 }
@@ -73,8 +74,9 @@ namespace Pulsar4X.WinForms.Controls
         ///
         /// <param name="FromForm"> [in,out] from form. </param>
         /// <param name="Tab">      [in,out] The tab. </param>
+        /// <param name="Location"> [in,out] The Location to position the new form. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        public static void PopOutTab(ref Form FromForm, ref TabPage Tab)
+        public static void PopOutTab(ref Form FromForm, ref TabPage Tab, ref Point Location)
         {
             Forms.SubForm SubForm = new Forms.SubForm();                                // Create the new subform.
             Panel SubPanel = SubForm.GetMainPanel();                                    // get the MainPanel
@@ -88,6 +90,7 @@ namespace Pulsar4X.WinForms.Controls
 
             g_lSubForms.Add(SubForm);               // Add new SubForm to the SubForms list.
             SubForm.Show();                         // Show the new form.
+            SubForm.Location = Location;            // Position the new form, must be set after Show() is called or it mwon't work.
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////

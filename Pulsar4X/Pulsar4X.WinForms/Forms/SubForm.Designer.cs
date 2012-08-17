@@ -33,10 +33,12 @@
             // 
             // MainPanel
             // 
+            this.MainPanel.AutoScroll = true;
             this.MainPanel.Location = new System.Drawing.Point(13, 13);
             this.MainPanel.Name = "MainPanel";
             this.MainPanel.Size = new System.Drawing.Size(759, 537);
             this.MainPanel.TabIndex = 0;
+            //this.MainPanel.Resize += new System.EventHandler(this.MainPanel_Resize);
             // 
             // SubForm
             // 
@@ -47,6 +49,7 @@
             this.Name = "SubForm";
             this.Text = "SubForm";
             this.Load += new System.EventHandler(this.SubForm_Load);
+            this.Resize += new System.EventHandler(this.SubForm_Resize);
             this.ResumeLayout(false);
 
         }

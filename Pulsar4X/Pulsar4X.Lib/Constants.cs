@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X
 {
     /// <summary>
     /// Container class for all the constants used elsewhere in the game
     /// </summary>
-    public class Constants
+    public static class Constants
     {
         /// <summary>
         /// Constants dealing with units and measurements
         /// </summary>
-        public class Units
+        public static class Units
         {
             /// <summary>
             /// Mass in grams of one solar mass
@@ -84,7 +85,7 @@ namespace Pulsar4X
         /// <summary>
         /// Constants detailing our solar system
         /// </summary>
-        public class Sol
+        public static class Sol
         {
             /// <summary>
             /// Constants involving our Sun
@@ -181,11 +182,258 @@ namespace Pulsar4X
             }
         }
 
-        public class Gasses
+        public static class Gasses
         {
+
+            public static Molecule H = new Molecule
+            {
+                Id = 1,
+                Symbol = "H",
+                Name = "Hydrogen",
+                AtomicWeight = 1.0079,
+                MeltingPoint = 14.06,
+                BoilingPoint = 20.40,
+                Density = 8.99e-05,
+                AbundanceE = 0.00125893,
+                AbundanceS = 27925.4,
+                Reactivity = 1,
+                MaximumInspiredPartialPressure = Constants.Units.INCREDIBLY_LARGE_NUMBER
+            };
+
+            public static Molecule He = new Molecule
+            {
+                Id = 2,
+                Symbol = "He",
+                Name = "Helium",
+                AtomicWeight = 4.0026,
+                MeltingPoint = 3.46,
+                BoilingPoint = 4.20,
+                Density = 0.0001787,
+                AbundanceE = 7.94328e-09,
+                AbundanceS = 2722.7,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = (61000.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule N = new Molecule
+            {
+                Id = 7,
+                Symbol = "N",
+                Name = "Nitrogen",
+                AtomicWeight = 14.0067,
+                MeltingPoint = 63.34,
+                BoilingPoint = 77.40,
+                Density = 0.0012506,
+                AbundanceE = 1.99526e-05,
+                AbundanceS = 3.13329,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = (2330.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule O = new Molecule
+            {
+                Id = 8,
+                Symbol = "O",
+                Name = "Oxygen",
+                AtomicWeight = 15.9994,
+                MeltingPoint = 54.80,
+                BoilingPoint = 90.20,
+                Density = 0.001429,
+                AbundanceE = 0.501187,
+                AbundanceS = 23.8232,
+                Reactivity = 10,
+                MaximumInspiredPartialPressure = (400.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule Ne = new Molecule
+            {
+                Id = 10,
+                Symbol = "Ne",
+                Name = "Neon",
+                AtomicWeight = 20.1700,
+                MeltingPoint = 24.53,
+                BoilingPoint = 27.10,
+                Density = 0.0009,
+                AbundanceE = 5.01187e-09,
+                AbundanceS = 3.4435e-5,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = (3900.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule Ar = new Molecule
+            {
+                Id = 18,
+                Symbol = "Ar",
+                Name = "Argon",
+                AtomicWeight = 39.9480,
+                MeltingPoint = 84.00,
+                BoilingPoint = 87.30,
+                Density = 0.0017824,
+                AbundanceE = 3.16228e-06,
+                AbundanceS = 0.100925,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = (1220.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule Kr = new Molecule
+            {
+                Id = 36,
+                Symbol = "Kr",
+                Name = "Krypton",
+                AtomicWeight = 83.8000,
+                MeltingPoint = 116.60,
+                BoilingPoint = 119.70,
+                Density = 0.003708,
+                AbundanceE = 1e-10,
+                AbundanceS = 4.4978e-05,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = Constants.Gasses.InspiredPartialPressure.MAX_KR_IPP
+            };
+
+            public static Molecule Xe = new Molecule
+            {
+                Id = 54,
+                Symbol = "Xe",
+                Name = "Xenon",
+                AtomicWeight = 131.3000,
+                MeltingPoint = 161.30,
+                BoilingPoint = 165.00,
+                Density = 0.00588,
+                AbundanceE = 3.16228e-11,
+                AbundanceS = 4.69894e-06,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = (160.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule NH3 = new Molecule
+            {
+                Id = 900,
+                Symbol = "NH3",
+                Name = "Ammonia",
+                AtomicWeight = 17.0000,
+                MeltingPoint = 195.46,
+                BoilingPoint = 239.66,
+                Density = 0.001,
+                AbundanceE = 0.002,
+                AbundanceS = 0.0001,
+                Reactivity = 1,
+                MaximumInspiredPartialPressure = (100.0 * Constants.Sol.Earth.PPM_PRSSURE)
+            };
+
+            public static Molecule H2O = new Molecule
+            {
+                Id = 901,
+                Symbol = "H2O",
+                Name = "Water",
+                AtomicWeight = 18.0000,
+                MeltingPoint = 273.16,
+                BoilingPoint = 373.16,
+                Density = 1.000,
+                AbundanceE = 0.03,
+                AbundanceS = 0.001,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = Constants.Units.INCREDIBLY_LARGE_NUMBER
+            };
+
+            public static Molecule CO2 = new Molecule
+            {
+                Id = 902,
+                Symbol = "CO2",
+                Name = "CarbonDioxide",
+                AtomicWeight = 44.0000,
+                MeltingPoint = 194.66,
+                BoilingPoint = 194.66,
+                Density = 0.001,
+                AbundanceE = 0.01,
+                AbundanceS = 0.0005,
+                Reactivity = 0,
+                MaximumInspiredPartialPressure = (7.0 * Constants.Sol.Earth.MMHG_TO_MILLIBARS)
+            };
+
+            public static Molecule O3 = new Molecule
+            {
+                Id = 903,
+                Symbol = "O3",
+                Name = "Ozone",
+                AtomicWeight = 48.0000,
+                MeltingPoint = 80.16,
+                BoilingPoint = 161.16,
+                Density = 0.001,
+                AbundanceE = 0.001,
+                AbundanceS = 0.000001,
+                Reactivity = 2,
+                MaximumInspiredPartialPressure = (0.1 * Constants.Sol.Earth.PPM_PRSSURE)
+            };
+
+            public static Molecule CH4 = new Molecule
+            {
+                Id = 904,
+                Symbol = "CH4",
+                Name = "Methane",
+                AtomicWeight = 16.0000,
+                MeltingPoint = 90.16,
+                BoilingPoint = 109.16,
+                Density = 0.010,
+                AbundanceE = 0.005,
+                AbundanceS = 0.0001,
+                Reactivity = 1,
+                MaximumInspiredPartialPressure = (50000.0 * Constants.Sol.Earth.PPM_PRSSURE)
+            };
+
+            public static Molecule F = new Molecule
+            {
+                Id = 9,
+                Symbol = "F",
+                Name = "Fluorine",
+                AtomicWeight = 18.9984,
+                MeltingPoint = 53.58,
+                BoilingPoint = 85.10,
+                Density = 0.001696,
+                AbundanceE = 0.000630957,
+                AbundanceS = 0.000843335,
+                Reactivity = 50,
+                MaximumInspiredPartialPressure = (0.1 * Constants.Sol.Earth.PPM_PRSSURE)
+            };
+
+            public static Molecule Cl = new Molecule
+            {
+                Id = 17,
+                Symbol = "Cl",
+                Name = "Chlorine",
+                AtomicWeight = 35.4530,
+                MeltingPoint = 172.22,
+                BoilingPoint = 239.20,
+                Density = 0.003214,
+                AbundanceE = 0.000125893,
+                AbundanceS = 0.005236,
+                Reactivity = 40,
+                MaximumInspiredPartialPressure = (1.0 * Constants.Sol.Earth.PPM_PRSSURE)
+            };
+
+            public static Dictionary<int, Molecule> GasLookup = new Dictionary<int, Molecule>()
+            {
+                {H.Id, H},
+                {He.Id, He},
+                {N.Id, N},
+                {O.Id, O},
+                {Ne.Id, Ne},
+                {Ar.Id, Ar},
+                {Kr.Id, Kr},
+                {Xe.Id, Xe},
+                {NH3.Id, NH3},
+                {H2O.Id, H2O},
+                {CO2.Id, CO2},
+                {O3.Id, O3},
+                {CH4.Id, CH4},
+                {F.Id, F},
+                {Cl.Id, Cl}
+            };
+
+
             /// <summary>
             /// Atomic numbers for use in the ElementalTable as lookups
             /// </summary>
+            /*
             public class AtomicNumbers
             {
                 public const int AN_H = 1;
@@ -213,7 +461,7 @@ namespace Pulsar4X
                 public const int AN_CH4 = 904;
                 public const int AN_CH3CH2OH = 905;
             }
-
+            */
             /// <summary>
             /// Inspired Partial Pressure constants
             /// </summary>
@@ -247,29 +495,29 @@ namespace Pulsar4X
             /// </summary>
             public class MolecularWeights
             {
-                public const double ATOMIC_HYDROGEN = 1.0;	/* H   */
+                //public const double ATOMIC_HYDROGEN = 1.0;	/* H   */
                 public const double MOL_HYDROGEN = 2.0;	/* H2  */
                 public const double HELIUM = 4.0;	/* He  */
-                public const double ATOMIC_NITROGEN = 14.0;	/* N   */
-                public const double ATOMIC_OXYGEN = 16.0;	/* O   */
-                public const double METHANE = 16.0;/* CH4 */
-                public const double AMMONIA = 17.0;	/* NH3 */
+                //public const double ATOMIC_NITROGEN = 14.0;	/* N   */
+                //public const double ATOMIC_OXYGEN = 16.0;	/* O   */
+                //public const double METHANE = 16.0;/* CH4 */
+                //public const double AMMONIA = 17.0;	/* NH3 */
                 public const double WATER_VAPOR = 18.0;/* H2O */
-                public const double NEON = 20.2;	/* Ne  */
+                //public const double NEON = 20.2;	/* Ne  */
                 public const double MOL_NITROGEN = 28.0;	/* N2  */
-                public const double CARBON_MONOXIDE = 28.0;	/* CO  */
-                public const double NITRIC_OXIDE = 30.0;/* NO  */
-                public const double MOL_OXYGEN = 32.0;	/* O2  */
-                public const double HYDROGEN_SULPHIDE = 34.1;	/* H2S */
-                public const double ARGON = 39.9;	/* Ar  */
-                public const double CARBON_DIOXIDE = 44.0;	/* CO2 */
-                public const double NITROUS_OXIDE = 44.0;	/* N2O */
-                public const double NITROGEN_DIOXIDE = 46.0;	/* NO2 */
-                public const double OZONE = 48.0;	/* O3  */
-                public const double SULPH_DIOXIDE = 64.1;	/* SO2 */
-                public const double SULPH_TRIOXIDE = 80.1;	/* SO3 */
-                public const double KRYPTON = 83.8;/* Kr  */
-                public const double XENON = 131.3; /* Xe  */ 
+                //public const double CARBON_MONOXIDE = 28.0;	/* CO  */
+                //public const double NITRIC_OXIDE = 30.0;/* NO  */
+                //public const double MOL_OXYGEN = 32.0;	/* O2  */
+                //public const double HYDROGEN_SULPHIDE = 34.1;	/* H2S */
+                //public const double ARGON = 39.9;	/* Ar  */
+                //public const double CARBON_DIOXIDE = 44.0;	/* CO2 */
+                //public const double NITROUS_OXIDE = 44.0;	/* N2O */
+                //public const double NITROGEN_DIOXIDE = 46.0;	/* NO2 */
+                //public const double OZONE = 48.0;	/* O3  */
+                //public const double SULPH_DIOXIDE = 64.1;	/* SO2 */
+                //public const double SULPH_TRIOXIDE = 80.1;	/* SO3 */
+                //public const double KRYPTON = 83.8;/* Kr  */
+                //public const double XENON = 131.3; /* Xe  */ 
             }
         }
 

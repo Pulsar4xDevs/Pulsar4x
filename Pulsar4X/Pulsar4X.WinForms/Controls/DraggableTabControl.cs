@@ -29,6 +29,7 @@ namespace Pulsar4X.WinForms.Controls
             MouseDown += OnMouseDown;
             MouseMove += OnMouseMove;
             MouseUp += OnMouseUp;
+            Resize += OnResize;
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -91,11 +92,14 @@ namespace Pulsar4X.WinForms.Controls
             {
                 // Test to see if we were droped outside any window.
                 Form parentForm = this.Parent.Parent as Form;
-                Form DropedForm = FormAt(e.Location);
+                Form DropedForm = FormAt(Cursor.Position);  // note that the position passed in here needs to be in Absolute Coords, i.e. relative to the desktop.
                 if (DropedForm == null)
                 {
                     // if yes creat new Subform, add to subform list, creat new tab control, add to tab control list, add tab to new tab control, reomve from this one.
-                    UIController.PopOutTab(ref parentForm, ref m_DraggedTab);
+                    Point NewFormLocation = new Point();
+                    NewFormLocation.X = Cursor.Position.X;
+                    NewFormLocation.Y = Cursor.Position.Y;
+                    UIController.PopOutTab(ref parentForm, ref m_DraggedTab, ref NewFormLocation);
                 }
                 else
                 {
@@ -126,6 +130,16 @@ namespace Pulsar4X.WinForms.Controls
 
             Swap(m_DraggedTab, tab);
             SelectedTab = m_DraggedTab;
+        }
+
+        private void OnResize(object sender, EventArgs e)
+        {
+            ///< Not sure if this does anything...
+            Panel parentPanel = this.Parent as Panel;
+            if (parentPanel != null)
+            {
+                this.Size = parentPanel.Size;
+            }
         }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,7 +187,7 @@ namespace Pulsar4X.WinForms.Controls
         ///
         /// <remarks>   Gregory.nott, 17/08/2012. </remarks>
         ///
-        /// <param name="position"> The position. </param>
+        /// <param name="position"> The position. Must be in Absolute Corrdinantes, i.e. realtive to the desltop. Use Cursor.Position for best result. </param>
         ///
         /// <returns>   The Form we are at. </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
