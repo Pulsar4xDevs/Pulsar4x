@@ -1,10 +1,15 @@
 ﻿using System;
 using Pulsar4X.Entities;
+using log4net;
+
 
 namespace Pulsar4X.Stargen
 {
     public class StarSystemFactory
     {
+
+        public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystemFactory));
+
         private readonly double _minimumStellarAge;
         private readonly double _maximumStellarAge;
         private readonly bool _generateMoons;

@@ -39,7 +39,11 @@ end
 			"System.Drawing",
 			log4netlib()
 			}
-		files { "Pulsar4X/Pulsar4X.WinForms/**.cs" }
+		files { 
+			"Pulsar4X/Pulsar4X.WinForms/**.cs",
+			"Pulsar4X/Pulsar4X.WinForms/**.resx",
+			"Pulsar4X/Pulsar4X.WinForms/**.config"
+			}
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
