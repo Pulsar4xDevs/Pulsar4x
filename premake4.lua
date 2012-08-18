@@ -20,8 +20,16 @@ end
 
 -- Find the required nunit library
 function nunitlib()
-	if (os.isdir("Pulsar4X/deps/NUnit-2.6.1")) then -- Have the log4net binaries
+	if (os.isdir("Pulsar4X/deps/NUnit-2.6.1")) then -- Have the nunit binaries
 		return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
+	end
+end
+
+-- Find the required sqlite library
+function sqlitelib()
+	if (os.isdir("Pulsar4X/deps/Sqlite")) then -- Have the sqlite binaries
+		--Assume .NET 4.0 for now
+		return "Pulsar4X/deps/Sqlite/Windows-1.0.81.0/System.Data.SQLite.dll";
 	end
 end
 	
@@ -64,7 +72,8 @@ end
 			"System",
 			"System.Data",
 			"System.Xml",
-			log4netlib()
+			log4netlib(),
+			sqlitelib()
 			}
 		files { 
 			"Pulsar4X/Pulsar4X.Lib/**.cs",

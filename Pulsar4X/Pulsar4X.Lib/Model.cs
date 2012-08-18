@@ -16,6 +16,8 @@ namespace Pulsar4X
         }
 
 
+        public string Name { get; set; }
+
 #region Entities
 
         private ObservableCollection<Race> _races;
