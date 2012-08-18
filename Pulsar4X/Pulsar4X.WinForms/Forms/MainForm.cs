@@ -30,7 +30,7 @@ namespace Pulsar4X
             m_MainTabControl.Size = MainPanel.Size;
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[0]);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[1]);
-            m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
+           //m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
 
             MainPanel.Controls.Add(m_MainTabControl);
         }
@@ -44,30 +44,7 @@ namespace Pulsar4X
         private void systemInformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show System information tab.
-        }
-
-        private void MainForm_MakeActive(object sender, EventArgs e)
-        {
-            // this needs to happen for the Dragging of tabs to work.
-            // if the form does not become active when a tab is dragged over it
-            // then it will not be availble for the "drop".
-            this.Activate();
-        }
-
-        private void MainForm_DragMakeActive(object sender, DragEventArgs e)
-        {
-            // this needs to happen for the Dragging of tabs to work.
-            // if the form does not become active when a tab is dragged over it
-            // then it will not be availble for the "drop".
-            this.Activate();
-        }
-
-        private void MainForm_MouseDown(object sender, MouseEventArgs e)
-        {
-            // this needs to happen for the Dragging of tabs to work.
-            // if the form does not become active when a tab is dragged over it
-            // then it will not be availble for the "drop".
-            this.Activate();
+            WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_INDEX);
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -81,6 +58,11 @@ namespace Pulsar4X
             {
                 control.Size = newSize; // this will edit the size of any sub forms. there will generall only be the one DraggableTabControl.
             }
+        }
+
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
 
     }

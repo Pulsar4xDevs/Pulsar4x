@@ -21,6 +21,15 @@ namespace Pulsar4X.WinForms
         public class UITabs
         {
             /// <summary>
+            /// Index for Game Start Screen.
+            /// </summary>
+            public const int        GAME_START_SCREEN_INDEX = 0;
+            /// <summary>
+            /// Name/Title For Game Start Screen.
+            /// </summary>
+            public const string     GAME_START_SCREEN_NAME = "Start";
+
+            /// <summary>
             /// Index for System Generation and Display tab.
             /// </summary>
             public const int        SYSTEM_GENERATION_AND_DISPLAY_INDEX = 9;
@@ -28,6 +37,8 @@ namespace Pulsar4X.WinForms
             /// Name/Title for System Generation and Display tab.
             /// </summary>
             public const string     SYSTEM_GENERATION_AND_DISPLAY_NAME = "System Generation and Display";
+
+
 
  
         }

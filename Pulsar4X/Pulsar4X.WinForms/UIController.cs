@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
+using Pulsar4X.WinForms;
 
 namespace Pulsar4X.WinForms.Controls
 {
@@ -35,12 +36,20 @@ namespace Pulsar4X.WinForms.Controls
             {
                 string temp = "test " + i.ToString();
                 g_aTabPages[i] = new TabPage(temp);
-                
+                g_aTabPages[i].AutoScroll = true;                                               // turn on autoscoll.
+
+                if (i == UIConstants.UITabs.GAME_START_SCREEN_INDEX)
+                {
+                    g_aTabPages[i].Name = UIConstants.UITabs.GAME_START_SCREEN_NAME;            // Set Tab Name
+                    g_aTabPages[i].Text = UIConstants.UITabs.GAME_START_SCREEN_NAME;            // Set Tab Title
+                    Controls.GameStartScreen GameStartScr = new GameStartScreen();              // Creat Game Start Screen.
+                    g_aTabPages[i].Controls.Add(GameStartScr);                                  // Add Control to tab.
+                }
+
                 if (i == UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_INDEX)
                 {
                     g_aTabPages[i].Name = UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_NAME; // Set tab Name.
                     g_aTabPages[i].Text = UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_NAME; // Set Tab Title
-                    g_aTabPages[i].AutoScroll = true;
                     Controls.SystemGenAndDisplay SystemGenAndDis = new SystemGenAndDisplay();    // Create System Gen and Display Control.
                     g_aTabPages[i].Controls.Add(SystemGenAndDis);                                // Add Control to tab.
                 }
@@ -59,8 +68,8 @@ namespace Pulsar4X.WinForms.Controls
         public static void MoveTab(ref Form FromForm, ref Form ToForm, ref TabPage Tab)
         {
             // get the From TabControl:
-            DraggableTabControl FromtabControl = GetDraggableTabControl(ref FromForm);
-            DraggableTabControl ToTabControl = GetDraggableTabControl(ref ToForm);
+            DraggableTabControl FromtabControl = GetDraggableTabControl(FromForm);
+            DraggableTabControl ToTabControl = GetDraggableTabControl(ToForm);
 
 
             ToTabControl.TabPages.Add(Tab);
@@ -84,7 +93,7 @@ namespace Pulsar4X.WinForms.Controls
             tempDraggableTabControl.Name = "DraggableTabControl";                       // name the control
             tempDraggableTabControl.Size = SubPanel.Size;                               // Set size to take up the full MainPanel
             tempDraggableTabControl.TabPages.Add(Tab);                                  // Add the poped out tab to thre controll
-            DraggableTabControl FromTabControl = GetDraggableTabControl(ref FromForm);  // get the DraggableTabControl from the source (from) form
+            DraggableTabControl FromTabControl = GetDraggableTabControl(FromForm);  // get the DraggableTabControl from the source (from) form
             SubPanel.Controls.Add(tempDraggableTabControl);                             // Remove the tab from the source panel.
             // the Tab has been moved.
 
@@ -102,7 +111,7 @@ namespace Pulsar4X.WinForms.Controls
         ///
         /// <returns>   The draggable tab control. </returns>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        public static DraggableTabControl GetDraggableTabControl(ref Form Form)
+        public static DraggableTabControl GetDraggableTabControl(Form Form)
         {
             Control[] SubControls = new Control[1];                 // Array of Controls for storage. 
             SubControls = Form.Controls.Find("MainPanel", true);    // note that the tab Controls are allways containd in the "MainPanel" 
@@ -122,7 +131,53 @@ namespace Pulsar4X.WinForms.Controls
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         public static void SubFormsCleanup()
         {
-            // Cleans up the SubForms List b
+            if (g_lSubForms.Count > 0)
+            {
+                foreach (Forms.SubForm subForm in g_lSubForms)
+                {
+                    DraggableTabControl tabControl = GetDraggableTabControl(subForm); // get the tab control
+                    if (tabControl != null)
+                    {
+                        if (tabControl.TabPages.Count < 1)
+                        {
+                            subForm.Hide();                             // Hide the form.
+                            UIController.g_lSubForms.Remove(subForm);   // remove it from our list.
+                            subForm.Close();                            // Close it.
+                            return;                                     // Only remove one form per cleanup call.
+                        }
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Will Find the Specified tab and make it the active tab/window.
+        /// </summary>
+        public static void ShowTab(int a_iTabIndex)
+        {
+            // first check that the tab is in a valid window:
+            DraggableTabControl parentControl = g_aTabPages[a_iTabIndex].Parent as DraggableTabControl;
+            if (parentControl != null)
+            {
+                // we have a valid parent control...
+                g_aTabPages[a_iTabIndex].BringToFront();                   // Bring Tab Page to fron.
+                parentControl.SelectedTab = g_aTabPages[a_iTabIndex];       // Make tab bage the selected one for it's Parent controller.
+                Form parentForm = parentControl.Parent.Parent as Form;    // two parents to go up to Panel, then form.
+                if (parentForm != null)
+                {
+                    parentForm.Activate();                                  // Make the Parent form active
+                    parentForm.BringToFront();                              // and bring it to the front.
+                }
+            }
+            else
+            {
+                // it has no parent controller, add it to main form:
+                Form MainForm = g_aMainForm as Form;
+                DraggableTabControl TabControl = GetDraggableTabControl(MainForm);
+                TabControl.TabPages.Add(g_aTabPages[a_iTabIndex]);
+                TabControl.SelectedTab = g_aTabPages[a_iTabIndex];
+            }
         }
     }
 }
