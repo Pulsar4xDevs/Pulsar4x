@@ -16,6 +16,10 @@ namespace Pulsar4X.Entities
         {
             get { return string.Format("{0} {1}", FirstName, LastName); }
         }
-        
+
+        public CommanderTypes CommanderType { get; set; }
+        public int Rank { get; set; }
+        public string RankName { get; set; }
+
     }
 }

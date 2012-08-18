@@ -93,9 +93,9 @@ namespace Pulsar4X.Entities
             return nextName;
         }
 
-        public List<ThemeRank> GetRanks(RankTypes rankType)
+        public List<ThemeRank> GetRanks(CommanderTypes commanderType)
         {
-            return RankNames.Where(r => r.RankType == rankType)
+            return RankNames.Where(r => r.CommanderType == commanderType)
                                  .OrderBy(r => r.Rank)
                                  .ToList();
         }
@@ -105,6 +105,6 @@ namespace Pulsar4X.Entities
     {
         public int Rank { get; set; }
         public string Name { get; set; }
-        public RankTypes RankType { get; set; }
+        public CommanderTypes CommanderType { get; set; }
     }
 }

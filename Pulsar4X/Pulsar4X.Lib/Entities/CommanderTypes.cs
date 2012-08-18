@@ -1,6 +1,6 @@
 ﻿namespace Pulsar4X.Entities
 {
-    public enum RankTypes
+    public enum CommanderTypes
     {
         Navy,
         Ground,
