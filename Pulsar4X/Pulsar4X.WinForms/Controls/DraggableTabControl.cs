@@ -109,16 +109,17 @@ namespace Pulsar4X.WinForms.Controls
                 }
 
                 // close old window, if a sub form!:
-                Forms.SubForm Temp = parentForm as Forms.SubForm;
-                if (Temp != null)
-                {
-                    if (this.TabPages.Count < 1)
-                    {
-                        Temp.Hide();
-                        UIController.g_lSubForms.Remove(Temp);
-                        Temp.Close();
-                    }
-                }
+                UIController.SubFormsCleanup();
+                //Forms.SubForm Temp = parentForm as Forms.SubForm;
+                //if (Temp != null)
+                //{
+                //    if (this.TabPages.Count < 1)
+                //    {
+                //        Temp.Hide();
+                //        UIController.g_lSubForms.Remove(Temp);
+                //        Temp.Close();
+                //    }
+                //}
 
                 return;
             }

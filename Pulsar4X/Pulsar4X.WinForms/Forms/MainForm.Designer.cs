@@ -75,8 +75,9 @@
             this.addShipNamesToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
+            this.gameToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.G)));
             this.gameToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
-            this.gameToolStripMenuItem.Text = "Game";
+            this.gameToolStripMenuItem.Text = "&Game";
             // 
             // selectDefaultRaceToolStripMenuItem
             // 
@@ -105,8 +106,10 @@
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
+            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.X)));
             this.exitToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.exitToolStripMenuItem.Text = "Exit";
+            this.exitToolStripMenuItem.Text = "E&xit";
+            this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // spaceMasterToolStripMenuItem
             // 
@@ -114,8 +117,9 @@
             this.spaceMasterOnToolStripMenuItem,
             this.spaceMasterOffToolStripMenuItem});
             this.spaceMasterToolStripMenuItem.Name = "spaceMasterToolStripMenuItem";
-            this.spaceMasterToolStripMenuItem.Size = new System.Drawing.Size(86, 20);
-            this.spaceMasterToolStripMenuItem.Text = "SpaceMaster";
+            this.spaceMasterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
+            this.spaceMasterToolStripMenuItem.Size = new System.Drawing.Size(89, 20);
+            this.spaceMasterToolStripMenuItem.Text = "&Space Master";
             // 
             // spaceMasterOnToolStripMenuItem
             // 
@@ -134,13 +138,15 @@
             this.empiresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.systemInformationToolStripMenuItem});
             this.empiresToolStripMenuItem.Name = "empiresToolStripMenuItem";
+            this.empiresToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.empiresToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
-            this.empiresToolStripMenuItem.Text = "Empire";
+            this.empiresToolStripMenuItem.Text = "&Empire";
             // 
             // systemInformationToolStripMenuItem
             // 
             this.systemInformationToolStripMenuItem.Name = "systemInformationToolStripMenuItem";
-            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.systemInformationToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
+            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.systemInformationToolStripMenuItem.Text = "System Information";
             this.systemInformationToolStripMenuItem.Click += new System.EventHandler(this.systemInformationToolStripMenuItem_Click);
             // 
@@ -203,12 +209,6 @@
             this.Name = "MainForm";
             this.Text = "Pulsar4X";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragMakeActive);
-            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragMakeActive);
-            this.DragOver += new System.Windows.Forms.DragEventHandler(this.MainForm_DragMakeActive);
-            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainForm_MouseDown);
-            this.MouseEnter += new System.EventHandler(this.MainForm_MakeActive);
-            this.MouseHover += new System.EventHandler(this.MainForm_MakeActive);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
