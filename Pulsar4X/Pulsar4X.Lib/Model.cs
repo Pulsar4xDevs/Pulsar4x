@@ -17,6 +17,10 @@ namespace Pulsar4X
 
 
 #region Entities
+
+        private ObservableCollection<Race> _races;
+       
+
         private ObservableCollection<StarSystem> _starsystems;
         public ObservableCollection<StarSystem> StarSystems
         {

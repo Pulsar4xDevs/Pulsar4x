@@ -8,13 +8,17 @@ namespace Pulsar4X.Entities
     public class Population
     {
         public int Id { get; set; }
+        public Race Race { get; set; }
         public string Name { get; set; }
+
+        /// <summary>
+        /// Planet the population is attached to
+        /// </summary>
         public Planet Planet { get; set; }
         
         public int CivilianPopulation { get; set; }
         public int FuelStockpile { get; set; }
-
-
+        
         // TODO: store minerals as individual properties? or define constants for each mineral type and
         // store the values in a dictionary keyed off constants?
         public decimal Duranium { get; set; }

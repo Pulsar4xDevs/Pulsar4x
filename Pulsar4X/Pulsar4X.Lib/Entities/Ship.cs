@@ -8,8 +8,8 @@ namespace Pulsar4X.Entities
     public class Ship
     {
         public int Id { get; set; }
-        public int RaceId { get; set; }
-        public int ShipClassId { get; set; }
+        public Race Race { get; set; }
+        public ShipClass ShipClass { get; set; }
         public string Name { get; set; }
         public string ClassNotes { get; set; }
         public string Notes { get; set; }

@@ -8,8 +8,8 @@ namespace Pulsar4X.Entities
     public class Fleet
     {
         public int Id { get; set; }
-        public int RaceId { get; set; }
-        public int TaskForceId { get; set; }
+        public Race Race { get; set; }
+        public TaskForce TaskForce { get; set; }
         public string Name { get; set; }
 
         public long XSystem { get; set; }

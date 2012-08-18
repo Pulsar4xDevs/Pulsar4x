@@ -8,7 +8,7 @@ namespace Pulsar4X.Entities
     public class TaskForce
     {
         public int Id { get; set; }
-        public int RaceId { get; set; }
+        public Race Race { get; set; }
         public string Name { get; set; }
 
         public List<Fleet> Fleets { get; set; } 

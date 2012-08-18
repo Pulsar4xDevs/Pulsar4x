@@ -11,30 +11,100 @@ namespace Pulsar4X.Entities
     /// -Ship Classes
     /// -Star Systems
     /// -Commander Ranks
+    /// 
+    /// WHen requesting Names, it will provide the next available name in the list. If
+    /// it has reached the end of the list, it will loop to the front.
+    /// 
+    /// If no Names are defined for a category, it will return "Name Unavailable"
+    /// 
     /// </summary>
     public class Theme
     {
+        protected const string NAME_UNAVAILABLE = "Name Unavailable";
+
         public int Id { get; set; }
         public string Name { get; set; }
 
-        
-
-
-        class ThemeRank
+        public bool HasClassNames
         {
-            public int Rank { get; set; }
-            public string Name { get; set; }
-            public RankTypes RankType { get; set; }
+            get { return (ClassNames != null && ClassNames.Count > 0); }
+        }
+        public bool HasRankNames
+        {
+            get { return (RankNames != null && RankNames.Count > 0); }
+        }
+        public bool HasSystemNames
+        {
+            get { return (SystemNames != null && SystemNames.Count > 0); }
+        }
+        
+        /// <summary>
+        /// Use GetNextClassName to retrieve Class names for the user
+        /// </summary>
+        public Queue<string> ClassNames { get; set; }
 
-            public enum RankTypes
+        /// <summary>
+        /// Use GetNextSystemName to retrieve System names for the user
+        /// </summary>
+        public Queue<string> SystemNames { get; set; }
+
+        /// <summary>
+        /// Use GetRanks to retrieve Ranks for the user
+        /// </summary>
+        public List<ThemeRank> RankNames { get; set; }
+        
+        /// <summary>
+        /// Returns the next Class name for the Theme
+        /// </summary>
+        /// <returns></returns>
+        public string GetNextClassName()
+        {
+            if (ClassNames == null || ClassNames.Count == 0)
+                return NAME_UNAVAILABLE;
+
+            string nextName;
+            do
             {
-                Navy,
-                Ground,
-                Civilian
-            }
+                nextName = ClassNames.Dequeue();
+            } while (string.IsNullOrEmpty(nextName));
+
+            //put the name at the end so we keep looping
+            ClassNames.Enqueue(nextName);
+            return nextName;
         }
 
+        /// <summary>
+        /// Returns the next System Name for the theme
+        /// </summary>
+        /// <returns></returns>
+        public string GetNextSystemName()
+        {
+            if (SystemNames == null || SystemNames.Count == 0)
+                return NAME_UNAVAILABLE;
+
+            string nextName;
+            do
+            {
+                nextName = SystemNames.Dequeue();
+            } while (string.IsNullOrEmpty(nextName));
+
+            //put the name at the end so we keep looping
+            SystemNames.Enqueue(nextName);
+            return nextName;
+        }
+
+        public List<ThemeRank> GetRanks(RankTypes rankType)
+        {
+            return RankNames.Where(r => r.RankType == rankType)
+                                 .OrderBy(r => r.Rank)
+                                 .ToList();
+        }
     }
 
-
+    public class ThemeRank
+    {
+        public int Rank { get; set; }
+        public string Name { get; set; }
+        public RankTypes RankType { get; set; }
+    }
 }
