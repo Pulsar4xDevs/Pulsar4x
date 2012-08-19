@@ -8,7 +8,7 @@ namespace Pulsar4X.Entities
 {
     public class Star
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
 
         public long XGalactic { get; set; }

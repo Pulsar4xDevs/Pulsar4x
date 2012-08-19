@@ -65,8 +65,8 @@ namespace Pulsar4X.Stargen
             for (int i = 0; i < protoStar.Planets.Count; i++)
             {
                 var planet = protoStar.Planets[i];
-                planet.Id = i + 1;
-                planet.Name = string.Format("{0} {1}", protoStar.Star.Name, planet.Id);
+                planet.Id = Guid.NewGuid();
+                planet.Name = string.Format("{0} {1}", protoStar.Star.Name, i + 1);
                 GeneratePlanet(planet);
             }
         }
@@ -148,7 +148,7 @@ namespace Pulsar4X.Stargen
                 }
             }
 
-            planet.Day = EnviroUtilities.DayLength(planet);	/* Modifies planet->resonant_period */
+            planet.LengthOfDay = EnviroUtilities.DayLength(planet);	/* Modifies planet->resonant_period */
             planet.EscapeVelocity = EnviroUtilities.EscapeVel(planet.Mass, planet.Radius);
             planet.MolecularWeightRetained = EnviroUtilities.MinMolecWeight(planet);
 
@@ -259,8 +259,8 @@ namespace Pulsar4X.Stargen
                         {
                             moon.SemiMajorAxis = planet.SemiMajorAxis;
                             moon.Eccentricity = planet.Eccentricity;
-                            moon.Id = n + 1;
-                            moon.Name = string.Format("{0}.{1}", planet.Name, moon.Id);
+                            moon.Id = Guid.NewGuid();
+                            moon.Name = string.Format("{0}.{1}", planet.Name, n + 1);
                             moon.Primary = planet.Primary;
 
                             GeneratePlanet(moon);
@@ -294,8 +294,8 @@ namespace Pulsar4X.Stargen
                 double totamount = 0;
                 var pressure = planet.SurfacePressure / Constants.Units.MILLIBARS_PER_BAR;
                 //bool gasesExist = false;
-                
-                foreach(Molecule gas in Constants.Gases.GasLookup.Values)
+
+                foreach (Molecule gas in Constants.Gases.GasLookup.Values)
                 //for (int i = 0; i < ElementalTable.Instance.Count; i++)
                 {
                     double yp = gas.BoilingPoint /

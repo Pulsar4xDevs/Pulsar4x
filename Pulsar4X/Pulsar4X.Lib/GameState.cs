@@ -7,7 +7,7 @@ using Pulsar4X.Entities;
 
 namespace Pulsar4X
 {
-    public class Model
+    public class GameState
     {
         public void Commit()
         {

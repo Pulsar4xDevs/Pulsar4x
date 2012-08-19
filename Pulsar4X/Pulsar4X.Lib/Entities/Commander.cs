@@ -7,7 +7,7 @@ namespace Pulsar4X.Entities
 {
     public class Commander
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Race Race { get; set; }
         public Species Species { get; set; }
         public string FirstName { get; set; }

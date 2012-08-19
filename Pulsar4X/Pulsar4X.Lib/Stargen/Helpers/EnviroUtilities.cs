@@ -759,7 +759,7 @@ namespace Pulsar4X.Stargen
                 planet.CloudCover = 1.0;
 
             if ((planet.HighTemperature >= planet.BoilingPoint) && (!first)
-                && !((int)planet.Day == (int)(planet.OrbitalPeriod * 24.0) || (planet.IsInResonantRotation)))
+                && !((int)planet.LengthOfDay == (int)(planet.OrbitalPeriod * 24.0) || (planet.IsInResonantRotation)))
             {
                 planet.HydrosphereCover = 0.0;
                 boilOff = true;
@@ -875,7 +875,7 @@ namespace Pulsar4X.Stargen
             var pressmod = 1 / Math.Sqrt(1 + 20 * planet.SurfacePressure / 1000.0);
             var ppmod = 1 / Math.Sqrt(10 + 5 * planet.SurfacePressure / 1000.0);
             var tiltmod = Math.Abs(Math.Cos(planet.AxialTilt * Math.PI / 180) * Math.Pow(1 + planet.Eccentricity, 2));
-            var daymod = 1 / (200 / planet.Day + 1);
+            var daymod = 1 / (200 / planet.LengthOfDay + 1);
             var mh = Math.Pow(1 + daymod, pressmod);
             var ml = Math.Pow(1 - daymod, pressmod);
             var hi = mh * planet.SurfaceTemperature;
@@ -883,7 +883,7 @@ namespace Pulsar4X.Stargen
             var sh = hi + Math.Pow((100 + hi) * tiltmod, Math.Sqrt(ppmod));
             var wl = lo - Math.Pow((150 + lo) * tiltmod, Math.Sqrt(ppmod));
             var max = planet.SurfaceTemperature + Math.Sqrt(planet.SurfaceTemperature) * 10;
-            var min = planet.SurfaceTemperature / Math.Sqrt(planet.Day + 24);
+            var min = planet.SurfaceTemperature / Math.Sqrt(planet.LengthOfDay + 24);
 
             if (lo < min) lo = min;
             if (wl < 0) wl = 0;

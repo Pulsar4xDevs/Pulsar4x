@@ -7,7 +7,7 @@ namespace Pulsar4X.Entities
 {
     public class Population
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Race Race { get; set; }
         public string Name { get; set; }
 

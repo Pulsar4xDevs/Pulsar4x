@@ -16,7 +16,7 @@ namespace Pulsar4X.Entities
         public long YSystem { get; set; }
 
         //TODO: Currently Id is only unique in the star it belongs to, not unique across multiple stars
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public PlanetTypes PlanetType { get; set; }
         public bool IsGasGiant { get; set; }
@@ -27,7 +27,7 @@ namespace Pulsar4X.Entities
         public double AxialTilt { get; set; } //unit of degrees
         public int OrbitZone { get; set; } //the zone of the planet
         public double OrbitalPeriod { get; set; } //length of local year (in days)
-        public double Day { get; set; } //length of local day (hours)
+        public double LengthOfDay { get; set; } //length of local day (hours)
         public bool IsInResonantRotation { get; set; } //tidally locked
 
         public double Mass { get; set; } //mass (in solar masses)

@@ -6,13 +6,12 @@ using System.Net.Mime;
 using System.Text;
 using System.Data.SQLite;
 
-namespace Pulsar4X.Lib.Storage
+namespace Pulsar4X.Storage
 {
     //TODO: Add functionality for providing the folder to save the game into, to override default save folder
     class SqliteStorage
     {
         private const string DEFAULT_SAVED_GAMES_FOLDER = "SavedGames";
-        private const string CONNECTION_STRING = "Data Source={0};Version=3;";
 
         /// <summary>
         /// Saves the current game Model. Will overwrite a file with the same name.
@@ -21,31 +20,19 @@ namespace Pulsar4X.Lib.Storage
         /// <param name="gameState">Model to be saved</param>
         /// <param name="applicationPath">Application path the game is running in (Application.StartupPath) </param>
         /// <param name="saveName">Name for the saved game file, if none is given, the name of the game will be used</param>
-        public void Save(Model gameState, string applicationPath, string saveName = null)
+        public void Save(GameState gameState, string applicationPath, string saveName = null)
         {
             if (gameState == null) throw new ArgumentNullException("gameState", "Cannot save null game state.");
             if (string.IsNullOrEmpty(gameState.Name)) throw new ArgumentException("gameState.Name must not be null or empty");
 
-            string dbFileName = string.Format("{0}.db", gameState.Name);
+            string dbFileName = string.Format("{0}.db", string.IsNullOrEmpty(saveName) ? gameState.Name : saveName);
             string path = Path.Combine(applicationPath, DEFAULT_SAVED_GAMES_FOLDER, gameState.Name);
-            string fullPathName = Path.Combine(path, dbFileName);
+            
+            var cd = new CreateDatabase(path, dbFileName);
+            cd.Save(gameState);
 
-            if (Directory.Exists(path) == false)
-                Directory.CreateDirectory(path);
 
-            //remove the old file if there is one
-            if (File.Exists(fullPathName))
-            {
-                File.Delete(fullPathName);
-            }
 
-            //create our new db file
-            SQLiteConnection.CreateFile(fullPathName);
-
-            using (var conn = new SQLiteConnection(string.Format(CONNECTION_STRING, fullPathName)))
-            {
-                //create tables for saved game
-            }
         }
 
         /// <summary>
@@ -53,7 +40,7 @@ namespace Pulsar4X.Lib.Storage
         /// /SavedGames/[GameName]/AutoSave/AutoSave-[GameDate].db
         /// </summary>
         /// <param name="gameState"></param>
-        public void AutoSave(Model gameState)
+        public void AutoSave(GameState gameState, string applicationPath)
         {
 
         }
@@ -63,7 +50,7 @@ namespace Pulsar4X.Lib.Storage
         /// </summary>
         /// <param name="fullPath">Full path including file name of the game file to be loaded</param>
         /// <returns>A Model populated from the saved game file</returns>
-        public Model Load(string fullPath)
+        public GameState Load(string fullPath)
         {
             throw new NotImplementedException();
         }

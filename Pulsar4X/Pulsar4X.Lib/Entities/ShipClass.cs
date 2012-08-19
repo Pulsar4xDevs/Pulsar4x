@@ -7,7 +7,7 @@ namespace Pulsar4X.Entities
 {
     public class ShipClass
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Race Race { get; set; }
         public string ClassName { get; set; }
         public int HullDescriptionId { get; set; }
