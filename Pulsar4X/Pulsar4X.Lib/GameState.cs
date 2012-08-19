@@ -7,7 +7,7 @@ using Pulsar4X.Entities;
 
 namespace Pulsar4X
 {
-    class Model
+    public class Model
     {
         public void Commit()
         {
