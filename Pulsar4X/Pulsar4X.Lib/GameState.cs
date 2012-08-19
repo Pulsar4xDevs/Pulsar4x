@@ -21,7 +21,18 @@ namespace Pulsar4X
 #region Entities
 
         private ObservableCollection<Race> _races;
-       
+        public ObservableCollection<Race> Races
+        {
+            get
+            {
+                if (_races == null)
+                {
+                    //Load from DB here
+                }
+                return _races;
+            }
+            set { _races = value; }
+        }
 
         private ObservableCollection<StarSystem> _starsystems;
         public ObservableCollection<StarSystem> StarSystems
@@ -34,6 +45,7 @@ namespace Pulsar4X
                 }
                 return _starsystems;
             }
+            set { _starsystems = value; }
         }
 
         private ObservableCollection<Star> _stars;
@@ -47,6 +59,7 @@ namespace Pulsar4X
                 }
                 return _stars;
             }
+            set { _stars = value; }
         }
 
         private ObservableCollection<Planet> _planets;
@@ -60,6 +73,7 @@ namespace Pulsar4X
                 }
                 return _planets;
             }
+            set { _planets = value; }
         }
 #endregion Entities
 

@@ -26,7 +26,12 @@ namespace Pulsar4X.Stargen
         {
             //create the starsystem
             var starSystem = new StarSystem(name);
-            _starFactory.Create(name).ForEach(star => starSystem.Stars.Add(star));
+            _starFactory.Create(name).ForEach(star =>
+                                                  {
+                                                      star.StarSystem = starSystem;
+                                                      star.StarSystemId = starSystem.Id;
+                                                      starSystem.Stars.Add(star);
+                                                  });
 
             for (var i = 0; i < starSystem.Stars.Count; i++)
             {
@@ -54,7 +59,12 @@ namespace Pulsar4X.Stargen
                 GeneratePlanets(protoStar);
 
                 //populate the Star from the protoStar
-                protoStar.Planets.ForEach(planet => star.Planets.Add(planet));
+                protoStar.Planets.ForEach(planet =>
+                                              {
+                                                  planet.Primary = star;
+                                                  planet.PrimaryId = star.Id;
+                                                  star.Planets.Add(planet);
+                                              });
             }
 
             return starSystem;
@@ -154,7 +164,7 @@ namespace Pulsar4X.Stargen
 
             if ((planet.PlanetType == PlanetTypes.GasGiant) || (planet.PlanetType == PlanetTypes.IceGiant) || (planet.PlanetType == PlanetTypes.GasDwarf))
             {
-                planet.HaGreenhouseEffect = false;
+                planet.HasGreenhouseEffect = false;
                 planet.VolatileGasInventory = Constants.Units.INCREDIBLY_LARGE_NUMBER;
                 planet.SurfacePressure = Constants.Units.INCREDIBLY_LARGE_NUMBER;
                 planet.BoilingPoint = Constants.Units.INCREDIBLY_LARGE_NUMBER;
@@ -172,9 +182,9 @@ namespace Pulsar4X.Stargen
             {
                 planet.EstimatedTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, Constants.Sol.Earth.ALBEDO);
                 planet.SurfaceGravity = EnviroUtilities.Gravity(planet.SurfaceAcceleration);
-                planet.HaGreenhouseEffect = EnviroUtilities.Greenhouse(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis);
+                planet.HasGreenhouseEffect = EnviroUtilities.Greenhouse(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis);
                 planet.VolatileGasInventory = EnviroUtilities.VolInventory(planet.Mass, planet.EscapeVelocity, planet.RootMeanSquaredVelocity,
-                                                                                    planet.Primary.Mass, planet.OrbitZone, planet.HaGreenhouseEffect,
+                                                                                    planet.Primary.Mass, planet.OrbitZone, planet.HasGreenhouseEffect,
                                                                                     (planet.MassOfGas / planet.Mass) > 0.000001);
                 planet.SurfacePressure = EnviroUtilities.Pressure(planet.VolatileGasInventory, planet.Radius, planet.SurfaceGravity);
 

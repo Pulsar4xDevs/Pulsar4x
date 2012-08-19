@@ -7,6 +7,8 @@ namespace Pulsar4X.Stargen
 {
     public class StarSystemFactory
     {
+        private const double MinAge = 1.0E9;
+        private const double MaxAge = 6.0E9;
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystemFactory));
 
@@ -14,6 +16,9 @@ namespace Pulsar4X.Stargen
         private readonly double _maximumStellarAge;
         private readonly bool _generateMoons;
 
+        public StarSystemFactory(bool genMoons) : this(MinAge, MaxAge, genMoons)
+        {
+        }
 
         public StarSystemFactory(double minStellarAge, double maxStellarAge,  bool genMoons)
         {

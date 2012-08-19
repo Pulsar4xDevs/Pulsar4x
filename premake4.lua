@@ -32,6 +32,14 @@ function sqlitelib()
 		return "Pulsar4X/deps/Sqlite/Windows-1.0.81.0/System.Data.SQLite.dll";
 	end
 end
+
+-- Find the required dapper library
+function dapperlib()
+	if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the dapper binaries
+		--Assume .NET 4.0 for now
+		return "Pulsar4X/deps/Dapper/bin/Dapper.dll";
+	end
+end
 	
 	-- WinForms Project, main UI project
 	project "Pulsar4X.WinForms"
@@ -73,7 +81,8 @@ end
 			"System.Data",
 			"System.Xml",
 			log4netlib(),
-			sqlitelib()
+			sqlitelib(),
+			dapperlib()
 			}
 		files { 
 			"Pulsar4X/Pulsar4X.Lib/**.cs",

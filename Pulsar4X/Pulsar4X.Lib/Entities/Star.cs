@@ -25,6 +25,7 @@ namespace Pulsar4X.Entities
         public StarSpectrum Spectrum { get; set; }
 
         public ObservableCollection<Planet> Planets { get; set; }
+        public Guid StarSystemId { get; set; }
         public StarSystem StarSystem { get; set; }
         
 

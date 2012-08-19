@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
+using Pulsar4X.Stargen;
 using Pulsar4X.Storage;
 using Pulsar4X.Entities;
 
@@ -12,7 +14,7 @@ namespace Pulsar4X.Tests
     [TestFixture]
     public class StorageTests
     {
-        private GameState _model;
+        private GameState _gameState;
         private CreateDatabase _createDatabase;
 
         private string _appPath;
@@ -22,8 +24,22 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void TestSetup()
         {
-            _model = new GameState();
-            _model.Name = "Test Game";
+            _gameState = new GameState();
+            _gameState.Name = "Test Game";
+            _gameState.Races = new ObservableCollection<Race>();
+            _gameState.StarSystems = new ObservableCollection<StarSystem>();
+            _gameState.Stars = new ObservableCollection<Star>();
+            _gameState.Planets = new ObservableCollection<Planet>();
+
+            var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
+            var theme = new Theme { Id = Guid.NewGuid(), Name = "Test Theme" };
+            _gameState.Races.Add(new Race { Id = Guid.NewGuid(), Name = "Test Race", Species = species, SpeciesId = species.Id, Title = "Mighty Humans", Theme = theme, ThemeId = theme.Id });
+
+            var ssf = new StarSystemFactory(true);
+            var ss = ssf.Create("Test Sol");
+            _gameState.StarSystems.Add(ss);
+            ss.Stars.ToList().ForEach(x => _gameState.Stars.Add(x));
+            ss.Stars.ToList().SelectMany(x => x.Planets).ToList().ForEach(p => _gameState.Planets.Add(p));
 
             UriBuilder uri = new UriBuilder(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
             _appPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
@@ -47,5 +63,10 @@ namespace Pulsar4X.Tests
             _createDatabase.CreateTables();
         }
 
+        [Test]
+        public void Create_Saved_Game_Insert_Data()
+        {
+            _createDatabase.Save(_gameState);
+        }
     }
 }

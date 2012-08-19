@@ -33,6 +33,7 @@ namespace Pulsar4X.Stargen
             {
                 var star = new Star();
 
+                star.Id = Guid.NewGuid();
                 //TODO: All of the variable generation below this can be redone to be more realistic or playable in the future.
                 //TODO: This is generated based on data scrapped from wikipedia on Star Spectrums and their distribution
                 star.Name = numberOfStars == 1 ? name : string.Format("{0} {1}", name, GetPostfix(i));

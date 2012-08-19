@@ -732,16 +732,16 @@ namespace Pulsar4X.Stargen
                 SetTempRange(planet);
             }
 
-            if (planet.HaGreenhouseEffect && planet.MaxTemperature < planet.BoilingPoint)
+            if (planet.HasGreenhouseEffect && planet.MaxTemperature < planet.BoilingPoint)
             {
-                planet.HaGreenhouseEffect = false;
+                planet.HasGreenhouseEffect = false;
 
                 planet.VolatileGasInventory = VolInventory(planet.Mass,
                                                            planet.EscapeVelocity,
                                                            planet.RootMeanSquaredVelocity,
                                                            planet.Primary.Mass,
                                                            planet.OrbitZone,
-                                                           planet.HaGreenhouseEffect,
+                                                           planet.HasGreenhouseEffect,
                                                            (planet.MassOfGas / planet.Mass) > 0.000001);
                 planet.SurfacePressure = Pressure(planet.VolatileGasInventory, planet.Radius, planet.SurfaceGravity);
 
@@ -755,7 +755,7 @@ namespace Pulsar4X.Stargen
                                                planet.HydrosphereCover);
             planet.IceCover = IceFraction(planet.HydrosphereCover, planet.SurfaceTemperature);
 
-            if ((planet.HaGreenhouseEffect) && (planet.SurfacePressure > 0.0))
+            if ((planet.HasGreenhouseEffect) && (planet.SurfacePressure > 0.0))
                 planet.CloudCover = 1.0;
 
             if ((planet.HighTemperature >= planet.BoilingPoint) && (!first)

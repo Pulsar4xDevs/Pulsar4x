@@ -10,8 +10,11 @@ namespace Pulsar4X.Entities
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Title { get; set; }
+
+        public Guid SpeciesId { get; set; }
         public Species Species { get; set; }
 
+        public Guid ThemeId { get; set; }
         public Theme Theme { get; set; }
 
         public List<StarSystem> KnownSystems { get; set; }

@@ -10,6 +10,7 @@ namespace Pulsar4X.Entities
     {
         public ObservableCollection<Planet> Moons { get; set; } //moons orbiting the planet
         public ObservableCollection<Gas> Gases { get; set; } //gases in atmosphere
+        public Guid PrimaryId { get; set; }
         public Star Primary { get; set; }
 
         public long XSystem { get; set; }
@@ -45,7 +46,7 @@ namespace Pulsar4X.Entities
         public double MolecularWeightRetained { get; set; } //smallest molecular weight retained
         public double VolatileGasInventory { get; set; }
         public double SurfacePressure { get; set; }//units of millibars (mb)
-        public bool HaGreenhouseEffect { get; set; } // runaway greenhouse effect
+        public bool HasGreenhouseEffect { get; set; } // runaway greenhouse effect
         public double BoilingPoint { get; set; }//boiling point of water(K)
         public double Albedo { get; set; } //albedo of planet
         public double ExoSphericTemperature { get; set; } // degrees of Kelvin

@@ -5,6 +5,8 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Dapper;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.Storage
 {
@@ -13,6 +15,7 @@ namespace Pulsar4X.Storage
         private readonly string _saveDirectoryPath;
         private readonly string _dbFileName;
         private readonly string _fullFilePathName;
+        private readonly string _connectionString;
 
         private const string CONNECTION_STRING = "Data Source={0};Version=3;";
 
@@ -21,10 +24,77 @@ namespace Pulsar4X.Storage
             _saveDirectoryPath = path;
             _dbFileName = dbFileName;
             _fullFilePathName = Path.Combine(_saveDirectoryPath, _dbFileName);
+            _connectionString = string.Format(CONNECTION_STRING, _fullFilePathName);
         }
         public void Save(GameState gameState)
         {
-            throw new NotImplementedException();
+            CreateSaveFile();
+            CreateTables();
+            InsertData(gameState);
+        }
+
+        private void InsertData(GameState gameState)
+        {
+            using (var conn = new SQLiteConnection(_connectionString))
+            {
+                conn.Open();
+                //save the races
+                foreach (var race in gameState.Races)
+                {
+                    if (race == null) continue;
+
+                    conn.Execute("insert into Races " +
+                                 "(Id, Name, Title, SpeciesId, ThemeId) " +
+                                 "values " +
+                                 "(@Id, @Name, @Title, @SpeciesId, @ThemeId)", race);
+                }
+
+                foreach (var starSystem in gameState.StarSystems)
+                {
+                    if (starSystem == null) continue;
+
+                    conn.Execute("insert into StarSystems " +
+                                 "(Id, Name) " +
+                                 "values " +
+                                 "(@Id, @Name)", starSystem);
+                }
+
+                foreach (var star in gameState.Stars)
+                {
+                    if (star == null) continue;
+
+                    conn.Execute("insert into Stars " +
+                                 "(Id, Name, Age, Life, Luminosity, EcoSphereRadius, Mass, " +
+                                 "XGalactic, YGalactic, XSystem, YSystem, StarSystemId) " +
+                                 "values " +
+                                 "(@Id, @Name, @Age, @Life, @Luminosity, @EcoSphereRadius, @Mass, " +
+                                 "@XGalactic, @YGalactic, @XSystem, @YSystem, @StarSystemId)", star);
+                }
+
+                foreach (var planet in gameState.Planets)
+                {
+                    if (planet == null) continue;
+
+                    conn.Execute("insert into Planets " +
+                                 "(Id, Name, PrimaryId, XSystem, YSystem, SemiMajorAxis, Eccentricity, AxialTilt, " +
+                                 "OrbitZone, OrbitalPeriod, LengthOfDay, Mass, MassOfDust, MassOfGas, RadiusOfCore, " +
+                                 "Radius, Density, SurfaceArea, EscapeVelocity, SurfaceAcceleration, SurfaceGravity, " +
+                                 "RootMeanSquaredVelocity, MolecularWeightRetained, VolatileGasInventory, SurfacePressure, " +
+                                 "HasGreenhouseEffect, BoilingPoint, Albedo, ExoSphericTemperature, EstimatedTemperature, " +
+                                 "EstimatedTerrestrialTemperature, SurfaceTemperature, RiseInTemperatureDueToGreenhouse, " +
+                                 "HighTemperature, LowTemperature, MaxTemperature, MinTemperature, HydrosphereCover, " +
+                                 "CloudCover, IceCover, IsGasGiant, IsMoon) " +
+                                 "values " +
+                                 "(@Id, @Name, @PrimaryId, @XSystem, @YSystem, @SemiMajorAxis, @Eccentricity, @AxialTilt, " +
+                                 "@OrbitZone, @OrbitalPeriod, @LengthOfDay, @Mass, @MassOfDust, @MassOfGas, @RadiusOfCore, " +
+                                 "@Radius, @Density, @SurfaceArea, @EscapeVelocity, @SurfaceAcceleration, @SurfaceGravity, " +
+                                 "@RootMeanSquaredVelocity, @MolecularWeightRetained, @VolatileGasInventory, @SurfacePressure, " +
+                                 "@HasGreenhouseEffect, @BoilingPoint, @Albedo, @ExoSphericTemperature, @EstimatedTemperature, " +
+                                 "@EstimatedTerrestrialTemperature, @SurfaceTemperature, @RiseInTemperatureDueToGreenhouse, " +
+                                 "@HighTemperature, @LowTemperature, @MaxTemperature, @MinTemperature, @HydrosphereCover, " +
+                                 "@CloudCover, @IceCover, @IsGasGiant, @IsMoon)", planet);
+                }
+            }
         }
 
         /// <summary>
@@ -50,7 +120,7 @@ namespace Pulsar4X.Storage
         /// </summary>
         public void CreateTables()
         {
-            using (var conn = new SQLiteConnection(string.Format(CONNECTION_STRING, _fullFilePathName)))
+            using (var conn = new SQLiteConnection(_connectionString))
             {
                 conn.Open();
 
@@ -141,6 +211,6 @@ namespace Pulsar4X.Storage
                 "IsMoon INTEGER NOT NULL)"
         };
 
-        
+
     }
 }

@@ -17,7 +17,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void Stargen_Default_StarSystem_With_Moons()
         {
-            var ssf = new StarSystemFactory(MinAge, MaxAge, true);
+            var ssf = new StarSystemFactory(true);
             StarSystem ss = null;
             for (int i = 0; i < 200; i++)
             {
@@ -35,7 +35,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void Stargen_Default_StarSystem_Without_Moons()
         {
-            var ssf = new StarSystemFactory(MinAge, MaxAge, false);
+            var ssf = new StarSystemFactory(false);
             StarSystem ss = null;
             for (int i = 0; i < 200; i++)
             {
@@ -53,7 +53,7 @@ namespace Pulsar4X.Tests
         [Test, ExpectedException(typeof(ArgumentException))]
         public void Stargen_Default_StarSystem_With_No_Name_Throws()
         {
-            var ssf = new StarSystemFactory(MinAge, MaxAge, true);
+            var ssf = new StarSystemFactory(true);
 
             var ss = ssf.Create("");
 
