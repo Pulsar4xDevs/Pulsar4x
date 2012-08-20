@@ -211,6 +211,22 @@ namespace Pulsar4X.Stargen
 
             return (dayInHours);
         }
+
+        /// <summary>
+        /// This function, given the orbital radius of a planet in AU, returns
+        ///	 the orbital 'zone' of the particle.
+        /// </summary>
+        /// <param name="luminosity"></param>
+        /// <param name="orbitalRadius"></param>
+        /// <returns></returns>
+        public static int OrbitalZone(double luminosity, double orbitalRadius)
+        {
+            if (orbitalRadius < (4.0 * Math.Sqrt(luminosity)))
+                return 1;
+            if (orbitalRadius < (15.0 * Math.Sqrt(luminosity)))
+                return 2;
+            return 3;
+        }
         
         /// <summary>
         ///	 The orbital radius is expected in units of Astronomical Units (AU).	
