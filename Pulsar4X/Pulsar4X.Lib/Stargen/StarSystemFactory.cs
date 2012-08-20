@@ -34,6 +34,28 @@ namespace Pulsar4X.Stargen
             var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge,  _generateMoons);
             var ss = accrete.Create(name);
 
+            if (logger.IsDebugEnabled)
+            {
+                logger.Debug("Star System Generated!");
+                for(int i = 0; i<ss.Stars.Count; i++)
+                {
+                    Star star = ss.Stars[i];
+                    logger.Debug(string.Format("Star {0}: Mass {1:N4}, Luminosity {2:N4}, Spectrum {3}{4}, {5} planets", i, star.Mass, star.Luminosity, star.Spectrum, star.SpectrumAdjustment, star.Planets.Count));
+                    for (int j = 0; j < star.Planets.Count; j++)
+                    {
+                        Planet p = star.Planets[j];
+                        if(j==0)
+                            logger.Debug(string.Format("P{0,-6}{1,9}AU {2,10}{3,10}{4,12}{5,5}", "#", "Orbit", "Mass", "GasMass", "PlanetType", "Moons"));
+                        logger.Debug(string.Format("P{0,-6}{1,9:N4}AU {2,10:N4}{3,10}{4,12}{5,5}", j, p.SemiMajorAxis, p.MassInEarthMasses, p.MassOfGasInEarthMasses > 0 ? p.MassOfGasInEarthMasses.ToString("N4") : "None", p.PlanetType, p.Moons.Count));
+                        for(int k=0; k<p.Moons.Count; k++)
+                        {
+                            Planet m = p.Moons[k];
+                            logger.Debug(string.Format("P{0,-6}{1,9:N4}AU {2,10:N4}{3,10}{4,12}", j+"-"+k, m.SemiMajorAxis, m.MassInEarthMasses, m.MassOfGasInEarthMasses > 0 ? m.MassOfGasInEarthMasses.ToString("N4") : "None", m.PlanetType));
+                        }
+                    }
+                }
+            }
+
             return ss;
         }
     }
