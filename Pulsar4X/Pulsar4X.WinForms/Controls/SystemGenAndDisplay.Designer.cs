@@ -76,6 +76,17 @@
             this.BodyPictureBox = new System.Windows.Forms.PictureBox();
             this.CloseButton = new System.Windows.Forms.Button();
             this.groupBoxBottomButtons = new System.Windows.Forms.GroupBox();
+            this.ClipboardButton = new System.Windows.Forms.Button();
+            this.FixedNameButton = new System.Windows.Forms.Button();
+            this.BanBodyButton = new System.Windows.Forms.Button();
+            this.SystemMapButton = new System.Windows.Forms.Button();
+            this.ChangeImageButton = new System.Windows.Forms.Button();
+            this.AddColonyButton = new System.Windows.Forms.Button();
+            this.GeoStatusButton = new System.Windows.Forms.Button();
+            this.RenameBodyButton = new System.Windows.Forms.Button();
+            this.AutoRenameButton = new System.Windows.Forms.Button();
+            this.RenameSysButton = new System.Windows.Forms.Button();
+            this.DeleteSystemButton = new System.Windows.Forms.Button();
             this.groupBoxColonyCostFact = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.DangerousAtmosTextBox = new System.Windows.Forms.TextBox();
@@ -92,35 +103,88 @@
             this.labelWaterAvailable = new System.Windows.Forms.Label();
             this.labelAcceptableGravity = new System.Windows.Forms.Label();
             this.groupBoxMineralDeposits = new System.Windows.Forms.GroupBox();
-            this.groupBoxJumpPointSurvey = new System.Windows.Forms.GroupBox();
             this.MineralDepositsRichTextBox = new System.Windows.Forms.RichTextBox();
-            this.labelCurrentSituation = new System.Windows.Forms.Label();
-            this.labelJSPPerSurveyLocation = new System.Windows.Forms.Label();
-            this.ShowSBServeysCheckBox = new System.Windows.Forms.CheckBox();
-            this.CurrentSituationTextBox = new System.Windows.Forms.TextBox();
+            this.groupBoxJumpPointSurvey = new System.Windows.Forms.GroupBox();
             this.JSPPerSurveyLocTextBox = new System.Windows.Forms.TextBox();
-            this.DeleteSystemButton = new System.Windows.Forms.Button();
-            this.RenameSysButton = new System.Windows.Forms.Button();
-            this.AutoRenameButton = new System.Windows.Forms.Button();
-            this.RenameBodyButton = new System.Windows.Forms.Button();
-            this.GeoStatusButton = new System.Windows.Forms.Button();
-            this.AddColonyButton = new System.Windows.Forms.Button();
-            this.ChangeImageButton = new System.Windows.Forms.Button();
-            this.SystemMapButton = new System.Windows.Forms.Button();
-            this.BanBodyButton = new System.Windows.Forms.Button();
-            this.FixedNameButton = new System.Windows.Forms.Button();
-            this.ClipboardButton = new System.Windows.Forms.Button();
+            this.CurrentSituationTextBox = new System.Windows.Forms.TextBox();
+            this.ShowSBServeysCheckBox = new System.Windows.Forms.CheckBox();
+            this.labelJSPPerSurveyLocation = new System.Windows.Forms.Label();
+            this.labelCurrentSituation = new System.Windows.Forms.Label();
+            this.groupBoxJPDetails = new System.Windows.Forms.GroupBox();
+            this.groupBoxJPLayout = new System.Windows.Forms.GroupBox();
+            this.groupBoxJPTravelTimes = new System.Windows.Forms.GroupBox();
+            this.JPDetailsDataGridView = new System.Windows.Forms.DataGridView();
+            this.JPTravelTimesDataGridView = new System.Windows.Forms.DataGridView();
+            this.JPHierachyTreeView = new System.Windows.Forms.TreeView();
+            this.groupBoxOptionsOuter = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsSystemsNotes = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsNotes = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsAsteroids = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsMoons = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsDistances = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsDiameter = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsEscapeVelocity = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsMinerals = new System.Windows.Forms.GroupBox();
+            this.groupBoxOptionsTemperature = new System.Windows.Forms.GroupBox();
+            this.OptAsteroidsHideRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptAsteroisShowRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptAsteroidsMineralsRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptMoonsHideRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptMoonsShowRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptMoonsMineralsRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptDistAURadioButton = new System.Windows.Forms.RadioButton();
+            this.OptDistMilesRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptDistKmRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptDiamEarthRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptDiamMilesRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptDiamKmRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptExcapeVEarthRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptEscapeVMilesRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptEscapeVKmRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptTempKelvinRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptTempCelsiusRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptTempFahrenheitRadioButton = new System.Windows.Forms.RadioButton();
+            this.OptMineralsCheckBox = new System.Windows.Forms.CheckBox();
+            this.StarADataGridView = new System.Windows.Forms.DataGridView();
+            this.StarBDataGridView = new System.Windows.Forms.DataGridView();
+            this.StarCDataGridView = new System.Windows.Forms.DataGridView();
+            this.StarDDataGridView = new System.Windows.Forms.DataGridView();
+            this.OptNotesRichTextBox = new System.Windows.Forms.RichTextBox();
             this.GeneralInfoGroupBox.SuspendLayout();
             this.groupBoxEnvironTolerances.SuspendLayout();
             this.groupBoxStars.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.StarsDataGridView)).BeginInit();
             this.StarsDatatabControl.SuspendLayout();
+            this.StarATabPage.SuspendLayout();
+            this.StarBTabPage.SuspendLayout();
+            this.StarCTabPage.SuspendLayout();
+            this.StarDTabPage.SuspendLayout();
+            this.JumpPointsTabPage.SuspendLayout();
+            this.HierachyViewTabPage.SuspendLayout();
+            this.OptionsTabPage.SuspendLayout();
             this.groupBoxBodyImage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.BodyPictureBox)).BeginInit();
             this.groupBoxBottomButtons.SuspendLayout();
             this.groupBoxColonyCostFact.SuspendLayout();
             this.groupBoxMineralDeposits.SuspendLayout();
             this.groupBoxJumpPointSurvey.SuspendLayout();
+            this.groupBoxJPDetails.SuspendLayout();
+            this.groupBoxJPTravelTimes.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.JPDetailsDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.JPTravelTimesDataGridView)).BeginInit();
+            this.groupBoxOptionsOuter.SuspendLayout();
+            this.groupBoxOptionsNotes.SuspendLayout();
+            this.groupBoxOptionsAsteroids.SuspendLayout();
+            this.groupBoxOptionsMoons.SuspendLayout();
+            this.groupBoxOptionsDistances.SuspendLayout();
+            this.groupBoxOptionsDiameter.SuspendLayout();
+            this.groupBoxOptionsEscapeVelocity.SuspendLayout();
+            this.groupBoxOptionsMinerals.SuspendLayout();
+            this.groupBoxOptionsTemperature.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.StarADataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StarBDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StarCDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StarDDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // NameListBox
@@ -164,7 +228,7 @@
             // ControllingEmpireListBox
             // 
             this.ControllingEmpireListBox.FormattingEnabled = true;
-            this.ControllingEmpireListBox.Location = new System.Drawing.Point(533, 18);
+            this.ControllingEmpireListBox.Location = new System.Drawing.Point(531, 16);
             this.ControllingEmpireListBox.Name = "ControllingEmpireListBox";
             this.ControllingEmpireListBox.Size = new System.Drawing.Size(171, 17);
             this.ControllingEmpireListBox.TabIndex = 11;
@@ -192,7 +256,7 @@
             // AgetextBox
             // 
             this.AgetextBox.Enabled = false;
-            this.AgetextBox.Location = new System.Drawing.Point(368, 16);
+            this.AgetextBox.Location = new System.Drawing.Point(368, 15);
             this.AgetextBox.Name = "AgetextBox";
             this.AgetextBox.Size = new System.Drawing.Size(62, 20);
             this.AgetextBox.TabIndex = 8;
@@ -202,7 +266,7 @@
             // TypetextBox
             // 
             this.TypetextBox.Enabled = false;
-            this.TypetextBox.Location = new System.Drawing.Point(210, 16);
+            this.TypetextBox.Location = new System.Drawing.Point(206, 15);
             this.TypetextBox.Name = "TypetextBox";
             this.TypetextBox.Size = new System.Drawing.Size(120, 20);
             this.TypetextBox.TabIndex = 7;
@@ -230,7 +294,7 @@
             // labelControllingEmpire
             // 
             this.labelControllingEmpire.AutoSize = true;
-            this.labelControllingEmpire.Location = new System.Drawing.Point(436, 20);
+            this.labelControllingEmpire.Location = new System.Drawing.Point(436, 18);
             this.labelControllingEmpire.Name = "labelControllingEmpire";
             this.labelControllingEmpire.Size = new System.Drawing.Size(91, 13);
             this.labelControllingEmpire.TabIndex = 4;
@@ -239,7 +303,7 @@
             // labelAge
             // 
             this.labelAge.AutoSize = true;
-            this.labelAge.Location = new System.Drawing.Point(336, 20);
+            this.labelAge.Location = new System.Drawing.Point(336, 18);
             this.labelAge.Name = "labelAge";
             this.labelAge.Size = new System.Drawing.Size(26, 13);
             this.labelAge.TabIndex = 3;
@@ -248,7 +312,7 @@
             // labelType
             // 
             this.labelType.AutoSize = true;
-            this.labelType.Location = new System.Drawing.Point(173, 20);
+            this.labelType.Location = new System.Drawing.Point(173, 18);
             this.labelType.Name = "labelType";
             this.labelType.Size = new System.Drawing.Size(31, 13);
             this.labelType.TabIndex = 2;
@@ -497,6 +561,7 @@
             // 
             // StarATabPage
             // 
+            this.StarATabPage.Controls.Add(this.StarADataGridView);
             this.StarATabPage.Location = new System.Drawing.Point(4, 22);
             this.StarATabPage.Name = "StarATabPage";
             this.StarATabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -507,6 +572,7 @@
             // 
             // StarBTabPage
             // 
+            this.StarBTabPage.Controls.Add(this.StarBDataGridView);
             this.StarBTabPage.Location = new System.Drawing.Point(4, 22);
             this.StarBTabPage.Name = "StarBTabPage";
             this.StarBTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -517,6 +583,7 @@
             // 
             // StarCTabPage
             // 
+            this.StarCTabPage.Controls.Add(this.StarCDataGridView);
             this.StarCTabPage.Location = new System.Drawing.Point(4, 22);
             this.StarCTabPage.Name = "StarCTabPage";
             this.StarCTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -527,6 +594,7 @@
             // 
             // StarDTabPage
             // 
+            this.StarDTabPage.Controls.Add(this.StarDDataGridView);
             this.StarDTabPage.Location = new System.Drawing.Point(4, 22);
             this.StarDTabPage.Name = "StarDTabPage";
             this.StarDTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -537,6 +605,9 @@
             // 
             // JumpPointsTabPage
             // 
+            this.JumpPointsTabPage.Controls.Add(this.groupBoxJPTravelTimes);
+            this.JumpPointsTabPage.Controls.Add(this.groupBoxJPLayout);
+            this.JumpPointsTabPage.Controls.Add(this.groupBoxJPDetails);
             this.JumpPointsTabPage.Location = new System.Drawing.Point(4, 22);
             this.JumpPointsTabPage.Name = "JumpPointsTabPage";
             this.JumpPointsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -547,6 +618,7 @@
             // 
             // HierachyViewTabPage
             // 
+            this.HierachyViewTabPage.Controls.Add(this.JPHierachyTreeView);
             this.HierachyViewTabPage.Location = new System.Drawing.Point(4, 22);
             this.HierachyViewTabPage.Name = "HierachyViewTabPage";
             this.HierachyViewTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -567,6 +639,9 @@
             // 
             // OptionsTabPage
             // 
+            this.OptionsTabPage.Controls.Add(this.groupBoxOptionsNotes);
+            this.OptionsTabPage.Controls.Add(this.groupBoxOptionsSystemsNotes);
+            this.OptionsTabPage.Controls.Add(this.groupBoxOptionsOuter);
             this.OptionsTabPage.Location = new System.Drawing.Point(4, 22);
             this.OptionsTabPage.Name = "OptionsTabPage";
             this.OptionsTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -620,6 +695,105 @@
             this.groupBoxBottomButtons.Size = new System.Drawing.Size(1216, 45);
             this.groupBoxBottomButtons.TabIndex = 8;
             this.groupBoxBottomButtons.TabStop = false;
+            // 
+            // ClipboardButton
+            // 
+            this.ClipboardButton.Location = new System.Drawing.Point(929, 16);
+            this.ClipboardButton.Name = "ClipboardButton";
+            this.ClipboardButton.Size = new System.Drawing.Size(85, 23);
+            this.ClipboardButton.TabIndex = 18;
+            this.ClipboardButton.Text = "Clipboard";
+            this.ClipboardButton.UseVisualStyleBackColor = true;
+            // 
+            // FixedNameButton
+            // 
+            this.FixedNameButton.Location = new System.Drawing.Point(840, 16);
+            this.FixedNameButton.Name = "FixedNameButton";
+            this.FixedNameButton.Size = new System.Drawing.Size(85, 23);
+            this.FixedNameButton.TabIndex = 17;
+            this.FixedNameButton.Text = "Fixed Name";
+            this.FixedNameButton.UseVisualStyleBackColor = true;
+            // 
+            // BanBodyButton
+            // 
+            this.BanBodyButton.Location = new System.Drawing.Point(751, 16);
+            this.BanBodyButton.Name = "BanBodyButton";
+            this.BanBodyButton.Size = new System.Drawing.Size(85, 23);
+            this.BanBodyButton.TabIndex = 16;
+            this.BanBodyButton.Text = "Ban Body";
+            this.BanBodyButton.UseVisualStyleBackColor = true;
+            // 
+            // SystemMapButton
+            // 
+            this.SystemMapButton.Location = new System.Drawing.Point(662, 16);
+            this.SystemMapButton.Name = "SystemMapButton";
+            this.SystemMapButton.Size = new System.Drawing.Size(85, 23);
+            this.SystemMapButton.TabIndex = 15;
+            this.SystemMapButton.Text = "System Map";
+            this.SystemMapButton.UseVisualStyleBackColor = true;
+            // 
+            // ChangeImageButton
+            // 
+            this.ChangeImageButton.Location = new System.Drawing.Point(572, 16);
+            this.ChangeImageButton.Name = "ChangeImageButton";
+            this.ChangeImageButton.Size = new System.Drawing.Size(85, 23);
+            this.ChangeImageButton.TabIndex = 14;
+            this.ChangeImageButton.Text = "Change Image";
+            this.ChangeImageButton.UseVisualStyleBackColor = true;
+            // 
+            // AddColonyButton
+            // 
+            this.AddColonyButton.Location = new System.Drawing.Point(483, 16);
+            this.AddColonyButton.Name = "AddColonyButton";
+            this.AddColonyButton.Size = new System.Drawing.Size(85, 23);
+            this.AddColonyButton.TabIndex = 13;
+            this.AddColonyButton.Text = "Add Colony";
+            this.AddColonyButton.UseVisualStyleBackColor = true;
+            // 
+            // GeoStatusButton
+            // 
+            this.GeoStatusButton.Location = new System.Drawing.Point(394, 16);
+            this.GeoStatusButton.Name = "GeoStatusButton";
+            this.GeoStatusButton.Size = new System.Drawing.Size(85, 23);
+            this.GeoStatusButton.TabIndex = 12;
+            this.GeoStatusButton.Text = "Geo Status";
+            this.GeoStatusButton.UseVisualStyleBackColor = true;
+            // 
+            // RenameBodyButton
+            // 
+            this.RenameBodyButton.Location = new System.Drawing.Point(305, 16);
+            this.RenameBodyButton.Name = "RenameBodyButton";
+            this.RenameBodyButton.Size = new System.Drawing.Size(85, 23);
+            this.RenameBodyButton.TabIndex = 11;
+            this.RenameBodyButton.Text = "Rename Body";
+            this.RenameBodyButton.UseVisualStyleBackColor = true;
+            // 
+            // AutoRenameButton
+            // 
+            this.AutoRenameButton.Location = new System.Drawing.Point(216, 16);
+            this.AutoRenameButton.Name = "AutoRenameButton";
+            this.AutoRenameButton.Size = new System.Drawing.Size(85, 23);
+            this.AutoRenameButton.TabIndex = 10;
+            this.AutoRenameButton.Text = "Auto Rename";
+            this.AutoRenameButton.UseVisualStyleBackColor = true;
+            // 
+            // RenameSysButton
+            // 
+            this.RenameSysButton.Location = new System.Drawing.Point(128, 16);
+            this.RenameSysButton.Name = "RenameSysButton";
+            this.RenameSysButton.Size = new System.Drawing.Size(85, 23);
+            this.RenameSysButton.TabIndex = 9;
+            this.RenameSysButton.Text = "Rename Sys";
+            this.RenameSysButton.UseVisualStyleBackColor = true;
+            // 
+            // DeleteSystemButton
+            // 
+            this.DeleteSystemButton.Location = new System.Drawing.Point(1028, 16);
+            this.DeleteSystemButton.Name = "DeleteSystemButton";
+            this.DeleteSystemButton.Size = new System.Drawing.Size(85, 23);
+            this.DeleteSystemButton.TabIndex = 8;
+            this.DeleteSystemButton.Text = "Delete System";
+            this.DeleteSystemButton.UseVisualStyleBackColor = true;
             // 
             // groupBoxColonyCostFact
             // 
@@ -780,6 +954,15 @@
             this.groupBoxMineralDeposits.TabStop = false;
             this.groupBoxMineralDeposits.Text = "Mineral Deposits";
             // 
+            // MineralDepositsRichTextBox
+            // 
+            this.MineralDepositsRichTextBox.Location = new System.Drawing.Point(7, 12);
+            this.MineralDepositsRichTextBox.Name = "MineralDepositsRichTextBox";
+            this.MineralDepositsRichTextBox.ReadOnly = true;
+            this.MineralDepositsRichTextBox.Size = new System.Drawing.Size(198, 154);
+            this.MineralDepositsRichTextBox.TabIndex = 0;
+            this.MineralDepositsRichTextBox.Text = "";
+            // 
             // groupBoxJumpPointSurvey
             // 
             this.groupBoxJumpPointSurvey.Controls.Add(this.JSPPerSurveyLocTextBox);
@@ -794,32 +977,23 @@
             this.groupBoxJumpPointSurvey.TabStop = false;
             this.groupBoxJumpPointSurvey.Text = "Jump Point Survey Details";
             // 
-            // MineralDepositsRichTextBox
+            // JSPPerSurveyLocTextBox
             // 
-            this.MineralDepositsRichTextBox.Location = new System.Drawing.Point(7, 12);
-            this.MineralDepositsRichTextBox.Name = "MineralDepositsRichTextBox";
-            this.MineralDepositsRichTextBox.ReadOnly = true;
-            this.MineralDepositsRichTextBox.Size = new System.Drawing.Size(198, 154);
-            this.MineralDepositsRichTextBox.TabIndex = 0;
-            this.MineralDepositsRichTextBox.Text = "";
+            this.JSPPerSurveyLocTextBox.Enabled = false;
+            this.JSPPerSurveyLocTextBox.Location = new System.Drawing.Point(11, 92);
+            this.JSPPerSurveyLocTextBox.Name = "JSPPerSurveyLocTextBox";
+            this.JSPPerSurveyLocTextBox.Size = new System.Drawing.Size(148, 20);
+            this.JSPPerSurveyLocTextBox.TabIndex = 4;
+            this.JSPPerSurveyLocTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // labelCurrentSituation
+            // CurrentSituationTextBox
             // 
-            this.labelCurrentSituation.AutoSize = true;
-            this.labelCurrentSituation.Location = new System.Drawing.Point(8, 27);
-            this.labelCurrentSituation.Name = "labelCurrentSituation";
-            this.labelCurrentSituation.Size = new System.Drawing.Size(85, 13);
-            this.labelCurrentSituation.TabIndex = 0;
-            this.labelCurrentSituation.Text = "Current Situation";
-            // 
-            // labelJSPPerSurveyLocation
-            // 
-            this.labelJSPPerSurveyLocation.AutoSize = true;
-            this.labelJSPPerSurveyLocation.Location = new System.Drawing.Point(8, 78);
-            this.labelJSPPerSurveyLocation.Name = "labelJSPPerSurveyLocation";
-            this.labelJSPPerSurveyLocation.Size = new System.Drawing.Size(125, 13);
-            this.labelJSPPerSurveyLocation.TabIndex = 1;
-            this.labelJSPPerSurveyLocation.Text = "JSP Per Survey Location";
+            this.CurrentSituationTextBox.Enabled = false;
+            this.CurrentSituationTextBox.Location = new System.Drawing.Point(11, 44);
+            this.CurrentSituationTextBox.Name = "CurrentSituationTextBox";
+            this.CurrentSituationTextBox.Size = new System.Drawing.Size(148, 20);
+            this.CurrentSituationTextBox.TabIndex = 3;
+            this.CurrentSituationTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // ShowSBServeysCheckBox
             // 
@@ -831,122 +1005,443 @@
             this.ShowSBServeysCheckBox.Text = "Show SB Surveys";
             this.ShowSBServeysCheckBox.UseVisualStyleBackColor = true;
             // 
-            // CurrentSituationTextBox
+            // labelJSPPerSurveyLocation
             // 
-            this.CurrentSituationTextBox.Enabled = false;
-            this.CurrentSituationTextBox.Location = new System.Drawing.Point(11, 44);
-            this.CurrentSituationTextBox.Name = "CurrentSituationTextBox";
-            this.CurrentSituationTextBox.Size = new System.Drawing.Size(148, 20);
-            this.CurrentSituationTextBox.TabIndex = 3;
-            this.CurrentSituationTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.labelJSPPerSurveyLocation.AutoSize = true;
+            this.labelJSPPerSurveyLocation.Location = new System.Drawing.Point(8, 78);
+            this.labelJSPPerSurveyLocation.Name = "labelJSPPerSurveyLocation";
+            this.labelJSPPerSurveyLocation.Size = new System.Drawing.Size(125, 13);
+            this.labelJSPPerSurveyLocation.TabIndex = 1;
+            this.labelJSPPerSurveyLocation.Text = "JSP Per Survey Location";
             // 
-            // JSPPerSurveyLocTextBox
+            // labelCurrentSituation
             // 
-            this.JSPPerSurveyLocTextBox.Enabled = false;
-            this.JSPPerSurveyLocTextBox.Location = new System.Drawing.Point(11, 92);
-            this.JSPPerSurveyLocTextBox.Name = "JSPPerSurveyLocTextBox";
-            this.JSPPerSurveyLocTextBox.Size = new System.Drawing.Size(148, 20);
-            this.JSPPerSurveyLocTextBox.TabIndex = 4;
-            this.JSPPerSurveyLocTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.labelCurrentSituation.AutoSize = true;
+            this.labelCurrentSituation.Location = new System.Drawing.Point(8, 27);
+            this.labelCurrentSituation.Name = "labelCurrentSituation";
+            this.labelCurrentSituation.Size = new System.Drawing.Size(85, 13);
+            this.labelCurrentSituation.TabIndex = 0;
+            this.labelCurrentSituation.Text = "Current Situation";
             // 
-            // DeleteSystemButton
+            // groupBoxJPDetails
             // 
-            this.DeleteSystemButton.Location = new System.Drawing.Point(1028, 16);
-            this.DeleteSystemButton.Name = "DeleteSystemButton";
-            this.DeleteSystemButton.Size = new System.Drawing.Size(85, 23);
-            this.DeleteSystemButton.TabIndex = 8;
-            this.DeleteSystemButton.Text = "Delete System";
-            this.DeleteSystemButton.UseVisualStyleBackColor = true;
+            this.groupBoxJPDetails.Controls.Add(this.JPDetailsDataGridView);
+            this.groupBoxJPDetails.Location = new System.Drawing.Point(4, 7);
+            this.groupBoxJPDetails.Name = "groupBoxJPDetails";
+            this.groupBoxJPDetails.Size = new System.Drawing.Size(398, 279);
+            this.groupBoxJPDetails.TabIndex = 0;
+            this.groupBoxJPDetails.TabStop = false;
+            this.groupBoxJPDetails.Text = "Details";
             // 
-            // RenameSysButton
+            // groupBoxJPLayout
             // 
-            this.RenameSysButton.Location = new System.Drawing.Point(128, 16);
-            this.RenameSysButton.Name = "RenameSysButton";
-            this.RenameSysButton.Size = new System.Drawing.Size(85, 23);
-            this.RenameSysButton.TabIndex = 9;
-            this.RenameSysButton.Text = "Rename Sys";
-            this.RenameSysButton.UseVisualStyleBackColor = true;
+            this.groupBoxJPLayout.Location = new System.Drawing.Point(408, 7);
+            this.groupBoxJPLayout.Name = "groupBoxJPLayout";
+            this.groupBoxJPLayout.Size = new System.Drawing.Size(398, 279);
+            this.groupBoxJPLayout.TabIndex = 1;
+            this.groupBoxJPLayout.TabStop = false;
+            this.groupBoxJPLayout.Text = "Layout";
             // 
-            // AutoRenameButton
+            // groupBoxJPTravelTimes
             // 
-            this.AutoRenameButton.Location = new System.Drawing.Point(216, 16);
-            this.AutoRenameButton.Name = "AutoRenameButton";
-            this.AutoRenameButton.Size = new System.Drawing.Size(85, 23);
-            this.AutoRenameButton.TabIndex = 10;
-            this.AutoRenameButton.Text = "Auto Rename";
-            this.AutoRenameButton.UseVisualStyleBackColor = true;
+            this.groupBoxJPTravelTimes.Controls.Add(this.JPTravelTimesDataGridView);
+            this.groupBoxJPTravelTimes.Location = new System.Drawing.Point(810, 7);
+            this.groupBoxJPTravelTimes.Name = "groupBoxJPTravelTimes";
+            this.groupBoxJPTravelTimes.Size = new System.Drawing.Size(396, 279);
+            this.groupBoxJPTravelTimes.TabIndex = 1;
+            this.groupBoxJPTravelTimes.TabStop = false;
+            this.groupBoxJPTravelTimes.Text = "Travel Times";
             // 
-            // RenameBodyButton
+            // JPDetailsDataGridView
             // 
-            this.RenameBodyButton.Location = new System.Drawing.Point(305, 16);
-            this.RenameBodyButton.Name = "RenameBodyButton";
-            this.RenameBodyButton.Size = new System.Drawing.Size(85, 23);
-            this.RenameBodyButton.TabIndex = 11;
-            this.RenameBodyButton.Text = "Rename Body";
-            this.RenameBodyButton.UseVisualStyleBackColor = true;
+            this.JPDetailsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.JPDetailsDataGridView.Location = new System.Drawing.Point(7, 20);
+            this.JPDetailsDataGridView.Name = "JPDetailsDataGridView";
+            this.JPDetailsDataGridView.Size = new System.Drawing.Size(385, 253);
+            this.JPDetailsDataGridView.TabIndex = 0;
             // 
-            // GeoStatusButton
+            // JPTravelTimesDataGridView
             // 
-            this.GeoStatusButton.Location = new System.Drawing.Point(394, 16);
-            this.GeoStatusButton.Name = "GeoStatusButton";
-            this.GeoStatusButton.Size = new System.Drawing.Size(85, 23);
-            this.GeoStatusButton.TabIndex = 12;
-            this.GeoStatusButton.Text = "Geo Status";
-            this.GeoStatusButton.UseVisualStyleBackColor = true;
+            this.JPTravelTimesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.JPTravelTimesDataGridView.Location = new System.Drawing.Point(7, 20);
+            this.JPTravelTimesDataGridView.Name = "JPTravelTimesDataGridView";
+            this.JPTravelTimesDataGridView.Size = new System.Drawing.Size(381, 253);
+            this.JPTravelTimesDataGridView.TabIndex = 0;
             // 
-            // AddColonyButton
+            // JPHierachyTreeView
             // 
-            this.AddColonyButton.Location = new System.Drawing.Point(483, 16);
-            this.AddColonyButton.Name = "AddColonyButton";
-            this.AddColonyButton.Size = new System.Drawing.Size(85, 23);
-            this.AddColonyButton.TabIndex = 13;
-            this.AddColonyButton.Text = "Add Colony";
-            this.AddColonyButton.UseVisualStyleBackColor = true;
+            this.JPHierachyTreeView.Location = new System.Drawing.Point(7, 7);
+            this.JPHierachyTreeView.Name = "JPHierachyTreeView";
+            this.JPHierachyTreeView.Size = new System.Drawing.Size(350, 276);
+            this.JPHierachyTreeView.TabIndex = 0;
             // 
-            // ChangeImageButton
+            // groupBoxOptionsOuter
             // 
-            this.ChangeImageButton.Location = new System.Drawing.Point(572, 16);
-            this.ChangeImageButton.Name = "ChangeImageButton";
-            this.ChangeImageButton.Size = new System.Drawing.Size(85, 23);
-            this.ChangeImageButton.TabIndex = 14;
-            this.ChangeImageButton.Text = "Change Image";
-            this.ChangeImageButton.UseVisualStyleBackColor = true;
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsMinerals);
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsTemperature);
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsEscapeVelocity);
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsDiameter);
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsDistances);
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsMoons);
+            this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsAsteroids);
+            this.groupBoxOptionsOuter.Location = new System.Drawing.Point(7, 7);
+            this.groupBoxOptionsOuter.Name = "groupBoxOptionsOuter";
+            this.groupBoxOptionsOuter.Size = new System.Drawing.Size(775, 130);
+            this.groupBoxOptionsOuter.TabIndex = 0;
+            this.groupBoxOptionsOuter.TabStop = false;
             // 
-            // SystemMapButton
+            // groupBoxOptionsSystemsNotes
             // 
-            this.SystemMapButton.Location = new System.Drawing.Point(662, 16);
-            this.SystemMapButton.Name = "SystemMapButton";
-            this.SystemMapButton.Size = new System.Drawing.Size(85, 23);
-            this.SystemMapButton.TabIndex = 15;
-            this.SystemMapButton.Text = "System Map";
-            this.SystemMapButton.UseVisualStyleBackColor = true;
+            this.groupBoxOptionsSystemsNotes.Location = new System.Drawing.Point(789, 7);
+            this.groupBoxOptionsSystemsNotes.Name = "groupBoxOptionsSystemsNotes";
+            this.groupBoxOptionsSystemsNotes.Size = new System.Drawing.Size(413, 276);
+            this.groupBoxOptionsSystemsNotes.TabIndex = 1;
+            this.groupBoxOptionsSystemsNotes.TabStop = false;
+            this.groupBoxOptionsSystemsNotes.Text = "System Notes";
             // 
-            // BanBodyButton
+            // groupBoxOptionsNotes
             // 
-            this.BanBodyButton.Location = new System.Drawing.Point(751, 16);
-            this.BanBodyButton.Name = "BanBodyButton";
-            this.BanBodyButton.Size = new System.Drawing.Size(85, 23);
-            this.BanBodyButton.TabIndex = 16;
-            this.BanBodyButton.Text = "Ban Body";
-            this.BanBodyButton.UseVisualStyleBackColor = true;
+            this.groupBoxOptionsNotes.Controls.Add(this.OptNotesRichTextBox);
+            this.groupBoxOptionsNotes.Location = new System.Drawing.Point(7, 143);
+            this.groupBoxOptionsNotes.Name = "groupBoxOptionsNotes";
+            this.groupBoxOptionsNotes.Size = new System.Drawing.Size(775, 140);
+            this.groupBoxOptionsNotes.TabIndex = 2;
+            this.groupBoxOptionsNotes.TabStop = false;
             // 
-            // FixedNameButton
+            // groupBoxOptionsAsteroids
             // 
-            this.FixedNameButton.Location = new System.Drawing.Point(840, 16);
-            this.FixedNameButton.Name = "FixedNameButton";
-            this.FixedNameButton.Size = new System.Drawing.Size(85, 23);
-            this.FixedNameButton.TabIndex = 17;
-            this.FixedNameButton.Text = "Fixed Name";
-            this.FixedNameButton.UseVisualStyleBackColor = true;
+            this.groupBoxOptionsAsteroids.Controls.Add(this.OptAsteroidsMineralsRadioButton);
+            this.groupBoxOptionsAsteroids.Controls.Add(this.OptAsteroisShowRadioButton);
+            this.groupBoxOptionsAsteroids.Controls.Add(this.OptAsteroidsHideRadioButton);
+            this.groupBoxOptionsAsteroids.Location = new System.Drawing.Point(6, 19);
+            this.groupBoxOptionsAsteroids.Name = "groupBoxOptionsAsteroids";
+            this.groupBoxOptionsAsteroids.Size = new System.Drawing.Size(110, 100);
+            this.groupBoxOptionsAsteroids.TabIndex = 0;
+            this.groupBoxOptionsAsteroids.TabStop = false;
+            this.groupBoxOptionsAsteroids.Text = "Asteroids";
             // 
-            // ClipboardButton
+            // groupBoxOptionsMoons
             // 
-            this.ClipboardButton.Location = new System.Drawing.Point(929, 16);
-            this.ClipboardButton.Name = "ClipboardButton";
-            this.ClipboardButton.Size = new System.Drawing.Size(85, 23);
-            this.ClipboardButton.TabIndex = 18;
-            this.ClipboardButton.Text = "Clipboard";
-            this.ClipboardButton.UseVisualStyleBackColor = true;
+            this.groupBoxOptionsMoons.Controls.Add(this.OptMoonsMineralsRadioButton);
+            this.groupBoxOptionsMoons.Controls.Add(this.OptMoonsShowRadioButton);
+            this.groupBoxOptionsMoons.Controls.Add(this.OptMoonsHideRadioButton);
+            this.groupBoxOptionsMoons.Location = new System.Drawing.Point(138, 19);
+            this.groupBoxOptionsMoons.Name = "groupBoxOptionsMoons";
+            this.groupBoxOptionsMoons.Size = new System.Drawing.Size(110, 100);
+            this.groupBoxOptionsMoons.TabIndex = 1;
+            this.groupBoxOptionsMoons.TabStop = false;
+            this.groupBoxOptionsMoons.Text = "Moons";
+            // 
+            // groupBoxOptionsDistances
+            // 
+            this.groupBoxOptionsDistances.Controls.Add(this.OptDistKmRadioButton);
+            this.groupBoxOptionsDistances.Controls.Add(this.OptDistMilesRadioButton);
+            this.groupBoxOptionsDistances.Controls.Add(this.OptDistAURadioButton);
+            this.groupBoxOptionsDistances.Location = new System.Drawing.Point(270, 19);
+            this.groupBoxOptionsDistances.Name = "groupBoxOptionsDistances";
+            this.groupBoxOptionsDistances.Size = new System.Drawing.Size(71, 100);
+            this.groupBoxOptionsDistances.TabIndex = 1;
+            this.groupBoxOptionsDistances.TabStop = false;
+            this.groupBoxOptionsDistances.Text = "Distances";
+            // 
+            // groupBoxOptionsDiameter
+            // 
+            this.groupBoxOptionsDiameter.Controls.Add(this.OptDiamKmRadioButton);
+            this.groupBoxOptionsDiameter.Controls.Add(this.OptDiamMilesRadioButton);
+            this.groupBoxOptionsDiameter.Controls.Add(this.OptDiamEarthRadioButton);
+            this.groupBoxOptionsDiameter.Location = new System.Drawing.Point(363, 19);
+            this.groupBoxOptionsDiameter.Name = "groupBoxOptionsDiameter";
+            this.groupBoxOptionsDiameter.Size = new System.Drawing.Size(78, 100);
+            this.groupBoxOptionsDiameter.TabIndex = 2;
+            this.groupBoxOptionsDiameter.TabStop = false;
+            this.groupBoxOptionsDiameter.Text = "Diameter";
+            // 
+            // groupBoxOptionsEscapeVelocity
+            // 
+            this.groupBoxOptionsEscapeVelocity.Controls.Add(this.OptEscapeVKmRadioButton);
+            this.groupBoxOptionsEscapeVelocity.Controls.Add(this.OptEscapeVMilesRadioButton);
+            this.groupBoxOptionsEscapeVelocity.Controls.Add(this.OptExcapeVEarthRadioButton);
+            this.groupBoxOptionsEscapeVelocity.Location = new System.Drawing.Point(463, 19);
+            this.groupBoxOptionsEscapeVelocity.Name = "groupBoxOptionsEscapeVelocity";
+            this.groupBoxOptionsEscapeVelocity.Size = new System.Drawing.Size(102, 100);
+            this.groupBoxOptionsEscapeVelocity.TabIndex = 3;
+            this.groupBoxOptionsEscapeVelocity.TabStop = false;
+            this.groupBoxOptionsEscapeVelocity.Text = "Escape Velocity";
+            // 
+            // groupBoxOptionsMinerals
+            // 
+            this.groupBoxOptionsMinerals.Controls.Add(this.OptMineralsCheckBox);
+            this.groupBoxOptionsMinerals.Location = new System.Drawing.Point(696, 19);
+            this.groupBoxOptionsMinerals.Name = "groupBoxOptionsMinerals";
+            this.groupBoxOptionsMinerals.Size = new System.Drawing.Size(71, 100);
+            this.groupBoxOptionsMinerals.TabIndex = 1;
+            this.groupBoxOptionsMinerals.TabStop = false;
+            this.groupBoxOptionsMinerals.Text = "Minerals";
+            // 
+            // groupBoxOptionsTemperature
+            // 
+            this.groupBoxOptionsTemperature.Controls.Add(this.OptTempFahrenheitRadioButton);
+            this.groupBoxOptionsTemperature.Controls.Add(this.OptTempCelsiusRadioButton);
+            this.groupBoxOptionsTemperature.Controls.Add(this.OptTempKelvinRadioButton);
+            this.groupBoxOptionsTemperature.Location = new System.Drawing.Point(587, 19);
+            this.groupBoxOptionsTemperature.Name = "groupBoxOptionsTemperature";
+            this.groupBoxOptionsTemperature.Size = new System.Drawing.Size(87, 100);
+            this.groupBoxOptionsTemperature.TabIndex = 4;
+            this.groupBoxOptionsTemperature.TabStop = false;
+            this.groupBoxOptionsTemperature.Text = "Temperature";
+            // 
+            // OptAsteroidsHideRadioButton
+            // 
+            this.OptAsteroidsHideRadioButton.AutoSize = true;
+            this.OptAsteroidsHideRadioButton.Location = new System.Drawing.Point(9, 20);
+            this.OptAsteroidsHideRadioButton.Name = "OptAsteroidsHideRadioButton";
+            this.OptAsteroidsHideRadioButton.Size = new System.Drawing.Size(47, 17);
+            this.OptAsteroidsHideRadioButton.TabIndex = 0;
+            this.OptAsteroidsHideRadioButton.TabStop = true;
+            this.OptAsteroidsHideRadioButton.Text = "Hide";
+            this.OptAsteroidsHideRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptAsteroisShowRadioButton
+            // 
+            this.OptAsteroisShowRadioButton.AutoSize = true;
+            this.OptAsteroisShowRadioButton.Location = new System.Drawing.Point(9, 44);
+            this.OptAsteroisShowRadioButton.Name = "OptAsteroisShowRadioButton";
+            this.OptAsteroisShowRadioButton.Size = new System.Drawing.Size(52, 17);
+            this.OptAsteroisShowRadioButton.TabIndex = 1;
+            this.OptAsteroisShowRadioButton.TabStop = true;
+            this.OptAsteroisShowRadioButton.Text = "Show";
+            this.OptAsteroisShowRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptAsteroidsMineralsRadioButton
+            // 
+            this.OptAsteroidsMineralsRadioButton.AutoSize = true;
+            this.OptAsteroidsMineralsRadioButton.Location = new System.Drawing.Point(9, 68);
+            this.OptAsteroidsMineralsRadioButton.Name = "OptAsteroidsMineralsRadioButton";
+            this.OptAsteroidsMineralsRadioButton.Size = new System.Drawing.Size(102, 17);
+            this.OptAsteroidsMineralsRadioButton.TabIndex = 2;
+            this.OptAsteroidsMineralsRadioButton.TabStop = true;
+            this.OptAsteroidsMineralsRadioButton.Text = "Show if Minerals";
+            this.OptAsteroidsMineralsRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptMoonsHideRadioButton
+            // 
+            this.OptMoonsHideRadioButton.AutoSize = true;
+            this.OptMoonsHideRadioButton.Location = new System.Drawing.Point(7, 20);
+            this.OptMoonsHideRadioButton.Name = "OptMoonsHideRadioButton";
+            this.OptMoonsHideRadioButton.Size = new System.Drawing.Size(47, 17);
+            this.OptMoonsHideRadioButton.TabIndex = 0;
+            this.OptMoonsHideRadioButton.TabStop = true;
+            this.OptMoonsHideRadioButton.Text = "Hide";
+            this.OptMoonsHideRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptMoonsShowRadioButton
+            // 
+            this.OptMoonsShowRadioButton.AutoSize = true;
+            this.OptMoonsShowRadioButton.Location = new System.Drawing.Point(7, 44);
+            this.OptMoonsShowRadioButton.Name = "OptMoonsShowRadioButton";
+            this.OptMoonsShowRadioButton.Size = new System.Drawing.Size(52, 17);
+            this.OptMoonsShowRadioButton.TabIndex = 1;
+            this.OptMoonsShowRadioButton.TabStop = true;
+            this.OptMoonsShowRadioButton.Text = "Show";
+            this.OptMoonsShowRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptMoonsMineralsRadioButton
+            // 
+            this.OptMoonsMineralsRadioButton.AutoSize = true;
+            this.OptMoonsMineralsRadioButton.Location = new System.Drawing.Point(7, 68);
+            this.OptMoonsMineralsRadioButton.Name = "OptMoonsMineralsRadioButton";
+            this.OptMoonsMineralsRadioButton.Size = new System.Drawing.Size(102, 17);
+            this.OptMoonsMineralsRadioButton.TabIndex = 2;
+            this.OptMoonsMineralsRadioButton.TabStop = true;
+            this.OptMoonsMineralsRadioButton.Text = "Show if Minerals";
+            this.OptMoonsMineralsRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptDistAURadioButton
+            // 
+            this.OptDistAURadioButton.AutoSize = true;
+            this.OptDistAURadioButton.Location = new System.Drawing.Point(7, 20);
+            this.OptDistAURadioButton.Name = "OptDistAURadioButton";
+            this.OptDistAURadioButton.Size = new System.Drawing.Size(40, 17);
+            this.OptDistAURadioButton.TabIndex = 0;
+            this.OptDistAURadioButton.TabStop = true;
+            this.OptDistAURadioButton.Text = "AU";
+            this.OptDistAURadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptDistMilesRadioButton
+            // 
+            this.OptDistMilesRadioButton.AutoSize = true;
+            this.OptDistMilesRadioButton.Location = new System.Drawing.Point(7, 44);
+            this.OptDistMilesRadioButton.Name = "OptDistMilesRadioButton";
+            this.OptDistMilesRadioButton.Size = new System.Drawing.Size(49, 17);
+            this.OptDistMilesRadioButton.TabIndex = 1;
+            this.OptDistMilesRadioButton.TabStop = true;
+            this.OptDistMilesRadioButton.Text = "Miles";
+            this.OptDistMilesRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptDistKmRadioButton
+            // 
+            this.OptDistKmRadioButton.AutoSize = true;
+            this.OptDistKmRadioButton.Location = new System.Drawing.Point(6, 68);
+            this.OptDistKmRadioButton.Name = "OptDistKmRadioButton";
+            this.OptDistKmRadioButton.Size = new System.Drawing.Size(40, 17);
+            this.OptDistKmRadioButton.TabIndex = 2;
+            this.OptDistKmRadioButton.TabStop = true;
+            this.OptDistKmRadioButton.Text = "Km";
+            this.OptDistKmRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptDiamEarthRadioButton
+            // 
+            this.OptDiamEarthRadioButton.AutoSize = true;
+            this.OptDiamEarthRadioButton.Location = new System.Drawing.Point(7, 20);
+            this.OptDiamEarthRadioButton.Name = "OptDiamEarthRadioButton";
+            this.OptDiamEarthRadioButton.Size = new System.Drawing.Size(70, 17);
+            this.OptDiamEarthRadioButton.TabIndex = 0;
+            this.OptDiamEarthRadioButton.TabStop = true;
+            this.OptDiamEarthRadioButton.Text = "Earth/Sol";
+            this.OptDiamEarthRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptDiamMilesRadioButton
+            // 
+            this.OptDiamMilesRadioButton.AutoSize = true;
+            this.OptDiamMilesRadioButton.Location = new System.Drawing.Point(7, 44);
+            this.OptDiamMilesRadioButton.Name = "OptDiamMilesRadioButton";
+            this.OptDiamMilesRadioButton.Size = new System.Drawing.Size(49, 17);
+            this.OptDiamMilesRadioButton.TabIndex = 1;
+            this.OptDiamMilesRadioButton.TabStop = true;
+            this.OptDiamMilesRadioButton.Text = "Miles";
+            this.OptDiamMilesRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptDiamKmRadioButton
+            // 
+            this.OptDiamKmRadioButton.AutoSize = true;
+            this.OptDiamKmRadioButton.Location = new System.Drawing.Point(7, 68);
+            this.OptDiamKmRadioButton.Name = "OptDiamKmRadioButton";
+            this.OptDiamKmRadioButton.Size = new System.Drawing.Size(40, 17);
+            this.OptDiamKmRadioButton.TabIndex = 2;
+            this.OptDiamKmRadioButton.TabStop = true;
+            this.OptDiamKmRadioButton.Text = "Km";
+            this.OptDiamKmRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptExcapeVEarthRadioButton
+            // 
+            this.OptExcapeVEarthRadioButton.AutoSize = true;
+            this.OptExcapeVEarthRadioButton.Location = new System.Drawing.Point(7, 20);
+            this.OptExcapeVEarthRadioButton.Name = "OptExcapeVEarthRadioButton";
+            this.OptExcapeVEarthRadioButton.Size = new System.Drawing.Size(50, 17);
+            this.OptExcapeVEarthRadioButton.TabIndex = 0;
+            this.OptExcapeVEarthRadioButton.TabStop = true;
+            this.OptExcapeVEarthRadioButton.Text = "Earth";
+            this.OptExcapeVEarthRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptEscapeVMilesRadioButton
+            // 
+            this.OptEscapeVMilesRadioButton.AutoSize = true;
+            this.OptEscapeVMilesRadioButton.Location = new System.Drawing.Point(7, 44);
+            this.OptEscapeVMilesRadioButton.Name = "OptEscapeVMilesRadioButton";
+            this.OptEscapeVMilesRadioButton.Size = new System.Drawing.Size(71, 17);
+            this.OptEscapeVMilesRadioButton.TabIndex = 1;
+            this.OptEscapeVMilesRadioButton.TabStop = true;
+            this.OptEscapeVMilesRadioButton.Text = "Miles/sec";
+            this.OptEscapeVMilesRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptEscapeVKmRadioButton
+            // 
+            this.OptEscapeVKmRadioButton.AutoSize = true;
+            this.OptEscapeVKmRadioButton.Location = new System.Drawing.Point(7, 68);
+            this.OptEscapeVKmRadioButton.Name = "OptEscapeVKmRadioButton";
+            this.OptEscapeVKmRadioButton.Size = new System.Drawing.Size(62, 17);
+            this.OptEscapeVKmRadioButton.TabIndex = 2;
+            this.OptEscapeVKmRadioButton.TabStop = true;
+            this.OptEscapeVKmRadioButton.Text = "Km/sec";
+            this.OptEscapeVKmRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptTempKelvinRadioButton
+            // 
+            this.OptTempKelvinRadioButton.AutoSize = true;
+            this.OptTempKelvinRadioButton.Location = new System.Drawing.Point(7, 20);
+            this.OptTempKelvinRadioButton.Name = "OptTempKelvinRadioButton";
+            this.OptTempKelvinRadioButton.Size = new System.Drawing.Size(54, 17);
+            this.OptTempKelvinRadioButton.TabIndex = 0;
+            this.OptTempKelvinRadioButton.TabStop = true;
+            this.OptTempKelvinRadioButton.Text = "Kelvin";
+            this.OptTempKelvinRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptTempCelsiusRadioButton
+            // 
+            this.OptTempCelsiusRadioButton.AutoSize = true;
+            this.OptTempCelsiusRadioButton.Location = new System.Drawing.Point(7, 44);
+            this.OptTempCelsiusRadioButton.Name = "OptTempCelsiusRadioButton";
+            this.OptTempCelsiusRadioButton.Size = new System.Drawing.Size(58, 17);
+            this.OptTempCelsiusRadioButton.TabIndex = 1;
+            this.OptTempCelsiusRadioButton.TabStop = true;
+            this.OptTempCelsiusRadioButton.Text = "Celsius";
+            this.OptTempCelsiusRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptTempFahrenheitRadioButton
+            // 
+            this.OptTempFahrenheitRadioButton.AutoSize = true;
+            this.OptTempFahrenheitRadioButton.Location = new System.Drawing.Point(7, 67);
+            this.OptTempFahrenheitRadioButton.Name = "OptTempFahrenheitRadioButton";
+            this.OptTempFahrenheitRadioButton.Size = new System.Drawing.Size(75, 17);
+            this.OptTempFahrenheitRadioButton.TabIndex = 2;
+            this.OptTempFahrenheitRadioButton.TabStop = true;
+            this.OptTempFahrenheitRadioButton.Text = "Fahrenheit";
+            this.OptTempFahrenheitRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // OptMineralsCheckBox
+            // 
+            this.OptMineralsCheckBox.AutoSize = true;
+            this.OptMineralsCheckBox.Location = new System.Drawing.Point(7, 44);
+            this.OptMineralsCheckBox.Name = "OptMineralsCheckBox";
+            this.OptMineralsCheckBox.Size = new System.Drawing.Size(65, 17);
+            this.OptMineralsCheckBox.TabIndex = 0;
+            this.OptMineralsCheckBox.Text = "Minerals";
+            this.OptMineralsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // StarADataGridView
+            // 
+            this.StarADataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.StarADataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarADataGridView.Name = "StarADataGridView";
+            this.StarADataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarADataGridView.TabIndex = 0;
+            // 
+            // StarBDataGridView
+            // 
+            this.StarBDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.StarBDataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarBDataGridView.Name = "StarBDataGridView";
+            this.StarBDataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarBDataGridView.TabIndex = 0;
+            // 
+            // StarCDataGridView
+            // 
+            this.StarCDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.StarCDataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarCDataGridView.Name = "StarCDataGridView";
+            this.StarCDataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarCDataGridView.TabIndex = 0;
+            // 
+            // StarDDataGridView
+            // 
+            this.StarDDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.StarDDataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarDDataGridView.Name = "StarDDataGridView";
+            this.StarDDataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarDDataGridView.TabIndex = 0;
+            // 
+            // OptNotesRichTextBox
+            // 
+            this.OptNotesRichTextBox.BackColor = System.Drawing.SystemColors.Window;
+            this.OptNotesRichTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.OptNotesRichTextBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.OptNotesRichTextBox.Location = new System.Drawing.Point(6, 20);
+            this.OptNotesRichTextBox.Name = "OptNotesRichTextBox";
+            this.OptNotesRichTextBox.ReadOnly = true;
+            this.OptNotesRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.OptNotesRichTextBox.Size = new System.Drawing.Size(761, 114);
+            this.OptNotesRichTextBox.TabIndex = 0;
+            this.OptNotesRichTextBox.Text = "Put any Notes RE above options here...";
             // 
             // SystemGenAndDisplay
             // 
@@ -971,6 +1466,13 @@
             this.groupBoxStars.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.StarsDataGridView)).EndInit();
             this.StarsDatatabControl.ResumeLayout(false);
+            this.StarATabPage.ResumeLayout(false);
+            this.StarBTabPage.ResumeLayout(false);
+            this.StarCTabPage.ResumeLayout(false);
+            this.StarDTabPage.ResumeLayout(false);
+            this.JumpPointsTabPage.ResumeLayout(false);
+            this.HierachyViewTabPage.ResumeLayout(false);
+            this.OptionsTabPage.ResumeLayout(false);
             this.groupBoxBodyImage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.BodyPictureBox)).EndInit();
             this.groupBoxBottomButtons.ResumeLayout(false);
@@ -979,6 +1481,30 @@
             this.groupBoxMineralDeposits.ResumeLayout(false);
             this.groupBoxJumpPointSurvey.ResumeLayout(false);
             this.groupBoxJumpPointSurvey.PerformLayout();
+            this.groupBoxJPDetails.ResumeLayout(false);
+            this.groupBoxJPTravelTimes.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.JPDetailsDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.JPTravelTimesDataGridView)).EndInit();
+            this.groupBoxOptionsOuter.ResumeLayout(false);
+            this.groupBoxOptionsNotes.ResumeLayout(false);
+            this.groupBoxOptionsAsteroids.ResumeLayout(false);
+            this.groupBoxOptionsAsteroids.PerformLayout();
+            this.groupBoxOptionsMoons.ResumeLayout(false);
+            this.groupBoxOptionsMoons.PerformLayout();
+            this.groupBoxOptionsDistances.ResumeLayout(false);
+            this.groupBoxOptionsDistances.PerformLayout();
+            this.groupBoxOptionsDiameter.ResumeLayout(false);
+            this.groupBoxOptionsDiameter.PerformLayout();
+            this.groupBoxOptionsEscapeVelocity.ResumeLayout(false);
+            this.groupBoxOptionsEscapeVelocity.PerformLayout();
+            this.groupBoxOptionsMinerals.ResumeLayout(false);
+            this.groupBoxOptionsMinerals.PerformLayout();
+            this.groupBoxOptionsTemperature.ResumeLayout(false);
+            this.groupBoxOptionsTemperature.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.StarADataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StarBDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StarCDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.StarDDataGridView)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1067,5 +1593,45 @@
         private System.Windows.Forms.Button AutoRenameButton;
         private System.Windows.Forms.Button RenameSysButton;
         private System.Windows.Forms.Button DeleteSystemButton;
+        private System.Windows.Forms.GroupBox groupBoxJPTravelTimes;
+        private System.Windows.Forms.DataGridView JPTravelTimesDataGridView;
+        private System.Windows.Forms.GroupBox groupBoxJPLayout;
+        private System.Windows.Forms.GroupBox groupBoxJPDetails;
+        private System.Windows.Forms.DataGridView JPDetailsDataGridView;
+        private System.Windows.Forms.TreeView JPHierachyTreeView;
+        private System.Windows.Forms.GroupBox groupBoxOptionsNotes;
+        private System.Windows.Forms.GroupBox groupBoxOptionsSystemsNotes;
+        private System.Windows.Forms.GroupBox groupBoxOptionsOuter;
+        private System.Windows.Forms.GroupBox groupBoxOptionsAsteroids;
+        private System.Windows.Forms.GroupBox groupBoxOptionsMinerals;
+        private System.Windows.Forms.GroupBox groupBoxOptionsTemperature;
+        private System.Windows.Forms.GroupBox groupBoxOptionsEscapeVelocity;
+        private System.Windows.Forms.GroupBox groupBoxOptionsDiameter;
+        private System.Windows.Forms.GroupBox groupBoxOptionsDistances;
+        private System.Windows.Forms.GroupBox groupBoxOptionsMoons;
+        private System.Windows.Forms.CheckBox OptMineralsCheckBox;
+        private System.Windows.Forms.RadioButton OptTempFahrenheitRadioButton;
+        private System.Windows.Forms.RadioButton OptTempCelsiusRadioButton;
+        private System.Windows.Forms.RadioButton OptTempKelvinRadioButton;
+        private System.Windows.Forms.RadioButton OptEscapeVKmRadioButton;
+        private System.Windows.Forms.RadioButton OptEscapeVMilesRadioButton;
+        private System.Windows.Forms.RadioButton OptExcapeVEarthRadioButton;
+        private System.Windows.Forms.RadioButton OptDiamKmRadioButton;
+        private System.Windows.Forms.RadioButton OptDiamMilesRadioButton;
+        private System.Windows.Forms.RadioButton OptDiamEarthRadioButton;
+        private System.Windows.Forms.RadioButton OptDistKmRadioButton;
+        private System.Windows.Forms.RadioButton OptDistMilesRadioButton;
+        private System.Windows.Forms.RadioButton OptDistAURadioButton;
+        private System.Windows.Forms.RadioButton OptMoonsMineralsRadioButton;
+        private System.Windows.Forms.RadioButton OptMoonsShowRadioButton;
+        private System.Windows.Forms.RadioButton OptMoonsHideRadioButton;
+        private System.Windows.Forms.RadioButton OptAsteroidsMineralsRadioButton;
+        private System.Windows.Forms.RadioButton OptAsteroisShowRadioButton;
+        private System.Windows.Forms.RadioButton OptAsteroidsHideRadioButton;
+        private System.Windows.Forms.DataGridView StarADataGridView;
+        private System.Windows.Forms.DataGridView StarBDataGridView;
+        private System.Windows.Forms.DataGridView StarCDataGridView;
+        private System.Windows.Forms.DataGridView StarDDataGridView;
+        private System.Windows.Forms.RichTextBox OptNotesRichTextBox;
     }
 }
