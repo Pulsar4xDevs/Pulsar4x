@@ -26,14 +26,14 @@ namespace Pulsar4X.Tests
         {
             _gameState = new GameState();
             _gameState.Name = "Test Game";
-            _gameState.Races = new ObservableCollection<Race>();
+            _gameState.Factions = new ObservableCollection<Faction>();
             _gameState.StarSystems = new ObservableCollection<StarSystem>();
             _gameState.Stars = new ObservableCollection<Star>();
             _gameState.Planets = new ObservableCollection<Planet>();
 
             var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
             var theme = new Theme { Id = Guid.NewGuid(), Name = "Test Theme" };
-            _gameState.Races.Add(new Race { Id = Guid.NewGuid(), Name = "Test Race", Species = species, SpeciesId = species.Id, Title = "Mighty Humans", Theme = theme, ThemeId = theme.Id });
+            _gameState.Factions.Add(new Faction { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, SpeciesId = species.Id, Title = "Mighty Humans", Theme = theme, ThemeId = theme.Id });
 
             var ssf = new StarSystemFactory(true);
             var ss = ssf.Create("Test Sol");

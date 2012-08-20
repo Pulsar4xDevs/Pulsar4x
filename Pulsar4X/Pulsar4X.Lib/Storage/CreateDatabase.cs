@@ -39,11 +39,11 @@ namespace Pulsar4X.Storage
             {
                 conn.Open();
                 //save the races
-                foreach (var race in gameState.Races)
+                foreach (var race in gameState.Factions)
                 {
                     if (race == null) continue;
 
-                    conn.Execute("insert into Races " +
+                    conn.Execute("insert into Factions " +
                                  "(Id, Name, Title, SpeciesId, ThemeId) " +
                                  "values " +
                                  "(@Id, @Name, @Title, @SpeciesId, @ThemeId)", race);
@@ -141,7 +141,7 @@ namespace Pulsar4X.Storage
 
         private static readonly List<string> CreateTableSqlStatements = new List<string>
         {
-            "CREATE TABLE Races(" +
+            "CREATE TABLE Factions(" +
                 "Id GUID NULL, " +
                 "Name Text NULL, " +
                 "Title Text NULL," +

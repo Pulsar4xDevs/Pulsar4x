@@ -20,18 +20,18 @@ namespace Pulsar4X
 
 #region Entities
 
-        private ObservableCollection<Race> _races;
-        public ObservableCollection<Race> Races
+        private ObservableCollection<Faction> _factions;
+        public ObservableCollection<Faction> Factions
         {
             get
             {
-                if (_races == null)
+                if (_factions == null)
                 {
                     //Load from DB here
                 }
-                return _races;
+                return _factions;
             }
-            set { _races = value; }
+            set { _factions = value; }
         }
 
         private ObservableCollection<StarSystem> _starsystems;

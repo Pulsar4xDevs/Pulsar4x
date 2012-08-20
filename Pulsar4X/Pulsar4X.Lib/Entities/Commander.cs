@@ -8,8 +8,17 @@ namespace Pulsar4X.Entities
     public class Commander
     {
         public Guid Id { get; set; }
-        public Race Race { get; set; }
-        public Species Species { get; set; }
+        public Guid FactionId { get; set; }
+        private Faction _faction;
+        public Faction Faction
+        {
+            get { return _faction; }
+            set
+            {
+                _faction = value;
+                if (_faction != null) FactionId = _faction.Id;
+            }
+        }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string FullName
