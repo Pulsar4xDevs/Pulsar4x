@@ -52,9 +52,10 @@ namespace Pulsar4X.Stargen
                 int counter = 0;
                 while (protoStar.DustAvailable)
                 {
+                    counter++;
                     var protoPlanet = new ProtoPlanet()
                     {
-                        Star = protoStar,
+                        Star = star,
                         SemiMajorAxis = MathUtilities.Random.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
                         Eccentricity = rnd.RandomEccentricity(),
                         DustMass = Constants.Stargen.PROTOPLANET_MASS
@@ -63,12 +64,12 @@ namespace Pulsar4X.Stargen
 
                     if (protoStar.IsDustAvailable(protoPlanet))
                     {
-                        var criticalMass = protoPlanet.CriticalLimit;
-                        AccreteDust(protoPlanet);
+                        //var criticalMass = protoPlanet.CriticalLimit;
+                        AccreteDust(protoStar, protoPlanet);
 
                         if (protoPlanet.Mass > Constants.Stargen.PROTOPLANET_MASS)
                         {
-                            CoalescePlanetesimals(protoPlanet);
+                            CoalescePlanetesimals(protoStar, protoPlanet);
                         }
                         else
                         {
@@ -76,7 +77,7 @@ namespace Pulsar4X.Stargen
                         }
                     }
                     if (counter == 10000)
-                        logger.Debug("Exceeded 10000 attempts to create a planet! Will continue!");
+                        logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
                 } while (protoStar.DustAvailable && counter < 10000) ;
                 
                 //populate the Star from the protoStar
@@ -84,22 +85,24 @@ namespace Pulsar4X.Stargen
                                               {
                                                   planet.Planet.Primary = star;
                                                   planet.Planet.PrimaryId = star.Id;
+                                                  if (_generateMoons)
+                                                      DistMoonMasses(protoStar, planet);
                                                   star.Planets.Add(planet.Planet);
                                               });
-                protoStar.Planets = protoStar.Planets.OrderBy(x => x.SemiMajorAxis).ToList();
+                star.Planets = new ObservableCollection<Planet>(star.Planets.OrderBy(x => x.SemiMajorAxis));
                 GeneratePlanets(star);
             }
 
             return starSystem;
         }
 
-        private void CoalescePlanetesimals(ProtoPlanet p)
+        private void CoalescePlanetesimals(AccreteDisc Disc, ProtoPlanet p)
         {
-            p.Star.Planets.Add(p);
-            doCollisions(p.Star);
+            Disc.Planets.Add(p);
+            doCollisions(Disc);
         }
 
-        private void doCollisions(ProtoStar star)
+        private void doCollisions(AccreteDisc Disc)
         {
             double miu1, miu2;
             double delta = 1, deltaMin = 0;
@@ -109,17 +112,17 @@ namespace Pulsar4X.Stargen
             do
             {
                 collision = false;
-                star.Planets = new List<ProtoPlanet>(star.Planets.OrderBy(x => x.SemiMajorAxis));
-                for (int i = 0; i < star.Planets.Count - 1; i++)
+                Disc.Planets = new List<ProtoPlanet>(Disc.Planets.OrderBy(x => x.SemiMajorAxis));
+                for (int i = 0; i < Disc.Planets.Count - 1; i++)
                 {
-                    ProtoPlanet aPlanet = star.Planets[i];
-                    ProtoPlanet bPlanet = star.Planets[i + 1];
+                    ProtoPlanet aPlanet = Disc.Planets[i];
+                    ProtoPlanet bPlanet = Disc.Planets[i + 1];
 
-                    miu1 = aPlanet.Mass / star.Mass;
-                    miu2 = bPlanet.Mass / star.Mass;
+                    miu1 = aPlanet.Mass / Disc.Mass;
+                    miu2 = bPlanet.Mass / Disc.Mass;
 
                     deltaMin = 2.4 * (Math.Pow(miu1 + miu2, 1.0 / 3.0));
-                    delta = bPlanet.SemiMajorAxis - aPlanet.SemiMajorAxis / aPlanet.SemiMajorAxis;
+                    delta = Math.Abs(bPlanet.SemiMajorAxis - aPlanet.SemiMajorAxis / aPlanet.SemiMajorAxis);
 
                     if (delta <= deltaMin)
                     {
@@ -145,18 +148,18 @@ namespace Pulsar4X.Stargen
                             Eccentricity = newE,
                             DustMass = aPlanet.DustMass + bPlanet.DustMass,
                             GasMass = aPlanet.GasMass + bPlanet.GasMass,
-                            Star = star
+                            Star = Disc.Star
                         };
                         //newP.CritMass = getCriticalMass(newP);
                         //newP.CloudDensity = getCloudDensity(newP);
 
-                        AccreteDust(newP);
+                        AccreteDust(Disc, newP);
 
                         logger.Debug(string.Format("New planet at {0:N4} AU with mass {1:N5}!", newP.SemiMajorAxis, newP.MassInEarthMasses));
 
-                        star.Planets.Remove(aPlanet);
-                        star.Planets.Remove(bPlanet);
-                        star.Planets.Add(newP);
+                        Disc.Planets.Remove(aPlanet);
+                        Disc.Planets.Remove(bPlanet);
+                        Disc.Planets.Add(newP);
 
                         collision = true;
                         break;
@@ -167,9 +170,9 @@ namespace Pulsar4X.Stargen
             while (collision == true);
         }
 
-        private void AccreteDust(ProtoPlanet p)
+        private void AccreteDust(AccreteDisc Disc, ProtoPlanet p)
         {
-            ProtoStar star = p.Star;
+            //ProtoStar star = p.Star;
 
             double startDustMass = p.DustMass;
             double startGasMass = p.GasMass;
@@ -192,11 +195,11 @@ namespace Pulsar4X.Stargen
                 p.DustMass = startDustMass;
                 p.GasMass = startGasMass;
 
-                foreach (AccretionBand band in star.Bands)
+                foreach (AccreteBand band in Disc.Bands)
                 {
                     if(band.Intersect(rInner, rOuter))
                     {
-                        CollectDust(p, rInner, rOuter, gatherLast);
+                        CollectDust(Disc, p, rInner, rOuter, gatherLast);
                     }
                     //band.CollectDust(rInner, rOuter, p, gatherLast);
                 }
@@ -204,16 +207,14 @@ namespace Pulsar4X.Stargen
             }
             while ((p.Mass - gatherLast) >= (0.0001 * p.Mass));
 
-            star.UpdateDust(p); // Clear dust only on reduced mass?
+            Disc.UpdateDust(p); // Clear dust only on reduced mass?
 
         }
 
-        
-
-        public void CollectDust(ProtoPlanet p, double inner, double outer, double lastMass)
+        public void CollectDust(AccreteDisc Disc, ProtoPlanet p, double inner, double outer, double lastMass)
         {
-            ProtoStar star = p.Star;
-            foreach (AccretionBand band in star.Bands)
+            //ProtoStar star = p.Star;
+            foreach (AccreteBand band in Disc.Bands)
             {
                 double gather = 0.0;
 
@@ -235,13 +236,13 @@ namespace Pulsar4X.Stargen
                     {
                         if ((lastMass > p.CriticalLimit) && band.GasPresent)
                         {
-                            massdensity = (Constants.Stargen.K * p.DustDensity) / (1.0 + (Math.Sqrt(p.CriticalLimit / lastMass) * (Constants.Stargen.K - 1.0)));
-                            gasdensity = massdensity - p.DustDensity;
+                            massdensity = p.CloudDensity;
+                            gasdensity = massdensity - (Constants.Stargen.K * massdensity) / (1.0 + (Math.Sqrt(p.CriticalLimit / p.Mass) * (Constants.Stargen.K - 1.0)));
                             dustdensity = massdensity - gasdensity;
                         }
                         else
                         {
-                            dustdensity = p.DustDensity;
+                            dustdensity = p.CloudDensity;
                             gasdensity = 0.0;
                         }
                     }
@@ -256,6 +257,50 @@ namespace Pulsar4X.Stargen
                 }
             }
 
+        }
+
+        private void DistMoonMasses(ProtoStar star, ProtoPlanet planet)
+        {
+            planet.initDisc(0.0D, star.StellarDustLimit);
+            int counter = 0;
+            do
+            {
+                counter++;
+
+                ProtoPlanet moon = new ProtoPlanet()
+                {
+                    SemiMajorAxis = rnd.NextDouble(planet.PlanetInnerBound, planet.PlanetOuterBound),
+                    Eccentricity = rnd.RandomEccentricity(),
+                    DustMass = Constants.Stargen.PROTOPLANET_MASS,
+                    Star = star.Star,
+                    IsMoon = true
+                };
+
+                if (planet.IsDustAvailable(moon))
+                {
+                    //var criticalMass = protoPlanet.CriticalLimit;
+                    AccreteDust(planet, moon);
+
+                    if (moon.Mass > Constants.Stargen.PROTOPLANET_MASS)
+                    {
+                        CoalescePlanetesimals(planet, moon);
+                    }
+                    else
+                    {
+                        logger.Debug("Moon at " + moon.SemiMajorAxis + " failed due to large neighbor!");
+                    }
+                }
+
+                if (counter == 10000)
+                    logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
+            }while (planet.DustAvailable && counter < 10000);
+
+            planet.Planets.ForEach(moon=>
+                    {
+                        moon.Planet.Primary = planet.Star;
+                        moon.Planet.PrimaryId = planet.Star.Id;
+                        planet.Planet.Moons.Add(moon.Planet);
+                    });
         }
 
         private void GeneratePlanets(Star Star)

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.Stargen
 {
-    public class AccretionBand
+    public class AccreteBand
     {
         public double InnerEdge { get; set; }
         public double OuterEdge { get; set; }
