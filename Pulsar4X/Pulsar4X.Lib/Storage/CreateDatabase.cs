@@ -142,24 +142,24 @@ namespace Pulsar4X.Storage
         private static readonly List<string> CreateTableSqlStatements = new List<string>
         {
             "CREATE TABLE Races(" +
-                "Id GUID NOT NULL, " +
-                "Name Text NOT NULL, " +
-                "Title Text NOT NULL," +
-                "SpeciesId GUID NOT NULL, " +
-                "ThemeId GUID NOT NULL)",
+                "Id GUID NULL, " +
+                "Name Text NULL, " +
+                "Title Text NULL," +
+                "SpeciesId GUID NULL, " +
+                "ThemeId GUID NULL)",
 
             "CREATE TABLE StarSystems(" +
-                "Id GUID NOT NULL, " +
-                "Name Text NOT NULL)",
+                "Id GUID NULL, " +
+                "Name Text NULL)",
 
             "CREATE TABLE Stars(" +
-                "Id GUID NOT NULL, " +
-                "StarSystemId GUID NOT NULL, " +
-                "Name Text NOT NULL, " +
-                "XGalactic Integer NOT NULL, " +
-                "YGalactic Integer NOT NULL, " +
-                "XSystem Integer NOT NULL, " +
-                "YSystem Integer NOT NULL, " +
+                "Id GUID NULL, " +
+                "StarSystemId GUID NULL, " +
+                "Name Text NULL, " +
+                "XGalactic Integer NULL, " +
+                "YGalactic Integer NULL, " +
+                "XSystem Integer NULL, " +
+                "YSystem Integer NULL, " +
                 "Luminosity real NULL, " +
                 "Mass real NULL, " +
                 "Life real NULL, " +
@@ -167,48 +167,48 @@ namespace Pulsar4X.Storage
                 "EcoSphereRadius real NULL)",
 
             "CREATE TABLE Planets(" +
-                "Id GUID NOT NULL, " +
-                "PrimaryId GUID NOT NULL, " +
-                "XSystem real NOT NULL, " +
-                "YSystem real NOT NULL, " +
-                "Name Text NOT NULL, " +
-                "SemiMajorAxis real NOT NULL, " +
-                "Eccentricity real NOT NULL, " +
-                "AxialTilt real NOT NULL, " +
-                "OrbitZone int NOT NULL, " +
-                "OrbitalPeriod real NOT NULL, " +
-                "LengthOfDay real NOT NULL, " +
-                "Mass real NOT NULL, " +
-                "MassOfDust real NOT NULL, " +
-                "MassOfGas real NOT NULL, " +
-                "RadiusOfCore real NOT NULL, " +
-                "Radius real NOT NULL, " +
-                "Density real NOT NULL, " +
-                "SurfaceArea real NOT NULL, " +
-                "EscapeVelocity real NOT NULL, " +
-                "SurfaceAcceleration real NOT NULL, " +
-                "SurfaceGravity real NOT NULL, " +
-                "RootMeanSquaredVelocity real NOT NULL, " +
-                "MolecularWeightRetained real NOT NULL, " +
-                "VolatileGasInventory real NOT NULL, " +
-                "SurfacePressure real NOT NULL, " +
-                "HasGreenhouseEffect INTEGER NOT NULL, " +
-                "BoilingPoint real NOT NULL, " +
-                "Albedo real NOT NULL, " +
-                "ExoSphericTemperature real NOT NULL, " +
-                "EstimatedTemperature real NOT NULL, " +
-                "EstimatedTerrestrialTemperature real NOT NULL, " +
-                "SurfaceTemperature real NOT NULL, " +
-                "RiseInTemperatureDueToGreenhouse real NOT NULL, " +
-                "HighTemperature real NOT NULL, " +
-                "LowTemperature real NOT NULL, " +
-                "MaxTemperature real NOT NULL, " +
-                "MinTemperature real NOT NULL, " +
-                "HydrosphereCover real NOT NULL, " +
-                "CloudCover real NOT NULL, " +
-                "IceCover real NOT NULL, " +
-                "IsGasGiant INTEGER NOT NULL, " +
-                "IsMoon INTEGER NOT NULL)"
+                "Id GUID NULL, " +
+                "PrimaryId GUID NULL, " +
+                "XSystem real NULL, " +
+                "YSystem real NULL, " +
+                "Name Text NULL, " +
+                "SemiMajorAxis real NULL, " +
+                "Eccentricity real NULL, " +
+                "AxialTilt real NULL, " +
+                "OrbitZone int NULL, " +
+                "OrbitalPeriod real NULL, " +
+                "LengthOfDay real NULL, " +
+                "Mass real NULL, " +
+                "MassOfDust real NULL, " +
+                "MassOfGas real NULL, " +
+                "RadiusOfCore real NULL, " +
+                "Radius real NULL, " +
+                "Density real NULL, " +
+                "SurfaceArea real NULL, " +
+                "EscapeVelocity real NULL, " +
+                "SurfaceAcceleration real NULL, " +
+                "SurfaceGravity real NULL, " +
+                "RootMeanSquaredVelocity real NULL, " +
+                "MolecularWeightRetained real NULL, " +
+                "VolatileGasInventory real NULL, " +
+                "SurfacePressure real NULL, " +
+                "HasGreenhouseEffect INTEGER NULL, " +
+                "BoilingPoint real NULL, " +
+                "Albedo real NULL, " +
+                "ExoSphericTemperature real NULL, " +
+                "EstimatedTemperature real NULL, " +
+                "EstimatedTerrestrialTemperature real NULL, " +
+                "SurfaceTemperature real NULL, " +
+                "RiseInTemperatureDueToGreenhouse real NULL, " +
+                "HighTemperature real NULL, " +
+                "LowTemperature real NULL, " +
+                "MaxTemperature real NULL, " +
+                "MinTemperature real NULL, " +
+                "HydrosphereCover real NULL, " +
+                "CloudCover real NULL, " +
+                "IceCover real NULL, " +
+                "IsGasGiant INTEGER NULL, " +
+                "IsMoon INTEGER NULL)"
         };
 
 
