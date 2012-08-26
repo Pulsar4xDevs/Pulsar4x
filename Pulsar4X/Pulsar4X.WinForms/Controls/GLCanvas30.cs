@@ -24,6 +24,7 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
 
+        private GLUtilities.GLShader m_oShaderProgram;
 
 
         // for testing:
@@ -37,9 +38,6 @@ namespace Pulsar4X.WinForms.Controls
         public GLCanvas30()
             : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Debug)
         {
-            // The Following Enables OpenGL depth Test, this will prevent OpenGL from drawing 
-            // anything which is obscured by by a previosly draw pixel.
-            //GL.Enable(EnableCap.DepthTest);
             #if DEBUG
                 Program.logger.Info("UI: Creating an OpenGL 3.0+ GLCanvas");
             #endif
@@ -48,10 +46,8 @@ namespace Pulsar4X.WinForms.Controls
         public override void OnLoad(object sender, EventArgs e)
         {
             // Other state
-            //GraphicsContext.CurrentContext.SwapInterval = 4;
             GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
-            GL.Enable(EnableCap.DepthTest);
-            
+
             #if DEBUG
                 Program.logger.Info("OpenGL Pre State Config Error Check: " + GL.GetError().ToString());
             #endif
@@ -68,6 +64,7 @@ namespace Pulsar4X.WinForms.Controls
             GL.FrontFace(FrontFaceDirection.Ccw);
             GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
             //GL.Enable(EnableCap.alpha);
             GL.ClearColor(System.Drawing.Color.MidnightBlue);
             GL.ClearDepth(1.0);
@@ -89,7 +86,11 @@ namespace Pulsar4X.WinForms.Controls
             SetupViewPort(0, 0, this.Size.Width, this.Size.Height);               
            // Program.logger.Info("OpenGL post View Setup: " + GL.GetError().ToString());
 
-            m_oQuad = new GLUtilities.GLPrimitive();
+            m_oShaderProgram = new GLUtilities.GLShader();
+            m_oQuad = new GLUtilities.GLPrimitive(m_oShaderProgram);
+            m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
+            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+
             m_oSW.Start();
         }
 

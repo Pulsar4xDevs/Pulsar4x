@@ -67,17 +67,29 @@ void main()
     FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;                   
 };";
 
+            int iShaderError = 1;
+
             int iGLVertexShader = GL.CreateShader(ShaderType.VertexShader);    // Get a shader handle from open GL
             GL.ShaderSource(iGLVertexShader, szVertexShader);                  // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLVertexShader);                                 // Tell OpenGL to compile the shaders gened above.
-            
-            Program.logger.Info("Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
+
+            GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
+            if (iShaderError != 1)
+            {
+                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
+                iShaderError = 1;
+            }
 
             int iGLPixelShader = GL.CreateShader(ShaderType.FragmentShader);    // Get a shader handle from open GL
             GL.ShaderSource(iGLPixelShader, szPixelShader);                     // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLPixelShader);                                   // Tell OpenGL to compile the shaders gened above.
 
-            Program.logger.Info("Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
+            GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
+            if (iShaderError != 1)
+            {
+                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
+                iShaderError = 1;
+            }
 
             m_iShaderProgramHandle = GL.CreateProgram();                        // Tell OpenGL to creat a handle for a complete shader program (composed of the above two shaders).
             GL.AttachShader(m_iShaderProgramHandle, iGLVertexShader);           // Attache our Vertex shader to the program.
@@ -89,10 +101,13 @@ void main()
             GL.BindFragDataLocation(m_iShaderProgramHandle, 3, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3.
 
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
-            int temp = 1;
-            Program.logger.Info("Creating Shader Program: " + GL.GetProgramInfoLog(m_iShaderProgramHandle)); // Log Result!
-            GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out temp);
-            Program.logger.Info("Validating shader: " + temp.ToString());
+            
+            GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
+            if (iShaderError != 1)
+            {
+                Program.logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
+                iShaderError = 1;
+            }
 
             // The Following Bind our Projection, view (camera) and model Matricies in c# to the corosponding vars in the shader program
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
@@ -124,9 +139,34 @@ void main()
         }
 
 
+        public void SetProjectionMatrix(ref Matrix4 a_m4Projection)
+        {
+            OpenTKUtilities.UseShaderProgram(m_iShaderProgramHandle);
+            GL.UniformMatrix4(m_aiShaderMatrixLocations[0], false, ref a_m4Projection);
+        }
+
+        public void SetViewMatrix(ref Matrix4 a_m4View)
+        {
+            OpenTKUtilities.UseShaderProgram(m_iShaderProgramHandle);
+            GL.UniformMatrix4(m_aiShaderMatrixLocations[1], false, ref a_m4View);
+        }
+
+        public void SetModelMatrix(ref Matrix4 a_m4Model)
+        {
+            OpenTKUtilities.UseShaderProgram(m_iShaderProgramHandle);
+            GL.UniformMatrix4(m_aiShaderMatrixLocations[2], false, ref a_m4Model);
+        }
+
+        public void StartUsing(ref Matrix4 a_m4Model)
+        {
+            OpenTKUtilities.UseShaderProgram(m_iShaderProgramHandle);
+            GL.UniformMatrix4(m_aiShaderMatrixLocations[2], false, ref a_m4Model);
+        }
+
         public void StartUsing(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View, ref Matrix4 a_m4Model)
         {
-            GL.UseProgram(m_iShaderProgramHandle);
+            //GL.UseProgram(m_iShaderProgramHandle);
+            OpenTKUtilities.UseShaderProgram(m_iShaderProgramHandle);
             //GL.UniformMatrix4(m_aiShaderMatrixLocations[0], 1, false, ref a_m4Projection.Row0.X);
             //GL.UniformMatrix4(m_aiShaderMatrixLocations[1], 1, false, ref a_m4View.Row0.X);
             //GL.UniformMatrix4(m_aiShaderMatrixLocations[2], 1, false, ref a_m4Model.Row0.X);
@@ -138,7 +178,7 @@ void main()
 
         public void StopUsing()
         {
-            GL.UseProgram( 0 );
+            OpenTKUtilities.UseShaderProgram( 0 );
         }
     }
 }

@@ -67,7 +67,7 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// <summary>
         /// Creates a generic "quad" Primative!!
         /// </summary>
-        public GLPrimitive()
+        public GLPrimitive(GLShader a_oShaderProgram)
         {
             //setup our quads vertcies:
             m_v2Size.X = 128;
@@ -119,7 +119,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_uiTextureID = OpenTKUtilities.LoadTexture("test.png");
 
             // Create our shader:
-            m_oShaderProgram = new GLShader();
+            m_oShaderProgram = a_oShaderProgram;
 
             // tell Opgl about our VBOs:
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
@@ -129,9 +129,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             #endif
 
             GL.GenBuffers(1, out m_uiVertexBufferHandle);                   // Generate our Vertex Buffer Object and get the handle to it.
-            Program.logger.Info("OpenGL Gen m_uiVertexBufferHandle Code: " + GL.GetError().ToString());
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
-            Program.logger.Info("OpenGL Gen m_uiVertexBufferHandle Code: " + GL.GetError().ToString());
             GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
             #if DEBUG
                 Program.logger.Info("OpenGL Generate VBO: " + GL.GetError().ToString());
@@ -177,10 +175,12 @@ namespace Pulsar4X.WinForms.GLUtilities
             //GL.EnableClientState(ArrayCap.IndexArray);
             GL.BindVertexArray(m_uiVextexArrayHandle);
             //GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
-            m_oShaderProgram.StartUsing(ref a_m4Projection, ref a_m4View, ref m_m4ModelMatrix);
+            //m_oShaderProgram.StartUsing(ref a_m4Projection, ref a_m4View, ref m_m4ModelMatrix);
+            m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
             
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
+            //GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
+            OpenTKUtilities.Use2DTexture(m_uiTextureID);
             GL.DrawRangeElements(BeginMode.Triangles, 0, 3, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
             //GL.DrawElements(BeginMode.Triangles, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
