@@ -52,6 +52,30 @@ function dapperlib()
 		return os.findlib("nunit.framework")
 	end
 end
+
+-- Find the required OpenTK library
+function opentklib()
+	if(os.is("windows")) then
+		if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the OpenTK binaries
+			--Assume .NET for now, should work for mono
+			return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
+		end
+	else
+		return os.findlib("nunit.framework")
+	end
+end
+
+-- Find the required OpenTK.GLControl library
+function opentkglcontrollib()
+	if(os.is("windows")) then
+		if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the OpenTK.GLControl binaries
+			--Assume .NET for now, should work for mono
+			return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
+		end
+	else
+		return os.findlib("nunit.framework")
+	end
+end
 	
 	-- WinForms Project, main UI project
 	project "Pulsar4X.WinForms"
@@ -65,7 +89,9 @@ end
 			"System.Data",
 			"System.Windows.Forms",
 			"System.Drawing",
-			log4netlib()
+			log4netlib(),
+			opentklib(),
+			opentkglcontrollib()
 			}
 		files { 
 			"Pulsar4X/Pulsar4X.WinForms/**.cs",

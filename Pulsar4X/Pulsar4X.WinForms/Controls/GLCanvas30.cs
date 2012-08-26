@@ -48,8 +48,8 @@ namespace Pulsar4X.WinForms.Controls
         public override void OnLoad(object sender, EventArgs e)
         {
             // Other state
-            GraphicsContext.CurrentContext.SwapInterval = 4;
-            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
+            //GraphicsContext.CurrentContext.SwapInterval = 4;
+            GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
             GL.Enable(EnableCap.DepthTest);
             
             #if DEBUG
