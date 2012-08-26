@@ -20,24 +20,36 @@ end
 
 -- Find the required nunit library
 function nunitlib()
-	if (os.isdir("Pulsar4X/deps/NUnit-2.6.1")) then -- Have the nunit binaries
-		return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
+	if(os.is("windows")) then
+		if (os.isdir("Pulsar4X/deps/NUnit-2.6.1")) then -- Have the nunit binaries
+			return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
+		end
+	else
+		return os.findlib("nunit.framework")
 	end
 end
 
 -- Find the required sqlite library
 function sqlitelib()
-	if (os.isdir("Pulsar4X/deps/Sqlite")) then -- Have the sqlite binaries
-		--Assume .NET 4.0 for now
-		return "Pulsar4X/deps/Sqlite/Windows-1.0.81.0/System.Data.SQLite.dll";
+	if(os.is("windows")) then
+		if (os.isdir("Pulsar4X/deps/Sqlite")) then -- Have the sqlite binaries
+			--Assume .NET 4.0 for now, should work for mono
+			return "Pulsar4X/deps/Sqlite/Windows-1.0.81.0/System.Data.SQLite.dll";
+		end
+	else
+		return os.findlib("nunit.framework")
 	end
 end
 
 -- Find the required dapper library
 function dapperlib()
-	if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the dapper binaries
-		--Assume .NET 4.0 for now
-		return "Pulsar4X/deps/Dapper/bin/Dapper.dll";
+	if(os.is("windows")) then
+		if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the dapper binaries
+			--Assume .NET 4.0 for now
+			return "Pulsar4X/deps/Dapper/bin/Dapper.dll";
+		end
+	else
+		return os.findlib("nunit.framework")
 	end
 end
 	
@@ -67,8 +79,16 @@ end
 			flags { "Symbols" }
 			
 		configuration "Release"
-		targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
+			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
 			flags { "Optimize" }
+			
+		configuration { "windows", "Debug" }
+			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.dll", "Pulsar4X/Pulsar4X.Lib/bin/Debug/SQLite.Interop.dll")
+			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.pdb", "Pulsar4X/Pulsar4X.Lib/bin/Debug/SQLite.Interop.pdb")
+		
+		configuration { "windows", "Release" }
+			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.dll", "Pulsar4X/Pulsar4X.Lib/bin/Release/SQLite.Interop.dll")
+			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.pdb", "Pulsar4X/Pulsar4X.Lib/bin/Release/SQLite.Interop.pdb")
 			
 	-- Lib Project, contains game files
 	project "Pulsar4X.Lib"
@@ -87,7 +107,9 @@ end
 		files { 
 			"Pulsar4X/Pulsar4X.Lib/**.cs",
 			}
-		
+			
+		configuration { "windows", "Release" }
+			
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.Lib/bin/Debug"
 			defines { "DEBUG" }

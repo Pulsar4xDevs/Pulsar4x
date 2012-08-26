@@ -8,8 +8,29 @@ namespace Pulsar4X.Entities
     public class Ship
     {
         public Guid Id { get; set; }
-        public Race Race { get; set; }
-        public ShipClass ShipClass { get; set; }
+        public Guid FactionId { get; set; }
+        private Faction _faction;
+        public Faction Faction
+        {
+            get { return _faction; }
+            set
+            {
+                _faction = value;
+                if (_faction != null) FactionId = _faction.Id;
+            }
+        }
+
+        public Guid ShipClassId { get; set; }
+        private ShipClass _shipClass;
+        public ShipClass ShipClass
+        {
+            get { return _shipClass; }
+            set
+            {
+                _shipClass = value;
+                if (_shipClass != null) ShipClassId = _shipClass.Id;
+            }
+        }
         public string Name { get; set; }
         public string ClassNotes { get; set; }
         public string Notes { get; set; }

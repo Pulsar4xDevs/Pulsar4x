@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Pulsar4X.Entities;
+using log4net;
 
 namespace Pulsar4X.Stargen
 {
     class Accrete
     {
+        public static readonly ILog logger = LogManager.GetLogger(typeof(Accrete));
+
         private readonly bool _generateMoons;
         private readonly double _minimumStellarAge;
         private readonly double _maximumStellarAge;
@@ -65,6 +68,7 @@ namespace Pulsar4X.Stargen
                                                   planet.PrimaryId = star.Id;
                                                   star.Planets.Add(planet);
                                               });
+                protoStar.Planets = protoStar.Planets.OrderBy(x => x.SemiMajorAxis).ToList();
             }
 
             return starSystem;

@@ -32,8 +32,11 @@ namespace Pulsar4X.Entities
         public bool IsInResonantRotation { get; set; } //tidally locked
 
         public double Mass { get; set; } //mass (in solar masses)
+        public double MassInEarthMasses { get { return Mass * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfDust { get; set; } //mass, ignoring gas
+        public double MassOfDustInEarthMasses { get { return MassOfDust * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfGas { get; set; } //mass, ignoring dust
+        public double MassOfGasInEarthMasses { get { return MassOfGas * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
 
         public double RadiusOfCore { get; set; } //radius of the rocky core (in km)
         public double Radius { get; set; } //equitorial radius (in km)
