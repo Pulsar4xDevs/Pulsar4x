@@ -21,13 +21,22 @@ namespace Pulsar4X.WinForms
         public class UITabs
         {
             /// <summary>
-            /// Index for Game Start Screen.
+            /// Index for Game Start tab.
             /// </summary>
             public const int        GAME_START_SCREEN_INDEX = 0;
             /// <summary>
-            /// Name/Title For Game Start Screen.
+            /// Name/Title For Game Start tab.
             /// </summary>
             public const string     GAME_START_SCREEN_NAME = "Start";
+
+            /// <summary>
+            /// Index for System Map tab.
+            /// </summary>
+            public const int SYSTEM_MAP_INDEX = 3;
+            /// <summary>
+            /// Name/Title For System Map tab.
+            /// </summary>
+            public const string SYSTEM_MAP_NAME = "System Map";
 
             /// <summary>
             /// Index for System Generation and Display tab.

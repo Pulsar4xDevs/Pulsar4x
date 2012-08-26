@@ -46,6 +46,14 @@ namespace Pulsar4X.WinForms.Controls
                     g_aTabPages[i].Controls.Add(GameStartScr);                                  // Add Control to tab.
                 }
 
+                if (i == UIConstants.UITabs.SYSTEM_MAP_INDEX)
+                {
+                    g_aTabPages[i].Name = UIConstants.UITabs.SYSTEM_MAP_NAME;                   // Set Tab Name
+                    g_aTabPages[i].Text = UIConstants.UITabs.SYSTEM_MAP_NAME;                   // Set Tab Title
+                    Controls.SystemMap SystemMap = new SystemMap();                             // Creat Game Start Screen.
+                    g_aTabPages[i].Controls.Add(SystemMap);                                     // Add Control to tab.
+                }
+
                 if (i == UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_INDEX)
                 {
                     g_aTabPages[i].Name = UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_NAME; // Set tab Name.
