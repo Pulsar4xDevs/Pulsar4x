@@ -16,53 +16,57 @@ namespace Pulsar4X.WinForms.GLUtilities
     /// A class used for constructing and rendering an OpenGL primative (e.g. Quad, triangle, etc.).
     /// It includes the ability to apply a texture or color to the primative.
     /// </summary>
-    class GLPrimitive
+    public class GLPrimitive
     {
         // Note: for AU/KM conversions: Constants.Units.KM_PER_AU
 
         /// <summary>
         /// Array of verticies that make up this primative.
         /// </summary>
-        private GLVertex[] m_aoVerticies;
+        protected GLVertex[] m_aoVerticies;
 
         /// <summary>
         /// An array of Indexes into the m_aoVerticies array. this tells the GPU in which order to draw the vertexes.
         /// this also allows us to reuse verticies, saving on the amount if memory we need to transfer to the GPU.
         /// </summary>
-        public ushort[] m_auiIndicies;
+        protected ushort[] m_auiIndicies;
 
         /// <summary>
         /// Size of this Object in x and y.
         /// </summary>
-        private OpenTK.Vector2 m_v2Size;
+        protected OpenTK.Vector2 m_v2Size;
 
         /// <summary>
         /// Handle to the Vertex array that will be passed to OpenGL/GPU.
         /// </summary>
-        public uint m_uiVextexArrayHandle;
+        protected uint m_uiVextexArrayHandle;
 
         /// <summary>
         /// Handle to the Vertex Buffer, i.e. the actual Vertex Data being sent to the GPU. This is part of the VertexArray.
         /// </summary>
-        private uint m_uiVertexBufferHandle;
+        protected uint m_uiVertexBufferHandle;
 
         /// <summary>
         /// Handle to the Index Buffer, it is used to specify which Verticies in the Vertex Buiffer get written int what order. 
         /// It is part of the VertexArray.
         /// </summary>
-        private uint m_uiIndexBufferHandle;
+        protected uint m_uiIndexBufferHandle;
 
         /// <summary>
         /// Translates this Model Relative to the rest of the world.
         /// </summary>
-        public OpenTK.Matrix4 m_m4ModelMatrix = new Matrix4();
+        protected OpenTK.Matrix4 m_m4ModelMatrix = new Matrix4();
 
         /// <summary>
         /// OpenGL texture ID.
         /// </summary>
-        public uint m_uiTextureID;
+        protected uint m_uiTextureID;
 
-        private GLShader m_oShaderProgram;
+        protected GLShader m_oShaderProgram;
+
+        public GLPrimitive()
+        {
+        }
 
         /// <summary>
         /// Creates a generic "quad" Primative!!
@@ -77,7 +81,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_aoVerticies[0].m_v3Position.X = -0.5f * m_v2Size.X;
             m_aoVerticies[0].m_v3Position.Y = -0.5f * m_v2Size.Y;
             m_aoVerticies[0].m_v3Position.Z = -1.0f;
-            m_aoVerticies[0].m_v4Color.X = (OpenTK.Half)2048;
+            m_aoVerticies[0].m_v4Color.Y = (OpenTK.Half)2048;
             m_aoVerticies[0].m_v2UV.X = 0.0f;
             m_aoVerticies[0].m_v2UV.Y = 1.0f;
 
@@ -91,14 +95,14 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_aoVerticies[2].m_v3Position.X = -0.5f * m_v2Size.X;
             m_aoVerticies[2].m_v3Position.Y = 0.5f * m_v2Size.Y;
             m_aoVerticies[2].m_v3Position.Z = -1.0f;
-            m_aoVerticies[2].m_v4Color.Z = (OpenTK.Half)2048;
+            m_aoVerticies[2].m_v4Color.Y = (OpenTK.Half)2048;
             m_aoVerticies[2].m_v2UV.X = 0.0f;
             m_aoVerticies[2].m_v2UV.Y = 0.0f;
 
             m_aoVerticies[3].m_v3Position.X = 0.5f * m_v2Size.X;
             m_aoVerticies[3].m_v3Position.Y = 0.5f * m_v2Size.Y;
             m_aoVerticies[3].m_v3Position.Z = -1.0f;
-            m_aoVerticies[3].m_v4Color.W = (OpenTK.Half)2048;
+            m_aoVerticies[3].m_v4Color.Y = (OpenTK.Half)1024;
             m_aoVerticies[3].m_v2UV.X = 1.0f;
             m_aoVerticies[3].m_v2UV.Y = 0.0f;
 
@@ -113,7 +117,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             //m_m4ModelView = new Matrix4d();
             m_m4ModelMatrix = Matrix4.Identity;
             //m_m4ModelView = Matrix4.Scale(1);
-            m_m4ModelMatrix = Matrix4.CreateTranslation(new Vector3(400, 400, -1));
+            m_m4ModelMatrix = Matrix4.CreateTranslation(new Vector3(400, 400, 0));
 
             // Load Our Texture
             m_uiTextureID = OpenTKUtilities.LoadTexture("test.png");
@@ -168,10 +172,10 @@ namespace Pulsar4X.WinForms.GLUtilities
         }
 
 
-        public void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
+        public virtual void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
             //GL.EnableClientState(ArrayCap.VertexArray);
-           // GL.EnableClientState(ArrayCap.TextureCoordArray);
+            //GL.EnableClientState(ArrayCap.TextureCoordArray);
             //GL.EnableClientState(ArrayCap.IndexArray);
             GL.BindVertexArray(m_uiVextexArrayHandle);
             //GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);

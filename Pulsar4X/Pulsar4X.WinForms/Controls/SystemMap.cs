@@ -28,6 +28,8 @@ namespace Pulsar4X.WinForms.Controls
         {
             m_GLCanvas = new GLCanvas30();
             m_GLCanvas.Size = this.Size;
+            this.Dock = DockStyle.Fill;
+            m_GLCanvas.Dock = DockStyle.Fill;
             this.Controls.Add(m_GLCanvas);
             //m_GLCanvas.PreRenderPlanet(5.0f);
         }

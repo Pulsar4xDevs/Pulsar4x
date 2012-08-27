@@ -25,10 +25,13 @@ namespace Pulsar4X.WinForms.Controls
         Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
 
         private GLUtilities.GLShader m_oShaderProgram;
+        private GLUtilities.GLShader m_oShaderProgram2;
+
 
 
         // for testing:
         GLUtilities.GLPrimitive m_oQuad;
+        GLUtilities.GLCircle m_oCircle;
         System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
         System.Diagnostics.Stopwatch oSW2 = new System.Diagnostics.Stopwatch();
         double m_dAccumulator = 0;
@@ -45,13 +48,13 @@ namespace Pulsar4X.WinForms.Controls
 
         public override void OnLoad(object sender, EventArgs e)
         {
-            // Other state
             GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
+            m_bLoaded = true;           // So we know we have a valid Loaded OpenGL context.
 
             #if DEBUG
                 Program.logger.Info("OpenGL Pre State Config Error Check: " + GL.GetError().ToString());
             #endif
-            GL.ShadeModel(ShadingModel.Smooth);
+            //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.ReadBuffer(ReadBufferMode.Back);
             GL.DrawBuffer(DrawBufferMode.Back);
@@ -65,13 +68,14 @@ namespace Pulsar4X.WinForms.Controls
             GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
-            //GL.Enable(EnableCap.alpha);
             GL.ClearColor(System.Drawing.Color.MidnightBlue);
             GL.ClearDepth(1.0);
             GL.ClearStencil(0);
-            //GL.Enable(EnableCap.VertexArray);
+            GL.Enable(EnableCap.VertexArray);
+            #if DEBUG
+                        Program.logger.Info("OpenGL Post State Config Error Check: " + GL.GetError().ToString());
+            #endif
 
-            m_bLoaded = true;           // So we know we have a valid Loaded OpenGL context.
             Program.logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
             #if DEBUG
                 // Log out OpeGL specific stuff if debug build.
@@ -87,9 +91,16 @@ namespace Pulsar4X.WinForms.Controls
            // Program.logger.Info("OpenGL post View Setup: " + GL.GetError().ToString());
 
             m_oShaderProgram = new GLUtilities.GLShader();
+            //m_oShaderProgram2 = new GLUtilities.GLShader("DefaultVertShader.txt", "SolidColorFragShader.txt");
             m_oQuad = new GLUtilities.GLPrimitive(m_oShaderProgram);
             m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            //m_oShaderProgram2.SetProjectionMatrix(ref m_m4ProjectionMatrix);
+            //m_oShaderProgram2.SetViewMatrix(ref m_m4ViewMatrix);
+
+
+            Vector3 Pos = new Vector3(220,220,0);
+            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, Pos, 120.0f, System.Drawing.Color.Green);
 
             m_oSW.Start();
         }
@@ -107,6 +118,24 @@ namespace Pulsar4X.WinForms.Controls
             this.Invalidate();
         }
 
+        public override void OnResize(object sender, EventArgs e)
+        {
+            this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
+            SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
+            this.Invalidate();                                       // Force redraw.
+        }
+
+        public override void OnSizeChange(object sender, EventArgs e)
+        {
+            if (m_bLoaded == true)
+            {
+                //this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
+                SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
+                m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
+                m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+                //this.Invalidate();                                       // Force redraw.
+            }
+        }
 
         public override void SetupViewPort( int a_iViewportPosX, int a_iViewportPosY,
                                             int a_iViewportWidth, int a_iViewPortHeight)
@@ -135,7 +164,7 @@ namespace Pulsar4X.WinForms.Controls
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Clear Back buffer of previous frame.
 
             m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
-
+            m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
             //m_oShader.StopUsing();
             GraphicsContext.CurrentContext.SwapBuffers();
             #if DEBUG

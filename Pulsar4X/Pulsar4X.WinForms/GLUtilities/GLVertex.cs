@@ -63,11 +63,19 @@ namespace Pulsar4X.WinForms.GLUtilities
         {
             m_v3Position = a_v3Position;
             // We order the color RGBA because this is the order expected by OpenGL/Graphics card.
-            m_v4Color.X = (OpenTK.Half)a_oColor.R;
-            m_v4Color.Y = (OpenTK.Half)a_oColor.G;
-            m_v4Color.Z = (OpenTK.Half)a_oColor.B;
-            m_v4Color.W = (OpenTK.Half)a_oColor.A;
+            m_v4Color.X = (OpenTK.Half)(a_oColor.R * 8);
+            m_v4Color.Y = (OpenTK.Half)(a_oColor.G * 8);
+            m_v4Color.Z = (OpenTK.Half)(a_oColor.B * 8);
+            m_v4Color.W = (OpenTK.Half)(a_oColor.A * 8);
             m_v2UV = a_v2UV;
+        }
+
+        public void SetColor(System.Drawing.Color a_oColor)
+        {
+            m_v4Color.X = (OpenTK.Half)(a_oColor.R * 8);
+            m_v4Color.Y = (OpenTK.Half)(a_oColor.G * 8);
+            m_v4Color.Z = (OpenTK.Half)(a_oColor.B * 8);
+            m_v4Color.W = (OpenTK.Half)(a_oColor.A * 8);
         }
 
         /// <summary>

@@ -135,7 +135,7 @@ namespace Pulsar4X.WinForms.Controls
 
         private void OnResize(object sender, EventArgs e)
         {
-            ///< Not sure if this does anything...
+            // Not sure if this does anything...
             Panel parentPanel = this.Parent as Panel;
             if (parentPanel != null)
             {

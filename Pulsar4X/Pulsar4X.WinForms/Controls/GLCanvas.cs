@@ -49,6 +49,7 @@ namespace Pulsar4X.WinForms.Controls
             Load += new System.EventHandler(this.OnLoad);                           // Setep Load Event Handler
             Resize += new System.EventHandler(this.OnResize);                       // Setep Resize Event Handler
             Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);      // Setep Paint Event Handler
+            SizeChanged += new System.EventHandler(this.OnSizeChange);
             //Application.Idle += Application_Idle;
         }
 
@@ -72,6 +73,13 @@ namespace Pulsar4X.WinForms.Controls
         public virtual void OnResize(object sender, EventArgs e)
         {
             this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
+            SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
+            this.Invalidate();                                       // Force redraw.
+        }
+
+        public virtual void OnSizeChange(object sender, EventArgs e)
+        {
+            //this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
             SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
             this.Invalidate();                                       // Force redraw.
         }
