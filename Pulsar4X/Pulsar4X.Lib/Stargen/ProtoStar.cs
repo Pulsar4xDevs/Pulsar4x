@@ -43,7 +43,7 @@ namespace Pulsar4X.Stargen
             //PlanetInnerBound = NearestPlanet;
             //PlanetOuterBound = FarthestPlanet;
 
-            initDisc(0.0D, StellarDustLimit);
+            initDisc(0.0D, StellarDustLimit, false);
         }
 
         public double StellarDustLimit

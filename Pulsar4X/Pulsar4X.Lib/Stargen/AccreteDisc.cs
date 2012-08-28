@@ -16,17 +16,21 @@ namespace Pulsar4X.Stargen
         public double OuterDustLimit { get; set; }
         public double InnerDustLimit { get; set; }
 
+        public bool isMoonDisc { get; set; }
+
         public abstract double Mass { get; }
 
         public abstract Star Star { get; set; }
 
-        public void initDisc(double innerdust, double outerdust)
+        public void initDisc(double innerdust, double outerdust, bool moons)
         {
             InnerDustLimit = innerdust;
             OuterDustLimit = outerdust;
 
             PlanetInnerBound = NearestPlanet;
             PlanetOuterBound = FarthestPlanet;
+
+            isMoonDisc = moons;
 
             Bands = new List<AccreteBand>
                 {
@@ -62,6 +66,7 @@ namespace Pulsar4X.Stargen
 
         public bool IsDustAvailable(ProtoPlanet p)
         {
+            p.ReduceMass();
             return IsDustLeftRange(p.InnerEffectLimit, p.OuterEffectLimit);
         }
 

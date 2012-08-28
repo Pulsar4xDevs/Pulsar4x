@@ -60,6 +60,7 @@ namespace Pulsar4X.Stargen
                         Eccentricity = rnd.RandomEccentricity(),
                         DustMass = Constants.Stargen.PROTOPLANET_MASS
                     };
+                    protoPlanet.init();
 
 
                     if (protoStar.IsDustAvailable(protoPlanet))
@@ -122,14 +123,14 @@ namespace Pulsar4X.Stargen
                     miu2 = bPlanet.Mass / Disc.Mass;
 
                     deltaMin = 2.4 * (Math.Pow(miu1 + miu2, 1.0 / 3.0));
-                    delta = Math.Abs(bPlanet.SemiMajorAxis - aPlanet.SemiMajorAxis / aPlanet.SemiMajorAxis);
+                    delta = Math.Abs((bPlanet.SemiMajorAxis - aPlanet.SemiMajorAxis) / aPlanet.SemiMajorAxis);
 
-                    if (delta <= deltaMin)
+                    if (delta <= deltaMin && !Disc.isMoonDisc)
                     {
                         // New orbital distance
                         newA = (aPlanet.Mass + bPlanet.Mass) / ((aPlanet.Mass / aPlanet.SemiMajorAxis) + (bPlanet.Mass / bPlanet.SemiMajorAxis));
 
-                        logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
+                        //logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
 
                         // Compute new eccentricity
                         double temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
@@ -148,12 +149,23 @@ namespace Pulsar4X.Stargen
                             Eccentricity = newE,
                             DustMass = aPlanet.DustMass + bPlanet.DustMass,
                             GasMass = aPlanet.GasMass + bPlanet.GasMass,
-                            Star = Disc.Star
+                            Star = Disc.Star,
+                            IsMoon=aPlanet.IsMoon,
+                            MoonOf = aPlanet.MoonOf
                         };
+                        newP.init();
                         //newP.CritMass = getCriticalMass(newP);
                         //newP.CloudDensity = getCloudDensity(newP);
 
+                        //double startmass = newP.Mass;
                         AccreteDust(Disc, newP);
+                        /*if (newP.Mass < startmass)
+                            logger.Debug("Accretion reduced mass, something is wrong!");
+                        else if (newP.Mass > startmass)
+                            logger.Debug("Accretion increased mass!");
+                        else
+                            logger.Debug("Accretion did not change mass!");*/
+
 
                         logger.Debug(string.Format("New planet at {0:N4} AU with mass {1:N5}!", newP.SemiMajorAxis, newP.MassInEarthMasses));
 
@@ -195,9 +207,9 @@ namespace Pulsar4X.Stargen
                 p.DustMass = startDustMass;
                 p.GasMass = startGasMass;
 
-                foreach (AccreteBand band in Disc.Bands)
+                //foreach (AccreteBand band in Disc.Bands)
                 {
-                    if(band.Intersect(rInner, rOuter))
+                    //if(band.Intersect(rInner, rOuter))
                     {
                         CollectDust(Disc, p, rInner, rOuter, gatherLast);
                     }
@@ -219,7 +231,7 @@ namespace Pulsar4X.Stargen
                 double gather = 0.0;
 
 
-                if (band.Intersect(inner, outer))
+                if (band.Intersect(inner, outer) && band.DustPresent)
                 {
                     double bandwidth = outer - inner;
                     double temp1 = Math.Max(outer - band.OuterEdge, 0.0);
@@ -261,7 +273,7 @@ namespace Pulsar4X.Stargen
 
         private void DistMoonMasses(ProtoStar star, ProtoPlanet planet)
         {
-            planet.initDisc(0.0D, star.StellarDustLimit);
+            planet.initDisc(0.0D, star.StellarDustLimit, true);
             int counter = 0;
             do
             {
@@ -273,8 +285,10 @@ namespace Pulsar4X.Stargen
                     Eccentricity = rnd.RandomEccentricity(),
                     DustMass = Constants.Stargen.PROTOPLANET_MASS,
                     Star = star.Star,
-                    IsMoon = true
+                    IsMoon = true,
+                    MoonOf = planet
                 };
+                moon.init();
 
                 if (planet.IsDustAvailable(moon))
                 {
@@ -294,6 +308,8 @@ namespace Pulsar4X.Stargen
                 if (counter == 10000)
                     logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
             }while (planet.DustAvailable && counter < 10000);
+
+            planet.Planets = new List<ProtoPlanet>(planet.Planets.OrderBy(x => x.SemiMajorAxis));
 
             planet.Planets.ForEach(moon=>
                     {
@@ -500,13 +516,14 @@ namespace Pulsar4X.Stargen
             {
                 if (planet.Moons != null)
                 {
-                    for (int n = 0; n < planet.Moons.Count; n++)
+                    var moonList = planet.Moons.ToList();
+                    for (int n = 0; n < moonList.Count; n++)
                     {
-                        var moon = planet.Moons[n];
+                        var moon = moonList[n];
                         if (moon.Mass * Constants.Sol.Sun.MASS_IN_EARTH_MASSES > .000001)
                         {
-                            moon.SemiMajorAxis = planet.SemiMajorAxis;
-                            moon.Eccentricity = planet.Eccentricity;
+                            //moon.SemiMajorAxis = planet.SemiMajorAxis;
+                            //moon.Eccentricity = planet.Eccentricity;
                             moon.Id = Guid.NewGuid();
                             moon.Name = string.Format("{0}.{1}", planet.Name, n + 1);
                             moon.Primary = planet.Primary;
@@ -514,20 +531,31 @@ namespace Pulsar4X.Stargen
                             GeneratePlanet(moon);
 
                             //TODO: Look at adding atmosphere call to this
-                            var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0));
-                            var hillSphere = planet.SemiMajorAxis * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0));
+                            var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
+                            var hillSphere = planet.SemiMajorAxis * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
 
-                            if ((rocheLimit * 3.0) < hillSphere)
+                            //if ((rocheLimit * 3.0) < hillSphere)
+                            if (moon.SemiMajorAxis < rocheLimit)
                             {
-                                moon.SemiMajorAxis = MathUtilities.Random.NextDouble(rocheLimit * 1.5, hillSphere / 2.0) / Constants.Units.KM_PER_AU;
-                                moon.Eccentricity = rnd.RandomEccentricity();
+                                // Moon too close.
+                                // TODO: Turn moon into rings
+                                planet.Moons.Remove(moon);
+                                //logger.Debug(string.Format("Moon of planet {0} inside Roche limit", planet.Name));
                             }
-                            else
+
+                            if (moon.SemiMajorAxis > hillSphere)
                             {
-                                //TODO: Figure out what to do if the planet is not large enough to hold the moon
-                                moon.SemiMajorAxis = 0;
-                                moon.Eccentricity = 0;
+                                // Moon too far
+                                planet.Moons.Remove(moon);
+                                //logger.Debug(string.Format("Moon of planet {0} outside hill radius", planet.Name));
                             }
+
+                        }
+                        else
+                        {
+                            // Moon too small
+                            planet.Moons.Remove(moon);
+                            //logger.Debug(string.Format("Moon of planet {0} too small", planet.Name));
                         }
                     }
                 }

@@ -18,20 +18,42 @@ namespace Pulsar4X.Stargen
         //public double MassToCollectGas { get; set; }
 
         public bool IsMoon { get { return Planet.IsMoon; } set { Planet.IsMoon = value; } }
+        public ProtoPlanet MoonOf { get; set; }
 
-        public double CloudDensity
-        {
-            get
-            {
-                return Constants.Stargen.DUST_DENSITY_COEFF * Math.Sqrt(Star.Mass) * Math.Exp(-Constants.Stargen.ALPHA * Math.Pow(SemiMajorAxis, (1.0 / Constants.Stargen.N)));
-            }
-        }
+        public double CloudDensity { get; set; }
 
         public ProtoPlanet()
         {
             Planet = new Planet();
         }
 
+        public void init()
+        {
+            SetCloudDensity();
+            SetCriticalLimit();
+        }
+
+        private void SetCriticalLimit()
+        {
+            if (IsMoon)
+            {
+                // Use planet's critical limit instead
+                CriticalLimit = MoonOf.CriticalLimit;
+            }
+            else
+            {
+                var perihelionDist = (SemiMajorAxis - SemiMajorAxis * Eccentricity);
+                var temp = perihelionDist * Math.Sqrt(Star.Luminosity);
+                CriticalLimit = (Constants.Stargen.B * Math.Pow(temp, -0.75));
+            }
+        }
+
+        private void SetCloudDensity()
+        {
+            if(IsMoon)
+                CloudDensity = Constants.Stargen.DUST_DENSITY_COEFF * Math.Sqrt(MoonOf.Mass) * Math.Exp(-Constants.Stargen.ALPHA * Math.Pow(SemiMajorAxis, (1.0 / Constants.Stargen.N)));
+            CloudDensity = Constants.Stargen.DUST_DENSITY_COEFF * Math.Sqrt(Star.Mass) * Math.Exp(-Constants.Stargen.ALPHA * Math.Pow(SemiMajorAxis, (1.0 / Constants.Stargen.N)));
+        }
 
         /*
         public ProtoPlanet(double a, double e, double mass)
@@ -44,31 +66,11 @@ namespace Pulsar4X.Stargen
         }
         */
 
-        public double CriticalLimit
-        {
-            get
-            {
-                var perihelionDist = (SemiMajorAxis - SemiMajorAxis * Eccentricity);
-                var temp = perihelionDist * Math.Sqrt(Star.Luminosity);
-                return (Constants.Stargen.B * Math.Pow(temp, -0.75));
-            }
-        }
+        public double CriticalLimit { get; set; }
 
-        public double InnerEffectLimit
-        {
-            get
-            {
-                return (SemiMajorAxis * (1.0 - Eccentricity) * (1.0 - Mass) / (1.0 + Constants.Stargen.CLOUD_ECCENTRICITY));
-            }
-        }
+        public double InnerEffectLimit { get; set; }
 
-        public double OuterEffectLimit
-        {
-            get
-            {
-                return (SemiMajorAxis * (1.0 + Eccentricity) * (1.0 + Mass) / (1.0 - Constants.Stargen.CLOUD_ECCENTRICITY));
-            }
-        }
+        public double OuterEffectLimit { get; set; }
 
         /*public double DustDensity
         {
@@ -96,6 +98,8 @@ namespace Pulsar4X.Stargen
                 double temp = Mass / (1.0 + Mass);
                 ReducedMass = Math.Pow(temp, (1.0 / 4.0));
             }
+            InnerEffectLimit = (SemiMajorAxis * (1.0 - Eccentricity) * (1.0 - ReducedMass) / (1.0 + Constants.Stargen.CLOUD_ECCENTRICITY));
+            OuterEffectLimit = (SemiMajorAxis * (1.0 + Eccentricity) * (1.0 + ReducedMass) / (1.0 - Constants.Stargen.CLOUD_ECCENTRICITY));
         }
 
     }
