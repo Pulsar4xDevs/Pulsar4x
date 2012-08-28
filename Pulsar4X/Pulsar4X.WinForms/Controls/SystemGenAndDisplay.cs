@@ -20,14 +20,18 @@ namespace Pulsar4X.WinForms.Controls
             VM = new StarSystemViewModel();
 
             NameListBox.DataSource = new BindingSource(VM.StarSystems, null);
-            NameListBox.DataBindings.Add(new Binding("SelectedItem", VM.CurrentStarSystem, null));
+            NameListBox.DataBindings.Add(new Binding("SelectedItem", VM, "CurrentStarSystem", true, DataSourceUpdateMode.OnPropertyChanged));
             NameListBox.DisplayMember = "Name";
 
-            AgetextBox.DataBindings.Add(new Binding("Text", VM.CurrentStarSystem.Stars[0].Age, null));
+            NameListBox.SelectedIndexChanged +=
+                (s, args) => NameListBox.DataBindings["SelectedItem"].WriteValue();
 
-            StarsDataGridView.DataSource = VM.CurrentStarSystem.Stars;
+            AgetextBox.DataBindings.Add(new Binding("Text", VM, "CurrentStarSystemAge", true, DataSourceUpdateMode.OnPropertyChanged));
 
-            StarADataGridView.DataSource = new BindingSource(VM.CurrentStar.Planets, null);
+            StarsDataGridView.DataSource = VM.StarsSource;
+
+
+            StarADataGridView.DataSource = VM.PlanetSource;
         }
 
     }
