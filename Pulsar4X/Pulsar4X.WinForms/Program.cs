@@ -22,12 +22,14 @@ namespace Pulsar4X.WinForms
             XmlConfigurator.Configure();
 
             logger.Info("Program Started");
-
+            /*
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Pulsar4X.WinForms.Controls.UIController UIComponentControler = new Controls.UIController();
             Application.Run(Controls.UIController.g_aMainForm);
-
+            */
+            StarSystemFactory ssf = new StarSystemFactory(true);
+            ssf.Create("Test");
 
             logger.Info("Program Ended");
         }

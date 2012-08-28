@@ -8,5 +8,15 @@ namespace Pulsar4X
         {
             return rnd.NextDouble() * (max - min) + min;
         }
+
+        public static double About(this Random rnd, double value, double variation)
+        {
+            return (value + (value * rnd.NextDouble(-variation, variation)));
+        }
+
+        public static double RandomEccentricity(this Random rnd)
+        {
+            return 1.0 - Math.Pow(rnd.NextDouble(0.0, 1.0), Constants.Units.ECCENTRICITY_COEFF);
+        }
     }
 }

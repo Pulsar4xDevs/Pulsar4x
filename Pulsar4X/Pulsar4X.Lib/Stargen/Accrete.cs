@@ -16,11 +16,18 @@ namespace Pulsar4X.Stargen
         private readonly double _maximumStellarAge;
         private readonly StarFactory _starFactory;
 
-        public Accrete(double minStellarAge, double maxStellarAge, bool genMoons)
+        public Random rnd;
+
+        public Accrete(double minStellarAge, double maxStellarAge, bool genMoons, Random rnd = null)
         {
             _generateMoons = genMoons;
             _minimumStellarAge = minStellarAge;
             _maximumStellarAge = maxStellarAge;
+
+            if (rnd == null)
+                this.rnd = new Random();
+            else
+                this.rnd = rnd;
 
             _starFactory = new StarFactory(_minimumStellarAge, _maximumStellarAge);
         }
@@ -41,48 +48,291 @@ namespace Pulsar4X.Stargen
                 var star = starSystem.Stars[i];
                 var protoStar = new ProtoStar(star);
 
-                while (protoStar.DustLeft)
+                //protoStar.DistributePlanetaryMasses(rnd);
+                int counter = 0;
+                while (protoStar.DustAvailable)
                 {
-                    var protoPlanet =
-                        new ProtoPlanet(MathUtilities.Random.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
-                                        AccreteUtilities.RandomEccentricity(), Constants.Stargen.PROTOPLANET_MASS);
-
-                    if (AccreteUtilities.DustAvailable(protoStar, protoPlanet))
+                    counter++;
+                    var protoPlanet = new ProtoPlanet()
                     {
-                        var criticalMass = AccreteUtilities.CriticalLimit(protoPlanet.SemiMajorAxis, protoPlanet.Eccentricity, protoStar.Luminosity);
-                        AccreteDust(protoStar, protoPlanet, criticalMass);
+                        Star = star,
+                        SemiMajorAxis = MathUtilities.Random.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
+                        Eccentricity = rnd.RandomEccentricity(),
+                        DustMass = Constants.Stargen.PROTOPLANET_MASS
+                    };
+                    protoPlanet.init();
+
+
+                    if (protoStar.IsDustAvailable(protoPlanet))
+                    {
+                        //var criticalMass = protoPlanet.CriticalLimit;
+                        AccreteDust(protoStar, protoPlanet);
 
                         if (protoPlanet.Mass > Constants.Stargen.PROTOPLANET_MASS)
                         {
-                            CoalescePlanetesimals(protoStar, protoPlanet, criticalMass);
+                            CoalescePlanetesimals(protoStar, protoPlanet);
+                        }
+                        else
+                        {
+                            logger.Debug("Planet at " + protoPlanet.SemiMajorAxis + " failed due to large neighbor!");
                         }
                     }
-                }
-
-                GeneratePlanets(protoStar);
-
+                    if (counter == 10000)
+                        logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
+                } while (protoStar.DustAvailable && counter < 10000) ;
+                
                 //populate the Star from the protoStar
                 protoStar.Planets.ForEach(planet =>
                                               {
-                                                  planet.Primary = star;
-                                                  planet.PrimaryId = star.Id;
-                                                  star.Planets.Add(planet);
+                                                  planet.Planet.Primary = star;
+                                                  planet.Planet.PrimaryId = star.Id;
+                                                  if (_generateMoons)
+                                                      DistMoonMasses(protoStar, planet);
+                                                  star.Planets.Add(planet.Planet);
                                               });
-                protoStar.Planets = protoStar.Planets.OrderBy(x => x.SemiMajorAxis).ToList();
+                star.Planets = new ObservableCollection<Planet>(star.Planets.OrderBy(x => x.SemiMajorAxis));
+                GeneratePlanets(star);
             }
 
             return starSystem;
         }
 
-        private void GeneratePlanets(ProtoStar protoStar)
+        private void CoalescePlanetesimals(AccreteDisc Disc, ProtoPlanet p)
         {
-            for (int i = 0; i < protoStar.Planets.Count; i++)
+            Disc.Planets.Add(p);
+            doCollisions(Disc);
+        }
+
+        private void doCollisions(AccreteDisc Disc)
+        {
+            double miu1, miu2;
+            double delta = 1, deltaMin = 0;
+            double newE, newA;
+
+            bool collision;
+            do
             {
-                var planet = protoStar.Planets[i];
+                collision = false;
+                Disc.Planets = new List<ProtoPlanet>(Disc.Planets.OrderBy(x => x.SemiMajorAxis));
+                for (int i = 0; i < Disc.Planets.Count - 1; i++)
+                {
+                    ProtoPlanet aPlanet = Disc.Planets[i];
+                    ProtoPlanet bPlanet = Disc.Planets[i + 1];
+
+                    miu1 = aPlanet.Mass / Disc.Mass;
+                    miu2 = bPlanet.Mass / Disc.Mass;
+
+                    deltaMin = 2.4 * (Math.Pow(miu1 + miu2, 1.0 / 3.0));
+                    delta = Math.Abs((bPlanet.SemiMajorAxis - aPlanet.SemiMajorAxis) / aPlanet.SemiMajorAxis);
+
+                    if (delta <= deltaMin && !Disc.isMoonDisc)
+                    {
+                        // New orbital distance
+                        newA = (aPlanet.Mass + bPlanet.Mass) / ((aPlanet.Mass / aPlanet.SemiMajorAxis) + (bPlanet.Mass / bPlanet.SemiMajorAxis));
+
+                        //logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
+
+                        // Compute new eccentricity
+                        double temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
+                        temp = temp + (bPlanet.Mass * Math.Sqrt(bPlanet.SemiMajorAxis) * Math.Sqrt(Math.Sqrt(1.0 - Math.Pow(bPlanet.Eccentricity, 2.0))));
+                        temp = temp / ((aPlanet.Mass + bPlanet.Mass) * Math.Sqrt(newA));
+                        temp = 1.0 - Math.Pow(temp, 2.0);
+
+                        temp = Math.Min(Math.Max(temp, 0.0), 1.0);
+
+                        newE = Math.Sqrt(temp);
+
+                        // Create a new Protoplanet to accrete additional material
+                        var newP = new ProtoPlanet()
+                        {
+                            SemiMajorAxis = newA,
+                            Eccentricity = newE,
+                            DustMass = aPlanet.DustMass + bPlanet.DustMass,
+                            GasMass = aPlanet.GasMass + bPlanet.GasMass,
+                            Star = Disc.Star,
+                            IsMoon=aPlanet.IsMoon,
+                            MoonOf = aPlanet.MoonOf
+                        };
+                        newP.init();
+                        //newP.CritMass = getCriticalMass(newP);
+                        //newP.CloudDensity = getCloudDensity(newP);
+
+                        //double startmass = newP.Mass;
+                        AccreteDust(Disc, newP);
+                        /*if (newP.Mass < startmass)
+                            logger.Debug("Accretion reduced mass, something is wrong!");
+                        else if (newP.Mass > startmass)
+                            logger.Debug("Accretion increased mass!");
+                        else
+                            logger.Debug("Accretion did not change mass!");*/
+
+
+                        logger.Debug(string.Format("New planet at {0:N4} AU with mass {1:N5}!", newP.SemiMajorAxis, newP.MassInEarthMasses));
+
+                        Disc.Planets.Remove(aPlanet);
+                        Disc.Planets.Remove(bPlanet);
+                        Disc.Planets.Add(newP);
+
+                        collision = true;
+                        break;
+                    }
+                }
+
+            }
+            while (collision == true);
+        }
+
+        private void AccreteDust(AccreteDisc Disc, ProtoPlanet p)
+        {
+            //ProtoStar star = p.Star;
+
+            double startDustMass = p.DustMass;
+            double startGasMass = p.GasMass;
+            //double minAccretion = 0.0001 * startMass;
+
+            double gatherLast = 0.0;
+
+            double rInner = 0;
+            double rOuter = 0;
+
+            do
+            {
+                //gatherLast = gatherNow;
+                gatherLast = p.Mass;
+
+                p.ReduceMass();
+                rInner = p.InnerEffectLimit;
+                rOuter = p.OuterEffectLimit;
+
+                p.DustMass = startDustMass;
+                p.GasMass = startGasMass;
+
+                //foreach (AccreteBand band in Disc.Bands)
+                {
+                    //if(band.Intersect(rInner, rOuter))
+                    {
+                        CollectDust(Disc, p, rInner, rOuter, gatherLast);
+                    }
+                    //band.CollectDust(rInner, rOuter, p, gatherLast);
+                }
+
+            }
+            while ((p.Mass - gatherLast) >= (0.0001 * p.Mass));
+
+            Disc.UpdateDust(p); // Clear dust only on reduced mass?
+
+        }
+
+        public void CollectDust(AccreteDisc Disc, ProtoPlanet p, double inner, double outer, double lastMass)
+        {
+            //ProtoStar star = p.Star;
+            foreach (AccreteBand band in Disc.Bands)
+            {
+                double gather = 0.0;
+
+
+                if (band.Intersect(inner, outer) && band.DustPresent)
+                {
+                    double bandwidth = outer - inner;
+                    double temp1 = Math.Max(outer - band.OuterEdge, 0.0);
+                    double temp2 = Math.Max(band.InnerEdge - inner, 0.0);
+                    double width = bandwidth - temp1 - temp2;
+
+                    double dustdensity, gasdensity, massdensity;
+                    if (!band.DustPresent)
+                    {
+                        dustdensity = 0.0;
+                        gasdensity = 0.0;
+                    }
+                    else
+                    {
+                        if ((lastMass > p.CriticalLimit) && band.GasPresent)
+                        {
+                            massdensity = p.CloudDensity;
+                            gasdensity = massdensity - (Constants.Stargen.K * massdensity) / (1.0 + (Math.Sqrt(p.CriticalLimit / p.Mass) * (Constants.Stargen.K - 1.0)));
+                            dustdensity = massdensity - gasdensity;
+                        }
+                        else
+                        {
+                            dustdensity = p.CloudDensity;
+                            gasdensity = 0.0;
+                        }
+                    }
+
+                    double temp = 4.0 * Math.PI * Math.Pow(p.SemiMajorAxis, 2.0) * p.ReducedMass * (1.0 - (p.Eccentricity * (temp1 - temp2) / bandwidth));
+                    double volume = temp * width;
+
+
+                    p.DustMass += volume * dustdensity;
+                    p.GasMass += volume * gasdensity;
+
+                }
+            }
+
+        }
+
+        private void DistMoonMasses(ProtoStar star, ProtoPlanet planet)
+        {
+            planet.initDisc(0.0D, star.StellarDustLimit, true);
+            int counter = 0;
+            do
+            {
+                counter++;
+
+                ProtoPlanet moon = new ProtoPlanet()
+                {
+                    SemiMajorAxis = rnd.NextDouble(planet.PlanetInnerBound, planet.PlanetOuterBound),
+                    Eccentricity = rnd.RandomEccentricity(),
+                    DustMass = Constants.Stargen.PROTOPLANET_MASS,
+                    Star = star.Star,
+                    IsMoon = true,
+                    MoonOf = planet
+                };
+                moon.init();
+
+                if (planet.IsDustAvailable(moon))
+                {
+                    //var criticalMass = protoPlanet.CriticalLimit;
+                    AccreteDust(planet, moon);
+
+                    if (moon.Mass > Constants.Stargen.PROTOPLANET_MASS)
+                    {
+                        CoalescePlanetesimals(planet, moon);
+                    }
+                    else
+                    {
+                        logger.Debug("Moon at " + moon.SemiMajorAxis + " failed due to large neighbor!");
+                    }
+                }
+
+                if (counter == 10000)
+                    logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
+            }while (planet.DustAvailable && counter < 10000);
+
+            planet.Planets = new List<ProtoPlanet>(planet.Planets.OrderBy(x => x.SemiMajorAxis));
+
+            planet.Planets.ForEach(moon=>
+                    {
+                        moon.Planet.Primary = planet.Star;
+                        moon.Planet.PrimaryId = planet.Star.Id;
+                        planet.Planet.Moons.Add(moon.Planet);
+                    });
+        }
+
+        private void GeneratePlanets(Star Star)
+        {
+            for (int i = 0; i < Star.Planets.Count; i++)
+            {
+                var planet = Star.Planets[i];
                 planet.Id = Guid.NewGuid();
-                planet.Name = string.Format("{0} {1}", protoStar.Star.Name, i + 1);
+                planet.Name = string.Format("{0} {1}", Star.Name, i + 1);
                 GeneratePlanet(planet);
             }
+        }
+
+        private void GeneratePlanet(ProtoPlanet protoplanet)
+        {
+            GeneratePlanet(protoplanet.Planet);
         }
 
         private void GeneratePlanet(Planet planet)
@@ -95,7 +345,7 @@ namespace Pulsar4X.Stargen
             planet.RiseInTemperatureDueToGreenhouse = 0;
             planet.IsInResonantRotation = false;
 
-            planet.OrbitZone = AccreteUtilities.OrbitalZone(planet.Primary.Luminosity, planet.SemiMajorAxis);
+            planet.OrbitZone = EnviroUtilities.OrbitalZone(planet.Primary.Luminosity, planet.SemiMajorAxis);
             planet.OrbitalPeriod = EnviroUtilities.Period(planet.SemiMajorAxis, planet.Mass, planet.Primary.Mass);
             planet.AxialTilt = EnviroUtilities.Inclination(planet.SemiMajorAxis);
 
@@ -143,7 +393,7 @@ namespace Pulsar4X.Stargen
                     {
                         var h2Loss = ((1.0 - (1.0 / Math.Exp(planet.Primary.Age / h2Life))) * h2Mass);
                         planet.MassOfGas -= h2Loss;
-                        planet.Mass -= h2Loss;
+                        //planet.Mass -= h2Loss;
 
                         //Mass of planet changed so recalculate
                         planet.SurfaceAcceleration = EnviroUtilities.Acceleration(planet.Mass, planet.Radius);
@@ -153,7 +403,7 @@ namespace Pulsar4X.Stargen
                     {
                         var heLoss = ((1.0 - (1.0 / Math.Exp(planet.Primary.Age / heLife))) * heMass);
                         planet.MassOfGas -= heLoss;
-                        planet.Mass -= heLoss;
+                        //planet.Mass -= heLoss;
 
                         //Mass of planet changed so recalculate
                         planet.SurfaceAcceleration = EnviroUtilities.Acceleration(planet.Mass, planet.Radius);
@@ -266,13 +516,14 @@ namespace Pulsar4X.Stargen
             {
                 if (planet.Moons != null)
                 {
-                    for (int n = 0; n < planet.Moons.Count; n++)
+                    var moonList = planet.Moons.ToList();
+                    for (int n = 0; n < moonList.Count; n++)
                     {
-                        var moon = planet.Moons[n];
+                        var moon = moonList[n];
                         if (moon.Mass * Constants.Sol.Sun.MASS_IN_EARTH_MASSES > .000001)
                         {
-                            moon.SemiMajorAxis = planet.SemiMajorAxis;
-                            moon.Eccentricity = planet.Eccentricity;
+                            //moon.SemiMajorAxis = planet.SemiMajorAxis;
+                            //moon.Eccentricity = planet.Eccentricity;
                             moon.Id = Guid.NewGuid();
                             moon.Name = string.Format("{0}.{1}", planet.Name, n + 1);
                             moon.Primary = planet.Primary;
@@ -280,20 +531,31 @@ namespace Pulsar4X.Stargen
                             GeneratePlanet(moon);
 
                             //TODO: Look at adding atmosphere call to this
-                            var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0));
-                            var hillSphere = planet.SemiMajorAxis * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0));
+                            var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
+                            var hillSphere = planet.SemiMajorAxis * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
 
-                            if ((rocheLimit * 3.0) < hillSphere)
+                            //if ((rocheLimit * 3.0) < hillSphere)
+                            if (moon.SemiMajorAxis < rocheLimit)
                             {
-                                moon.SemiMajorAxis = MathUtilities.Random.NextDouble(rocheLimit * 1.5, hillSphere / 2.0) / Constants.Units.KM_PER_AU;
-                                moon.Eccentricity = AccreteUtilities.RandomEccentricity();
+                                // Moon too close.
+                                // TODO: Turn moon into rings
+                                planet.Moons.Remove(moon);
+                                //logger.Debug(string.Format("Moon of planet {0} inside Roche limit", planet.Name));
                             }
-                            else
+
+                            if (moon.SemiMajorAxis > hillSphere)
                             {
-                                //TODO: Figure out what to do if the planet is not large enough to hold the moon
-                                moon.SemiMajorAxis = 0;
-                                moon.Eccentricity = 0;
+                                // Moon too far
+                                planet.Moons.Remove(moon);
+                                //logger.Debug(string.Format("Moon of planet {0} outside hill radius", planet.Name));
                             }
+
+                        }
+                        else
+                        {
+                            // Moon too small
+                            planet.Moons.Remove(moon);
+                            //logger.Debug(string.Format("Moon of planet {0} too small", planet.Name));
                         }
                     }
                 }
@@ -391,7 +653,7 @@ namespace Pulsar4X.Stargen
         /// <param name="protoPlanet"> </param>
         /// <param name="criticalMass"></param>
         /// <param name="protoStar"> </param>
-        private void CoalescePlanetesimals(ProtoStar protoStar, ProtoPlanet protoPlanet, double criticalMass)
+        /*private void CoalescePlanetesimals(ProtoStar protoStar, ProtoPlanet protoPlanet, double criticalMass)
         {
             var finished = false;
             var reducedMassOfProtoPlanet = Math.Pow(protoPlanet.Mass / (1.0 + protoPlanet.Mass), (1.0 / 4.0));
@@ -399,7 +661,7 @@ namespace Pulsar4X.Stargen
             // First we try to find an existing planet with an over-lapping orbit.
             for (int i = 0; i < protoStar.Planets.Count; i++)
             {
-                var thePlanet = protoStar.Planets[i];
+                var thePlanet = protoStar.Planets[i].Planet;
                 double diff = thePlanet.SemiMajorAxis - protoPlanet.SemiMajorAxis;
                 double reducedMassOfPlanet;
                 double dist1;
@@ -407,7 +669,7 @@ namespace Pulsar4X.Stargen
                 if (diff > 0.0)
                 {
                     dist1 = (protoPlanet.SemiMajorAxis * (1.0 + protoPlanet.Eccentricity) * (1.0 + reducedMassOfProtoPlanet)) - protoPlanet.SemiMajorAxis;
-                    /* x aphelion	 */
+                    // x aphelion	 
                     reducedMassOfPlanet = Math.Pow(thePlanet.Mass / (1.0 + thePlanet.Mass), (1.0 / 4.0));
                     dist2 = thePlanet.SemiMajorAxis
                             - (thePlanet.SemiMajorAxis * (1.0 - thePlanet.Eccentricity) * (1.0 - reducedMassOfPlanet));
@@ -415,7 +677,7 @@ namespace Pulsar4X.Stargen
                 else
                 {
                     dist1 = protoPlanet.SemiMajorAxis - (protoPlanet.SemiMajorAxis * (1.0 - protoPlanet.Eccentricity) * (1.0 - reducedMassOfProtoPlanet));
-                    /* x perihelion */
+                    // x perihelion 
                     reducedMassOfPlanet = Math.Pow((thePlanet.Mass / (1.0 + thePlanet.Mass)), (1.0 / 4.0));
                     dist2 = (thePlanet.SemiMajorAxis * (1.0 + thePlanet.Eccentricity) * (1.0 + reducedMassOfPlanet))
                         - thePlanet.SemiMajorAxis;
@@ -553,12 +815,13 @@ namespace Pulsar4X.Stargen
                 else
                     protoStar.Planets.Insert(index, thePlanet);
             }
-        }
+        }*/
+
 
         /// <summary>
         /// Accrete dust for a planetoid based on the given parameters.
         /// </summary>
-        private void AccreteDust(ProtoStar protoStar, ProtoPlanet protoPlanet, double criticalMass)
+        /*private void AccreteDust(ProtoStar protoStar, ProtoPlanet protoPlanet, double criticalMass)
         {
             double previousMass;
             double newMass = protoPlanet.Mass;
@@ -574,8 +837,9 @@ namespace Pulsar4X.Stargen
             protoPlanet.Mass += newMass;
             protoPlanet.DustMass = newDust;
             protoPlanet.GasMass = newGas;
-            AccreteUtilities.UpdateDustLanes(protoStar, protoPlanet, previousMass, criticalMass);
-        }
+            protoStar.UpdateDust(protoPlanet);
+            //AccreteUtilities.UpdateDustLanes(protoStar, protoPlanet, previousMass, criticalMass);
+        }*/
 
         /// <summary>
         /// Method to aggregate dust onto a planetoid based on the disk it is sweeping through.
@@ -587,18 +851,18 @@ namespace Pulsar4X.Stargen
         /// <param name="lastMass"> </param>
         /// <param name="newDust"> </param>
         /// <param name="bandIndex"> </param>
-        private double CollectDust(ProtoStar protoStar, ProtoPlanet protoPlanet, double lastMass, ref double newDust, ref double newGas, double critMass, int bandIndex)
+        /*private double CollectDust(ProtoStar protoStar, ProtoPlanet protoPlanet, double lastMass, ref double newDust, ref double newGas, double critMass, int bandIndex)
         {
             //TODO: Needs to be refactored, has more parameters than it needs
             double gasDensity = 0.0;
             double nextDust = 0;
             double nextGas = 0;
 
-            double dustDensity = AccreteUtilities.DustDensity(protoStar, protoPlanet);
+            double dustDensity = protoPlanet.DustDensity;
 
             var reducedMass = Math.Pow(lastMass / (1.0 + lastMass), (1.0 / 4.0));
-            var rInner = AccreteUtilities.InnerEffectLimit(protoPlanet.SemiMajorAxis, protoPlanet.Eccentricity, reducedMass, protoStar.CloudEccentricity);
-            var rOuter = AccreteUtilities.OuterEffectLimit(protoPlanet.SemiMajorAxis, protoPlanet.Eccentricity, reducedMass, protoStar.CloudEccentricity);
+            var rInner = protoPlanet.InnerEffectLimit;
+            var rOuter = protoPlanet.OuterEffectLimit;
 
             if ((rInner < 0.0))
                 rInner = 0.0;
@@ -653,6 +917,6 @@ namespace Pulsar4X.Stargen
             newDust = newDust + nextDust;
 
             return (newMass + nextMass);
-        }
+        }*/
     }
 }

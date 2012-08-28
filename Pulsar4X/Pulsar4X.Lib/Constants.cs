@@ -577,6 +577,8 @@ namespace Pulsar4X
             public const double Q2_36 = 0.0698; // 1/Kelvin
 
             public const double JIMS_FUDGE = 1.004;
+
+            public const double CLOUD_ECCENTRICITY = 0.2D;
         }
     }
 }

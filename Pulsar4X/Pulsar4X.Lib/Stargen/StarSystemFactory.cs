@@ -16,7 +16,7 @@ namespace Pulsar4X.Stargen
         private readonly double _maximumStellarAge;
         private readonly bool _generateMoons;
 
-        public StarSystemFactory(bool genMoons) : this(MinAge, MaxAge, genMoons)
+        public StarSystemFactory(bool genMoons = true) : this(MinAge, MaxAge, genMoons)
         {
         }
 
@@ -45,8 +45,8 @@ namespace Pulsar4X.Stargen
                     {
                         Planet p = star.Planets[j];
                         if(j==0)
-                            logger.Debug(string.Format("P{0,-6}{1,9}AU {2,10}{3,10}{4,12}{5,5}", "#", "Orbit", "Mass", "GasMass", "PlanetType", "Moons"));
-                        logger.Debug(string.Format("P{0,-6}{1,9:N4}AU {2,10:N4}{3,10}{4,12}{5,5}", j, p.SemiMajorAxis, p.MassInEarthMasses, p.MassOfGasInEarthMasses > 0 ? p.MassOfGasInEarthMasses.ToString("N4") : "None", p.PlanetType, p.Moons.Count));
+                            logger.Debug(string.Format("P{0,-6}{1,9}AU {2,10}{3,10}{4,12}{5,6}", "#", "Orbit", "Mass", "GasMass", "Type", "Moons"));
+                        logger.Debug(string.Format("P{0,-6}{1,9:N4}AU {2,10:N4}{3,10}{4,12}{5,6}", j, p.SemiMajorAxis, p.MassInEarthMasses, p.MassOfGasInEarthMasses > 0 ? p.MassOfGasInEarthMasses.ToString("N4") : "None", p.PlanetType, p.Moons.Count));
                         for(int k=0; k<p.Moons.Count; k++)
                         {
                             Planet m = p.Moons[k];
