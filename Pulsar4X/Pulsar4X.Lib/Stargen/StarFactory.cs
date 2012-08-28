@@ -39,9 +39,9 @@ namespace Pulsar4X.Stargen
                 star.Name = numberOfStars == 1 ? name : string.Format("{0} {1}", name, GetPostfix(i));
                 star.Spectrum = GenerateSpectrum();
                 star.Mass = GenerateMass(star.Spectrum); //MathUtilities.Random.NextDouble(_minimumMass, _maximumMass);
-                star.Luminosity = AccreteUtilities.Luminosity(star.Mass);
-                star.EcoSphereRadius = AccreteUtilities.EcoSphereRadius(star.Luminosity);
-                star.Life = AccreteUtilities.StellarLife(star.Mass, star.Luminosity);
+                star.Luminosity = Luminosity(star.Mass);
+                star.EcoSphereRadius = EcoSphereRadius(star.Luminosity);
+                star.Life = StellarLife(star.Mass, star.Luminosity);
                 star.Age = MathUtilities.Random.NextDouble(_minimumAge, Math.Max(_maximumAge, star.Life));
                 star.SpectrumAdjustment = MathUtilities.Random.Next(0, 10);
 
@@ -84,6 +84,9 @@ namespace Pulsar4X.Stargen
 
         private StarSpectrum GenerateSpectrum()
         {
+            //TODO: Remove, temporary hack to create more Sol-sized stars
+            return StarSpectrum.G;
+
             //TODO: Add support for age of galaxy if we want that, right now it just does medium age
             var chance = MathUtilities.Random.NextDouble();
             if (chance < SpectrumOChance)
@@ -174,5 +177,28 @@ namespace Pulsar4X.Stargen
             var c = (char)(65 + (i - 1));
             return c.ToString();
         }
+
+        public static double EcoSphereRadius(double luminosity)
+        {
+            return Math.Sqrt(luminosity);
+        }
+
+        public static double StellarLife(double mass, double luminosity)
+        {
+            var life = 1.0E10 * (mass / luminosity);
+            return life;
+        }
+
+        public static double Luminosity(double massRatio)
+        {
+            double n;
+            if (massRatio < 1.0)
+                n = 1.75 * (massRatio - 0.1) + 3.325;
+            else
+                n = 0.5 * (2.0 - massRatio) + 4.4;
+
+            return Math.Pow(massRatio, n);
+        }
+
     }
 }
