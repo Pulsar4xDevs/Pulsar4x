@@ -26,6 +26,8 @@ namespace Pulsar4X.WinForms
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Pulsar4X.WinForms.Controls.UIController UIComponentControler = new Controls.UIController();
+            OpenTKUtilities.Instance.Initialise();  // Get the best possible version of OpenGL
+            //OpenTKUtilities.Instance.Initialise(OpenTKUtilities.GLVersion.OpenGL2X);
             Application.Run(Controls.UIController.g_aMainForm);
             
             /*

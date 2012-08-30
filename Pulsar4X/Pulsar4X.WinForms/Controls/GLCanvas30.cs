@@ -17,7 +17,7 @@ namespace Pulsar4X.WinForms.Controls
     /// <summary>
     /// A custom Version of the GLControl class which guarantees that OpenGL version 3.X is availble.
     /// </summary>
-    class GLCanvas30 : GLCanvas
+    public class GLCanvas30 : GLCanvas
     {
         /// <summary>
         /// Our Projections/ViewMatricies.
@@ -42,7 +42,7 @@ namespace Pulsar4X.WinForms.Controls
             : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Debug)
         {
             #if DEBUG
-                Program.logger.Info("UI: Creating an OpenGL 3.0+ GLCanvas");
+                Program.logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
             #endif
         }
 
@@ -73,7 +73,7 @@ namespace Pulsar4X.WinForms.Controls
             GL.ClearStencil(0);
             GL.Enable(EnableCap.VertexArray);
             #if DEBUG
-                        Program.logger.Info("OpenGL Post State Config Error Check: " + GL.GetError().ToString());
+                Program.logger.Info("OpenGL Post State Config Error Check: " + GL.GetError().ToString());
             #endif
 
             Program.logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
@@ -167,9 +167,9 @@ namespace Pulsar4X.WinForms.Controls
             m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
             //m_oShader.StopUsing();
             GraphicsContext.CurrentContext.SwapBuffers();
-            #if DEBUG
-                Program.logger.Info("Draw Colpeted, OpenGL error: " + GL.GetError().ToString());
-            #endif
+           // #if DEBUG
+           //     Program.logger.Info("Draw Colpeted, OpenGL error: " + GL.GetError().ToString());
+           // #endif
 
             m_oSW.Stop();
             m_dAccumulator += m_oSW.Elapsed.TotalMilliseconds;

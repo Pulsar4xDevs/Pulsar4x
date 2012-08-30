@@ -14,7 +14,7 @@ namespace Pulsar4X.WinForms.Controls
     /// <summary>
     /// An Customised version of GLControle, Used as a base for the OpenGL Version Specifc dervied classes.
     /// </summary>
-    abstract class GLCanvas : OpenTK.GLControl
+    public abstract class GLCanvas : OpenTK.GLControl
     {
         /// <summary>
         /// used to determine if this control hase bee sucessfully loaded.

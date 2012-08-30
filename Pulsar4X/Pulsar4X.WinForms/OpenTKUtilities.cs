@@ -11,6 +11,9 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using log4net.Config;
 using log4net;
+using OpenTK.Platform;
+using Config = OpenTK.Configuration;
+using Utilities = OpenTK.Platform.Utilities;
 
 namespace Pulsar4X.WinForms
 {
@@ -45,6 +48,35 @@ namespace Pulsar4X.WinForms
         int m_iActiveShader = 0;
 
         /// <summary>
+        /// Values that repesent OpenGL Versions.
+        /// </summary>
+        public enum GLVersion
+        {
+            Unknown = 0,
+            OpenGL1X,
+            OpenGL2X,
+            OpenGL3X,
+            OpenGL4X
+        };
+
+
+        /// <summary> 
+        /// The supported open gl version 
+        /// </summary>
+        GLVersion m_eSupportedOpenGLVersion;
+        public GLVersion SupportedOpenGLVersion
+        {
+            get
+            {
+                return m_eSupportedOpenGLVersion;
+            }
+            set
+            {
+                m_eSupportedOpenGLVersion = value;
+            }
+        }
+
+        /// <summary>
         /// Instance of this class/singelton
         /// </summary>
         private static readonly OpenTKUtilities m_oInstance = new OpenTKUtilities(); 
@@ -67,11 +99,77 @@ namespace Pulsar4X.WinForms
         /// Initialises the OpenTK Framework, Specificaly OpenGL.
         /// </summary>
         /// <returns>True If Successfull, false otherwise.</returns>
-        public bool Initialise()
+        public bool Initialise(GLVersion a_eGLVersion = GLVersion.Unknown)
         {
-            throw new NotImplementedException();
+            // create a OpenTK Controll and query it for the GLContext version number:
+            OpenTK.GLControl oTest = new GLControl(new GraphicsMode(32,24,8,4), 4, 0, GraphicsContextFlags.Default);
+            Form oOpenGLVersionCheck = new Form();
+            oOpenGLVersionCheck.Controls.Add(oTest);
+            oOpenGLVersionCheck.Show();
+            oOpenGLVersionCheck.Hide();
+            
+            string szOpenGLVersion = GL.GetString(StringName.Version);
+            int iMajor = int.Parse(szOpenGLVersion[0].ToString());      // extracts the major verion number an converts it to a int.
+            int iMinor = int.Parse(szOpenGLVersion[2].ToString());      // same again for minor verion number.
 
-            //return false; // return false as this has not yet been implemented.
+            #if DEBUG
+                Program.logger.Debug("Highest OpenGL Version Initialised is " + szOpenGLVersion);  
+            #endif
+
+            if (iMajor == 1)
+            {
+                m_eSupportedOpenGLVersion = GLVersion.OpenGL1X;
+            }
+            else if (iMajor == 3 && iMinor < 2)
+            {
+                m_eSupportedOpenGLVersion = GLVersion.OpenGL2X;
+            }
+            else if (iMajor == 3 && iMinor >= 2)
+            {
+                m_eSupportedOpenGLVersion = GLVersion.OpenGL3X;
+            }
+            else if (iMajor == 4)
+            {
+                m_eSupportedOpenGLVersion = GLVersion.OpenGL4X;
+            }
+
+
+            if (a_eGLVersion != GLVersion.Unknown)
+            {
+                m_eSupportedOpenGLVersion = a_eGLVersion;
+                #if DEBUG
+                    Program.logger.Warn("OpenGL Version Autodetect has been overridden to " + a_eGLVersion.ToString());
+                #endif
+            }
+
+            return true;
+        }
+
+
+        /// <summary>
+        /// Creates and returns a new GLCanvas, the exact version is determined by the OpenGL supproted by the system.
+        /// OpenGL 2.x = GLCanvas20
+        /// OpenGL 3.x = GLCanvas30
+        /// </summary>
+        /// <returns>A Valid GLCanvas Control</returns>
+        public GLCanvas CreateGLCanvas()
+        {
+            switch (m_eSupportedOpenGLVersion)
+            {
+                case GLVersion.OpenGL1X:
+                    // Not Supported
+                    throw new NotSupportedException();
+                case GLVersion.OpenGL2X:
+                    return new GLCanves20();
+                case GLVersion.OpenGL3X:
+                    return new GLCanvas30();
+                case GLVersion.OpenGL4X:
+                    // not implimented yet, retrun a version 3 instead:
+                    return new GLCanvas30();
+                default:
+                    // Not Supported
+                    throw new NotSupportedException();
+            }
         }
 
 
