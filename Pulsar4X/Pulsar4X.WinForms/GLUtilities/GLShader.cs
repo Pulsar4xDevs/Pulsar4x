@@ -164,6 +164,7 @@ void main()
             GL.ShaderSource(iGLVertexShader, szVertexShader);                  // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLVertexShader);                                 // Tell OpenGL to compile the shaders gened above.
 
+            logger.Info("OpenGL Compile Vertex Shader GL error check: " + GL.GetError().ToString());
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
@@ -175,6 +176,7 @@ void main()
             GL.ShaderSource(iGLPixelShader, szPixelShader);                     // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLPixelShader);                                   // Tell OpenGL to compile the shaders gened above.
 
+            logger.Info("OpenGL Compile fragment/pixel Shader GL error check: " + GL.GetError().ToString());
             GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
@@ -185,6 +187,8 @@ void main()
             m_iShaderProgramHandle = GL.CreateProgram();                        // Tell OpenGL to creat a handle for a complete shader program (composed of the above two shaders).
             GL.AttachShader(m_iShaderProgramHandle, iGLVertexShader);           // Attache our Vertex shader to the program.
             GL.AttachShader(m_iShaderProgramHandle, iGLPixelShader);            // Attache our Pixel (fragment) shader to our program.
+            logger.Info("OpenGL attache shaders to program error check: " + GL.GetError().ToString());
+
             // Note the below 4 function calls bind our vertex components in C# to our OpenGL shader.
             GL.BindAttribLocation(m_iShaderProgramHandle, 0, "VertexPosition"); // Binds the vertex position Variable in the shader program to the index 0.
             GL.BindAttribLocation(m_iShaderProgramHandle, 1, "VertexColour");   // Binds the vertex color Variable in the shader program to the index 1.
@@ -192,6 +196,7 @@ void main()
             //GL.BindFragDataLocation(m_iShaderProgramHandle, 0, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3.
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
+            logger.Info("OpenGL Link Shader program error check: " + GL.GetError().ToString());
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
             if (iShaderError != 1)
             {
