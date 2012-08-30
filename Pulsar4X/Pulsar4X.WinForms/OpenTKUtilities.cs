@@ -124,7 +124,7 @@ namespace Pulsar4X.WinForms
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL2X;
             }
-            else if (iMajor == 3 && iMinor >= 2)
+            else if (iMajor <= 3 && iMinor >= 2)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL3X;
             }

@@ -45,7 +45,7 @@ namespace Pulsar4X.WinForms.Controls
 
 
         public GLCanves20()
-            : base(new GraphicsMode(32, 24, 8, 4), 1, 0, GraphicsContextFlags.Debug)
+            : base(new GraphicsMode(32, 24, 8, 4), 2, 0, GraphicsContextFlags.Debug)
         {
             #if DEBUG
                 Program.logger.Info("UI: Creating an OpenGL 2.1+ GLCanvas");
