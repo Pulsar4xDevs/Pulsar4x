@@ -121,7 +121,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_m4ModelMatrix = Matrix4.CreateTranslation(new Vector3(400, 400, 0));
 
             // Load Our Texture
-            m_uiTextureID = OpenTKUtilities.LoadTexture("test.png");
+            m_uiTextureID = OpenTKUtilities.LoadTexture("test.png"); ///< @todo Proper Path when resources sorted.
 
             // Create our shader:
             m_oShaderProgram = a_oShaderProgram;

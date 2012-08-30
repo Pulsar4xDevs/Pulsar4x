@@ -108,11 +108,10 @@ namespace Pulsar4X.WinForms.GLUtilities
             // The Following Bind our Projection, view (camera) and model Matricies in c# to the corosponding vars in the shader program
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
             m_aiShaderMatrixLocations = new int[3];     // create memory.
-            m_aiShaderMatrixLocations[0] = GL.GetUniformLocation(m_iShaderProgramHandle, "ProjectionMatrix");
-            m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
-            m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
-
-            Program.logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
+            logger.Info("OpenGL Bind Projection Matrix to Shader Code: " + GL.GetError().ToString());
+            logger.Info("OpenGL Bind View Matrix to Shader Code: " + GL.GetError().ToString());
+            logger.Info("OpenGL Bind Model Matrix to Shader Code: " + GL.GetError().ToString());
+            logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.
             // Deleteing them now lets OpenGL know that we don't want to use tem again in a different shader (if we do we will need to re compile them).
@@ -120,8 +119,6 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.DeleteShader(iGLVertexShader);
             GL.DeleteShader(iGLPixelShader);
         }
-
-
 
         void CreateDefault12()
         {
@@ -206,10 +203,13 @@ void main()
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
             m_aiShaderMatrixLocations = new int[3];     // create memory.
             m_aiShaderMatrixLocations[0] = GL.GetUniformLocation(m_iShaderProgramHandle, "ProjectionMatrix");
+            logger.Info("OpenGL Bind Projection Matrix to Shader Code: " + GL.GetError().ToString());
             m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
+            logger.Info("OpenGL Bind View Matrix to Shader Code: " + GL.GetError().ToString());
             m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
+            logger.Info("OpenGL Bind Model Matrix to Shader Code: " + GL.GetError().ToString());
 
-            Program.logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
+            logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.
             // Deleteing them now lets OpenGL know that we don't want to use tem again in a different shader (if we do we will need to re compile them).
