@@ -22,6 +22,9 @@ namespace Pulsar4X.WinForms
     /// </summary>
     public sealed class OpenTKUtilities
     {
+        public static readonly ILog logger = LogManager.GetLogger(typeof(OpenTKUtilities));
+
+
         /// <summary>
         /// A Structure used to store data about a texture.
         /// </summary>
@@ -113,14 +116,18 @@ namespace Pulsar4X.WinForms
             int iMinor = int.Parse(szOpenGLVersion[2].ToString());      // same again for minor verion number.
 
             #if DEBUG
-                Program.logger.Debug("Highest OpenGL Version Initialised is " + szOpenGLVersion);  
+                logger.Debug("Highest OpenGL Version Initialised is " + szOpenGLVersion);  
             #endif
 
             if (iMajor == 1)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL1X;
             }
-            else if (iMajor == 3 && iMinor < 2)
+            else if (iMajor == 2)
+            {
+                m_eSupportedOpenGLVersion = GLVersion.OpenGL2X;
+            }
+            else if (iMajor <= 3 && iMinor < 2)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL2X;
             }
@@ -132,13 +139,20 @@ namespace Pulsar4X.WinForms
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL4X;
             }
+            else
+            {
+                #if DEBUG
+                    logger.Error("OpenGL Version Autodetect Could Not work out which version of OpenGL is on this system");
+                    logger.Error("OpenGL Version Major is: " + iMajor.ToString() + "OpenGL Minor is: " + iMinor.ToString());
+                #endif
+            }
 
 
             if (a_eGLVersion != GLVersion.Unknown)
             {
                 m_eSupportedOpenGLVersion = a_eGLVersion;
                 #if DEBUG
-                    Program.logger.Warn("OpenGL Version Autodetect has been overridden to " + a_eGLVersion.ToString());
+                    logger.Warn("OpenGL Version Autodetect has been overridden to " + a_eGLVersion.ToString());
                 #endif
             }
 
@@ -230,7 +244,7 @@ namespace Pulsar4X.WinForms
             // Load data by telling OpenGL to build mipmaps out of bitmap data
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, oRawTextureData.Scan0);
 
-            Program.logger.Info("OpenGL Loading Texture " + a_szTextureFile + ": " + GL.GetError().ToString());
+            logger.Info("OpenGL Loading Texture " + a_szTextureFile + ": " + GL.GetError().ToString());
 
             // Now that we have provided the data to OpenGL we can free the texture from system Ram.
             oTextureBitmap.UnlockBits(oRawTextureData);

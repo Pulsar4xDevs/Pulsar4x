@@ -17,6 +17,9 @@ namespace Pulsar4X.WinForms.GLUtilities
     /// </summary>
     public class GLShader
     {
+
+        public static readonly ILog logger = LogManager.GetLogger(typeof(GLShader));
+
         /// <summary>
         /// OpenGL Handle for this Shader.
         /// </summary>
@@ -70,7 +73,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -81,7 +84,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -98,7 +101,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -171,7 +174,7 @@ void main()
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -182,7 +185,7 @@ void main()
             GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -199,7 +202,7 @@ void main()
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -271,7 +274,7 @@ void main()
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + GL.GetShaderInfoLog(iGLVertexShader)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -282,7 +285,7 @@ void main()
             GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + GL.GetShaderInfoLog(iGLPixelShader)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -299,7 +302,7 @@ void main()
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
             if (iShaderError != 1)
             {
-                Program.logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
+                logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
                 iShaderError = 1;
             }
 
@@ -310,7 +313,7 @@ void main()
             m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
             m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
 
-            Program.logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
+            logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.
             // Deleteing them now lets OpenGL know that we don't want to use tem again in a different shader (if we do we will need to re compile them).

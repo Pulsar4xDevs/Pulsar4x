@@ -8,6 +8,8 @@ using OpenTK.Graphics;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.Controls;
 using OpenTK.Graphics.OpenGL;
+using log4net.Config;
+using log4net;
 
 namespace Pulsar4X.WinForms.Controls
 {
@@ -16,6 +18,9 @@ namespace Pulsar4X.WinForms.Controls
     /// </summary>
     public abstract class GLCanvas : OpenTK.GLControl
     {
+
+        public static readonly ILog logger = LogManager.GetLogger(typeof(GLCanvas));
+
         /// <summary>
         /// used to determine if this control hase bee sucessfully loaded.
         /// </summary>

@@ -19,6 +19,7 @@ namespace Pulsar4X.WinForms.GLUtilities
     public class GLPrimitive
     {
         // Note: for AU/KM conversions: Constants.Units.KM_PER_AU
+        public static readonly ILog logger = LogManager.GetLogger(typeof(GLPrimitive));
 
         /// <summary>
         /// Array of verticies that make up this primative.
@@ -129,21 +130,21 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
             GL.BindVertexArray(m_uiVextexArrayHandle);                      // Lets OpenGL that this is the current "active" vertex array.
             #if DEBUG
-                Program.logger.Info("OpenGL Generate VAO: " + GL.GetError().ToString());
+                logger.Info("OpenGL Generate VAO: " + GL.GetError().ToString());
             #endif
 
             GL.GenBuffers(1, out m_uiVertexBufferHandle);                   // Generate our Vertex Buffer Object and get the handle to it.
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
             GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
             #if DEBUG
-                Program.logger.Info("OpenGL Generate VBO: " + GL.GetError().ToString());
+                logger.Info("OpenGL Generate VBO: " + GL.GetError().ToString());
             #endif
 
             GL.GenBuffers(1, out m_uiIndexBufferHandle);                    //Generate Our index Buffer and get handle to it.
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle); // Lets Open GL know that this is the current active buffer object.
             GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(m_auiIndicies.Length * sizeof(ushort)), m_auiIndicies, BufferUsageHint.StaticDraw); // Tells OpenGL how the data is structured.
             #if DEBUG
-                Program.logger.Info("OpenGL Generate EBO: " + GL.GetError().ToString());
+                logger.Info("OpenGL Generate EBO: " + GL.GetError().ToString());
             #endif
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);    // Switch back to our Buffer Object as the current buffer.
@@ -151,7 +152,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.VertexAttribPointer(1, 4, VertexAttribPointerType.HalfFloat, true, GLVertex.SizeInBytes(), Vector3d.SizeInBytes); // tells OpenGL about the 4 half floats used to repesent color.
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector3d.SizeInBytes + Vector4h.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
             #if DEBUG
-                Program.logger.Info("OpenGL Create Vertes Attribute Pointers: " + GL.GetError().ToString());
+                logger.Info("OpenGL Create Vertes Attribute Pointers: " + GL.GetError().ToString());
             #endif
             
             // Turn on the Vertex Attribs:

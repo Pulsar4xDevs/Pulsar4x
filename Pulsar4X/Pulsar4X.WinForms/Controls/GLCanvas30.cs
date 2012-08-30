@@ -42,7 +42,7 @@ namespace Pulsar4X.WinForms.Controls
             : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Debug)
         {
             #if DEBUG
-                Program.logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
+                logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
             #endif
         }
 
@@ -52,7 +52,7 @@ namespace Pulsar4X.WinForms.Controls
             m_bLoaded = true;           // So we know we have a valid Loaded OpenGL context.
 
             #if DEBUG
-                Program.logger.Info("OpenGL Pre State Config Error Check: " + GL.GetError().ToString());
+                logger.Info("OpenGL Pre State Config Error Check: " + GL.GetError().ToString());
             #endif
             //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -73,17 +73,17 @@ namespace Pulsar4X.WinForms.Controls
             GL.ClearStencil(0);
             GL.Enable(EnableCap.VertexArray);
             #if DEBUG
-                Program.logger.Info("OpenGL Post State Config Error Check: " + GL.GetError().ToString());
+                logger.Info("OpenGL Post State Config Error Check: " + GL.GetError().ToString());
             #endif
 
-            Program.logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
+            logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
             #if DEBUG
                 // Log out OpeGL specific stuff if debug build.
-                Program.logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
-                Program.logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
-                Program.logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
-                Program.logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
-                Program.logger.Info("OpenGL Error Check: " + GL.GetError().ToString());
+                logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
+                logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
+                logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
+                logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
+                logger.Info("OpenGL Error Check: " + GL.GetError().ToString());
             #endif
 
             // Setup Our View Port, this sets Our Projection and View Matricies.
@@ -168,7 +168,7 @@ namespace Pulsar4X.WinForms.Controls
             //m_oShader.StopUsing();
             GraphicsContext.CurrentContext.SwapBuffers();
            // #if DEBUG
-           //     Program.logger.Info("Draw Colpeted, OpenGL error: " + GL.GetError().ToString());
+           //     logger.Info("Draw Colpeted, OpenGL error: " + GL.GetError().ToString());
            // #endif
 
             m_oSW.Stop();
