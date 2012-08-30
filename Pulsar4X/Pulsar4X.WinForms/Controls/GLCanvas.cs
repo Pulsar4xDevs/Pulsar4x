@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.Controls;
-using OpenTK.Graphics.OpenGL;
 using log4net.Config;
 using log4net;
 
@@ -20,6 +21,13 @@ namespace Pulsar4X.WinForms.Controls
     {
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLCanvas));
+
+
+        /// <summary>
+        /// Our Projections/ViewMatricies.
+        /// </summary>
+        protected Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
+
 
         /// <summary>
         /// used to determine if this control hase bee sucessfully loaded.

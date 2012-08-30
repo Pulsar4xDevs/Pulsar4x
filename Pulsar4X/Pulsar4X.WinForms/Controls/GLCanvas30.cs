@@ -22,7 +22,7 @@ namespace Pulsar4X.WinForms.Controls
         /// <summary>
         /// Our Projections/ViewMatricies.
         /// </summary>
-        Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
+        //Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
 
         private GLUtilities.GLShader m_oShaderProgram;
         private GLUtilities.GLShader m_oShaderProgram2;

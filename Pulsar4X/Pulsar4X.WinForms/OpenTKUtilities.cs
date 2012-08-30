@@ -84,9 +84,6 @@ namespace Pulsar4X.WinForms
         /// </summary>
         private static readonly OpenTKUtilities m_oInstance = new OpenTKUtilities(); 
 
-
-        private OpenTKUtilities() { }
-
         /// <summary>
         /// Returns the instance of the OpenTKUtilities class.
         /// </summary>
@@ -99,11 +96,17 @@ namespace Pulsar4X.WinForms
         }
 
         /// <summary>
-        /// Initialises the OpenTK Framework, Specificaly OpenGL.
+        /// Constructor that prevents a default instance of this class from being created.
         /// </summary>
-        /// <returns>True If Successfull, false otherwise.</returns>
+        private OpenTKUtilities() { }
+
+        /// <summary>   Initialises the OpenTK Framework, Specificaly OpenGL. </summary>
+        /// <param name="a_eGLVersion"> (optional) the e gl version. </param>
+        /// <returns> True If Successfull, false otherwise. </returns>
         public bool Initialise(GLVersion a_eGLVersion = GLVersion.Unknown)
         {
+            bool bSuccess = false;  // used to shpow success or failure of Init.
+
             // create a OpenTK Controll and query it for the GLContext version number:
             OpenTK.GLControl oTest = new GLControl(new GraphicsMode(32,24,8,4), 4, 0, GraphicsContextFlags.Default);
             Form oOpenGLVersionCheck = new Form();
@@ -126,37 +129,39 @@ namespace Pulsar4X.WinForms
             else if (iMajor == 2)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL2X;
+                bSuccess = true;
             }
             else if (iMajor <= 3 && iMinor < 2)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL2X;
+                bSuccess = true;
             }
             else if (iMajor <= 3 && iMinor >= 2)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL3X;
+                bSuccess = true;
             }
             else if (iMajor == 4)
             {
                 m_eSupportedOpenGLVersion = GLVersion.OpenGL4X;
+                bSuccess = true;
             }
             else
             {
-                #if DEBUG
-                    logger.Error("OpenGL Version Autodetect Could Not work out which version of OpenGL is on this system");
-                    logger.Error("OpenGL Version Major is: " + iMajor.ToString() + "OpenGL Minor is: " + iMinor.ToString());
-                #endif
+                logger.Error("OpenGL Version Autodetect Could Not work out which version of OpenGL is on this system");
+                logger.Error("OpenGL Version Major is: " + iMajor.ToString() + "OpenGL Minor is: " + iMinor.ToString());
+                bSuccess = false;
             }
 
 
             if (a_eGLVersion != GLVersion.Unknown)
             {
                 m_eSupportedOpenGLVersion = a_eGLVersion;
-                #if DEBUG
-                    logger.Warn("OpenGL Version Autodetect has been overridden to " + a_eGLVersion.ToString());
-                #endif
+                logger.Warn("OpenGL Version Autodetect has been overridden to " + a_eGLVersion.ToString());
+                bSuccess = true;
             }
 
-            return true;
+            return bSuccess;
         }
 
 

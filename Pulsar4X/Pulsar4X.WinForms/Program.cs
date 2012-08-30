@@ -27,8 +27,14 @@ namespace Pulsar4X.WinForms
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Pulsar4X.WinForms.Controls.UIController UIComponentControler = new Controls.UIController();
-            OpenTKUtilities.Instance.Initialise();  // Get the best possible version of OpenGL
+            bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise();  // Get the best possible version of OpenGL
             //OpenTKUtilities.Instance.Initialise(OpenTKUtilities.GLVersion.OpenGL2X);
+            if (bOpenTKInitOK == false)
+            {
+                // Log error with open TK:
+                logger.Warn("Error Initialising OpenTK and OpenGL. System and Glaaxy Maps May not work correctly!");
+            }
+
             Application.Run(Controls.UIController.g_aMainForm);
             
             /*
