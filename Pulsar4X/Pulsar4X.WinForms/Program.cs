@@ -18,6 +18,7 @@ namespace Pulsar4X.WinForms
         [STAThread]
         static void Main()
         {
+            AppDomain.CurrentDomain.FirstChanceException += new EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs>(CurrentDomain_FirstChanceException);
 
             XmlConfigurator.Configure();
 
@@ -36,6 +37,11 @@ namespace Pulsar4X.WinForms
             */
 
             logger.Info("Program Ended");
+        }
+
+        static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+        {
+            logger.Error("First chance exception!", e.Exception);
         }
     }
 }
