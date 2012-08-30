@@ -144,26 +144,22 @@ void main()
     gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);              
     TexCoord = UVCord;                                                                   
     PixelColour = VertexColor;                                                           
-};";
+}";
 
             //precision highp float;
             //varying vec4 FragColor; 
             string szPixelShader = @"
 #version 120
-                                                                             
-
-                                                                  
+                                                                                                                                       
 uniform sampler2D TextureSampler; 
                                                        
-in vec4 PixelColour;                                                                    
-in vec2 TexCoord;
-                                                                        
-
-                                                                     
+varying vec4 PixelColour;                                                                    
+varying vec2 TexCoord;
+                                                                                                                                          
 void main()                                                                            
 {                                                                                    
     gl_FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;                  
-};";
+}";
 
             int iShaderError = 1;
 
