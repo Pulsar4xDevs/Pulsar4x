@@ -155,7 +155,7 @@ varying vec2 TexCoord;
                                                                                                                                           
 void main()                                                                            
 {                                                                                    
-    gl_FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;                  
+    gl_FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;              
 }";
 
             int iShaderError = 1;
@@ -204,6 +204,7 @@ void main()
                 iShaderError = 1;
             }
 
+            logger.Info("OpenGL Pre Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // The Following Bind our Projection, view (camera) and model Matricies in c# to the corosponding vars in the shader program
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
             m_aiShaderMatrixLocations = new int[3];     // create memory.

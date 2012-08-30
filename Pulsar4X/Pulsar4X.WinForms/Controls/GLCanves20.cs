@@ -76,6 +76,8 @@ namespace Pulsar4X.WinForms.Controls
             GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
+            //GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            //GL.Enable(EnableCap.Blend);
             GL.ClearColor(System.Drawing.Color.MidnightBlue);
             GL.ClearDepth(1.0);
             GL.ClearStencil(0);

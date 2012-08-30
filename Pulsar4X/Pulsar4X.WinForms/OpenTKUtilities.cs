@@ -227,7 +227,7 @@ namespace Pulsar4X.WinForms
             // Get the data out of the bit map
             System.Drawing.Imaging.BitmapData oRawTextureData = oTextureBitmap.LockBits(new Rectangle(0, 0, oTextureBitmap.Width, oTextureBitmap.Height),
                                                                                     System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                                                                                    System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                                                                                    System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
             // Code to transfer Texture Data to GPU
                 
@@ -242,7 +242,7 @@ namespace Pulsar4X.WinForms
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Nearest);
 
             // Load data by telling OpenGL to build mipmaps out of bitmap data
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgb, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, oRawTextureData.Scan0);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, oRawTextureData.Scan0);
 
             logger.Info("OpenGL Loading Texture " + a_szTextureFile + ": " + GL.GetError().ToString());
 

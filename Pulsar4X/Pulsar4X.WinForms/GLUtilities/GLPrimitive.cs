@@ -107,13 +107,18 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_aoVerticies[3].m_v2UV.X = 1.0f;
             m_aoVerticies[3].m_v2UV.Y = 0.0f;
 
-            m_auiIndicies = new ushort[6];
+            //m_auiIndicies = new ushort[6];  // draw anticlockwise!!
+            //m_auiIndicies[0] = 3;  // 0
+            //m_auiIndicies[1] = 2;  // 1
+            //m_auiIndicies[2] = 1;  // 2
+            //m_auiIndicies[3] = 1;  // 2
+            //m_auiIndicies[4] = 2;  // 1
+            //m_auiIndicies[5] = 0;  // 3
+            m_auiIndicies = new ushort[4];
             m_auiIndicies[0] = 0;
             m_auiIndicies[1] = 1;
             m_auiIndicies[2] = 2;
-            m_auiIndicies[3] = 2;
-            m_auiIndicies[4] = 1;
-            m_auiIndicies[5] = 3;
+            m_auiIndicies[3] = 3;
 
             //m_m4ModelView = new Matrix4d();
             m_m4ModelMatrix = Matrix4.Identity;
@@ -186,8 +191,8 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.ActiveTexture(TextureUnit.Texture0);
             //GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
             OpenTKUtilities.Use2DTexture(m_uiTextureID);
-            GL.DrawRangeElements(BeginMode.Triangles, 0, 3, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
-            //GL.DrawElements(BeginMode.Triangles, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            //GL.DrawRangeElements(BeginMode.Triangles, 0, 3, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
 }
