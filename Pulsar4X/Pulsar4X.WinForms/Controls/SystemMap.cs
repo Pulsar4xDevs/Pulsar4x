@@ -50,7 +50,7 @@ namespace Pulsar4X.WinForms.Controls
         private void button1_Click(object sender, EventArgs e)
         {
             //m_GLCanvas.TestFunc(int.Parse(textBox1.Text));
-            FPSLabel.Text = m_GLCanvas.m_fps.ToString();
+            FPSLabel.Text = m_GLCanvas.FPS.ToString();
         }
     }
 }

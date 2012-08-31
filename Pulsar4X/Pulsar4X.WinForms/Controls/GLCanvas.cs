@@ -22,31 +22,36 @@ namespace Pulsar4X.WinForms.Controls
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLCanvas));
 
-
         /// <summary>
         /// Our Projections/ViewMatricies.
         /// </summary>
         protected Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
-
 
         /// <summary>
         /// used to determine if this control hase bee sucessfully loaded.
         /// </summary>
         protected bool m_bLoaded = false;
 
-        public float m_fps = 0;
+
+
+        protected float m_fps = 0;
+        public float FPS
+        {
+            get
+            {
+                return m_fps;
+            }
+        }
 
 
         public GLCanvas()
         {
-            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
             RegisterEventHandlers();
         }
 
         public GLCanvas(GraphicsMode a_oGraphicsMode)
             : base(a_oGraphicsMode)
         {
-            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
             RegisterEventHandlers();
         }
 
@@ -67,7 +72,18 @@ namespace Pulsar4X.WinForms.Controls
         }
 
         public abstract void OnLoad(object sender, EventArgs e);
-        public abstract void OnPaint(object sender, PaintEventArgs e);
+        public abstract void OnSizeChange(object sender, EventArgs e);
+
+        public void OnPaint(object sender, PaintEventArgs e)
+        {
+            if (!m_bLoaded)
+            {
+                return;
+            }
+
+            Render();
+            this.Invalidate();
+        }
 
         public void Application_Idle(object sender, EventArgs e)
         {
@@ -77,22 +93,11 @@ namespace Pulsar4X.WinForms.Controls
             }
 
             this.Invalidate();
-
-            //double dMilliseconds = ComputeTimeSlice();
-            //Accumulate(dMilliseconds);
-            // Animate(dMilliseconds);
         }
 
         public virtual void OnResize(object sender, EventArgs e)
         {
             this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
-            SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
-            this.Invalidate();                                       // Force redraw.
-        }
-
-        public virtual void OnSizeChange(object sender, EventArgs e)
-        {
-            //this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
             SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
             this.Invalidate();                                       // Force redraw.
         }
@@ -108,10 +113,18 @@ namespace Pulsar4X.WinForms.Controls
         public virtual void SetupViewPort(  int a_iViewportPosX,    int a_iViewportPosY, 
                                             int a_iViewportWidth,    int a_iViewPortHeight)
         {
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-            GL.Ortho(0, a_iViewportWidth, a_iViewPortHeight, 0, -1, 1);                         // Top left corner pixel has coords (0,0), same as in winforms.
-            GL.Viewport(a_iViewportPosX, a_iViewportPosY, a_iViewportWidth, a_iViewPortHeight); // Sets Position of the viewport relative to the world (as defined above) and it's size.
+            GL.Viewport(a_iViewportPosX, a_iViewportPosY, a_iViewportWidth, a_iViewPortHeight);
+            //float aspectRatio = a_iViewportWidth / (float)(a_iViewPortHeight); // Calculate Aspect Ratio.
+
+            // Setup our Projection Matrix, This defines how the 2D image seen on screen is created from our 3d world.
+            // This will setup a projection where 0,0 is in the bottom left of the screen and we are looking at the X,Y plane from above (i think, i might be below).
+            m_m4ProjectionMatrix = new Matrix4(new Vector4((2.0f / a_iViewportWidth), 0, 0, 0),
+                                                new Vector4(0, (2.0f / a_iViewPortHeight), 0, 0),
+                                                new Vector4(0, 0, 1, 0),
+                                                new Vector4(-1, -1, 1, 1));
+
+            // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
+            m_m4ViewMatrix = Matrix4.Identity;
         }
 
         public void PositionViewPort(int a_iViewportPosX, int a_iViewportPosY)
@@ -125,8 +138,6 @@ namespace Pulsar4X.WinForms.Controls
         }
 
         public abstract void Render();
-
-        //public abstract void PreRenderPlanet(float a_fRadius);
 
         public abstract void TestFunc(int a_itest);
 
