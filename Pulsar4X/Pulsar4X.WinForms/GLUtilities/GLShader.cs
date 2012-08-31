@@ -18,6 +18,87 @@ namespace Pulsar4X.WinForms.GLUtilities
     public class GLShader
     {
 
+        #region DefaultShaders
+
+
+        string m_szVertexShaderVer120 = @"
+#version 120
+                                                                          
+attribute vec3 VertexPosition;                                                             
+attribute vec4 VertexColor;                                                                 
+attribute vec2 UVCord;
+                                                                      
+uniform mat4 ProjectionMatrix;                                                        
+uniform mat4 ViewMatrix;                                                              
+uniform mat4 ModelMatrix;
+                                                                
+varying vec4 PixelColour;                                                                    
+varying vec2 TexCoord;
+                                                                       
+void main()                                                                          
+{                                                                                       
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);              
+    TexCoord = UVCord;                                                                   
+    PixelColour = VertexColor;                                                           
+}";
+
+        //precision highp float;
+        //varying vec4 FragColor; 
+        string m_szPixelShaderVer120 = @"
+#version 120
+                                                                                                                                       
+uniform sampler2D TextureSampler; 
+                                                       
+varying vec4 PixelColour;                                                                    
+varying vec2 TexCoord;
+                                                                                                                                          
+void main()                                                                            
+{                                                                                    
+    gl_FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;              
+}";
+
+
+        string m_szVertexShaderVer150 = @"
+#version 150
+                                                                          
+in vec3 VertexPosition;                                                             
+in vec4 VertexColor;                                                                 
+in vec2 UVCord;
+                                                                      
+uniform mat4 ProjectionMatrix;                                                        
+uniform mat4 ViewMatrix;                                                              
+uniform mat4 ModelMatrix;
+                                                                
+out vec4 PixelColour;                                                                    
+out vec2 TexCoord;
+                                                                       
+void main()                                                                          
+{                                                                                       
+    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);              
+    TexCoord = UVCord;                                                                   
+    PixelColour = VertexColor;                                                           
+};";
+
+        string m_szPixelShaderVer150 = @"
+#version 150
+                                                                             
+precision highp float;
+                                                                  
+uniform sampler2D TextureSampler; 
+                                                       
+in vec4 PixelColour;                                                                    
+in vec2 TexCoord;
+                                                                        
+out vec4 FragColor; 
+                                                                     
+void main()                                                                            
+{                                                                                    
+    FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;                  
+};";
+
+        #endregion
+
+
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLShader));
 
         /// <summary>
@@ -35,16 +116,18 @@ namespace Pulsar4X.WinForms.GLUtilities
             switch (OpenTKUtilities.Instance.SupportedOpenGLVersion)
             {
                 case OpenTKUtilities.GLVersion.OpenGL2X:
-                    CreateDefault12();
+                    CreateDefaultVer120();
                     break;
                 default:
-                    CreateDefault15();
+                    CreateDefaultVer150();
                     break;
             }
         }
 
 
-
+        /// <summary>   Constructor. </summary>
+        /// <param name="a_szVertShaderFile">   The Vertex shader file. </param>
+        /// <param name="a_szFragShaderFile">   The fragment shader file. </param>
         public GLShader(string a_szVertShaderFile, string a_szFragShaderFile)
         {
             // Load Shader source files:
@@ -55,13 +138,41 @@ namespace Pulsar4X.WinForms.GLUtilities
                 szVertShaderSource = oVertFile.ReadToEnd();
                 oVertFile.Close();
             }
+            else
+            {
+                logger.Error("Could not load vertex shader file: " + a_szVertShaderFile);
+                // Set a default shader in the hopes that it will work. its better than nothing *shrug*
+                switch (OpenTKUtilities.Instance.SupportedOpenGLVersion)
+                {
+                    case OpenTKUtilities.GLVersion.OpenGL2X:
+                        szVertShaderSource = m_szVertexShaderVer120;
+                        break;
+                    default:
+                        szVertShaderSource = m_szVertexShaderVer150;
+                        break;
+                }
+            }
 
             string szFragShaderSource = "";
-            if (System.IO.File.Exists(a_szVertShaderFile))
+            if (System.IO.File.Exists(a_szFragShaderFile))
             {
-                System.IO.StreamReader oFragFile = new System.IO.StreamReader(a_szVertShaderFile);
+                System.IO.StreamReader oFragFile = new System.IO.StreamReader(a_szFragShaderFile);
                 szFragShaderSource = oFragFile.ReadToEnd();
                 oFragFile.Close();
+            }
+            else
+            {
+                logger.Error("Could not load fragment shader file: " + a_szFragShaderFile);
+                // Set a default shader in the hopes that it will work. its better than nothing *shrug*
+                switch (OpenTKUtilities.Instance.SupportedOpenGLVersion)
+                {
+                    case OpenTKUtilities.GLVersion.OpenGL2X:
+                        szFragShaderSource = m_szPixelShaderVer120;
+                        break;
+                    default:
+                        szFragShaderSource = m_szPixelShaderVer150;
+                        break;
+                }
             }
 
             int iShaderError = 1;
@@ -95,7 +206,10 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.BindAttribLocation(m_iShaderProgramHandle, 0, "VertexPosition"); // Binds the vertex position Variable in the shader program to the index 0.
             GL.BindAttribLocation(m_iShaderProgramHandle, 1, "VertexColour");   // Binds the vertex color Variable in the shader program to the index 1.
             GL.BindAttribLocation(m_iShaderProgramHandle, 2, "UVCord");         // Binds the vertex UC coords Variable in the shader program to the index 2.
-            GL.BindFragDataLocation(m_iShaderProgramHandle, 0, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3.
+            if (OpenTKUtilities.Instance.SupportedOpenGLVersion != OpenTKUtilities.GLVersion.OpenGL2X)
+            {
+                GL.BindFragDataLocation(m_iShaderProgramHandle, 0, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3, only for GL3.0 or greater!!
+            }
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
@@ -120,51 +234,17 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.DeleteShader(iGLPixelShader);
         }
 
-        void CreateDefault12()
+        /// <summary>   
+        /// Creates the default shader for openGL 2.1 or higher
+        /// </summary>
+        void CreateDefaultVer120()
         {
-            string szVertexShader = @"
-#version 120
-                                                                          
-attribute vec3 VertexPosition;                                                             
-attribute vec4 VertexColor;                                                                 
-attribute vec2 UVCord;
-                                                                      
-uniform mat4 ProjectionMatrix;                                                        
-uniform mat4 ViewMatrix;                                                              
-uniform mat4 ModelMatrix;
-                                                                
-varying vec4 PixelColour;                                                                    
-varying vec2 TexCoord;
-                                                                       
-void main()                                                                          
-{                                                                                       
-    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);              
-    TexCoord = UVCord;                                                                   
-    PixelColour = VertexColor;                                                           
-}";
-
-            //precision highp float;
-            //varying vec4 FragColor; 
-            string szPixelShader = @"
-#version 120
-                                                                                                                                       
-uniform sampler2D TextureSampler; 
-                                                       
-varying vec4 PixelColour;                                                                    
-varying vec2 TexCoord;
-                                                                                                                                          
-void main()                                                                            
-{                                                                                    
-    gl_FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;              
-}";
-
             int iShaderError = 1;
 
             int iGLVertexShader = GL.CreateShader(ShaderType.VertexShader);    // Get a shader handle from open GL
-            GL.ShaderSource(iGLVertexShader, szVertexShader);                  // Let OpenGL know about the source code for the shandle provided.
+            GL.ShaderSource(iGLVertexShader, m_szVertexShaderVer120);                  // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLVertexShader);                                 // Tell OpenGL to compile the shaders gened above.
 
-            logger.Info("OpenGL Compile Vertex Shader GL error check: " + GL.GetError().ToString());
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
@@ -173,10 +253,9 @@ void main()
             }
 
             int iGLPixelShader = GL.CreateShader(ShaderType.FragmentShader);    // Get a shader handle from open GL
-            GL.ShaderSource(iGLPixelShader, szPixelShader);                     // Let OpenGL know about the source code for the shandle provided.
+            GL.ShaderSource(iGLPixelShader, m_szPixelShaderVer120);                     // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLPixelShader);                                   // Tell OpenGL to compile the shaders gened above.
 
-            logger.Info("OpenGL Compile fragment/pixel Shader GL error check: " + GL.GetError().ToString());
             GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
             if (iShaderError != 1)
             {
@@ -187,16 +266,13 @@ void main()
             m_iShaderProgramHandle = GL.CreateProgram();                        // Tell OpenGL to creat a handle for a complete shader program (composed of the above two shaders).
             GL.AttachShader(m_iShaderProgramHandle, iGLVertexShader);           // Attache our Vertex shader to the program.
             GL.AttachShader(m_iShaderProgramHandle, iGLPixelShader);            // Attache our Pixel (fragment) shader to our program.
-            logger.Info("OpenGL attache shaders to program error check: " + GL.GetError().ToString());
 
             // Note the below 4 function calls bind our vertex components in C# to our OpenGL shader.
             GL.BindAttribLocation(m_iShaderProgramHandle, 0, "VertexPosition"); // Binds the vertex position Variable in the shader program to the index 0.
             GL.BindAttribLocation(m_iShaderProgramHandle, 1, "VertexColour");   // Binds the vertex color Variable in the shader program to the index 1.
             GL.BindAttribLocation(m_iShaderProgramHandle, 2, "UVCord");         // Binds the vertex UC coords Variable in the shader program to the index 2.
-            //GL.BindFragDataLocation(m_iShaderProgramHandle, 0, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3.
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
-            logger.Info("OpenGL Link Shader program error check: " + GL.GetError().ToString());
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
             if (iShaderError != 1)
             {
@@ -209,11 +285,8 @@ void main()
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
             m_aiShaderMatrixLocations = new int[3];     // create memory.
             m_aiShaderMatrixLocations[0] = GL.GetUniformLocation(m_iShaderProgramHandle, "ProjectionMatrix");
-            logger.Info("OpenGL Bind Projection Matrix to Shader Code: " + GL.GetError().ToString());
             m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
-            logger.Info("OpenGL Bind View Matrix to Shader Code: " + GL.GetError().ToString());
             m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
-            logger.Info("OpenGL Bind Model Matrix to Shader Code: " + GL.GetError().ToString());
 
             logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // This tells OpenGL to delete the shader objects. 
@@ -226,51 +299,15 @@ void main()
 
 
 
-
-        void CreateDefault15()
+        /// <summary>   
+        /// Creates the default Shader for openGL 3.2 or higher.
+        /// </summary>
+        void CreateDefaultVer150()
         {
-            string szVertexShader = @"
-#version 150
-                                                                          
-in vec3 VertexPosition;                                                             
-in vec4 VertexColor;                                                                 
-in vec2 UVCord;
-                                                                      
-uniform mat4 ProjectionMatrix;                                                        
-uniform mat4 ViewMatrix;                                                              
-uniform mat4 ModelMatrix;
-                                                                
-out vec4 PixelColour;                                                                    
-out vec2 TexCoord;
-                                                                       
-void main()                                                                          
-{                                                                                       
-    gl_Position = ProjectionMatrix * ViewMatrix * ModelMatrix * vec4(VertexPosition, 1.0);              
-    TexCoord = UVCord;                                                                   
-    PixelColour = VertexColor;                                                           
-};";
-
-            string szPixelShader = @"
-#version 150
-                                                                             
-precision highp float;
-                                                                  
-uniform sampler2D TextureSampler; 
-                                                       
-in vec4 PixelColour;                                                                    
-in vec2 TexCoord;
-                                                                        
-out vec4 FragColor; 
-                                                                     
-void main()                                                                            
-{                                                                                    
-    FragColor = texture2D(TextureSampler, TexCoord) * PixelColour;                  
-};";
-
             int iShaderError = 1;
 
             int iGLVertexShader = GL.CreateShader(ShaderType.VertexShader);    // Get a shader handle from open GL
-            GL.ShaderSource(iGLVertexShader, szVertexShader);                  // Let OpenGL know about the source code for the shandle provided.
+            GL.ShaderSource(iGLVertexShader, m_szVertexShaderVer150);          // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLVertexShader);                                 // Tell OpenGL to compile the shaders gened above.
 
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
@@ -281,7 +318,7 @@ void main()
             }
 
             int iGLPixelShader = GL.CreateShader(ShaderType.FragmentShader);    // Get a shader handle from open GL
-            GL.ShaderSource(iGLPixelShader, szPixelShader);                     // Let OpenGL know about the source code for the shandle provided.
+            GL.ShaderSource(iGLPixelShader, m_szPixelShaderVer150);                     // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLPixelShader);                                   // Tell OpenGL to compile the shaders gened above.
 
             GL.GetShader(iGLPixelShader, ShaderParameter.CompileStatus, out iShaderError);
@@ -324,19 +361,11 @@ void main()
             GL.DeleteShader(iGLPixelShader);
         }
 
-
-        //public GLShader(string a_szVertexShader, string a_szPixelShader)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-
         ~GLShader()
         {
             // lets try and clean up after ourselves!!
             //GL.DeleteShader(m_iShaderProgramHandle);
         }
-
 
         public void SetProjectionMatrix(ref Matrix4 a_m4Projection)
         {
@@ -364,11 +393,7 @@ void main()
 
         public void StartUsing(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View, ref Matrix4 a_m4Model)
         {
-            //GL.UseProgram(m_iShaderProgramHandle);
             OpenTKUtilities.UseShaderProgram(m_iShaderProgramHandle);
-            //GL.UniformMatrix4(m_aiShaderMatrixLocations[0], 1, false, ref a_m4Projection.Row0.X);
-            //GL.UniformMatrix4(m_aiShaderMatrixLocations[1], 1, false, ref a_m4View.Row0.X);
-            //GL.UniformMatrix4(m_aiShaderMatrixLocations[2], 1, false, ref a_m4Model.Row0.X);
 
             GL.UniformMatrix4(m_aiShaderMatrixLocations[0], false, ref a_m4Projection);
             GL.UniformMatrix4(m_aiShaderMatrixLocations[1], false, ref a_m4View);

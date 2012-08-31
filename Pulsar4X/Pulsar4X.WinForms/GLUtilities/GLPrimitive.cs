@@ -63,6 +63,10 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// </summary>
         protected uint m_uiTextureID;
 
+
+        /// <summary> 
+        /// A handle to the shader program to be used by this Primitive. 
+        /// </summary>
         protected GLShader m_oShaderProgram;
 
         public GLPrimitive()
@@ -107,13 +111,6 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_aoVerticies[3].m_v2UV.X = 1.0f;
             m_aoVerticies[3].m_v2UV.Y = 0.0f;
 
-            //m_auiIndicies = new ushort[6];  // draw anticlockwise!!
-            //m_auiIndicies[0] = 3;  // 0
-            //m_auiIndicies[1] = 2;  // 1
-            //m_auiIndicies[2] = 1;  // 2
-            //m_auiIndicies[3] = 1;  // 2
-            //m_auiIndicies[4] = 2;  // 1
-            //m_auiIndicies[5] = 0;  // 3
             m_auiIndicies = new ushort[4];
             m_auiIndicies[0] = 0;
             m_auiIndicies[1] = 1;
@@ -180,18 +177,13 @@ namespace Pulsar4X.WinForms.GLUtilities
 
         public virtual void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
-            //GL.EnableClientState(ArrayCap.VertexArray);
-            //GL.EnableClientState(ArrayCap.TextureCoordArray);
-            //GL.EnableClientState(ArrayCap.IndexArray);
             GL.BindVertexArray(m_uiVextexArrayHandle);
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
-            //m_oShaderProgram.StartUsing(ref a_m4Projection, ref a_m4View, ref m_m4ModelMatrix);
+
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
             
-            GL.ActiveTexture(TextureUnit.Texture0);
-            //GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
+            //GL.ActiveTexture(TextureUnit.Texture0);
             OpenTKUtilities.Use2DTexture(m_uiTextureID);
-            //GL.DrawRangeElements(BeginMode.Triangles, 0, 3, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+
             GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }

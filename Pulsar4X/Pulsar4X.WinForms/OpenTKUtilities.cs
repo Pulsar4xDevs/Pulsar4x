@@ -24,7 +24,6 @@ namespace Pulsar4X.WinForms
     {
         public static readonly ILog logger = LogManager.GetLogger(typeof(OpenTKUtilities));
 
-
         /// <summary>
         /// A Structure used to store data about a texture.
         /// </summary>
@@ -34,6 +33,18 @@ namespace Pulsar4X.WinForms
             public uint m_uiTextureID = 0;
             public string m_szTextureFile = "null";
         }
+
+        /// <summary>
+        /// Values that repesent OpenGL Versions.
+        /// </summary>
+        public enum GLVersion
+        {
+            Unknown = 0,
+            OpenGL1X,
+            OpenGL2X,
+            OpenGL3X,
+            OpenGL4X
+        };
 
         /// <summary>
         /// List of Textures already loaded.
@@ -50,23 +61,31 @@ namespace Pulsar4X.WinForms
         /// </summary>
         int m_iActiveShader = 0;
 
-        /// <summary>
-        /// Values that repesent OpenGL Versions.
-        /// </summary>
-        public enum GLVersion
-        {
-            Unknown = 0,
-            OpenGL1X,
-            OpenGL2X,
-            OpenGL3X,
-            OpenGL4X
-        };
-
-
         /// <summary> 
-        /// The supported open gl version 
+        /// The supported openGL version 
         /// </summary>
         GLVersion m_eSupportedOpenGLVersion;
+
+        /// <summary>
+        /// Instance of this class/singelton
+        /// </summary>
+        private static readonly OpenTKUtilities m_oInstance = new OpenTKUtilities(); 
+
+
+
+        /// <summary>
+        /// Returns the instance of the OpenTKUtilities class.
+        /// </summary>
+        public static OpenTKUtilities Instance
+        {
+            get
+            {
+                return m_oInstance;
+            }
+        }
+
+        /// <summary>   Gets or sets the supported open gl version. </summary>
+        /// <value> The supported openGL version. </value>
         public GLVersion SupportedOpenGLVersion
         {
             get
@@ -79,21 +98,7 @@ namespace Pulsar4X.WinForms
             }
         }
 
-        /// <summary>
-        /// Instance of this class/singelton
-        /// </summary>
-        private static readonly OpenTKUtilities m_oInstance = new OpenTKUtilities(); 
 
-        /// <summary>
-        /// Returns the instance of the OpenTKUtilities class.
-        /// </summary>
-        public static OpenTKUtilities Instance
-        {
-            get
-            {
-                return m_oInstance;
-            }
-        }
 
         /// <summary>
         /// Constructor that prevents a default instance of this class from being created.
@@ -153,7 +158,7 @@ namespace Pulsar4X.WinForms
                 bSuccess = false;
             }
 
-
+            // override the Detected veriosn if a one was specified.
             if (a_eGLVersion != GLVersion.Unknown)
             {
                 m_eSupportedOpenGLVersion = a_eGLVersion;
@@ -202,11 +207,12 @@ namespace Pulsar4X.WinForms
             // First check if the file exists:
             if (!System.IO.File.Exists(a_szTextureFile))
             {
+                logger.Error("Could not find texture file: " + a_szTextureFile);
                 return 0; // retun 0 if invalid file.
             }
 
 
-            // Second Chak if we have already loaded the file:
+            // Second Check if we have already loaded the file:
             TextureData oTexture = m_oInstance.m_lLoadedTextures.Find(
                 delegate(TextureData oTextureData)
                 {

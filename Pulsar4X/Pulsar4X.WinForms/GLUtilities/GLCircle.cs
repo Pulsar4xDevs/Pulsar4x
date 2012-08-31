@@ -12,17 +12,20 @@ using log4net;
 
 namespace Pulsar4X.WinForms.GLUtilities
 {
+    
+    /// <summary>   
+    /// Circle Primitive.
+    /// </summary>
     class GLCircle : GLPrimitive
     {
 
-
         /// <summary>
-        /// 
+        /// Constructor
         /// </summary>
-        /// <param name="a_oShaderProgram"></param>
-        /// <param name="a_v3Pos"></param>
-        /// <param name="a_fRadus"></param>
-        /// <param name="a_oColor"></param>
+        /// <param name="a_oShaderProgram"> The Shader program to use when rendering.</param>
+        /// <param name="a_v3Pos">The Position of the circle.</param>
+        /// <param name="a_fRadus">The Radius of the circle.</param>
+        /// <param name="a_oColor">The color of the circle.</param>
         public GLCircle(GLShader a_oShaderProgram, Vector3 a_v3Pos, float a_fRadus, System.Drawing.Color a_oColor)
             : base()
         {
@@ -96,18 +99,12 @@ namespace Pulsar4X.WinForms.GLUtilities
 
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
-            //GL.EnableClientState(ArrayCap.VertexArray);
-            //GL.EnableClientState(ArrayCap.TextureCoordArray);
-            //GL.EnableClientState(ArrayCap.IndexArray);
             GL.BindVertexArray(m_uiVextexArrayHandle);
-            //GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
-            //m_oShaderProgram.StartUsing(ref a_m4Projection, ref a_m4View, ref m_m4ModelMatrix);
+
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
 
-            //GL.ActiveTexture(TextureUnit.Texture0);
-            //GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
             //OpenTKUtilities.Use2DTexture(m_uiTextureID);
-            //GL.DrawRangeElements(BeginMode.Triangles, 0, 3, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+
             GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
