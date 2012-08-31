@@ -62,5 +62,11 @@ namespace Pulsar4X.WinForms
                                                 "Written By ... \n\n" +
                                                 "Forums: http://aurora2.pentarch.org/index.php/board,169.0.html \n" +
                                                 "Wiki: http://pulsar4x.pentarch.org/wiki/index.php?title=Main_Page \n";
+
+
+        public const float ZOOM_DEFAULT_SCALLER = 1.0f;
+        public const float ZOOM_IN_FACTOR = 2.0f;
+        public const float ZOOM_OUT_FACTOR = 0.5f;
+
     }
 }

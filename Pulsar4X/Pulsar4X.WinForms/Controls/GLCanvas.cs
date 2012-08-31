@@ -32,7 +32,24 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         protected bool m_bLoaded = false;
 
+        /// <summary> 
+        /// The zoom scaler, make this smaller to zoom out, larger to zoom in.
+        /// </summary>
+        protected float m_fZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
 
+        /// <summary>   Gets or sets the zoom factor. Make this smaller to zoom out, larger to zoom in.</summary>
+        /// <value> The zoom factor. </value>
+        public float ZoomFactor
+        {
+            get
+            {
+                return m_fZoomScaler;
+            }
+            set
+            {
+                m_fZoomScaler = value;
+            }
+        }
 
         protected float m_fps = 0;
         public float FPS
@@ -113,7 +130,7 @@ namespace Pulsar4X.WinForms.Controls
         public virtual void SetupViewPort(  int a_iViewportPosX,    int a_iViewportPosY, 
                                             int a_iViewportWidth,    int a_iViewPortHeight)
         {
-            //GL.Viewport(a_iViewportPosX, a_iViewportPosY, a_iViewportWidth, a_iViewPortHeight);
+            GL.Viewport(a_iViewportPosX, a_iViewportPosY, a_iViewportWidth, a_iViewPortHeight);
             //float aspectRatio = a_iViewportWidth / (float)(a_iViewPortHeight); // Calculate Aspect Ratio.
 
             // Setup our Projection Matrix, This defines how the 2D image seen on screen is created from our 3d world.
@@ -127,9 +144,12 @@ namespace Pulsar4X.WinForms.Controls
             //                                    new Vector4(-1, -1, 1, 1));
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
-            m_m4ViewMatrix = Matrix4.Identity;
-
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
         }
+
+        public abstract void IncreaseZoomScaler();
+
+        public abstract void DecreaseZoomScaler();
 
         public void PositionViewPort(int a_iViewportPosX, int a_iViewportPosY)
         {

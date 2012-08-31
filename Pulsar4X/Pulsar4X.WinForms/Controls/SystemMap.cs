@@ -28,6 +28,7 @@ namespace Pulsar4X.WinForms.Controls
         public SystemMap()
         {
             InitializeComponent();
+            this.MouseWheel += new MouseEventHandler(SystemMap_MouseWheel);
         }
 
         private void SystemMap_Load(object sender, EventArgs e)
@@ -56,6 +57,22 @@ namespace Pulsar4X.WinForms.Controls
         private void SystemMap_SizeChanged(object sender, EventArgs e)
         {
             this.Size = Parent.Size;
+        }
+
+        private void SystemMap_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            // See here for MSDN Ref: http://msdn.microsoft.com/en-us/library/system.windows.forms.control.mousewheel(v=vs.71).aspx
+            if (e.Delta <= -120)
+            {
+                // then we have scrolled down, so zoom out!!
+                m_GLCanvas.DecreaseZoomScaler();
+                
+            }
+            else if (e.Delta >= 120)
+            {
+                // the we have scrolled up, so zoom in.
+                m_GLCanvas.IncreaseZoomScaler();
+            }
         }
     }
 }

@@ -89,8 +89,8 @@ namespace Pulsar4X.WinForms.Controls
             m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
 
-            m_oQuad = new GLUtilities.GLQuad(m_oShaderProgram, new Vector3(400, 400, 0), new Vector2(256, 256), System.Drawing.Color.Orange, "DefaultIcon.png");
-            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, new Vector3(220, 220, 0), 120.0f, System.Drawing.Color.Green, "DefaultTexture.png");
+            m_oQuad = new GLUtilities.GLQuad(m_oShaderProgram, new Vector3(512, 0, 0), new Vector2(128, 128), System.Drawing.Color.Orange, "DefaultIcon.png");
+            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, new Vector3(0, 0, 0), 512.0f, System.Drawing.Color.Green, "DefaultTexture.png");
             
             m_oSW.Start();
         }
@@ -106,10 +106,27 @@ namespace Pulsar4X.WinForms.Controls
             {
                 // When we are resized by our parent as pert of the docking, we will need to adjust our projection and view matricies 
                 // to reflect the new viewing area:
-                SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
+                SetupViewPort(0, 0, this.Size.Width, this.Size.Height);  // Setup viewport again.
                 m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
                 m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             }
+        }
+
+        public override void IncreaseZoomScaler()
+        {
+            m_fZoomScaler *= UIConstants.ZOOM_IN_FACTOR;
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
+            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            this.Invalidate();
+
+        }
+
+        public override void DecreaseZoomScaler()
+        {
+            m_fZoomScaler *= UIConstants.ZOOM_OUT_FACTOR;
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
+            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            this.Invalidate();
         }
 
         /// <summary>
@@ -121,8 +138,9 @@ namespace Pulsar4X.WinForms.Controls
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Clear Back buffer of previous frame.
 
-            m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
             m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
+            m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
+            
             GraphicsContext.CurrentContext.SwapBuffers();
            // #if DEBUG
            //     logger.Info("Draw Colpeted, OpenGL error: " + GL.GetError().ToString());
