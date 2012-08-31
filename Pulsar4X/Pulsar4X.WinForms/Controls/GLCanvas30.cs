@@ -89,8 +89,8 @@ namespace Pulsar4X.WinForms.Controls
             m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
 
-            m_oQuad = new GLUtilities.GLQuad(m_oShaderProgram, new Vector3(512, 0, 0), new Vector2(128, 128), System.Drawing.Color.Orange, "DefaultIcon.png");
-            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, new Vector3(0, 0, 0), 512.0f, System.Drawing.Color.Green, "DefaultTexture.png");
+            m_oQuad = new GLUtilities.GLQuad(m_oShaderProgram, new Vector3(512, 0, 0), new Vector2(128, 128), System.Drawing.Color.Orange, "./Resources/Textures/DefaultIcon.png");
+            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, new Vector3(0, 0, 0), 512.0f, System.Drawing.Color.Green, "./Resources/Textures/DefaultTexture.png");
             
             m_oSW.Start();
         }
