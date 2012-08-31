@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpenTK.Graphics;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.Controls;
-using OpenTK.Graphics.OpenGL;
 using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 using log4net.Config;
 using log4net;
 
@@ -19,14 +19,13 @@ namespace Pulsar4X.WinForms.GLUtilities
     class GLCircle : GLPrimitive
     {
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="a_oShaderProgram"> The Shader program to use when rendering.</param>
-        /// <param name="a_v3Pos">The Position of the circle.</param>
-        /// <param name="a_fRadus">The Radius of the circle.</param>
-        /// <param name="a_oColor">The color of the circle.</param>
-        public GLCircle(GLShader a_oShaderProgram, Vector3 a_v3Pos, float a_fRadus, System.Drawing.Color a_oColor)
+        /// <summary>   Constructor. </summary>
+        /// <param name="a_oShaderProgram"> The Shader program to use when rendering. </param>
+        /// <param name="a_v3Pos">          The Position of the circle. </param>
+        /// <param name="a_fRadus">         The Radius of the circle. </param>
+        /// <param name="a_oColor">         The color of the circle. </param>
+        /// <param name="a_szTexture">      (optional) the texture file. </param>
+        public GLCircle(GLShader a_oShaderProgram, Vector3 a_v3Pos, float a_fRadus, System.Drawing.Color a_oColor, string a_szTexture = "")
             : base()
         {
             // calculate the number of verts for the circle:
@@ -59,7 +58,17 @@ namespace Pulsar4X.WinForms.GLUtilities
 
             // Set our shader program:
             m_oShaderProgram = a_oShaderProgram;
-            m_uiTextureID = 0;
+            
+            // Load texture if specified:
+            if (a_szTexture != "")
+            {
+                // We can assuem we have been provided with a texture to load:
+                m_uiTextureID = OpenTKUtilities.LoadTexture(a_szTexture);
+            }
+            else
+            {
+                m_uiTextureID = 0; // set texture to none!
+            }
 
 
             // tell Opgl about our VBOs:
@@ -103,7 +112,7 @@ namespace Pulsar4X.WinForms.GLUtilities
 
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
 
-            //OpenTKUtilities.Use2DTexture(m_uiTextureID);
+            OpenTKUtilities.Use2DTexture(m_uiTextureID);
 
             GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }

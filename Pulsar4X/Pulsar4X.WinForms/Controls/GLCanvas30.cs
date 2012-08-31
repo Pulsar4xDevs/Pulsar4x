@@ -24,7 +24,7 @@ namespace Pulsar4X.WinForms.Controls
         private GLUtilities.GLShader m_oShaderProgram;
 
         // for testing:
-        GLUtilities.GLPrimitive m_oQuad;
+        GLUtilities.GLQuad m_oQuad;
         GLUtilities.GLCircle m_oCircle;
         System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
         System.Diagnostics.Stopwatch oSW2 = new System.Diagnostics.Stopwatch();
@@ -62,6 +62,7 @@ namespace Pulsar4X.WinForms.Controls
             GL.CullFace(CullFaceMode.Back);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.DepthTest);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Enable(EnableCap.Blend);
             GL.ClearColor(System.Drawing.Color.MidnightBlue);
             GL.ClearDepth(1.0);
@@ -88,8 +89,8 @@ namespace Pulsar4X.WinForms.Controls
             m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
 
-            m_oQuad = new GLUtilities.GLPrimitive(m_oShaderProgram);
-            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, new Vector3(220,220,0), 120.0f, System.Drawing.Color.Green);
+            m_oQuad = new GLUtilities.GLQuad(m_oShaderProgram, new Vector3(400, 400, 0), new Vector2(256, 256), System.Drawing.Color.Orange, "DefaultIcon.png");
+            m_oCircle = new GLUtilities.GLCircle(m_oShaderProgram, new Vector3(220, 220, 0), 120.0f, System.Drawing.Color.Green, "DefaultTexture.png");
             
             m_oSW.Start();
         }
