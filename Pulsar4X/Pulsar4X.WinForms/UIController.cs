@@ -51,6 +51,7 @@ namespace Pulsar4X.WinForms.Controls
                     g_aTabPages[i].Name = UIConstants.UITabs.SYSTEM_MAP_NAME;                   // Set Tab Name
                     g_aTabPages[i].Text = UIConstants.UITabs.SYSTEM_MAP_NAME;                   // Set Tab Title
                     Controls.SystemMap SystemMap = new SystemMap();                             // Creat Game Start Screen.
+                    SystemMap.Dock = DockStyle.Fill;                                            // Set the system map to fill the whole tab.
                     g_aTabPages[i].Controls.Add(SystemMap);                                     // Add Control to tab.
                 }
 

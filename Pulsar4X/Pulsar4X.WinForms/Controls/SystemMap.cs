@@ -36,7 +36,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 m_GLCanvas = OpenTKUtilities.Instance.CreateGLCanvas(); //new GLCanvas30();
                 m_GLCanvas.Size = this.Size;
-                this.Dock = DockStyle.Fill;
+                //this.Dock = DockStyle.Fill;
                 m_GLCanvas.Dock = DockStyle.Fill;
                 this.Controls.Add(m_GLCanvas);
             }
@@ -51,6 +51,11 @@ namespace Pulsar4X.WinForms.Controls
         {
             //m_GLCanvas.TestFunc(int.Parse(textBox1.Text));
             FPSLabel.Text = m_GLCanvas.FPS.ToString();
+        }
+
+        private void SystemMap_SizeChanged(object sender, EventArgs e)
+        {
+            this.Size = Parent.Size;
         }
     }
 }
