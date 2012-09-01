@@ -128,22 +128,35 @@ namespace Pulsar4X.WinForms.Controls
 
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
-            m_v3PanStartLocation.X = e.Location.X;
-            m_v3PanStartLocation.Y = e.Location.Y;
-            m_v3PanStartLocation.Z = 0.0f;
+            // An left mouse down, start pan.
+            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Left))
+            {
+                m_v3PanStartLocation.X = e.Location.X;
+                m_v3PanStartLocation.Y = e.Location.Y;
+                m_v3PanStartLocation.Z = 0.0f;
+            }
+            else if (e.Button.Equals(System.Windows.Forms.MouseButtons.Middle))
+            {
+                // on middle or mouse wheel button, centre!
+                this.CenterOnZero();
+            }
 
         }
 
         private void OnMouseUp(object sender, MouseEventArgs e)
         {
-            Vector3 v3PanEndLocation;
-            v3PanEndLocation.X = e.Location.X;
-            v3PanEndLocation.Y = e.Location.Y;
-            v3PanEndLocation.Z = 0.0f;
+            // On Left mouse release Pan.
+            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Left))
+            {
+                Vector3 v3PanEndLocation;
+                v3PanEndLocation.X = e.Location.X;
+                v3PanEndLocation.Y = e.Location.Y;
+                v3PanEndLocation.Z = 0.0f;
 
-            Vector3 v3PanAmount = v3PanEndLocation - m_v3PanStartLocation;
-            v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
-            this.Pan(ref v3PanAmount);
+                Vector3 v3PanAmount = v3PanEndLocation - m_v3PanStartLocation;
+                v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
+                this.Pan(ref v3PanAmount);
+            }
         }
 
         
