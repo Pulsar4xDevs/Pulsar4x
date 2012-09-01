@@ -140,7 +140,6 @@ namespace Pulsar4X.WinForms.Controls
                 // on middle or mouse wheel button, centre!
                 this.CenterOnZero();
             }
-
         }
 
         private void OnMouseUp(object sender, MouseEventArgs e)

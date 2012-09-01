@@ -114,8 +114,15 @@ namespace Pulsar4X.WinForms
 
             // create a OpenTK Controll and query it for the GLContext version number:
             OpenTK.GLControl oTest = new GLControl(new GraphicsMode(32,24,8,4), 4, 0, GraphicsContextFlags.Default);
+            // We need to "show" a for before OpenTK actuall initilise the GLContext (which we need to happen to get a version number!).
+            // the following creates a form that we can show but will never be seen by the end user!
             Form oOpenGLVersionCheck = new Form();
             oOpenGLVersionCheck.Controls.Add(oTest);
+            oOpenGLVersionCheck.StartPosition = FormStartPosition.CenterScreen;
+            oOpenGLVersionCheck.Size = new Size(0, 0);
+            oOpenGLVersionCheck.ShowInTaskbar = false;
+            oOpenGLVersionCheck.FormBorderStyle = FormBorderStyle.None;
+            oOpenGLVersionCheck.TopMost = false;
             oOpenGLVersionCheck.Show();
             oOpenGLVersionCheck.Hide();
             
