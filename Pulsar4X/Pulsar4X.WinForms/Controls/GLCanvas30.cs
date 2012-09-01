@@ -129,6 +129,30 @@ namespace Pulsar4X.WinForms.Controls
             this.Invalidate();
         }
 
+        public override void Pan(ref Vector3 a_v3PanAmount)
+        {
+            m_m4ViewMatrix = m_m4ViewMatrix * Matrix4.CreateTranslation(a_v3PanAmount);
+            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            this.Invalidate();
+        }
+
+        public override void CenterOnZero()
+        {
+            m_m4ViewMatrix = Matrix4.Identity;
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler); // reset scaler.
+            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            this.Invalidate();
+        }
+
+        public override void CenterOn(ref Vector3 a_v3Location)
+        {
+            m_m4ViewMatrix = Matrix4.Identity;
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler); // reset scaler.
+            m_m4ViewMatrix = m_m4ViewMatrix * Matrix4.CreateTranslation(a_v3Location);
+            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            this.Invalidate();
+        }
+
         /// <summary>
         /// OpenGL 3.2 - use shaders and a 2D drawing method.
         /// </summary>

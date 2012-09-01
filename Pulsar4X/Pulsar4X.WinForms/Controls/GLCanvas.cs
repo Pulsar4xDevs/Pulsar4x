@@ -37,6 +37,11 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         protected float m_fZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
 
+        /// <summary>
+        /// Keeps tract of the start location when calculation Panning.
+        /// </summary>
+        Vector3 m_v3PanStartLocation;
+
         /// <summary>   Gets or sets the zoom factor. Make this smaller to zoom out, larger to zoom in.</summary>
         /// <value> The zoom factor. </value>
         public float ZoomFactor
@@ -85,6 +90,8 @@ namespace Pulsar4X.WinForms.Controls
             Resize += new System.EventHandler(this.OnResize);                       // Setep Resize Event Handler
             Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);      // Setep Paint Event Handler
             SizeChanged += new System.EventHandler(this.OnSizeChange);
+            MouseDown += new MouseEventHandler(OnMouseDown);
+            MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
         }
 
@@ -119,6 +126,26 @@ namespace Pulsar4X.WinForms.Controls
             this.Invalidate();                                       // Force redraw.
         }
 
+        private void OnMouseDown(object sender, MouseEventArgs e)
+        {
+            m_v3PanStartLocation.X = e.Location.X;
+            m_v3PanStartLocation.Y = e.Location.Y;
+            m_v3PanStartLocation.Z = 0.0f;
+
+        }
+
+        private void OnMouseUp(object sender, MouseEventArgs e)
+        {
+            Vector3 v3PanEndLocation;
+            v3PanEndLocation.X = e.Location.X;
+            v3PanEndLocation.Y = e.Location.Y;
+            v3PanEndLocation.Z = 0.0f;
+
+            Vector3 v3PanAmount = v3PanEndLocation - m_v3PanStartLocation;
+            v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
+            this.Pan(ref v3PanAmount);
+        }
+
         
         /// <summary>
         /// Sets up the OpenGL viewport/camera.
@@ -151,15 +178,11 @@ namespace Pulsar4X.WinForms.Controls
 
         public abstract void DecreaseZoomScaler();
 
-        public void PositionViewPort(int a_iViewportPosX, int a_iViewportPosY)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Pan(ref Vector3 a_v3PanAmount);
 
-        public void ResizeViewPort(int a_iViewportWidth,    int a_iViewPortHeight)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void CenterOnZero();
+
+        public abstract void CenterOn(ref Vector3 a_v3Location);
 
         public abstract void Render();
 
