@@ -17,6 +17,7 @@ namespace Pulsar4X
         {
             InitializeComponent();
             m_MainTabControl.Name = "DraggableTabControl";
+            m_MainTabControl.Dock = DockStyle.Fill;
         }
 
         public Panel GetMainPanel()
@@ -27,24 +28,12 @@ namespace Pulsar4X
         private void MainForm_Load(object sender, EventArgs e)
         {
             // Load in the dragable tabs here, setup ref. list to all tabs?
-            m_MainTabControl.Size = MainPanel.Size;
+            //m_MainTabControl.Size = MainPanel.Size;
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[3]);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[0]);
            //m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
 
             MainPanel.Controls.Add(m_MainTabControl);
-        }
-
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Pulsar4X.WinForms.Forms.AboutBox AboutBox = new WinForms.Forms.AboutBox();
-            AboutBox.Show();
-        }
-
-        private void systemInformationToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Show System information tab.
-            WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_INDEX);
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -64,6 +53,25 @@ namespace Pulsar4X
         {
             Application.Exit();
         }
+
+        private void systemMapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Show System Map.
+            WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_MAP_INDEX);
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Pulsar4X.WinForms.Forms.AboutBox AboutBox = new WinForms.Forms.AboutBox();
+            AboutBox.Show();
+        }
+
+        private void systemInformationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Show System information tab.
+            WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_INDEX);
+        }
+
 
     }
 }

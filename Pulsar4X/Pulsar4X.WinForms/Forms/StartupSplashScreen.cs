@@ -146,7 +146,7 @@ namespace Pulsar4X.WinForms.Forms
             // Fade in or out:
             if (m_dOpacityIncrement > 0)
             {
-                m_iActualTicks++;           // Increm,ent the number of ticks.
+                m_iActualTicks++;           // Increment the number of ticks.
                 if (this.Opacity < 1)
                 {
                     this.Opacity += m_dOpacityIncrement;
@@ -171,7 +171,7 @@ namespace Pulsar4X.WinForms.Forms
             if (m_dLastCompletionFraction < m_dCompletionFraction)
             {
                 m_dLastCompletionFraction += m_dPBIncrementPerTimerInterval;
-                int iWidth = (int)Math.Floor(m_oStatusPanel.ClientRectangle.Width * m_dCompletionFraction);
+                int iWidth = (int)Math.Floor(m_oStatusPanel.ClientRectangle.Width * m_dLastCompletionFraction);
                 int iHeight = m_oStatusPanel.ClientRectangle.Height;
                 int iX = m_oStatusPanel.ClientRectangle.X;
                 int iY = m_oStatusPanel.ClientRectangle.Y;

@@ -34,5 +34,10 @@ namespace Pulsar4X.WinForms.Controls
             StarADataGridView.DataSource = VM.PlanetSource;
         }
 
+        private void SystemGenAndDisplay_Load(object sender, EventArgs e)
+        {
+            this.Dock = DockStyle.Fill;
+        }
+
     }
 }

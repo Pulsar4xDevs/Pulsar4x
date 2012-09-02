@@ -32,14 +32,10 @@
             this.labelName = new System.Windows.Forms.Label();
             this.GeneralInfoGroupBox = new System.Windows.Forms.GroupBox();
             this.ControllingEmpireListBox = new System.Windows.Forms.ListBox();
-            this.IDTextBox = new System.Windows.Forms.TextBox();
             this.DiscoveredTextBox = new System.Windows.Forms.TextBox();
-            this.AgetextBox = new System.Windows.Forms.TextBox();
             this.TypetextBox = new System.Windows.Forms.TextBox();
-            this.labelID = new System.Windows.Forms.Label();
             this.labelDiscovered = new System.Windows.Forms.Label();
             this.labelControllingEmpire = new System.Windows.Forms.Label();
-            this.labelAge = new System.Windows.Forms.Label();
             this.labelType = new System.Windows.Forms.Label();
             this.groupBoxEnvironTolerances = new System.Windows.Forms.GroupBox();
             this.BreathsTextBox = new System.Windows.Forms.TextBox();
@@ -60,8 +56,6 @@
             this.labelBreaths = new System.Windows.Forms.Label();
             this.labelSpecies = new System.Windows.Forms.Label();
             this.groupBoxStars = new System.Windows.Forms.GroupBox();
-            this.labelStarsUnitsInfo = new System.Windows.Forms.Label();
-            this.DelStarButton = new System.Windows.Forms.Button();
             this.StarsDataGridView = new System.Windows.Forms.DataGridView();
             this.StarsDatatabControl = new System.Windows.Forms.TabControl();
             this.StarATabPage = new System.Windows.Forms.TabPage();
@@ -112,18 +106,15 @@
             this.OptAsteroidsMineralsRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroisShowRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroidsHideRadioButton = new System.Windows.Forms.RadioButton();
-            this.groupBoxBodyImage = new System.Windows.Forms.GroupBox();
-            this.BodyPictureBox = new System.Windows.Forms.PictureBox();
             this.CloseButton = new System.Windows.Forms.Button();
             this.groupBoxBottomButtons = new System.Windows.Forms.GroupBox();
+            this.GenSystemButton = new System.Windows.Forms.Button();
             this.ClipboardButton = new System.Windows.Forms.Button();
             this.FixedNameButton = new System.Windows.Forms.Button();
-            this.BanBodyButton = new System.Windows.Forms.Button();
             this.SystemMapButton = new System.Windows.Forms.Button();
             this.ChangeImageButton = new System.Windows.Forms.Button();
             this.AddColonyButton = new System.Windows.Forms.Button();
             this.GeoStatusButton = new System.Windows.Forms.Button();
-            this.RenameBodyButton = new System.Windows.Forms.Button();
             this.AutoRenameButton = new System.Windows.Forms.Button();
             this.RenameSysButton = new System.Windows.Forms.Button();
             this.DeleteSystemButton = new System.Windows.Forms.Button();
@@ -150,7 +141,10 @@
             this.ShowSBServeysCheckBox = new System.Windows.Forms.CheckBox();
             this.labelJSPPerSurveyLocation = new System.Windows.Forms.Label();
             this.labelCurrentSituation = new System.Windows.Forms.Label();
-            this.GenSystemButton = new System.Windows.Forms.Button();
+            this.BodyPictureBox = new System.Windows.Forms.PictureBox();
+            this.labelAge = new System.Windows.Forms.Label();
+            this.AgetextBox = new System.Windows.Forms.TextBox();
+            this.GroupBoxStartData = new System.Windows.Forms.GroupBox();
             this.GeneralInfoGroupBox.SuspendLayout();
             this.groupBoxEnvironTolerances.SuspendLayout();
             this.groupBoxStars.SuspendLayout();
@@ -180,12 +174,12 @@
             this.groupBoxOptionsDistances.SuspendLayout();
             this.groupBoxOptionsMoons.SuspendLayout();
             this.groupBoxOptionsAsteroids.SuspendLayout();
-            this.groupBoxBodyImage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.BodyPictureBox)).BeginInit();
             this.groupBoxBottomButtons.SuspendLayout();
             this.groupBoxColonyCostFact.SuspendLayout();
             this.groupBoxMineralDeposits.SuspendLayout();
             this.groupBoxJumpPointSurvey.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.BodyPictureBox)).BeginInit();
+            this.GroupBoxStartData.SuspendLayout();
             this.SuspendLayout();
             // 
             // NameListBox
@@ -193,7 +187,7 @@
             this.NameListBox.FormattingEnabled = true;
             this.NameListBox.Location = new System.Drawing.Point(47, 16);
             this.NameListBox.Name = "NameListBox";
-            this.NameListBox.Size = new System.Drawing.Size(120, 17);
+            this.NameListBox.Size = new System.Drawing.Size(158, 17);
             this.NameListBox.TabIndex = 0;
             // 
             // labelName
@@ -207,21 +201,19 @@
             // 
             // GeneralInfoGroupBox
             // 
-            this.GeneralInfoGroupBox.Controls.Add(this.ControllingEmpireListBox);
-            this.GeneralInfoGroupBox.Controls.Add(this.IDTextBox);
-            this.GeneralInfoGroupBox.Controls.Add(this.DiscoveredTextBox);
             this.GeneralInfoGroupBox.Controls.Add(this.AgetextBox);
+            this.GeneralInfoGroupBox.Controls.Add(this.labelAge);
+            this.GeneralInfoGroupBox.Controls.Add(this.ControllingEmpireListBox);
+            this.GeneralInfoGroupBox.Controls.Add(this.DiscoveredTextBox);
             this.GeneralInfoGroupBox.Controls.Add(this.TypetextBox);
-            this.GeneralInfoGroupBox.Controls.Add(this.labelID);
             this.GeneralInfoGroupBox.Controls.Add(this.labelDiscovered);
             this.GeneralInfoGroupBox.Controls.Add(this.labelControllingEmpire);
-            this.GeneralInfoGroupBox.Controls.Add(this.labelAge);
             this.GeneralInfoGroupBox.Controls.Add(this.labelType);
             this.GeneralInfoGroupBox.Controls.Add(this.NameListBox);
             this.GeneralInfoGroupBox.Controls.Add(this.labelName);
-            this.GeneralInfoGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.GeneralInfoGroupBox.Location = new System.Drawing.Point(0, 0);
             this.GeneralInfoGroupBox.Name = "GeneralInfoGroupBox";
-            this.GeneralInfoGroupBox.Size = new System.Drawing.Size(1015, 41);
+            this.GeneralInfoGroupBox.Size = new System.Drawing.Size(1008, 41);
             this.GeneralInfoGroupBox.TabIndex = 2;
             this.GeneralInfoGroupBox.TabStop = false;
             this.GeneralInfoGroupBox.Text = "General System Info";
@@ -229,64 +221,35 @@
             // ControllingEmpireListBox
             // 
             this.ControllingEmpireListBox.FormattingEnabled = true;
-            this.ControllingEmpireListBox.Location = new System.Drawing.Point(531, 16);
+            this.ControllingEmpireListBox.Location = new System.Drawing.Point(455, 16);
             this.ControllingEmpireListBox.Name = "ControllingEmpireListBox";
-            this.ControllingEmpireListBox.Size = new System.Drawing.Size(171, 17);
+            this.ControllingEmpireListBox.Size = new System.Drawing.Size(184, 17);
             this.ControllingEmpireListBox.TabIndex = 11;
-            // 
-            // IDTextBox
-            // 
-            this.IDTextBox.Enabled = false;
-            this.IDTextBox.Location = new System.Drawing.Point(963, 15);
-            this.IDTextBox.Name = "IDTextBox";
-            this.IDTextBox.Size = new System.Drawing.Size(46, 20);
-            this.IDTextBox.TabIndex = 10;
-            this.IDTextBox.Text = "0";
-            this.IDTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // DiscoveredTextBox
             // 
             this.DiscoveredTextBox.Enabled = false;
-            this.DiscoveredTextBox.Location = new System.Drawing.Point(777, 15);
+            this.DiscoveredTextBox.Location = new System.Drawing.Point(712, 16);
             this.DiscoveredTextBox.Name = "DiscoveredTextBox";
-            this.DiscoveredTextBox.Size = new System.Drawing.Size(156, 20);
+            this.DiscoveredTextBox.Size = new System.Drawing.Size(180, 20);
             this.DiscoveredTextBox.TabIndex = 9;
             this.DiscoveredTextBox.Text = "1st Jan 2025";
             this.DiscoveredTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // AgetextBox
-            // 
-            this.AgetextBox.Enabled = false;
-            this.AgetextBox.Location = new System.Drawing.Point(368, 15);
-            this.AgetextBox.Name = "AgetextBox";
-            this.AgetextBox.Size = new System.Drawing.Size(62, 20);
-            this.AgetextBox.TabIndex = 8;
-            this.AgetextBox.Text = "10 GY";
-            this.AgetextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // TypetextBox
             // 
             this.TypetextBox.Enabled = false;
-            this.TypetextBox.Location = new System.Drawing.Point(206, 15);
+            this.TypetextBox.Location = new System.Drawing.Point(244, 15);
             this.TypetextBox.Name = "TypetextBox";
-            this.TypetextBox.Size = new System.Drawing.Size(120, 20);
+            this.TypetextBox.Size = new System.Drawing.Size(108, 20);
             this.TypetextBox.TabIndex = 7;
             this.TypetextBox.Text = "Single Star";
             this.TypetextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // labelID
-            // 
-            this.labelID.AutoSize = true;
-            this.labelID.Location = new System.Drawing.Point(939, 18);
-            this.labelID.Name = "labelID";
-            this.labelID.Size = new System.Drawing.Size(18, 13);
-            this.labelID.TabIndex = 6;
-            this.labelID.Text = "ID";
-            // 
             // labelDiscovered
             // 
             this.labelDiscovered.AutoSize = true;
-            this.labelDiscovered.Location = new System.Drawing.Point(710, 18);
+            this.labelDiscovered.Location = new System.Drawing.Point(645, 19);
             this.labelDiscovered.Name = "labelDiscovered";
             this.labelDiscovered.Size = new System.Drawing.Size(61, 13);
             this.labelDiscovered.TabIndex = 5;
@@ -295,25 +258,16 @@
             // labelControllingEmpire
             // 
             this.labelControllingEmpire.AutoSize = true;
-            this.labelControllingEmpire.Location = new System.Drawing.Point(436, 18);
+            this.labelControllingEmpire.Location = new System.Drawing.Point(360, 18);
             this.labelControllingEmpire.Name = "labelControllingEmpire";
             this.labelControllingEmpire.Size = new System.Drawing.Size(91, 13);
             this.labelControllingEmpire.TabIndex = 4;
             this.labelControllingEmpire.Text = "Controlling Empire";
             // 
-            // labelAge
-            // 
-            this.labelAge.AutoSize = true;
-            this.labelAge.Location = new System.Drawing.Point(336, 18);
-            this.labelAge.Name = "labelAge";
-            this.labelAge.Size = new System.Drawing.Size(26, 13);
-            this.labelAge.TabIndex = 3;
-            this.labelAge.Text = "Age";
-            // 
             // labelType
             // 
             this.labelType.AutoSize = true;
-            this.labelType.Location = new System.Drawing.Point(173, 18);
+            this.labelType.Location = new System.Drawing.Point(211, 18);
             this.labelType.Name = "labelType";
             this.labelType.Size = new System.Drawing.Size(31, 13);
             this.labelType.TabIndex = 2;
@@ -321,6 +275,7 @@
             // 
             // groupBoxEnvironTolerances
             // 
+            this.groupBoxEnvironTolerances.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.groupBoxEnvironTolerances.Controls.Add(this.BreathsTextBox);
             this.groupBoxEnvironTolerances.Controls.Add(this.labelPressure);
             this.groupBoxEnvironTolerances.Controls.Add(this.labelTemperature);
@@ -338,9 +293,9 @@
             this.groupBoxEnvironTolerances.Controls.Add(this.SpeciesLlistBox);
             this.groupBoxEnvironTolerances.Controls.Add(this.labelBreaths);
             this.groupBoxEnvironTolerances.Controls.Add(this.labelSpecies);
-            this.groupBoxEnvironTolerances.Location = new System.Drawing.Point(1024, 3);
+            this.groupBoxEnvironTolerances.Location = new System.Drawing.Point(802, 462);
             this.groupBoxEnvironTolerances.Name = "groupBoxEnvironTolerances";
-            this.groupBoxEnvironTolerances.Size = new System.Drawing.Size(196, 181);
+            this.groupBoxEnvironTolerances.Size = new System.Drawing.Size(199, 168);
             this.groupBoxEnvironTolerances.TabIndex = 3;
             this.groupBoxEnvironTolerances.TabStop = false;
             this.groupBoxEnvironTolerances.Text = "Environmental Tolerances";
@@ -358,7 +313,7 @@
             // labelPressure
             // 
             this.labelPressure.AutoSize = true;
-            this.labelPressure.Location = new System.Drawing.Point(10, 161);
+            this.labelPressure.Location = new System.Drawing.Point(10, 149);
             this.labelPressure.Name = "labelPressure";
             this.labelPressure.Size = new System.Drawing.Size(74, 13);
             this.labelPressure.TabIndex = 17;
@@ -367,7 +322,7 @@
             // labelTemperature
             // 
             this.labelTemperature.AutoSize = true;
-            this.labelTemperature.Location = new System.Drawing.Point(10, 135);
+            this.labelTemperature.Location = new System.Drawing.Point(10, 124);
             this.labelTemperature.Name = "labelTemperature";
             this.labelTemperature.Size = new System.Drawing.Size(83, 13);
             this.labelTemperature.TabIndex = 16;
@@ -376,7 +331,7 @@
             // Oxygen
             // 
             this.Oxygen.AutoSize = true;
-            this.Oxygen.Location = new System.Drawing.Point(10, 105);
+            this.Oxygen.Location = new System.Drawing.Point(10, 101);
             this.Oxygen.Name = "Oxygen";
             this.Oxygen.Size = new System.Drawing.Size(69, 13);
             this.Oxygen.TabIndex = 14;
@@ -385,7 +340,7 @@
             // labelGravity
             // 
             this.labelGravity.AutoSize = true;
-            this.labelGravity.Location = new System.Drawing.Point(10, 83);
+            this.labelGravity.Location = new System.Drawing.Point(10, 79);
             this.labelGravity.Name = "labelGravity";
             this.labelGravity.Size = new System.Drawing.Size(57, 13);
             this.labelGravity.TabIndex = 13;
@@ -394,7 +349,7 @@
             // PressureTextBox
             // 
             this.PressureTextBox.Enabled = false;
-            this.PressureTextBox.Location = new System.Drawing.Point(149, 154);
+            this.PressureTextBox.Location = new System.Drawing.Point(149, 150);
             this.PressureTextBox.Name = "PressureTextBox";
             this.PressureTextBox.Size = new System.Drawing.Size(41, 20);
             this.PressureTextBox.TabIndex = 12;
@@ -404,7 +359,7 @@
             // TempMaxTextBox
             // 
             this.TempMaxTextBox.Enabled = false;
-            this.TempMaxTextBox.Location = new System.Drawing.Point(149, 128);
+            this.TempMaxTextBox.Location = new System.Drawing.Point(149, 124);
             this.TempMaxTextBox.Name = "TempMaxTextBox";
             this.TempMaxTextBox.Size = new System.Drawing.Size(41, 20);
             this.TempMaxTextBox.TabIndex = 11;
@@ -414,7 +369,7 @@
             // TempMinTextBox
             // 
             this.TempMinTextBox.Enabled = false;
-            this.TempMinTextBox.Location = new System.Drawing.Point(98, 128);
+            this.TempMinTextBox.Location = new System.Drawing.Point(98, 124);
             this.TempMinTextBox.Name = "TempMinTextBox";
             this.TempMinTextBox.Size = new System.Drawing.Size(45, 20);
             this.TempMinTextBox.TabIndex = 10;
@@ -424,7 +379,7 @@
             // OxygenMaxTextBox
             // 
             this.OxygenMaxTextBox.Enabled = false;
-            this.OxygenMaxTextBox.Location = new System.Drawing.Point(149, 102);
+            this.OxygenMaxTextBox.Location = new System.Drawing.Point(149, 98);
             this.OxygenMaxTextBox.Name = "OxygenMaxTextBox";
             this.OxygenMaxTextBox.Size = new System.Drawing.Size(41, 20);
             this.OxygenMaxTextBox.TabIndex = 9;
@@ -434,7 +389,7 @@
             // OxygenMinTextBox
             // 
             this.OxygenMinTextBox.Enabled = false;
-            this.OxygenMinTextBox.Location = new System.Drawing.Point(98, 102);
+            this.OxygenMinTextBox.Location = new System.Drawing.Point(98, 98);
             this.OxygenMinTextBox.Name = "OxygenMinTextBox";
             this.OxygenMinTextBox.Size = new System.Drawing.Size(45, 20);
             this.OxygenMinTextBox.TabIndex = 8;
@@ -444,7 +399,7 @@
             // GravityMaxTextBox
             // 
             this.GravityMaxTextBox.Enabled = false;
-            this.GravityMaxTextBox.Location = new System.Drawing.Point(149, 76);
+            this.GravityMaxTextBox.Location = new System.Drawing.Point(149, 72);
             this.GravityMaxTextBox.Name = "GravityMaxTextBox";
             this.GravityMaxTextBox.Size = new System.Drawing.Size(41, 20);
             this.GravityMaxTextBox.TabIndex = 7;
@@ -454,7 +409,7 @@
             // GravityMinTextBox
             // 
             this.GravityMinTextBox.Enabled = false;
-            this.GravityMinTextBox.Location = new System.Drawing.Point(98, 76);
+            this.GravityMinTextBox.Location = new System.Drawing.Point(98, 72);
             this.GravityMinTextBox.Name = "GravityMinTextBox";
             this.GravityMinTextBox.Size = new System.Drawing.Size(45, 20);
             this.GravityMinTextBox.TabIndex = 6;
@@ -464,7 +419,7 @@
             // Max
             // 
             this.Max.AutoSize = true;
-            this.Max.Location = new System.Drawing.Point(155, 60);
+            this.Max.Location = new System.Drawing.Point(155, 56);
             this.Max.Name = "Max";
             this.Max.Size = new System.Drawing.Size(27, 13);
             this.Max.TabIndex = 5;
@@ -473,7 +428,7 @@
             // labelMin
             // 
             this.labelMin.AutoSize = true;
-            this.labelMin.Location = new System.Drawing.Point(108, 59);
+            this.labelMin.Location = new System.Drawing.Point(108, 55);
             this.labelMin.Name = "labelMin";
             this.labelMin.Size = new System.Drawing.Size(24, 13);
             this.labelMin.TabIndex = 4;
@@ -507,41 +462,25 @@
             // 
             // groupBoxStars
             // 
-            this.groupBoxStars.Controls.Add(this.labelStarsUnitsInfo);
-            this.groupBoxStars.Controls.Add(this.DelStarButton);
+            this.groupBoxStars.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBoxStars.AutoSize = true;
             this.groupBoxStars.Controls.Add(this.StarsDataGridView);
-            this.groupBoxStars.Location = new System.Drawing.Point(4, 51);
+            this.groupBoxStars.Location = new System.Drawing.Point(4, 42);
+            this.groupBoxStars.MinimumSize = new System.Drawing.Size(1000, 110);
             this.groupBoxStars.Name = "groupBoxStars";
-            this.groupBoxStars.Size = new System.Drawing.Size(1014, 133);
+            this.groupBoxStars.Size = new System.Drawing.Size(1000, 110);
             this.groupBoxStars.TabIndex = 4;
             this.groupBoxStars.TabStop = false;
             this.groupBoxStars.Text = "Stars";
             // 
-            // labelStarsUnitsInfo
-            // 
-            this.labelStarsUnitsInfo.AutoSize = true;
-            this.labelStarsUnitsInfo.Location = new System.Drawing.Point(8, 112);
-            this.labelStarsUnitsInfo.Name = "labelStarsUnitsInfo";
-            this.labelStarsUnitsInfo.Size = new System.Drawing.Size(253, 13);
-            this.labelStarsUnitsInfo.TabIndex = 2;
-            this.labelStarsUnitsInfo.Text = "For Masses, Radius and blah, blah, edit this later ok.";
-            // 
-            // DelStarButton
-            // 
-            this.DelStarButton.Enabled = false;
-            this.DelStarButton.Location = new System.Drawing.Point(933, 103);
-            this.DelStarButton.Name = "DelStarButton";
-            this.DelStarButton.Size = new System.Drawing.Size(75, 23);
-            this.DelStarButton.TabIndex = 1;
-            this.DelStarButton.Text = "Delete Star";
-            this.DelStarButton.UseVisualStyleBackColor = true;
-            // 
             // StarsDataGridView
             // 
             this.StarsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.StarsDataGridView.Location = new System.Drawing.Point(8, 28);
+            this.StarsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StarsDataGridView.Location = new System.Drawing.Point(3, 16);
             this.StarsDataGridView.Name = "StarsDataGridView";
-            this.StarsDataGridView.Size = new System.Drawing.Size(1000, 72);
+            this.StarsDataGridView.Size = new System.Drawing.Size(994, 91);
             this.StarsDataGridView.TabIndex = 0;
             // 
             // StarsDatatabControl
@@ -554,10 +493,11 @@
             this.StarsDatatabControl.Controls.Add(this.HierachyViewTabPage);
             this.StarsDatatabControl.Controls.Add(this.SystemGraphicTabPage);
             this.StarsDatatabControl.Controls.Add(this.OptionsTabPage);
-            this.StarsDatatabControl.Location = new System.Drawing.Point(4, 191);
+            this.StarsDatatabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StarsDatatabControl.Location = new System.Drawing.Point(0, 13);
             this.StarsDatatabControl.Name = "StarsDatatabControl";
             this.StarsDatatabControl.SelectedIndex = 0;
-            this.StarsDatatabControl.Size = new System.Drawing.Size(1216, 315);
+            this.StarsDatatabControl.Size = new System.Drawing.Size(1001, 288);
             this.StarsDatatabControl.TabIndex = 5;
             // 
             // StarATabPage
@@ -566,7 +506,7 @@
             this.StarATabPage.Location = new System.Drawing.Point(4, 22);
             this.StarATabPage.Name = "StarATabPage";
             this.StarATabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.StarATabPage.Size = new System.Drawing.Size(1208, 289);
+            this.StarATabPage.Size = new System.Drawing.Size(993, 262);
             this.StarATabPage.TabIndex = 0;
             this.StarATabPage.Text = "Star-A";
             this.StarATabPage.UseVisualStyleBackColor = true;
@@ -574,9 +514,10 @@
             // StarADataGridView
             // 
             this.StarADataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.StarADataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarADataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StarADataGridView.Location = new System.Drawing.Point(3, 3);
             this.StarADataGridView.Name = "StarADataGridView";
-            this.StarADataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarADataGridView.Size = new System.Drawing.Size(987, 256);
             this.StarADataGridView.TabIndex = 0;
             // 
             // StarBTabPage
@@ -585,7 +526,7 @@
             this.StarBTabPage.Location = new System.Drawing.Point(4, 22);
             this.StarBTabPage.Name = "StarBTabPage";
             this.StarBTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.StarBTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.StarBTabPage.Size = new System.Drawing.Size(987, 215);
             this.StarBTabPage.TabIndex = 1;
             this.StarBTabPage.Text = "Star-B";
             this.StarBTabPage.UseVisualStyleBackColor = true;
@@ -593,9 +534,10 @@
             // StarBDataGridView
             // 
             this.StarBDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.StarBDataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarBDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StarBDataGridView.Location = new System.Drawing.Point(3, 3);
             this.StarBDataGridView.Name = "StarBDataGridView";
-            this.StarBDataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarBDataGridView.Size = new System.Drawing.Size(981, 209);
             this.StarBDataGridView.TabIndex = 0;
             // 
             // StarCTabPage
@@ -604,7 +546,7 @@
             this.StarCTabPage.Location = new System.Drawing.Point(4, 22);
             this.StarCTabPage.Name = "StarCTabPage";
             this.StarCTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.StarCTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.StarCTabPage.Size = new System.Drawing.Size(993, 229);
             this.StarCTabPage.TabIndex = 2;
             this.StarCTabPage.Text = "Star-C";
             this.StarCTabPage.UseVisualStyleBackColor = true;
@@ -612,9 +554,10 @@
             // StarCDataGridView
             // 
             this.StarCDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.StarCDataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarCDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StarCDataGridView.Location = new System.Drawing.Point(3, 3);
             this.StarCDataGridView.Name = "StarCDataGridView";
-            this.StarCDataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarCDataGridView.Size = new System.Drawing.Size(987, 223);
             this.StarCDataGridView.TabIndex = 0;
             // 
             // StarDTabPage
@@ -623,7 +566,7 @@
             this.StarDTabPage.Location = new System.Drawing.Point(4, 22);
             this.StarDTabPage.Name = "StarDTabPage";
             this.StarDTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.StarDTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.StarDTabPage.Size = new System.Drawing.Size(993, 229);
             this.StarDTabPage.TabIndex = 3;
             this.StarDTabPage.Text = "Star-D";
             this.StarDTabPage.UseVisualStyleBackColor = true;
@@ -631,9 +574,10 @@
             // StarDDataGridView
             // 
             this.StarDDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.StarDDataGridView.Location = new System.Drawing.Point(7, 7);
+            this.StarDDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StarDDataGridView.Location = new System.Drawing.Point(3, 3);
             this.StarDDataGridView.Name = "StarDDataGridView";
-            this.StarDDataGridView.Size = new System.Drawing.Size(1195, 276);
+            this.StarDDataGridView.Size = new System.Drawing.Size(987, 223);
             this.StarDDataGridView.TabIndex = 0;
             // 
             // JumpPointsTabPage
@@ -644,7 +588,7 @@
             this.JumpPointsTabPage.Location = new System.Drawing.Point(4, 22);
             this.JumpPointsTabPage.Name = "JumpPointsTabPage";
             this.JumpPointsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.JumpPointsTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.JumpPointsTabPage.Size = new System.Drawing.Size(993, 229);
             this.JumpPointsTabPage.TabIndex = 4;
             this.JumpPointsTabPage.Text = "Jump Points";
             this.JumpPointsTabPage.UseVisualStyleBackColor = true;
@@ -652,9 +596,9 @@
             // groupBoxJPTravelTimes
             // 
             this.groupBoxJPTravelTimes.Controls.Add(this.JPTravelTimesDataGridView);
-            this.groupBoxJPTravelTimes.Location = new System.Drawing.Point(810, 7);
+            this.groupBoxJPTravelTimes.Location = new System.Drawing.Point(660, 7);
             this.groupBoxJPTravelTimes.Name = "groupBoxJPTravelTimes";
-            this.groupBoxJPTravelTimes.Size = new System.Drawing.Size(396, 279);
+            this.groupBoxJPTravelTimes.Size = new System.Drawing.Size(330, 214);
             this.groupBoxJPTravelTimes.TabIndex = 1;
             this.groupBoxJPTravelTimes.TabStop = false;
             this.groupBoxJPTravelTimes.Text = "Travel Times";
@@ -664,14 +608,14 @@
             this.JPTravelTimesDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.JPTravelTimesDataGridView.Location = new System.Drawing.Point(7, 20);
             this.JPTravelTimesDataGridView.Name = "JPTravelTimesDataGridView";
-            this.JPTravelTimesDataGridView.Size = new System.Drawing.Size(381, 253);
+            this.JPTravelTimesDataGridView.Size = new System.Drawing.Size(320, 191);
             this.JPTravelTimesDataGridView.TabIndex = 0;
             // 
             // groupBoxJPLayout
             // 
-            this.groupBoxJPLayout.Location = new System.Drawing.Point(408, 7);
+            this.groupBoxJPLayout.Location = new System.Drawing.Point(330, 7);
             this.groupBoxJPLayout.Name = "groupBoxJPLayout";
-            this.groupBoxJPLayout.Size = new System.Drawing.Size(398, 279);
+            this.groupBoxJPLayout.Size = new System.Drawing.Size(330, 214);
             this.groupBoxJPLayout.TabIndex = 1;
             this.groupBoxJPLayout.TabStop = false;
             this.groupBoxJPLayout.Text = "Layout";
@@ -681,7 +625,7 @@
             this.groupBoxJPDetails.Controls.Add(this.JPDetailsDataGridView);
             this.groupBoxJPDetails.Location = new System.Drawing.Point(4, 7);
             this.groupBoxJPDetails.Name = "groupBoxJPDetails";
-            this.groupBoxJPDetails.Size = new System.Drawing.Size(398, 279);
+            this.groupBoxJPDetails.Size = new System.Drawing.Size(330, 214);
             this.groupBoxJPDetails.TabIndex = 0;
             this.groupBoxJPDetails.TabStop = false;
             this.groupBoxJPDetails.Text = "Details";
@@ -691,7 +635,7 @@
             this.JPDetailsDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.JPDetailsDataGridView.Location = new System.Drawing.Point(7, 20);
             this.JPDetailsDataGridView.Name = "JPDetailsDataGridView";
-            this.JPDetailsDataGridView.Size = new System.Drawing.Size(385, 253);
+            this.JPDetailsDataGridView.Size = new System.Drawing.Size(313, 194);
             this.JPDetailsDataGridView.TabIndex = 0;
             // 
             // HierachyViewTabPage
@@ -700,16 +644,17 @@
             this.HierachyViewTabPage.Location = new System.Drawing.Point(4, 22);
             this.HierachyViewTabPage.Name = "HierachyViewTabPage";
             this.HierachyViewTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.HierachyViewTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.HierachyViewTabPage.Size = new System.Drawing.Size(993, 229);
             this.HierachyViewTabPage.TabIndex = 5;
             this.HierachyViewTabPage.Text = "Hierachy View";
             this.HierachyViewTabPage.UseVisualStyleBackColor = true;
             // 
             // JPHierachyTreeView
             // 
-            this.JPHierachyTreeView.Location = new System.Drawing.Point(7, 7);
+            this.JPHierachyTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.JPHierachyTreeView.Location = new System.Drawing.Point(3, 3);
             this.JPHierachyTreeView.Name = "JPHierachyTreeView";
-            this.JPHierachyTreeView.Size = new System.Drawing.Size(350, 276);
+            this.JPHierachyTreeView.Size = new System.Drawing.Size(987, 223);
             this.JPHierachyTreeView.TabIndex = 0;
             // 
             // SystemGraphicTabPage
@@ -717,7 +662,7 @@
             this.SystemGraphicTabPage.Location = new System.Drawing.Point(4, 22);
             this.SystemGraphicTabPage.Name = "SystemGraphicTabPage";
             this.SystemGraphicTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.SystemGraphicTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.SystemGraphicTabPage.Size = new System.Drawing.Size(993, 229);
             this.SystemGraphicTabPage.TabIndex = 6;
             this.SystemGraphicTabPage.Text = "System Graphic";
             this.SystemGraphicTabPage.UseVisualStyleBackColor = true;
@@ -730,7 +675,7 @@
             this.OptionsTabPage.Location = new System.Drawing.Point(4, 22);
             this.OptionsTabPage.Name = "OptionsTabPage";
             this.OptionsTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.OptionsTabPage.Size = new System.Drawing.Size(1208, 289);
+            this.OptionsTabPage.Size = new System.Drawing.Size(993, 229);
             this.OptionsTabPage.TabIndex = 7;
             this.OptionsTabPage.Text = "Options";
             this.OptionsTabPage.UseVisualStyleBackColor = true;
@@ -738,9 +683,9 @@
             // groupBoxOptionsNotes
             // 
             this.groupBoxOptionsNotes.Controls.Add(this.OptNotesRichTextBox);
-            this.groupBoxOptionsNotes.Location = new System.Drawing.Point(7, 143);
+            this.groupBoxOptionsNotes.Location = new System.Drawing.Point(7, 122);
             this.groupBoxOptionsNotes.Name = "groupBoxOptionsNotes";
-            this.groupBoxOptionsNotes.Size = new System.Drawing.Size(775, 140);
+            this.groupBoxOptionsNotes.Size = new System.Drawing.Size(702, 101);
             this.groupBoxOptionsNotes.TabIndex = 2;
             this.groupBoxOptionsNotes.TabStop = false;
             // 
@@ -753,15 +698,15 @@
             this.OptNotesRichTextBox.Name = "OptNotesRichTextBox";
             this.OptNotesRichTextBox.ReadOnly = true;
             this.OptNotesRichTextBox.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
-            this.OptNotesRichTextBox.Size = new System.Drawing.Size(761, 114);
+            this.OptNotesRichTextBox.Size = new System.Drawing.Size(690, 63);
             this.OptNotesRichTextBox.TabIndex = 0;
             this.OptNotesRichTextBox.Text = "Put any Notes RE above options here...";
             // 
             // groupBoxOptionsSystemsNotes
             // 
-            this.groupBoxOptionsSystemsNotes.Location = new System.Drawing.Point(789, 7);
+            this.groupBoxOptionsSystemsNotes.Location = new System.Drawing.Point(715, 6);
             this.groupBoxOptionsSystemsNotes.Name = "groupBoxOptionsSystemsNotes";
-            this.groupBoxOptionsSystemsNotes.Size = new System.Drawing.Size(413, 276);
+            this.groupBoxOptionsSystemsNotes.Size = new System.Drawing.Size(272, 217);
             this.groupBoxOptionsSystemsNotes.TabIndex = 1;
             this.groupBoxOptionsSystemsNotes.TabStop = false;
             this.groupBoxOptionsSystemsNotes.Text = "System Notes";
@@ -775,16 +720,16 @@
             this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsDistances);
             this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsMoons);
             this.groupBoxOptionsOuter.Controls.Add(this.groupBoxOptionsAsteroids);
-            this.groupBoxOptionsOuter.Location = new System.Drawing.Point(7, 7);
+            this.groupBoxOptionsOuter.Location = new System.Drawing.Point(7, 2);
             this.groupBoxOptionsOuter.Name = "groupBoxOptionsOuter";
-            this.groupBoxOptionsOuter.Size = new System.Drawing.Size(775, 130);
+            this.groupBoxOptionsOuter.Size = new System.Drawing.Size(702, 119);
             this.groupBoxOptionsOuter.TabIndex = 0;
             this.groupBoxOptionsOuter.TabStop = false;
             // 
             // groupBoxOptionsMinerals
             // 
             this.groupBoxOptionsMinerals.Controls.Add(this.OptMineralsCheckBox);
-            this.groupBoxOptionsMinerals.Location = new System.Drawing.Point(696, 19);
+            this.groupBoxOptionsMinerals.Location = new System.Drawing.Point(624, 11);
             this.groupBoxOptionsMinerals.Name = "groupBoxOptionsMinerals";
             this.groupBoxOptionsMinerals.Size = new System.Drawing.Size(71, 100);
             this.groupBoxOptionsMinerals.TabIndex = 1;
@@ -806,7 +751,7 @@
             this.groupBoxOptionsTemperature.Controls.Add(this.OptTempFahrenheitRadioButton);
             this.groupBoxOptionsTemperature.Controls.Add(this.OptTempCelsiusRadioButton);
             this.groupBoxOptionsTemperature.Controls.Add(this.OptTempKelvinRadioButton);
-            this.groupBoxOptionsTemperature.Location = new System.Drawing.Point(587, 19);
+            this.groupBoxOptionsTemperature.Location = new System.Drawing.Point(527, 11);
             this.groupBoxOptionsTemperature.Name = "groupBoxOptionsTemperature";
             this.groupBoxOptionsTemperature.Size = new System.Drawing.Size(87, 100);
             this.groupBoxOptionsTemperature.TabIndex = 4;
@@ -851,7 +796,7 @@
             this.groupBoxOptionsEscapeVelocity.Controls.Add(this.OptEscapeVKmRadioButton);
             this.groupBoxOptionsEscapeVelocity.Controls.Add(this.OptEscapeVMilesRadioButton);
             this.groupBoxOptionsEscapeVelocity.Controls.Add(this.OptExcapeVEarthRadioButton);
-            this.groupBoxOptionsEscapeVelocity.Location = new System.Drawing.Point(463, 19);
+            this.groupBoxOptionsEscapeVelocity.Location = new System.Drawing.Point(415, 11);
             this.groupBoxOptionsEscapeVelocity.Name = "groupBoxOptionsEscapeVelocity";
             this.groupBoxOptionsEscapeVelocity.Size = new System.Drawing.Size(102, 100);
             this.groupBoxOptionsEscapeVelocity.TabIndex = 3;
@@ -896,7 +841,7 @@
             this.groupBoxOptionsDiameter.Controls.Add(this.OptDiamKmRadioButton);
             this.groupBoxOptionsDiameter.Controls.Add(this.OptDiamMilesRadioButton);
             this.groupBoxOptionsDiameter.Controls.Add(this.OptDiamEarthRadioButton);
-            this.groupBoxOptionsDiameter.Location = new System.Drawing.Point(363, 19);
+            this.groupBoxOptionsDiameter.Location = new System.Drawing.Point(327, 11);
             this.groupBoxOptionsDiameter.Name = "groupBoxOptionsDiameter";
             this.groupBoxOptionsDiameter.Size = new System.Drawing.Size(78, 100);
             this.groupBoxOptionsDiameter.TabIndex = 2;
@@ -941,7 +886,7 @@
             this.groupBoxOptionsDistances.Controls.Add(this.OptDistKmRadioButton);
             this.groupBoxOptionsDistances.Controls.Add(this.OptDistMilesRadioButton);
             this.groupBoxOptionsDistances.Controls.Add(this.OptDistAURadioButton);
-            this.groupBoxOptionsDistances.Location = new System.Drawing.Point(270, 19);
+            this.groupBoxOptionsDistances.Location = new System.Drawing.Point(246, 11);
             this.groupBoxOptionsDistances.Name = "groupBoxOptionsDistances";
             this.groupBoxOptionsDistances.Size = new System.Drawing.Size(71, 100);
             this.groupBoxOptionsDistances.TabIndex = 1;
@@ -986,7 +931,7 @@
             this.groupBoxOptionsMoons.Controls.Add(this.OptMoonsMineralsRadioButton);
             this.groupBoxOptionsMoons.Controls.Add(this.OptMoonsShowRadioButton);
             this.groupBoxOptionsMoons.Controls.Add(this.OptMoonsHideRadioButton);
-            this.groupBoxOptionsMoons.Location = new System.Drawing.Point(138, 19);
+            this.groupBoxOptionsMoons.Location = new System.Drawing.Point(126, 11);
             this.groupBoxOptionsMoons.Name = "groupBoxOptionsMoons";
             this.groupBoxOptionsMoons.Size = new System.Drawing.Size(110, 100);
             this.groupBoxOptionsMoons.TabIndex = 1;
@@ -1031,7 +976,7 @@
             this.groupBoxOptionsAsteroids.Controls.Add(this.OptAsteroidsMineralsRadioButton);
             this.groupBoxOptionsAsteroids.Controls.Add(this.OptAsteroisShowRadioButton);
             this.groupBoxOptionsAsteroids.Controls.Add(this.OptAsteroidsHideRadioButton);
-            this.groupBoxOptionsAsteroids.Location = new System.Drawing.Point(6, 19);
+            this.groupBoxOptionsAsteroids.Location = new System.Drawing.Point(6, 11);
             this.groupBoxOptionsAsteroids.Name = "groupBoxOptionsAsteroids";
             this.groupBoxOptionsAsteroids.Size = new System.Drawing.Size(110, 100);
             this.groupBoxOptionsAsteroids.TabIndex = 0;
@@ -1071,23 +1016,6 @@
             this.OptAsteroidsHideRadioButton.Text = "Hide";
             this.OptAsteroidsHideRadioButton.UseVisualStyleBackColor = true;
             // 
-            // groupBoxBodyImage
-            // 
-            this.groupBoxBodyImage.Controls.Add(this.BodyPictureBox);
-            this.groupBoxBodyImage.Location = new System.Drawing.Point(4, 513);
-            this.groupBoxBodyImage.Name = "groupBoxBodyImage";
-            this.groupBoxBodyImage.Size = new System.Drawing.Size(200, 172);
-            this.groupBoxBodyImage.TabIndex = 6;
-            this.groupBoxBodyImage.TabStop = false;
-            // 
-            // BodyPictureBox
-            // 
-            this.BodyPictureBox.Location = new System.Drawing.Point(6, 12);
-            this.BodyPictureBox.Name = "BodyPictureBox";
-            this.BodyPictureBox.Size = new System.Drawing.Size(188, 154);
-            this.BodyPictureBox.TabIndex = 0;
-            this.BodyPictureBox.TabStop = false;
-            // 
             // CloseButton
             // 
             this.CloseButton.Location = new System.Drawing.Point(1127, 16);
@@ -1099,28 +1027,36 @@
             // 
             // groupBoxBottomButtons
             // 
+            this.groupBoxBottomButtons.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.groupBoxBottomButtons.Controls.Add(this.GenSystemButton);
             this.groupBoxBottomButtons.Controls.Add(this.ClipboardButton);
             this.groupBoxBottomButtons.Controls.Add(this.FixedNameButton);
-            this.groupBoxBottomButtons.Controls.Add(this.BanBodyButton);
             this.groupBoxBottomButtons.Controls.Add(this.SystemMapButton);
             this.groupBoxBottomButtons.Controls.Add(this.ChangeImageButton);
             this.groupBoxBottomButtons.Controls.Add(this.AddColonyButton);
             this.groupBoxBottomButtons.Controls.Add(this.GeoStatusButton);
-            this.groupBoxBottomButtons.Controls.Add(this.RenameBodyButton);
             this.groupBoxBottomButtons.Controls.Add(this.AutoRenameButton);
             this.groupBoxBottomButtons.Controls.Add(this.RenameSysButton);
             this.groupBoxBottomButtons.Controls.Add(this.DeleteSystemButton);
             this.groupBoxBottomButtons.Controls.Add(this.CloseButton);
-            this.groupBoxBottomButtons.Location = new System.Drawing.Point(4, 691);
+            this.groupBoxBottomButtons.Location = new System.Drawing.Point(0, 636);
             this.groupBoxBottomButtons.Name = "groupBoxBottomButtons";
-            this.groupBoxBottomButtons.Size = new System.Drawing.Size(1216, 45);
+            this.groupBoxBottomButtons.Size = new System.Drawing.Size(1008, 45);
             this.groupBoxBottomButtons.TabIndex = 8;
             this.groupBoxBottomButtons.TabStop = false;
             // 
+            // GenSystemButton
+            // 
+            this.GenSystemButton.Location = new System.Drawing.Point(4, 16);
+            this.GenSystemButton.Name = "GenSystemButton";
+            this.GenSystemButton.Size = new System.Drawing.Size(85, 23);
+            this.GenSystemButton.TabIndex = 19;
+            this.GenSystemButton.Text = "Gen System";
+            this.GenSystemButton.UseVisualStyleBackColor = true;
+            // 
             // ClipboardButton
             // 
-            this.ClipboardButton.Location = new System.Drawing.Point(929, 16);
+            this.ClipboardButton.Location = new System.Drawing.Point(728, 16);
             this.ClipboardButton.Name = "ClipboardButton";
             this.ClipboardButton.Size = new System.Drawing.Size(85, 23);
             this.ClipboardButton.TabIndex = 18;
@@ -1129,25 +1065,16 @@
             // 
             // FixedNameButton
             // 
-            this.FixedNameButton.Location = new System.Drawing.Point(840, 16);
+            this.FixedNameButton.Location = new System.Drawing.Point(637, 16);
             this.FixedNameButton.Name = "FixedNameButton";
             this.FixedNameButton.Size = new System.Drawing.Size(85, 23);
             this.FixedNameButton.TabIndex = 17;
             this.FixedNameButton.Text = "Fixed Name";
             this.FixedNameButton.UseVisualStyleBackColor = true;
             // 
-            // BanBodyButton
-            // 
-            this.BanBodyButton.Location = new System.Drawing.Point(751, 16);
-            this.BanBodyButton.Name = "BanBodyButton";
-            this.BanBodyButton.Size = new System.Drawing.Size(85, 23);
-            this.BanBodyButton.TabIndex = 16;
-            this.BanBodyButton.Text = "Ban Body";
-            this.BanBodyButton.UseVisualStyleBackColor = true;
-            // 
             // SystemMapButton
             // 
-            this.SystemMapButton.Location = new System.Drawing.Point(662, 16);
+            this.SystemMapButton.Location = new System.Drawing.Point(546, 19);
             this.SystemMapButton.Name = "SystemMapButton";
             this.SystemMapButton.Size = new System.Drawing.Size(85, 23);
             this.SystemMapButton.TabIndex = 15;
@@ -1156,7 +1083,7 @@
             // 
             // ChangeImageButton
             // 
-            this.ChangeImageButton.Location = new System.Drawing.Point(572, 16);
+            this.ChangeImageButton.Location = new System.Drawing.Point(455, 16);
             this.ChangeImageButton.Name = "ChangeImageButton";
             this.ChangeImageButton.Size = new System.Drawing.Size(85, 23);
             this.ChangeImageButton.TabIndex = 14;
@@ -1165,7 +1092,7 @@
             // 
             // AddColonyButton
             // 
-            this.AddColonyButton.Location = new System.Drawing.Point(483, 16);
+            this.AddColonyButton.Location = new System.Drawing.Point(364, 16);
             this.AddColonyButton.Name = "AddColonyButton";
             this.AddColonyButton.Size = new System.Drawing.Size(85, 23);
             this.AddColonyButton.TabIndex = 13;
@@ -1174,25 +1101,16 @@
             // 
             // GeoStatusButton
             // 
-            this.GeoStatusButton.Location = new System.Drawing.Point(394, 16);
+            this.GeoStatusButton.Location = new System.Drawing.Point(273, 16);
             this.GeoStatusButton.Name = "GeoStatusButton";
             this.GeoStatusButton.Size = new System.Drawing.Size(85, 23);
             this.GeoStatusButton.TabIndex = 12;
             this.GeoStatusButton.Text = "Geo Status";
             this.GeoStatusButton.UseVisualStyleBackColor = true;
             // 
-            // RenameBodyButton
-            // 
-            this.RenameBodyButton.Location = new System.Drawing.Point(305, 16);
-            this.RenameBodyButton.Name = "RenameBodyButton";
-            this.RenameBodyButton.Size = new System.Drawing.Size(85, 23);
-            this.RenameBodyButton.TabIndex = 11;
-            this.RenameBodyButton.Text = "Rename Body";
-            this.RenameBodyButton.UseVisualStyleBackColor = true;
-            // 
             // AutoRenameButton
             // 
-            this.AutoRenameButton.Location = new System.Drawing.Point(216, 16);
+            this.AutoRenameButton.Location = new System.Drawing.Point(182, 16);
             this.AutoRenameButton.Name = "AutoRenameButton";
             this.AutoRenameButton.Size = new System.Drawing.Size(85, 23);
             this.AutoRenameButton.TabIndex = 10;
@@ -1201,7 +1119,7 @@
             // 
             // RenameSysButton
             // 
-            this.RenameSysButton.Location = new System.Drawing.Point(128, 16);
+            this.RenameSysButton.Location = new System.Drawing.Point(95, 16);
             this.RenameSysButton.Name = "RenameSysButton";
             this.RenameSysButton.Size = new System.Drawing.Size(85, 23);
             this.RenameSysButton.TabIndex = 9;
@@ -1210,7 +1128,7 @@
             // 
             // DeleteSystemButton
             // 
-            this.DeleteSystemButton.Location = new System.Drawing.Point(1028, 16);
+            this.DeleteSystemButton.Location = new System.Drawing.Point(913, 16);
             this.DeleteSystemButton.Name = "DeleteSystemButton";
             this.DeleteSystemButton.Size = new System.Drawing.Size(85, 23);
             this.DeleteSystemButton.TabIndex = 8;
@@ -1219,6 +1137,7 @@
             // 
             // groupBoxColonyCostFact
             // 
+            this.groupBoxColonyCostFact.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.groupBoxColonyCostFact.Controls.Add(this.richTextBox1);
             this.groupBoxColonyCostFact.Controls.Add(this.DangerousAtmosTextBox);
             this.groupBoxColonyCostFact.Controls.Add(this.BreathableAtmosTextBox);
@@ -1233,26 +1152,26 @@
             this.groupBoxColonyCostFact.Controls.Add(this.labelAtmosPressureFactor);
             this.groupBoxColonyCostFact.Controls.Add(this.labelWaterAvailable);
             this.groupBoxColonyCostFact.Controls.Add(this.labelAcceptableGravity);
-            this.groupBoxColonyCostFact.Location = new System.Drawing.Point(203, 513);
+            this.groupBoxColonyCostFact.Location = new System.Drawing.Point(172, 462);
             this.groupBoxColonyCostFact.Name = "groupBoxColonyCostFact";
-            this.groupBoxColonyCostFact.Size = new System.Drawing.Size(385, 172);
+            this.groupBoxColonyCostFact.Size = new System.Drawing.Size(337, 165);
             this.groupBoxColonyCostFact.TabIndex = 9;
             this.groupBoxColonyCostFact.TabStop = false;
             this.groupBoxColonyCostFact.Text = "Colony Cost Factors.";
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(6, 116);
+            this.richTextBox1.Location = new System.Drawing.Point(1, 116);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(373, 50);
+            this.richTextBox1.Size = new System.Drawing.Size(337, 43);
             this.richTextBox1.TabIndex = 13;
             this.richTextBox1.Text = "";
             // 
             // DangerousAtmosTextBox
             // 
             this.DangerousAtmosTextBox.Enabled = false;
-            this.DangerousAtmosTextBox.Location = new System.Drawing.Point(331, 72);
+            this.DangerousAtmosTextBox.Location = new System.Drawing.Point(296, 72);
             this.DangerousAtmosTextBox.Name = "DangerousAtmosTextBox";
             this.DangerousAtmosTextBox.Size = new System.Drawing.Size(42, 20);
             this.DangerousAtmosTextBox.TabIndex = 12;
@@ -1261,7 +1180,7 @@
             // BreathableAtmosTextBox
             // 
             this.BreathableAtmosTextBox.Enabled = false;
-            this.BreathableAtmosTextBox.Location = new System.Drawing.Point(331, 47);
+            this.BreathableAtmosTextBox.Location = new System.Drawing.Point(296, 47);
             this.BreathableAtmosTextBox.Name = "BreathableAtmosTextBox";
             this.BreathableAtmosTextBox.Size = new System.Drawing.Size(42, 20);
             this.BreathableAtmosTextBox.TabIndex = 11;
@@ -1270,7 +1189,7 @@
             // TempCostFactorTextBox
             // 
             this.TempCostFactorTextBox.Enabled = false;
-            this.TempCostFactorTextBox.Location = new System.Drawing.Point(331, 21);
+            this.TempCostFactorTextBox.Location = new System.Drawing.Point(296, 21);
             this.TempCostFactorTextBox.Name = "TempCostFactorTextBox";
             this.TempCostFactorTextBox.Size = new System.Drawing.Size(42, 20);
             this.TempCostFactorTextBox.TabIndex = 10;
@@ -1279,7 +1198,7 @@
             // AtmosPressureFactorTextBox
             // 
             this.AtmosPressureFactorTextBox.Enabled = false;
-            this.AtmosPressureFactorTextBox.Location = new System.Drawing.Point(137, 71);
+            this.AtmosPressureFactorTextBox.Location = new System.Drawing.Point(115, 71);
             this.AtmosPressureFactorTextBox.Name = "AtmosPressureFactorTextBox";
             this.AtmosPressureFactorTextBox.Size = new System.Drawing.Size(42, 20);
             this.AtmosPressureFactorTextBox.TabIndex = 9;
@@ -1288,7 +1207,7 @@
             // WaterAvailableTextBox
             // 
             this.WaterAvailableTextBox.Enabled = false;
-            this.WaterAvailableTextBox.Location = new System.Drawing.Point(137, 46);
+            this.WaterAvailableTextBox.Location = new System.Drawing.Point(115, 46);
             this.WaterAvailableTextBox.Name = "WaterAvailableTextBox";
             this.WaterAvailableTextBox.Size = new System.Drawing.Size(42, 20);
             this.WaterAvailableTextBox.TabIndex = 8;
@@ -1297,7 +1216,7 @@
             // AcceptableGravityTextBox
             // 
             this.AcceptableGravityTextBox.Enabled = false;
-            this.AcceptableGravityTextBox.Location = new System.Drawing.Point(137, 20);
+            this.AcceptableGravityTextBox.Location = new System.Drawing.Point(115, 20);
             this.AcceptableGravityTextBox.Name = "AcceptableGravityTextBox";
             this.AcceptableGravityTextBox.Size = new System.Drawing.Size(42, 20);
             this.AcceptableGravityTextBox.TabIndex = 7;
@@ -1306,7 +1225,7 @@
             // labelAtmosphereNotes
             // 
             this.labelAtmosphereNotes.AutoSize = true;
-            this.labelAtmosphereNotes.Location = new System.Drawing.Point(7, 99);
+            this.labelAtmosphereNotes.Location = new System.Drawing.Point(1, 99);
             this.labelAtmosphereNotes.Name = "labelAtmosphereNotes";
             this.labelAtmosphereNotes.Size = new System.Drawing.Size(94, 13);
             this.labelAtmosphereNotes.TabIndex = 6;
@@ -1315,7 +1234,7 @@
             // labelDangerousAtmosphere
             // 
             this.labelDangerousAtmosphere.AutoSize = true;
-            this.labelDangerousAtmosphere.Location = new System.Drawing.Point(193, 75);
+            this.labelDangerousAtmosphere.Location = new System.Drawing.Point(168, 75);
             this.labelDangerousAtmosphere.Name = "labelDangerousAtmosphere";
             this.labelDangerousAtmosphere.Size = new System.Drawing.Size(118, 13);
             this.labelDangerousAtmosphere.TabIndex = 5;
@@ -1324,7 +1243,7 @@
             // labelTempCostFactor
             // 
             this.labelTempCostFactor.AutoSize = true;
-            this.labelTempCostFactor.Location = new System.Drawing.Point(193, 24);
+            this.labelTempCostFactor.Location = new System.Drawing.Point(168, 24);
             this.labelTempCostFactor.Name = "labelTempCostFactor";
             this.labelTempCostFactor.Size = new System.Drawing.Size(124, 13);
             this.labelTempCostFactor.TabIndex = 4;
@@ -1333,7 +1252,7 @@
             // labelBreathableAtmosphere
             // 
             this.labelBreathableAtmosphere.AutoSize = true;
-            this.labelBreathableAtmosphere.Location = new System.Drawing.Point(193, 50);
+            this.labelBreathableAtmosphere.Location = new System.Drawing.Point(168, 50);
             this.labelBreathableAtmosphere.Name = "labelBreathableAtmosphere";
             this.labelBreathableAtmosphere.Size = new System.Drawing.Size(117, 13);
             this.labelBreathableAtmosphere.TabIndex = 3;
@@ -1342,7 +1261,7 @@
             // labelAtmosPressureFactor
             // 
             this.labelAtmosPressureFactor.AutoSize = true;
-            this.labelAtmosPressureFactor.Location = new System.Drawing.Point(8, 74);
+            this.labelAtmosPressureFactor.Location = new System.Drawing.Point(2, 74);
             this.labelAtmosPressureFactor.Name = "labelAtmosPressureFactor";
             this.labelAtmosPressureFactor.Size = new System.Drawing.Size(113, 13);
             this.labelAtmosPressureFactor.TabIndex = 2;
@@ -1351,7 +1270,7 @@
             // labelWaterAvailable
             // 
             this.labelWaterAvailable.AutoSize = true;
-            this.labelWaterAvailable.Location = new System.Drawing.Point(8, 49);
+            this.labelWaterAvailable.Location = new System.Drawing.Point(2, 49);
             this.labelWaterAvailable.Name = "labelWaterAvailable";
             this.labelWaterAvailable.Size = new System.Drawing.Size(82, 13);
             this.labelWaterAvailable.TabIndex = 1;
@@ -1360,7 +1279,7 @@
             // labelAcceptableGravity
             // 
             this.labelAcceptableGravity.AutoSize = true;
-            this.labelAcceptableGravity.Location = new System.Drawing.Point(8, 24);
+            this.labelAcceptableGravity.Location = new System.Drawing.Point(2, 24);
             this.labelAcceptableGravity.Name = "labelAcceptableGravity";
             this.labelAcceptableGravity.Size = new System.Drawing.Size(97, 13);
             this.labelAcceptableGravity.TabIndex = 0;
@@ -1368,10 +1287,11 @@
             // 
             // groupBoxMineralDeposits
             // 
+            this.groupBoxMineralDeposits.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.groupBoxMineralDeposits.Controls.Add(this.MineralDepositsRichTextBox);
-            this.groupBoxMineralDeposits.Location = new System.Drawing.Point(585, 513);
+            this.groupBoxMineralDeposits.Location = new System.Drawing.Point(515, 468);
             this.groupBoxMineralDeposits.Name = "groupBoxMineralDeposits";
-            this.groupBoxMineralDeposits.Size = new System.Drawing.Size(212, 172);
+            this.groupBoxMineralDeposits.Size = new System.Drawing.Size(147, 159);
             this.groupBoxMineralDeposits.TabIndex = 10;
             this.groupBoxMineralDeposits.TabStop = false;
             this.groupBoxMineralDeposits.Text = "Mineral Deposits";
@@ -1381,46 +1301,47 @@
             this.MineralDepositsRichTextBox.Location = new System.Drawing.Point(7, 12);
             this.MineralDepositsRichTextBox.Name = "MineralDepositsRichTextBox";
             this.MineralDepositsRichTextBox.ReadOnly = true;
-            this.MineralDepositsRichTextBox.Size = new System.Drawing.Size(198, 154);
+            this.MineralDepositsRichTextBox.Size = new System.Drawing.Size(133, 138);
             this.MineralDepositsRichTextBox.TabIndex = 0;
             this.MineralDepositsRichTextBox.Text = "";
             // 
             // groupBoxJumpPointSurvey
             // 
+            this.groupBoxJumpPointSurvey.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.groupBoxJumpPointSurvey.Controls.Add(this.JSPPerSurveyLocTextBox);
             this.groupBoxJumpPointSurvey.Controls.Add(this.CurrentSituationTextBox);
             this.groupBoxJumpPointSurvey.Controls.Add(this.ShowSBServeysCheckBox);
             this.groupBoxJumpPointSurvey.Controls.Add(this.labelJSPPerSurveyLocation);
             this.groupBoxJumpPointSurvey.Controls.Add(this.labelCurrentSituation);
-            this.groupBoxJumpPointSurvey.Location = new System.Drawing.Point(796, 513);
+            this.groupBoxJumpPointSurvey.Location = new System.Drawing.Point(669, 463);
             this.groupBoxJumpPointSurvey.Name = "groupBoxJumpPointSurvey";
-            this.groupBoxJumpPointSurvey.Size = new System.Drawing.Size(165, 172);
+            this.groupBoxJumpPointSurvey.Size = new System.Drawing.Size(133, 167);
             this.groupBoxJumpPointSurvey.TabIndex = 11;
             this.groupBoxJumpPointSurvey.TabStop = false;
-            this.groupBoxJumpPointSurvey.Text = "Jump Point Survey Details";
+            this.groupBoxJumpPointSurvey.Text = "JP Survey Details";
             // 
             // JSPPerSurveyLocTextBox
             // 
             this.JSPPerSurveyLocTextBox.Enabled = false;
-            this.JSPPerSurveyLocTextBox.Location = new System.Drawing.Point(11, 92);
+            this.JSPPerSurveyLocTextBox.Location = new System.Drawing.Point(6, 92);
             this.JSPPerSurveyLocTextBox.Name = "JSPPerSurveyLocTextBox";
-            this.JSPPerSurveyLocTextBox.Size = new System.Drawing.Size(148, 20);
+            this.JSPPerSurveyLocTextBox.Size = new System.Drawing.Size(122, 20);
             this.JSPPerSurveyLocTextBox.TabIndex = 4;
             this.JSPPerSurveyLocTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // CurrentSituationTextBox
             // 
             this.CurrentSituationTextBox.Enabled = false;
-            this.CurrentSituationTextBox.Location = new System.Drawing.Point(11, 44);
+            this.CurrentSituationTextBox.Location = new System.Drawing.Point(6, 44);
             this.CurrentSituationTextBox.Name = "CurrentSituationTextBox";
-            this.CurrentSituationTextBox.Size = new System.Drawing.Size(148, 20);
+            this.CurrentSituationTextBox.Size = new System.Drawing.Size(122, 20);
             this.CurrentSituationTextBox.TabIndex = 3;
             this.CurrentSituationTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // ShowSBServeysCheckBox
             // 
             this.ShowSBServeysCheckBox.AutoSize = true;
-            this.ShowSBServeysCheckBox.Location = new System.Drawing.Point(11, 149);
+            this.ShowSBServeysCheckBox.Location = new System.Drawing.Point(6, 123);
             this.ShowSBServeysCheckBox.Name = "ShowSBServeysCheckBox";
             this.ShowSBServeysCheckBox.Size = new System.Drawing.Size(111, 17);
             this.ShowSBServeysCheckBox.TabIndex = 2;
@@ -1430,7 +1351,7 @@
             // labelJSPPerSurveyLocation
             // 
             this.labelJSPPerSurveyLocation.AutoSize = true;
-            this.labelJSPPerSurveyLocation.Location = new System.Drawing.Point(8, 78);
+            this.labelJSPPerSurveyLocation.Location = new System.Drawing.Point(3, 78);
             this.labelJSPPerSurveyLocation.Name = "labelJSPPerSurveyLocation";
             this.labelJSPPerSurveyLocation.Size = new System.Drawing.Size(125, 13);
             this.labelJSPPerSurveyLocation.TabIndex = 1;
@@ -1439,42 +1360,73 @@
             // labelCurrentSituation
             // 
             this.labelCurrentSituation.AutoSize = true;
-            this.labelCurrentSituation.Location = new System.Drawing.Point(8, 27);
+            this.labelCurrentSituation.Location = new System.Drawing.Point(3, 27);
             this.labelCurrentSituation.Name = "labelCurrentSituation";
             this.labelCurrentSituation.Size = new System.Drawing.Size(85, 13);
             this.labelCurrentSituation.TabIndex = 0;
             this.labelCurrentSituation.Text = "Current Situation";
             // 
-            // GenSystemButton
+            // BodyPictureBox
             // 
-            this.GenSystemButton.Location = new System.Drawing.Point(28, 16);
-            this.GenSystemButton.Name = "GenSystemButton";
-            this.GenSystemButton.Size = new System.Drawing.Size(85, 23);
-            this.GenSystemButton.TabIndex = 19;
-            this.GenSystemButton.Text = "Gen System";
-            this.GenSystemButton.UseVisualStyleBackColor = true;
+            this.BodyPictureBox.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.BodyPictureBox.Location = new System.Drawing.Point(0, 461);
+            this.BodyPictureBox.Name = "BodyPictureBox";
+            this.BodyPictureBox.Size = new System.Drawing.Size(166, 166);
+            this.BodyPictureBox.TabIndex = 0;
+            this.BodyPictureBox.TabStop = false;
+            // 
+            // labelAge
+            // 
+            this.labelAge.AutoSize = true;
+            this.labelAge.Location = new System.Drawing.Point(898, 16);
+            this.labelAge.Name = "labelAge";
+            this.labelAge.Size = new System.Drawing.Size(26, 13);
+            this.labelAge.TabIndex = 12;
+            this.labelAge.Text = "Age";
+            // 
+            // AgetextBox
+            // 
+            this.AgetextBox.Location = new System.Drawing.Point(934, 15);
+            this.AgetextBox.Name = "AgetextBox";
+            this.AgetextBox.Size = new System.Drawing.Size(52, 20);
+            this.AgetextBox.TabIndex = 13;
+            // 
+            // GroupBoxStartData
+            // 
+            this.GroupBoxStartData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.GroupBoxStartData.AutoSize = true;
+            this.GroupBoxStartData.Controls.Add(this.StarsDatatabControl);
+            this.GroupBoxStartData.Location = new System.Drawing.Point(3, 155);
+            this.GroupBoxStartData.Margin = new System.Windows.Forms.Padding(0);
+            this.GroupBoxStartData.Name = "GroupBoxStartData";
+            this.GroupBoxStartData.Padding = new System.Windows.Forms.Padding(0);
+            this.GroupBoxStartData.Size = new System.Drawing.Size(1001, 301);
+            this.GroupBoxStartData.TabIndex = 3;
+            this.GroupBoxStartData.TabStop = false;
             // 
             // SystemGenAndDisplay
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.GroupBoxStartData);
+            this.Controls.Add(this.BodyPictureBox);
             this.Controls.Add(this.groupBoxJumpPointSurvey);
+            this.Controls.Add(this.groupBoxEnvironTolerances);
             this.Controls.Add(this.groupBoxMineralDeposits);
             this.Controls.Add(this.groupBoxColonyCostFact);
             this.Controls.Add(this.groupBoxBottomButtons);
-            this.Controls.Add(this.groupBoxBodyImage);
-            this.Controls.Add(this.StarsDatatabControl);
             this.Controls.Add(this.groupBoxStars);
-            this.Controls.Add(this.groupBoxEnvironTolerances);
             this.Controls.Add(this.GeneralInfoGroupBox);
             this.Name = "SystemGenAndDisplay";
-            this.Size = new System.Drawing.Size(1223, 739);
+            this.Size = new System.Drawing.Size(1008, 681);
+            this.Load += new System.EventHandler(this.SystemGenAndDisplay_Load);
             this.GeneralInfoGroupBox.ResumeLayout(false);
             this.GeneralInfoGroupBox.PerformLayout();
             this.groupBoxEnvironTolerances.ResumeLayout(false);
             this.groupBoxEnvironTolerances.PerformLayout();
             this.groupBoxStars.ResumeLayout(false);
-            this.groupBoxStars.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.StarsDataGridView)).EndInit();
             this.StarsDatatabControl.ResumeLayout(false);
             this.StarATabPage.ResumeLayout(false);
@@ -1508,15 +1460,16 @@
             this.groupBoxOptionsMoons.PerformLayout();
             this.groupBoxOptionsAsteroids.ResumeLayout(false);
             this.groupBoxOptionsAsteroids.PerformLayout();
-            this.groupBoxBodyImage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.BodyPictureBox)).EndInit();
             this.groupBoxBottomButtons.ResumeLayout(false);
             this.groupBoxColonyCostFact.ResumeLayout(false);
             this.groupBoxColonyCostFact.PerformLayout();
             this.groupBoxMineralDeposits.ResumeLayout(false);
             this.groupBoxJumpPointSurvey.ResumeLayout(false);
             this.groupBoxJumpPointSurvey.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.BodyPictureBox)).EndInit();
+            this.GroupBoxStartData.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -1525,15 +1478,11 @@
         private System.Windows.Forms.ListBox NameListBox;
         private System.Windows.Forms.Label labelName;
         private System.Windows.Forms.GroupBox GeneralInfoGroupBox;
-        private System.Windows.Forms.Label labelID;
         private System.Windows.Forms.Label labelDiscovered;
         private System.Windows.Forms.Label labelControllingEmpire;
-        private System.Windows.Forms.Label labelAge;
         private System.Windows.Forms.Label labelType;
-        private System.Windows.Forms.TextBox AgetextBox;
         private System.Windows.Forms.TextBox TypetextBox;
         private System.Windows.Forms.ListBox ControllingEmpireListBox;
-        private System.Windows.Forms.TextBox IDTextBox;
         private System.Windows.Forms.TextBox DiscoveredTextBox;
         private System.Windows.Forms.GroupBox groupBoxEnvironTolerances;
         private System.Windows.Forms.ListBox SpeciesLlistBox;
@@ -1555,8 +1504,6 @@
         private System.Windows.Forms.TextBox BreathsTextBox;
         private System.Windows.Forms.GroupBox groupBoxStars;
         private System.Windows.Forms.DataGridView StarsDataGridView;
-        private System.Windows.Forms.Button DelStarButton;
-        private System.Windows.Forms.Label labelStarsUnitsInfo;
         private System.Windows.Forms.TabControl StarsDatatabControl;
         private System.Windows.Forms.TabPage StarATabPage;
         private System.Windows.Forms.TabPage StarBTabPage;
@@ -1566,8 +1513,6 @@
         private System.Windows.Forms.TabPage HierachyViewTabPage;
         private System.Windows.Forms.TabPage SystemGraphicTabPage;
         private System.Windows.Forms.TabPage OptionsTabPage;
-        private System.Windows.Forms.GroupBox groupBoxBodyImage;
-        private System.Windows.Forms.PictureBox BodyPictureBox;
         private System.Windows.Forms.Button CloseButton;
         private System.Windows.Forms.GroupBox groupBoxBottomButtons;
         private System.Windows.Forms.GroupBox groupBoxColonyCostFact;
@@ -1595,12 +1540,10 @@
         private System.Windows.Forms.Label labelCurrentSituation;
         private System.Windows.Forms.Button ClipboardButton;
         private System.Windows.Forms.Button FixedNameButton;
-        private System.Windows.Forms.Button BanBodyButton;
         private System.Windows.Forms.Button SystemMapButton;
         private System.Windows.Forms.Button ChangeImageButton;
         private System.Windows.Forms.Button AddColonyButton;
         private System.Windows.Forms.Button GeoStatusButton;
-        private System.Windows.Forms.Button RenameBodyButton;
         private System.Windows.Forms.Button AutoRenameButton;
         private System.Windows.Forms.Button RenameSysButton;
         private System.Windows.Forms.Button DeleteSystemButton;
@@ -1645,5 +1588,9 @@
         private System.Windows.Forms.DataGridView StarDDataGridView;
         private System.Windows.Forms.RichTextBox OptNotesRichTextBox;
         private System.Windows.Forms.Button GenSystemButton;
+        private System.Windows.Forms.PictureBox BodyPictureBox;
+        private System.Windows.Forms.TextBox AgetextBox;
+        private System.Windows.Forms.Label labelAge;
+        private System.Windows.Forms.GroupBox GroupBoxStartData;
     }
 }

@@ -47,6 +47,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.informationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainPanel = new System.Windows.Forms.Panel();
+            this.systemMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,7 +63,7 @@
             this.helpToolStripMenuItem});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
-            this.MainMenu.Size = new System.Drawing.Size(1340, 24);
+            this.MainMenu.Size = new System.Drawing.Size(1008, 24);
             this.MainMenu.TabIndex = 1;
             this.MainMenu.Text = "MainMenu";
             // 
@@ -136,7 +137,8 @@
             // empiresToolStripMenuItem
             // 
             this.empiresToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.systemInformationToolStripMenuItem});
+            this.systemInformationToolStripMenuItem,
+            this.systemMapToolStripMenuItem});
             this.empiresToolStripMenuItem.Name = "empiresToolStripMenuItem";
             this.empiresToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.empiresToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
@@ -193,16 +195,25 @@
             // MainPanel
             // 
             this.MainPanel.AutoScroll = true;
-            this.MainPanel.Location = new System.Drawing.Point(13, 28);
+            this.MainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MainPanel.Location = new System.Drawing.Point(0, 24);
             this.MainPanel.Name = "MainPanel";
-            this.MainPanel.Size = new System.Drawing.Size(1315, 706);
+            this.MainPanel.Size = new System.Drawing.Size(1008, 706);
             this.MainPanel.TabIndex = 2;
+            // 
+            // systemMapToolStripMenuItem
+            // 
+            this.systemMapToolStripMenuItem.Name = "systemMapToolStripMenuItem";
+            this.systemMapToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
+            this.systemMapToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.systemMapToolStripMenuItem.Text = "System Map";
+            this.systemMapToolStripMenuItem.Click += new System.EventHandler(this.systemMapToolStripMenuItem_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1340, 746);
+            this.ClientSize = new System.Drawing.Size(1008, 730);
             this.Controls.Add(this.MainPanel);
             this.Controls.Add(this.MainMenu);
             this.MainMenuStrip = this.MainMenu;
@@ -238,6 +249,7 @@
         private System.Windows.Forms.ToolStripMenuItem spaceMasterOffToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem systemInformationToolStripMenuItem;
         private System.Windows.Forms.Panel MainPanel;
+        private System.Windows.Forms.ToolStripMenuItem systemMapToolStripMenuItem;
     }
 }
 

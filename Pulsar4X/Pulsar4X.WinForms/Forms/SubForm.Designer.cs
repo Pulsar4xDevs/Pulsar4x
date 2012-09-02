@@ -34,17 +34,17 @@
             // MainPanel
             // 
             this.MainPanel.AutoScroll = true;
-            this.MainPanel.Location = new System.Drawing.Point(13, 13);
+            this.MainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.MainPanel.Location = new System.Drawing.Point(0, 0);
             this.MainPanel.Name = "MainPanel";
-            this.MainPanel.Size = new System.Drawing.Size(759, 537);
+            this.MainPanel.Size = new System.Drawing.Size(1008, 730);
             this.MainPanel.TabIndex = 0;
-            //this.MainPanel.Resize += new System.EventHandler(this.MainPanel_Resize);
             // 
             // SubForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 562);
+            this.ClientSize = new System.Drawing.Size(1008, 730);
             this.Controls.Add(this.MainPanel);
             this.Name = "SubForm";
             this.Text = "SubForm";
