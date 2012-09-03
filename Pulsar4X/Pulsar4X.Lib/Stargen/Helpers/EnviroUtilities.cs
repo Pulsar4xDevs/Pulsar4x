@@ -869,7 +869,7 @@ namespace Pulsar4X.Stargen
 
             for (index = 0; index < planet.Gases.Count; index++)
             {
-                Molecule gas = Constants.Gases.GasLookup[planet.Gases[index].ElementId];
+                Molecule gas = Constants.Gases.GasLookup[planet.Gases[index].MoleculeId];
 
                 double ipp = InspiredPartialPressure(planet.SurfacePressure, planet.Gases[index].SurfacePressure);
 

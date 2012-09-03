@@ -7,7 +7,7 @@ namespace Pulsar4X.Entities
 {
     public class Gas
     {
-        public int ElementId { get; set; }
+        public int MoleculeId { get; set; }
         public double SurfacePressure { get; set; } //units of millibars (mb)
     }
 }

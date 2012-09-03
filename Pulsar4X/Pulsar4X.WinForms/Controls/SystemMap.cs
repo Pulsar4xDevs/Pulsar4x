@@ -86,7 +86,7 @@ namespace Pulsar4X.WinForms.Controls
         /// <summary>
         /// Gets or sets the currently viewed star system.
         /// </summary>
-        Entities.StarSystem CurrentStarSystem
+        public Entities.StarSystem CurrentStarSystem
         {
             get
             {

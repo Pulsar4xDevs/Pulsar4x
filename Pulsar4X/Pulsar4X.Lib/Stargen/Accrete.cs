@@ -623,7 +623,7 @@ namespace Pulsar4X.Stargen
                                 planet.Gases = new BindingList<Gas>();
                             planet.Gases.Add(new Gas()
                             {
-                                ElementId = gas.Id,
+                                MoleculeId = gas.Id,
                                 SurfacePressure = planet.SurfacePressure * amount
                             });
                         }

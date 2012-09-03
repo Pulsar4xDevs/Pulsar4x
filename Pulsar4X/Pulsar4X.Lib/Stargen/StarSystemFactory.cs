@@ -36,6 +36,7 @@ namespace Pulsar4X.Stargen
 
             if (logger.IsDebugEnabled)
             {
+                /*
                 logger.Debug("Star System Generated!");
                 for(int i = 0; i<ss.Stars.Count; i++)
                 {
@@ -54,6 +55,7 @@ namespace Pulsar4X.Stargen
                         }
                     }
                 }
+                */
             }
 
             return ss;
