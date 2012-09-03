@@ -38,13 +38,9 @@ solution "Pulsar4X"
 			flags { "Optimize" }
 			
 		configuration { "windows", "Debug" }
-			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.dll", "Pulsar4X/Pulsar4X.Lib/bin/Debug/SQLite.Interop.dll")
-			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.pdb", "Pulsar4X/Pulsar4X.Lib/bin/Debug/SQLite.Interop.pdb")
 			os.copydir("Pulsar4X/Pulsar4X.WinForms/Resources", "Pulsar4X/Pulsar4X.WinForms/bin/Debug/Resources")
 		
 		configuration { "windows", "Release" }
-			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.dll", "Pulsar4X/Pulsar4X.Lib/bin/Release/SQLite.Interop.dll")
-			os.copyfile("Pulsar4X/deps/Sqlite/Windows-1.0.81.0/SQLite.Interop.pdb", "Pulsar4X/Pulsar4X.Lib/bin/Release/SQLite.Interop.pdb")
 			os.copydir("Pulsar4X/Pulsar4X.WinForms/Resources", "Pulsar4X/Pulsar4X.WinForms/bin/Release/Resources")
 			
 	-- Lib Project, contains game files
@@ -58,8 +54,7 @@ solution "Pulsar4X"
 			"System.Data",
 			"System.Xml",
 			log4netlib(),
-			sqlitelib(),
-			dapperlib()
+			jsonlib()
 			}
 		files { 
 			"Pulsar4X/Pulsar4X.Lib/**.cs",
