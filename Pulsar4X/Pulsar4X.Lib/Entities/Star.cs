@@ -28,8 +28,6 @@ namespace Pulsar4X.Entities
         public StarSpectrum Spectrum { get; set; }
         
         public BindingList<Planet> Planets { get; set; }
-        public Guid StarSystemId { get; set; }
-        //[JsonIgnore]
         public StarSystem StarSystem { get; set; }
 
         [JsonIgnore]

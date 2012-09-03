@@ -9,37 +9,13 @@ namespace Pulsar4X.Entities
     public class Population
     {
         public Guid Id { get; set; }
-        public Guid FactionId { get; set; }
-        //[JsonIgnore]
-        private Faction _faction;
-        //[JsonIgnore]
-        public Faction Faction
-        {
-            get { return _faction; }
-            set
-            {
-                _faction = value;
-                if (_faction != null) FactionId = _faction.Id;
-            }
-        }
+        public Faction Faction { get; set; }
         public string Name { get; set; }
 
-        public Guid PlanetId { get; set; }
-        //[JsonIgnore]
-        private Planet _planet;
         /// <summary>
         /// Planet the population is attached to
         /// </summary>
-        //[JsonIgnore]
-        public Planet Planet
-        {
-            get { return _planet; }
-            set
-            {
-                _planet = value;
-                if (_planet != null) PlanetId = _planet.Id;
-            }
-        }
+        public Planet Planet { get; set; }
 
         public int CivilianPopulation { get; set; }
         public int FuelStockpile { get; set; }

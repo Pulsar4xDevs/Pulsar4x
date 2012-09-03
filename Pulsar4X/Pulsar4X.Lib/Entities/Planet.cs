@@ -12,8 +12,6 @@ namespace Pulsar4X.Entities
     {
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
         public BindingList<Gas> Gases { get; set; } //gases in atmosphere
-        public Guid PrimaryId { get; set; }
-        //[JsonIgnore]
         public Star Primary { get; set; }
 
         public long XSystem { get; set; }

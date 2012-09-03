@@ -9,25 +9,13 @@ namespace Pulsar4X.Entities
     public class ShipClass
     {
         public Guid Id { get; set; }
-        public Guid FactionId { get; set; }
-        //[JsonIgnore]
-        private Faction _faction;
-        //[JsonIgnore]
-        public Faction Faction
-        {
-            get { return _faction; }
-            set
-            {
-                _faction = value;
-                if (_faction != null) FactionId = _faction.Id;
-            }
-        }
-        
+        public Faction Faction { get; set; }
+
         public string ClassName { get; set; }
         public int HullDescriptionId { get; set; }
         public string Notes { get; set; }
         public decimal BuildPointCost { get; set; }
-        
+
         /// <summary>
         /// In 50 ton increments
         /// </summary>

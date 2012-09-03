@@ -9,38 +9,14 @@ namespace Pulsar4X.Entities
     public class Ship
     {
         public Guid Id { get; set; }
-        public Guid FactionId { get; set; }
-        //[JsonIgnore]
-        private Faction _faction;
-        //[JsonIgnore]
-        public Faction Faction
-        {
-            get { return _faction; }
-            set
-            {
-                _faction = value;
-                if (_faction != null) FactionId = _faction.Id;
-            }
-        }
-        
-        public Guid ShipClassId { get; set; }
-        //[JsonIgnore]
-        private ShipClass _shipClass;
-        //[JsonIgnore]
-        public ShipClass ShipClass
-        {
-            get { return _shipClass; }
-            set
-            {
-                _shipClass = value;
-                if (_shipClass != null) ShipClassId = _shipClass.Id;
-            }
-        }
-        
+        public Faction Faction { get; set; }
+
+        public ShipClass ShipClass { get; set; }
+
         public string Name { get; set; }
         public string ClassNotes { get; set; }
         public string Notes { get; set; }
-        
+
         public int ThermalSignature { get; set; }
         public int CrossSection { get; set; }
         public int CurrentFuel { get; set; }

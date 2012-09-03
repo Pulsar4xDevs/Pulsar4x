@@ -40,7 +40,6 @@ namespace Pulsar4X.Stargen
             _starFactory.Create(name).ForEach(star =>
                                                   {
                                                       star.StarSystem = starSystem;
-                                                      star.StarSystemId = starSystem.Id;
                                                       starSystem.Stars.Add(star);
                                                   });
 
@@ -86,7 +85,6 @@ namespace Pulsar4X.Stargen
                 protoStar.Planets.ForEach(planet =>
                                               {
                                                   planet.Planet.Primary = star;
-                                                  planet.Planet.PrimaryId = star.Id;
                                                   if (_generateMoons)
                                                       DistMoonMasses(protoStar, planet);
                                                   star.Planets.Add(planet.Planet);
@@ -312,7 +310,6 @@ namespace Pulsar4X.Stargen
             planet.Planets.ForEach(moon=>
                     {
                         moon.Planet.Primary = planet.Star;
-                        moon.Planet.PrimaryId = planet.Star.Id;
                         planet.Planet.Moons.Add(moon.Planet);
                     });
         }
