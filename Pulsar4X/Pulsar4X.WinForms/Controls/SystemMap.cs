@@ -24,6 +24,7 @@ namespace Pulsar4X.WinForms.Controls
 
         private Pulsar4X.Entities.StarSystem m_oCurrnetSystem;
 
+        public GLStarSystemViewModel VM { get; set; }
 
         /// <summary> The gl canvas </summary>
         GLCanvas m_GLCanvas;
@@ -32,6 +33,9 @@ namespace Pulsar4X.WinForms.Controls
         {
             InitializeComponent();
             this.MouseWheel += new MouseEventHandler(SystemMap_MouseWheel);
+
+            VM = new GLStarSystemViewModel();
+            this.Bind(c => c.CurrentStarSystem, VM, d => d.CurrentStarSystem);
         }
 
         private void SystemMap_Load(object sender, EventArgs e)
@@ -90,8 +94,19 @@ namespace Pulsar4X.WinForms.Controls
             }
             set
             {
-                m_oCurrnetSystem = value;
+                if (value != m_oCurrnetSystem)
+                {
+                    m_oCurrnetSystem = value;
+                    RefreshStarSystem();
+                }
             }
+        }
+
+        /// <summary>
+        /// Refreshes and redraws the StarSystem
+        /// </summary>
+        public void RefreshStarSystem()
+        {
         }
         
     }

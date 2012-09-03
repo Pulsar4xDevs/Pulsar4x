@@ -35,6 +35,9 @@ namespace Pulsar4X.ViewModels
             // For now, just create a new starsystem
             var ssf = new StarSystemFactory(false);
             CurrentStarSystem = ssf.Create("FooBar");
+
+            StarSystems = new BindingList<StarSystem>();
+            StarSystems.Add(CurrentStarSystem);
         }
 
 
