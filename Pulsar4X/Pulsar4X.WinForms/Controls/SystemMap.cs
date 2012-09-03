@@ -90,6 +90,7 @@ namespace Pulsar4X.WinForms.Controls
             }
             set
             {
+                m_oCurrnetSystem = value;
             }
         }
         
