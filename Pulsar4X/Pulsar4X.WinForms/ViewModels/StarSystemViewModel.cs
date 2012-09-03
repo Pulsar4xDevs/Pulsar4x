@@ -7,6 +7,7 @@ using Pulsar4X.Entities;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
+using System.Linq.Expressions;
 
 namespace Pulsar4X.ViewModels
 {
@@ -19,22 +20,24 @@ namespace Pulsar4X.ViewModels
             set
             {
                 _currentstarsystem = value;
-                NotifyPropertyChanged("CurrentStarSystem");
-                CurrentStarSystemAge = _currentstarsystem.Stars[0].Age;
+                //NotifyPropertyChanged("CurrentStarSystem");
+                OnPropertyChanged(() => CurrentStarSystem);
+                CurrentStarSystemAge = _currentstarsystem.Stars[0].Age.ToString();
                 Stars = new BindingList<Star>(_currentstarsystem.Stars);
                 StarsSource.DataSource = Stars;
             }
         }
         public BindingList<StarSystem> StarSystems { get; set; }
 
-        private double _currentstarsystemage;
-        public double CurrentStarSystemAge
+        private string _currentstarsystemage;
+        public string CurrentStarSystemAge
         {
             get { return _currentstarsystemage; }
             set
             {
                 _currentstarsystemage = value;
-                NotifyPropertyChanged("CurrentStarSystemAge");
+                //NotifyPropertyChanged("CurrentStarSystemAge");
+                OnPropertyChanged(() => CurrentStarSystemAge);
             }
         }
 
@@ -45,7 +48,8 @@ namespace Pulsar4X.ViewModels
             set
             {
                 _stars = value;
-                NotifyPropertyChanged("Stars");
+                //NotifyPropertyChanged("Stars");
+                OnPropertyChanged(() => Stars);
                 CurrentStar = _stars[0];
             }
         }
@@ -90,11 +94,15 @@ namespace Pulsar4X.ViewModels
             set
             {
                 _currentstar = value;
-                NotifyPropertyChanged("CurrentStar");
+                //NotifyPropertyChanged("CurrentStar");
+                OnPropertyChanged(() => CurrentStar);
                 PlanetSource.DataSource = _currentstar.Planets;
             }
         }
         public Planet CurrentPlanet { get; set; }
+
+        public bool isSM { get; set; }
+        public bool isNotSM { get { return !isSM; } set { isSM = !value; } }
 
         public StarSystemViewModel()
         {
@@ -112,14 +120,15 @@ namespace Pulsar4X.ViewModels
             CurrentPlanet = CurrentStar.Planets.First();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void NotifyPropertyChanged(String propertyName)
+        private void OnPropertyChanged(Expression<Func<object>> property)
         {
             if (PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged(this,
+                    new PropertyChangedEventArgs(BindingHelper.Name(property)));
             }
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

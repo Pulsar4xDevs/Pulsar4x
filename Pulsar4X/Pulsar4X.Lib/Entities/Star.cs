@@ -28,8 +28,14 @@ namespace Pulsar4X.Entities
         public BindingList<Planet> Planets { get; set; }
         public Guid StarSystemId { get; set; }
         public StarSystem StarSystem { get; set; }
-        
 
+        public string Class
+        {
+            get
+            {
+                return (Spectrum.ToString() + SpectrumAdjustment.ToString());
+            }
+        }
 
         public Star()
         {
