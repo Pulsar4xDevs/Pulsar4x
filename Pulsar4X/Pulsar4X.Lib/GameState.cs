@@ -16,10 +16,27 @@ namespace Pulsar4X
             throw new NotImplementedException();
         }
 
-
+        #region Game Meta data
         public string Name { get; set; }
+        public string SaveDirectoryPath { get; set; }
+        #endregion
+        
 
 #region Entities
+
+        private BindingList<Species> _species;
+        public BindingList<Species> Species
+        {
+            get
+            {
+                if (_species == null)
+                {
+                    //Load from DB here
+                }
+                return _species;
+            }
+            set { _species = value; }
+        }
 
         private BindingList<Faction> _factions;
         public BindingList<Faction> Factions

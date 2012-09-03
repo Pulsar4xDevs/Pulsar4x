@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
@@ -21,18 +22,21 @@ namespace Pulsar4X.Entities
     public class Theme
     {
         protected const string NAME_UNAVAILABLE = "Name Unavailable";
-
+        
         public Guid Id { get; set; }
         public string Name { get; set; }
 
+        [JsonIgnore]
         public bool HasClassNames
         {
             get { return (ClassNames != null && ClassNames.Count > 0); }
         }
+        [JsonIgnore]
         public bool HasRankNames
         {
             get { return (RankNames != null && RankNames.Count > 0); }
         }
+        [JsonIgnore]
         public bool HasSystemNames
         {
             get { return (SystemNames != null && SystemNames.Count > 0); }

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using Pulsar4X.Stargen;
 using Pulsar4X.Storage;
@@ -16,7 +13,6 @@ namespace Pulsar4X.Tests
     public class StorageTests
     {
         private GameState _gameState;
-        private CreateDatabase _createDatabase;
 
         private string _appPath;
         private string _saveFolder;
@@ -27,12 +23,14 @@ namespace Pulsar4X.Tests
         {
             _gameState = new GameState();
             _gameState.Name = "Test Game";
+            _gameState.Species = new BindingList<Species>();
             _gameState.Factions = new BindingList<Faction>();
             _gameState.StarSystems = new BindingList<StarSystem>();
             _gameState.Stars = new BindingList<Star>();
             _gameState.Planets = new BindingList<Planet>();
 
             var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
+            _gameState.Species.Add(species);
             var theme = new Theme { Id = Guid.NewGuid(), Name = "Test Theme" };
             _gameState.Factions.Add(new Faction { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, SpeciesId = species.Id, Title = "Mighty Humans", Theme = theme, ThemeId = theme.Id });
 
@@ -45,29 +43,25 @@ namespace Pulsar4X.Tests
             UriBuilder uri = new UriBuilder(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
             _appPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
             _saveFolder = Path.Combine(_appPath, "Test");
-            _createDatabase = new CreateDatabase(_saveFolder, SAVE_GAME_FILE_NAME);
+        }
+        [Test]
+        public void Save_GameState_To_JSON()
+        {
+            var s = new Store("TestGameFile", _saveFolder);
+            s.SaveGame(_gameState);
         }
 
         [Test]
-        public void Create_Saved_Game_DB_File()
+        public void Load_GameState_From_JSON()
         {
-            _createDatabase.CreateSaveFile();
+            var s = new Store("TestGameFile", _saveFolder);
+            s.SaveGame(_gameState);
 
-            Console.WriteLine(_saveFolder);
-            Assert.IsTrue(File.Exists(Path.Combine(_saveFolder, SAVE_GAME_FILE_NAME)));
+            var gs = s.LoadGame(Path.Combine(_saveFolder, "TestGameFile"));
+
+            Assert.IsNotNull(gs);
         }
 
-        [Test]
-        public void Create_Saved_Game_DB_Tables()
-        {
-            _createDatabase.CreateSaveFile();
-            _createDatabase.CreateTables();
-        }
-
-        [Test]
-        public void Create_Saved_Game_Insert_Data()
-        {
-            _createDatabase.Save(_gameState);
-        }
+        
     }
 }

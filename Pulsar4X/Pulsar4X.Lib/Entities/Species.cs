@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
@@ -9,14 +10,13 @@ namespace Pulsar4X.Entities
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-
         public double MinimumGravityConstraint { get; set; }
         public double MaximumGravityConstraint { get; set; }
         public double MinimumPressureConstraint { get; set; }
         public double MaximumPressureConstraint { get; set; }
         public double MinimumTemperatureConstraint { get; set; }
         public double MaximumTemperatureConstraint { get; set; }
-
+        
         public List<SpeciesGasConstraint> GasConstraints { get; set; }
 
         public Species()

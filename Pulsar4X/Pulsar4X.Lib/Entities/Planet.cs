@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
@@ -12,6 +13,7 @@ namespace Pulsar4X.Entities
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
         public BindingList<Gas> Gases { get; set; } //gases in atmosphere
         public Guid PrimaryId { get; set; }
+        //[JsonIgnore]
         public Star Primary { get; set; }
 
         public long XSystem { get; set; }

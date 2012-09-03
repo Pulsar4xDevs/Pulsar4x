@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
@@ -9,7 +10,9 @@ namespace Pulsar4X.Entities
     {
         public Guid Id { get; set; }
         public Guid FactionId { get; set; }
+        //[JsonIgnore]
         private Faction _faction;
+        //[JsonIgnore]
         public Faction Faction
         {
             get { return _faction; }
@@ -20,7 +23,6 @@ namespace Pulsar4X.Entities
             }
         }
         public string Name { get; set; }
-
         public List<Fleet> Fleets { get; set; } 
     }
 }
