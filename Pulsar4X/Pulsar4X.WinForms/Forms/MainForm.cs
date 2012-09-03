@@ -29,6 +29,7 @@ namespace Pulsar4X
         {
             // Load in the dragable tabs here, setup ref. list to all tabs?
             //m_MainTabControl.Size = MainPanel.Size;
+            m_MainTabControl.MinimumSize = new System.Drawing.Size(1008, 706);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[3]);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[0]);
            //m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);

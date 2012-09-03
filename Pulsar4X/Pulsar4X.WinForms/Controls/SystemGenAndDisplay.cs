@@ -63,48 +63,48 @@ namespace Pulsar4X.WinForms.Controls
             StarsDataGridView.SelectionChanged += new EventHandler(StarsDataGridView_SelectionChanged);
 
             // Setup the starsA Grid
-            StarADataGridView.AutoGenerateColumns = false;
-            StarADataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            StarADataGridView.Bind(c => c.AllowUserToAddRows, VM, d => d.isSM);
-            StarADataGridView.Bind(c => c.AllowUserToDeleteRows, VM, d => d.isSM);
-            StarADataGridView.Bind(c => c.ReadOnly, VM, d => d.isNotSM);
+            PlanetsDataGridView.AutoGenerateColumns = false;
+            PlanetsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            PlanetsDataGridView.Bind(c => c.AllowUserToAddRows, VM, d => d.isSM);
+            PlanetsDataGridView.Bind(c => c.AllowUserToDeleteRows, VM, d => d.isSM);
+            PlanetsDataGridView.Bind(c => c.ReadOnly, VM, d => d.isNotSM);
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "Name";
                 col.HeaderText = "Name";
-                StarADataGridView.Columns.Add(col);
+                PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "PlanetType";
                 col.HeaderText = "Type";
-                StarADataGridView.Columns.Add(col);
+                PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "MassInEarthMasses";
                 col.HeaderText = "Mass";
-                StarADataGridView.Columns.Add(col);
+                PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "MassOfGasInEarthMasses";
                 col.HeaderText = "GasMass";
-                StarADataGridView.Columns.Add(col);
+                PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "SurfaceGravity";
                 col.HeaderText = "Gravity";
-                StarADataGridView.Columns.Add(col);
+                PlanetsDataGridView.Columns.Add(col);
             }
-            StarADataGridView.DataSource = VM.PlanetSource;
-            StarADataGridView.SelectionChanged += new EventHandler(StarADataGridView_SelectionChanged);
+            PlanetsDataGridView.DataSource = VM.PlanetSource;
+            PlanetsDataGridView.SelectionChanged += new EventHandler(StarADataGridView_SelectionChanged);
         }
 
         void StarADataGridView_SelectionChanged(object sender, EventArgs e)
         {
-            var sel = StarADataGridView.SelectedRows;
+            var sel = PlanetsDataGridView.SelectedRows;
             if (sel.Count > 0)
             {
                 VM.CurrentPlanet = (Planet)sel[0].DataBoundItem;
