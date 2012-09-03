@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
     public class Planet
     {
-        public ObservableCollection<Planet> Moons { get; set; } //moons orbiting the planet
-        public ObservableCollection<Gas> Gases { get; set; } //gases in atmosphere
+        public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
+        public BindingList<Gas> Gases { get; set; } //gases in atmosphere
         public Guid PrimaryId { get; set; }
         public Star Primary { get; set; }
 
@@ -69,8 +70,8 @@ namespace Pulsar4X.Entities
 
         public Planet()
         {
-            Moons = new ObservableCollection<Planet>();
-            Gases = new ObservableCollection<Gas>();
+            Moons = new BindingList<Planet>();
+            Gases = new BindingList<Gas>();
         }
     }
 }

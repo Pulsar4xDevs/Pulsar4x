@@ -8,6 +8,7 @@ using NUnit.Framework;
 using Pulsar4X.Stargen;
 using Pulsar4X.Storage;
 using Pulsar4X.Entities;
+using System.ComponentModel;
 
 namespace Pulsar4X.Tests
 {
@@ -26,10 +27,10 @@ namespace Pulsar4X.Tests
         {
             _gameState = new GameState();
             _gameState.Name = "Test Game";
-            _gameState.Factions = new ObservableCollection<Faction>();
-            _gameState.StarSystems = new ObservableCollection<StarSystem>();
-            _gameState.Stars = new ObservableCollection<Star>();
-            _gameState.Planets = new ObservableCollection<Planet>();
+            _gameState.Factions = new BindingList<Faction>();
+            _gameState.StarSystems = new BindingList<StarSystem>();
+            _gameState.Stars = new BindingList<Star>();
+            _gameState.Planets = new BindingList<Planet>();
 
             var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
             var theme = new Theme { Id = Guid.NewGuid(), Name = "Test Theme" };

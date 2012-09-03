@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
@@ -24,7 +25,7 @@ namespace Pulsar4X.Entities
         public int SpectrumAdjustment { get; set; }
         public StarSpectrum Spectrum { get; set; }
 
-        public ObservableCollection<Planet> Planets { get; set; }
+        public BindingList<Planet> Planets { get; set; }
         public Guid StarSystemId { get; set; }
         public StarSystem StarSystem { get; set; }
         
@@ -32,7 +33,7 @@ namespace Pulsar4X.Entities
 
         public Star()
         {
-            Planets = new ObservableCollection<Planet>();
+            Planets = new BindingList<Planet>();
         }
     }
 }

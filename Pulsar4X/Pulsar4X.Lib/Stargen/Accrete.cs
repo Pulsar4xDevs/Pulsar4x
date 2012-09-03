@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Pulsar4X.Entities;
 using log4net;
+using System.ComponentModel;
 
 namespace Pulsar4X.Stargen
 {
@@ -90,7 +91,7 @@ namespace Pulsar4X.Stargen
                                                       DistMoonMasses(protoStar, planet);
                                                   star.Planets.Add(planet.Planet);
                                               });
-                star.Planets = new ObservableCollection<Planet>(star.Planets.OrderBy(x => x.SemiMajorAxis));
+                star.Planets = new BindingList<Planet>(star.Planets.OrderBy(x => x.SemiMajorAxis).ToList());
                 GeneratePlanets(star);
             }
 
@@ -228,9 +229,6 @@ namespace Pulsar4X.Stargen
             //ProtoStar star = p.Star;
             foreach (AccreteBand band in Disc.Bands)
             {
-                double gather = 0.0;
-
-
                 if (band.Intersect(inner, outer) && band.DustPresent)
                 {
                     double bandwidth = outer - inner;
@@ -622,7 +620,7 @@ namespace Pulsar4X.Stargen
                         {
 
                             if (planet.Gases == null)
-                                planet.Gases = new ObservableCollection<Gas>();
+                                planet.Gases = new BindingList<Gas>();
                             planet.Gases.Add(new Gas()
                             {
                                 ElementId = gas.Id,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
@@ -10,7 +11,7 @@ namespace Pulsar4X.Entities
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public ObservableCollection<Star> Stars { get; set; }
+        public BindingList<Star> Stars { get; set; }
 
         public StarSystem()
             : this(string.Empty)
@@ -21,7 +22,7 @@ namespace Pulsar4X.Entities
         {
             Id = Guid.NewGuid();
             Name = name;
-            Stars = new ObservableCollection<Star>();
+            Stars = new BindingList<Star>();
         }
     }
 }

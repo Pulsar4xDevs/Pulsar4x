@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using Pulsar4X.Entities;
+using System.ComponentModel;
 
 namespace Pulsar4X
 {
@@ -20,8 +21,8 @@ namespace Pulsar4X
 
 #region Entities
 
-        private ObservableCollection<Faction> _factions;
-        public ObservableCollection<Faction> Factions
+        private BindingList<Faction> _factions;
+        public BindingList<Faction> Factions
         {
             get
             {
@@ -34,8 +35,8 @@ namespace Pulsar4X
             set { _factions = value; }
         }
 
-        private ObservableCollection<StarSystem> _starsystems;
-        public ObservableCollection<StarSystem> StarSystems
+        private BindingList<StarSystem> _starsystems;
+        public BindingList<StarSystem> StarSystems
         {
             get
             {
@@ -48,8 +49,8 @@ namespace Pulsar4X
             set { _starsystems = value; }
         }
 
-        private ObservableCollection<Star> _stars;
-        public ObservableCollection<Star> Stars
+        private BindingList<Star> _stars;
+        public BindingList<Star> Stars
         {
             get
             {
@@ -62,8 +63,8 @@ namespace Pulsar4X
             set { _stars = value; }
         }
 
-        private ObservableCollection<Planet> _planets;
-        public ObservableCollection<Planet> Planets
+        private BindingList<Planet> _planets;
+        public BindingList<Planet> Planets
         {
             get
             {

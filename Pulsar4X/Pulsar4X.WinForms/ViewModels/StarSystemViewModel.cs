@@ -25,7 +25,7 @@ namespace Pulsar4X.ViewModels
                 StarsSource.DataSource = Stars;
             }
         }
-        public ObservableCollection<StarSystem> StarSystems { get; set; }
+        public BindingList<StarSystem> StarSystems { get; set; }
 
         private double _currentstarsystemage;
         public double CurrentStarSystemAge
@@ -103,7 +103,7 @@ namespace Pulsar4X.ViewModels
             var ss = ssf.Create("Test");
             var ss2 = ssf.Create("Foo");
             var ss3 = ssf.Create("Bar");
-            StarSystems = new ObservableCollection<StarSystem>();
+            StarSystems = new BindingList<StarSystem>();
             StarSystems.Add(ss);
             StarSystems.Add(ss2);
             StarSystems.Add(ss3);
