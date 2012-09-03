@@ -14,12 +14,10 @@ namespace Pulsar4X.Storage
         /// </summary>
         private const string DefaultSaveGamePath = "Save";
 
-        private string _saveGameFileName;
+        private readonly string _saveGameFileName;
         private string _saveGameDirectoryPath;
         private string _fullSaveGameFileNamePath;
-        private StringBuilder _fileBuffer;
-
-
+        
 
         public Store(string saveGameFileName, string saveGameDirectoryPath)
         {
@@ -27,8 +25,6 @@ namespace Pulsar4X.Storage
 
             _saveGameDirectoryPath = saveGameDirectoryPath;
             _saveGameFileName = saveGameFileName;
-
-            _fileBuffer = new StringBuilder();
         }
 
         /// <summary>
@@ -68,7 +64,6 @@ namespace Pulsar4X.Storage
                 serializer.Serialize(writer, gameState);
             }
         }
-
 
         private string GetApplicationPath()
         {

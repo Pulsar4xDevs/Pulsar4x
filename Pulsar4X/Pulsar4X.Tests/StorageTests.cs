@@ -44,6 +44,14 @@ namespace Pulsar4X.Tests
             _appPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
             _saveFolder = Path.Combine(_appPath, "Test");
         }
+
+
+        [Test, ExpectedException]
+        public void Save_Throws_Without_GameName()
+        {
+            var s = new Store("", _saveFolder);
+        }
+
         [Test]
         public void Save_GameState_To_JSON()
         {
