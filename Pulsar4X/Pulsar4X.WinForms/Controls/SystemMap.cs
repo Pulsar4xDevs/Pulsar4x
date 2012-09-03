@@ -13,6 +13,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using log4net.Config;
 using log4net;
+using Pulsar4X.ViewModels;
 
 namespace Pulsar4X.WinForms.Controls
 {
@@ -20,6 +21,8 @@ namespace Pulsar4X.WinForms.Controls
     {
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(SystemMap));
+
+        private Pulsar4X.Entities.StarSystem m_oCurrnetSystem;
 
 
         /// <summary> The gl canvas </summary>
@@ -74,5 +77,21 @@ namespace Pulsar4X.WinForms.Controls
                 m_GLCanvas.IncreaseZoomScaler();
             }
         }
+
+
+        /// <summary>
+        /// Gets or sets the currently viewed star system.
+        /// </summary>
+        Entities.StarSystem CurrentStarSystem
+        {
+            get
+            {
+                return m_oCurrnetSystem;
+            }
+            set
+            {
+            }
+        }
+        
     }
 }
