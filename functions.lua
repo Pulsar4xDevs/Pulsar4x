@@ -100,7 +100,7 @@ end
 -- Find the required OpenTK library
 function opentklib()
 	if(os.is("windows")) then
-		if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the OpenTK binaries
+		if (os.isdir("Pulsar4X/deps/OpenTK-1.0")) then -- Have the OpenTK binaries
 			--Assume .NET for now, should work for mono
 			return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
 		end
@@ -112,7 +112,7 @@ end
 -- Find the required OpenTK.GLControl library
 function opentkglcontrollib()
 	if(os.is("windows")) then
-		if (os.isdir("Pulsar4X/deps/Dapper/bin")) then -- Have the OpenTK.GLControl binaries
+		if (os.isdir("Pulsar4X/deps/OpenTK-1.0")) then -- Have the OpenTK.GLControl binaries
 			--Assume .NET for now, should work for mono
 			return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
 		end

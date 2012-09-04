@@ -32,12 +32,9 @@ namespace Pulsar4X.ViewModels
 
         public GLStarSystemViewModel()
         {
-            // For now, just create a new starsystem
-            var ssf = new StarSystemFactory(false);
-            CurrentStarSystem = ssf.Create("FooBar");
+            CurrentStarSystem = GameState.Instance.StarSystems.First();
 
-            StarSystems = new BindingList<StarSystem>();
-            StarSystems.Add(CurrentStarSystem);
+            StarSystems = GameState.Instance.StarSystems;
         }
 
 

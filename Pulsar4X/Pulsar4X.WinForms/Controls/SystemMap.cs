@@ -35,6 +35,11 @@ namespace Pulsar4X.WinForms.Controls
             this.MouseWheel += new MouseEventHandler(SystemMap_MouseWheel);
 
             VM = new GLStarSystemViewModel();
+
+            SystemSelectComboBox.Bind(c => c.DataSource, VM, d => d.StarSystems);
+            SystemSelectComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem);
+            SystemSelectComboBox.DisplayMember = "Name";
+
             this.Bind(c => c.CurrentStarSystem, VM, d => d.CurrentStarSystem);
         }
 

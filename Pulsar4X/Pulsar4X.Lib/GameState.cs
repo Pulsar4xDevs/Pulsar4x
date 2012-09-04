@@ -48,6 +48,7 @@ namespace Pulsar4X
                 if (_species == null)
                 {
                     //Load from DB here
+                    _species = new BindingList<Species>();
                 }
                 return _species;
             }
@@ -62,6 +63,7 @@ namespace Pulsar4X
                 if (_factions == null)
                 {
                     //Load from DB here
+                    _factions = new BindingList<Faction>();
                 }
                 return _factions;
             }
@@ -76,6 +78,7 @@ namespace Pulsar4X
                 if (_starsystems == null)
                 {
                     // Load from DB here
+                    _starsystems = new BindingList<StarSystem>();
                 }
                 return _starsystems;
             }
@@ -90,6 +93,7 @@ namespace Pulsar4X
                 if (_stars == null)
                 {
                     // Load from DB here
+                    _stars = new BindingList<Star>();
                 }
                 return _stars;
             }
@@ -104,6 +108,7 @@ namespace Pulsar4X
                 if (_planets == null)
                 {
                     // Load from DB here
+                    _planets = new BindingList<Planet>();
                 }
                 return _planets;
             }

@@ -30,6 +30,13 @@ namespace Pulsar4X.WinForms
 
             logger.Info("Program Started");
 
+            Forms.StartupSplashScreen.SetStatus("Initializing data...");
+            Forms.StartupSplashScreen.Progress = 0.35;
+            var ssf = new StarSystemFactory(true);
+            GameState.Instance.StarSystems.Add(ssf.Create("Test"));
+            GameState.Instance.StarSystems.Add(ssf.Create("Foo"));
+            GameState.Instance.StarSystems.Add(ssf.Create("Bar"));
+
             Forms.StartupSplashScreen.SetStatus("Initialising Controls...");
             Forms.StartupSplashScreen.Progress = 0.5;
             Application.EnableVisualStyles();

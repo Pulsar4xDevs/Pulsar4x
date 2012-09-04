@@ -107,15 +107,8 @@ namespace Pulsar4X.ViewModels
         public StarSystemViewModel()
         {
             // Just gen a Starsystem
-            var ssf = new StarSystemFactory(false);
-            var ss = ssf.Create("Test");
-            var ss2 = ssf.Create("Foo");
-            var ss3 = ssf.Create("Bar");
-            StarSystems = new BindingList<StarSystem>();
-            StarSystems.Add(ss);
-            StarSystems.Add(ss2);
-            StarSystems.Add(ss3);
-            CurrentStarSystem = ss;
+            StarSystems = GameState.Instance.StarSystems;
+            CurrentStarSystem = GameState.Instance.StarSystems.First();
             CurrentStar = CurrentStarSystem.Stars.First();
             CurrentPlanet = CurrentStar.Planets.First();
         }

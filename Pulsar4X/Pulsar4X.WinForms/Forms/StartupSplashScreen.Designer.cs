@@ -89,7 +89,6 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Pulasr4X Loading...";
-            this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
 
