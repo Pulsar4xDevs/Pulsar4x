@@ -25,8 +25,16 @@ solution "Pulsar4X"
 		files { 
 			"Pulsar4X/Pulsar4X.WinForms/**.cs",
 			"Pulsar4X/Pulsar4X.WinForms/**.resx",
-			"Pulsar4X/Pulsar4X.WinForms/**.config"
+			"Pulsar4X/Pulsar4X.WinForms/**.config",
+			"Pulsar4X/Pulsar4X.WinForms/Resources/**"
 			}
+		excludes {
+			"Pulsar4X/Pulsar4X.WinForms/bin/**",
+			"Pulsar4X/Pulsar4X.WinForms/obj/**"
+			}
+		
+		configuration "**.png"
+			buildaction "copy"
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
@@ -36,13 +44,7 @@ solution "Pulsar4X"
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
 			flags { "Optimize" }
-			
-		configuration { "windows", "Debug" }
-			os.copydir("Pulsar4X/Pulsar4X.WinForms/Resources", "Pulsar4X/Pulsar4X.WinForms/bin/Debug/Resources")
-		
-		configuration { "windows", "Release" }
-			os.copydir("Pulsar4X/Pulsar4X.WinForms/Resources", "Pulsar4X/Pulsar4X.WinForms/bin/Release/Resources")
-			
+					
 	-- Lib Project, contains game files
 	project "Pulsar4X.Lib"
 		kind "SharedLib"
