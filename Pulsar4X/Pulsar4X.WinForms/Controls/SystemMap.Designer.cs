@@ -90,7 +90,6 @@
             this.Name = "SystemMap";
             this.Size = new System.Drawing.Size(1009, 681);
             this.Load += new System.EventHandler(this.SystemMap_Load);
-            this.SizeChanged += new System.EventHandler(this.SystemMap_SizeChanged);
             this.ControlsPanel.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

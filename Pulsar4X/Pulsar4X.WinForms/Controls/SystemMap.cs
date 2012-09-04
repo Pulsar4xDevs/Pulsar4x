@@ -66,11 +66,6 @@ namespace Pulsar4X.WinForms.Controls
             FPSLabel.Text = m_GLCanvas.FPS.ToString();
         }
 
-        private void SystemMap_SizeChanged(object sender, EventArgs e)
-        {
-            this.Size = Parent.Size;
-        }
-
         private void SystemMap_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             // See here for MSDN Ref: http://msdn.microsoft.com/en-us/library/system.windows.forms.control.mousewheel(v=vs.71).aspx

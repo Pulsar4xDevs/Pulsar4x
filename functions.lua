@@ -93,20 +93,12 @@ end
 
 -- Find the required OpenTK library
 function opentklib()
-	if(os.is("windows")) then
-		--Assume .NET for now, should work for mono
-		return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
-	else
-		return os.findlib("nunit.framework")
-	end
+	-- should work for mono and .net
+	return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
 end
 
 -- Find the required OpenTK.GLControl library
 function opentkglcontrollib()
-	if(os.is("windows")) then
-		--Assume .NET for now, should work for mono
-		return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
-	else
-		return os.findlib("nunit.framework")
-	end
+	-- should work for mono and .net
+	return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
 end
