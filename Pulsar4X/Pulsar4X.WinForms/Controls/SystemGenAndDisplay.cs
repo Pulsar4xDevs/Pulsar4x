@@ -51,12 +51,14 @@ namespace Pulsar4X.WinForms.Controls
             {
                 col.DataPropertyName = "Mass";
                 col.HeaderText = "Mass";
+                col.DefaultCellStyle.Format = "N4";
                 StarsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "Luminosity";
                 col.HeaderText = "Luminosity";
+                col.DefaultCellStyle.Format = "N4";
                 StarsDataGridView.Columns.Add(col);
             }
             StarsDataGridView.DataSource = VM.StarsSource;
@@ -84,18 +86,21 @@ namespace Pulsar4X.WinForms.Controls
             {
                 col.DataPropertyName = "MassInEarthMasses";
                 col.HeaderText = "Mass";
+                col.DefaultCellStyle.Format = "N4";
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "MassOfGasInEarthMasses";
                 col.HeaderText = "GasMass";
+                col.DefaultCellStyle.Format = "N4";
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "SurfaceGravity";
                 col.HeaderText = "Gravity";
+                col.DefaultCellStyle.Format = "N4";
                 PlanetsDataGridView.Columns.Add(col);
             }
             PlanetsDataGridView.DataSource = VM.PlanetSource;
