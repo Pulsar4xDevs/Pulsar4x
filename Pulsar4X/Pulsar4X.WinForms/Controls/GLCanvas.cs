@@ -90,8 +90,9 @@ namespace Pulsar4X.WinForms.Controls
             Resize += new System.EventHandler(this.OnResize);                       // Setep Resize Event Handler
             Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);      // Setep Paint Event Handler
             SizeChanged += new System.EventHandler(this.OnSizeChange);
+            MouseMove += new MouseEventHandler(OnMouseMove);
             MouseDown += new MouseEventHandler(OnMouseDown);
-            MouseUp += new MouseEventHandler(OnMouseUp);
+            //MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
         }
 
@@ -126,6 +127,26 @@ namespace Pulsar4X.WinForms.Controls
             this.Invalidate();                                       // Force redraw.
         }
 
+        private void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                Vector3 v3PanEndLocation;
+                v3PanEndLocation.X = e.Location.X;
+                v3PanEndLocation.Y = e.Location.Y;
+                v3PanEndLocation.Z = 0.0f;
+
+                Vector3 v3PanAmount = (v3PanEndLocation - m_v3PanStartLocation);
+
+                v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
+                this.Pan(ref v3PanAmount);
+
+                m_v3PanStartLocation.X = e.Location.X;
+                m_v3PanStartLocation.Y = e.Location.Y;
+                m_v3PanStartLocation.Z = 0.0f;
+            }
+        }
+
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
             // An left mouse down, start pan.
@@ -141,7 +162,7 @@ namespace Pulsar4X.WinForms.Controls
                 this.CenterOnZero();
             }
         }
-
+        /*
         private void OnMouseUp(object sender, MouseEventArgs e)
         {
             // On Left mouse release Pan.
@@ -157,6 +178,7 @@ namespace Pulsar4X.WinForms.Controls
                 this.Pan(ref v3PanAmount);
             }
         }
+        */
 
         
         /// <summary>
