@@ -62,36 +62,30 @@ end
 	
 -- Find the required log4net library
 function log4netlib()
-	if (os.isdir("Pulsar4X/deps/log4net-1.2.11")) then -- Have the log4net binaries
-		if (_OPTIONS.dotnet == "mono") then
-			-- Assume Mono 2.0
-			return "Pulsar4X/deps/log4net-1.2.11/bin/mono/2.0/release/log4net.dll"
-		else
-			-- .NET 4.0
-			return "Pulsar4X/deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll"
-		end
+	if (_OPTIONS.dotnet == "mono") then
+		-- Assume Mono 2.0
+		return "Pulsar4X/deps/log4net-1.2.11/bin/mono/2.0/release/log4net.dll"
+	else
+		-- .NET 4.0
+		return "Pulsar4X/deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll"
 	end
 end
 
 -- Find the required json library
 function jsonlib()
-	if (os.isdir("Pulsar4X/deps/Json45r8/bin/Net40")) then -- Have the log4net binaries
-		if (_OPTIONS.dotnet == "mono") then
-			-- Assume Mono 2.0
-			return "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
-		else
-			-- .NET 4.0
-			return "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
-		end
+	if (_OPTIONS.dotnet == "mono") then
+		-- Assume Mono 2.0
+		return "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
+	else
+		-- .NET 4.0
+		return "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
 	end
 end
 
 -- Find the required nunit library
 function nunitlib()
 	if(os.is("windows")) then
-		if (os.isdir("Pulsar4X/deps/NUnit-2.6.1")) then -- Have the nunit binaries
-			return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
-		end
+		return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
 	else
 		return os.findlib("nunit.framework")
 	end
@@ -100,10 +94,8 @@ end
 -- Find the required OpenTK library
 function opentklib()
 	if(os.is("windows")) then
-		if (os.isdir("Pulsar4X/deps/OpenTK-1.0")) then -- Have the OpenTK binaries
-			--Assume .NET for now, should work for mono
-			return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
-		end
+		--Assume .NET for now, should work for mono
+		return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
 	else
 		return os.findlib("nunit.framework")
 	end
@@ -112,10 +104,8 @@ end
 -- Find the required OpenTK.GLControl library
 function opentkglcontrollib()
 	if(os.is("windows")) then
-		if (os.isdir("Pulsar4X/deps/OpenTK-1.0")) then -- Have the OpenTK.GLControl binaries
-			--Assume .NET for now, should work for mono
-			return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
-		end
+		--Assume .NET for now, should work for mono
+		return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
 	else
 		return os.findlib("nunit.framework")
 	end
