@@ -33,7 +33,7 @@ solution "Pulsar4X"
 			"Pulsar4X/Pulsar4X.WinForms/obj/**"
 			}
 		
-		configuration "**.png"
+		configuration "Resources/**"
 			buildaction "copy"
 		
 		configuration "Debug"
