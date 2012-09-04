@@ -10,6 +10,22 @@ namespace Pulsar4X
 {
     public class GameState
     {
+
+        #region Singleton
+        private static GameState instance;
+        public static GameState Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new GameState();
+                }
+                return instance;
+            }
+        }
+        #endregion
+
         public void Commit()
         {
             // Save all changes to db
