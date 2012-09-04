@@ -1,10 +1,10 @@
+dofile "functions.lua"
+
 -- Solution
 solution "Pulsar4X"
 	configurations { "Debug", "Release" }
 	location "Pulsar4X"
 	framework "4.0"
-	
-	dofile "functions.lua"
 	
 	-- WinForms Project, main UI project
 	project "Pulsar4X.WinForms"
@@ -97,15 +97,6 @@ solution "Pulsar4X"
 			targetdir "Pulsar4X/Pulsar4X.Tests/bin/Release"
 			flags { "Optimize" }
 			
--- defaultaction setup
-function defaultaction(osName, actionName)
-	if (actionName == nil) then
-		_ACTION = _ACTION or osName
-	end	   
-	if os.is(osName) then
-		_ACTION = _ACTION or actionName
-	end
-end
-
 defaultaction "vs2010"
 
+debugoutput()

@@ -56,18 +56,25 @@ function os.copydir(src_dir, dst_dir, filter, single_dst_dir)
 end
 	
 	
-	
-	
+-- defaultaction setup
+function defaultaction(osName, actionName)
+	if (actionName == nil) then
+		_ACTION = _ACTION or osName
+	end	   
+	if os.is(osName) then
+		_ACTION = _ACTION or actionName
+	end
+end
 	
 	
 -- Find the required log4net library
 function log4netlib()
 	if (_OPTIONS.dotnet == "mono") then
 		-- Assume Mono 2.0
-		return "Pulsar4X/deps/log4net-1.2.11/bin/mono/2.0/release/log4net.dll"
+		return os.findlib("log4net") or "Pulsar4X/deps/log4net-1.2.11/bin/mono/2.0/release/log4net.dll"
 	else
 		-- .NET 4.0
-		return "Pulsar4X/deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll"
+		return os.findlib("log4net") or "Pulsar4X/deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll"
 	end
 end
 
@@ -75,30 +82,42 @@ end
 function jsonlib()
 	if (_OPTIONS.dotnet == "mono") then
 		-- Assume Mono 2.0
-		return "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
+		return os.findlib("Newtonsoft.Json") or "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
 	else
 		-- .NET 4.0
-		return "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
+		return os.findlib("Newtonsoft.Json") or "Pulsar4X/deps/Json45r8/bin/Net40/Newtonsoft.Json.dll"
 	end
 end
 
 -- Find the required nunit library
 function nunitlib()
-	if(os.is("windows")) then
-		return "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
-	else
-		return os.findlib("nunit.framework")
-	end
+	return os.findlib("nunit.framework") or "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
 end
 
 -- Find the required OpenTK library
 function opentklib()
 	-- should work for mono and .net
-	return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
+	return os.findlib("OpenTK") or "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
 end
 
 -- Find the required OpenTK.GLControl library
 function opentkglcontrollib()
 	-- should work for mono and .net
-	return "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
+	return os.findlib("OpenTK.GLControl") or "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.GLControl.dll";
+end
+
+
+-- Output Debug information for finding libraries on various platforms
+function debugoutput()
+	local ver = os.getversion()
+	printf("--------------------")
+	printf("OS is:             %s - %s.%s.%s (%s)", os.get(), ver.majorversion, ver.minorversion, ver.revision, ver.description)
+	printf("Configured for:    %s", _OPTIONS.dotnet or ".NET")
+	printf("Action is:         %s", _ACTION)
+	printf("log4net library:   %s", log4netlib())
+	printf("json library:      %s", jsonlib())
+	printf("nunit library:     %s", nunitlib())
+	printf("opentk library:    %s", opentklib())
+	printf("opentk control:    %s", opentkglcontrollib())
+	printf("--------------------")
 end
