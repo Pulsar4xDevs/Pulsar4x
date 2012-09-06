@@ -32,9 +32,9 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.FPSLabel = new System.Windows.Forms.Label();
             this.ControlsPanel = new System.Windows.Forms.Panel();
-            this.SystemSelectComboBox = new System.Windows.Forms.ComboBox();
-            this.KmScaleLabel = new System.Windows.Forms.Label();
             this.AUScaleLabel = new System.Windows.Forms.Label();
+            this.KmScaleLabel = new System.Windows.Forms.Label();
+            this.SystemSelectComboBox = new System.Windows.Forms.ComboBox();
             this.ControlsPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -74,14 +74,14 @@
             this.ControlsPanel.Size = new System.Drawing.Size(200, 645);
             this.ControlsPanel.TabIndex = 3;
             // 
-            // SystemSelectComboBox
+            // AUScaleLabel
             // 
-            this.SystemSelectComboBox.FormattingEnabled = true;
-            this.SystemSelectComboBox.Location = new System.Drawing.Point(3, 3);
-            this.SystemSelectComboBox.Name = "SystemSelectComboBox";
-            this.SystemSelectComboBox.Size = new System.Drawing.Size(190, 21);
-            this.SystemSelectComboBox.TabIndex = 0;
-            this.SystemSelectComboBox.SelectionChangeCommitted += new System.EventHandler(this.SystemSelectComboBox_SelectionChangeCommitted);
+            this.AUScaleLabel.AutoSize = true;
+            this.AUScaleLabel.Location = new System.Drawing.Point(3, 44);
+            this.AUScaleLabel.Name = "AUScaleLabel";
+            this.AUScaleLabel.Size = new System.Drawing.Size(52, 13);
+            this.AUScaleLabel.TabIndex = 2;
+            this.AUScaleLabel.Text = "Scale AU";
             // 
             // KmScaleLabel
             // 
@@ -92,14 +92,14 @@
             this.KmScaleLabel.TabIndex = 1;
             this.KmScaleLabel.Text = "Scale Km";
             // 
-            // AUScaleLabel
+            // SystemSelectComboBox
             // 
-            this.AUScaleLabel.AutoSize = true;
-            this.AUScaleLabel.Location = new System.Drawing.Point(7, 48);
-            this.AUScaleLabel.Name = "AUScaleLabel";
-            this.AUScaleLabel.Size = new System.Drawing.Size(52, 13);
-            this.AUScaleLabel.TabIndex = 2;
-            this.AUScaleLabel.Text = "Scale AU";
+            this.SystemSelectComboBox.FormattingEnabled = true;
+            this.SystemSelectComboBox.Location = new System.Drawing.Point(3, 3);
+            this.SystemSelectComboBox.Name = "SystemSelectComboBox";
+            this.SystemSelectComboBox.Size = new System.Drawing.Size(190, 21);
+            this.SystemSelectComboBox.TabIndex = 0;
+            this.SystemSelectComboBox.SelectionChangeCommitted += new System.EventHandler(this.SystemSelectComboBox_SelectionChangeCommitted);
             // 
             // SystemMap
             // 

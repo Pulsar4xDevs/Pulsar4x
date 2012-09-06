@@ -129,6 +129,10 @@ namespace Pulsar4X.WinForms.Controls
             int iCounter = 0;
             foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
             {
+                // reset zoom factor:
+                // we need to do this to stop the problem of "big Planets" when changing systems with a non 1.0 zoom factor.
+                m_GLCanvas.ZoomFactor = 1.0f;
+
                 Vector3 v3StarPos = new Vector3(0, 0, 0);
                 if (iCounter > 0)
                 {

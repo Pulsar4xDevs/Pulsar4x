@@ -80,6 +80,13 @@ namespace Pulsar4X.WinForms.Controls
             set
             {
                 m_fZoomScaler = value;
+                // update view matrix:
+                m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.Translation(m_v3ViewOffset);
+                if (m_bLoaded && m_oShaderProgram != null)
+                {
+                    m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+                }
+
             }
         }
 
