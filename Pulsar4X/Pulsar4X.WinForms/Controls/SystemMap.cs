@@ -122,7 +122,8 @@ namespace Pulsar4X.WinForms.Controls
             // for star color later: http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
             // or this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/tool_pl.txt 
             // and this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html
-            // or this: http://www.vendian.org/mncharity/dir3/starcolor/
+            // or this: http://www.vendian.org/mncharity/dir3/starcolor
+            // For right now to work around float percision and overflow issues 1 am scaling everthing down by a factor of 10.
             m_GLCanvas.RenderList.Clear(); // clear the render list!!
 
             // add star to centre of the map.
@@ -133,16 +134,23 @@ namespace Pulsar4X.WinForms.Controls
                 // we need to do this to stop the problem of "big Planets" when changing systems with a non 1.0 zoom factor.
                 m_GLCanvas.ZoomFactor = 1.0f;
 
+                double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10);
+
                 Vector3 v3StarPos = new Vector3(0, 0, 0);
                 if (iCounter > 0)
                 {
-                    // then we have a secondary, etc star give random position.
+                    // then we have a secondary, etc star give random position around its orbit!
                     Random rnd = new Random();
-                    v3StarPos.X = (float)(rnd.Next(10, 20) * Pulsar4X.Constants.Units.KM_PER_AU);
-                    v3StarPos.Y = (float)(rnd.Next(10, 20) * Pulsar4X.Constants.Units.KM_PER_AU);
+                    float fAngle = rnd.Next(0, 360);
+                    int temp = sizeof(float);
+                    double temp2 = float.MaxValue;
+                    double temp3 = float.MinValue;
+                    fAngle = MathHelper.DegreesToRadians(fAngle);
+                    v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
+                    v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
                 }
 
-                float fSize = (float)oStar.EcoSphereRadius * 2 * 695500; // i.e. radois of sun.
+                float fSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
 
                 GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                                                                         v3StarPos,
@@ -155,14 +163,13 @@ namespace Pulsar4X.WinForms.Controls
 
                 foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
                 {
-                    double fOrbitRadius = oPlanet.SemiMajorAxis * Pulsar4X.Constants.Units.KM_PER_AU / 10;
-                    float fPlanetSize = (float)oPlanet.Radius * 2;
-                    if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
-                    {
+                    double fOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
+                    float fPlanetSize = (float)oPlanet.Radius * 2 / 10;
+                    //if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
+                   // {
                         // if we are too small, make us bigger for drawing!!
-                        fPlanetSize = fPlanetSize * 1000;
-
-                    }
+                       // fPlanetSize = fPlanetSize * 1000;
+                    //}
 
                     GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                         new Vector3((float)fOrbitRadius, 0, 0) + v3StarPos,                                    // offset Pos by parent star pos
@@ -195,7 +202,7 @@ namespace Pulsar4X.WinForms.Controls
 
         private void UpdateScaleLabels()
         {
-            double dKmscale = this.Size.Width / m_GLCanvas.ZoomFactor;
+            double dKmscale = this.Size.Width / m_GLCanvas.ZoomFactor * 10;  // times by 10 to make scale the same as actual scale usid in drawing the systems.
             float dAUScale = (float)(dKmscale / Pulsar4X.Constants.Units.KM_PER_AU);
             KmScaleLabel.Text = "Km = " + dKmscale.ToString();
             AUScaleLabel.Text = "AU = " + dAUScale.ToString();

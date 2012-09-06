@@ -120,6 +120,11 @@ namespace Pulsar4X.WinForms.Controls
         {
             m_fZoomScaler *= UIConstants.ZOOM_IN_FACTOR;
 
+            if (m_fZoomScaler > UIConstants.ZOOM_MAXINUM_VALUE)
+            {
+                m_fZoomScaler = UIConstants.ZOOM_MAXINUM_VALUE;
+            }
+
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
@@ -129,6 +134,12 @@ namespace Pulsar4X.WinForms.Controls
         public override void DecreaseZoomScaler()
         {
             m_fZoomScaler *= UIConstants.ZOOM_OUT_FACTOR;
+
+            if (m_fZoomScaler < UIConstants.ZOOM_MINIMUM_VALUE)
+            {
+                m_fZoomScaler = UIConstants.ZOOM_MINIMUM_VALUE;
+            }
+
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
