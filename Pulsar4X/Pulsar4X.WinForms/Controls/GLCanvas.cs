@@ -27,10 +27,20 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         protected Matrix4 m_m4ProjectionMatrix, m_m4ViewMatrix;
 
+        /// <summary> The shader program used by default.</summary>
+        protected GLUtilities.GLShader m_oShaderProgram;
+        public GLUtilities.GLShader DefaultShader
+        {
+            get
+            {
+                return m_oShaderProgram;
+            }
+        }
+
         /// <summary>
         /// used to determine if this control hase bee sucessfully loaded.
         /// </summary>
-        protected bool m_bLoaded = false;
+        public bool m_bLoaded = false;
 
         /// <summary> 
         /// The zoom scaler, make this smaller to zoom out, larger to zoom in.
@@ -42,7 +52,20 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         Vector3 m_v3PanStartLocation;
 
-        /// <summary>   Gets or sets the zoom factor. Make this smaller to zoom out, larger to zoom in.</summary>
+        /// <summary> 
+        /// List of objects to render 
+        /// </summary>
+        protected List<GLUtilities.GLPrimitive> m_loRenderList = new List<GLUtilities.GLPrimitive>();
+
+        public List<GLUtilities.GLPrimitive> RenderList
+        {
+            get
+            {
+                return m_loRenderList;
+            }
+        }
+
+        /// <summary>   Gets or sets the zoom factor. </summary>
         /// <value> The zoom factor. </value>
         public float ZoomFactor
         {
@@ -207,6 +230,13 @@ namespace Pulsar4X.WinForms.Controls
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
         }
+
+
+        public void AddToRenderList(GLUtilities.GLPrimitive a_oPrimitive)
+        {
+            m_loRenderList.Add(a_oPrimitive);
+        }
+
 
         public abstract void IncreaseZoomScaler();
 

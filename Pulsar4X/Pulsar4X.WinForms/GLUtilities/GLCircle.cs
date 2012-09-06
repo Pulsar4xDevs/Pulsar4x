@@ -30,6 +30,12 @@ namespace Pulsar4X.WinForms.GLUtilities
         {
             // calculate the number of verts for the circle:
             int iNumOfVerts = (int)(a_fRadus * OpenTK.MathHelper.PiOver3); 
+            // clamp verts:
+            if (iNumOfVerts > 1000)
+            {
+                iNumOfVerts = 1000;
+            }
+            
             // create some working vars:
             double dX, dY, dAngle;
 

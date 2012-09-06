@@ -52,6 +52,7 @@ namespace Pulsar4X.WinForms.Controls
                 //this.Dock = DockStyle.Fill;
                 m_GLCanvas.Dock = DockStyle.Fill;
                 this.Controls.Add(m_GLCanvas);
+                RefreshStarSystem();
             }
             catch (System.NotSupportedException ex)
             {
@@ -107,6 +108,64 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         public void RefreshStarSystem()
         {
+            if (m_GLCanvas == null)
+            {
+                return;
+            }
+            else if (m_GLCanvas.m_bLoaded == false)
+            {
+                return;
+            }
+
+            // test code only, just to see how bad the scale issue is.
+            m_GLCanvas.RenderList.Clear(); // clear the render list!!
+
+            // add star to centre of the map.
+            foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
+            {
+                float fRadius = (float)oStar.EcoSphereRadius * 2 * 695500; // i.e. radois of sun.
+
+                GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader, 
+                                                                        Vector3.Zero,
+                                                                        new Vector2(fRadius, fRadius), 
+                                                                        Color.LightYellow,
+                                                                        "./Resources/Textures/DefaultIcon.png");
+                m_GLCanvas.AddToRenderList(oStarQuad);
+
+                // now go though and add each planet to render list.
+
+                foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
+                {
+                    fRadius = (float)oPlanet.SemiMajorAxis * (float)Pulsar4X.Constants.Units.KM_PER_AU;
+
+                    GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
+                        new Vector3(fRadius, 0, 0),
+                        new Vector2((float)oPlanet.Radius * 2, (float)oPlanet.Radius * 2),
+                        Color.LimeGreen,
+                        "./Resources/Textures/DefaultIcon.png");
+                    GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader, 
+                        Vector3.Zero,
+                        fRadius, 
+                        Color.LimeGreen, 
+                        "./Resources/Textures/DefaultTexture.png");
+
+                    m_GLCanvas.AddToRenderList(oPlanetQuad);
+                    m_GLCanvas.AddToRenderList(oPlanetOrbitCirc);
+                }
+
+
+                // just do primary for now:
+                break;
+            }
+
+            
+
+
+        }
+
+        private void SystemSelectComboBox_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+           // RefreshStarSystem(); // we only need to do this as the System is change automagicly by the data binding. not needed?????
         }
         
     }

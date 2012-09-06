@@ -20,8 +20,7 @@ namespace Pulsar4X.WinForms.Controls
     public class GLCanvas30 : GLCanvas
     {
 
-        /// <summary> The shader program used by default.</summary>
-        private GLUtilities.GLShader m_oShaderProgram;
+        
 
         // for testing:
         GLUtilities.GLQuad m_oQuad;
@@ -115,6 +114,7 @@ namespace Pulsar4X.WinForms.Controls
         public override void IncreaseZoomScaler()
         {
             m_fZoomScaler *= UIConstants.ZOOM_IN_FACTOR;
+            
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
@@ -162,8 +162,14 @@ namespace Pulsar4X.WinForms.Controls
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Clear Back buffer of previous frame.
 
-            m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
-            m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
+            //m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
+            //m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
+            
+            // call render on all items in the render list:
+            foreach (GLUtilities.GLPrimitive oPrimative in m_loRenderList)
+            {
+                oPrimative.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
+            }
             
             GraphicsContext.CurrentContext.SwapBuffers();
            // #if DEBUG

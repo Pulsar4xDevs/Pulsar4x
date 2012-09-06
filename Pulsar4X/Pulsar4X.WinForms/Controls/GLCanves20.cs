@@ -24,7 +24,7 @@ namespace Pulsar4X.WinForms.Controls
     {
 
         /// <summary> The shader program </summary>
-        private GLShader m_oShaderProgram;
+       // private GLShader m_oShaderProgram;
 
         // for testing:
         GLQuad m_oQuad;
@@ -166,8 +166,15 @@ namespace Pulsar4X.WinForms.Controls
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Clear Back buffer of previous frame.
 
-            m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
-            m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
+            //m_oCircle.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
+           // m_oQuad.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);       // render our quad.
+
+            // call render on all items in the render list:
+            foreach (GLUtilities.GLPrimitive oPrimative in m_loRenderList)
+            {
+                oPrimative.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
+            }
+           
 
             GraphicsContext.CurrentContext.SwapBuffers();
             //#if DEBUG

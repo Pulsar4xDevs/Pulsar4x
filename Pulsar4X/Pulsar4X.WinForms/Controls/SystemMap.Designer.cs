@@ -77,6 +77,7 @@
             this.SystemSelectComboBox.Name = "SystemSelectComboBox";
             this.SystemSelectComboBox.Size = new System.Drawing.Size(190, 21);
             this.SystemSelectComboBox.TabIndex = 0;
+            this.SystemSelectComboBox.SelectionChangeCommitted += new System.EventHandler(this.SystemSelectComboBox_SelectionChangeCommitted);
             // 
             // SystemMap
             // 
