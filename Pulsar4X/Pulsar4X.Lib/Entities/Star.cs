@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using System.Drawing;
 
 namespace Pulsar4X.Entities
 {
@@ -24,6 +25,7 @@ namespace Pulsar4X.Entities
         public double Age { get; set; }
         public double Temperature { get; set; }
         public double Radius { get; set; }
+        public Color Color { get; set; }
         
         public double EcoSphereRadius { get; set; }
         public int SpectrumAdjustment { get; set; }

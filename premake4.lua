@@ -55,6 +55,7 @@ solution "Pulsar4X"
 			"System",
 			"System.Data",
 			"System.Xml",
+			"System.Drawing",
 			log4netlib(),
 			jsonlib()
 			}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Pulsar4X.Entities;
+using System.Drawing;
 
 namespace Pulsar4X.Stargen
 {
@@ -27,6 +28,23 @@ namespace Pulsar4X.Stargen
                 {StarSpectrum.K, new List<double> { 5000.0, 4850.0, 4700.0, 4550.0, 4400.0, 4250.0, 4100.0, 3950.0, 3800.0, 3650.0}},
                 {StarSpectrum.M, new List<double> { 3500.0, 3200.0, 2900.0, 2600.0, 2300.0, 2000.0, 1700.0, 1400.0, 1100.0, 800.0}}
             };
+
+        /// <summary>
+        /// Look up table for star colors
+        /// Incomplete, assumes spectral adjustment of 5
+        /// Should be expanded
+        /// </summary>
+        public static Dictionary<StarSpectrum, List<Color>> ColorLookup = new Dictionary<StarSpectrum, List<Color>>()
+            {
+                {StarSpectrum.O, new List<Color> { Color.FromArgb(255, 155, 176, 255) }},
+                {StarSpectrum.B, new List<Color> { Color.FromArgb(255, 170, 191, 255) }},
+                {StarSpectrum.A, new List<Color> { Color.FromArgb(255, 202, 215, 255) }},
+                {StarSpectrum.F, new List<Color> { Color.FromArgb(255, 248, 247, 255) }},
+                {StarSpectrum.G, new List<Color> { Color.FromArgb(255, 255, 244, 234) }},
+                {StarSpectrum.K, new List<Color> { Color.FromArgb(255, 255, 210, 161) }},
+                {StarSpectrum.M, new List<Color> { Color.FromArgb(255, 255, 204, 111) }}
+            };
+
 
         /// <summary>
         /// Creates a collection of stars for use in a StarSystem. By default, it will generate a 
@@ -62,6 +80,8 @@ namespace Pulsar4X.Stargen
                 star.Temperature += MathUtilities.Random.randomNormal() * (star.Temperature / 200.0);
 
                 star.Radius = Radius(star.Luminosity, star.Temperature);
+
+                star.Color = ColorLookup[star.Spectrum][0];
 
                 if (i > 0)
                     star.OrbitalRadius = MathUtilities.Random.NextDouble(0.5, 100);
