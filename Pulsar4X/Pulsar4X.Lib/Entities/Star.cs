@@ -22,10 +22,14 @@ namespace Pulsar4X.Entities
         public double Mass { get; set; }
         public double Life { get; set; }
         public double Age { get; set; }
+        public double Temperature { get; set; }
+        public double Radius { get; set; }
         
         public double EcoSphereRadius { get; set; }
         public int SpectrumAdjustment { get; set; }
         public StarSpectrum Spectrum { get; set; }
+
+        public double OrbitalRadius { get; set; }
         
         public BindingList<Planet> Planets { get; set; }
         public StarSystem StarSystem { get; set; }

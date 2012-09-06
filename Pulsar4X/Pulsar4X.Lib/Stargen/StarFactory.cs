@@ -16,6 +16,19 @@ namespace Pulsar4X.Stargen
         }
 
         /// <summary>
+        /// Star Class to temperature lookup.  From Universe.
+        /// </summary>
+        public static Dictionary<StarSpectrum, List<double>> TempLookup = new Dictionary<StarSpectrum, List<double>>()
+            {
+                {StarSpectrum.B, new List<double> { 25000.0, 23600.0, 22200.0, 20800.0, 19400.0, 18000.0, 16600.0, 15200.0, 13800.0, 12400.0 }},
+                {StarSpectrum.A, new List<double> { 11000.0, 10650.0, 10300.0, 9950.0, 9600.0, 9250.0, 8900.0, 8550.0, 8200.0, 7850.0}},
+                {StarSpectrum.F, new List<double> { 7500.0, 7350.0, 7200.0, 7050.0, 6900.0, 6750.0, 6600.0, 6450.0, 6300.0, 6150.0}},
+                {StarSpectrum.G, new List<double> { 6000.0, 5900.0, 5800.0, 5700.0, 5600.0, 5500.0, 5400.0, 5300.0, 5200.0, 5100.0}},
+                {StarSpectrum.K, new List<double> { 5000.0, 4850.0, 4700.0, 4550.0, 4400.0, 4250.0, 4100.0, 3950.0, 3800.0, 3650.0}},
+                {StarSpectrum.M, new List<double> { 3500.0, 3200.0, 2900.0, 2600.0, 2300.0, 2000.0, 1700.0, 1400.0, 1100.0, 800.0}}
+            };
+
+        /// <summary>
         /// Creates a collection of stars for use in a StarSystem. By default, it will generate a 
         /// weighted random number of stars between 1 and 3. If the overrideNumberOfStars parameter 
         /// is set to a value greater than 0, it will generate that many stars.
@@ -44,6 +57,16 @@ namespace Pulsar4X.Stargen
                 star.Life = StellarLife(star.Mass, star.Luminosity);
                 star.Age = MathUtilities.Random.NextDouble(_minimumAge, Math.Max(_maximumAge, star.Life));
                 star.SpectrumAdjustment = MathUtilities.Random.Next(0, 10);
+
+                star.Temperature = TempLookup[star.Spectrum][star.SpectrumAdjustment];
+                star.Temperature += MathUtilities.Random.randomNormal() * (star.Temperature / 200.0);
+
+                star.Radius = Radius(star.Luminosity, star.Temperature);
+
+                if (i > 0)
+                    star.OrbitalRadius = MathUtilities.Random.NextDouble(0.5, 100);
+                else
+                    star.OrbitalRadius = 0.0;
 
                 stars.Add(star);
             }
@@ -198,6 +221,11 @@ namespace Pulsar4X.Stargen
                 n = 0.5 * (2.0 - massRatio) + 4.4;
 
             return Math.Pow(massRatio, n);
+        }
+
+        public static double Radius(double luminosity, double temperature)
+        {
+            return Math.Sqrt(luminosity) * ((6100.0 / temperature) * (6100.0 / temperature));
         }
 
     }
