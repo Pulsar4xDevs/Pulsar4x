@@ -20,8 +20,6 @@ namespace Pulsar4X.WinForms.Controls
     public class GLCanvas30 : GLCanvas
     {
 
-        
-
         // for testing:
         GLUtilities.GLQuad m_oQuad;
         GLUtilities.GLCircle m_oCircle;

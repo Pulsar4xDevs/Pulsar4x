@@ -123,12 +123,12 @@ namespace Pulsar4X.WinForms.Controls
             // add star to centre of the map.
             foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
             {
-                float fRadius = (float)oStar.EcoSphereRadius * 2 * 695500; // i.e. radois of sun.
+                float fSize = (float)oStar.EcoSphereRadius * 2 * 695500; // i.e. radois of sun.
 
                 GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader, 
                                                                         Vector3.Zero,
-                                                                        new Vector2(fRadius, fRadius), 
-                                                                        Color.LightYellow,
+                                                                        new Vector2(fSize, fSize), 
+                                                                        Color.FromArgb(255, 255, 255, 0),    // yellow!
                                                                         "./Resources/Textures/DefaultIcon.png");
                 m_GLCanvas.AddToRenderList(oStarQuad);
 
@@ -136,17 +136,24 @@ namespace Pulsar4X.WinForms.Controls
 
                 foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
                 {
-                    fRadius = (float)oPlanet.SemiMajorAxis * (float)Pulsar4X.Constants.Units.KM_PER_AU;
+                    float fOrbitRadius = (float)oPlanet.SemiMajorAxis * (float)Pulsar4X.Constants.Units.KM_PER_AU;
+                    float fPlanetSize = (float)oPlanet.Radius * 2;
+                    if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
+                    {
+                        // if we are too small, make us bigger for drawing!!
+                        fPlanetSize = fPlanetSize * 1000;
+
+                    }
 
                     GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
-                        new Vector3(fRadius, 0, 0),
+                        new Vector3(fOrbitRadius, 0, 0),
                         new Vector2((float)oPlanet.Radius * 2, (float)oPlanet.Radius * 2),
-                        Color.LimeGreen,
+                        Color.FromArgb(255, 50, 205, 50),  // lime green
                         "./Resources/Textures/DefaultIcon.png");
                     GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader, 
                         Vector3.Zero,
-                        fRadius, 
-                        Color.LimeGreen, 
+                        fOrbitRadius, 
+                        Color.FromArgb(255, 50, 205, 50),  // lime green
                         "./Resources/Textures/DefaultTexture.png");
 
                     m_GLCanvas.AddToRenderList(oPlanetQuad);

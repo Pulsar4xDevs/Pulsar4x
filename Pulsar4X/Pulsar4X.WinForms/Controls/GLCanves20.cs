@@ -119,7 +119,8 @@ namespace Pulsar4X.WinForms.Controls
         public override void IncreaseZoomScaler()
         {
             m_fZoomScaler *= UIConstants.ZOOM_IN_FACTOR;
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
+
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
 
@@ -128,20 +129,22 @@ namespace Pulsar4X.WinForms.Controls
         public override void DecreaseZoomScaler()
         {
             m_fZoomScaler *= UIConstants.ZOOM_OUT_FACTOR;
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
         }
 
         public override void Pan(ref Vector3 a_v3PanAmount)
         {
-            m_m4ViewMatrix = m_m4ViewMatrix * Matrix4.CreateTranslation(a_v3PanAmount);
+            m_v3ViewOffset = m_v3ViewOffset + a_v3PanAmount;
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
         }
 
         public override void CenterOnZero()
         {
+            m_v3ViewOffset = Vector3.Zero;  // sero out offset.
             m_m4ViewMatrix = Matrix4.Identity;
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler); // reset scaler.
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
@@ -150,9 +153,9 @@ namespace Pulsar4X.WinForms.Controls
 
         public override void CenterOn(ref Vector3 a_v3Location)
         {
+            m_v3ViewOffset = a_v3Location;                  // set offset.
             m_m4ViewMatrix = Matrix4.Identity;
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler); // reset scaler.
-            m_m4ViewMatrix = m_m4ViewMatrix * Matrix4.CreateTranslation(a_v3Location);
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             this.Invalidate();
         }
