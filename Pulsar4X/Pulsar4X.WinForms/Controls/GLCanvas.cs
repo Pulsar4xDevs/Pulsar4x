@@ -47,6 +47,10 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         protected float m_fZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
 
+
+        /// <summary> The view offset, i.e. how much the view should be offset from 0, 0 </summary>
+        protected Vector3 m_v3ViewOffset = new Vector3(0, 0, 0);
+
         /// <summary>
         /// Keeps tract of the start location when calculation Panning.
         /// </summary>
@@ -228,7 +232,7 @@ namespace Pulsar4X.WinForms.Controls
             //                                    new Vector4(-1, -1, 1, 1));
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler);
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.Translation(m_v3ViewOffset);
         }
 
 
