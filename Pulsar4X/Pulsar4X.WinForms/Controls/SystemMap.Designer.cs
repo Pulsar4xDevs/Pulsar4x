@@ -33,6 +33,8 @@
             this.FPSLabel = new System.Windows.Forms.Label();
             this.ControlsPanel = new System.Windows.Forms.Panel();
             this.SystemSelectComboBox = new System.Windows.Forms.ComboBox();
+            this.KmScaleLabel = new System.Windows.Forms.Label();
+            this.AUScaleLabel = new System.Windows.Forms.Label();
             this.ControlsPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -64,6 +66,8 @@
             // 
             // ControlsPanel
             // 
+            this.ControlsPanel.Controls.Add(this.AUScaleLabel);
+            this.ControlsPanel.Controls.Add(this.KmScaleLabel);
             this.ControlsPanel.Controls.Add(this.SystemSelectComboBox);
             this.ControlsPanel.Location = new System.Drawing.Point(4, 4);
             this.ControlsPanel.Name = "ControlsPanel";
@@ -79,6 +83,24 @@
             this.SystemSelectComboBox.TabIndex = 0;
             this.SystemSelectComboBox.SelectionChangeCommitted += new System.EventHandler(this.SystemSelectComboBox_SelectionChangeCommitted);
             // 
+            // KmScaleLabel
+            // 
+            this.KmScaleLabel.AutoSize = true;
+            this.KmScaleLabel.Location = new System.Drawing.Point(4, 31);
+            this.KmScaleLabel.Name = "KmScaleLabel";
+            this.KmScaleLabel.Size = new System.Drawing.Size(52, 13);
+            this.KmScaleLabel.TabIndex = 1;
+            this.KmScaleLabel.Text = "Scale Km";
+            // 
+            // AUScaleLabel
+            // 
+            this.AUScaleLabel.AutoSize = true;
+            this.AUScaleLabel.Location = new System.Drawing.Point(7, 48);
+            this.AUScaleLabel.Name = "AUScaleLabel";
+            this.AUScaleLabel.Size = new System.Drawing.Size(52, 13);
+            this.AUScaleLabel.TabIndex = 2;
+            this.AUScaleLabel.Text = "Scale AU";
+            // 
             // SystemMap
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -92,6 +114,7 @@
             this.Size = new System.Drawing.Size(1009, 681);
             this.Load += new System.EventHandler(this.SystemMap_Load);
             this.ControlsPanel.ResumeLayout(false);
+            this.ControlsPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -104,5 +127,7 @@
         private System.Windows.Forms.Label FPSLabel;
         private System.Windows.Forms.Panel ControlsPanel;
         private System.Windows.Forms.ComboBox SystemSelectComboBox;
+        private System.Windows.Forms.Label KmScaleLabel;
+        private System.Windows.Forms.Label AUScaleLabel;
     }
 }
