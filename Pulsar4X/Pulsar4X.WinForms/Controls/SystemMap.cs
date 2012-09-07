@@ -218,9 +218,8 @@ namespace Pulsar4X.WinForms.Controls
         /// <param name="a_dMaxOrbit">The Highest orbiut in the system.</param>
         private void FitZoom(double a_dMaxOrbit)
         {
-            ///< @todo function to it the system to the screen. 100 needs to be replaced with actual max orbit...
-            double dZoomFactor = ((this.Size.Width / m_GLCanvas.ZoomFactor * 10) / (100 * Pulsar4X.Constants.Units.KM_PER_AU));
-            m_GLCanvas.ZoomFactor = (float)MathHelper.NextPowerOfTwo(dZoomFactor);
+            double dZoomFactor = ((this.Size.Width / m_GLCanvas.ZoomFactor) / (a_dMaxOrbit * 2));
+            m_GLCanvas.ZoomFactor = (float)dZoomFactor; 
         }
 
         /// <summary>
