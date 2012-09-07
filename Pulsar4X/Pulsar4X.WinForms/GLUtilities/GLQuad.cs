@@ -46,10 +46,10 @@ namespace Pulsar4X.WinForms.GLUtilities
 
             //setup our quads vertcies:
             m_aoVerticies = new GLVertex[4];
-            m_aoVerticies[0] = new GLVertex(new Vector3d(-0.5 * m_v2Size.X, -0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(0.0f, 1.0f));
-            m_aoVerticies[1] = new GLVertex(new Vector3d(0.5 * m_v2Size.X, -0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(1.0f, 1.0f));
-            m_aoVerticies[2] = new GLVertex(new Vector3d(-0.5 * m_v2Size.X, 0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(0.0f, 0.0f));
-            m_aoVerticies[3] = new GLVertex(new Vector3d(0.5 * m_v2Size.X, 0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(1.0f, 0.0f));
+            m_aoVerticies[0] = new GLVertex(new Vector3(-0.5f * m_v2Size.X, -0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(0.0f, 1.0f));
+            m_aoVerticies[1] = new GLVertex(new Vector3(0.5f * m_v2Size.X, -0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(1.0f, 1.0f));
+            m_aoVerticies[2] = new GLVertex(new Vector3(-0.5f * m_v2Size.X, 0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(0.0f, 0.0f));
+            m_aoVerticies[3] = new GLVertex(new Vector3(0.5f * m_v2Size.X, 0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(1.0f, 0.0f));
 
             // Setup Draw order. *this apears to have no effect under GL2.X*
             m_auiIndicies = new ushort[4];
@@ -81,9 +81,9 @@ namespace Pulsar4X.WinForms.GLUtilities
             //#endif
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);    // Switch back to our Buffer Object as the current buffer.
-            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Double, false, GLVertex.SizeInBytes(), 0);  // Tells OpenGL about the first three doubles in the vbo, i.e the position of the vertex.
-            GL.VertexAttribPointer(1, 4, VertexAttribPointerType.HalfFloat, true, GLVertex.SizeInBytes(), Vector3d.SizeInBytes); // tells OpenGL about the 4 half floats used to repesent color.
-            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector3d.SizeInBytes + Vector4h.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
+            GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), 0);  // Tells OpenGL about the first three doubles in the vbo, i.e the position of the vertex.
+            GL.VertexAttribPointer(1, 4, VertexAttribPointerType.HalfFloat, true, GLVertex.SizeInBytes(), Vector3.SizeInBytes); // tells OpenGL about the 4 half floats used to repesent color.
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector3.SizeInBytes + Vector4h.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
             //#if DEBUG
             //        logger.Info("OpenGL Create Vertes Attribute Pointers: " + GL.GetError().ToString());
             //#endif

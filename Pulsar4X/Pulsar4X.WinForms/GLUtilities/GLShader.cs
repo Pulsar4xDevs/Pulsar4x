@@ -223,9 +223,9 @@ void main()
             // The Following Bind our Projection, view (camera) and model Matricies in c# to the corosponding vars in the shader program
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
             m_aiShaderMatrixLocations = new int[3];     // create memory.
-            logger.Info("OpenGL Bind Projection Matrix to Shader Code: " + GL.GetError().ToString());
-            logger.Info("OpenGL Bind View Matrix to Shader Code: " + GL.GetError().ToString());
-            logger.Info("OpenGL Bind Model Matrix to Shader Code: " + GL.GetError().ToString());
+            m_aiShaderMatrixLocations[0] = GL.GetUniformLocation(m_iShaderProgramHandle, "ProjectionMatrix");
+            m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
+            m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
             logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.

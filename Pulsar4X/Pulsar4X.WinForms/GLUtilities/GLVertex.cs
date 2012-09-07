@@ -23,7 +23,7 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// <summary>
         /// The Vertix position Relative to the position of the whole object of which this vertex is a part of.
         /// </summary>lo
-        public OpenTK.Vector3d   m_v3Position;
+        public OpenTK.Vector3   m_v3Position;
 
         /// <summary>
         /// The Color of the vertex. We are using a Half size float because each chanle only needs 8 bits of data, 
@@ -52,14 +52,14 @@ namespace Pulsar4X.WinForms.GLUtilities
         //    m_v2UV.Y = 0;
         //}
 
-        public GLVertex(OpenTK.Vector3d a_v3Position, OpenTK.Vector4h a_v4Color, OpenTK.Vector2 a_v2UV)
+        public GLVertex(OpenTK.Vector3 a_v3Position, OpenTK.Vector4h a_v4Color, OpenTK.Vector2 a_v2UV)
         {
             m_v3Position = a_v3Position;
             m_v4Color = a_v4Color;
             m_v2UV = a_v2UV;
         }
 
-        public GLVertex(OpenTK.Vector3d a_v3Position, System.Drawing.Color a_oColor, OpenTK.Vector2 a_v2UV)
+        public GLVertex(OpenTK.Vector3 a_v3Position, System.Drawing.Color a_oColor, OpenTK.Vector2 a_v2UV)
         {
             m_v3Position = a_v3Position;
             // We order the color RGBA because this is the order expected by OpenGL/Graphics card.
@@ -88,7 +88,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             //int temp = Vector3.SizeInBytes + Vector4h.SizeInBytes + Vector2.SizeInBytes;
             //GLVertex temp3 = new GLVertex();
             //int temp2 = System.Runtime.InteropServices.Marshal.SizeOf(temp3);
-            return (Vector3d.SizeInBytes + Vector4h.SizeInBytes + Vector2.SizeInBytes);
+            return (Vector3.SizeInBytes + Vector4h.SizeInBytes + Vector2.SizeInBytes);
         }
 
         // Note the below code can be used to test that this struct is Bittable. It return true as of 26/8/12.
