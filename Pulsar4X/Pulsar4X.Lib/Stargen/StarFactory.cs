@@ -83,8 +83,8 @@ namespace Pulsar4X.Stargen
 
                 star.Color = ColorLookup[star.Spectrum][0];
 
-                if (i > 0)
-                    star.OrbitalRadius = MathUtilities.Random.NextDouble(0.5, 100);
+                if (i > 1)
+                    star.OrbitalRadius = MathUtilities.Random.NextDouble(0.5, 50);
                 else
                     star.OrbitalRadius = 0.0;
 

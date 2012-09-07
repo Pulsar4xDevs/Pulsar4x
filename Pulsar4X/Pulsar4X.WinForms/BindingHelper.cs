@@ -50,6 +50,16 @@ namespace Pulsar4X
             control.DataBindings.Add(Name(controlProperty), dataSource, Name(dataMember));
         }
 
+        public static void Bind<TC, TD, TP>(this TC control, Expression<Func<TC, TP>> controlProperty, TD dataSource, Expression<Func<TD, TP>> dataMember, DataSourceUpdateMode dataSourceUpdateMode) where TC : Control
+        {
+            control.DataBindings.Add(Name(controlProperty), dataSource, Name(dataMember), true, dataSourceUpdateMode);
+        }
+
+        public static void Bind<TC, TD, TP>(this TC control, Expression<Func<TC, TP>> controlProperty, TD dataSource, Expression<Func<TD, TP>> dataMember, DataSourceUpdateMode dataSourceUpdateMode, object nullValue) where TC : Control
+        {
+            control.DataBindings.Add(Name(controlProperty), dataSource, Name(dataMember), true, dataSourceUpdateMode, nullValue);
+        }
+
         public static void BindLabelText<T>(this Label control, T dataObject, Expression<Func<T, object>> dataMember)
         {
             // as this is way one any type of property is ok

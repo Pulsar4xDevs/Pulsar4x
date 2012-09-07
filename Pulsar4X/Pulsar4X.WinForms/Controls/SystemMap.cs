@@ -118,6 +118,8 @@ namespace Pulsar4X.WinForms.Controls
                 return;
             }
 
+            Cursor.Current = Cursors.WaitCursor;
+
             // test code only, just to see how bad the scale issue is.
             // for star color later: http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
             // or this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/tool_pl.txt 
@@ -186,6 +188,8 @@ namespace Pulsar4X.WinForms.Controls
                 //break;
                 iCounter++;
             }
+
+            Cursor.Current = Cursors.Default;
 
             
 

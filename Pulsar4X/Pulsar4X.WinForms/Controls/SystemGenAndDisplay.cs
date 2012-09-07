@@ -21,7 +21,7 @@ namespace Pulsar4X.WinForms.Controls
             VM = new StarSystemViewModel();
 
             NameListBox.DataSource = VM.StarSystems;
-            NameListBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem);
+            NameListBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem, DataSourceUpdateMode.OnPropertyChanged);
             NameListBox.DisplayMember = "Name";
 
             NameListBox.SelectedIndexChanged +=

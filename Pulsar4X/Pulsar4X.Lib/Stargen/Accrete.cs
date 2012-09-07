@@ -48,6 +48,21 @@ namespace Pulsar4X.Stargen
                 var star = starSystem.Stars[i];
                 var protoStar = new ProtoStar(star);
 
+                for (int j = 0; j < starSystem.Stars.Count; j++)
+                {
+                    if (i != j)
+                    {
+                        // Forbidden zone inner is 1/3 of the minimum seperation
+                        // Forbidden zone outer is 3x the maximum seperation
+                        // TODO: Add in effect of eccentricities
+                        var minseperation = Math.Abs(starSystem.Stars[j].OrbitalRadius - starSystem.Stars[i].OrbitalRadius);
+                        var maxseperation = Math.Abs(starSystem.Stars[j].OrbitalRadius + starSystem.Stars[i].OrbitalRadius);
+                        var inner = minseperation / 3.0;
+                        var outer = maxseperation * 3.0;
+                        protoStar.UpdateDust(inner, outer, false);
+                    }
+                }
+
                 //protoStar.DistributePlanetaryMasses(rnd);
                 int counter = 0;
                 while (protoStar.DustAvailable)
