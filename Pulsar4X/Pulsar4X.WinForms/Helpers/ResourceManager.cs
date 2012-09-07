@@ -39,7 +39,7 @@ namespace Pulsar4X.Helpers
         /// </summary>
         class TextureData
         {
-            public int m_iUseCount = 0;
+            public uint m_uiUseCount = 0;
             public uint m_uiTextureID = 0;
             public string m_szTextureFile = "null";
         }
@@ -61,6 +61,7 @@ namespace Pulsar4X.Helpers
             bool test = m_dicTextures.TryGetValue(a_szTextureFile, out oTexture);
             if (test)
             {
+                oTexture.m_uiUseCount++;
                 return oTexture.m_uiTextureID;
             }
 
@@ -75,7 +76,7 @@ namespace Pulsar4X.Helpers
             // Create New Texture Data:
             TextureData oNewTexture = new TextureData();
             oNewTexture.m_szTextureFile = a_szTextureFile;
-            oNewTexture.m_iUseCount = 1;
+            oNewTexture.m_uiUseCount = 1;
 
             // load the file into a bitmap
             System.Drawing.Bitmap oTextureBitmap = new System.Drawing.Bitmap(a_szTextureFile);

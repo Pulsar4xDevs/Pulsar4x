@@ -118,6 +118,7 @@ namespace Pulsar4X.WinForms.Controls
                 return;
             }
 
+            // Change cursor to wait
             Cursor.Current = Cursors.WaitCursor;
 
             // test code only, just to see how bad the scale issue is.
@@ -189,11 +190,10 @@ namespace Pulsar4X.WinForms.Controls
                 iCounter++;
             }
 
+            // Change Cursor Back to default.
             Cursor.Current = Cursors.Default;
 
-            
-
-
+            FitZoom();
         }
 
         private void SystemSelectComboBox_SelectionChangeCommitted(object sender, EventArgs e)
@@ -208,6 +208,15 @@ namespace Pulsar4X.WinForms.Controls
             KmScaleLabel.Text = "Km = " + dKmscale.ToString();
             AUScaleLabel.Text = "AU = " + dAUScale.ToString();
         }
-        
+
+
+        private void FitZoom()
+        {
+            ///< @todo function to it the system to the screen. 100 needs to be replaced with actual max orbit...
+            double dZoomFactor = ((this.Size.Width / m_GLCanvas.ZoomFactor * 10) / (100 * Pulsar4X.Constants.Units.KM_PER_AU));
+            m_GLCanvas.ZoomFactor = (float)MathHelper.NextPowerOfTwo(dZoomFactor);
+        }
+
+
     }
 }
