@@ -9,10 +9,15 @@ using System.Windows.Forms;
 
 namespace Pulsar4X
 {
+    /// <summary> This the Primary Form for the program, all other UI elements hang of this in some way.</summary>
     public partial class MainForm : Form
     {
+        /// <summary> The main tab control </summary>
         Pulsar4X.WinForms.Controls.DraggableTabControl m_MainTabControl = new Pulsar4X.WinForms.Controls.DraggableTabControl();
 
+
+        /// <summary>   Default constructor. </summary>
+        /// <remarks>   Gregory.nott, 9/7/2012. </remarks>
         public MainForm()
         {
             InitializeComponent();
@@ -20,11 +25,18 @@ namespace Pulsar4X
             m_MainTabControl.Dock = DockStyle.Fill;
         }
 
+
+        /// <summary>   Gets the main panel. used For the Draggable Tabs </summary>
+        /// <returns>   The main panel. </returns>
         public Panel GetMainPanel()
         {
             return MainPanel;
         }
 
+
+        /// <summary>   Event handler. Called by MainForm for load events. </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information. </param>
         private void MainForm_Load(object sender, EventArgs e)
         {
             // Load in the dragable tabs here, setup ref. list to all tabs?
@@ -32,7 +44,7 @@ namespace Pulsar4X
             m_MainTabControl.MinimumSize = new System.Drawing.Size(1008, 706);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[3]);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[0]);
-           //m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
+            m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
 
             MainPanel.Controls.Add(m_MainTabControl);
             
@@ -42,36 +54,41 @@ namespace Pulsar4X
             Pulsar4X.WinForms.Forms.StartupSplashScreen.CloseForm();
         }
 
-        private void MainForm_Resize(object sender, EventArgs e)
-        {
-            Size newSize = this.Size;
-            newSize.Width -= 42;            // Adjust size width to keet boarders
-            newSize.Height -= 63;           // Adjust size height to keep boarders.
-            MainPanel.Size = newSize;       // Set new MainPanel Size
 
-            foreach (Control control in MainPanel.Controls)
-            {
-                control.Size = newSize; // this will edit the size of any sub forms. there will generall only be the one DraggableTabControl.
-            }
-        }
-
+        /// <summary>   Event handler. Called by exitToolStripMenuItem for click events. </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information. </param>
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
+        
+        /// <summary>   Event handler. Called by systemMapToolStripMenuItem for click events. </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information. </param>
         private void systemMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show System Map.
             WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_MAP_INDEX);
         }
 
+
+        /// <summary>   Event handler. Called by aboutToolStripMenuItem for click events. </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information. </param>
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Pulsar4X.WinForms.Forms.AboutBox AboutBox = new WinForms.Forms.AboutBox();
             AboutBox.Show();
         }
 
+
+        /// <summary>
+        /// Event handler. Called by systemInformationToolStripMenuItem for click events.
+        /// </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information. </param>
         private void systemInformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show System information tab.

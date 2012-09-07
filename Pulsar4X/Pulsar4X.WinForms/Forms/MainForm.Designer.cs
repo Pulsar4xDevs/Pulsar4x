@@ -39,8 +39,8 @@
             this.spaceMasterOnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.spaceMasterOffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.empiresToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.calculationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameParametersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miscellaneousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,6 +53,9 @@
             // 
             // MainMenu
             // 
+            this.MainMenu.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.MainMenu.Dock = System.Windows.Forms.DockStyle.None;
             this.MainMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.gameToolStripMenuItem,
             this.spaceMasterToolStripMenuItem,
@@ -63,7 +66,7 @@
             this.helpToolStripMenuItem});
             this.MainMenu.Location = new System.Drawing.Point(0, 0);
             this.MainMenu.Name = "MainMenu";
-            this.MainMenu.Size = new System.Drawing.Size(1008, 24);
+            this.MainMenu.Size = new System.Drawing.Size(537, 24);
             this.MainMenu.TabIndex = 1;
             this.MainMenu.TabStop = true;
             this.MainMenu.Text = "MainMenu";
@@ -145,14 +148,6 @@
             this.empiresToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.empiresToolStripMenuItem.Text = "&Empire";
             // 
-            // systemInformationToolStripMenuItem
-            // 
-            this.systemInformationToolStripMenuItem.Name = "systemInformationToolStripMenuItem";
-            this.systemInformationToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
-            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.systemInformationToolStripMenuItem.Text = "System Information";
-            this.systemInformationToolStripMenuItem.Click += new System.EventHandler(this.systemInformationToolStripMenuItem_Click);
-            // 
             // systemMapToolStripMenuItem
             // 
             this.systemMapToolStripMenuItem.Name = "systemMapToolStripMenuItem";
@@ -160,6 +155,14 @@
             this.systemMapToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.systemMapToolStripMenuItem.Text = "System Map";
             this.systemMapToolStripMenuItem.Click += new System.EventHandler(this.systemMapToolStripMenuItem_Click);
+            // 
+            // systemInformationToolStripMenuItem
+            // 
+            this.systemInformationToolStripMenuItem.Name = "systemInformationToolStripMenuItem";
+            this.systemInformationToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
+            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.systemInformationToolStripMenuItem.Text = "System Information";
+            this.systemInformationToolStripMenuItem.Click += new System.EventHandler(this.systemInformationToolStripMenuItem_Click);
             // 
             // calculationsToolStripMenuItem
             // 
@@ -191,14 +194,14 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // informationToolStripMenuItem
             // 
             this.informationToolStripMenuItem.Name = "informationToolStripMenuItem";
-            this.informationToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.informationToolStripMenuItem.Size = new System.Drawing.Size(137, 22);
             this.informationToolStripMenuItem.Text = "Information";
             // 
             // MainPanel
@@ -225,7 +228,6 @@
             this.Name = "MainForm";
             this.Text = "Pulsar4X";
             this.Load += new System.EventHandler(this.MainForm_Load);
-            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
             this.ResumeLayout(false);

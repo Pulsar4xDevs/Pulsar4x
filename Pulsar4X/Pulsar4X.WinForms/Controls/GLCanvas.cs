@@ -29,6 +29,9 @@ namespace Pulsar4X.WinForms.Controls
 
         /// <summary> The shader program used by default.</summary>
         protected GLUtilities.GLShader m_oShaderProgram;
+
+        /// <summary>   Gets the default shader. </summary>
+        /// <value> The default shader. </value>
         public GLUtilities.GLShader DefaultShader
         {
             get
@@ -47,7 +50,6 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         protected float m_fZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
 
-
         /// <summary> The view offset, i.e. how much the view should be offset from 0, 0 </summary>
         protected Vector3 m_v3ViewOffset = new Vector3(0, 0, 0);
 
@@ -61,6 +63,8 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         protected List<GLUtilities.GLPrimitive> m_loRenderList = new List<GLUtilities.GLPrimitive>();
 
+        /// <summary> Gets the list of Objects for render </summary>
+        /// <value> A List of GLPrimitives for render </value>
         public List<GLUtilities.GLPrimitive> RenderList
         {
             get
@@ -69,7 +73,7 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
-        /// <summary>   Gets or sets the zoom factor. </summary>
+        /// <summary> Gets or sets the zoom factor. </summary>
         /// <value> The zoom factor. </value>
         public float ZoomFactor
         {
@@ -90,6 +94,8 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
+
+        ///< @todo FPS counter,  For testing will need to be either deleted or cleaned up at some point
         protected float m_fps = 0;
         public float FPS
         {
@@ -100,39 +106,59 @@ namespace Pulsar4X.WinForms.Controls
         }
 
 
+        /// <summary>   Default constructor. </summary>
         public GLCanvas()
         {
             RegisterEventHandlers();
         }
 
+        /// <summary> Constructor. </summary>
+        /// <param name="a_oGraphicsMode">  The openGL graphics mode. </param>
         public GLCanvas(GraphicsMode a_oGraphicsMode)
             : base(a_oGraphicsMode)
         {
             RegisterEventHandlers();
         }
 
+
+        /// <summary>   Constructor. </summary>
+        /// <remarks>   Gregory.nott, 9/7/2012. </remarks>
+        /// <param name="a_oGraphicsMode">  The openGL graphics mode. </param>
+        /// <param name="a_iMajor">  The Major part of the openGL Version (1, 2, 3 or 4). </param>
+        /// <param name="a_iMinor">  The minor part of the openGL version.</param>
+        /// <param name="a_eFlags">  (optional) Any OpenGL Flags, e.g. Debug or Normal</param>
         public GLCanvas(GraphicsMode a_oGraphicsMode, int a_iMajor, int a_iMinor, GraphicsContextFlags a_eFlags = GraphicsContextFlags.Default)
             : base(a_oGraphicsMode, a_iMajor, a_iMinor, a_eFlags)
         {
             RegisterEventHandlers();
         }
 
+        /// <summary> Registers the event handlers. </summary>
         private void RegisterEventHandlers()
         {
             // Below we setup even handlers for this class:
-            Load += new System.EventHandler(this.OnLoad);                           // Setep Load Event Handler
-            Resize += new System.EventHandler(this.OnResize);                       // Setep Resize Event Handler
-            Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);      // Setep Paint Event Handler
-            SizeChanged += new System.EventHandler(this.OnSizeChange);
-            MouseMove += new MouseEventHandler(OnMouseMove);
-            MouseDown += new MouseEventHandler(OnMouseDown);
+            Load += new System.EventHandler(this.OnLoad);                           // Setup Load Event Handler
+            Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);      // Setup Paint Event Handler
+            SizeChanged += new System.EventHandler(this.OnSizeChange);              // Setup Size Changed Enet Handler.
+            MouseMove += new MouseEventHandler(OnMouseMove);                        // Setup Mouse Move Event handler
+            MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
             //MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
         }
 
         public abstract void OnLoad(object sender, EventArgs e);
+
+        /// <summary> Executes the size change action. </summary>
+        /// <remarks> Must be overloaded by the inherited classes. 
+        /// 		  This is needed to update the view and projection matricies whenever the form size changes.
+        /// 		  If these matricies are not updates then the view will be cut off and not draw for the whole screen. </remarks>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
         public abstract void OnSizeChange(object sender, EventArgs e);
 
+        /// <summary>   Paints this window, Calles the Render() functio to make sure our sceen is rendered. </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
         public void OnPaint(object sender, PaintEventArgs e)
         {
             if (!m_bLoaded)
@@ -144,6 +170,9 @@ namespace Pulsar4X.WinForms.Controls
             this.Invalidate();
         }
 
+        /// <summary>   Event handler. Called by Application for idle events. Keeps the Canvas rendering evan when nothing is happening! </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
         public void Application_Idle(object sender, EventArgs e)
         {
             if (m_bLoaded != true)
@@ -154,13 +183,10 @@ namespace Pulsar4X.WinForms.Controls
             this.Invalidate();
         }
 
-        public virtual void OnResize(object sender, EventArgs e)
-        {
-            this.Size = this.Parent.Size;               // Set this controls size to be the same as the parent. This is assuemd to be safe.
-            SetupViewPort(0, 0, this.Size.Height, this.Size.Width);  // Setup viewport again.
-            this.Invalidate();                                       // Force redraw.
-        }
 
+        /// <summary>   Executes the mouse move action. i.e. Panning </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -181,6 +207,10 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
+
+        /// <summary>   Executes the mouse down action. i.e. Start panning </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
             // An left mouse down, start pan.
@@ -196,6 +226,8 @@ namespace Pulsar4X.WinForms.Controls
                 this.CenterOnZero();
             }
         }
+
+
         /*
         private void OnMouseUp(object sender, MouseEventArgs e)
         {
@@ -242,12 +274,12 @@ namespace Pulsar4X.WinForms.Controls
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.Translation(m_v3ViewOffset);
         }
 
-
+        /// <summary>   Adds a GLPrimitive to the render list. </summary>
+        /// <param name="a_oPrimitive"> The primitive to add. </param>
         public void AddToRenderList(GLUtilities.GLPrimitive a_oPrimitive)
         {
             m_loRenderList.Add(a_oPrimitive);
         }
-
 
         public abstract void IncreaseZoomScaler();
 
@@ -262,6 +294,5 @@ namespace Pulsar4X.WinForms.Controls
         public abstract void Render();
 
         public abstract void TestFunc(int a_itest);
-
     }
 }
