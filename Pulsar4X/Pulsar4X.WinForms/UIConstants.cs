@@ -57,11 +57,13 @@ namespace Pulsar4X.WinForms
         /// </summary>
         public const string ABOUT_BOX_TEXT =    "Pulsa4X\n" +
                                                 "A Fan work recreation of Aurora4x in C#\n" +
-                                                "Version 0.0.0.1 Pre-Alpha\n\n" +
-                                                "Desgined By ...\n" +
-                                                "Written By ... \n\n" +
+                                                "Version 0.0.0.2 Pre-Alpha\n\n" +
+                                                "Contributors: Antagonist, clement, HailRyan, Nathan, SnopyDogy, Sublight.\n" +
+                                                "Testers: joe \n" +
+                                                "Hosting Provided by: Eric Luken \n\n" + 
                                                 "Forums: http://aurora2.pentarch.org/index.php/board,169.0.html \n" +
-                                                "Wiki: http://pulsar4x.pentarch.org/wiki/index.php?title=Main_Page \n";
+                                                "Wiki: http://pulsar4x.pentarch.org/wiki/index.php?title=Main_Page \n" +
+                                                "GitHub Org: https://github.com/Pulsar4xDevs \n";
 
 
         public const float ZOOM_DEFAULT_SCALLER = 1.0f;

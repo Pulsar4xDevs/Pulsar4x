@@ -35,6 +35,11 @@ namespace Pulsar4X
            //m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
 
             MainPanel.Controls.Add(m_MainTabControl);
+            
+            // close splash screen:
+            Pulsar4X.WinForms.Forms.StartupSplashScreen.SetStatus("Starting...");
+            Pulsar4X.WinForms.Forms.StartupSplashScreen.Progress = 0.9;
+            Pulsar4X.WinForms.Forms.StartupSplashScreen.CloseForm();
         }
 
         private void MainForm_Resize(object sender, EventArgs e)

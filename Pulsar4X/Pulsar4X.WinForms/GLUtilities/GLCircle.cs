@@ -18,7 +18,6 @@ namespace Pulsar4X.WinForms.GLUtilities
     /// </summary>
     class GLCircle : GLPrimitive
     {
-
         /// <summary>   Constructor. </summary>
         /// <param name="a_oShaderProgram"> The Shader program to use when rendering. </param>
         /// <param name="a_v3Pos">          The Position of the circle. </param>

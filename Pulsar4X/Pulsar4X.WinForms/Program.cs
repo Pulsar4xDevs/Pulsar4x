@@ -25,26 +25,26 @@ namespace Pulsar4X.WinForms
             AppDomain.CurrentDomain.FirstChanceException += new EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs>(CurrentDomain_FirstChanceException);
 
             Forms.StartupSplashScreen.SetStatus("Loading Configuration...");
-            Forms.StartupSplashScreen.Progress = 0.25;
+            Forms.StartupSplashScreen.Progress = 0.2;
             XmlConfigurator.Configure();
 
             logger.Info("Program Started");
 
             Forms.StartupSplashScreen.SetStatus("Initializing data...");
-            Forms.StartupSplashScreen.Progress = 0.35;
+            Forms.StartupSplashScreen.Progress = 0.3;
             var ssf = new StarSystemFactory(true);
             GameState.Instance.StarSystems.Add(ssf.Create("Test"));
             GameState.Instance.StarSystems.Add(ssf.Create("Foo"));
             GameState.Instance.StarSystems.Add(ssf.Create("Bar"));
 
             Forms.StartupSplashScreen.SetStatus("Initialising Controls...");
-            Forms.StartupSplashScreen.Progress = 0.5;
+            Forms.StartupSplashScreen.Progress = 0.45;
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Pulsar4X.WinForms.Controls.UIController UIComponentControler = new Controls.UIController();
 
             Forms.StartupSplashScreen.SetStatus("Testing For OpenGL...");
-            Forms.StartupSplashScreen.Progress = 0.75;
+            Forms.StartupSplashScreen.Progress = 0.7;
             bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise();  // Get the best possible version of OpenGL
             //bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise(OpenTKUtilities.GLVersion.OpenGL2X); // force GL2.0
             if (bOpenTKInitOK == false)
@@ -53,10 +53,10 @@ namespace Pulsar4X.WinForms
                 logger.Warn("Error Initialising OpenTK and OpenGL. System and Glaaxy Maps May not work correctly!");
             }
 
-            // Close splash screen:
+            // Starting:
             Forms.StartupSplashScreen.SetStatus("Starting...");
-            Forms.StartupSplashScreen.Progress = 1.0;
-            Forms.StartupSplashScreen.CloseForm();
+            Forms.StartupSplashScreen.Progress = 0.8;
+            // note that main form will close the splash screen on load!!
             Application.Run(Controls.UIController.g_aMainForm);
             
             /*
