@@ -55,8 +55,12 @@ namespace Pulsar4X.Stargen
                         // Forbidden zone inner is 1/3 of the minimum seperation
                         // Forbidden zone outer is 3x the maximum seperation
                         // TODO: Add in effect of eccentricities
-                        var minseperation = Math.Abs(starSystem.Stars[j].OrbitalRadius - starSystem.Stars[i].OrbitalRadius);
-                        var maxseperation = Math.Abs(starSystem.Stars[j].OrbitalRadius + starSystem.Stars[i].OrbitalRadius);
+                        double minseperation = Math.Abs(starSystem.Stars[j].OrbitalRadius - starSystem.Stars[i].OrbitalRadius);
+                        double maxseperation;
+                        if (i == 0)
+                            maxseperation = Math.Abs(starSystem.Stars[j].OrbitalRadius + starSystem.Stars[i].OrbitalRadius);
+                        else
+                            maxseperation = 200;
                         var inner = minseperation / 3.0;
                         var outer = maxseperation * 3.0;
                         protoStar.UpdateDust(inner, outer, false);
