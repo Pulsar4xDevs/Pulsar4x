@@ -37,7 +37,7 @@ namespace Pulsar4X.Lib
 		}
 
 
-		public void FindPolarPosition(Orbit theOrbit, long secondsSinceEpoch, ref double angle, ref double radius)
+		public void FindPolarPosition(Orbit theOrbit, long secondsSinceEpoch, out double angle, out double radius)
 		{
 			long orbitPeriod = (long) (Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / theOrbit.StandGrav));
             double orbitFraction = 1.0 * ((secondsSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
@@ -71,8 +71,8 @@ namespace Pulsar4X.Lib
 
 		public void FindCartesianPosition(Orbit theOrbit, long secondsSinceEpoch, ref double x, ref double y)
 		{
-			double angle = 0, radius = 0;
-			FindPolarPosition(theOrbit, secondsSinceEpoch, ref angle, ref radius);
+			double angle, radius;
+			FindPolarPosition(theOrbit, secondsSinceEpoch, out angle, out radius);
 			x = -1 * radius * Math.Sin(angle);
 			y = radius * Math.Cos(angle);
 		}

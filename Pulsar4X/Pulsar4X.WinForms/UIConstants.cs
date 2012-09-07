@@ -53,6 +53,16 @@ namespace Pulsar4X.WinForms
         }
 
         /// <summary>
+        /// Texture File Paths.
+        /// </summary>
+        public class Textures
+        {
+            public const string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
+            public const string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
+        }
+
+
+        /// <summary>
         /// About Box Text.
         /// </summary>
         public const string ABOUT_BOX_TEXT =    "Pulsa4X\n" +

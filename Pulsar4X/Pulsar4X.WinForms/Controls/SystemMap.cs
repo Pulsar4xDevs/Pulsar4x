@@ -155,7 +155,7 @@ namespace Pulsar4X.WinForms.Controls
                                                                         v3StarPos,
                                                                         new Vector2(fSize, fSize), 
                                                                         Color.FromArgb(255, 255, 255, 0),    // yellow!
-                                                                        "./Resources/Textures/DefaultIcon.png");
+                                                                        UIConstants.Textures.DEFAULT_PLANET_ICON);
                 m_GLCanvas.AddToRenderList(oStarQuad);
 
                 // now go though and add each planet to render list.
@@ -174,12 +174,12 @@ namespace Pulsar4X.WinForms.Controls
                         new Vector3((float)fOrbitRadius, 0, 0) + v3StarPos,                                    // offset Pos by parent star pos
                         new Vector2(fPlanetSize, fPlanetSize),
                         Color.FromArgb(255, 50, 205, 50),  // lime green
-                        "./Resources/Textures/DefaultIcon.png");
+                        UIConstants.Textures.DEFAULT_PLANET_ICON);
                     GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
                         v3StarPos,                                                                      // base around parent star pos.
                         (float)fOrbitRadius, 
                         Color.FromArgb(255, 50, 205, 50),  // lime green
-                        "./Resources/Textures/DefaultTexture.png");
+                        UIConstants.Textures.DEFAULT_TEXTURE);
 
                     m_GLCanvas.AddToRenderList(oPlanetQuad);
                     m_GLCanvas.AddToRenderList(oPlanetOrbitCirc);

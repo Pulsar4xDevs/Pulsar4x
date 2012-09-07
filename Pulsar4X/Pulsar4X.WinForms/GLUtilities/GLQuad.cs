@@ -37,7 +37,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             if (a_szTexture != "")
             {
                 // We can assuem we have been provided with a texture to load:
-                m_uiTextureID = OpenTKUtilities.LoadTexture(a_szTexture);
+                m_uiTextureID = Helpers.ResourceManager.Instance.LoadTexture(a_szTexture);
             }
             else
             {
