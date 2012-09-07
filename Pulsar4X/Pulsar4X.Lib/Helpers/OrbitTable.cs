@@ -8,9 +8,9 @@ namespace Pulsar4X.Lib
 {
 	public class OrbitTable
 	{
-		private static int nodes = 25;		//Each table point reprsents 1/(2n)th of an orbital period
+		private static uint nodes = 25;		//Each table point reprsents 1/(2n)th of an orbital period
 		private static int N_orbits = 10;	//Each each orbital excentricy has a different profile.
-		private static double[][] table = new double[orbits+1][nodes];
+		private static double[,] table = new double[N_orbits+1, nodes];
 
 		public OrbitTable ()
 		{
@@ -19,12 +19,12 @@ namespace Pulsar4X.Lib
 			for (j = 0; j < N_orbits; j++) {
 				double excentricy = 1.0 * j / N_orbits;
 				double angle = 0;
-				table [j] [0] = 0;
+				table[j, 0] = 0;
 
 				int k;
 				for (k = 0; k < nodes * 4; k++) {
 					if (k % 4 == 0)	// the '4' reflects solving for 4x as many points as table elements to improve accuracy.
-						OrbitTable [j] [(int)(k / 4)] = angle;
+                        table[j, (int)(k / 4)] = angle;
 
 					//Secant Predition-Correction Method. 
 					//Pretty good accuracy when excentricy is small. For accuracy with large excentricy smaller steps are required.
@@ -32,15 +32,15 @@ namespace Pulsar4X.Lib
 					double iAngle2 = angle + Math.PI * 2 / (2.0 * nodes * 4) * Math.Pow (1 - excentricy * Math.Cos (iAngle1), 2.0) / Math.Pow (1 - excentricy * excentricy, 1.5);
 					angle = 0.5 * (iAngle1 + iAngle2);
 				}
-				table [j] [nodes] = angle;
+				table [j, nodes] = angle;
 			}
 		}
 
 
 		public void FindPolarPosition(Orbit theOrbit, long secondsSinceEpoch, ref double angle, ref double radius)
 		{
-			long orbitPeriod = (long) Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / theOrbit.StandGrav);
-			double orbitFraction = 1.0 * ((secondsSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
+			long orbitPeriod = (long) (Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / theOrbit.StandGrav));
+            double orbitFraction = 1.0 * ((secondsSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
 			bool mirrorSide = false;
 			if( orbitFraction >= 0.5)
 			{
@@ -48,13 +48,13 @@ namespace Pulsar4X.Lib
 				orbitFraction = 1.0 - orbitFraction;
 			}
 
-			int lowerA = (int) orbitFraction * nodes * 2;
+			int lowerA = (int) (orbitFraction * nodes * 2);
 			int upperA = (int) Math.Ceiling(orbitFraction * nodes * 2);
 			int lowerE = (int) theOrbit.Eccentricity * N_orbits;
 			int upperE = (int) Math.Ceiling(theOrbit.Eccentricity * N_orbits);
 
-			double lowEA = table[lowerE][lowerA] + (table[lowerE][upperA] - table[lowerE][lowerA]) * (orbitFraction * nodes * 2.0 - lowerA);
-			double highEA = table[upperE][lowerA] + (table[upperE][upperA] - table[upperE][lowerA]) * (orbitFraction * nodes * 2.0 - lowerA);
+			double lowEA = table[lowerE, lowerA] + (table[lowerE, upperA] - table[lowerE, lowerA]) * (orbitFraction * nodes * 2.0 - lowerA);
+			double highEA = table[upperE, lowerA] + (table[upperE, upperA] - table[upperE, lowerA]) * (orbitFraction * nodes * 2.0 - lowerA);
 
 			angle = lowEA + (highEA - lowEA) * (theOrbit.Eccentricity * N_orbits - lowerE);
 
@@ -71,8 +71,8 @@ namespace Pulsar4X.Lib
 
 		public void FindCartesianPosition(Orbit theOrbit, long secondsSinceEpoch, ref double x, ref double y)
 		{
-			double angle, radius;
-			FindPolarPosition(theOrbit, secondsSinceEpoch, angle, radius);
+			double angle = 0, radius = 0;
+			FindPolarPosition(theOrbit, secondsSinceEpoch, ref angle, ref radius);
 			x = -1 * radius * Math.Sin(angle);
 			y = radius * Math.Cos(angle);
 		}
