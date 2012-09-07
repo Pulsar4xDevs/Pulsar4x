@@ -131,6 +131,7 @@ namespace Pulsar4X.WinForms.Controls
 
             // add star to centre of the map.
             int iCounter = 0;
+            double dMaxOrbitDist = 0; // used for fit to zoom.
             foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
             {
                 // reset zoom factor:
@@ -148,6 +149,7 @@ namespace Pulsar4X.WinForms.Controls
                     fAngle = MathHelper.DegreesToRadians(fAngle);
                     v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
                     v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
+                    MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
                 }
 
                 float fSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
@@ -165,6 +167,7 @@ namespace Pulsar4X.WinForms.Controls
                 {
                     double fOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
                     float fPlanetSize = (float)oPlanet.Radius * 2 / 10;
+                    MaxOrbitDistTest(ref dMaxOrbitDist, fOrbitRadius);
                     //if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
                    // {
                         // if we are too small, make us bigger for drawing!!
@@ -193,7 +196,7 @@ namespace Pulsar4X.WinForms.Controls
             // Change Cursor Back to default.
             Cursor.Current = Cursors.Default;
 
-            FitZoom();
+            FitZoom(dMaxOrbitDist);
         }
 
         private void SystemSelectComboBox_SelectionChangeCommitted(object sender, EventArgs e)
@@ -209,12 +212,28 @@ namespace Pulsar4X.WinForms.Controls
             AUScaleLabel.Text = "AU = " + dAUScale.ToString();
         }
 
-
-        private void FitZoom()
+        /// <summary>
+        /// This will fit the current zoom level to the system, based on the "Max Orbit" provided.
+        /// </summary>
+        /// <param name="a_dMaxOrbit">The Highest orbiut in the system.</param>
+        private void FitZoom(double a_dMaxOrbit)
         {
             ///< @todo function to it the system to the screen. 100 needs to be replaced with actual max orbit...
             double dZoomFactor = ((this.Size.Width / m_GLCanvas.ZoomFactor * 10) / (100 * Pulsar4X.Constants.Units.KM_PER_AU));
             m_GLCanvas.ZoomFactor = (float)MathHelper.NextPowerOfTwo(dZoomFactor);
+        }
+
+        /// <summary>
+        /// Small Function that will test a current Max orbit against a possible replacment, it will change the current Max orbit if the test is larger.
+        /// </summary>
+        /// <param name="a_dCurrent">Current Max Orbit</param>
+        /// <param name="a_dTest">Orbit to test against</param>
+        private void MaxOrbitDistTest(ref double a_dCurrent, double a_dTest)
+        {
+            if (a_dCurrent < a_dTest)
+            {
+                a_dCurrent = a_dTest;
+            }
         }
 
 
