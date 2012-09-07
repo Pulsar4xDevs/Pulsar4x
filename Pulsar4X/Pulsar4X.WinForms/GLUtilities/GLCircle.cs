@@ -106,9 +106,9 @@ namespace Pulsar4X.WinForms.GLUtilities
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
 
-            #if DEBUG
-                logger.Info("OpenGL Create Circle Primitive: " + GL.GetError().ToString());
-            #endif
+           // #if DEBUG
+           //     logger.Info("OpenGL Create Circle Primitive: " + GL.GetError().ToString());
+            //#endif
         }
 
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)

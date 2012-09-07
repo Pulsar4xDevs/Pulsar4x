@@ -142,9 +142,6 @@ namespace Pulsar4X.WinForms.Controls
                     // then we have a secondary, etc star give random position around its orbit!
                     Random rnd = new Random();
                     float fAngle = rnd.Next(0, 360);
-                    int temp = sizeof(float);
-                    double temp2 = float.MaxValue;
-                    double temp3 = float.MinValue;
                     fAngle = MathHelper.DegreesToRadians(fAngle);
                     v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
                     v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
