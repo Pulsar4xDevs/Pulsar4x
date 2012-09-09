@@ -189,5 +189,17 @@ namespace Pulsar4X.WinForms.GLUtilities
 
             GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
+
+        public virtual void Render()
+        {
+            GL.BindVertexArray(m_uiVextexArrayHandle);
+
+            m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
+
+            //GL.ActiveTexture(TextureUnit.Texture0);
+            OpenTKUtilities.Use2DTexture(m_uiTextureID);
+
+            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+        }
     }
 }

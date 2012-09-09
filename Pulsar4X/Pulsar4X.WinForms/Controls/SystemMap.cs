@@ -14,6 +14,7 @@ using OpenTK.Graphics.OpenGL;
 using log4net.Config;
 using log4net;
 using Pulsar4X.ViewModels;
+using Pulsar4X.WinForms.Controls.SceenGraph;
 
 namespace Pulsar4X.WinForms.Controls
 {
@@ -28,7 +29,11 @@ namespace Pulsar4X.WinForms.Controls
 
         /// <summary> The gl canvas </summary>
         GLCanvas m_GLCanvas;
-        
+
+        List<Sceen> m_lSystemSceens = new List<Sceen>();
+
+        Sceen m_oCurrentSceen;
+
         public SystemMap()
         {
             InitializeComponent();
@@ -109,6 +114,7 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         public void RefreshStarSystem()
         {
+            // We only want to refresh a system when we have a valid GLCanvas:
             if (m_GLCanvas == null)
             {
                 return;
@@ -118,29 +124,81 @@ namespace Pulsar4X.WinForms.Controls
                 return;
             }
 
+            // Now we test to see if we have already loaded this system or if it the current one:
+            if (m_oCurrentSceen == null)
+            {
+                // we have an invalid current system, creat a new one!!
+                CreateNewSystemSceen();
+                return; // we dont need to do anything else, CreateNewSystemSceen took care of it all for us.
+            }
+            else if (m_oCurrentSceen.SceenID != m_oCurrnetSystem.Id)
+            {
+                // check if we have created it previously:
+                bool bSceenFound = false;
+                foreach (Sceen oSceen in m_lSystemSceens)
+                {
+                    if (oSceen.SceenID == m_oCurrnetSystem.Id)
+                    {
+                        // switch our current sceen and break the loop:
+                        SetCurrentSceen(oSceen);
+                        bSceenFound = true;
+                        break;
+                    }
+                }
+
+                // check to see if we found it:
+                if (bSceenFound == false)
+                {
+                    // we didn't, so crest it:
+                    CreateNewSystemSceen();
+                    return; // we dont need to do anything else, CreateNewSystemSceen took care of it all for us.
+                }
+            }
+
+            // As we are refreshing the current system or one previosle turned into a sceen, we do the below:
+
             // Change cursor to wait
             Cursor.Current = Cursors.WaitCursor;
 
-            // test code only, just to see how bad the scale issue is.
-            // for star color later: http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
-            // or this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/tool_pl.txt 
-            // and this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html
-            // or this: http://www.vendian.org/mncharity/dir3/starcolor
-            // For right now to work around float percision and overflow issues 1 am scaling everthing down by a factor of 10.
-            m_GLCanvas.RenderList.Clear(); // clear the render list!!
+            // Do things like update orbits and taskgroups here.
 
-            // add star to centre of the map.
-            int iCounter = 0;
-            double dMaxOrbitDist = 0; // used for fit to zoom.
+            // Change Cursor Back to default.
+            Cursor.Current = Cursors.Default;
+
+        }
+
+        /// <summary>
+        /// Creats a new sceen for the currently selected star system.
+        /// </summary>
+        private void CreateNewSystemSceen()
+        {
+            // Change cursor to wait
+            Cursor.Current = Cursors.WaitCursor;
+
+            // create new sceen root node:
+            Sceen oNewSceen = new Sceen();
+            oNewSceen.SceenID = m_oCurrnetSystem.Id;
+            m_lSystemSceens.Add(oNewSceen);
+            // set sceen to current:
+            SetCurrentSceen(oNewSceen);
+
+            // Creat Working Vars:
+            double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
+            int iCounter = 0;                                                   // Keeps track of the number of stars.
+            double dMaxOrbitDist = 0;                                           // used for fit to zoom.
+            Vector3 v3StarPos = new Vector3(0, 0, 0);                           // used for storing the psoition of the current star in the system
+            float fStarSize = 0.0f;                                             // Size of a star
+            double dPlanetOrbitRadius = 0;                                      // used for holding the orbit in Km for a planet.
+            Vector3 v3PlanetPos = new Vector3(0, 0, 0);                         // Used to store the planet Pos.
+            float fPlanetSize = 0;                                              // used to hold the planets size.
+            double dMoonOrbitRadius = 0;                                        // used for holding the orbit in Km for a Moon.
+            float fMoonSize = 0;                                                // used to hold the Moons size.
+
+            // start creating star branches in the sceen graph:
+            SceenElement oRootStar = new StarElement();
+            SceenElement oCurrStar = oRootStar;
             foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
             {
-                // reset zoom factor:
-                // we need to do this to stop the problem of "big Planets" when changing systems with a non 1.0 zoom factor.
-                m_GLCanvas.ZoomFactor = 1.0f;
-
-                double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10);
-
-                Vector3 v3StarPos = new Vector3(0, 0, 0);
                 if (iCounter > 0)
                 {
                     // then we have a secondary, etc star give random position around its orbit!
@@ -150,53 +208,77 @@ namespace Pulsar4X.WinForms.Controls
                     v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
                     v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
+                    oCurrStar = new StarElement();
                 }
 
-                float fSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
+                fStarSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
 
                 GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                                                                         v3StarPos,
-                                                                        new Vector2(fSize, fSize), 
+                                                                        new Vector2(fStarSize, fStarSize),
                                                                         Color.FromArgb(255, 255, 255, 0),    // yellow!
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
-                m_GLCanvas.AddToRenderList(oStarQuad);
+                oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
+                oCurrStar.EntityID = oStar.Id;
+                oNewSceen.AddElement(oCurrStar);
 
                 // now go though and add each planet to render list.
-
                 foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
                 {
-                    double fOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
-                    float fPlanetSize = (float)oPlanet.Radius * 2 / 10;
-                    MaxOrbitDistTest(ref dMaxOrbitDist, fOrbitRadius);
-                    //if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
-                   // {
-                        // if we are too small, make us bigger for drawing!!
-                       // fPlanetSize = fPlanetSize * 1000;
-                    //}
+                    SceenElement oPlanetElement = new PlanetElement();
+                    oPlanetElement.EntityID = oPlanet.Id;
+
+                    dPlanetOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
+                    fPlanetSize = (float)oPlanet.Radius * 2 / 10;
+                    MaxOrbitDistTest(ref dMaxOrbitDist, dPlanetOrbitRadius);
+                    v3PlanetPos = new Vector3((float)dPlanetOrbitRadius, 0, 0) + v3StarPos; // offset Pos by parent star pos
 
                     GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
-                        new Vector3((float)fOrbitRadius, 0, 0) + v3StarPos,                                    // offset Pos by parent star pos
+                        v3PlanetPos,                                    
                         new Vector2(fPlanetSize, fPlanetSize),
                         Color.FromArgb(255, 50, 205, 50),  // lime green
                         UIConstants.Textures.DEFAULT_PLANET_ICON);
                     GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
                         v3StarPos,                                                                      // base around parent star pos.
-                        (float)fOrbitRadius, 
+                        (float)dPlanetOrbitRadius,
                         Color.FromArgb(255, 50, 205, 50),  // lime green
                         UIConstants.Textures.DEFAULT_TEXTURE);
 
-                    m_GLCanvas.AddToRenderList(oPlanetQuad);
-                    m_GLCanvas.AddToRenderList(oPlanetOrbitCirc);
+                    oPlanetElement.AddPrimitive(oPlanetQuad);
+                    oPlanetElement.AddPrimitive(oPlanetOrbitCirc);
+                    oCurrStar.AddChildElement(oPlanetElement);
+
+                    // now again for the moons:
+                    foreach (Pulsar4X.Entities.Planet oMoon in oPlanet.Moons)
+                    {
+                        SceenElement oMoonElement = new PlanetElement();
+                        oMoonElement.EntityID = oMoon.Id;
+
+                        dMoonOrbitRadius = oMoon.SemiMajorAxis * dKMperAUdevby10;
+                        fMoonSize = (float)oMoon.Radius * 2 / 10;
+
+                        GLUtilities.GLQuad oMoonQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
+                            new Vector3((float)dMoonOrbitRadius, 0, 0) + v3PlanetPos,                                    // offset Pos by parent planet pos
+                            new Vector2(fMoonSize, fMoonSize),
+                            Color.FromArgb(255, 50, 50, 205),  // lime green
+                            UIConstants.Textures.DEFAULT_PLANET_ICON);
+                        GLUtilities.GLCircle oMoonOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
+                            v3PlanetPos,                                                                      // base around parent planet pos.
+                            (float)dMoonOrbitRadius,
+                            Color.FromArgb(255, 50, 50, 205),  // lime green
+                            UIConstants.Textures.DEFAULT_TEXTURE);
+
+                        oMoonElement.AddPrimitive(oMoonQuad);
+                        oMoonElement.AddPrimitive(oMoonOrbitCirc);
+                        oPlanetElement.AddChildElement(oMoonElement);
+                    }
                 }
-                // just do primary for now:
-                //break;
-                iCounter++;
+
+                FitZoom(dMaxOrbitDist);
+
+                // Change Cursor Back to default.
+                Cursor.Current = Cursors.Default;
             }
-
-            // Change Cursor Back to default.
-            Cursor.Current = Cursors.Default;
-
-            FitZoom(dMaxOrbitDist);
         }
 
         private void SystemSelectComboBox_SelectionChangeCommitted(object sender, EventArgs e)
@@ -235,6 +317,94 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
+        /// <summary>
+        /// Sets the Current Sceen
+        /// </summary>
+        /// <param name="a_oSceen">The New Current Sceen</param>
+        private void SetCurrentSceen(Sceen a_oSceen)
+        {
+            m_oCurrentSceen = a_oSceen;
+            m_GLCanvas.SceenToRender = a_oSceen;
+        }
+
 
     }
 }
+
+
+
+
+
+
+
+//// test code only, just to see how bad the scale issue is.
+//// for star color later: http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
+//// or this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/tool_pl.txt 
+//// and this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html
+//// or this: http://www.vendian.org/mncharity/dir3/starcolor
+//// For right now to work around float percision and overflow issues 1 am scaling everthing down by a factor of 10.
+//m_GLCanvas.RenderList.Clear(); // clear the render list!!
+
+//// add star to centre of the map.
+//int iCounter = 0;
+//double dMaxOrbitDist = 0; // used for fit to zoom.
+//foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
+//{
+//    // reset zoom factor:
+//    // we need to do this to stop the problem of "big Planets" when changing systems with a non 1.0 zoom factor.
+//    m_GLCanvas.ZoomFactor = 1.0f;
+
+//    double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10);
+
+//    Vector3 v3StarPos = new Vector3(0, 0, 0);
+//    if (iCounter > 0)
+//    {
+//        // then we have a secondary, etc star give random position around its orbit!
+//        Random rnd = new Random();
+//        float fAngle = rnd.Next(0, 360);
+//        fAngle = MathHelper.DegreesToRadians(fAngle);
+//        v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
+//        v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
+//        MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
+//    }
+
+//    float fSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
+
+//    GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
+//                                                            v3StarPos,
+//                                                            new Vector2(fSize, fSize), 
+//                                                            Color.FromArgb(255, 255, 255, 0),    // yellow!
+//                                                            UIConstants.Textures.DEFAULT_PLANET_ICON);
+//    m_GLCanvas.AddToRenderList(oStarQuad);
+
+//    // now go though and add each planet to render list.
+
+//    foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
+//    {
+//        double fOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
+//        float fPlanetSize = (float)oPlanet.Radius * 2 / 10;
+//        MaxOrbitDistTest(ref dMaxOrbitDist, fOrbitRadius);
+//        //if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
+//       // {
+//            // if we are too small, make us bigger for drawing!!
+//           // fPlanetSize = fPlanetSize * 1000;
+//        //}
+
+//        GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
+//            new Vector3((float)fOrbitRadius, 0, 0) + v3StarPos,                                    // offset Pos by parent star pos
+//            new Vector2(fPlanetSize, fPlanetSize),
+//            Color.FromArgb(255, 50, 205, 50),  // lime green
+//            UIConstants.Textures.DEFAULT_PLANET_ICON);
+//        GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
+//            v3StarPos,                                                                      // base around parent star pos.
+//            (float)fOrbitRadius, 
+//            Color.FromArgb(255, 50, 205, 50),  // lime green
+//            UIConstants.Textures.DEFAULT_TEXTURE);
+
+//        m_GLCanvas.AddToRenderList(oPlanetQuad);
+//        m_GLCanvas.AddToRenderList(oPlanetOrbitCirc);
+//    }
+//    // just do primary for now:
+//    //break;
+//    iCounter++;
+//}

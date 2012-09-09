@@ -12,7 +12,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
     /// <summary>
     /// Root Node of a Sceen Graph
     /// </summary>
-    public class SceenGraph
+    public class Sceen
     {
         /// <summary>
         /// List of all top level Sprites That Make up the Sceen.
@@ -56,9 +56,15 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         private Vector3 m_v3ViewOffset = new Vector3(0, 0, 0);
 
         /// <summary>
+        /// The Sceen ID, this could be a system ID for example.
+        /// </summary>
+        public Guid SceenID { get; set; } 
+
+
+        /// <summary>
         /// Default Constructor.
         /// </summary>
-        public SceenGraph()
+        public Sceen()
         {
         }
 
@@ -82,6 +88,15 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
             {
                 oElement.Refresh(m_fZoomScaler);
             }
+        }
+
+        /// <summary>
+        /// Add an element to the sceen
+        /// </summary>
+        /// <param name="a_oElement"> the Element to add.</param>
+        public void AddElement(SceenElement a_oElement)
+        {
+            m_lElements.Add(a_oElement);
         }
     }
 }

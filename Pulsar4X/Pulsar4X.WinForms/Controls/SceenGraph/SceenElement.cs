@@ -76,6 +76,9 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// </summary>
         public SceenElement()
         {
+            // set some defaults:
+            MinimumSize = new Vector3(32, 32, 0);
+            RenderChildren = true;
         }
 
         /// <summary>
@@ -95,6 +98,22 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// <param name="a_fZoomScaler"></param>
         public abstract void Refresh(float a_fZoomScaler);
 
+        /// <summary>
+        /// Add a primitive to the Sceen Element
+        /// </summary>
+        /// <param name="a_oPrimitive">The Primitive to Add</param>
+        public void AddPrimitive(GLPrimitive a_oPrimitive)
+        {
+            m_lPrimitives.Add(a_oPrimitive);
+        }
 
+        /// <summary>
+        /// Add a Child Element to this element.
+        /// </summary>
+        /// <param name="a_oElement">The element to add.</param>
+        public void AddChildElement(SceenElement a_oElement)
+        {
+            m_lChildren.Add(a_oElement);
+        }
     }
 }

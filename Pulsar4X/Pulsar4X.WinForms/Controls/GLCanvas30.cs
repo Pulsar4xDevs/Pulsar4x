@@ -164,10 +164,13 @@ namespace Pulsar4X.WinForms.Controls
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Clear Back buffer of previous frame.
             
             // call render on all items in the render list:
-            foreach (GLUtilities.GLPrimitive oPrimative in m_loRenderList)
-            {
-                oPrimative.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
-            }
+            //foreach (GLUtilities.GLPrimitive oPrimative in m_loRenderList)
+            //{
+            //    oPrimative.Render(ref m_m4ProjectionMatrix, ref m_m4ViewMatrix);
+            //}
+
+            // call render on the sceen:
+            SceenToRender.Render();
             
             GraphicsContext.CurrentContext.SwapBuffers();
            // #if DEBUG

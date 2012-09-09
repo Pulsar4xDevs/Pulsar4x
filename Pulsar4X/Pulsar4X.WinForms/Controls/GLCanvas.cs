@@ -73,6 +73,8 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
+        public SceenGraph.Sceen SceenToRender { get; set; }
+
         /// <summary> Gets or sets the zoom factor. </summary>
         /// <value> The zoom factor. </value>
         public float ZoomFactor
