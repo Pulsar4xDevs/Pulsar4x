@@ -41,8 +41,8 @@ namespace Pulsar4X.WinForms.GLUtilities
             for (int i = 0; i < iNumOfVerts; ++i)
             {
                 dAngle = i * (MathHelper.TwoPi / iNumOfVerts);
-                fX = (float)Math.Cos(dAngle) * a_fRadus;
-                fY = (float)Math.Sin(dAngle) * a_fRadus;
+                fX = (float)Math.Cos(dAngle) * 1;
+                fY = (float)Math.Sin(dAngle) * 1;
 
                 m_aoVerticies[i].m_v3Position.X = fX;
                 m_aoVerticies[i].m_v3Position.Y = fY;
@@ -55,7 +55,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_auiIndicies[iNumOfVerts] = 0;
 
             // Setup Matrix:
-            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos);
+            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos) * Matrix4.Scale(a_fRadus * 2);
 
             // Set our shader program:
             m_oShaderProgram = a_oShaderProgram;

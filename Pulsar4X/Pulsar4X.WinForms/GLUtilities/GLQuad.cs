@@ -32,7 +32,8 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_v2Size = a_v2Size;
             m_oShaderProgram = a_oShaderProgram;
             m_m4ModelMatrix = Matrix4.Identity;
-            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos);
+            ///< @todo make quads scale better, so it can scale on X or Y...
+            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos) * Matrix4.Scale(m_v2Size.X);  // x and y should be the same, so scale by X
 
             if (a_szTexture != "")
             {
@@ -46,10 +47,10 @@ namespace Pulsar4X.WinForms.GLUtilities
 
             //setup our quads vertcies:
             m_aoVerticies = new GLVertex[4];
-            m_aoVerticies[0] = new GLVertex(new Vector3(-0.5f * m_v2Size.X, -0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(0.0f, 1.0f));
-            m_aoVerticies[1] = new GLVertex(new Vector3(0.5f * m_v2Size.X, -0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(1.0f, 1.0f));
-            m_aoVerticies[2] = new GLVertex(new Vector3(-0.5f * m_v2Size.X, 0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(0.0f, 0.0f));
-            m_aoVerticies[3] = new GLVertex(new Vector3(0.5f * m_v2Size.X, 0.5f * m_v2Size.Y, 0.0f), a_oColor, new Vector2(1.0f, 0.0f));
+            m_aoVerticies[0] = new GLVertex(new Vector3(-0.5f, -0.5f, 0.0f), a_oColor, new Vector2(0.0f, 1.0f));
+            m_aoVerticies[1] = new GLVertex(new Vector3(0.5f, -0.5f, 0.0f), a_oColor, new Vector2(1.0f, 1.0f));
+            m_aoVerticies[2] = new GLVertex(new Vector3(-0.5f, 0.5f, 0.0f), a_oColor, new Vector2(0.0f, 0.0f));
+            m_aoVerticies[3] = new GLVertex(new Vector3(0.5f, 0.5f, 0.0f), a_oColor, new Vector2(1.0f, 0.0f));
 
             // Setup Draw order. *this apears to have no effect under GL2.X*
             m_auiIndicies = new ushort[4];
