@@ -55,6 +55,18 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// </summary>
         private Vector3 m_v3ViewOffset = new Vector3(0, 0, 0);
 
+        public Vector3 ViewOffset
+        {
+            get
+            {
+                return m_v3ViewOffset;
+            }
+            set
+            {
+                m_v3ViewOffset = value;
+            }
+        }
+
         /// <summary>
         /// The Sceen ID, this could be a system ID for example.
         /// </summary>

@@ -68,6 +68,9 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// </summary>
         public float SelectionDistance { get; set; }
 
+        /// <summary>
+        /// If False this element will not render any of its children
+        /// </summary>
         public bool RenderChildren { get; set; }
 
 

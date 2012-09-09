@@ -58,22 +58,34 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         Vector3 m_v3PanStartLocation;
 
-        /// <summary> 
-        /// List of objects to render 
+        /// <summary>
+        /// The Current Sceen for the Canvas to Render.
         /// </summary>
-        protected List<GLUtilities.GLPrimitive> m_loRenderList = new List<GLUtilities.GLPrimitive>();
-
-        /// <summary> Gets the list of Objects for render </summary>
-        /// <value> A List of GLPrimitives for render </value>
-        public List<GLUtilities.GLPrimitive> RenderList
+        protected SceenGraph.Sceen m_oSceenToRender;
+        
+        public SceenGraph.Sceen SceenToRender 
         {
             get
             {
-                return m_loRenderList;
+                return m_oSceenToRender;
+            }
+            set
+            {
+                // first save the view setting to the sceen:
+                if (m_oSceenToRender != null)
+                {
+                    m_oSceenToRender.ViewOffset = m_v3ViewOffset;
+                    m_oSceenToRender.ZoomSclaer = m_fZoomScaler;
+                }
+
+                // Now set our new sceen and view settings.
+                m_oSceenToRender = value;
+                m_fZoomScaler = m_oSceenToRender.ZoomSclaer;
+                m_v3ViewOffset = m_oSceenToRender.ViewOffset;
+                m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+                m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             }
         }
-
-        public SceenGraph.Sceen SceenToRender { get; set; }
 
         /// <summary> Gets or sets the zoom factor. </summary>
         /// <value> The zoom factor. </value>
@@ -87,7 +99,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 m_fZoomScaler = value;
                 // update view matrix:
-                m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.Translation(m_v3ViewOffset);
+                m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
                 if (m_bLoaded && m_oShaderProgram != null)
                 {
                     m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
@@ -229,25 +241,6 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
-
-        /*
-        private void OnMouseUp(object sender, MouseEventArgs e)
-        {
-            // On Left mouse release Pan.
-            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Left))
-            {
-                Vector3 v3PanEndLocation;
-                v3PanEndLocation.X = e.Location.X;
-                v3PanEndLocation.Y = e.Location.Y;
-                v3PanEndLocation.Z = 0.0f;
-
-                Vector3 v3PanAmount = v3PanEndLocation - m_v3PanStartLocation;
-                v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
-                this.Pan(ref v3PanAmount);
-            }
-        }
-        */
-
         
         /// <summary>
         /// Sets up the OpenGL viewport/camera.
@@ -274,13 +267,6 @@ namespace Pulsar4X.WinForms.Controls
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.Translation(m_v3ViewOffset);
-        }
-
-        /// <summary>   Adds a GLPrimitive to the render list. </summary>
-        /// <param name="a_oPrimitive"> The primitive to add. </param>
-        public void AddToRenderList(GLUtilities.GLPrimitive a_oPrimitive)
-        {
-            m_loRenderList.Add(a_oPrimitive);
         }
 
         public abstract void IncreaseZoomScaler();
