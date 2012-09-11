@@ -77,12 +77,10 @@ namespace Pulsar4X.WinForms.Controls
                 logger.Info("OpenGL Error Check: " + GL.GetError().ToString());
             #endif
 
+            m_oShaderProgram = new GLUtilities.GLShader();
+
             // Setup Our View Port, this sets Our Projection and View Matricies.
             SetupViewPort(0, 0, this.Size.Width, this.Size.Height);               
-
-            m_oShaderProgram = new GLUtilities.GLShader();
-            m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
-            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
 
             m_oSW.Start();
         }
@@ -94,13 +92,12 @@ namespace Pulsar4X.WinForms.Controls
                 // When we are resized by our parent as pert of the docking, we will need to adjust our projection and view matricies 
                 // to reflect the new viewing area:
                 SetupViewPort(0, 0, this.Size.Width, this.Size.Height);  // Setup viewport again.
-                m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
-                m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             }
         }
 
         public override void IncreaseZoomScaler()
         {
+            float fOldZoomSxaler = m_fZoomScaler;
             m_fZoomScaler *= UIConstants.ZOOM_IN_FACTOR;
 
             if (m_fZoomScaler > UIConstants.ZOOM_MAXINUM_VALUE)
@@ -108,14 +105,13 @@ namespace Pulsar4X.WinForms.Controls
                 m_fZoomScaler = UIConstants.ZOOM_MAXINUM_VALUE;
             }
 
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
-            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            RecalculateViewMatrix(fOldZoomSxaler);
             this.Invalidate();
-
         }
 
         public override void DecreaseZoomScaler()
         {
+            float fOldZoomSxaler = m_fZoomScaler;
             m_fZoomScaler *= UIConstants.ZOOM_OUT_FACTOR;
 
             if (m_fZoomScaler < UIConstants.ZOOM_MINIMUM_VALUE)
@@ -123,34 +119,28 @@ namespace Pulsar4X.WinForms.Controls
                 m_fZoomScaler = UIConstants.ZOOM_MINIMUM_VALUE;
             }
 
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
-            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            RecalculateViewMatrix(fOldZoomSxaler);
             this.Invalidate();
         }
 
         public override void Pan(ref Vector3 a_v3PanAmount)
         {
             m_v3ViewOffset = m_v3ViewOffset + a_v3PanAmount;
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
-            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            RecalculateViewMatrix();
             this.Invalidate();
         }
 
         public override void CenterOnZero()
         {
             m_v3ViewOffset = Vector3.Zero;  // sero out offset.
-            m_m4ViewMatrix = Matrix4.Identity;
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler); // reset scaler.
-            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            RecalculateViewMatrix();
             this.Invalidate();
         }
 
         public override void CenterOn(ref Vector3 a_v3Location)
         {
             m_v3ViewOffset = a_v3Location;                  // set offset.
-            m_m4ViewMatrix = Matrix4.Identity;
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
-            m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            RecalculateViewMatrix();
             this.Invalidate();
         }
 

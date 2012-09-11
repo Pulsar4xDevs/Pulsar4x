@@ -82,8 +82,7 @@ namespace Pulsar4X.WinForms.Controls
                 m_oSceenToRender = value;
                 m_fZoomScaler = m_oSceenToRender.ZoomSclaer;
                 m_v3ViewOffset = m_oSceenToRender.ViewOffset;
-                m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
-                m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+                RecalculateViewMatrix();
             }
         }
 
@@ -97,14 +96,10 @@ namespace Pulsar4X.WinForms.Controls
             }
             set
             {
+                float OldZoomScale = m_fZoomScaler;
                 m_fZoomScaler = value;
                 // update view matrix:
-                m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
-                if (m_bLoaded && m_oShaderProgram != null)
-                {
-                    m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
-                }
-
+                RecalculateViewMatrix(OldZoomScale);
             }
         }
 
@@ -266,7 +261,53 @@ namespace Pulsar4X.WinForms.Controls
             //                                    new Vector4(-1, -1, 1, 1));
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.Translation(m_v3ViewOffset);
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+            if (m_bLoaded && m_oShaderProgram != null)
+            {
+                m_oShaderProgram.SetProjectionMatrix(ref m_m4ProjectionMatrix);
+                m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            }
+        }
+
+
+        public virtual Vector3 ConvertScreenCoordsToWorldCoords(Vector3 a_v3ScreenCoords)
+        {
+            return a_v3ScreenCoords / m_fZoomScaler;
+        }
+
+        public virtual Vector3 ConvertScreenCoordsToWorldCoords(Vector3 a_v3ScreenCoords, float a_fZoomScaler)
+        {
+            return a_v3ScreenCoords / a_fZoomScaler;
+        }
+
+        public virtual Vector3 ConvertWorldCoordsToScreenCoords(Vector3 a_v3WorldCoords)
+        {
+            return a_v3WorldCoords * m_fZoomScaler;
+        }
+
+        public virtual Vector3 ConvertWorldCoordsToScreenCoords(Vector3 a_v3WorldCoords, float a_fZoomScaler)
+        {
+            return a_v3WorldCoords * a_fZoomScaler;
+        }
+
+        public virtual void RecalculateViewMatrix(float a_fOldZoomScaler = -1.0f)
+        {
+            // When we are provided a valid old zoom we will convert the View offset to take into account the change in position.
+            // this only needs to happen if the zoomscale has changed.
+            if (a_fOldZoomScaler > 0.0f)
+            {
+                // first get current world position of camera:
+                Vector3 v3WorldPos = ConvertScreenCoordsToWorldCoords(m_v3ViewOffset, a_fOldZoomScaler);
+                // and convert it to new screen coords at new zoom scale:
+                m_v3ViewOffset = ConvertWorldCoordsToScreenCoords(v3WorldPos);
+            }
+
+            // create new view matrix and apply to shader (if loaded properly and shader is valid!)
+            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+            if (m_bLoaded && m_oShaderProgram != null)
+            {
+                m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
+            }
         }
 
         public abstract void IncreaseZoomScaler();
