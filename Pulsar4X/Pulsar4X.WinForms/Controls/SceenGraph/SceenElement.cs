@@ -35,7 +35,22 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// The Controlling Primitive is used to to work out things like if this boject has been selected, 
         /// e.g. For a Planet the Planet icon in the Controlling Primitive, everthing else is just UI chrome that hangs off mit.
         /// </summary>
-        protected GLPrimitive m_oControllingPrimitive;
+        protected GLPrimitive m_oPrimaryPrimitive;
+
+        /// <summary>
+        /// Gets or sets the Controlling Primitive.
+        /// </summary>
+        public GLPrimitive PrimaryPrimitive
+        {
+            get
+            {
+                return m_oPrimaryPrimitive;
+            }
+            set
+            {
+                m_oPrimaryPrimitive = value;
+            }
+        }
 
         /// <summary>
         /// List of children
@@ -59,9 +74,14 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         public Guid EntityID { get; set; }
 
         /// <summary>
-        /// Define the minium size in pixels for this object, 0 means that it can disapear, 
+        /// Define the minium size in pixels for this object, 0 means that it can disapear.
         /// </summary>
-        public Vector3 MinimumSize { get; set; }
+        public Vector2 MinimumSize { get; set; }
+
+        /// <summary>
+        /// Defines the real size of this object in Km.
+        /// </summary>
+        public Vector2 RealSize { get; set; }
 
         /// <summary>
         /// Defines the distance from the ControllingPrimitive's Position for testing for selection. 
@@ -80,7 +100,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         public SceenElement()
         {
             // set some defaults:
-            MinimumSize = new Vector3(32, 32, 0);
+            MinimumSize = new Vector2(8, 8);
             RenderChildren = true;
         }
 

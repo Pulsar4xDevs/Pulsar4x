@@ -38,6 +38,11 @@ namespace Pulsar4X.WinForms.GLUtilities
         protected OpenTK.Vector2 m_v2Size;
 
         /// <summary>
+        /// The Position of the object in world coords.
+        /// </summary>
+        protected OpenTK.Vector3 m_v3Position;
+
+        /// <summary>
         /// Handle to the Vertex array that will be passed to OpenGL/GPU.
         /// </summary>
         protected uint m_uiVextexArrayHandle;
@@ -200,6 +205,17 @@ namespace Pulsar4X.WinForms.GLUtilities
             OpenTKUtilities.Use2DTexture(m_uiTextureID);
 
             GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+        }
+
+        public virtual void RecalculateModelMatrix()
+        {
+            m_m4ModelMatrix = Matrix4.Scale(m_v2Size.X) * Matrix4.CreateTranslation(m_v3Position);
+        }
+
+        public virtual void SetSize(Vector2 a_v2Size)
+        {
+            m_v2Size = a_v2Size;
+            RecalculateModelMatrix();
         }
     }
 }

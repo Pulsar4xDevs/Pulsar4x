@@ -44,6 +44,31 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
 
         public override void Refresh(float a_fZoomScaler)
         {
+            // Adjust the size of the Primary Sprite (the planet icon) if necessary.
+            if (MinimumSize.X > 0 && MinimumSize.Y > 0)
+            {
+                // calc size in pixels given current zoom factor:
+                Vector2 v2CurrSize = RealSize * a_fZoomScaler;
+
+                if (MinimumSize.X > v2CurrSize.X && MinimumSize.Y > v2CurrSize.Y)
+                {
+                    // then it is too small, make it display at a proper size: 
+                    PrimaryPrimitive.SetSize(MinimumSize / a_fZoomScaler);
+                    //RenderChildren = false;
+                }
+                else
+                {
+                    // we want to draw to scale:
+                    PrimaryPrimitive.SetSize(RealSize);
+                    //RenderChildren = true;
+                }
+            }
+
+            // loop through any children:
+            foreach (SceenElement oElement in m_lChildren)
+            {
+                oElement.Refresh(a_fZoomScaler);
+            }
         }
     }
 }

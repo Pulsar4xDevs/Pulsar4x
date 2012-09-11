@@ -27,6 +27,10 @@ namespace Pulsar4X.WinForms.GLUtilities
         public GLCircle(GLShader a_oShaderProgram, Vector3 a_v3Pos, float a_fRadus, System.Drawing.Color a_oColor, string a_szTexture = "")
             : base()
         {
+            // Save some stuff to member vars:
+            m_v3Position = a_v3Pos;
+            m_v2Size.X = a_fRadus;
+
             // Subjective testing shows that 90 verts looks as good as 1000, so no point in doing any more.
             int iNumOfVerts = 90;
             
@@ -55,8 +59,8 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_auiIndicies[iNumOfVerts] = 0;
 
             // Setup Matrix:
-            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos) * Matrix4.Scale(a_fRadus * 2);
-
+            m_m4ModelMatrix = Matrix4.Scale(a_fRadus * 2) * Matrix4.CreateTranslation(a_v3Pos);
+            
             // Set our shader program:
             m_oShaderProgram = a_oShaderProgram;
             

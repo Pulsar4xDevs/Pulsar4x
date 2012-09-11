@@ -30,10 +30,11 @@ namespace Pulsar4X.WinForms.GLUtilities
         {
             // Setup Member Vars:
             m_v2Size = a_v2Size;
+            m_v3Position = a_v3Pos;
             m_oShaderProgram = a_oShaderProgram;
             m_m4ModelMatrix = Matrix4.Identity;
             ///< @todo make quads scale better, so it can scale on X or Y...
-            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos) * Matrix4.Scale(m_v2Size.X);  // x and y should be the same, so scale by X
+            m_m4ModelMatrix = Matrix4.Scale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);  // x and y should be the same, so scale by X
 
             if (a_szTexture != "")
             {

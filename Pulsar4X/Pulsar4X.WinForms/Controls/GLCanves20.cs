@@ -113,6 +113,8 @@ namespace Pulsar4X.WinForms.Controls
             }
 
             RecalculateViewMatrix(fOldZoomSxaler);
+            SceenToRender.ZoomSclaer = m_fZoomScaler;
+            SceenToRender.Refresh();                    // called so sceen elements can adjust to new zoom value.
             this.Invalidate();
         }
 
@@ -127,6 +129,8 @@ namespace Pulsar4X.WinForms.Controls
             }
 
             RecalculateViewMatrix(fOldZoomSxaler);
+            SceenToRender.ZoomSclaer = m_fZoomScaler;
+            SceenToRender.Refresh();                    // called so sceen elements can adjust to new zoom value.
             this.Invalidate();
         }
 
@@ -134,6 +138,7 @@ namespace Pulsar4X.WinForms.Controls
         {
             m_v3ViewOffset = m_v3ViewOffset + a_v3PanAmount;
             RecalculateViewMatrix();
+            SceenToRender.ViewOffset = m_v3ViewOffset;
             this.Invalidate();
         }
 
@@ -141,6 +146,7 @@ namespace Pulsar4X.WinForms.Controls
         {
             m_v3ViewOffset = Vector3.Zero;  // sero out offset.
             RecalculateViewMatrix();
+            SceenToRender.ViewOffset = m_v3ViewOffset;
             this.Invalidate();
         }
 
@@ -148,6 +154,7 @@ namespace Pulsar4X.WinForms.Controls
         {
             m_v3ViewOffset = a_v3Location;                  // set offset.
             RecalculateViewMatrix();
+            SceenToRender.ViewOffset = m_v3ViewOffset;
             this.Invalidate();
         }
 
