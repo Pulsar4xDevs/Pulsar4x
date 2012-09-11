@@ -69,6 +69,26 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         }
 
         /// <summary>
+        ///  This SceenElements Parent.
+        /// </summary>
+        protected SceenElement m_oParent;
+
+        /// <summary>
+        /// Gets or Sets the Parent Sceen Element of this Object.
+        /// </summary>
+        public SceenElement Parent
+        {
+            get
+            {
+                return m_oParent;
+            }
+            set
+            {
+                m_oParent = value;
+            }
+        }
+
+        /// <summary>
         /// The ID of the entity this object repesents.
         /// </summary>
         public Guid EntityID { get; set; }
@@ -136,6 +156,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// <param name="a_oElement">The element to add.</param>
         public void AddChildElement(SceenElement a_oElement)
         {
+            a_oElement.Parent = this;
             m_lChildren.Add(a_oElement);
         }
     }
