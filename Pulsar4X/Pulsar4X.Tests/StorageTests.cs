@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
     public class StorageTests
     {
         private GameState _gameState;
-        private List<CommanderNameTheme> _nameThemes;
+        private Dictionary<Guid, CommanderNameTheme> _nameThemes;
 
         private string _appPath;
         private string _saveFolder;
@@ -46,27 +46,31 @@ namespace Pulsar4X.Tests
             _appPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
             _saveFolder = Path.Combine(_appPath, "Test");
 
-            _nameThemes = new List<CommanderNameTheme>();
-            _nameThemes.Add(new CommanderNameTheme()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Test Theme 1",
-                NameEntries =
-                    {
-                        new NameEntry() {IsFemale = false, Name = "Bob", NamePosition = NamePosition.FirstName}, 
-                        new NameEntry() {IsFemale = false, Name = "Smith", NamePosition = NamePosition.LastName}
-                    }
-            });
-            _nameThemes.Add(new CommanderNameTheme()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Test Theme 2",
-                NameEntries =
-                    {
-                        new NameEntry() {IsFemale = true, Name = "Sarah", NamePosition = NamePosition.FirstName}, 
-                        new NameEntry() {IsFemale = false, Name = "Connor", NamePosition = NamePosition.LastName}
-                    }
-            });
+            _nameThemes = new Dictionary<Guid, CommanderNameTheme>();
+            var ct1 = new CommanderNameTheme()
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = "Test Theme 1",
+                                NameEntries =
+                                    {
+                                        new NameEntry() {IsFemale = false, Name = "Bob", NamePosition = NamePosition.FirstName}, 
+                                        new NameEntry() {IsFemale = false, Name = "Smith", NamePosition = NamePosition.LastName}
+                                    }
+                            };
+            _nameThemes.Add(ct1.Id, ct1);
+            var ct2 = new CommanderNameTheme()
+                          {
+                              Id = Guid.NewGuid(),
+                              Name = "Test Theme 2",
+                              NameEntries =
+                                  {
+                                      new NameEntry()
+                                          {IsFemale = true, Name = "Sarah", NamePosition = NamePosition.FirstName},
+                                      new NameEntry()
+                                          {IsFemale = false, Name = "Connor", NamePosition = NamePosition.LastName}
+                                  }
+                          };
+            _nameThemes.Add(ct2.Id, ct2);
         }
 
 

@@ -14,6 +14,7 @@ namespace Pulsar4X.Entities
         public Species Species { get; set; }
 
         public FactionTheme FactionTheme { get; set; }
+        public FactionCommanderTheme CommanderTheme { get; set; }
 
         public List<StarSystem> KnownSystems { get; set; }
         public List<TaskForce> TaskForces { get; set; }
