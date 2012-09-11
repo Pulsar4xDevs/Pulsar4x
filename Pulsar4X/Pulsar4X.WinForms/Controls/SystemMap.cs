@@ -210,6 +210,7 @@ namespace Pulsar4X.WinForms.Controls
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
                     oCurrStar = new StarElement();
                 }
+                iCounter++;
 
                 fStarSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
 
