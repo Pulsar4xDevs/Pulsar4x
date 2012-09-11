@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -13,6 +14,7 @@ namespace Pulsar4X.Tests
     public class StorageTests
     {
         private GameState _gameState;
+        private List<CommanderNameTheme> _nameThemes;
 
         private string _appPath;
         private string _saveFolder;
@@ -31,8 +33,8 @@ namespace Pulsar4X.Tests
 
             var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
             _gameState.Species.Add(species);
-            var theme = new Theme { Id = Guid.NewGuid(), Name = "Test Theme" };
-            _gameState.Factions.Add(new Faction { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, Title = "Mighty Humans", Theme = theme });
+            var theme = new FactionTheme { Id = Guid.NewGuid(), Name = "Test Theme" };
+            _gameState.Factions.Add(new Faction { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, Title = "Mighty Humans", FactionTheme = theme });
 
             var ssf = new StarSystemFactory(true);
             var ss = ssf.Create("Test Sol");
@@ -43,6 +45,28 @@ namespace Pulsar4X.Tests
             UriBuilder uri = new UriBuilder(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
             _appPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
             _saveFolder = Path.Combine(_appPath, "Test");
+
+            _nameThemes = new List<CommanderNameTheme>();
+            _nameThemes.Add(new CommanderNameTheme()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test Theme 1",
+                NameEntries =
+                    {
+                        new NameEntry() {IsFemale = false, Name = "Bob", NamePosition = NamePosition.FirstName}, 
+                        new NameEntry() {IsFemale = false, Name = "Smith", NamePosition = NamePosition.LastName}
+                    }
+            });
+            _nameThemes.Add(new CommanderNameTheme()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test Theme 2",
+                NameEntries =
+                    {
+                        new NameEntry() {IsFemale = true, Name = "Sarah", NamePosition = NamePosition.FirstName}, 
+                        new NameEntry() {IsFemale = false, Name = "Connor", NamePosition = NamePosition.LastName}
+                    }
+            });
         }
 
 
@@ -70,6 +94,15 @@ namespace Pulsar4X.Tests
             Assert.IsNotNull(gs);
         }
 
-        
+        [Test]
+        public void Save_And_Load_CommanderNameThemes_To_JSON()
+        {
+            var bs = new Bootstrap();
+            bs.SaveCommanderNameTheme(_nameThemes);
+
+            var nt = bs.LoadCommanderNameTheme();
+            Assert.IsNotNull(nt);
+            Assert.IsNotEmpty(nt);
+        }
     }
 }

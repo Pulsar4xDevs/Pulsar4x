@@ -19,7 +19,7 @@ namespace Pulsar4X.Entities
     /// If no Names are defined for a category, it will return "Name Unavailable"
     /// 
     /// </summary>
-    public class Theme
+    public class FactionTheme
     {
         protected const string NAME_UNAVAILABLE = "Name Unavailable";
         
