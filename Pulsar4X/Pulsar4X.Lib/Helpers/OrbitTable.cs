@@ -8,8 +8,8 @@ namespace Pulsar4X.Lib
 {
 	public class OrbitTable
 	{
-		private static uint nodes = 25;		//Each table point reprsents 1/(2n)th of an orbital period
-		private static int N_orbits = 10;	//Each each orbital excentricy has a different profile.
+		private static uint nodes = 100;		//Each table point reprsents 1/(2n)th of an orbital period
+		private static int N_orbits = 40;	//Each each orbital excentricy has a different profile.
 		private static double[,] table = new double[N_orbits+1, nodes];
 
 		public OrbitTable ()
@@ -69,12 +69,33 @@ namespace Pulsar4X.Lib
 
 		}
 
-		public void FindCartesianPosition(Orbit theOrbit, long secondsSinceEpoch, ref double x, ref double y)
+		public void FindCartesianPosition(Orbit theOrbit, long secondsSinceEpoch, out double x, out double y)
 		{
 			double angle, radius;
 			FindPolarPosition(theOrbit, secondsSinceEpoch, out angle, out radius);
 			x = -1 * radius * Math.Sin(angle);
 			y = radius * Math.Cos(angle);
+		}
+
+		public double FindRadiusFromAngle(Orbit theOrbit, double angle)
+		{
+			angle += theOrbit.LongitudeOfApogee;
+			if(angle > Math.PI * 2)
+				angle -= Math.PI * 2;
+			
+			double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle));
+			return radius;
+		}
+
+		public void FindCordsFromAngle(Orbit theOrbit, double angle, out double x, out double y)
+		{
+			angle += theOrbit.LongitudeOfApogee;
+			if(angle > Math.PI * 2)
+				angle -= Math.PI * 2;
+			
+			double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle));
+			x = -1 * radius * Math.Sin(angle);
+			y = radius * Math.Cos(angle);	
 		}
 
 	}
