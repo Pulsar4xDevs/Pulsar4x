@@ -31,8 +31,16 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_v3Position = a_v3Pos;
             m_v2Size.X = a_fRadus;
 
-            // Subjective testing shows that 90 verts looks as good as 1000, so no point in doing any more.
-            int iNumOfVerts = 90;
+            // calculate the number of verts, min is 90 for a good looking circle, max is 360 for performace reasons.
+            int iNumOfVerts = (int)(a_fRadus * MathHelper.PiOver4);
+            if (iNumOfVerts < 90)
+            {
+                iNumOfVerts = 90;
+            }
+            else if (iNumOfVerts > 360)
+            {
+                iNumOfVerts = 360;
+            }
             
             // create some working vars:
             double dAngle;
