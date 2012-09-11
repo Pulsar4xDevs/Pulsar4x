@@ -66,6 +66,8 @@
             // 
             // ControlsPanel
             // 
+            this.ControlsPanel.BackColor = System.Drawing.Color.MidnightBlue;
+            this.ControlsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ControlsPanel.Controls.Add(this.AUScaleLabel);
             this.ControlsPanel.Controls.Add(this.KmScaleLabel);
             this.ControlsPanel.Controls.Add(this.SystemSelectComboBox);
@@ -77,6 +79,7 @@
             // AUScaleLabel
             // 
             this.AUScaleLabel.AutoSize = true;
+            this.AUScaleLabel.ForeColor = System.Drawing.Color.White;
             this.AUScaleLabel.Location = new System.Drawing.Point(3, 44);
             this.AUScaleLabel.Name = "AUScaleLabel";
             this.AUScaleLabel.Size = new System.Drawing.Size(52, 13);
@@ -86,6 +89,7 @@
             // KmScaleLabel
             // 
             this.KmScaleLabel.AutoSize = true;
+            this.KmScaleLabel.ForeColor = System.Drawing.Color.White;
             this.KmScaleLabel.Location = new System.Drawing.Point(4, 31);
             this.KmScaleLabel.Name = "KmScaleLabel";
             this.KmScaleLabel.Size = new System.Drawing.Size(52, 13);
@@ -94,6 +98,9 @@
             // 
             // SystemSelectComboBox
             // 
+            this.SystemSelectComboBox.BackColor = System.Drawing.Color.MidnightBlue;
+            this.SystemSelectComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.SystemSelectComboBox.ForeColor = System.Drawing.Color.White;
             this.SystemSelectComboBox.FormattingEnabled = true;
             this.SystemSelectComboBox.Location = new System.Drawing.Point(3, 3);
             this.SystemSelectComboBox.Name = "SystemSelectComboBox";
