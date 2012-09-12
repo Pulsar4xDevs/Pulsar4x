@@ -46,6 +46,8 @@ namespace Pulsar4X.WinForms.Controls
             SystemSelectComboBox.DisplayMember = "Name";
 
             this.Bind(c => c.CurrentStarSystem, VM, d => d.CurrentStarSystem);
+
+            SystemSelectComboBox.SelectedIndexChanged += (s, args) => SystemSelectComboBox.DataBindings["SelectedItem"].WriteValue();
         }
 
         private void SystemMap_Load(object sender, EventArgs e)

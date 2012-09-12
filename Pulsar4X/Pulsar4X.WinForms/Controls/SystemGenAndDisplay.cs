@@ -20,12 +20,11 @@ namespace Pulsar4X.WinForms.Controls
 
             VM = new StarSystemViewModel();
 
-            NameListBox.DataSource = VM.StarSystems;
-            NameListBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem, DataSourceUpdateMode.OnPropertyChanged);
-            NameListBox.DisplayMember = "Name";
+            NameComboBox.DataSource = VM.StarSystems;
+            NameComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem, DataSourceUpdateMode.OnPropertyChanged);
+            NameComboBox.DisplayMember = "Name";
 
-            NameListBox.SelectedIndexChanged +=
-                (s, args) => NameListBox.DataBindings["SelectedItem"].WriteValue();
+            NameComboBox.SelectedIndexChanged += (s, args) => NameComboBox.DataBindings["SelectedItem"].WriteValue();
 
             AgetextBox.Bind(c => c.Text, VM, d => d.CurrentStarSystemAge);
 
