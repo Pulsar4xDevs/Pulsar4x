@@ -248,12 +248,12 @@ namespace Pulsar4X.WinForms.Controls
                     GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                         v3PlanetPos,                                    
                         new Vector2(fPlanetSize, fPlanetSize),
-                        Color.FromArgb(255, 50, 205, 50),  // lime green
+                        Color.FromArgb(255, 0, 205, 0),  // lime green
                         UIConstants.Textures.DEFAULT_PLANET_ICON);
                     GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
                         v3StarPos,                                                                      // base around parent star pos.
                         (float)dPlanetOrbitRadius / 2,
-                        Color.FromArgb(255, 50, 205, 50),  // lime green
+                        Color.FromArgb(255, 0, 205, 0),  // lime green
                         UIConstants.Textures.DEFAULT_TEXTURE);
 
                     oPlanetElement.AddPrimitive(oPlanetQuad);
