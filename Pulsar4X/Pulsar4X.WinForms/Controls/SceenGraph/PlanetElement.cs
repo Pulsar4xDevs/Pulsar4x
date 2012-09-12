@@ -54,13 +54,37 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                 {
                     // then it is too small, make it display at a proper size: 
                     PrimaryPrimitive.SetSize(MinimumSize / a_fZoomScaler);
-                    //RenderChildren = false;
+
+                    // turn off moons if min orbit < icon size in world coords:
+                    float test = (MinimumSize.X / a_fZoomScaler);
+                    if (SmallestOrbit < test)
+                    {
+                        // we are overlapping, weill not draw children:
+                        RenderChildren = false;
+                    }
+                    else
+                    {
+                        // we are not overlapping, will draw children:
+                        RenderChildren = true;
+                    }
                 }
                 else
                 {
                     // we want to draw to scale:
                     PrimaryPrimitive.SetSize(RealSize);
-                    //RenderChildren = true;
+
+                    // turn off moons if min orbit < icon size in world coords:
+                    float test = (RealSize.X / a_fZoomScaler);
+                    if (SmallestOrbit < test)
+                    {
+                        // we are overlapping, weill not draw children:
+                        RenderChildren = false;
+                    }
+                    else
+                    {
+                        // we are not overlapping, will draw children:
+                        RenderChildren = true;
+                    }
                 }
             }
 

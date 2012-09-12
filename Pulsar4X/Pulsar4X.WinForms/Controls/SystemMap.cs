@@ -184,7 +184,9 @@ namespace Pulsar4X.WinForms.Controls
 
             // Creat Working Vars:
             double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
-            int iCounter = 0;                                                   // Keeps track of the number of stars.
+            int iStarCounter = 0;                                               // Keeps track of the number of stars.
+            int iPlanetCounter = 0;                                             // Keeps track of the number of planets around the current star
+            int iMoonCounter = 0;                                               // Keeps track of the number of moons around the current planet.
             double dMaxOrbitDist = 0;                                           // used for fit to zoom.
             Vector3 v3StarPos = new Vector3(0, 0, 0);                           // used for storing the psoition of the current star in the system
             float fStarSize = 0.0f;                                             // Size of a star
@@ -199,7 +201,7 @@ namespace Pulsar4X.WinForms.Controls
             SceenElement oCurrStar = oRootStar;
             foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
             {
-                if (iCounter > 0)
+                if (iStarCounter > 0)
                 {
                     // then we have a secondary, etc star give random position around its orbit!
                     Random rnd = new Random();
@@ -210,7 +212,7 @@ namespace Pulsar4X.WinForms.Controls
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
                     oCurrStar = new StarElement();
                 }
-                iCounter++;
+                iStarCounter++;
 
                 fStarSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
 
@@ -230,6 +232,11 @@ namespace Pulsar4X.WinForms.Controls
                 {
                     SceenElement oPlanetElement = new PlanetElement();
                     oPlanetElement.EntityID = oPlanet.Id;
+
+                    if (iPlanetCounter == 0)
+                    {
+                        oCurrStar.SmallestOrbit = (float)(oPlanet.SemiMajorAxis * Pulsar4X.Constants.Units.KM_PER_AU * 2);
+                    }
 
                     dPlanetOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
                     v3PlanetPos = new Vector3((float)dPlanetOrbitRadius, 0, 0) + v3StarPos; // offset Pos by parent star pos
@@ -253,11 +260,18 @@ namespace Pulsar4X.WinForms.Controls
                     oPlanetElement.RealSize = new Vector2(fPlanetSize, fPlanetSize);
                     oCurrStar.AddChildElement(oPlanetElement);
 
+                    iPlanetCounter++;
+
                     // now again for the moons:
                     foreach (Pulsar4X.Entities.Planet oMoon in oPlanet.Moons)
                     {
                         SceenElement oMoonElement = new PlanetElement();
                         oMoonElement.EntityID = oMoon.Id;
+
+                        if (iMoonCounter == 0)
+                        {
+                            oPlanetElement.SmallestOrbit = (float)(oMoon.SemiMajorAxis * dKMperAUdevby10);
+                        }
 
                         dMoonOrbitRadius = oMoon.SemiMajorAxis * dKMperAUdevby10;
                         fMoonSize = (float)oMoon.Radius * 2 / 10;
@@ -278,12 +292,18 @@ namespace Pulsar4X.WinForms.Controls
                         oMoonElement.PrimaryPrimitive = oMoonQuad;
                         oMoonElement.RealSize = new Vector2(fMoonSize, fMoonSize);
                         oPlanetElement.AddChildElement(oMoonElement);
+
+                        iMoonCounter++;
                     }
+                    iMoonCounter = 0;
                 }
+                iPlanetCounter = 0;
 
                 FitZoom(dMaxOrbitDist);
 
                 oNewSceen.Refresh(); // force refresh.
+
+                
 
                 // Change Cursor Back to default.
                 Cursor.Current = Cursors.Default;

@@ -103,6 +103,11 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// </summary>
         public Vector2 RealSize { get; set; }
 
+        /// <summary>   
+        /// The Smallest Orbit around this object. Used to deterimine if this object should draw its children.
+        /// </summary>
+        public float SmallestOrbit { get; set; }
+
         /// <summary>
         /// Defines the distance from the ControllingPrimitive's Position for testing for selection. 
         /// </summary>
