@@ -13,7 +13,7 @@ namespace Pulsar4X.Helpers
     /// <summary>
     /// Class to manager the Loading and Saving of UI resources, Textures, Shaders, Sounds, Data Files, etc.
     /// </summary>
-    class ResourceManager
+    public class ResourceManager
     {
         public static readonly ILog logger = LogManager.GetLogger(typeof(ResourceManager));
 
@@ -145,7 +145,7 @@ namespace Pulsar4X.Helpers
             using (Graphics gfx = Graphics.FromImage(oStringBitmap))
             {
                 gfx.Clear(Color.Transparent);
-                Font oFont = new Font(new FontFamily("Arial"), 16.0f, FontStyle.Regular, GraphicsUnit.Pixel);
+                Font oFont = new Font(new FontFamily("Arial"), 128.0f, FontStyle.Regular, GraphicsUnit.Pixel);
                 SolidBrush oBrush = new SolidBrush(Color.White);
                 gfx.DrawString(a_szString, oFont, oBrush, 0, 0);
                                 
@@ -165,8 +165,8 @@ namespace Pulsar4X.Helpers
 
             // Configure Text Paramaters:
             //GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Modulate);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)All.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)All.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Nearest);
 
             // Load data by telling OpenGL to build mipmaps out of bitmap data
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, oStringBitmap.Width, oStringBitmap.Height,

@@ -37,10 +37,35 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// </summary>
         protected OpenTK.Vector2 m_v2Size;
 
+        public OpenTK.Vector2 Size
+        {
+            get
+            {
+                return m_v2Size;
+            }
+            set
+            {
+                SetSize(value);
+            }
+        }
+
+
         /// <summary>
         /// The Position of the object in world coords.
         /// </summary>
         protected OpenTK.Vector3 m_v3Position;
+
+        public OpenTK.Vector3 Position
+        {
+            get
+            {
+                return m_v3Position;
+            }
+            set
+            {
+                m_v3Position = value;
+            }
+        }
 
         /// <summary>
         /// Handle to the Vertex array that will be passed to OpenGL/GPU.
@@ -67,6 +92,21 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// OpenGL texture ID.
         /// </summary>
         protected uint m_uiTextureID;
+
+        /// <summary> Gets or sets the identifier of the texture. </summary>
+        ///
+        /// <value> The identifier of the texture. </value>
+        public uint TextureID
+        {
+            get
+            {
+                return m_uiTextureID;
+            }
+            set
+            {
+                m_uiTextureID = value;
+            }
+        }
 
         /// <summary> 
         /// A handle to the shader program to be used by this Primitive. 

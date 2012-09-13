@@ -52,6 +52,20 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
             }
         }
 
+        protected GLPrimitive m_oLablePrimitive;
+
+        public GLPrimitive LablePrimitive
+        {
+            get
+            {
+                return m_oLablePrimitive;
+            }
+            set
+            {
+                m_oLablePrimitive = value;
+            }
+        }
+
         /// <summary>
         /// List of children
         /// </summary>

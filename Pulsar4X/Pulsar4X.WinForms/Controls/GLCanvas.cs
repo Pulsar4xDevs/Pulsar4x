@@ -151,6 +151,7 @@ namespace Pulsar4X.WinForms.Controls
             SizeChanged += new System.EventHandler(this.OnSizeChange);              // Setup Size Changed Enet Handler.
             MouseMove += new MouseEventHandler(OnMouseMove);                        // Setup Mouse Move Event handler
             MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
+            MouseHover += new EventHandler(GLCanvas_OnMouseHover);
             //MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
         }
@@ -234,6 +235,18 @@ namespace Pulsar4X.WinForms.Controls
                 // on middle or mouse wheel button, centre!
                 this.CenterOnZero();
             }
+        }
+
+        private void GLCanvas_OnMouseHover(object sender, EventArgs e)
+        {
+            // get mouse position in control coords:
+            Point oCursorPosition = PointToClient(Cursor.Position);
+
+            // Convert to be world coords:
+            Vector3 v3CurPosWorldCorrds = new Vector3((Size.Width / 2) - oCursorPosition.X, (Size.Height / 2) - oCursorPosition.Y, 0);
+            v3CurPosWorldCorrds = v3CurPosWorldCorrds / ZoomFactor;
+
+           // Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
         }
 
         
@@ -323,5 +336,17 @@ namespace Pulsar4X.WinForms.Controls
         public abstract void Render();
 
         public abstract void TestFunc(int a_itest);
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // GLCanvas
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.Name = "GLCanvas";
+            this.ResumeLayout(false);
+
+        }
     }
 }

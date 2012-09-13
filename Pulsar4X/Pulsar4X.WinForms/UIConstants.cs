@@ -65,12 +65,12 @@ namespace Pulsar4X.WinForms
         /// <summary> 
         /// The default string texture height per character 
         /// </summary>
-        public const int DEFAULT_STRING_TEXTURE_HEIGHT_PER_CHAR = 16;
+        public const int DEFAULT_STRING_TEXTURE_HEIGHT_PER_CHAR = 128;
 
         /// <summary> 
         /// The default string texture width per character 
         /// </summary>
-        public const int DEFAULT_STRING_TEXTURE_WIDTH_PER_CHAR = 16;
+        public const int DEFAULT_STRING_TEXTURE_WIDTH_PER_CHAR = 128;
 
 
 

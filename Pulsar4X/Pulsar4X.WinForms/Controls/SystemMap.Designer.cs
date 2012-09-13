@@ -120,6 +120,7 @@
             this.Name = "SystemMap";
             this.Size = new System.Drawing.Size(1009, 681);
             this.Load += new System.EventHandler(this.SystemMap_Load);
+            this.MouseHover += new System.EventHandler(this.SystemMap_MouseHover);
             this.ControlsPanel.ResumeLayout(false);
             this.ControlsPanel.PerformLayout();
             this.ResumeLayout(false);

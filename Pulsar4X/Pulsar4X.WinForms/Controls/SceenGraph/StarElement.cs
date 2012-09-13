@@ -40,6 +40,28 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
 
         public override Guid GetSelected(Vector3 a_v3AtPos)
         {
+            Guid oElementID = Guid.Empty;
+
+            // check To see if position provided is close to our primary primitive:
+            float fDist = (m_oPrimaryPrimitive.Position - a_v3AtPos).Length;
+            if (m_oPrimaryPrimitive.Size.X > fDist)
+            {
+                // then we are selecting this object!!
+                return this.EntityID;
+            }
+
+            // else go though this elements children.
+            foreach (SceenElement oElement in m_lChildren)
+            {
+                oElementID = oElement.GetSelected(a_v3AtPos);
+
+                if (oElementID != Guid.Empty)
+                {
+                    // we have found something, retur its ID:
+                    return oElementID;
+                }
+            }
+
             return Guid.Empty;
         }
 

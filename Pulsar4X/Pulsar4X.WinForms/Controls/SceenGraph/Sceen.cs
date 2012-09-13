@@ -110,5 +110,22 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         {
             m_lElements.Add(a_oElement);
         }
+
+        public Guid GetElementAtCoords(Vector3 a_v3Coords)
+        {
+            Guid oElementID = Guid.Empty;
+            foreach (SceenElement oElement in m_lElements)
+            {
+                oElementID = oElement.GetSelected(a_v3Coords);
+
+                if (oElementID != Guid.Empty)
+                {
+                    // we have found something, retur its ID:
+                    return oElementID;
+                }
+            }
+
+            return oElementID;
+        }
     }
 }

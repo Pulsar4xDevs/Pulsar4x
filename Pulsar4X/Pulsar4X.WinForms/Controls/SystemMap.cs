@@ -226,6 +226,15 @@ namespace Pulsar4X.WinForms.Controls
                                                                         new Vector2(fStarSize, fStarSize),
                                                                         Color.FromArgb(255, 255, 255, 0),    // yellow!
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
+                // create texture from name:
+                Vector2 v2NameSize;
+                uint uiNameTex = Pulsar4X.Helpers.ResourceManager.Instance.GenStringTexture(oStar.Name, out v2NameSize);
+                GLUtilities.GLQuad oNameQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
+                                                                      new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - v2NameSize.Y, v3StarPos.Z),
+                                                                      v2NameSize,
+                                                                      Color.White);
+                oNameQuad.TextureID = uiNameTex;
+
                 // create orbit circle
                 if (iStarCounter > 0)
                 {
@@ -237,6 +246,7 @@ namespace Pulsar4X.WinForms.Controls
                     oCurrStar.AddPrimitive(oStarOrbitCirc);
                 }
                 oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
+                oCurrStar.AddPrimitive(oNameQuad);
                 oCurrStar.PrimaryPrimitive = oStarQuad;
                 oCurrStar.EntityID = oStar.Id;
                 oCurrStar.RealSize = new Vector2(fStarSize, fStarSize);
@@ -313,16 +323,13 @@ namespace Pulsar4X.WinForms.Controls
                     iMoonCounter = 0;
                 }
                 iPlanetCounter = 0;
-
-                FitZoom(dMaxOrbitDist);
-
-                oNewSceen.Refresh(); // force refresh.
-
-                
-
-                // Change Cursor Back to default.
-                Cursor.Current = Cursors.Default;
             }
+
+            FitZoom(dMaxOrbitDist);
+
+            oNewSceen.Refresh(); // force refresh.
+            // Change Cursor Back to default.
+            Cursor.Current = Cursors.Default;
         }
 
         private void SystemSelectComboBox_SelectionChangeCommitted(object sender, EventArgs e)
@@ -369,6 +376,18 @@ namespace Pulsar4X.WinForms.Controls
         {
             m_oCurrentSceen = a_oSceen;
             m_GLCanvas.SceenToRender = a_oSceen;
+        }
+
+        private void SystemMap_MouseHover(object sender, EventArgs e)
+        {
+            // get mouse position in control coords:
+            Point oCursorPosition = m_GLCanvas.PointToClient(Cursor.Position);
+
+            // Convert to be world coords:
+            Vector3 v3CurPosWorldCorrds = new Vector3((m_GLCanvas.Size.Width / 2) - oCursorPosition.X, (m_GLCanvas.Size.Height / 2) - oCursorPosition.Y, 0);
+            v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_GLCanvas.ZoomFactor;
+
+            Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
         }
 
 
