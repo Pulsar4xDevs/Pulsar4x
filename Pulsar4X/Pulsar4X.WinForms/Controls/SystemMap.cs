@@ -213,6 +213,9 @@ namespace Pulsar4X.WinForms.Controls
                     v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
                     oCurrStar = new StarElement();
+
+                    // create orbit circle:
+
                 }
                 iStarCounter++;
 
@@ -223,6 +226,16 @@ namespace Pulsar4X.WinForms.Controls
                                                                         new Vector2(fStarSize, fStarSize),
                                                                         Color.FromArgb(255, 255, 255, 0),    // yellow!
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
+                // create orbit circle
+                if (iStarCounter > 0)
+                {
+                    GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
+                        Vector3.Zero,                                                                      // base around parent star pos.
+                        (float)(oStar.OrbitalRadius * dKMperAUdevby10) / 2,
+                        Color.FromArgb(255, 255, 255, 0),  // yellow.
+                        UIConstants.Textures.DEFAULT_TEXTURE);
+                    oCurrStar.AddPrimitive(oStarOrbitCirc);
+                }
                 oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
                 oCurrStar.PrimaryPrimitive = oStarQuad;
                 oCurrStar.EntityID = oStar.Id;
@@ -248,12 +261,12 @@ namespace Pulsar4X.WinForms.Controls
                     GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                         v3PlanetPos,                                    
                         new Vector2(fPlanetSize, fPlanetSize),
-                        Color.FromArgb(255, 0, 205, 0),  // lime green
+                        Color.FromArgb(255, 0, 255, 0),  // lime green
                         UIConstants.Textures.DEFAULT_PLANET_ICON);
                     GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
                         v3StarPos,                                                                      // base around parent star pos.
                         (float)dPlanetOrbitRadius / 2,
-                        Color.FromArgb(255, 0, 205, 0),  // lime green
+                        Color.FromArgb(255, 0, 255, 0),  // lime green
                         UIConstants.Textures.DEFAULT_TEXTURE);
 
                     oPlanetElement.AddPrimitive(oPlanetQuad);
@@ -281,12 +294,12 @@ namespace Pulsar4X.WinForms.Controls
                         GLUtilities.GLQuad oMoonQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                             new Vector3((float)dMoonOrbitRadius, 0, 0) + v3PlanetPos,                                    // offset Pos by parent planet pos
                             new Vector2(fMoonSize, fMoonSize),
-                            Color.FromArgb(255, 50, 50, 205),  // lime green
+                            Color.FromArgb(255, 0, 205, 0),  // lime green
                             UIConstants.Textures.DEFAULT_PLANET_ICON);
                         GLUtilities.GLCircle oMoonOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
                             v3PlanetPos,                                                                      // base around parent planet pos.
                             (float)dMoonOrbitRadius / 2,
-                            Color.FromArgb(255, 50, 50, 205),  // lime green
+                            Color.FromArgb(255, 0, 205, 0),  // lime green
                             UIConstants.Textures.DEFAULT_TEXTURE);
 
                         oMoonElement.AddPrimitive(oMoonQuad);

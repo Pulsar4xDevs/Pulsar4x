@@ -28,7 +28,6 @@ namespace Pulsar4X.WinForms.Controls
 
         // for testing:
         System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
-        System.Diagnostics.Stopwatch oSW2 = new System.Diagnostics.Stopwatch();
         double m_dAccumulator = 0;
         int m_iFrameCounter = 0;
 

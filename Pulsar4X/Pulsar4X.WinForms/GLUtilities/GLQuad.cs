@@ -46,12 +46,19 @@ namespace Pulsar4X.WinForms.GLUtilities
                 m_uiTextureID = 0; // set texture to none!
             }
 
+            // calculate the Y scale to X, as we are using X for our scale in our matrix.
+            float fYScale = 1;
+            if (a_v2Size.X != 0)
+            {
+                fYScale = a_v2Size.Y / a_v2Size.X;
+            }
+
             //setup our quads vertcies:
             m_aoVerticies = new GLVertex[4];
-            m_aoVerticies[0] = new GLVertex(new Vector3(-0.5f, -0.5f, 0.0f), a_oColor, new Vector2(0.0f, 1.0f));
-            m_aoVerticies[1] = new GLVertex(new Vector3(0.5f, -0.5f, 0.0f), a_oColor, new Vector2(1.0f, 1.0f));
-            m_aoVerticies[2] = new GLVertex(new Vector3(-0.5f, 0.5f, 0.0f), a_oColor, new Vector2(0.0f, 0.0f));
-            m_aoVerticies[3] = new GLVertex(new Vector3(0.5f, 0.5f, 0.0f), a_oColor, new Vector2(1.0f, 0.0f));
+            m_aoVerticies[0] = new GLVertex(new Vector3(-0.5f, -0.5f * fYScale, 0.0f), a_oColor, new Vector2(0.0f, 1.0f));
+            m_aoVerticies[1] = new GLVertex(new Vector3(0.5f, -0.5f * fYScale, 0.0f), a_oColor, new Vector2(1.0f, 1.0f));
+            m_aoVerticies[2] = new GLVertex(new Vector3(-0.5f, 0.5f * fYScale, 0.0f), a_oColor, new Vector2(0.0f, 0.0f));
+            m_aoVerticies[3] = new GLVertex(new Vector3(0.5f, 0.5f * fYScale, 0.0f), a_oColor, new Vector2(1.0f, 0.0f));
 
             // Setup Draw order. *this apears to have no effect under GL2.X*
             m_auiIndicies = new ushort[4];
@@ -114,6 +121,9 @@ namespace Pulsar4X.WinForms.GLUtilities
         public override void Render()
         {
             GL.BindVertexArray(m_uiVextexArrayHandle);
+
+            // recreate our matrix based on size and position.
+            this.RecalculateModelMatrix();
 
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
 
