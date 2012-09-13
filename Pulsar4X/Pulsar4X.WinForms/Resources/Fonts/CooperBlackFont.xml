@@ -3,11 +3,9 @@
 	<!-- Row 0																			-->
 	<Character Umin="0.007937" Vmin="0.012676" Umax="0.032628" Vmax="0.164789" Char=" "/>
 	<Character Umin="0.040564" Vmin="0.012676" Umax="0.059083" Vmax="0.164789" Char="!"/>
-	<!--<Character Umin="0.067019" Vmin="0.012676" Umax="0.096120" Vmax="0.164789" Char="""/> --> 
-	<!--<Character Umin="0.104056" Vmin="0.012676" Umax="0.142857" Vmax="0.164789" Char="#"/> -->
-	<!--<Character Umin="0.150794" Vmin="0.012676" Umax="0.191358" Vmax="0.164789" Char="$"/> -->
-	<!--<Character Umin="0.225750" Vmin="0.012676" Umax="0.259259" Vmax="0.164789" Char="%"/> -->
-	<Character Umin="0.267196" Vmin="0.012676" Umax="0.332451" Vmax="0.164789" Char="&"/>
+	<Character Umin="0.104056" Vmin="0.012676" Umax="0.142857" Vmax="0.164789" Char="#"/>
+	<Character Umin="0.150794" Vmin="0.012676" Umax="0.191358" Vmax="0.164789" Char="$"/>
+	<Character Umin="0.225750" Vmin="0.012676" Umax="0.259259" Vmax="0.164789" Char="%"/>
 	<Character Umin="0.340388" Vmin="0.012676" Umax="0.353616" Vmax="0.164789" Char="'"/>
 	<Character Umin="0.361552" Vmin="0.012676" Umax="0.394180" Vmax="0.164789" Char="("/>
 	<Character Umin="0.402116" Vmin="0.012676" Umax="0.434744" Vmax="0.164789" Char=")"/>
@@ -31,9 +29,7 @@
 	<Character Umin="0.462963" Vmin="0.177465" Umax="0.506173" Vmax="0.329577" Char="0"/>
 	<Character Umin="0.514109" Vmin="0.177465" Umax="0.532628" Vmax="0.329577" Char=":"/>
 	<Character Umin="0.540564" Vmin="0.177465" Umax="0.559965" Vmax="0.329577" Char=";"/>
-	<Character Umin="0.567901" Vmin="0.177465" Umax="0.601411" Vmax="0.329577" Char="<"/> <!--<-->
 	<Character Umin="0.609347" Vmin="0.177465" Umax="0.646384" Vmax="0.329577" Char="="/>
-	<Character Umin="0.654321" Vmin="0.177465" Umax="0.687831" Vmax="0.329577" Char=">"/> <!-->-->
 	<Character Umin="0.695767" Vmin="0.177465" Umax="0.731041" Vmax="0.329577" Char="?"/>
 	
 	<!-- Row 2																			-->

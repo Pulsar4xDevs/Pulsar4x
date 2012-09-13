@@ -7,6 +7,7 @@ using log4net;
 using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
+using System.Xml;
 
 namespace Pulsar4X.Helpers
 {
@@ -44,7 +45,34 @@ namespace Pulsar4X.Helpers
             public string m_szTextureFile = "null";
         }
 
+
+        /// <summary> The dic of Loaded textures </summary>
         Dictionary<string, TextureData> m_dicTextures = new Dictionary<string, TextureData>();
+
+       
+        /// <summary>   
+        /// A Structure used to store data about a OpenGL Font. 
+        /// </summary>
+        public class GLFontData
+        {
+            public struct UVCoords
+            {
+                public Vector2 m_v2UVMin;
+                public Vector2 m_v2UVMax;
+            }
+
+            /// <summary> The character map </summary>
+            public Dictionary<char, UVCoords> m_dicCharMap = new Dictionary<char, UVCoords>();
+
+            public string m_szDataFile = "null";
+            public uint m_uiUseCount = 0;
+            public uint m_uiTextureID = 0;
+        }
+
+
+        /// <summary> The dic of Loaded GLFonts </summary>
+        Dictionary<string, GLFontData> m_dicGLFonts = new Dictionary<string, GLFontData>();
+
 
         /// <summary>
         /// Default Constructor.
@@ -181,6 +209,99 @@ namespace Pulsar4X.Helpers
             // return the texture id.
             return oNewTexture.m_uiTextureID;
         }
+
+        public GLFontData LoadGLFont(string a_szFontDataFile)
+        {
+            // safty checks:
+            if (a_szFontDataFile == null)
+            {
+                return null;
+            }
+            else if (a_szFontDataFile == "")
+            {
+                return null;
+            }
+
+            // next we see if this string has been gend already:
+            GLFontData oFontData = new GLFontData();
+            if (m_dicGLFonts.TryGetValue(a_szFontDataFile, out oFontData))
+            {
+                oFontData.m_uiUseCount++;
+                return oFontData;
+            }
+
+            // We have not loaded the font before so, set up new one:
+            oFontData.m_szDataFile = a_szFontDataFile;      // Set Data File path.
+            oFontData.m_uiUseCount = 1;
+
+            // Create some Working Vars and Buffers:
+            string szTextureFile = "";
+            string szBuffer;
+            char cBuffer = ' ';
+
+            // first load in XML file.
+            XmlTextReader oXMLReader = new XmlTextReader(a_szFontDataFile);
+
+            try
+            {
+                // Get Texture path:
+                if (oXMLReader.ReadToNextSibling("Font"))
+                {
+                    szTextureFile = oXMLReader.GetAttribute("texture");
+                }
+
+                // Move to first Charecter element
+                oXMLReader.ReadToDescendant("Character");
+
+                // Loop through all Char elements and get out UV coords for each charcter, save them to the Dic.
+                do
+                {
+                    GLFontData.UVCoords oUVCoords = new GLFontData.UVCoords();
+
+                    szBuffer = oXMLReader.GetAttribute("Umin");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
+
+                    szBuffer = oXMLReader.GetAttribute("Vmin");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
+
+                    szBuffer = oXMLReader.GetAttribute("Umax");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
+
+                    szBuffer = oXMLReader.GetAttribute("Vmax");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
+
+                    szBuffer = oXMLReader.GetAttribute("Char");
+                    foreach (char c in szBuffer)
+                    {
+                        cBuffer = c;
+                    }
+                    oFontData.m_dicCharMap.Add(cBuffer, oUVCoords);
+
+                } while (oXMLReader.ReadToNextSibling("Character"));  // Move to Next Charcter Element
+            }
+            catch (XmlException e)
+            {
+                // XML Error occured, catch and log.
+                logger.Error("Error: faild to load Font Data file " + a_szFontDataFile);
+                logger.Error("Font Exception: " + e.Message);
+                logger.Info("You May have an unsupported Charcter in thoe font data file, inclundg <, >, &");
+            }
+            finally
+            {
+                // Close the XMl file.
+                oXMLReader.Close();
+            }
+
+            // load font texture.
+            oFontData.m_uiTextureID = Pulsar4X.Helpers.ResourceManager.Instance.LoadTexture(szTextureFile);
+
+            // Add to list of loaded fonts:
+            m_dicGLFonts.Add(oFontData.m_szDataFile, oFontData);
+
+            return oFontData;
+        }
+
+
         
         /// <summary>
         /// Unloads the Specified Texture if it is no longer in use.
@@ -209,6 +330,10 @@ namespace Pulsar4X.Helpers
             //        m_lLoadedTextures.RemoveAt(oTextureIndex); // delete the data from the list.
             //    }
             //}
+        }
+
+        public void UnloadGLFont(string a_szFontDataFile)
+        {
         }
     }
 }
