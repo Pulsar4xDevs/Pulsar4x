@@ -131,7 +131,5 @@ namespace Pulsar4X.WinForms.GLUtilities
 
             GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
-
-
     }
 }

@@ -52,8 +52,15 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
             }
         }
 
+
+        /// <summary> The text lable primitive for this sceen element </summary>
         protected GLPrimitive m_oLablePrimitive;
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        /// <summary>   Gets or sets the lable primitive. </summary>
+        ///
+        /// <value> The lable primitive. </value>
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
         public GLPrimitive LablePrimitive
         {
             get

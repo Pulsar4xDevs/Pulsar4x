@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Font texture="./Fonts/CooperBlackFont.png">
+	<!-- Row 0																			-->
+	<Character Umin="0.007937" Vmin="0.012676" Umax="0.032628" Vmax="0.164789" Char=" "/>
+	<Character Umin="0.040564" Vmin="0.012676" Umax="0.059083" Vmax="0.164789" Char="!"/>
+	<Character Umin="0.067019" Vmin="0.012676" Umax="0.096120" Vmax="0.164789">&quot;</Character> <!--"-->
+	<Character Umin="0.104056" Vmin="0.012676" Umax="0.142857" Vmax="0.164789">#</Character>
+	<Character Umin="0.150794" Vmin="0.012676" Umax="0.191358" Vmax="0.164789">$</Character>
+	<Character Umin="0.225750" Vmin="0.012676" Umax="0.259259" Vmax="0.164789">%</Character>
+	<Character Umin="0.267196" Vmin="0.012676" Umax="0.332451" Vmax="0.164789">&amp;</Character> <!--&-->
+	<Character Umin="0.340388" Vmin="0.012676" Umax="0.353616" Vmax="0.164789">&apos;</Character> <!--'-->
+	<Character Umin="0.361552" Vmin="0.012676" Umax="0.394180" Vmax="0.164789">(</Character>
+	<Character Umin="0.402116" Vmin="0.012676" Umax="0.434744" Vmax="0.164789">)</Character>
+	<Character Umin="0.442681" Vmin="0.012676" Umax="0.474427" Vmax="0.164789">*</Character>
+	<Character Umin="0.482363" Vmin="0.012676" Umax="0.520282" Vmax="0.164789">+</Character>
+	<Character Umin="0.528219" Vmin="0.012676" Umax="0.546737" Vmax="0.164789">,</Character>
+	<Character Umin="0.554674" Vmin="0.012676" Umax="0.576720" Vmax="0.164789">-</Character>
+	<Character Umin="0.584656" Vmin="0.012676" Umax="0.603175" Vmax="0.164789">.</Character>
+	<Character Umin="0.611111" Vmin="0.012676" Umax="0.647266" Vmax="0.164789">/</Character>
+	
+	<!-- Row 1																			-->
+	<Character Umin="0.007937" Vmin="0.177465" Umax="0.050265" Vmax="0.329577">0</Character> 
+	<Character Umin="0.058201" Vmin="0.177465" Umax="0.097002" Vmax="0.329577">1</Character>
+	<Character Umin="0.104938" Vmin="0.177465" Umax="0.148148" Vmax="0.329577">2</Character> 
+	<Character Umin="0.156085" Vmin="0.177465" Umax="0.200176" Vmax="0.329577">3</Character>
+	<Character Umin="0.208113" Vmin="0.177465" Umax="0.251323" Vmax="0.329577">4</Character>
+	<Character Umin="0.259259" Vmin="0.177465" Umax="0.300705" Vmax="0.329577">5</Character>
+	<Character Umin="0.308642" Vmin="0.177465" Umax="0.352734" Vmax="0.329577">6</Character>
+	<Character Umin="0.360670" Vmin="0.177465" Umax="0.402998" Vmax="0.329577">7</Character>
+	<Character Umin="0.410935" Vmin="0.177465" Umax="0.455026" Vmax="0.329577">8</Character>
+	<Character Umin="0.462963" Vmin="0.177465" Umax="0.506173" Vmax="0.329577">9</Character>
+	<Character Umin="0.514109" Vmin="0.177465" Umax="0.532628" Vmax="0.329577">:</Character>
+	<Character Umin="0.540564" Vmin="0.177465" Umax="0.559965" Vmax="0.329577">;</Character>
+	<Character Umin="0.567901" Vmin="0.177465" Umax="0.601411" Vmax="0.329577">&lt;</Character> <!--<-->
+	<Character Umin="0.609347" Vmin="0.177465" Umax="0.646384" Vmax="0.329577">=</Character>
+	<Character Umin="0.654321" Vmin="0.177465" Umax="0.687831" Vmax="0.329577">&gt;</Character> <!-->-->
+	<Character Umin="0.695767" Vmin="0.177465" Umax="0.731041" Vmax="0.329577">?</Character>
+	
+	<!-- Row 2																			-->
+	<Character Umin="0.007937" Vmin="0.342254" Umax="0.065256" Vmax="0.494366">@</Character>
+	<Character Umin="0.073192" Vmin="0.342254" Umax="0.135802" Vmax="0.494366">A</Character>
+	<Character Umin="0.143739" Vmin="0.342254" Umax="0.195767" Vmax="0.494366">B</Character>
+	<Character Umin="0.203704" Vmin="0.342254" Umax="0.256614" Vmax="0.494366">C</Character>
+	<Character Umin="0.264550" Vmin="0.342254" Umax="0.321869" Vmax="0.494366">D</Character>
+	<Character Umin="0.329806" Vmin="0.342254" Umax="0.379189" Vmax="0.494366">E</Character>
+	<Character Umin="0.388007" Vmin="0.342254" Umax="0.437390" Vmax="0.494366">F</Character>
+	<Character Umin="0.445326" Vmin="0.342254" Umax="0.503527" Vmax="0.494366">G</Character>
+	<Character Umin="0.511464" Vmin="0.342254" Umax="0.569665" Vmax="0.494366">H</Character>
+	<Character Umin="0.577601" Vmin="0.342254" Umax="0.606702" Vmax="0.494366">I</Character>
+	<Character Umin="0.614638" Vmin="0.342254" Umax="0.662257" Vmax="0.494366">J</Character>
+	<Character Umin="0.670194" Vmin="0.342254" Umax="0.731922" Vmax="0.494366">K</Character>
+	<Character Umin="0.739859" Vmin="0.342254" Umax="0.788360" Vmax="0.494366">L</Character>
+	<Character Umin="0.796296" Vmin="0.342254" Umax="0.859788" Vmax="0.494366">M</Character>
+	<Character Umin="0.868607" Vmin="0.342254" Umax="0.929453" Vmax="0.494366">N</Character>
+	<Character Umin="0.937390" Vmin="0.342254" Umax="0.992063" Vmax="0.494366">O</Character>
+	
+	<!-- Row 3																			-->
+	<Character Umin="0.007937" Vmin="0.507042" Umax="0.056437" Vmax="0.659155">P</Character>
+	<Character Umin="0.064374" Vmin="0.507042" Umax="0.120811" Vmax="0.659155">Q</Character>
+	<Character Umin="0.128748" Vmin="0.507042" Umax="0.186067" Vmax="0.659155">R</Character>
+	<Character Umin="0.194004" Vmin="0.507042" Umax="0.239859" Vmax="0.659155">S</Character>
+	<Character Umin="0.247795" Vmin="0.507042" Umax="0.301587" Vmax="0.659155">T</Character>
+	<Character Umin="0.309524" Vmin="0.507042" Umax="0.370370" Vmax="0.659155">U</Character>
+	<Character Umin="0.378307" Vmin="0.507042" Umax="0.440035" Vmax="0.659155">V</Character>
+	<Character Umin="0.447972" Vmin="0.507042" Umax="0.527337" Vmax="0.659155">W</Character>
+	<Character Umin="0.535273" Vmin="0.507042" Umax="0.596120" Vmax="0.659155">X</Character>
+	<Character Umin="0.604056" Vmin="0.507042" Umax="0.663139" Vmax="0.659155">Y</Character>
+	<Character Umin="0.671076" Vmin="0.507042" Umax="0.723986" Vmax="0.659155">Z</Character>
+	<Character Umin="0.731041" Vmin="0.507042" Umax="0.758377" Vmax="0.659155">[</Character>
+	<Character Umin="0.766314" Vmin="0.507042" Umax="0.802469" Vmax="0.659155">\</Character>
+	<Character Umin="0.810406" Vmin="0.507042" Umax="0.837743" Vmax="0.659155">]</Character>
+	<Character Umin="0.845679" Vmin="0.507042" Umax="0.884480" Vmax="0.659155">^</Character>
+	<Character Umin="0.892416" Vmin="0.507042" Umax="0.931217" Vmax="0.659155">_</Character>
+	
+	<!-- Row 4																			-->
+	<Character Umin="0.007937" Vmin="0.671831" Umax="0.028219" Vmax="0.823944">`</Character>
+	<Character Umin="0.036155" Vmin="0.671831" Umax="0.077601" Vmax="0.823944">a</Character>
+	<Character Umin="0.084656" Vmin="0.671831" Umax="0.132275" Vmax="0.823944">b</Character>
+	<Character Umin="0.140212" Vmin="0.671831" Umax="0.179012" Vmax="0.823944">c</Character>
+	<Character Umin="0.186949" Vmin="0.671831" Umax="0.234568" Vmax="0.823944">d</Character>
+	<Character Umin="0.242504" Vmin="0.671831" Umax="0.281305" Vmax="0.823944">e</Character>
+	<Character Umin="0.289242" Vmin="0.671831" Umax="0.320988" Vmax="0.823944">f</Character>
+	<Character Umin="0.328924" Vmin="0.671831" Umax="0.372134" Vmax="0.823944">g</Character>
+	<Character Umin="0.380071" Vmin="0.671831" Umax="0.429453" Vmax="0.823944">h</Character>
+	<Character Umin="0.437390" Vmin="0.671831" Umax="0.462081" Vmax="0.823944">i</Character>
+	<Character Umin="0.470018" Vmin="0.671831" Umax="0.492945" Vmax="0.823944">j</Character>
+	<Character Umin="0.500000" Vmin="0.671831" Umax="0.554674" Vmax="0.823944">k</Character>
+	<Character Umin="0.562610" Vmin="0.671831" Umax="0.587302" Vmax="0.823944">l</Character>
+	<Character Umin="0.595238" Vmin="0.671831" Umax="0.666667" Vmax="0.823944">m</Character>
+	<Character Umin="0.674603" Vmin="0.671831" Umax="0.724868" Vmax="0.823944">n</Character>
+	<Character Umin="0.732804" Vmin="0.671831" Umax="0.776896" Vmax="0.823944">o</Character>
+	
+	<!-- Row 5																			-->
+	<Character Umin="0.007937" Vmin="0.836620" Umax="0.054674" Vmax="0.988732">p</Character>
+	<Character Umin="0.062610" Vmin="0.836620" Umax="0.110229" Vmax="0.988732">q</Character>
+	<Character Umin="0.118166" Vmin="0.836620" Umax="0.156966" Vmax="0.988732">r</Character>
+	<Character Umin="0.164903" Vmin="0.836620" Umax="0.198413" Vmax="0.988732">s</Character>
+	<Character Umin="0.206349" Vmin="0.836620" Umax="0.243386" Vmax="0.988732">t</Character>
+	<Character Umin="0.251323" Vmin="0.836620" Umax="0.299824" Vmax="0.988732">u</Character>
+	<Character Umin="0.307760" Vmin="0.836620" Umax="0.357143" Vmax="0.988732">v</Character>
+	<Character Umin="0.365079" Vmin="0.836620" Umax="0.441799" Vmax="0.988732">w</Character>
+	<Character Umin="0.449735" Vmin="0.836620" Umax="0.495591" Vmax="0.988732">x</Character>
+	<Character Umin="0.503527" Vmin="0.836620" Umax="0.551146" Vmax="0.988732">y</Character>
+	<Character Umin="0.559083" Vmin="0.836620" Umax="0.597884" Vmax="0.988732">z</Character>
+	<Character Umin="0.605820" Vmin="0.836620" Umax="0.639330" Vmax="0.988732">{</Character>
+	<Character Umin="0.647266" Vmin="0.836620" Umax="0.665785" Vmax="0.988732">|</Character>
+	<Character Umin="0.673721" Vmin="0.836620" Umax="0.708113" Vmax="0.988732">}</Character>
+	<Character Umin="0.716049" Vmin="0.836620" Umax="0.753086" Vmax="0.988732">~</Character>
+</Font>
