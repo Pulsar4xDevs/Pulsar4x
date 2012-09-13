@@ -5,8 +5,9 @@ using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Text;
+using Pulsar4X.WinForms.Helpers;
 using System.Windows.Forms;
-using Pulsar4X.ViewModels;
+using Pulsar4X.WinForms.ViewModels;
 using Pulsar4X.Entities;
 
 namespace Pulsar4X.WinForms.Controls

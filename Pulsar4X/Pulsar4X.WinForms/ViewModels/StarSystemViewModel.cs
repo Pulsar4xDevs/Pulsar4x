@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using Pulsar4X.Stargen;
 using Pulsar4X.Entities;
+using Pulsar4X.WinForms.Helpers;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.Linq.Expressions;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.WinForms.ViewModels
 {
     public class StarSystemViewModel : INotifyPropertyChanged
     {

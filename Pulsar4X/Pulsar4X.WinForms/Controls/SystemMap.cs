@@ -13,7 +13,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using log4net.Config;
 using log4net;
-using Pulsar4X.ViewModels;
+using Pulsar4X.WinForms.ViewModels;
 using Pulsar4X.WinForms.Controls.SceenGraph;
 
 namespace Pulsar4X.WinForms.Controls
@@ -229,7 +229,7 @@ namespace Pulsar4X.WinForms.Controls
                 // create texture from name:
                 GLUtilities.GLFont test = new GLUtilities.GLFont(m_GLCanvas.DefaultShader, v3StarPos, Vector2.Zero, Color.White);
                 Vector2 v2NameSize;
-                uint uiNameTex = Pulsar4X.Helpers.ResourceManager.Instance.GenStringTexture(oStar.Name, out v2NameSize);
+                uint uiNameTex = Helpers.ResourceManager.Instance.GenStringTexture(oStar.Name, out v2NameSize);
                 GLUtilities.GLQuad oNameQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
                                                                       new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - v2NameSize.Y, v3StarPos.Z),
                                                                       v2NameSize,

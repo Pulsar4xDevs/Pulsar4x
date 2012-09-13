@@ -5,9 +5,10 @@ using System.Text;
 using Pulsar4X.Entities;
 using System.ComponentModel;
 using Pulsar4X.Stargen;
+using Pulsar4X.WinForms.Helpers;
 using System.Linq.Expressions;
 
-namespace Pulsar4X.ViewModels
+namespace Pulsar4X.WinForms.ViewModels
 {
     public class GLStarSystemViewModel: INotifyPropertyChanged
     {

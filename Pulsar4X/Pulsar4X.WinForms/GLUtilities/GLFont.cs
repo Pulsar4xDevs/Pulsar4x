@@ -39,7 +39,7 @@ namespace Pulsar4X.WinForms.GLUtilities
 
 
         /// <summary> Information describing the font </summary>
-        Pulsar4X.Helpers.ResourceManager.GLFontData m_oFontData;
+        Helpers.ResourceManager.GLFontData m_oFontData;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Constructor. </summary>

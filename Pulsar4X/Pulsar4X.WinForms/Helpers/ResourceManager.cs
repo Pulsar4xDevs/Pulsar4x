@@ -9,7 +9,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using System.Xml;
 
-namespace Pulsar4X.Helpers
+namespace Pulsar4X.WinForms.Helpers
 {
     /// <summary>
     /// Class to manager the Loading and Saving of UI resources, Textures, Shaders, Sounds, Data Files, etc.
@@ -293,7 +293,7 @@ namespace Pulsar4X.Helpers
             }
 
             // load font texture.
-            oFontData.m_uiTextureID = Pulsar4X.Helpers.ResourceManager.Instance.LoadTexture(szTextureFile);
+            oFontData.m_uiTextureID = Helpers.ResourceManager.Instance.LoadTexture(szTextureFile);
 
             // Add to list of loaded fonts:
             m_dicGLFonts.Add(oFontData.m_szDataFile, oFontData);
