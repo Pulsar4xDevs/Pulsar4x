@@ -18,6 +18,7 @@ solution "Pulsar4X"
 			"System.Data",
 			"System.Windows.Forms",
 			"System.Drawing",
+			"System.Xml",
 			log4netlib(),
 			opentklib(),
 			opentkglcontrollib()

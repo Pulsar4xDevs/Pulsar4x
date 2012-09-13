@@ -57,46 +57,55 @@ namespace Pulsar4X.WinForms.GLUtilities
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         public GLFont(GLShader a_oShaderProgram, Vector3 a_v3Pos, Vector2 a_v2Size, System.Drawing.Color a_oColor, string a_szFontDataFile = "")
         {
-            string szTextureFile;
+            string szTextureFile = "";
             string szBuffer;
             char cBuffer = ' ';
 
             // first load in XML file.
             XmlTextReader oXMLReader = new XmlTextReader("./Resources/Fonts/CooperBlackFont.xml");
 
-            if (oXMLReader.ReadToNextSibling("Font"))
+            try
             {
-                szTextureFile = oXMLReader.GetAttribute("texture");
+
+                if (oXMLReader.ReadToNextSibling("Font"))
+                {
+                    szTextureFile = oXMLReader.GetAttribute("texture");
+                }
+
+                oXMLReader.ReadToDescendant("Character");
+
+                do
+                {
+                    UVCoords oUVCoords = new UVCoords();
+
+                    szBuffer = oXMLReader.GetAttribute("Umin");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
+
+                    szBuffer = oXMLReader.GetAttribute("Vmin");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
+
+                    szBuffer = oXMLReader.GetAttribute("Umax");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
+
+                    szBuffer = oXMLReader.GetAttribute("Vmax");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
+
+                    szBuffer = oXMLReader.GetAttribute("Char");
+                    foreach (char c in szBuffer)
+                    {
+                        cBuffer = c;
+                    }
+                    m_dicCharMap.Add(cBuffer, oUVCoords);
+
+                } while (oXMLReader.ReadToNextSibling("Character"));
+            }
+            catch
+            {
+                logger.Error("Error: faild to load Font Data file " + a_szFontDataFile);
             }
 
-            oXMLReader.ReadToDescendant("Character");
-
-            do
-            {
-                UVCoords oUVCoords = new UVCoords();
-
-                szBuffer = oXMLReader.GetAttribute("Umin");
-                float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
-
-                szBuffer = oXMLReader.GetAttribute("Vmin");
-                float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
-
-                szBuffer = oXMLReader.GetAttribute("Umax");
-                float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
-
-                szBuffer = oXMLReader.GetAttribute("Vmax");
-                float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
-
-                szBuffer = oXMLReader.GetAttribute("Char");
-                foreach (char c in szBuffer)
-                {
-                    cBuffer = c;
-                }
-                m_dicCharMap.Add(cBuffer, oUVCoords);
-
-            } while (oXMLReader.ReadToNextSibling("Character"));
-
-           
+            // load fon texture.
+            Pulsar4X.Helpers.ResourceManager.Instance.LoadTexture(szTextureFile);
         }
 
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
