@@ -61,6 +61,35 @@ namespace Pulsar4X.WinForms.Controls
                 col.DefaultCellStyle.Format = "N4";
                 StarsDataGridView.Columns.Add(col);
             }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Temperature";
+                col.HeaderText = "Temperature";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Radius";
+                col.HeaderText = "Radius";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "EcoSphereRadius";
+                col.HeaderText = "Habitable Zone";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "OrbitalRadius";
+                col.HeaderText = "Orbital Radius";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+
             StarsDataGridView.DataSource = VM.StarsSource;
             StarsDataGridView.SelectionChanged += new EventHandler(StarsDataGridView_SelectionChanged);
 
@@ -124,6 +153,14 @@ namespace Pulsar4X.WinForms.Controls
                 col.DefaultCellStyle.Format = "N4";
                 PlanetsDataGridView.Columns.Add(col);
             }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "IsInResonantRotation";
+                col.HeaderText = "Tidal Lock";
+                //col.DefaultCellStyle.Format .Format = "N4";
+                PlanetsDataGridView.Columns.Add(col);
+            }
+
             PlanetsDataGridView.DataSource = VM.PlanetSource;
             PlanetsDataGridView.SelectionChanged += new EventHandler(StarADataGridView_SelectionChanged);
         }

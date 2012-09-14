@@ -33,7 +33,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             }
             set
             {
-
+                m_szText = value;
             } 
         }
 

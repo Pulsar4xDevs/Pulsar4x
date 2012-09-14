@@ -163,6 +163,7 @@ namespace Pulsar4X.WinForms.Controls
             Cursor.Current = Cursors.WaitCursor;
 
             // Do things like update orbits and taskgroups here.
+            m_oCurrentSceen.Refresh();
 
             // Change Cursor Back to default.
             Cursor.Current = Cursors.Default;

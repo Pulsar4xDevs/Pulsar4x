@@ -46,9 +46,6 @@ namespace Pulsar4X.WinForms
             /// Name/Title for System Generation and Display tab.
             /// </summary>
             public const string     SYSTEM_GENERATION_AND_DISPLAY_NAME = "System Generation and Display";
-
-
-
  
         }
 
@@ -59,6 +56,7 @@ namespace Pulsar4X.WinForms
         {
             public const string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
             public const string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
+            public const string DEFAULT_GLFONT = "./Resources/Fonts/CooperBlackFont.xml";
         }
 
 
