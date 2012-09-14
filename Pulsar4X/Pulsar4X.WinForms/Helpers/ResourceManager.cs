@@ -67,6 +67,8 @@ namespace Pulsar4X.WinForms.Helpers
             public string m_szDataFile = "null";
             public uint m_uiUseCount = 0;
             public uint m_uiTextureID = 0;
+
+            public GLFontData() {}
         }
 
 
@@ -223,12 +225,13 @@ namespace Pulsar4X.WinForms.Helpers
             }
 
             // next we see if this string has been gend already:
-            GLFontData oFontData = new GLFontData();
+            GLFontData oFontData;
             if (m_dicGLFonts.TryGetValue(a_szFontDataFile, out oFontData))
             {
                 oFontData.m_uiUseCount++;
                 return oFontData;
             }
+            oFontData = new GLFontData();
 
             // We have not loaded the font before so, set up new one:
             oFontData.m_szDataFile = a_szFontDataFile;      // Set Data File path.

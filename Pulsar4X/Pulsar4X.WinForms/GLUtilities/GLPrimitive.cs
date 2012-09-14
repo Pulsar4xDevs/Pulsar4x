@@ -26,6 +26,14 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// </summary>
         protected GLVertex[] m_aoVerticies;
 
+        public GLVertex[] Verticies
+        {
+            get
+            {
+                return m_aoVerticies;
+            }
+        }
+
         /// <summary>
         /// An array of Indexes into the m_aoVerticies array. this tells the GPU in which order to draw the vertexes.
         /// this also allows us to reuse verticies, saving on the amount if memory we need to transfer to the GPU.
