@@ -11,14 +11,6 @@ namespace Pulsar4X.Entities
 {
     public class Star : OrbitingEntity
     {
-        //public Guid Id { get; set; }
-        //public string Name { get; set; }
-        
-        //public long XGalactic { get; set; }
-        //public long YGalactic { get; set; }
-        //public long XSystem { get; set; }
-        //public long YSystem { get; set; }
-
         double XGalactic { get; set; }
         double YGalactic { get; set; }
         double ZGalactic { get; set; }

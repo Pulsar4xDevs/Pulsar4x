@@ -210,9 +210,9 @@ namespace Pulsar4X.WinForms.Controls
                     Random rnd = new Random();
                     float fAngle = rnd.Next(0, 360);
                     fAngle = MathHelper.DegreesToRadians(fAngle);
-                    v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
-                    v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
-                    MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
+                    v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
+                    v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
+                    MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis * dKMperAUdevby10);
                     oCurrStar = new StarElement();
 
                     // create orbit circle:
@@ -231,7 +231,7 @@ namespace Pulsar4X.WinForms.Controls
                 GLUtilities.GLFont test = new GLUtilities.GLFont(m_GLCanvas.DefaultShader,
                     new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - 16, 0)
                     , new Vector2(16, 16), Color.White, UIConstants.Textures.DEFAULT_GLFONT);
-                test.Text = "testaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+                test.Text = "testaa";
                 Vector2 v2NameSize;
                 uint uiNameTex = Helpers.ResourceManager.Instance.GenStringTexture(oStar.Name, out v2NameSize);
                 GLUtilities.GLQuad oNameQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
@@ -245,7 +245,7 @@ namespace Pulsar4X.WinForms.Controls
                 {
                     GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
                         Vector3.Zero,                                                                      // base around parent star pos.
-                        (float)(oStar.OrbitalRadius * dKMperAUdevby10) / 2,
+                        (float)(oStar.SemiMajorAxis * dKMperAUdevby10) / 2,
                         Color.FromArgb(255, 255, 255, 0),  // yellow.
                         UIConstants.Textures.DEFAULT_TEXTURE);
                     oCurrStar.AddPrimitive(oStarOrbitCirc);
@@ -459,68 +459,3 @@ namespace Pulsar4X.WinForms.Controls
 //// and this http://www.vendian.org/mncharity/dir3/blackbody/UnstableURLs/bbr_color.html
 //// or this: http://www.vendian.org/mncharity/dir3/starcolor
 //// For right now to work around float percision and overflow issues 1 am scaling everthing down by a factor of 10.
-//m_GLCanvas.RenderList.Clear(); // clear the render list!!
-
-//// add star to centre of the map.
-//int iCounter = 0;
-//double dMaxOrbitDist = 0; // used for fit to zoom.
-//foreach (Pulsar4X.Entities.Star oStar in m_oCurrnetSystem.Stars)
-//{
-//    // reset zoom factor:
-//    // we need to do this to stop the problem of "big Planets" when changing systems with a non 1.0 zoom factor.
-//    m_GLCanvas.ZoomFactor = 1.0f;
-
-//    double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10);
-
-//    Vector3 v3StarPos = new Vector3(0, 0, 0);
-//    if (iCounter > 0)
-//    {
-//        // then we have a secondary, etc star give random position around its orbit!
-//        Random rnd = new Random();
-//        float fAngle = rnd.Next(0, 360);
-//        fAngle = MathHelper.DegreesToRadians(fAngle);
-//        v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
-//        v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.OrbitalRadius * dKMperAUdevby10);
-//        MaxOrbitDistTest(ref dMaxOrbitDist, oStar.OrbitalRadius * dKMperAUdevby10);
-//    }
-
-//    float fSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
-
-//    GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
-//                                                            v3StarPos,
-//                                                            new Vector2(fSize, fSize), 
-//                                                            Color.FromArgb(255, 255, 255, 0),    // yellow!
-//                                                            UIConstants.Textures.DEFAULT_PLANET_ICON);
-//    m_GLCanvas.AddToRenderList(oStarQuad);
-
-//    // now go though and add each planet to render list.
-
-//    foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
-//    {
-//        double fOrbitRadius = oPlanet.SemiMajorAxis * dKMperAUdevby10;
-//        float fPlanetSize = (float)oPlanet.Radius * 2 / 10;
-//        MaxOrbitDistTest(ref dMaxOrbitDist, fOrbitRadius);
-//        //if (fPlanetSize * m_GLCanvas.ZoomFactor < 16)
-//       // {
-//            // if we are too small, make us bigger for drawing!!
-//           // fPlanetSize = fPlanetSize * 1000;
-//        //}
-
-//        GLUtilities.GLQuad oPlanetQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
-//            new Vector3((float)fOrbitRadius, 0, 0) + v3StarPos,                                    // offset Pos by parent star pos
-//            new Vector2(fPlanetSize, fPlanetSize),
-//            Color.FromArgb(255, 50, 205, 50),  // lime green
-//            UIConstants.Textures.DEFAULT_PLANET_ICON);
-//        GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(m_GLCanvas.DefaultShader,
-//            v3StarPos,                                                                      // base around parent star pos.
-//            (float)fOrbitRadius, 
-//            Color.FromArgb(255, 50, 205, 50),  // lime green
-//            UIConstants.Textures.DEFAULT_TEXTURE);
-
-//        m_GLCanvas.AddToRenderList(oPlanetQuad);
-//        m_GLCanvas.AddToRenderList(oPlanetOrbitCirc);
-//    }
-//    // just do primary for now:
-//    //break;
-//    iCounter++;
-//}

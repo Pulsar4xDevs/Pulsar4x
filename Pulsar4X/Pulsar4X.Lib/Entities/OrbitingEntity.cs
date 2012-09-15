@@ -14,9 +14,6 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double Radius { get; set; }
 
-        [Obsolete("OrbitalRadius is Obsolete, use SemiMajorAxis instead")]
-        public double OrbitalRadius { get; set; }
-
         /// <summary>
         /// semi-major axis of solar orbit (in AU)
         /// </summary>

@@ -72,7 +72,7 @@ namespace Pulsar4X.WinForms.Forms
 
             m_oThread = new Thread(new ThreadStart(StartupSplashScreen.ShowForm));
             m_oThread.IsBackground = true;
-            m_oThread.ApartmentState = ApartmentState.STA;
+            m_oThread.SetApartmentState(ApartmentState.STA);
             m_oThread.Start();
         }
 
