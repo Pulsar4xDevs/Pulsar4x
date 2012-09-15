@@ -10,10 +10,13 @@ namespace Pulsar4X.Entities
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public double BaseGravity { get; set; }
         public double MinimumGravityConstraint { get; set; }
         public double MaximumGravityConstraint { get; set; }
+        public double BasePressure { get; set; }
         public double MinimumPressureConstraint { get; set; }
         public double MaximumPressureConstraint { get; set; }
+        public double BaseTemperature { get; set; }
         public double MinimumTemperatureConstraint { get; set; }
         public double MaximumTemperatureConstraint { get; set; }
         

@@ -44,6 +44,7 @@
             this.calculationsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameParametersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.miscellaneousToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.commanderNameThemesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.informationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -178,9 +179,18 @@
             // 
             // miscellaneousToolStripMenuItem
             // 
+            this.miscellaneousToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.commanderNameThemesToolStripMenuItem});
             this.miscellaneousToolStripMenuItem.Name = "miscellaneousToolStripMenuItem";
             this.miscellaneousToolStripMenuItem.Size = new System.Drawing.Size(94, 20);
             this.miscellaneousToolStripMenuItem.Text = "Miscellaneous";
+            // 
+            // commanderNameThemesToolStripMenuItem
+            // 
+            this.commanderNameThemesToolStripMenuItem.Name = "commanderNameThemesToolStripMenuItem";
+            this.commanderNameThemesToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.commanderNameThemesToolStripMenuItem.Text = "Commander Name Themes";
+            this.commanderNameThemesToolStripMenuItem.Click += new System.EventHandler(this.commanderNameThemesToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -257,6 +267,7 @@
         private System.Windows.Forms.ToolStripMenuItem systemInformationToolStripMenuItem;
         private System.Windows.Forms.Panel MainPanel;
         private System.Windows.Forms.ToolStripMenuItem systemMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem commanderNameThemesToolStripMenuItem;
     }
 }
 

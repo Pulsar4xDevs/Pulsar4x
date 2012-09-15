@@ -33,6 +33,8 @@ namespace Pulsar4X.Storage
             serializer.NullValueHandling = NullValueHandling.Include;
 
             var file = Path.Combine(_dataDirectoryPath, CommanderNameThemeDataFileName);
+            if (File.Exists(file) == false) return new Dictionary<Guid, CommanderNameTheme>();
+
             using (var rdr = new StreamReader(file))
             using (JsonReader reader = new JsonTextReader(rdr))
             {

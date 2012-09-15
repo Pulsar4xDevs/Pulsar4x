@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Pulsar4X.Forms;
 
 namespace Pulsar4X
 {
@@ -93,6 +94,12 @@ namespace Pulsar4X
         {
             // Show System information tab.
             WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_GENERATION_AND_DISPLAY_INDEX);
+        }
+
+        private void commanderNameThemesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dialog = new CommanderNameThemesDialog();
+            dialog.ShowDialog();
         }
 
 
