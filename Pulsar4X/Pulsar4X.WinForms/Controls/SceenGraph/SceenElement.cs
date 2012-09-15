@@ -54,22 +54,22 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
 
 
         /// <summary> The text lable primitive for this sceen element </summary>
-        protected GLPrimitive m_oLablePrimitive;
+        protected GLFont m_oLable;
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Gets or sets the lable primitive. </summary>
         ///
         /// <value> The lable primitive. </value>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        public GLPrimitive LablePrimitive
+        public GLFont Lable
         {
             get
             {
-                return m_oLablePrimitive;
+                return m_oLable;
             }
             set
             {
-                m_oLablePrimitive = value;
+                m_oLable = value;
             }
         }
 

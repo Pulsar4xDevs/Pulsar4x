@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Font texture="./Fonts/CooperBlackFont.png">
+<Font texture="./Resources/Fonts/CooperBlackFont.png">
 	<!-- Row 0																			-->
 	<Character Umin="0.007937" Vmin="0.012676" Umax="0.032628" Vmax="0.164789" Char=" "/>
 	<Character Umin="0.040564" Vmin="0.012676" Umax="0.059083" Vmax="0.164789" Char="!"/>

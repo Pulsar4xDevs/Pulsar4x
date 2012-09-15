@@ -35,6 +35,12 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                     oElement.Render();
                 }
             }
+
+            // render lable:
+            if (m_oLable != null)
+            {
+                m_oLable.Render();
+            }
         }
 
 

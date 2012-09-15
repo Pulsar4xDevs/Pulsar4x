@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.WinForms;
+using Pulsar4X.WinForms.Helpers;
 using Pulsar4X.WinForms.Controls;
 using OpenTK;
 using OpenTK.Graphics;
@@ -105,6 +106,15 @@ namespace Pulsar4X.WinForms.GLUtilities
            // #if DEBUG
             //    logger.Info("OpenGL Create Quad Primitive: " + GL.GetError().ToString());
             //#endif
+        }
+
+        public override void UpdateVBOs()
+        {
+            GL.BindVertexArray(m_uiVextexArrayHandle);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
+            GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle); // Lets Open GL know that this is the current active buffer object.
+            GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(m_auiIndicies.Length * sizeof(ushort)), m_auiIndicies, BufferUsageHint.StaticDraw); // Tells OpenGL how the data is structured.
         }
 
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)

@@ -228,7 +228,10 @@ namespace Pulsar4X.WinForms.Controls
                                                                         Color.FromArgb(255, 255, 255, 0),    // yellow!
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
                 // create texture from name:
-                GLUtilities.GLFont test = new GLUtilities.GLFont(m_GLCanvas.DefaultShader, v3StarPos, new Vector2(10000,10000), Color.White, UIConstants.Textures.DEFAULT_GLFONT);
+                GLUtilities.GLFont test = new GLUtilities.GLFont(m_GLCanvas.DefaultShader,
+                    new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - 16, 0)
+                    , new Vector2(16, 16), Color.White, UIConstants.Textures.DEFAULT_GLFONT);
+                test.Text = "testaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
                 Vector2 v2NameSize;
                 uint uiNameTex = Helpers.ResourceManager.Instance.GenStringTexture(oStar.Name, out v2NameSize);
                 GLUtilities.GLQuad oNameQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
@@ -249,7 +252,7 @@ namespace Pulsar4X.WinForms.Controls
                 }
                 oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
                 oCurrStar.AddPrimitive(oNameQuad);
-                oCurrStar.LablePrimitive = oNameQuad;
+                //oCurrStar.Lable = test;
                 oCurrStar.PrimaryPrimitive = oStarQuad;
                 oCurrStar.EntityID = oStar.Id;
                 oCurrStar.RealSize = new Vector2(fStarSize, fStarSize);

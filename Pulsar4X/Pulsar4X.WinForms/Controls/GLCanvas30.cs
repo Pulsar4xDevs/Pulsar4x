@@ -24,6 +24,8 @@ namespace Pulsar4X.WinForms.Controls
         System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
         double m_dAccumulator = 0;
         int m_iFrameCounter = 0;
+
+        GLUtilities.GLFont oFont;
         
 
         public GLCanvas30()
@@ -79,7 +81,10 @@ namespace Pulsar4X.WinForms.Controls
             m_oShaderProgram = new GLUtilities.GLShader();
 
             // Setup Our View Port, this sets Our Projection and View Matricies.
-            SetupViewPort(0, 0, this.Size.Width, this.Size.Height);  
+            SetupViewPort(0, 0, this.Size.Width, this.Size.Height);
+
+            oFont = new GLUtilities.GLFont(m_oShaderProgram, new Vector3(100, 100, 0), new Vector2(16, 16), Color.GhostWhite, UIConstants.Textures.DEFAULT_GLFONT);
+            oFont.Text = "ijklmnopqrstuvwxyz,./?;'{}][-=_+|/?!@#$%^*()";
 
             m_oSW.Start();
         }
@@ -167,6 +172,7 @@ namespace Pulsar4X.WinForms.Controls
 
             // call render on the sceen:
             SceenToRender.Render();
+            oFont.Render();
             
             GraphicsContext.CurrentContext.SwapBuffers();
            // #if DEBUG

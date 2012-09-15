@@ -16,7 +16,7 @@ namespace Pulsar4X.WinForms.GLUtilities
     /// <summary> 
     /// A Font for use in OpenGL, will Render is current "Text".
     /// </summary>
-    class GLFont
+    public class GLFont
     {
         /// <summary> The text to render </summary>
         private string m_szText;
@@ -33,6 +33,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             set
             {
                 m_szText = value;
+                UpdateUVCoords();
             } 
         }
 
@@ -47,7 +48,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             set
             {
                 m_v3Position = value;
-                UpdatePositions();
+                UpdatePositionAndSize();
             }
         }
 
@@ -62,7 +63,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             set
             {
                 m_v2Size = value;
-                UpdateSize();
+                UpdatePositionAndSize();
             }
         }
 
@@ -87,13 +88,14 @@ namespace Pulsar4X.WinForms.GLUtilities
         /// <param name="a_oColor">         The color. </param>
         /// <param name="a_szFontDataFile"> (optional) the font data file. </param>
         ////////////////////////////////////////////////////////////////////////////////////////////////////
-        public GLFont(GLShader a_oShaderProgram, Vector3 a_v3Pos, Vector2 a_v2Size, System.Drawing.Color a_oColor, string a_szFontDataFile = "")
+        public GLFont(GLShader a_oShaderProgram, Vector3 a_v3Pos, Vector2 a_v2Size, System.Drawing.Color a_oColor, string a_szFontDataFile, string a_szText = "")
         {
             // load in data:
             m_oFontData = Helpers.ResourceManager.Instance.LoadGLFont(a_szFontDataFile);
 
             m_v3Position = a_v3Pos;
             m_v2Size = a_v2Size;
+            m_szText = a_szText;
 
             // Creat some working vars:
             Vector3 v3CharPos = new Vector3();
@@ -111,25 +113,39 @@ namespace Pulsar4X.WinForms.GLUtilities
                 // add quad to the list:
                 m_lQuads.Add(oQuad);
             }
+
+            UpdateUVCoords();
         }
 
         public void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
-            foreach (GLQuad oQuad in m_lQuads)
+            int iCharsToDraw = m_szText.Length;
+            if (iCharsToDraw > c_uiMaxNumberOfChars)
             {
-                oQuad.Render(ref a_m4Projection, ref a_m4View);
+                iCharsToDraw = (int)c_uiMaxNumberOfChars;
+            }
+
+            for (int i = 0; i < iCharsToDraw; ++i)
+            {
+                m_lQuads[i].Render(ref a_m4Projection, ref a_m4View);
             }
         }
 
         public void Render()
         {
-            foreach (GLQuad oQuad in m_lQuads)
+            int iCharsToDraw = m_szText.Length;
+            if (iCharsToDraw > c_uiMaxNumberOfChars)
             {
-                oQuad.Render();
+                iCharsToDraw = (int)c_uiMaxNumberOfChars;
+            }
+
+            for (int i = 0; i < iCharsToDraw; ++i)
+            {
+                m_lQuads[i].Render();
             }
         }
 
-        private void UpdatePositions()
+        private void UpdatePositionAndSize()
         {
             Vector3 v3CharPos = new Vector3();
             int i = 0;
@@ -137,17 +153,10 @@ namespace Pulsar4X.WinForms.GLUtilities
             foreach (GLQuad oQuad in m_lQuads)
             {
                 ++i;
+                oQuad.Size = m_v2Size;
                 v3CharPos.X = m_v3Position.X + i * m_v2Size.X;
                 v3CharPos.Y = m_v3Position.Y;
                 oQuad.Position = v3CharPos;
-            }
-        }
-
-        private void UpdateSize()
-        {
-            foreach (GLQuad oQuad in m_lQuads)
-            {
-                oQuad.Size = m_v2Size;
             }
         }
 
@@ -173,6 +182,7 @@ namespace Pulsar4X.WinForms.GLUtilities
                     m_lQuads[i].Verticies[2].m_v2UV = oGLUVCoords.m_v2UVMin;    // 0, 0
                     m_lQuads[i].Verticies[3].m_v2UV.X = oGLUVCoords.m_v2UVMax.X;    // 1 , 0
                     m_lQuads[i].Verticies[3].m_v2UV.Y = oGLUVCoords.m_v2UVMin.Y;    // 1 , 0
+                    m_lQuads[i].UpdateVBOs();
                 }
             }
         }

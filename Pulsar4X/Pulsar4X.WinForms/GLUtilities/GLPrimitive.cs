@@ -265,5 +265,7 @@ namespace Pulsar4X.WinForms.GLUtilities
             m_v2Size = a_v2Size;
             RecalculateModelMatrix();
         }
+
+        public abstract void UpdateVBOs();
     }
 }
