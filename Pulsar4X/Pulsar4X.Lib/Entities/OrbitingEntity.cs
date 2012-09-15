@@ -6,12 +6,8 @@ using Pulsar4X.Entities;
 
 namespace Pulsar4X.Entities
 {
-    public abstract class OrbitingEntity : GameEntity
+    public abstract class OrbitingEntity : StarSystemEntity
     {
-
-        public double XSystem { get; set; }
-        public double YSystem { get; set; }
-        public double ZSystem { get; set; }
 
         /// <summary>
         /// equitorial radius (in km)
@@ -60,12 +56,6 @@ namespace Pulsar4X.Entities
         /// The Star this object orbits.
         /// </summary>
         public Star Primary { get; set; }
-
-        protected double m_dMass;
-        /// <summary>
-        /// Mass in Solar Masses.
-        /// </summary>
-        public abstract double Mass { get; set; }
 
         /// <summary>
         /// The Age of the body in Years
