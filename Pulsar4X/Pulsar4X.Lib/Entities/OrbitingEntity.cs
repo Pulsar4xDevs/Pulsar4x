@@ -57,9 +57,9 @@ namespace Pulsar4X.Entities
         public bool IsInResonantRotation { get; set; }
 
         /// <summary>
-        /// The Entity this object orbits.
+        /// The Star this object orbits.
         /// </summary>
-        public OrbitingEntity Primary { get; set; }
+        public Star Primary { get; set; }
 
         protected double m_dMass;
         /// <summary>
@@ -72,10 +72,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         public abstract double Age { get; set; }
 
-
-        ///< @todo Move these back into Star class, will require refactor of StarGen Code.
-        public double EcoSphereRadius { get; set; }
-        public double Luminosity { get; set; }
+        /// <summary>
+        /// The Parent Orbiting Body, for Planets and stars this is the same as Primary, for moons it will be a planet.
+        /// </summary>
+        public OrbitingEntity Parent { get; set; }
 
 
         public OrbitingEntity() : base()

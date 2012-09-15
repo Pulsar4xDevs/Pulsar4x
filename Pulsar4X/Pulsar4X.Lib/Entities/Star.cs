@@ -37,6 +37,8 @@ namespace Pulsar4X.Entities
         public StarSpectrum Spectrum { get; set; }
 
         //public double OrbitalRadius { get; set; }
+        public double EcoSphereRadius { get; set; }
+        public double Luminosity { get; set; }
         
         public BindingList<Planet> Planets { get; set; }
         public StarSystem StarSystem { get; set; }
