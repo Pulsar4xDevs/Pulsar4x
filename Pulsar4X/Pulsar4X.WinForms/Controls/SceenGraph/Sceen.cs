@@ -50,6 +50,26 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
             }
         }
 
+        /// <summary>
+        /// The Default Zoom Scaler for this Sceen.
+        /// </summary>
+        private float m_fDefaultZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
+
+        /// <summary>
+        /// Gets or sets the Default Zoom FDor this Sceen.
+        /// </summary>
+        public float DefaultZoomScaler
+        {
+            get
+            {
+                return m_fDefaultZoomScaler;
+            }
+            set
+            {
+                m_fDefaultZoomScaler = value;
+            }
+        }
+
         /// <summary> 
         /// The view offset, i.e. how much the view should be offset from 0, 0 
         /// </summary>

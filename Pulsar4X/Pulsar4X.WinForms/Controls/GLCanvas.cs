@@ -100,6 +100,8 @@ namespace Pulsar4X.WinForms.Controls
                 m_fZoomScaler = value;
                 // update view matrix:
                 RecalculateViewMatrix(OldZoomScale);
+                // update sceen:
+                m_oSceenToRender.ZoomSclaer = m_fZoomScaler;
             }
         }
 
@@ -151,6 +153,7 @@ namespace Pulsar4X.WinForms.Controls
             SizeChanged += new System.EventHandler(this.OnSizeChange);              // Setup Size Changed Enet Handler.
             MouseMove += new MouseEventHandler(OnMouseMove);                        // Setup Mouse Move Event handler
             MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
+            MouseUp += new MouseEventHandler(OnMouseUp);                        // Setup Mouse Down Event handler.
             MouseHover += new EventHandler(GLCanvas_OnMouseHover);
             //MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
@@ -226,6 +229,7 @@ namespace Pulsar4X.WinForms.Controls
             // An left mouse down, start pan.
             if (e.Button.Equals(System.Windows.Forms.MouseButtons.Left))
             {
+                Cursor.Current = Cursors.NoMove2D;
                 m_v3PanStartLocation.X = e.Location.X;
                 m_v3PanStartLocation.Y = e.Location.Y;
                 m_v3PanStartLocation.Z = 0.0f;
@@ -235,6 +239,12 @@ namespace Pulsar4X.WinForms.Controls
                 // on middle or mouse wheel button, centre!
                 this.CenterOnZero();
             }
+        }
+
+        private void OnMouseUp(object sender, MouseEventArgs e)
+        {
+            // reset cursor:
+            Cursor.Current = Cursors.Default;
         }
 
         private void GLCanvas_OnMouseHover(object sender, EventArgs e)

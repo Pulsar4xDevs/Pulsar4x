@@ -332,6 +332,7 @@ namespace Pulsar4X.WinForms.Controls
             }
 
             FitZoom(dMaxOrbitDist);
+            oNewSceen.DefaultZoomScaler = m_oCurrentSceen.ZoomSclaer;
 
             oNewSceen.Refresh(); // force refresh.
             // Change Cursor Back to default.
@@ -358,7 +359,8 @@ namespace Pulsar4X.WinForms.Controls
         private void FitZoom(double a_dMaxOrbit)
         {
             double dZoomFactor = ((this.Size.Width / m_GLCanvas.ZoomFactor) / (a_dMaxOrbit * 2));
-            m_GLCanvas.ZoomFactor = (float)dZoomFactor; 
+            m_GLCanvas.ZoomFactor = (float)dZoomFactor;
+            m_oCurrentSceen.ZoomSclaer = (float)dZoomFactor;
         }
 
         /// <summary>
@@ -395,6 +397,51 @@ namespace Pulsar4X.WinForms.Controls
 
             Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
         }
+
+        private void ResetViewButton_Click(object sender, EventArgs e)
+        {
+            m_GLCanvas.CenterOnZero();
+            m_GLCanvas.ZoomFactor = m_oCurrentSceen.DefaultZoomScaler;
+            m_oCurrentSceen.Refresh();
+        }
+
+        private void ZoomInButton_Click(object sender, EventArgs e)
+        {
+            m_GLCanvas.IncreaseZoomScaler();
+            UpdateScaleLabels();
+        }
+
+        private void ZoomOutButton_Click(object sender, EventArgs e)
+        {
+            m_GLCanvas.DecreaseZoomScaler();
+            UpdateScaleLabels();
+        }
+
+        private void PanRightButton_Click(object sender, EventArgs e)
+        {
+            Vector3 v3PanAmount = new Vector3(-10.0f, 0, 0);
+            m_GLCanvas.Pan(ref v3PanAmount);
+        }
+
+        private void PanLeftButton_Click(object sender, EventArgs e)
+        {
+            Vector3 v3PanAmount = new Vector3(10.0f, 0, 0);
+            m_GLCanvas.Pan(ref v3PanAmount);
+        }
+
+        private void PanUpButton_Click(object sender, EventArgs e)
+        {
+            Vector3 v3PanAmount = new Vector3(0, -10.0f, 0);
+            m_GLCanvas.Pan(ref v3PanAmount);
+        }
+
+        private void PanDownButton_Click(object sender, EventArgs e)
+        {
+            Vector3 v3PanAmount = new Vector3(0, 10.0f, 0);
+            m_GLCanvas.Pan(ref v3PanAmount);
+        }
+
+        
 
 
     }
