@@ -31,74 +31,32 @@ namespace Pulsar4X.WinForms.Controls
 
             // Setup the stars Grid
             StarsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            StarsDataGridView.RowHeadersVisible = false;
             StarsDataGridView.AutoGenerateColumns = false;
             StarsDataGridView.Bind(c => c.AllowUserToAddRows, VM, d => d.isSM);
             StarsDataGridView.Bind(c => c.AllowUserToDeleteRows, VM, d => d.isSM);
             StarsDataGridView.Bind(c => c.ReadOnly, VM, d => d.isNotSM);
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Name";
-                col.HeaderText = "Name";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Class";
-                col.HeaderText = "Class";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Mass";
-                col.HeaderText = "Mass";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Luminosity";
-                col.HeaderText = "Luminosity";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Temperature";
-                col.HeaderText = "Temperature";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Radius";
-                col.HeaderText = "Radius";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "EcoSphereRadius";
-                col.HeaderText = "Habitable Zone";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "OrbitalRadius";
-                col.HeaderText = "Orbital Radius";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
+
+            AddColumnsToStarDataGrid();
 
             StarsDataGridView.DataSource = VM.StarsSource;
             StarsDataGridView.SelectionChanged += new EventHandler(StarsDataGridView_SelectionChanged);
 
             // Setup the Planet Data Grid
             PlanetsDataGridView.AutoGenerateColumns = false;
+            PlanetsDataGridView.RowHeadersVisible = false;
             PlanetsDataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             PlanetsDataGridView.Bind(c => c.AllowUserToAddRows, VM, d => d.isSM);
             PlanetsDataGridView.Bind(c => c.AllowUserToDeleteRows, VM, d => d.isSM);
             PlanetsDataGridView.Bind(c => c.ReadOnly, VM, d => d.isNotSM);
+            AddColumnsToPlanetDataGrid();
+
+            PlanetsDataGridView.DataSource = VM.PlanetSource;
+            PlanetsDataGridView.SelectionChanged += new EventHandler(StarADataGridView_SelectionChanged);
+        }
+
+        private void AddColumnsToPlanetDataGrid()
+        {
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "Name";
@@ -160,9 +118,64 @@ namespace Pulsar4X.WinForms.Controls
                 //col.DefaultCellStyle.Format .Format = "N4";
                 PlanetsDataGridView.Columns.Add(col);
             }
+        }
 
-            PlanetsDataGridView.DataSource = VM.PlanetSource;
-            PlanetsDataGridView.SelectionChanged += new EventHandler(StarADataGridView_SelectionChanged);
+        private void AddColumnsToStarDataGrid()
+        {
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Name";
+                col.HeaderText = "Name";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Class";
+                col.HeaderText = "Class";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Mass";
+                col.HeaderText = "Mass";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Luminosity";
+                col.HeaderText = "Luminosity";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Temperature";
+                col.HeaderText = "Temperature";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Radius";
+                col.HeaderText = "Radius";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "EcoSphereRadius";
+                col.HeaderText = "Habitable Zone";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "OrbitalRadius";
+                col.HeaderText = "Orbital Radius";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
         }
 
         void StarADataGridView_SelectionChanged(object sender, EventArgs e)
