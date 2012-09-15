@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
     public class StorageTests
     {
         private GameState _gameState;
-        private Dictionary<Guid, CommanderNameTheme> _nameThemes;
+        private List<CommanderNameTheme> _nameThemes;
 
         private string _appPath;
         private string _saveFolder;
@@ -46,7 +46,7 @@ namespace Pulsar4X.Tests
             _appPath = Path.GetDirectoryName(Uri.UnescapeDataString(uri.Path));
             _saveFolder = Path.Combine(_appPath, "Test");
 
-            _nameThemes = new Dictionary<Guid, CommanderNameTheme>();
+            _nameThemes = new List<CommanderNameTheme>();
             var ct1 = new CommanderNameTheme()
                             {
                                 Id = Guid.NewGuid(),
@@ -57,7 +57,7 @@ namespace Pulsar4X.Tests
                                         new NameEntry() {IsFemale = false, Name = "Smith", NamePosition = NamePosition.LastName}
                                     }
                             };
-            _nameThemes.Add(ct1.Id, ct1);
+            _nameThemes.Add(ct1);
             var ct2 = new CommanderNameTheme()
                           {
                               Id = Guid.NewGuid(),
@@ -70,7 +70,7 @@ namespace Pulsar4X.Tests
                                           {IsFemale = false, Name = "Connor", NamePosition = NamePosition.LastName}
                                   }
                           };
-            _nameThemes.Add(ct2.Id, ct2);
+            _nameThemes.Add(ct2);
         }
 
 

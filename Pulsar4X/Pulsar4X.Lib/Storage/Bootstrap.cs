@@ -26,23 +26,23 @@ namespace Pulsar4X.Storage
 
 
         private const string CommanderNameThemeDataFileName = "CommanderNameThemes.json";
-        public Dictionary<Guid, CommanderNameTheme> LoadCommanderNameTheme()
+        public List<CommanderNameTheme> LoadCommanderNameTheme()
         {
             var serializer = new JsonSerializer();
             serializer.Formatting = Formatting.Indented;
             serializer.NullValueHandling = NullValueHandling.Include;
 
             var file = Path.Combine(_dataDirectoryPath, CommanderNameThemeDataFileName);
-            if (File.Exists(file) == false) return new Dictionary<Guid, CommanderNameTheme>();
+            if (File.Exists(file) == false) return new List<CommanderNameTheme>();
 
             using (var rdr = new StreamReader(file))
             using (JsonReader reader = new JsonTextReader(rdr))
             {
-                return serializer.Deserialize<Dictionary<Guid, CommanderNameTheme>>(reader);
+                return serializer.Deserialize<List<CommanderNameTheme>>(reader);
             }
         }
 
-        public void SaveCommanderNameTheme(Dictionary<Guid, CommanderNameTheme> themes)
+        public void SaveCommanderNameTheme(List<CommanderNameTheme> themes)
         {
             var serializer = new JsonSerializer();
             serializer.Formatting = Formatting.Indented;

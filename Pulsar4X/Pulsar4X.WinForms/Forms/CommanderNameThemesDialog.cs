@@ -56,12 +56,14 @@ namespace Pulsar4X.Forms
                 col.DataPropertyName = "Name";
                 col.HeaderText = "Name";
                 dgvNameEntries.Columns.Add(col);
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
             using (var col = new DataGridViewComboBoxColumn())
             {
                 col.DataPropertyName = "NamePosition";
                 col.HeaderText = "Name Position";
                 col.DataSource = Enum.GetValues(typeof (NamePosition));
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 dgvNameEntries.Columns.Add(col);
             }
             using (var col = new DataGridViewCheckBoxColumn())
@@ -70,6 +72,7 @@ namespace Pulsar4X.Forms
                 col.HeaderText = "Is Female";
                 col.FalseValue = false;
                 col.TrueValue = true;
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.ColumnHeader;
                 dgvNameEntries.Columns.Add(col);
             }
         }

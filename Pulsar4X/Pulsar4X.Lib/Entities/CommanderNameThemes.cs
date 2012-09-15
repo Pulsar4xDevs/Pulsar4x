@@ -11,7 +11,7 @@ namespace Pulsar4X.Entities
         private static readonly CommanderNameThemes _instance = new CommanderNameThemes();
         public static CommanderNameThemes Instance { get { return _instance; } }
 
-        public Dictionary<Guid, CommanderNameTheme> NameThemes { get; set; }
+        public List<CommanderNameTheme> NameThemes { get; set; }
 
         static CommanderNameThemes()
         {
@@ -21,9 +21,5 @@ namespace Pulsar4X.Entities
             var bootstrap = new Bootstrap();
             NameThemes = bootstrap.LoadCommanderNameTheme();
         }
-
-
     }
-
-
 }

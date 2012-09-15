@@ -65,8 +65,7 @@ namespace Pulsar4X.ViewModels
 
         public CommanderNameThemesViewModel()
         {
-            NameThemes = new BindingList<CommanderNameTheme>(CommanderNameThemes.Instance.NameThemes.Values.ToList());
-
+            NameThemes = new BindingList<CommanderNameTheme>(CommanderNameThemes.Instance.NameThemes);
         }
 
         private void OnPropertyChanged(Expression<Func<object>> property)
@@ -87,7 +86,7 @@ namespace Pulsar4X.ViewModels
                 Id = Guid.NewGuid(),
                 Name = name
             };
-            CommanderNameThemes.Instance.NameThemes.Add(theme.Id, theme);
+            CommanderNameThemes.Instance.NameThemes.Add(theme);
 
             //update binding list
             NameThemes.Add(theme);

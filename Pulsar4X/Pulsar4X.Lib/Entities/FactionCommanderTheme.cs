@@ -55,18 +55,18 @@ namespace Pulsar4X.Entities
             {
                 if (randomInt <= option.Item1)
                 {
-                    if (CommanderNameThemes.Instance.NameThemes.ContainsKey(option.Item2))
-                    {
-                        var theme = CommanderNameThemes.Instance.NameThemes[option.Item2];
-                        var query = theme.NameEntries.Where(x => x.NamePosition == position &&
-                                                   (position != NamePosition.FirstName || x.IsFemale == isFemale)).ToList();
-                        var entryCount = query.Count();
-                        if (entryCount < 1)
-                            throw new ArgumentOutOfRangeException(theme.Name, "No valid entries found in Commander Name Theme");
+                    var theme = CommanderNameThemes.Instance.NameThemes.FirstOrDefault(x => x.Id == option.Item2);
+                    if (theme == null) throw new Exception(string.Format("Commander Name Theme not found. Id: {0}", option.Item2));
 
-                        var randomIndex = MathUtilities.Random.Next(0, entryCount);
-                        return query[randomIndex].Name;
-                    }
+                    var query = theme.NameEntries.Where(x => x.NamePosition == position &&
+                                               (position != NamePosition.FirstName || x.IsFemale == isFemale)).ToList();
+                    var entryCount = query.Count();
+                    if (entryCount < 1)
+                        throw new ArgumentOutOfRangeException(theme.Name, "No valid entries found in Commander Name Theme");
+
+                    var randomIndex = MathUtilities.Random.Next(0, entryCount);
+                    return query[randomIndex].Name;
+
                 }
             }
 
