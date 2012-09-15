@@ -142,6 +142,7 @@ namespace Pulsar4X.WinForms.Helpers
             return oNewTexture.m_uiTextureID;
         }
 
+        [Obsolete("GenStringTexture is Obsolete, use GLFont class instead")]
         public uint GenStringTexture(string a_szString, out Vector2 a_v2Size)
         {
             a_v2Size = Vector2.Zero;

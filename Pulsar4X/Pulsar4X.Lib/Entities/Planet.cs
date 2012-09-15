@@ -8,31 +8,32 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
-    public class Planet
+    public class Planet : OrbitingEntity
     {
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
         public BindingList<Gas> Gases { get; set; } //gases in atmosphere
-        public Star Primary { get; set; }
+        //public Star Primary { get; set; }
 
-        public long XSystem { get; set; }
-        public long YSystem { get; set; }
+        //public long XSystem { get; set; }
+        //public long YSystem { get; set; }
 
         //TODO: Currently Id is only unique in the star it belongs to, not unique across multiple stars
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+        //public Guid Id { get; set; }
+        //public string Name { get; set; }
         public PlanetTypes PlanetType { get; set; }
         public bool IsGasGiant { get; set; }
         public bool IsMoon { get; set; }
+        public override double Age { get; set; }
 
-        public double SemiMajorAxis { get; set; } //semi-major axis of solar orbit (in AU)
-        public double Eccentricity { get; set; } //eccentricity of solar orbit
-        public double AxialTilt { get; set; } //unit of degrees
-        public int OrbitZone { get; set; } //the zone of the planet
-        public double OrbitalPeriod { get; set; } //length of local year (in days)
-        public double LengthOfDay { get; set; } //length of local day (hours)
-        public bool IsInResonantRotation { get; set; } //tidally locked
+        //public double SemiMajorAxis { get; set; } //semi-major axis of solar orbit (in AU)
+        //public double Eccentricity { get; set; } //eccentricity of solar orbit
+        //public double AxialTilt { get; set; } //unit of degrees
+        //public int OrbitZone { get; set; } //the zone of the planet
+        //public double OrbitalPeriod { get; set; } //length of local year (in days)
+        //public double LengthOfDay { get; set; } //length of local day (hours)
+        //public bool IsInResonantRotation { get; set; } //tidally locked
 
-        public double Mass { get { return MassOfDust + MassOfGas; } } //mass (in solar masses)
+        public override double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
         public double MassInEarthMasses { get { return Mass * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfDust { get; set; } //mass, ignoring gas
         public double MassOfDustInEarthMasses { get { return MassOfDust * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
@@ -40,7 +41,7 @@ namespace Pulsar4X.Entities
         public double MassOfGasInEarthMasses { get { return MassOfGas * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
 
         public double RadiusOfCore { get; set; } //radius of the rocky core (in km)
-        public double Radius { get; set; } //equitorial radius (in km)
+        //public double Radius { get; set; } //equitorial radius (in km)
         public double Density { get; set; } //density (in g/cc)
         public double SurfaceArea { get; set; }//area in km2
         public double EscapeVelocity { get; set; } //units of cm/sec
@@ -68,7 +69,7 @@ namespace Pulsar4X.Entities
 
         
 
-        public Planet()
+        public Planet() : base()
         {
             Moons = new BindingList<Planet>();
             Gases = new BindingList<Gas>();
