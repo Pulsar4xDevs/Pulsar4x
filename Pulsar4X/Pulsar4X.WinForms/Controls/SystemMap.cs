@@ -227,18 +227,10 @@ namespace Pulsar4X.WinForms.Controls
                                                                         new Vector2(fStarSize, fStarSize),
                                                                         Color.FromArgb(255, 255, 255, 0),    // yellow!
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
-                // create texture from name:
-                GLUtilities.GLFont test = new GLUtilities.GLFont(m_GLCanvas.DefaultShader,
-                    new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - 16, 0)
-                    , new Vector2(16, 16), Color.White, UIConstants.Textures.DEFAULT_GLFONT);
-                test.Text = "testaa";
-                Vector2 v2NameSize;
-                uint uiNameTex = Helpers.ResourceManager.Instance.GenStringTexture(oStar.Name, out v2NameSize);
-                GLUtilities.GLQuad oNameQuad = new GLUtilities.GLQuad(m_GLCanvas.DefaultShader,
-                                                                      new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - v2NameSize.Y, v3StarPos.Z),
-                                                                      v2NameSize,
-                                                                      Color.White);
-                oNameQuad.TextureID = uiNameTex;
+                // create name leble:
+                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(m_GLCanvas.DefaultShader,
+                    new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - 280, 0),
+                    new Vector2(14, 14), Color.White, UIConstants.Textures.DEFAULT_GLFONT, oStar.Name);
 
                 // create orbit circle
                 if (iStarCounter > 0)
@@ -251,8 +243,7 @@ namespace Pulsar4X.WinForms.Controls
                     oCurrStar.AddPrimitive(oStarOrbitCirc);
                 }
                 oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
-                oCurrStar.AddPrimitive(oNameQuad);
-                //oCurrStar.Lable = test;
+                oCurrStar.Lable = oNameLable;
                 oCurrStar.PrimaryPrimitive = oStarQuad;
                 oCurrStar.EntityID = oStar.Id;
                 oCurrStar.RealSize = new Vector2(fStarSize, fStarSize);

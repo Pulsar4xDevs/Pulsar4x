@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AboutBox));
             this.OKButton = new System.Windows.Forms.Button();
             this.AboutTextBox = new System.Windows.Forms.RichTextBox();
             this.PulsarLogoPicBox = new System.Windows.Forms.PictureBox();
@@ -74,6 +75,7 @@
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.AboutTextBox);
             this.Controls.Add(this.PulsarLogoPicBox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AboutBox";
             this.Text = "AboutBox";
             this.Load += new System.EventHandler(this.AboutBox_Load);
