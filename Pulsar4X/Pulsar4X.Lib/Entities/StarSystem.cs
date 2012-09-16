@@ -8,10 +8,8 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
-    public class StarSystem
+    public class StarSystem : GameEntity
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
         public BindingList<Star> Stars { get; set; }
 
         public StarSystem()

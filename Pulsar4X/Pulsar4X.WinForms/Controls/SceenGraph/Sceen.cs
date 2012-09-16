@@ -6,6 +6,7 @@ using Pulsar4X;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.GLUtilities;
 using OpenTK;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.WinForms.Controls.SceenGraph
 {
@@ -98,6 +99,11 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// </summary>
         public Sceen()
         {
+        }
+
+        public Sceen(StarSystem a_oStarSystem)
+        {
+            // Build star system Sceen:
         }
 
         /// <summary>

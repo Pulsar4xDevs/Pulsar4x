@@ -6,6 +6,7 @@ using Pulsar4X;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.GLUtilities;
 using OpenTK;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.WinForms.Controls.SceenGraph
 {
@@ -15,10 +16,28 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
     class StarElement : SceenElement
     {
 
+        private Star m_oStar;
+
+        public abstract GameEntity SceenEntity 
+        {
+            get
+            {
+                return m_oStar;
+            }
+            set
+            {
+                m_oStar = value as Star;
+            }
+        }
+
         public StarElement()
             : base()
         {
 
+        }
+
+        public StarElement(Star a_oStar) : base(a_oStar)
+        {
         }
 
         public override void Render()

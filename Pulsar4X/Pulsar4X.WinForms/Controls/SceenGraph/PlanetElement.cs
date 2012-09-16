@@ -6,6 +6,7 @@ using Pulsar4X;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.GLUtilities;
 using OpenTK;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.WinForms.Controls.SceenGraph
 {
@@ -14,8 +15,29 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
     /// </summary>
     class PlanetElement : SceenElement
     {
+
+        private Planet m_oPlanet;
+
+        public abstract GameEntity SceenEntity
+        {
+            get
+            {
+                return m_oPlanet;
+            }
+            set
+            {
+                m_oPlanet = value as Planet;
+            }
+        }
+
+
         public PlanetElement()
             : base()
+        {
+        }
+
+        public PlanetElement(Planet a_oPlanet)
+            : base(a_oPlanet)
         {
         }
 

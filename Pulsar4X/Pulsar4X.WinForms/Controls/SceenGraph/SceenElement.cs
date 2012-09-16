@@ -6,6 +6,7 @@ using Pulsar4X;
 using Pulsar4X.WinForms;
 using Pulsar4X.WinForms.GLUtilities;
 using OpenTK;
+using Pulsar4X.Entities;
 
 
 namespace Pulsar4X.WinForms.Controls.SceenGraph
@@ -56,11 +57,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// <summary> The text lable primitive for this sceen element </summary>
         protected GLFont m_oLable;
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
         /// <summary>   Gets or sets the lable primitive. </summary>
-        ///
-        /// <value> The lable primitive. </value>
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
         public GLFont Lable
         {
             get
@@ -139,6 +136,10 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
         /// </summary>
         public bool RenderChildren { get; set; }
 
+        /// <summary>
+        /// The Game Entity this Sceen Element repesents.
+        /// </summary>
+        public abstract GameEntity SceenEntity { get; set;}
 
         /// <summary>
         /// Default Constructor
@@ -148,6 +149,20 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
             // set some defaults:
             MinimumSize = new Vector2(8, 8);
             RenderChildren = true;
+        }
+
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="a_GameEntity">The Game Entity this Sceen Element Repesents</param>
+        public SceenElement(GameEntity a_oGameEntity)
+        {
+            // set some defaults:
+            MinimumSize = new Vector2(8, 8);
+            RenderChildren = true;
+            SceenEntity = a_oGameEntity;
+            EntityID = a_oGameEntity.Id;
         }
 
         /// <summary>
