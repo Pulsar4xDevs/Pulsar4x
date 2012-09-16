@@ -68,12 +68,6 @@ namespace Pulsar4X.WinForms.Controls
             UpdateScaleLabels();
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            //m_GLCanvas.TestFunc(int.Parse(textBox1.Text));
-            FPSLabel.Text = m_GLCanvas.FPS.ToString();
-        }
-
         private void SystemMap_MouseWheel(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             // See here for MSDN Ref: http://msdn.microsoft.com/en-us/library/system.windows.forms.control.mousewheel(v=vs.71).aspx
@@ -230,7 +224,7 @@ namespace Pulsar4X.WinForms.Controls
                 // create name leble:
                 GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(m_GLCanvas.DefaultShader,
                     new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - 280, 0),
-                    new Vector2(14, 14), Color.White, UIConstants.Textures.DEFAULT_GLFONT, oStar.Name);
+                    new Vector2(11, 14), Color.White, UIConstants.Textures.DEFAULT_GLFONT, oStar.Name);
 
                 // create orbit circle
                 if (iStarCounter > 0)
@@ -341,6 +335,9 @@ namespace Pulsar4X.WinForms.Controls
             float dAUScale = (float)(dKmscale / Pulsar4X.Constants.Units.KM_PER_AU);
             KmScaleLabel.Text = "Km = " + dKmscale.ToString();
             AUScaleLabel.Text = "AU = " + dAUScale.ToString();
+
+            // Add FPS too for now:
+            FPSLabel.Text = m_GLCanvas.FPS.ToString();
         }
 
         /// <summary>
@@ -431,9 +428,6 @@ namespace Pulsar4X.WinForms.Controls
             Vector3 v3PanAmount = new Vector3(0, 10.0f, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
         }
-
-        
-
 
     }
 }

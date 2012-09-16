@@ -18,7 +18,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
 
         private Star m_oStar;
 
-        public abstract GameEntity SceenEntity 
+        public override GameEntity SceenEntity 
         {
             get
             {

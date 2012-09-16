@@ -171,8 +171,8 @@ namespace Pulsar4X.WinForms.Controls
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "OrbitalRadius";
-                col.HeaderText = "Orbital Radius";
+                col.DataPropertyName = "SemiMajorAxis";
+                col.HeaderText = "Orbital Radius (AU)";
                 col.DefaultCellStyle.Format = "N4";
                 StarsDataGridView.Columns.Add(col);
             }
