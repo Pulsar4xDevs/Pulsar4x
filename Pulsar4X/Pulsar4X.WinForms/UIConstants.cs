@@ -83,7 +83,8 @@ namespace Pulsar4X.WinForms
                                                 "Hosting Provided by: Eric Luken \n\n" + 
                                                 "Forums: http://aurora2.pentarch.org/index.php/board,169.0.html \n" +
                                                 "Wiki: http://pulsar4x.pentarch.org/wiki/index.php?title=Main_Page \n" +
-                                                "GitHub Org: https://github.com/Pulsar4xDevs \n";
+                                                "GitHub Org: https://github.com/Pulsar4xDevs \n" +
+                                                "Image of the Crab Nebula (a Pulsar ;), Credit to NASA and Hubble";
 
 
         public const float ZOOM_DEFAULT_SCALLER = 1.0f;
