@@ -55,6 +55,11 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                     oElement.Render();
                 }
             }
+
+            if (m_oLable != null)
+            {
+                m_oLable.Render();
+            }
         }
 
 
@@ -131,6 +136,9 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                     }
                 }
             }
+
+            // Adjust the size of the text so it is always 10 point:
+            Lable.Size = new Vector2(11 / a_fZoomScaler, 14 / a_fZoomScaler);
 
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)
