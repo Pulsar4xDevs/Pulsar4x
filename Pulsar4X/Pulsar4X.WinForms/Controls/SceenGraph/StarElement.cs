@@ -36,8 +36,15 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
 
         }
 
-        public StarElement(Star a_oStar) : base(a_oStar)
+        public StarElement(Star a_oStar, bool a_bPrimary = true) : base(a_oStar)
         {
+            if (!a_bPrimary)
+            {
+                // Do Non Primary Star Stuff here (e.g. orbit circle).
+                // Todo...
+            }
+            
+
         }
 
         public override void Render()

@@ -37,6 +37,13 @@ namespace Pulsar4X
 
             public const double KM_PER_AU = CM_PER_AU / CM_PER_KM;
 
+            /// <summary>
+            /// Plus or Minus 65Km
+            /// </summary>
+            public const double SOLAR_RADIUS_IN_KM = 696342.0;
+
+            public const double SOLAR_RADIUS_IN_AU = SOLAR_RADIUS_IN_KM / KM_PER_AU; 
+
             public const double SECONDS_PER_HOUR = 3600.0;
 
             public const double MILLIBARS_PER_BAR = 1000.00;

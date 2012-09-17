@@ -153,27 +153,39 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
             Vector3 v3MoonPos = Vector3.Zero;                                   // Used to store the Moons Position.
 
             // start creating star branches in the sceen graph:
-            SceenElement oRootStar = new StarElement();
-            SceenElement oCurrStar = oRootStar;
+            SceenElement oRootStar;
+            SceenElement oCurrStar;
             foreach (Pulsar4X.Entities.Star oStar in a_oStarSystem.Stars)
             {
-                if (iStarCounter > 0)
+
+                if (iStarCounter <= 0)
                 {
                     // then we have a secondary, etc star give random position around its orbit!
+                    oRootStar = new StarElement(oStar, true);
+                    oCurrStar = oRootStar;
+                }
+                else
+                {
+
                     Random rnd = new Random();
                     float fAngle = rnd.Next(0, 360);
                     fAngle = MathHelper.DegreesToRadians(fAngle);
                     v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis * dKMperAUdevby10);
-                    oCurrStar = new StarElement();
+                    oCurrStar = new StarElement(oStar, false);
 
-                    // create orbit circle:
-
+                    // create orbit circle
+                    GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultShader,
+                        Vector3.Zero,                                                                      // base around parent star pos.
+                        (float)(oStar.SemiMajorAxis * dKMperAUdevby10) / 2,
+                        Color.FromArgb(255, 255, 255, 0),  // yellow.
+                        UIConstants.Textures.DEFAULT_TEXTURE);
+                    oCurrStar.AddPrimitive(oStarOrbitCirc);
                 }
-                iStarCounter++;
+                
 
-                fStarSize = (float)oStar.Radius * 2 * 69550; // i.e. radius of sun / 10.
+                fStarSize = (float)(oStar.Radius * 2.0 * (Constants.Units.SOLAR_RADIUS_IN_KM / 10)); // i.e. radius of sun / 10.
 
                 GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(a_oDefaultShader,
                                                                         v3StarPos,
@@ -185,27 +197,16 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                     new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius * 69550)) - 280, 0),
                     new Vector2(11, 14), Color.White, UIConstants.Textures.DEFAULT_GLFONT, oStar.Name);
 
-                // create orbit circle
-                if (iStarCounter > 0)
-                {
-                    GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultShader,
-                        Vector3.Zero,                                                                      // base around parent star pos.
-                        (float)(oStar.SemiMajorAxis * dKMperAUdevby10) / 2,
-                        Color.FromArgb(255, 255, 255, 0),  // yellow.
-                        UIConstants.Textures.DEFAULT_TEXTURE);
-                    oCurrStar.AddPrimitive(oStarOrbitCirc);
-                }
                 oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
                 oCurrStar.Lable = oNameLable;
                 oCurrStar.PrimaryPrimitive = oStarQuad;
-                oCurrStar.EntityID = oStar.Id;
                 oCurrStar.RealSize = new Vector2(fStarSize, fStarSize);
                 this.AddElement(oCurrStar);
 
                 // now go though and add each planet to render list.
                 foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
                 {
-                    SceenElement oPlanetElement = new PlanetElement();
+                    SceenElement oPlanetElement = new PlanetElement(oPlanet);
                     oPlanetElement.EntityID = oPlanet.Id;
 
                     if (iPlanetCounter == 0)
@@ -245,7 +246,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                     // now again for the moons:
                     foreach (Pulsar4X.Entities.Planet oMoon in oPlanet.Moons)
                     {
-                        SceenElement oMoonElement = new PlanetElement();
+                        SceenElement oMoonElement = new PlanetElement(oMoon);
                         oMoonElement.EntityID = oMoon.Id;
 
                         if (iMoonCounter == 0)
@@ -283,6 +284,7 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                     iMoonCounter = 0;
                 }
                 iPlanetCounter = 0;
+                iStarCounter++;
             }
 
             // Set Sceen Size basd on Max Orbit:
