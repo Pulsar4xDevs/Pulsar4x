@@ -15,12 +15,12 @@ using log4net.Config;
 using log4net;
 using Pulsar4X.WinForms.ViewModels;
 using Pulsar4X.WinForms.Controls.SceenGraph;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.WinForms.Controls
 {
     public partial class SystemMap : UserControl
     {
-
         public static readonly ILog logger = LogManager.GetLogger(typeof(SystemMap));
 
         private Pulsar4X.Entities.StarSystem m_oCurrnetSystem;

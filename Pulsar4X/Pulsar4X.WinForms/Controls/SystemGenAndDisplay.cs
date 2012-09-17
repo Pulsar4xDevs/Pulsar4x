@@ -9,12 +9,18 @@ using Pulsar4X.WinForms.Helpers;
 using System.Windows.Forms;
 using Pulsar4X.WinForms.ViewModels;
 using Pulsar4X.Entities;
+using Pulsar4X.Stargen;
 
 namespace Pulsar4X.WinForms.Controls
 {
     public partial class SystemGenAndDisplay : UserControl
     {
         public StarSystemViewModel VM { get; set; }
+
+        // Some Temp Vars until we work out a better way to do Gen Systems from here.
+        StarSystemFactory ssf = new StarSystemFactory(true);
+        int m_iNumberOfNewSystemsGened = 0;
+
         public SystemGenAndDisplay()
         {
             InitializeComponent();
@@ -201,5 +207,30 @@ namespace Pulsar4X.WinForms.Controls
             this.Dock = DockStyle.Fill;
         }
 
+        private void GenSystemButton_Click(object sender, EventArgs e)
+        {
+            m_iNumberOfNewSystemsGened++;
+            GameState.Instance.StarSystems.Add(ssf.Create("New System " + m_iNumberOfNewSystemsGened.ToString()));
+        }
+
+        private void AutoRenameButton_Click(object sender, EventArgs e)
+        {
+            // Doesnt Work??
+            m_iNumberOfNewSystemsGened++;
+            VM.CurrentStarSystem.Name = "This Isn't Working Yet Ya Dummy x " + m_iNumberOfNewSystemsGened.ToString();
+        }
+
+        private void SystemMapButton_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void DeleteSystemButton_Click(object sender, EventArgs e)
+        {
+            ///< @todo Need better cleanup /refresh...
+            GameState.Instance.StarSystems.Remove(VM.CurrentStarSystem);
+        }
     }
+
+    
 }

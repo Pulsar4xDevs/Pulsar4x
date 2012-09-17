@@ -30,14 +30,15 @@
         {
             this.labelName = new System.Windows.Forms.Label();
             this.GeneralInfoGroupBox = new System.Windows.Forms.GroupBox();
+            this.ControllingEmpireComboBox = new System.Windows.Forms.ComboBox();
+            this.NameComboBox = new System.Windows.Forms.ComboBox();
             this.AgetextBox = new System.Windows.Forms.TextBox();
             this.labelAge = new System.Windows.Forms.Label();
             this.DiscoveredTextBox = new System.Windows.Forms.TextBox();
-            this.TypetextBox = new System.Windows.Forms.TextBox();
             this.labelDiscovered = new System.Windows.Forms.Label();
             this.labelControllingEmpire = new System.Windows.Forms.Label();
-            this.labelType = new System.Windows.Forms.Label();
             this.groupBoxEnvironTolerances = new System.Windows.Forms.GroupBox();
+            this.SpeciesComboBox = new System.Windows.Forms.ComboBox();
             this.BreathsTextBox = new System.Windows.Forms.TextBox();
             this.labelPressure = new System.Windows.Forms.Label();
             this.labelTemperature = new System.Windows.Forms.Label();
@@ -59,14 +60,12 @@
             this.CloseButton = new System.Windows.Forms.Button();
             this.groupBoxBottomButtons = new System.Windows.Forms.GroupBox();
             this.GenSystemButton = new System.Windows.Forms.Button();
-            this.ClipboardButton = new System.Windows.Forms.Button();
             this.FixedNameButton = new System.Windows.Forms.Button();
             this.SystemMapButton = new System.Windows.Forms.Button();
             this.ChangeImageButton = new System.Windows.Forms.Button();
             this.AddColonyButton = new System.Windows.Forms.Button();
             this.GeoStatusButton = new System.Windows.Forms.Button();
             this.AutoRenameButton = new System.Windows.Forms.Button();
-            this.RenameSysButton = new System.Windows.Forms.Button();
             this.DeleteSystemButton = new System.Windows.Forms.Button();
             this.groupBoxColonyCostFact = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
@@ -136,9 +135,8 @@
             this.OptAsteroidsMineralsRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroisShowRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroidsHideRadioButton = new System.Windows.Forms.RadioButton();
-            this.NameComboBox = new System.Windows.Forms.ComboBox();
-            this.ControllingEmpireComboBox = new System.Windows.Forms.ComboBox();
-            this.SpeciesComboBox = new System.Windows.Forms.ComboBox();
+            this.labelType = new System.Windows.Forms.Label();
+            this.TypetextBox = new System.Windows.Forms.TextBox();
             this.GeneralInfoGroupBox.SuspendLayout();
             this.groupBoxEnvironTolerances.SuspendLayout();
             this.groupBoxStars.SuspendLayout();
@@ -198,6 +196,24 @@
             this.GeneralInfoGroupBox.TabStop = false;
             this.GeneralInfoGroupBox.Text = "General System Info";
             // 
+            // ControllingEmpireComboBox
+            // 
+            this.ControllingEmpireComboBox.FormattingEnabled = true;
+            this.ControllingEmpireComboBox.Location = new System.Drawing.Point(455, 14);
+            this.ControllingEmpireComboBox.Name = "ControllingEmpireComboBox";
+            this.ControllingEmpireComboBox.Size = new System.Drawing.Size(184, 21);
+            this.ControllingEmpireComboBox.TabIndex = 1;
+            this.ControllingEmpireComboBox.Text = "Controlling Empire";
+            // 
+            // NameComboBox
+            // 
+            this.NameComboBox.FormattingEnabled = true;
+            this.NameComboBox.Location = new System.Drawing.Point(45, 16);
+            this.NameComboBox.Name = "NameComboBox";
+            this.NameComboBox.Size = new System.Drawing.Size(160, 21);
+            this.NameComboBox.TabIndex = 14;
+            this.NameComboBox.Text = "NameComboBox";
+            // 
             // AgetextBox
             // 
             this.AgetextBox.Location = new System.Drawing.Point(851, 15);
@@ -224,16 +240,6 @@
             this.DiscoveredTextBox.Text = "1st Jan 2025";
             this.DiscoveredTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // TypetextBox
-            // 
-            this.TypetextBox.Enabled = false;
-            this.TypetextBox.Location = new System.Drawing.Point(244, 15);
-            this.TypetextBox.Name = "TypetextBox";
-            this.TypetextBox.Size = new System.Drawing.Size(108, 20);
-            this.TypetextBox.TabIndex = 7;
-            this.TypetextBox.Text = "Single Star";
-            this.TypetextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
             // labelDiscovered
             // 
             this.labelDiscovered.AutoSize = true;
@@ -251,15 +257,6 @@
             this.labelControllingEmpire.Size = new System.Drawing.Size(91, 13);
             this.labelControllingEmpire.TabIndex = 4;
             this.labelControllingEmpire.Text = "Controlling Empire";
-            // 
-            // labelType
-            // 
-            this.labelType.AutoSize = true;
-            this.labelType.Location = new System.Drawing.Point(211, 18);
-            this.labelType.Name = "labelType";
-            this.labelType.Size = new System.Drawing.Size(31, 13);
-            this.labelType.TabIndex = 2;
-            this.labelType.Text = "Type";
             // 
             // groupBoxEnvironTolerances
             // 
@@ -287,6 +284,15 @@
             this.groupBoxEnvironTolerances.TabIndex = 3;
             this.groupBoxEnvironTolerances.TabStop = false;
             this.groupBoxEnvironTolerances.Text = "Environmental Tolerances";
+            // 
+            // SpeciesComboBox
+            // 
+            this.SpeciesComboBox.FormattingEnabled = true;
+            this.SpeciesComboBox.Location = new System.Drawing.Point(57, 15);
+            this.SpeciesComboBox.Name = "SpeciesComboBox";
+            this.SpeciesComboBox.Size = new System.Drawing.Size(133, 21);
+            this.SpeciesComboBox.TabIndex = 19;
+            this.SpeciesComboBox.Text = "Species";
             // 
             // BreathsTextBox
             // 
@@ -476,14 +482,12 @@
             // 
             this.groupBoxBottomButtons.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.groupBoxBottomButtons.Controls.Add(this.GenSystemButton);
-            this.groupBoxBottomButtons.Controls.Add(this.ClipboardButton);
             this.groupBoxBottomButtons.Controls.Add(this.FixedNameButton);
             this.groupBoxBottomButtons.Controls.Add(this.SystemMapButton);
             this.groupBoxBottomButtons.Controls.Add(this.ChangeImageButton);
             this.groupBoxBottomButtons.Controls.Add(this.AddColonyButton);
             this.groupBoxBottomButtons.Controls.Add(this.GeoStatusButton);
             this.groupBoxBottomButtons.Controls.Add(this.AutoRenameButton);
-            this.groupBoxBottomButtons.Controls.Add(this.RenameSysButton);
             this.groupBoxBottomButtons.Controls.Add(this.DeleteSystemButton);
             this.groupBoxBottomButtons.Controls.Add(this.CloseButton);
             this.groupBoxBottomButtons.Location = new System.Drawing.Point(0, 636);
@@ -500,19 +504,11 @@
             this.GenSystemButton.TabIndex = 19;
             this.GenSystemButton.Text = "Gen System";
             this.GenSystemButton.UseVisualStyleBackColor = true;
-            // 
-            // ClipboardButton
-            // 
-            this.ClipboardButton.Location = new System.Drawing.Point(728, 16);
-            this.ClipboardButton.Name = "ClipboardButton";
-            this.ClipboardButton.Size = new System.Drawing.Size(85, 23);
-            this.ClipboardButton.TabIndex = 18;
-            this.ClipboardButton.Text = "Clipboard";
-            this.ClipboardButton.UseVisualStyleBackColor = true;
+            this.GenSystemButton.Click += new System.EventHandler(this.GenSystemButton_Click);
             // 
             // FixedNameButton
             // 
-            this.FixedNameButton.Location = new System.Drawing.Point(637, 16);
+            this.FixedNameButton.Location = new System.Drawing.Point(550, 16);
             this.FixedNameButton.Name = "FixedNameButton";
             this.FixedNameButton.Size = new System.Drawing.Size(85, 23);
             this.FixedNameButton.TabIndex = 17;
@@ -521,16 +517,17 @@
             // 
             // SystemMapButton
             // 
-            this.SystemMapButton.Location = new System.Drawing.Point(546, 19);
+            this.SystemMapButton.Location = new System.Drawing.Point(459, 16);
             this.SystemMapButton.Name = "SystemMapButton";
             this.SystemMapButton.Size = new System.Drawing.Size(85, 23);
             this.SystemMapButton.TabIndex = 15;
             this.SystemMapButton.Text = "System Map";
             this.SystemMapButton.UseVisualStyleBackColor = true;
+            this.SystemMapButton.Click += new System.EventHandler(this.SystemMapButton_Click);
             // 
             // ChangeImageButton
             // 
-            this.ChangeImageButton.Location = new System.Drawing.Point(455, 16);
+            this.ChangeImageButton.Location = new System.Drawing.Point(368, 16);
             this.ChangeImageButton.Name = "ChangeImageButton";
             this.ChangeImageButton.Size = new System.Drawing.Size(85, 23);
             this.ChangeImageButton.TabIndex = 14;
@@ -539,7 +536,7 @@
             // 
             // AddColonyButton
             // 
-            this.AddColonyButton.Location = new System.Drawing.Point(364, 16);
+            this.AddColonyButton.Location = new System.Drawing.Point(277, 16);
             this.AddColonyButton.Name = "AddColonyButton";
             this.AddColonyButton.Size = new System.Drawing.Size(85, 23);
             this.AddColonyButton.TabIndex = 13;
@@ -548,7 +545,7 @@
             // 
             // GeoStatusButton
             // 
-            this.GeoStatusButton.Location = new System.Drawing.Point(273, 16);
+            this.GeoStatusButton.Location = new System.Drawing.Point(186, 16);
             this.GeoStatusButton.Name = "GeoStatusButton";
             this.GeoStatusButton.Size = new System.Drawing.Size(85, 23);
             this.GeoStatusButton.TabIndex = 12;
@@ -557,21 +554,13 @@
             // 
             // AutoRenameButton
             // 
-            this.AutoRenameButton.Location = new System.Drawing.Point(182, 16);
+            this.AutoRenameButton.Location = new System.Drawing.Point(95, 16);
             this.AutoRenameButton.Name = "AutoRenameButton";
             this.AutoRenameButton.Size = new System.Drawing.Size(85, 23);
             this.AutoRenameButton.TabIndex = 10;
             this.AutoRenameButton.Text = "Auto Rename";
             this.AutoRenameButton.UseVisualStyleBackColor = true;
-            // 
-            // RenameSysButton
-            // 
-            this.RenameSysButton.Location = new System.Drawing.Point(95, 16);
-            this.RenameSysButton.Name = "RenameSysButton";
-            this.RenameSysButton.Size = new System.Drawing.Size(85, 23);
-            this.RenameSysButton.TabIndex = 9;
-            this.RenameSysButton.Text = "Rename Sys";
-            this.RenameSysButton.UseVisualStyleBackColor = true;
+            this.AutoRenameButton.Click += new System.EventHandler(this.AutoRenameButton_Click);
             // 
             // DeleteSystemButton
             // 
@@ -581,6 +570,7 @@
             this.DeleteSystemButton.TabIndex = 8;
             this.DeleteSystemButton.Text = "Delete System";
             this.DeleteSystemButton.UseVisualStyleBackColor = true;
+            this.DeleteSystemButton.Click += new System.EventHandler(this.DeleteSystemButton_Click);
             // 
             // groupBoxColonyCostFact
             // 
@@ -1307,32 +1297,24 @@
             this.OptAsteroidsHideRadioButton.Text = "Hide";
             this.OptAsteroidsHideRadioButton.UseVisualStyleBackColor = true;
             // 
-            // NameComboBox
+            // labelType
             // 
-            this.NameComboBox.FormattingEnabled = true;
-            this.NameComboBox.Location = new System.Drawing.Point(45, 16);
-            this.NameComboBox.Name = "NameComboBox";
-            this.NameComboBox.Size = new System.Drawing.Size(160, 21);
-            this.NameComboBox.TabIndex = 14;
-            this.NameComboBox.Text = "NameComboBox";
+            this.labelType.AutoSize = true;
+            this.labelType.Location = new System.Drawing.Point(211, 18);
+            this.labelType.Name = "labelType";
+            this.labelType.Size = new System.Drawing.Size(31, 13);
+            this.labelType.TabIndex = 2;
+            this.labelType.Text = "Type";
             // 
-            // ControllingEmpireComboBox
+            // TypetextBox
             // 
-            this.ControllingEmpireComboBox.FormattingEnabled = true;
-            this.ControllingEmpireComboBox.Location = new System.Drawing.Point(455, 14);
-            this.ControllingEmpireComboBox.Name = "ControllingEmpireComboBox";
-            this.ControllingEmpireComboBox.Size = new System.Drawing.Size(184, 21);
-            this.ControllingEmpireComboBox.TabIndex = 1;
-            this.ControllingEmpireComboBox.Text = "Controlling Empire";
-            // 
-            // SpeciesComboBox
-            // 
-            this.SpeciesComboBox.FormattingEnabled = true;
-            this.SpeciesComboBox.Location = new System.Drawing.Point(57, 15);
-            this.SpeciesComboBox.Name = "SpeciesComboBox";
-            this.SpeciesComboBox.Size = new System.Drawing.Size(133, 21);
-            this.SpeciesComboBox.TabIndex = 19;
-            this.SpeciesComboBox.Text = "Species";
+            this.TypetextBox.Enabled = false;
+            this.TypetextBox.Location = new System.Drawing.Point(244, 15);
+            this.TypetextBox.Name = "TypetextBox";
+            this.TypetextBox.Size = new System.Drawing.Size(108, 20);
+            this.TypetextBox.TabIndex = 7;
+            this.TypetextBox.Text = "Single Star";
+            this.TypetextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // SystemGenAndDisplay
             // 
@@ -1402,8 +1384,6 @@
         private System.Windows.Forms.GroupBox GeneralInfoGroupBox;
         private System.Windows.Forms.Label labelDiscovered;
         private System.Windows.Forms.Label labelControllingEmpire;
-        private System.Windows.Forms.Label labelType;
-        private System.Windows.Forms.TextBox TypetextBox;
         private System.Windows.Forms.TextBox DiscoveredTextBox;
         private System.Windows.Forms.GroupBox groupBoxEnvironTolerances;
         private System.Windows.Forms.Label labelBreaths;
@@ -1449,14 +1429,12 @@
         private System.Windows.Forms.CheckBox ShowSBServeysCheckBox;
         private System.Windows.Forms.Label labelJSPPerSurveyLocation;
         private System.Windows.Forms.Label labelCurrentSituation;
-        private System.Windows.Forms.Button ClipboardButton;
         private System.Windows.Forms.Button FixedNameButton;
         private System.Windows.Forms.Button SystemMapButton;
         private System.Windows.Forms.Button ChangeImageButton;
         private System.Windows.Forms.Button AddColonyButton;
         private System.Windows.Forms.Button GeoStatusButton;
         private System.Windows.Forms.Button AutoRenameButton;
-        private System.Windows.Forms.Button RenameSysButton;
         private System.Windows.Forms.Button DeleteSystemButton;
         private System.Windows.Forms.Button GenSystemButton;
         private System.Windows.Forms.PictureBox BodyPictureBox;
@@ -1509,5 +1487,7 @@
         private System.Windows.Forms.ComboBox NameComboBox;
         private System.Windows.Forms.ComboBox ControllingEmpireComboBox;
         private System.Windows.Forms.ComboBox SpeciesComboBox;
+        private System.Windows.Forms.TextBox TypetextBox;
+        private System.Windows.Forms.Label labelType;
     }
 }
