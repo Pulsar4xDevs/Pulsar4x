@@ -185,7 +185,7 @@ namespace Pulsar4X.Stargen
                             logger.Debug("Accretion did not change mass!");*/
 
 
-                        logger.Debug(string.Format("New planet at {0:N4} AU with mass {1:N5}!", newP.SemiMajorAxis, newP.MassInEarthMasses));
+                        //logger.Debug(string.Format("New planet at {0:N4} AU with mass {1:N5}!", newP.SemiMajorAxis, newP.MassInEarthMasses));
 
                         Disc.Planets.Remove(aPlanet);
                         Disc.Planets.Remove(bPlanet);
