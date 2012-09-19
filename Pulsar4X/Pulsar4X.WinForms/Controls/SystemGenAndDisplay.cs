@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using Pulsar4X.WinForms.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace Pulsar4X.WinForms.Controls
 {
@@ -213,6 +215,12 @@ namespace Pulsar4X.WinForms.Controls
             GameState.Instance.StarSystems.Add(ssf.Create("New System " + m_iNumberOfNewSystemsGened.ToString()));
         }
 
+        private void GenGalaxyButton_Click(object sender, EventArgs e)
+        {
+            Forms.GenGalaxyDialog diagGenGalaxy = new Forms.GenGalaxyDialog();
+            diagGenGalaxy.ShowDialog();
+        }
+
         private void AutoRenameButton_Click(object sender, EventArgs e)
         {
             // Doesnt Work??
@@ -229,6 +237,22 @@ namespace Pulsar4X.WinForms.Controls
         {
             ///< @todo Need better cleanup /refresh...
             GameState.Instance.StarSystems.Remove(VM.CurrentStarSystem);
+        }
+
+        private void ExportButton_Click(object sender, EventArgs e)
+        {
+            ExportSaveFileDialog.ShowDialog();
+
+            var serializer = new JsonSerializer();
+            serializer.Formatting = Formatting.Indented;
+            serializer.NullValueHandling = NullValueHandling.Include;
+            serializer.PreserveReferencesHandling = PreserveReferencesHandling.All;
+
+            using (StreamWriter sw = new StreamWriter(ExportSaveFileDialog.FileName))
+            using (JsonWriter writer = new JsonTextWriter(sw))
+            {
+                serializer.Serialize(writer, VM.StarSystems);
+            }
         }
     }
 }

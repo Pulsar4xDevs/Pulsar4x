@@ -35,8 +35,10 @@
             this.AgetextBox = new System.Windows.Forms.TextBox();
             this.labelAge = new System.Windows.Forms.Label();
             this.DiscoveredTextBox = new System.Windows.Forms.TextBox();
+            this.TypetextBox = new System.Windows.Forms.TextBox();
             this.labelDiscovered = new System.Windows.Forms.Label();
             this.labelControllingEmpire = new System.Windows.Forms.Label();
+            this.labelType = new System.Windows.Forms.Label();
             this.groupBoxEnvironTolerances = new System.Windows.Forms.GroupBox();
             this.SpeciesComboBox = new System.Windows.Forms.ComboBox();
             this.BreathsTextBox = new System.Windows.Forms.TextBox();
@@ -59,6 +61,7 @@
             this.StarsDataGridView = new System.Windows.Forms.DataGridView();
             this.CloseButton = new System.Windows.Forms.Button();
             this.groupBoxBottomButtons = new System.Windows.Forms.GroupBox();
+            this.GenGalaxyButton = new System.Windows.Forms.Button();
             this.GenSystemButton = new System.Windows.Forms.Button();
             this.FixedNameButton = new System.Windows.Forms.Button();
             this.SystemMapButton = new System.Windows.Forms.Button();
@@ -135,8 +138,8 @@
             this.OptAsteroidsMineralsRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroisShowRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroidsHideRadioButton = new System.Windows.Forms.RadioButton();
-            this.labelType = new System.Windows.Forms.Label();
-            this.TypetextBox = new System.Windows.Forms.TextBox();
+            this.ExportButton = new System.Windows.Forms.Button();
+            this.ExportSaveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.GeneralInfoGroupBox.SuspendLayout();
             this.groupBoxEnvironTolerances.SuspendLayout();
             this.groupBoxStars.SuspendLayout();
@@ -240,6 +243,16 @@
             this.DiscoveredTextBox.Text = "1st Jan 2025";
             this.DiscoveredTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // TypetextBox
+            // 
+            this.TypetextBox.Enabled = false;
+            this.TypetextBox.Location = new System.Drawing.Point(244, 15);
+            this.TypetextBox.Name = "TypetextBox";
+            this.TypetextBox.Size = new System.Drawing.Size(108, 20);
+            this.TypetextBox.TabIndex = 7;
+            this.TypetextBox.Text = "Single Star";
+            this.TypetextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
             // labelDiscovered
             // 
             this.labelDiscovered.AutoSize = true;
@@ -257,6 +270,15 @@
             this.labelControllingEmpire.Size = new System.Drawing.Size(91, 13);
             this.labelControllingEmpire.TabIndex = 4;
             this.labelControllingEmpire.Text = "Controlling Empire";
+            // 
+            // labelType
+            // 
+            this.labelType.AutoSize = true;
+            this.labelType.Location = new System.Drawing.Point(211, 18);
+            this.labelType.Name = "labelType";
+            this.labelType.Size = new System.Drawing.Size(31, 13);
+            this.labelType.TabIndex = 2;
+            this.labelType.Text = "Type";
             // 
             // groupBoxEnvironTolerances
             // 
@@ -481,6 +503,8 @@
             // groupBoxBottomButtons
             // 
             this.groupBoxBottomButtons.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.groupBoxBottomButtons.Controls.Add(this.ExportButton);
+            this.groupBoxBottomButtons.Controls.Add(this.GenGalaxyButton);
             this.groupBoxBottomButtons.Controls.Add(this.GenSystemButton);
             this.groupBoxBottomButtons.Controls.Add(this.FixedNameButton);
             this.groupBoxBottomButtons.Controls.Add(this.SystemMapButton);
@@ -496,6 +520,16 @@
             this.groupBoxBottomButtons.TabIndex = 8;
             this.groupBoxBottomButtons.TabStop = false;
             // 
+            // GenGalaxyButton
+            // 
+            this.GenGalaxyButton.Location = new System.Drawing.Point(95, 16);
+            this.GenGalaxyButton.Name = "GenGalaxyButton";
+            this.GenGalaxyButton.Size = new System.Drawing.Size(85, 23);
+            this.GenGalaxyButton.TabIndex = 20;
+            this.GenGalaxyButton.Text = "Gen Galaxy";
+            this.GenGalaxyButton.UseVisualStyleBackColor = true;
+            this.GenGalaxyButton.Click += new System.EventHandler(this.GenGalaxyButton_Click);
+            // 
             // GenSystemButton
             // 
             this.GenSystemButton.Location = new System.Drawing.Point(4, 16);
@@ -508,7 +542,7 @@
             // 
             // FixedNameButton
             // 
-            this.FixedNameButton.Location = new System.Drawing.Point(550, 16);
+            this.FixedNameButton.Location = new System.Drawing.Point(641, 16);
             this.FixedNameButton.Name = "FixedNameButton";
             this.FixedNameButton.Size = new System.Drawing.Size(85, 23);
             this.FixedNameButton.TabIndex = 17;
@@ -517,7 +551,7 @@
             // 
             // SystemMapButton
             // 
-            this.SystemMapButton.Location = new System.Drawing.Point(459, 16);
+            this.SystemMapButton.Location = new System.Drawing.Point(550, 16);
             this.SystemMapButton.Name = "SystemMapButton";
             this.SystemMapButton.Size = new System.Drawing.Size(85, 23);
             this.SystemMapButton.TabIndex = 15;
@@ -527,7 +561,7 @@
             // 
             // ChangeImageButton
             // 
-            this.ChangeImageButton.Location = new System.Drawing.Point(368, 16);
+            this.ChangeImageButton.Location = new System.Drawing.Point(459, 16);
             this.ChangeImageButton.Name = "ChangeImageButton";
             this.ChangeImageButton.Size = new System.Drawing.Size(85, 23);
             this.ChangeImageButton.TabIndex = 14;
@@ -536,7 +570,7 @@
             // 
             // AddColonyButton
             // 
-            this.AddColonyButton.Location = new System.Drawing.Point(277, 16);
+            this.AddColonyButton.Location = new System.Drawing.Point(368, 16);
             this.AddColonyButton.Name = "AddColonyButton";
             this.AddColonyButton.Size = new System.Drawing.Size(85, 23);
             this.AddColonyButton.TabIndex = 13;
@@ -545,7 +579,7 @@
             // 
             // GeoStatusButton
             // 
-            this.GeoStatusButton.Location = new System.Drawing.Point(186, 16);
+            this.GeoStatusButton.Location = new System.Drawing.Point(277, 16);
             this.GeoStatusButton.Name = "GeoStatusButton";
             this.GeoStatusButton.Size = new System.Drawing.Size(85, 23);
             this.GeoStatusButton.TabIndex = 12;
@@ -554,7 +588,7 @@
             // 
             // AutoRenameButton
             // 
-            this.AutoRenameButton.Location = new System.Drawing.Point(95, 16);
+            this.AutoRenameButton.Location = new System.Drawing.Point(186, 16);
             this.AutoRenameButton.Name = "AutoRenameButton";
             this.AutoRenameButton.Size = new System.Drawing.Size(85, 23);
             this.AutoRenameButton.TabIndex = 10;
@@ -1297,24 +1331,21 @@
             this.OptAsteroidsHideRadioButton.Text = "Hide";
             this.OptAsteroidsHideRadioButton.UseVisualStyleBackColor = true;
             // 
-            // labelType
+            // ExportButton
             // 
-            this.labelType.AutoSize = true;
-            this.labelType.Location = new System.Drawing.Point(211, 18);
-            this.labelType.Name = "labelType";
-            this.labelType.Size = new System.Drawing.Size(31, 13);
-            this.labelType.TabIndex = 2;
-            this.labelType.Text = "Type";
+            this.ExportButton.Location = new System.Drawing.Point(732, 16);
+            this.ExportButton.Name = "ExportButton";
+            this.ExportButton.Size = new System.Drawing.Size(85, 23);
+            this.ExportButton.TabIndex = 21;
+            this.ExportButton.Text = "Export";
+            this.ExportButton.UseVisualStyleBackColor = true;
+            this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
-            // TypetextBox
+            // ExportSaveFileDialog
             // 
-            this.TypetextBox.Enabled = false;
-            this.TypetextBox.Location = new System.Drawing.Point(244, 15);
-            this.TypetextBox.Name = "TypetextBox";
-            this.TypetextBox.Size = new System.Drawing.Size(108, 20);
-            this.TypetextBox.TabIndex = 7;
-            this.TypetextBox.Text = "Single Star";
-            this.TypetextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.ExportSaveFileDialog.DefaultExt = "json";
+            this.ExportSaveFileDialog.FileName = "Galxy.json";
+            this.ExportSaveFileDialog.InitialDirectory = ".";
             // 
             // SystemGenAndDisplay
             // 
@@ -1489,5 +1520,8 @@
         private System.Windows.Forms.ComboBox SpeciesComboBox;
         private System.Windows.Forms.TextBox TypetextBox;
         private System.Windows.Forms.Label labelType;
+        private System.Windows.Forms.Button GenGalaxyButton;
+        private System.Windows.Forms.Button ExportButton;
+        private System.Windows.Forms.SaveFileDialog ExportSaveFileDialog;
     }
 }
