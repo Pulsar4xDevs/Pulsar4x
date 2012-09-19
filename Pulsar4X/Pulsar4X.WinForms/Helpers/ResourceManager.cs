@@ -282,6 +282,8 @@ namespace Pulsar4X.WinForms.Helpers
                     oFontData.m_dicCharMap.Add(cBuffer, oUVCoords);
 
                 } while (oXMLReader.ReadToNextSibling("Character"));  // Move to Next Charcter Element
+
+                logger.Info("Loaded GLFont Data File " + a_szFontDataFile);
             }
             catch (XmlException e)
             {

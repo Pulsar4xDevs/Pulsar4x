@@ -231,6 +231,4 @@ namespace Pulsar4X.WinForms.Controls
             GameState.Instance.StarSystems.Remove(VM.CurrentStarSystem);
         }
     }
-
-    
 }

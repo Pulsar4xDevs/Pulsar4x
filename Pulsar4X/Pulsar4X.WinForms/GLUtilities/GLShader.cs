@@ -102,6 +102,10 @@ void main()
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLShader));
 
+
+        /// <summary> Used for getting the last OpenGL Error. </summary>
+        private ErrorCode m_eGLError;
+
         /// <summary>
         /// OpenGL Handle for this Shader.
         /// </summary>
@@ -226,7 +230,11 @@ void main()
             m_aiShaderMatrixLocations[0] = GL.GetUniformLocation(m_iShaderProgramHandle, "ProjectionMatrix");
             m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
             m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
-            logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
+            ErrorCode m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Bind Matricies to Shader Code: " + m_eGLError.ToString());
+            }   
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.
             // Deleteing them now lets OpenGL know that we don't want to use tem again in a different shader (if we do we will need to re compile them).
@@ -288,8 +296,11 @@ void main()
             m_aiShaderMatrixLocations[0] = GL.GetUniformLocation(m_iShaderProgramHandle, "ProjectionMatrix");
             m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
             m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
-
-            logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Bind Matricies to Shader Code: " + m_eGLError.ToString());
+            }   
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.
             // Deleteing them now lets OpenGL know that we don't want to use tem again in a different shader (if we do we will need to re compile them).
@@ -353,7 +364,11 @@ void main()
             m_aiShaderMatrixLocations[1] = GL.GetUniformLocation(m_iShaderProgramHandle, "ViewMatrix");
             m_aiShaderMatrixLocations[2] = GL.GetUniformLocation(m_iShaderProgramHandle, "ModelMatrix");
 
-            logger.Info("OpenGL Bind Matricies to Shader Code: " + GL.GetError().ToString());
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Bind Matricies to Shader Code: " + m_eGLError.ToString());
+            }   
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.
             // Deleteing them now lets OpenGL know that we don't want to use tem again in a different shader (if we do we will need to re compile them).

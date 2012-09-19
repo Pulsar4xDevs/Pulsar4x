@@ -40,7 +40,11 @@ namespace Pulsar4X.WinForms.Controls
             m_bLoaded = true;           // So we know we have a valid Loaded OpenGL context.
 
             #if DEBUG
-                logger.Info("OpenGL Pre State Config Error Check: " + GL.GetError().ToString());
+                m_eGLError = GL.GetError();
+                if (m_eGLError != ErrorCode.NoError)
+                {
+                    logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+                }   
             #endif
             //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -61,20 +65,25 @@ namespace Pulsar4X.WinForms.Controls
             GL.ClearColor(System.Drawing.Color.MidnightBlue);
             GL.ClearDepth(1.0);
             GL.ClearStencil(0);
-            GL.Enable(EnableCap.VertexArray);
-            #if DEBUG
-                logger.Info("OpenGL Post State Config Error Check: " + GL.GetError().ToString());
-            #endif
-
+            //GL.Enable(EnableCap.VertexArray);
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
+            } 
+                
             logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
-            #if DEBUG
-                // Log out OpeGL specific stuff if debug build.
-                logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
-                logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
-                logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
-                logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
-                logger.Info("OpenGL Error Check: " + GL.GetError().ToString());
-            #endif
+            // Log out OpeGL specific stuff if debug build.
+            logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
+            logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
+            logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
+            logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Error Check, InvalidEnum or NoError Expected: " + m_eGLError.ToString());
+            }    
+
 
             m_oShaderProgram = new GLUtilities.GLShader();
 

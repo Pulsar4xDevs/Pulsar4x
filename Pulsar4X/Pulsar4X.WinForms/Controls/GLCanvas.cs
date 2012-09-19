@@ -22,6 +22,10 @@ namespace Pulsar4X.WinForms.Controls
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLCanvas));
 
+
+        /// <summary> Used for testing for OpenGL Errors. </summary>
+        protected ErrorCode m_eGLError;
+
         /// <summary>
         /// Our Projections/ViewMatricies.
         /// </summary>
