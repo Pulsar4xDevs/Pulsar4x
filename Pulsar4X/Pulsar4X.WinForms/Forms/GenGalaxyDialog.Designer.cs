@@ -35,6 +35,7 @@
             this.NoOfSystemsTextBox = new System.Windows.Forms.TextBox();
             this.GenerateButton = new System.Windows.Forms.Button();
             this.CancelButton = new System.Windows.Forms.Button();
+            this.Timelabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // GenProgressBar
@@ -96,12 +97,22 @@
             this.CancelButton.TabIndex = 6;
             this.CancelButton.Text = "Cancel";
             this.CancelButton.UseVisualStyleBackColor = true;
+            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
+            // Timelabel
+            // 
+            this.Timelabel.AutoSize = true;
+            this.Timelabel.Location = new System.Drawing.Point(34, 102);
+            this.Timelabel.Name = "Timelabel";
+            this.Timelabel.Size = new System.Drawing.Size(0, 13);
+            this.Timelabel.TabIndex = 7;
             // 
             // GenGalaxyDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(249, 127);
+            this.Controls.Add(this.Timelabel);
             this.Controls.Add(this.CancelButton);
             this.Controls.Add(this.GenerateButton);
             this.Controls.Add(this.NoOfSystemsTextBox);
@@ -112,6 +123,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "GenGalaxyDialog";
             this.Text = "GenGalaxyDialog";
+            this.Load += new System.EventHandler(this.GenGalaxyDialog_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -126,5 +138,6 @@
         private System.Windows.Forms.TextBox NoOfSystemsTextBox;
         private System.Windows.Forms.Button GenerateButton;
         private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Label Timelabel;
     }
 }
