@@ -20,6 +20,7 @@ solution "Pulsar4X"
 			"System.Drawing",
 			"System.Xml",
 			log4netlib(),
+			jsonlib(),
 			opentklib(),
 			opentkglcontrollib()
 			}
