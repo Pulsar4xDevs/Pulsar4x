@@ -22,7 +22,6 @@ solution "Pulsar4X"
 			log4netlib(),
 			jsonlib(),
 			opentklib(),
-			jsonlib(),
 			opentkglcontrollib()
 			}
 		files { 

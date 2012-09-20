@@ -119,6 +119,12 @@ namespace Pulsar4X.WinForms.GLUtilities
 
         public void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
+            if (m_szText == null)
+            {
+                // Do nothing if we have no valid text.
+                return;
+            }
+
             int iCharsToDraw = m_szText.Length;
             if (iCharsToDraw > c_uiMaxNumberOfChars)
             {
@@ -133,6 +139,12 @@ namespace Pulsar4X.WinForms.GLUtilities
 
         public void Render()
         {
+            if (m_szText == null)
+            {
+                // Do nothing if we have no valid text.
+                return;
+            }
+
             int iCharsToDraw = m_szText.Length;
             if (iCharsToDraw > c_uiMaxNumberOfChars)
             {
@@ -162,6 +174,12 @@ namespace Pulsar4X.WinForms.GLUtilities
 
         private void UpdateUVCoords()
         {
+            if (m_szText == null)
+            {
+                // Do nothing if we have no valid text.
+                return;
+            }
+
             char[] caText = m_szText.ToCharArray();
             int iCharsToDraw = caText.Length;
             if (iCharsToDraw > c_uiMaxNumberOfChars)

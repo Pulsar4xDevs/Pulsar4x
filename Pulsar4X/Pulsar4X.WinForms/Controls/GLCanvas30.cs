@@ -175,7 +175,10 @@ namespace Pulsar4X.WinForms.Controls
             //}
 
             // call render on the sceen:
-            SceenToRender.Render();
+            if (SceenToRender != null)
+            {
+                SceenToRender.Render();
+            }
             
             GraphicsContext.CurrentContext.SwapBuffers();
            // #if DEBUG
