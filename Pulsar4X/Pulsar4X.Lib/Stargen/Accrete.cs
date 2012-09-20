@@ -43,6 +43,10 @@ namespace Pulsar4X.Stargen
                                                       starSystem.Stars.Add(star);
                                                   });
 
+            // Create some working Vars:
+            double inner = 0.0;
+            double outer = 0.0;
+
             for (var i = 0; i < starSystem.Stars.Count; i++)
             {
                 var star = starSystem.Stars[i];
@@ -61,8 +65,8 @@ namespace Pulsar4X.Stargen
                             maxseperation = Math.Abs(starSystem.Stars[j].SemiMajorAxis + starSystem.Stars[i].SemiMajorAxis);
                         else
                             maxseperation = 200;
-                        var inner = minseperation / 3.0;
-                        var outer = maxseperation * 3.0;
+                        inner = minseperation / 3.0;
+                        outer = maxseperation * 3.0;
                         protoStar.UpdateDust(inner, outer, false);
                     }
                 }
@@ -123,9 +127,11 @@ namespace Pulsar4X.Stargen
 
         private void doCollisions(AccreteDisc Disc)
         {
+            // create working vars:
             double miu1, miu2;
             double delta = 1, deltaMin = 0;
             double newE, newA;
+            double temp;
 
             bool collision;
             do
@@ -151,7 +157,7 @@ namespace Pulsar4X.Stargen
                         //logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
 
                         // Compute new eccentricity
-                        double temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
+                        temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
                         temp = temp + (bPlanet.Mass * Math.Sqrt(bPlanet.SemiMajorAxis) * Math.Sqrt(Math.Sqrt(1.0 - Math.Pow(bPlanet.Eccentricity, 2.0))));
                         temp = temp / ((aPlanet.Mass + bPlanet.Mass) * Math.Sqrt(newA));
                         temp = 1.0 - Math.Pow(temp, 2.0);
@@ -244,16 +250,24 @@ namespace Pulsar4X.Stargen
         public void CollectDust(AccreteDisc Disc, ProtoPlanet p, double inner, double outer, double lastMass)
         {
             //ProtoStar star = p.Star;
+            // declear working vars:
+            double bandwidth = 0.0;
+            double temp = 0.0;
+            double temp1 = 0.0;
+            double temp2 = 0.0;
+            double width = 0.0;
+            double volume = 0.0;
+            double dustdensity, gasdensity, massdensity;
+
             foreach (AccreteBand band in Disc.Bands)
             {
                 if (band.Intersect(inner, outer) && band.DustPresent)
                 {
-                    double bandwidth = outer - inner;
-                    double temp1 = Math.Max(outer - band.OuterEdge, 0.0);
-                    double temp2 = Math.Max(band.InnerEdge - inner, 0.0);
-                    double width = bandwidth - temp1 - temp2;
+                    bandwidth = outer - inner;
+                    temp1 = Math.Max(outer - band.OuterEdge, 0.0);
+                    temp2 = Math.Max(band.InnerEdge - inner, 0.0);
+                    width = bandwidth - temp1 - temp2;
 
-                    double dustdensity, gasdensity, massdensity;
                     if (!band.DustPresent)
                     {
                         dustdensity = 0.0;
@@ -274,8 +288,8 @@ namespace Pulsar4X.Stargen
                         }
                     }
 
-                    double temp = 4.0 * Math.PI * Math.Pow(p.SemiMajorAxis, 2.0) * p.ReducedMass * (1.0 - (p.Eccentricity * (temp1 - temp2) / bandwidth));
-                    double volume = temp * width;
+                    temp = 4.0 * Math.PI * Math.Pow(p.SemiMajorAxis, 2.0) * p.ReducedMass * (1.0 - (p.Eccentricity * (temp1 - temp2) / bandwidth));
+                    volume = temp * width;
 
 
                     p.DustMass += volume * dustdensity;
@@ -335,21 +349,29 @@ namespace Pulsar4X.Stargen
 
         private void GeneratePlanets(Star Star)
         {
+            int count = 0;
+
+            // Sort the planets by orbit
+            Star.Planets = new BindingList<Planet>(Star.Planets.OrderBy(x => x.SemiMajorAxis).ToList());
+
             for (int i = 0; i < Star.Planets.Count; i++)
             {
                 var planet = Star.Planets[i];
                 planet.Id = Guid.NewGuid();
-                planet.Name = string.Format("{0} {1}", Star.Name, i + 1);
-                GeneratePlanet(planet);
+                if (GeneratePlanet(planet))
+                {
+                    planet.Name = string.Format("{0} {1}", Star.Name, count + 1);
+                    count++;
+                }
             }
         }
 
-        private void GeneratePlanet(ProtoPlanet protoplanet)
+        private bool GeneratePlanet(ProtoPlanet protoplanet)
         {
-            GeneratePlanet(protoplanet.Planet);
+            return GeneratePlanet(protoplanet.Planet);
         }
 
-        private void GeneratePlanet(Planet planet)
+        private bool GeneratePlanet(Planet planet)
         {
             planet.SurfaceTemperature = 0;
             planet.HighTemperature = 0;
@@ -530,6 +552,9 @@ namespace Pulsar4X.Stargen
             {
                 if (planet.Moons != null)
                 {
+                    // Sort moons
+                    planet.Moons = new BindingList<Planet>(planet.Moons.OrderBy(x => x.SemiMajorAxis).ToList());
+                    // Create a copy of the moons list
                     var moonList = planet.Moons.ToList();
                     for (int n = 0; n < moonList.Count; n++)
                     {
@@ -554,6 +579,7 @@ namespace Pulsar4X.Stargen
                                 // Moon too close.
                                 // TODO: Turn moon into rings
                                 planet.Moons.Remove(moon);
+                                return false;
                                 //logger.Debug(string.Format("Moon of planet {0} inside Roche limit", planet.Name));
                             }
 
@@ -561,6 +587,7 @@ namespace Pulsar4X.Stargen
                             {
                                 // Moon too far
                                 planet.Moons.Remove(moon);
+                                return false;
                                 //logger.Debug(string.Format("Moon of planet {0} outside hill radius", planet.Name));
                             }
 
@@ -569,11 +596,13 @@ namespace Pulsar4X.Stargen
                         {
                             // Moon too small
                             planet.Moons.Remove(moon);
+                            return false;
                             //logger.Debug(string.Format("Moon of planet {0} too small", planet.Name));
                         }
                     }
                 }
             }
+            return true;
         }
 
         private void CalculateGases(Planet planet)
@@ -585,10 +614,14 @@ namespace Pulsar4X.Stargen
                 var pressure = planet.SurfacePressure / Constants.Units.MILLIBARS_PER_BAR;
                 //bool gasesExist = false;
 
+                // create some working vars:
+                double yp = 0.0;
+                double amount = 0.0;
+
                 foreach (Molecule gas in Constants.Gases.GasLookup.Values)
                 //for (int i = 0; i < ElementalTable.Instance.Count; i++)
                 {
-                    double yp = gas.BoilingPoint /
+                    yp = gas.BoilingPoint /
                                      (373.0 * ((Math.Log((pressure) + 0.001) / -5050.5) + (1.0 / 373.0)));
 
                     if ((yp >= 0 && yp < planet.LowTemperature) && (gas.AtomicWeight >= planet.MolecularWeightRetained))
@@ -629,7 +662,7 @@ namespace Pulsar4X.Stargen
                         }
 
                         fract = (1 - (planet.MolecularWeightRetained / gas.AtomicWeight));
-                        double amount = abund * pvrms * react * fract;
+                        amount = abund * pvrms * react * fract;
 
                         totamount += amount;
                         if (amount > 0.0)

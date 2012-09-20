@@ -16,6 +16,8 @@ namespace Pulsar4X.WinForms.Forms
     {
         StarSystemFactory ssf = new StarSystemFactory(true);
 
+        System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
+
         public GenGalaxyDialog()
         {
             InitializeComponent();
@@ -23,6 +25,8 @@ namespace Pulsar4X.WinForms.Forms
 
         private void GenerateButton_Click(object sender, EventArgs e)
         {
+            m_oSW.Start();
+
             int iNoOfSystemsToGenerate = 1000;
             int.TryParse(NoOfSystemsTextBox.Text, out iNoOfSystemsToGenerate);
             int iNoOfSystemsDiv4 = iNoOfSystemsToGenerate / 4;
@@ -36,6 +40,18 @@ namespace Pulsar4X.WinForms.Forms
                 GenProgressBar.Value = i;
             }
 
+            m_oSW.Stop();
+            Timelabel.Text = m_oSW.Elapsed.Hours.ToString() + ":" + m_oSW.Elapsed.Minutes.ToString() + ":" + m_oSW.Elapsed.Seconds.ToString() + ":" + m_oSW.Elapsed.Milliseconds.ToString();
+        }
+
+        private void GenGalaxyDialog_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
 
     }
