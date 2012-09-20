@@ -349,21 +349,29 @@ namespace Pulsar4X.Stargen
 
         private void GeneratePlanets(Star Star)
         {
+            int count = 0;
+
+            // Sort the planets by orbit
+            Star.Planets = new BindingList<Planet>(Star.Planets.OrderBy(x => x.SemiMajorAxis).ToList());
+
             for (int i = 0; i < Star.Planets.Count; i++)
             {
                 var planet = Star.Planets[i];
                 planet.Id = Guid.NewGuid();
-                planet.Name = string.Format("{0} {1}", Star.Name, i + 1);
-                GeneratePlanet(planet);
+                if (GeneratePlanet(planet))
+                {
+                    planet.Name = string.Format("{0} {1}", Star.Name, count + 1);
+                    count++;
+                }
             }
         }
 
-        private void GeneratePlanet(ProtoPlanet protoplanet)
+        private bool GeneratePlanet(ProtoPlanet protoplanet)
         {
-            GeneratePlanet(protoplanet.Planet);
+            return GeneratePlanet(protoplanet.Planet);
         }
 
-        private void GeneratePlanet(Planet planet)
+        private bool GeneratePlanet(Planet planet)
         {
             planet.SurfaceTemperature = 0;
             planet.HighTemperature = 0;
@@ -544,6 +552,9 @@ namespace Pulsar4X.Stargen
             {
                 if (planet.Moons != null)
                 {
+                    // Sort moons
+                    planet.Moons = new BindingList<Planet>(planet.Moons.OrderBy(x => x.SemiMajorAxis).ToList());
+                    // Create a copy of the moons list
                     var moonList = planet.Moons.ToList();
                     for (int n = 0; n < moonList.Count; n++)
                     {
@@ -568,6 +579,7 @@ namespace Pulsar4X.Stargen
                                 // Moon too close.
                                 // TODO: Turn moon into rings
                                 planet.Moons.Remove(moon);
+                                return false;
                                 //logger.Debug(string.Format("Moon of planet {0} inside Roche limit", planet.Name));
                             }
 
@@ -575,6 +587,7 @@ namespace Pulsar4X.Stargen
                             {
                                 // Moon too far
                                 planet.Moons.Remove(moon);
+                                return false;
                                 //logger.Debug(string.Format("Moon of planet {0} outside hill radius", planet.Name));
                             }
 
@@ -583,11 +596,13 @@ namespace Pulsar4X.Stargen
                         {
                             // Moon too small
                             planet.Moons.Remove(moon);
+                            return false;
                             //logger.Debug(string.Format("Moon of planet {0} too small", planet.Name));
                         }
                     }
                 }
             }
+            return true;
         }
 
         private void CalculateGases(Planet planet)

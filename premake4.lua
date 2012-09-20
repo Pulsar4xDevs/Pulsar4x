@@ -21,6 +21,7 @@ solution "Pulsar4X"
 			"System.Xml",
 			log4netlib(),
 			opentklib(),
+			jsonlib(),
 			opentkglcontrollib()
 			}
 		files { 
