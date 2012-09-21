@@ -92,6 +92,7 @@ namespace Pulsar4X.WinForms
         public const float ZOOM_OUT_FACTOR = 0.5f;
         public const float ZOOM_MINIMUM_VALUE = 0.00000000186264515f;       // at this scale we have zoomed out soo much that a multy star system is only a couple of pixels wide!!
         public const float ZOOM_MAXINUM_VALUE = 32768.0f;                   // At this scale we are looking a 0.3m per pixel.
+        public const float DEFAULT_PAN_AMOUNT = 25.0f;
 
 
     }

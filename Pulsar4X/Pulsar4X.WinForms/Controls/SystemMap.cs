@@ -86,7 +86,6 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
-
         /// <summary>
         /// Gets or sets the currently viewed star system.
         /// </summary>
@@ -162,7 +161,6 @@ namespace Pulsar4X.WinForms.Controls
 
             // Change Cursor Back to default.
             Cursor.Current = Cursors.Default;
-
         }
 
         /// <summary>
@@ -188,20 +186,19 @@ namespace Pulsar4X.WinForms.Controls
             Cursor.Current = Cursors.Default;
         }
 
-        private void SystemSelectComboBox_SelectionChangeCommitted(object sender, EventArgs e)
-        {
-           // RefreshStarSystem(); // we only need to do this as the System is change automagicly by the data binding. not needed?????
-        }
 
         private void UpdateScaleLabels()
         {
-            double dKmscale = this.Size.Width / m_GLCanvas.ZoomFactor * 10;  // times by 10 to make scale the same as actual scale usid in drawing the systems.
-            float dAUScale = (float)(dKmscale / Pulsar4X.Constants.Units.KM_PER_AU);
-            KmScaleLabel.Text = "Km = " + dKmscale.ToString();
-            AUScaleLabel.Text = "AU = " + dAUScale.ToString();
+            if (m_GLCanvas != null)
+            {
+                double dKmscale = this.Size.Width / m_GLCanvas.ZoomFactor * 10;  // times by 10 to make scale the same as actual scale usid in drawing the systems.
+                float dAUScale = (float)(dKmscale / Pulsar4X.Constants.Units.KM_PER_AU);
+                KmScaleLabel.Text = "Km = " + dKmscale.ToString();
+                AUScaleLabel.Text = "AU = " + dAUScale.ToString();
 
-            // Add FPS too for now:
-            FPSLabel.Text = m_GLCanvas.FPS.ToString();
+                // Add FPS too for now:
+                FPSLabel.Text = m_GLCanvas.FPS.ToString();
+            }
         }
 
         /// <summary>
@@ -258,25 +255,25 @@ namespace Pulsar4X.WinForms.Controls
 
         private void PanRightButton_Click(object sender, EventArgs e)
         {
-            Vector3 v3PanAmount = new Vector3(-10.0f, 0, 0);
+            Vector3 v3PanAmount = new Vector3(-UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
         }
 
         private void PanLeftButton_Click(object sender, EventArgs e)
         {
-            Vector3 v3PanAmount = new Vector3(10.0f, 0, 0);
+            Vector3 v3PanAmount = new Vector3(UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
         }
 
         private void PanUpButton_Click(object sender, EventArgs e)
         {
-            Vector3 v3PanAmount = new Vector3(0, -10.0f, 0);
+            Vector3 v3PanAmount = new Vector3(0, -UIConstants.DEFAULT_PAN_AMOUNT, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
         }
 
         private void PanDownButton_Click(object sender, EventArgs e)
         {
-            Vector3 v3PanAmount = new Vector3(0, 10.0f, 0);
+            Vector3 v3PanAmount = new Vector3(0, UIConstants.DEFAULT_PAN_AMOUNT, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
         }
 
@@ -288,25 +285,25 @@ namespace Pulsar4X.WinForms.Controls
                 {
                     case Keys.W:
                         {
-                            Vector3 v3PanAmount = new Vector3(0, -10.0f, 0);
+                            Vector3 v3PanAmount = new Vector3(0, -UIConstants.DEFAULT_PAN_AMOUNT, 0);
                             m_GLCanvas.Pan(ref v3PanAmount);
                             break;
                         }
                     case Keys.S:
                         {
-                            Vector3 v3PanAmount = new Vector3(0, 10.0f, 0);
+                            Vector3 v3PanAmount = new Vector3(0, UIConstants.DEFAULT_PAN_AMOUNT, 0);
                             m_GLCanvas.Pan(ref v3PanAmount);
                             break;
                         }
                     case Keys.A:
                         {
-                            Vector3 v3PanAmount = new Vector3(10.0f, 0, 0);
+                            Vector3 v3PanAmount = new Vector3(UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
                             m_GLCanvas.Pan(ref v3PanAmount);
                             break;
                         }
                     case Keys.D:
                         {
-                            Vector3 v3PanAmount = new Vector3(-10.0f, 0, 0);
+                            Vector3 v3PanAmount = new Vector3(-UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
                             m_GLCanvas.Pan(ref v3PanAmount);
                             break;
                         }
@@ -333,6 +330,22 @@ namespace Pulsar4X.WinForms.Controls
                         }
                 }
             }
+
+            if (m != null)
+            {
+
+            }
+        }
+
+        private void SystemMap_SizeChanged(object sender, EventArgs e)
+        {
+            // update Scale lables for new screen size:
+            UpdateScaleLabels();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            
         }
 
     }

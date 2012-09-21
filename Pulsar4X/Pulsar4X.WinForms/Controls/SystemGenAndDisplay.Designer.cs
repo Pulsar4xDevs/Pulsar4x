@@ -61,6 +61,7 @@
             this.StarsDataGridView = new System.Windows.Forms.DataGridView();
             this.CloseButton = new System.Windows.Forms.Button();
             this.groupBoxBottomButtons = new System.Windows.Forms.GroupBox();
+            this.ExportButton = new System.Windows.Forms.Button();
             this.GenGalaxyButton = new System.Windows.Forms.Button();
             this.GenSystemButton = new System.Windows.Forms.Button();
             this.FixedNameButton = new System.Windows.Forms.Button();
@@ -138,7 +139,6 @@
             this.OptAsteroidsMineralsRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroisShowRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroidsHideRadioButton = new System.Windows.Forms.RadioButton();
-            this.ExportButton = new System.Windows.Forms.Button();
             this.ExportSaveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.GeneralInfoGroupBox.SuspendLayout();
             this.groupBoxEnvironTolerances.SuspendLayout();
@@ -520,6 +520,16 @@
             this.groupBoxBottomButtons.TabIndex = 8;
             this.groupBoxBottomButtons.TabStop = false;
             // 
+            // ExportButton
+            // 
+            this.ExportButton.Location = new System.Drawing.Point(732, 16);
+            this.ExportButton.Name = "ExportButton";
+            this.ExportButton.Size = new System.Drawing.Size(85, 23);
+            this.ExportButton.TabIndex = 21;
+            this.ExportButton.Text = "Export";
+            this.ExportButton.UseVisualStyleBackColor = true;
+            this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
+            // 
             // GenGalaxyButton
             // 
             this.GenGalaxyButton.Location = new System.Drawing.Point(95, 16);
@@ -635,14 +645,14 @@
             this.richTextBox1.Location = new System.Drawing.Point(1, 116);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(337, 43);
+            this.richTextBox1.Size = new System.Drawing.Size(333, 43);
             this.richTextBox1.TabIndex = 13;
             this.richTextBox1.Text = "";
             // 
             // DangerousAtmosTextBox
             // 
             this.DangerousAtmosTextBox.Enabled = false;
-            this.DangerousAtmosTextBox.Location = new System.Drawing.Point(296, 72);
+            this.DangerousAtmosTextBox.Location = new System.Drawing.Point(292, 72);
             this.DangerousAtmosTextBox.Name = "DangerousAtmosTextBox";
             this.DangerousAtmosTextBox.Size = new System.Drawing.Size(42, 20);
             this.DangerousAtmosTextBox.TabIndex = 12;
@@ -651,7 +661,7 @@
             // BreathableAtmosTextBox
             // 
             this.BreathableAtmosTextBox.Enabled = false;
-            this.BreathableAtmosTextBox.Location = new System.Drawing.Point(296, 47);
+            this.BreathableAtmosTextBox.Location = new System.Drawing.Point(292, 47);
             this.BreathableAtmosTextBox.Name = "BreathableAtmosTextBox";
             this.BreathableAtmosTextBox.Size = new System.Drawing.Size(42, 20);
             this.BreathableAtmosTextBox.TabIndex = 11;
@@ -660,7 +670,7 @@
             // TempCostFactorTextBox
             // 
             this.TempCostFactorTextBox.Enabled = false;
-            this.TempCostFactorTextBox.Location = new System.Drawing.Point(296, 21);
+            this.TempCostFactorTextBox.Location = new System.Drawing.Point(292, 21);
             this.TempCostFactorTextBox.Name = "TempCostFactorTextBox";
             this.TempCostFactorTextBox.Size = new System.Drawing.Size(42, 20);
             this.TempCostFactorTextBox.TabIndex = 10;
@@ -1330,16 +1340,6 @@
             this.OptAsteroidsHideRadioButton.TabStop = true;
             this.OptAsteroidsHideRadioButton.Text = "Hide";
             this.OptAsteroidsHideRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // ExportButton
-            // 
-            this.ExportButton.Location = new System.Drawing.Point(732, 16);
-            this.ExportButton.Name = "ExportButton";
-            this.ExportButton.Size = new System.Drawing.Size(85, 23);
-            this.ExportButton.TabIndex = 21;
-            this.ExportButton.Text = "Export";
-            this.ExportButton.UseVisualStyleBackColor = true;
-            this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
             // ExportSaveFileDialog
             // 

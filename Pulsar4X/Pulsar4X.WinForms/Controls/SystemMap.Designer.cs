@@ -40,7 +40,11 @@
             this.AUScaleLabel = new System.Windows.Forms.Label();
             this.KmScaleLabel = new System.Windows.Forms.Label();
             this.SystemSelectComboBox = new System.Windows.Forms.ComboBox();
+            this.ViewControlsGroupBox = new System.Windows.Forms.GroupBox();
+            this.ScaleGroupBox = new System.Windows.Forms.GroupBox();
             this.ControlsPanel.SuspendLayout();
+            this.ViewControlsGroupBox.SuspendLayout();
+            this.ScaleGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // FPSLabel
@@ -57,16 +61,9 @@
             // 
             this.ControlsPanel.BackColor = System.Drawing.Color.MidnightBlue;
             this.ControlsPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ControlsPanel.Controls.Add(this.ResetViewButton);
+            this.ControlsPanel.Controls.Add(this.ScaleGroupBox);
+            this.ControlsPanel.Controls.Add(this.ViewControlsGroupBox);
             this.ControlsPanel.Controls.Add(this.FPSLabel);
-            this.ControlsPanel.Controls.Add(this.ZoomOutButton);
-            this.ControlsPanel.Controls.Add(this.ZoomInButton);
-            this.ControlsPanel.Controls.Add(this.PanRightButton);
-            this.ControlsPanel.Controls.Add(this.PanDownButton);
-            this.ControlsPanel.Controls.Add(this.PanLeftButton);
-            this.ControlsPanel.Controls.Add(this.PanUpButton);
-            this.ControlsPanel.Controls.Add(this.AUScaleLabel);
-            this.ControlsPanel.Controls.Add(this.KmScaleLabel);
             this.ControlsPanel.Controls.Add(this.SystemSelectComboBox);
             this.ControlsPanel.Location = new System.Drawing.Point(4, 4);
             this.ControlsPanel.Name = "ControlsPanel";
@@ -75,7 +72,8 @@
             // 
             // ResetViewButton
             // 
-            this.ResetViewButton.Location = new System.Drawing.Point(112, 58);
+            this.ResetViewButton.ForeColor = System.Drawing.Color.Black;
+            this.ResetViewButton.Location = new System.Drawing.Point(114, 73);
             this.ResetViewButton.Name = "ResetViewButton";
             this.ResetViewButton.Size = new System.Drawing.Size(64, 23);
             this.ResetViewButton.TabIndex = 9;
@@ -85,7 +83,8 @@
             // 
             // ZoomOutButton
             // 
-            this.ZoomOutButton.Location = new System.Drawing.Point(153, 3);
+            this.ZoomOutButton.ForeColor = System.Drawing.Color.Black;
+            this.ZoomOutButton.Location = new System.Drawing.Point(155, 19);
             this.ZoomOutButton.Name = "ZoomOutButton";
             this.ZoomOutButton.Size = new System.Drawing.Size(23, 23);
             this.ZoomOutButton.TabIndex = 8;
@@ -95,7 +94,8 @@
             // 
             // ZoomInButton
             // 
-            this.ZoomInButton.Location = new System.Drawing.Point(112, 3);
+            this.ZoomInButton.ForeColor = System.Drawing.Color.Black;
+            this.ZoomInButton.Location = new System.Drawing.Point(114, 18);
             this.ZoomInButton.Name = "ZoomInButton";
             this.ZoomInButton.Size = new System.Drawing.Size(23, 23);
             this.ZoomInButton.TabIndex = 7;
@@ -105,7 +105,8 @@
             // 
             // PanRightButton
             // 
-            this.PanRightButton.Location = new System.Drawing.Point(56, 29);
+            this.PanRightButton.ForeColor = System.Drawing.Color.Black;
+            this.PanRightButton.Location = new System.Drawing.Point(58, 44);
             this.PanRightButton.Name = "PanRightButton";
             this.PanRightButton.Size = new System.Drawing.Size(26, 23);
             this.PanRightButton.TabIndex = 6;
@@ -115,7 +116,8 @@
             // 
             // PanDownButton
             // 
-            this.PanDownButton.Location = new System.Drawing.Point(31, 58);
+            this.PanDownButton.ForeColor = System.Drawing.Color.Black;
+            this.PanDownButton.Location = new System.Drawing.Point(33, 73);
             this.PanDownButton.Name = "PanDownButton";
             this.PanDownButton.Size = new System.Drawing.Size(23, 23);
             this.PanDownButton.TabIndex = 5;
@@ -125,7 +127,8 @@
             // 
             // PanLeftButton
             // 
-            this.PanLeftButton.Location = new System.Drawing.Point(6, 29);
+            this.PanLeftButton.ForeColor = System.Drawing.Color.Black;
+            this.PanLeftButton.Location = new System.Drawing.Point(8, 44);
             this.PanLeftButton.Name = "PanLeftButton";
             this.PanLeftButton.Size = new System.Drawing.Size(26, 23);
             this.PanLeftButton.TabIndex = 4;
@@ -135,7 +138,8 @@
             // 
             // PanUpButton
             // 
-            this.PanUpButton.Location = new System.Drawing.Point(32, 3);
+            this.PanUpButton.ForeColor = System.Drawing.Color.Black;
+            this.PanUpButton.Location = new System.Drawing.Point(34, 18);
             this.PanUpButton.Name = "PanUpButton";
             this.PanUpButton.Size = new System.Drawing.Size(23, 23);
             this.PanUpButton.TabIndex = 3;
@@ -147,7 +151,7 @@
             // 
             this.AUScaleLabel.AutoSize = true;
             this.AUScaleLabel.ForeColor = System.Drawing.Color.White;
-            this.AUScaleLabel.Location = new System.Drawing.Point(3, 115);
+            this.AUScaleLabel.Location = new System.Drawing.Point(5, 29);
             this.AUScaleLabel.Name = "AUScaleLabel";
             this.AUScaleLabel.Size = new System.Drawing.Size(52, 13);
             this.AUScaleLabel.TabIndex = 2;
@@ -157,7 +161,7 @@
             // 
             this.KmScaleLabel.AutoSize = true;
             this.KmScaleLabel.ForeColor = System.Drawing.Color.White;
-            this.KmScaleLabel.Location = new System.Drawing.Point(3, 93);
+            this.KmScaleLabel.Location = new System.Drawing.Point(6, 16);
             this.KmScaleLabel.Name = "KmScaleLabel";
             this.KmScaleLabel.Size = new System.Drawing.Size(52, 13);
             this.KmScaleLabel.TabIndex = 1;
@@ -169,11 +173,39 @@
             this.SystemSelectComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.SystemSelectComboBox.ForeColor = System.Drawing.Color.White;
             this.SystemSelectComboBox.FormattingEnabled = true;
-            this.SystemSelectComboBox.Location = new System.Drawing.Point(2, 142);
+            this.SystemSelectComboBox.Location = new System.Drawing.Point(3, 3);
             this.SystemSelectComboBox.Name = "SystemSelectComboBox";
             this.SystemSelectComboBox.Size = new System.Drawing.Size(190, 21);
             this.SystemSelectComboBox.TabIndex = 0;
-            this.SystemSelectComboBox.SelectionChangeCommitted += new System.EventHandler(this.SystemSelectComboBox_SelectionChangeCommitted);
+            // 
+            // ViewControlsGroupBox
+            // 
+            this.ViewControlsGroupBox.Controls.Add(this.PanRightButton);
+            this.ViewControlsGroupBox.Controls.Add(this.ResetViewButton);
+            this.ViewControlsGroupBox.Controls.Add(this.PanUpButton);
+            this.ViewControlsGroupBox.Controls.Add(this.PanLeftButton);
+            this.ViewControlsGroupBox.Controls.Add(this.ZoomOutButton);
+            this.ViewControlsGroupBox.Controls.Add(this.PanDownButton);
+            this.ViewControlsGroupBox.Controls.Add(this.ZoomInButton);
+            this.ViewControlsGroupBox.ForeColor = System.Drawing.Color.White;
+            this.ViewControlsGroupBox.Location = new System.Drawing.Point(8, 31);
+            this.ViewControlsGroupBox.Name = "ViewControlsGroupBox";
+            this.ViewControlsGroupBox.Size = new System.Drawing.Size(185, 106);
+            this.ViewControlsGroupBox.TabIndex = 10;
+            this.ViewControlsGroupBox.TabStop = false;
+            this.ViewControlsGroupBox.Text = "View Controls:";
+            // 
+            // ScaleGroupBox
+            // 
+            this.ScaleGroupBox.Controls.Add(this.KmScaleLabel);
+            this.ScaleGroupBox.Controls.Add(this.AUScaleLabel);
+            this.ScaleGroupBox.ForeColor = System.Drawing.Color.White;
+            this.ScaleGroupBox.Location = new System.Drawing.Point(8, 144);
+            this.ScaleGroupBox.Name = "ScaleGroupBox";
+            this.ScaleGroupBox.Size = new System.Drawing.Size(185, 49);
+            this.ScaleGroupBox.TabIndex = 11;
+            this.ScaleGroupBox.TabStop = false;
+            this.ScaleGroupBox.Text = "Screen Width In:";
             // 
             // SystemMap
             // 
@@ -184,9 +216,13 @@
             this.Name = "SystemMap";
             this.Size = new System.Drawing.Size(1009, 681);
             this.Load += new System.EventHandler(this.SystemMap_Load);
+            this.SizeChanged += new System.EventHandler(this.SystemMap_SizeChanged);
             this.MouseHover += new System.EventHandler(this.SystemMap_MouseHover);
             this.ControlsPanel.ResumeLayout(false);
             this.ControlsPanel.PerformLayout();
+            this.ViewControlsGroupBox.ResumeLayout(false);
+            this.ScaleGroupBox.ResumeLayout(false);
+            this.ScaleGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -205,5 +241,7 @@
         private System.Windows.Forms.Button PanDownButton;
         private System.Windows.Forms.Button PanLeftButton;
         private System.Windows.Forms.Button PanUpButton;
+        private System.Windows.Forms.GroupBox ScaleGroupBox;
+        private System.Windows.Forms.GroupBox ViewControlsGroupBox;
     }
 }
