@@ -579,7 +579,7 @@ namespace Pulsar4X.Stargen
                                 // Moon too close.
                                 // TODO: Turn moon into rings
                                 planet.Moons.Remove(moon);
-                                return false;
+                                //return false;
                                 //logger.Debug(string.Format("Moon of planet {0} inside Roche limit", planet.Name));
                             }
 
@@ -587,7 +587,7 @@ namespace Pulsar4X.Stargen
                             {
                                 // Moon too far
                                 planet.Moons.Remove(moon);
-                                return false;
+                                //return false;
                                 //logger.Debug(string.Format("Moon of planet {0} outside hill radius", planet.Name));
                             }
 
@@ -596,7 +596,7 @@ namespace Pulsar4X.Stargen
                         {
                             // Moon too small
                             planet.Moons.Remove(moon);
-                            return false;
+                            //return false;
                             //logger.Debug(string.Format("Moon of planet {0} too small", planet.Name));
                         }
                     }
