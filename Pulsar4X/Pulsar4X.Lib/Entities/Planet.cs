@@ -67,6 +67,38 @@ namespace Pulsar4X.Entities
         public double CloudCover { get; set; } //percent of surface covered
         public double IceCover { get; set; } //percent of surface covered
 
+        [JsonIgnore]
+        public string SurfaceTemperatureView
+        {
+            get
+            {
+                if (SurfaceTemperature == Constants.Units.INCREDIBLY_LARGE_NUMBER)
+                    return "N/A";
+                return SurfaceTemperature.ToString("N4");
+            }
+        }
+
+        [JsonIgnore]
+        public string SurfaceGravityView
+        {
+            get
+            {
+                if (SurfaceGravity == Constants.Units.INCREDIBLY_LARGE_NUMBER)
+                    return "N/A";
+                return SurfaceGravity.ToString("N4");
+            }
+        }
+
+        [JsonIgnore]
+        public string MassOfGasInEarthMassesView
+        {
+            get
+            {
+                if (MassOfGasInEarthMasses == 0.0)
+                    return "None";
+                return MassOfGasInEarthMasses.ToString("N4");
+            }
+        }
         
 
         public Planet() : base()

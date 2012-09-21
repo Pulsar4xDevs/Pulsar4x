@@ -82,20 +82,21 @@ namespace Pulsar4X.WinForms.Controls
                 col.DataPropertyName = "MassInEarthMasses";
                 col.HeaderText = "Mass (Earth Masses)";
                 col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "MassOfGasInEarthMasses";
+                col.DataPropertyName = "MassOfGasInEarthMassesView";
                 col.HeaderText = "Gas Mass (Earth Masses)";
-                col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "SurfaceGravity";
+                col.DataPropertyName = "SurfaceGravityView";
                 col.HeaderText = "Gravity";
-                col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
@@ -103,6 +104,7 @@ namespace Pulsar4X.WinForms.Controls
                 col.DataPropertyName = "Radius";
                 col.HeaderText = "Equitorial Radius (Km)";
                 col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
@@ -110,13 +112,14 @@ namespace Pulsar4X.WinForms.Controls
                 col.DataPropertyName = "SemiMajorAxis";
                 col.HeaderText = "Orbit Dist (AU)";
                 col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "SurfaceTemperature";
+                col.DataPropertyName = "SurfaceTemperatureView";
                 col.HeaderText = "Surface Temperature (K)";
-                col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())

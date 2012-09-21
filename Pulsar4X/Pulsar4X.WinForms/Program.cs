@@ -23,6 +23,7 @@ namespace Pulsar4X.WinForms
             Forms.StartupSplashScreen.ShowSplashScreen();
 
             AppDomain.CurrentDomain.FirstChanceException += new EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs>(CurrentDomain_FirstChanceException);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
             Forms.StartupSplashScreen.SetStatus("Loading Configuration...");
             Forms.StartupSplashScreen.Progress = 0.2;
@@ -65,6 +66,11 @@ namespace Pulsar4X.WinForms
             */
 
             logger.Info("Program Ended");
+        }
+
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            logger.Error("Unhandled Exception!", (Exception)e.ExceptionObject);
         }
 
         static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
