@@ -97,7 +97,17 @@ namespace Pulsar4X.WinForms.ViewModels
                 _currentstar = value;
                 //NotifyPropertyChanged("CurrentStar");
                 OnPropertyChanged(() => CurrentStar);
-                PlanetSource.DataSource = _currentstar.Planets;
+                var planetslist = new BindingList<Planet>();
+                foreach (Planet planet in CurrentStar.Planets)
+                {
+                    planetslist.Add(planet);
+                    foreach (Planet moon in planet.Moons)
+                    {
+                        planetslist.Add(moon);
+                    }
+                }
+                PlanetSource.DataSource = planetslist;
+
             }
         }
         public Planet CurrentPlanet { get; set; }
