@@ -75,11 +75,11 @@ namespace Pulsar4X.Lib
 			if(mirrorSide)
 				angle = Math.PI * 2 - angle;
 
-			angle += theOrbit.LongitudeOfApogee;
-			if(angle > Math.PI * 2)
-				angle -= Math.PI * 2;
+			//angle += theOrbit.LongitudeOfApogee;
+			//if(angle > Math.PI * 2)
+			//	angle -= Math.PI * 2;
 
-			radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle));
+			radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 
 		}
 
@@ -102,21 +102,21 @@ namespace Pulsar4X.Lib
 
 		public double FindRadiusFromAngle(OrbitingEntity theOrbit, double angle)
 		{
-			angle += theOrbit.LongitudeOfApogee;
-			if(angle > Math.PI * 2)
-				angle -= Math.PI * 2;
+			//angle += theOrbit.LongitudeOfApogee;
+			//if(angle > Math.PI * 2)
+			//	angle -= Math.PI * 2;
 			
-			double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle));
+			double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 			return radius;
 		}
 
 		public void FindCordsFromAngle(OrbitingEntity theOrbit, double angle, out double x, out double y)
 		{
-			angle += theOrbit.LongitudeOfApogee;
-			if(angle > Math.PI * 2)
-				angle -= Math.PI * 2;
+			//angle += theOrbit.LongitudeOfApogee;
+			//if(angle > Math.PI * 2)
+				//angle -= Math.PI * 2;
 			
-			double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle));
+			double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 - theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 			x = -1 * radius * Math.Sin(angle);
 			y = radius * Math.Cos(angle);	
 		}

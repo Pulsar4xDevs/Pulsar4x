@@ -101,6 +101,7 @@ namespace Pulsar4X.Stargen
                         Star = star,
                         SemiMajorAxis = MathUtilities.Random.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
                         Eccentricity = rnd.RandomEccentricity(),
+                        //Eccentricity = 0.99,
                         DustMass = Constants.Stargen.PROTOPLANET_MASS
                     };
                     protoPlanet.init();
@@ -405,6 +406,7 @@ namespace Pulsar4X.Stargen
             planet.OrbitalPeriod = EnviroUtilities.Period(planet.SemiMajorAxis, planet.Mass, planet.Primary.Mass);
             planet.AxialTilt = EnviroUtilities.Inclination(planet.SemiMajorAxis);
             planet.LongitudeOfApogee = MathUtilities.Random.NextDouble(0.0, 2 * Math.PI);
+            planet.TimeSinceApogee = Convert.ToInt64(MathUtilities.Random.NextDouble(0.0, planet.OrbitalPeriod * Constants.Units.SECONDS_PER_HOUR * 24.0));
 
             planet.ExoSphericTemperature = Constants.Sol.Earth.EXOSPHERE_TEMP / Math.Pow(planet.SemiMajorAxis / planet.Primary.EcoSphereRadius, 2.0);
             planet.RootMeanSquaredVelocity = EnviroUtilities.RootMeanSquareVelocity(Constants.Gases.MolecularWeights.MOL_NITROGEN, planet.ExoSphericTemperature);
@@ -594,7 +596,7 @@ namespace Pulsar4X.Stargen
 
                             //TODO: Look at adding atmosphere call to this
                             var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
-                            var hillSphere = planet.SemiMajorAxis * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
+                            var hillSphere = planet.SemiMajorAxis * (1.0-planet.Eccentricity) * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
 
                             //if ((rocheLimit * 3.0) < hillSphere)
                             if (moon.SemiMajorAxis < rocheLimit)
