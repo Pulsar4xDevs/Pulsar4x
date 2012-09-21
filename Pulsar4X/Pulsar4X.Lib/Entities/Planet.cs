@@ -99,6 +99,17 @@ namespace Pulsar4X.Entities
                 return MassOfGasInEarthMasses.ToString("N4");
             }
         }
+
+        [JsonIgnore]
+        public string MassOfDustInEarthMassesView
+        {
+            get
+            {
+                if (MassOfDustInEarthMasses < 0.0001)
+                    return MassOfDustInEarthMasses.ToString("#0.00e-0");
+                return MassOfDustInEarthMasses.ToString("N4");
+            }
+        }
         
 
         public Planet() : base()
