@@ -87,6 +87,7 @@ namespace Pulsar4X.Stargen
                     star.SemiMajorAxis = MathUtilities.Random.NextDouble(0.5, 50);
                 else
                     star.SemiMajorAxis = 0.0;
+                star.Eccentricity = MathUtilities.Random.RandomEccentricity();
 
                 stars.Add(star);
             }

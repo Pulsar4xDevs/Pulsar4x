@@ -49,7 +49,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool IsMoon { get; set; }
 
-        public double TimeSinceApogee { get; set; }
+        public long TimeSinceApogee { get; set; }
 
         /// <summary>
         /// angle counterclockwise from system 'north' to SemiMajorAxis at Apogee

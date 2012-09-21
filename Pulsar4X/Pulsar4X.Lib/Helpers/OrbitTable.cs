@@ -83,6 +83,15 @@ namespace Pulsar4X.Lib
 
 		}
 
+        public void UpdatePosition(OrbitingEntity theOrbit, long delta)
+        {
+            double x, y;
+            theOrbit.TimeSinceApogee+=delta;
+            FindCartesianPosition(theOrbit, theOrbit.TimeSinceApogee, out x, out y);
+            theOrbit.XSystem = x;
+            theOrbit.YSystem = y;
+        }
+
 		public void FindCartesianPosition(OrbitingEntity theOrbit, long secondsSinceEpoch, out double x, out double y)
 		{
 			double angle, radius;
