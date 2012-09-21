@@ -120,6 +120,8 @@ namespace Pulsar4X.WinForms.GLUtilities
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
             GL.BindVertexArray(m_uiVextexArrayHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
 
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
 
@@ -131,6 +133,8 @@ namespace Pulsar4X.WinForms.GLUtilities
         public override void Render()
         {
             GL.BindVertexArray(m_uiVextexArrayHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
 
             // recreate our matrix based on size and position.
             this.RecalculateModelMatrix();
