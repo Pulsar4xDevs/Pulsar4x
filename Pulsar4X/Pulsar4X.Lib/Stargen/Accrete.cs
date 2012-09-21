@@ -56,15 +56,35 @@ namespace Pulsar4X.Stargen
                 {
                     if (i != j)
                     {
+                        var starB = starSystem.Stars[j];
                         // Forbidden zone inner is 1/3 of the minimum seperation
                         // Forbidden zone outer is 3x the maximum seperation
                         // TODO: Add in effect of eccentricities
-                        double minseperation = Math.Abs(starSystem.Stars[j].SemiMajorAxis - starSystem.Stars[i].SemiMajorAxis);
+                        double minseperation, maxseperation;
+                        if (star.SemiMajorAxis > starB.SemiMajorAxis)
+                        {
+                            // Orbits beyond other star
+                            minseperation = Math.Abs(star.SemiMajorAxis * (1.0 - star.Eccentricity) - starB.SemiMajorAxis * (1.0 + starB.Eccentricity));
+                            if (i == 0)
+                                maxseperation = Math.Abs(star.SemiMajorAxis * (1.0 + star.Eccentricity) - starB.SemiMajorAxis * (1.0 - starB.Eccentricity));
+                            else
+                                maxseperation = 200;
+                        }
+                        else
+                        {
+                            // Orbits inside other star
+                            minseperation = Math.Abs(star.SemiMajorAxis * (1.0 + star.Eccentricity) - starB.SemiMajorAxis * (1.0 - starB.Eccentricity));
+                            if (i == 0)
+                                maxseperation = Math.Abs(star.SemiMajorAxis * (1.0 - star.Eccentricity) - starB.SemiMajorAxis * (1.0 + starB.Eccentricity));
+                            else
+                                maxseperation = 200;
+                        }
+                        /*minseperation = Math.Abs(starSystem.Stars[j].SemiMajorAxis - starSystem.Stars[i].SemiMajorAxis);
                         double maxseperation;
                         if (i == 0)
                             maxseperation = Math.Abs(starSystem.Stars[j].SemiMajorAxis + starSystem.Stars[i].SemiMajorAxis);
                         else
-                            maxseperation = 200;
+                            maxseperation = 200;*/
                         inner = minseperation / 3.0;
                         outer = maxseperation * 3.0;
                         protoStar.UpdateDust(inner, outer, false);
