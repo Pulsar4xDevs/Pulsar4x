@@ -239,42 +239,49 @@ namespace Pulsar4X.WinForms.Controls
             m_GLCanvas.CenterOnZero();
             m_GLCanvas.ZoomFactor = m_oCurrentSceen.DefaultZoomScaler;
             m_oCurrentSceen.Refresh();
+            m_GLCanvas.Focus();
         }
 
         private void ZoomInButton_Click(object sender, EventArgs e)
         {
             m_GLCanvas.IncreaseZoomScaler();
             UpdateScaleLabels();
+            m_GLCanvas.Focus();
         }
 
         private void ZoomOutButton_Click(object sender, EventArgs e)
         {
             m_GLCanvas.DecreaseZoomScaler();
             UpdateScaleLabels();
+            m_GLCanvas.Focus();
         }
 
         private void PanRightButton_Click(object sender, EventArgs e)
         {
             Vector3 v3PanAmount = new Vector3(-UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
+            m_GLCanvas.Focus();
         }
 
         private void PanLeftButton_Click(object sender, EventArgs e)
         {
             Vector3 v3PanAmount = new Vector3(UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
+            m_GLCanvas.Focus();
         }
 
         private void PanUpButton_Click(object sender, EventArgs e)
         {
             Vector3 v3PanAmount = new Vector3(0, -UIConstants.DEFAULT_PAN_AMOUNT, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
+            m_GLCanvas.Focus();
         }
 
         private void PanDownButton_Click(object sender, EventArgs e)
         {
             Vector3 v3PanAmount = new Vector3(0, UIConstants.DEFAULT_PAN_AMOUNT, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
+            m_GLCanvas.Focus();
         }
 
         public void InputProcessor(KeyEventArgs k, MouseEventArgs m)
@@ -346,6 +353,11 @@ namespace Pulsar4X.WinForms.Controls
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            InputProcessor(e, null);
         }
 
     }

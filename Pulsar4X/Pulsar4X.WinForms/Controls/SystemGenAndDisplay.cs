@@ -88,14 +88,14 @@ namespace Pulsar4X.WinForms.Controls
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "MassOfGasInEarthMassesView";
-                col.HeaderText = "Gas Mass (Earth Masses)";
+                col.HeaderText = "Atmosphere (Earth Masses)";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "SurfaceGravityView";
-                col.HeaderText = "Gravity";
+                col.HeaderText = "Surface Gravity";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 PlanetsDataGridView.Columns.Add(col);
             }
