@@ -17,16 +17,16 @@
 	<Character Umin="0.611111" Vmin="0.012676" Umax="0.647266" Vmax="0.164789" Char="/"/>
 	
 	<!-- Row 1																			-->
-	<Character Umin="0.007937" Vmin="0.177465" Umax="0.050265" Vmax="0.329577" Char="1"/>
-	<Character Umin="0.058201" Vmin="0.177465" Umax="0.097002" Vmax="0.329577" Char="2"/>
-	<Character Umin="0.104938" Vmin="0.177465" Umax="0.148148" Vmax="0.329577" Char="3"/>
-	<Character Umin="0.156085" Vmin="0.177465" Umax="0.200176" Vmax="0.329577" Char="4"/>
-	<Character Umin="0.208113" Vmin="0.177465" Umax="0.251323" Vmax="0.329577" Char="5"/>
-	<Character Umin="0.259259" Vmin="0.177465" Umax="0.300705" Vmax="0.329577" Char="6"/>
-	<Character Umin="0.308642" Vmin="0.177465" Umax="0.352734" Vmax="0.329577" Char="7"/>
-	<Character Umin="0.360670" Vmin="0.177465" Umax="0.402998" Vmax="0.329577" Char="8"/>
-	<Character Umin="0.410935" Vmin="0.177465" Umax="0.455026" Vmax="0.329577" Char="9"/>
-	<Character Umin="0.462963" Vmin="0.177465" Umax="0.506173" Vmax="0.329577" Char="0"/>
+	<Character Umin="0.007937" Vmin="0.177465" Umax="0.050265" Vmax="0.329577" Char="0"/>
+	<Character Umin="0.058201" Vmin="0.177465" Umax="0.097002" Vmax="0.329577" Char="1"/>
+	<Character Umin="0.104938" Vmin="0.177465" Umax="0.148148" Vmax="0.329577" Char="2"/>
+	<Character Umin="0.156085" Vmin="0.177465" Umax="0.200176" Vmax="0.329577" Char="3"/>
+	<Character Umin="0.208113" Vmin="0.177465" Umax="0.251323" Vmax="0.329577" Char="4"/>
+	<Character Umin="0.259259" Vmin="0.177465" Umax="0.300705" Vmax="0.329577" Char="5"/>
+	<Character Umin="0.308642" Vmin="0.177465" Umax="0.352734" Vmax="0.329577" Char="6"/>
+	<Character Umin="0.360670" Vmin="0.177465" Umax="0.402998" Vmax="0.329577" Char="7"/>
+	<Character Umin="0.410935" Vmin="0.177465" Umax="0.455026" Vmax="0.329577" Char="8"/>
+	<Character Umin="0.462963" Vmin="0.177465" Umax="0.506173" Vmax="0.329577" Char="9"/>
 	<Character Umin="0.514109" Vmin="0.177465" Umax="0.532628" Vmax="0.329577" Char=":"/>
 	<Character Umin="0.540564" Vmin="0.177465" Umax="0.559965" Vmax="0.329577" Char=";"/>
 	<Character Umin="0.609347" Vmin="0.177465" Umax="0.646384" Vmax="0.329577" Char="="/>
