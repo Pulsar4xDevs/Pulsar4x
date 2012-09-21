@@ -22,16 +22,15 @@ namespace Pulsar4X.Entities
         //public string Name { get; set; }
         public PlanetTypes PlanetType { get; set; }
         public bool IsGasGiant { get; set; }
-        public bool IsMoon { get; set; }
         public override double Age { get; set; }
 
         //public double SemiMajorAxis { get; set; } //semi-major axis of solar orbit (in AU)
         //public double Eccentricity { get; set; } //eccentricity of solar orbit
-        //public double AxialTilt { get; set; } //unit of degrees
-        //public int OrbitZone { get; set; } //the zone of the planet
+        public double AxialTilt { get; set; } //unit of degrees
+        public int OrbitZone { get; set; } //the zone of the planet
         //public double OrbitalPeriod { get; set; } //length of local year (in days)
-        //public double LengthOfDay { get; set; } //length of local day (hours)
-        //public bool IsInResonantRotation { get; set; } //tidally locked
+        public double LengthOfDay { get; set; } //length of local day (hours)
+        public bool IsInResonantRotation { get; set; } //tidally locked
 
         public override double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
         public double MassInEarthMasses { get { return Mass * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
@@ -67,6 +66,7 @@ namespace Pulsar4X.Entities
         public double CloudCover { get; set; } //percent of surface covered
         public double IceCover { get; set; } //percent of surface covered
 
+        // I'm not happy with this... This is View Code in the Model, but... easiest way to do it
         [JsonIgnore]
         public string SurfaceTemperatureView
         {

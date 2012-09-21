@@ -384,6 +384,7 @@ namespace Pulsar4X.Stargen
             planet.OrbitZone = EnviroUtilities.OrbitalZone(planet.Primary.Luminosity, planet.SemiMajorAxis);
             planet.OrbitalPeriod = EnviroUtilities.Period(planet.SemiMajorAxis, planet.Mass, planet.Primary.Mass);
             planet.AxialTilt = EnviroUtilities.Inclination(planet.SemiMajorAxis);
+            planet.LongitudeOfApogee = MathUtilities.Random.NextDouble(0.0, 2 * Math.PI);
 
             planet.ExoSphericTemperature = Constants.Sol.Earth.EXOSPHERE_TEMP / Math.Pow(planet.SemiMajorAxis / planet.Primary.EcoSphereRadius, 2.0);
             planet.RootMeanSquaredVelocity = EnviroUtilities.RootMeanSquareVelocity(Constants.Gases.MolecularWeights.MOL_NITROGEN, planet.ExoSphericTemperature);

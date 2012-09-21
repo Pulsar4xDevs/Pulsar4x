@@ -8,6 +8,8 @@ namespace Pulsar4X.Lib
 {
 	public class Orbit
 	{
+        // TODO: Delete this
+
 		//Orbit assumed to travel counter-clockwise from viewer
 		public double SemiMajorAxis {get; set;}		//in km
 		public double Eccentricity {get; set;} 

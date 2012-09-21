@@ -25,29 +25,9 @@ namespace Pulsar4X.Entities
         public double Eccentricity { get; set; } 
 
         /// <summary>
-        /// unit of degrees
-        /// </summary>
-        public double AxialTilt { get; set; }
-
-        /// <summary>
-        /// the zone of the planet
-        /// </summary>
-        public int OrbitZone { get; set; }
-
-        /// <summary>
         /// length of local year (in days)
         /// </summary>
         public double OrbitalPeriod { get; set; }
-
-        /// <summary>
-        /// length of local day (hours)
-        /// </summary>
-        public double LengthOfDay { get; set; }
-
-        /// <summary>
-        /// tidally locked
-        /// </summary>
-        public bool IsInResonantRotation { get; set; }
 
         /// <summary>
         /// The Star this object orbits.
@@ -64,6 +44,17 @@ namespace Pulsar4X.Entities
         /// </summary>
         public OrbitingEntity Parent { get; set; }
 
+        /// <summary>
+        /// Boolean set if the body is a moon
+        /// </summary>
+        public bool IsMoon { get; set; }
+
+        public double TimeSinceApogee { get; set; }
+
+        /// <summary>
+        /// angle counterclockwise from system 'north' to SemiMajorAxis at Apogee
+        /// </summary>
+        public double LongitudeOfApogee { get; set; }
 
         public OrbitingEntity() : base()
         {

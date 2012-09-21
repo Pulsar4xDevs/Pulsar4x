@@ -3,16 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.Lib
 {
 	public class OrbitTable
 	{
+        private static OrbitTable instance;
+        public static OrbitTable Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new OrbitTable();
+                }
+                return instance;
+            }
+        }
+
 		private static uint nodes = 100;		//Each table point reprsents 1/(2n)th of an orbital period
 		private static int N_orbits = 40;	//Each each orbital excentricy has a different profile.
 		private static double[,] table = new double[N_orbits+1, nodes];
 
-		public OrbitTable ()
+		private OrbitTable ()
 		{
 			//generate lookup table
 			int j;
@@ -37,9 +51,9 @@ namespace Pulsar4X.Lib
 		}
 
 
-		public void FindPolarPosition(Orbit theOrbit, long secondsSinceEpoch, out double angle, out double radius)
+		public void FindPolarPosition(OrbitingEntity theOrbit, long secondsSinceEpoch, out double angle, out double radius)
 		{
-			long orbitPeriod = (long) (Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / theOrbit.StandGrav));
+			long orbitPeriod = (long) (Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / (theOrbit.Mass*Constants.Units.GRAV_CONSTANT)));
             double orbitFraction = 1.0 * ((secondsSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
 			bool mirrorSide = false;
 			if( orbitFraction >= 0.5)
@@ -69,7 +83,7 @@ namespace Pulsar4X.Lib
 
 		}
 
-		public void FindCartesianPosition(Orbit theOrbit, long secondsSinceEpoch, out double x, out double y)
+		public void FindCartesianPosition(OrbitingEntity theOrbit, long secondsSinceEpoch, out double x, out double y)
 		{
 			double angle, radius;
 			FindPolarPosition(theOrbit, secondsSinceEpoch, out angle, out radius);
@@ -77,7 +91,7 @@ namespace Pulsar4X.Lib
 			y = radius * Math.Cos(angle);
 		}
 
-		public double FindRadiusFromAngle(Orbit theOrbit, double angle)
+		public double FindRadiusFromAngle(OrbitingEntity theOrbit, double angle)
 		{
 			angle += theOrbit.LongitudeOfApogee;
 			if(angle > Math.PI * 2)
@@ -87,7 +101,7 @@ namespace Pulsar4X.Lib
 			return radius;
 		}
 
-		public void FindCordsFromAngle(Orbit theOrbit, double angle, out double x, out double y)
+		public void FindCordsFromAngle(OrbitingEntity theOrbit, double angle, out double x, out double y)
 		{
 			angle += theOrbit.LongitudeOfApogee;
 			if(angle > Math.PI * 2)
