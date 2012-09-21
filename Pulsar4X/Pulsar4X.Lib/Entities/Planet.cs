@@ -33,10 +33,13 @@ namespace Pulsar4X.Entities
         public bool IsInResonantRotation { get; set; } //tidally locked
 
         public override double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
+        [JsonIgnore]
         public double MassInEarthMasses { get { return Mass * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfDust { get; set; } //mass, ignoring gas
+        [JsonIgnore]
         public double MassOfDustInEarthMasses { get { return MassOfDust * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfGas { get; set; } //mass, ignoring dust
+        [JsonIgnore]
         public double MassOfGasInEarthMasses { get { return MassOfGas * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
 
         public double RadiusOfCore { get; set; } //radius of the rocky core (in km)
@@ -101,15 +104,49 @@ namespace Pulsar4X.Entities
         }
 
         [JsonIgnore]
-        public string MassOfDustInEarthMassesView
+        public string MassInEarthMassesView
         {
             get
             {
-                if (MassOfDustInEarthMasses < 0.0001)
-                    return MassOfDustInEarthMasses.ToString("#0.00e-0");
-                return MassOfDustInEarthMasses.ToString("N4");
+                if (MassInEarthMasses <= 0.0001)
+                    return MassInEarthMasses.ToString("#0.0e-0");
+                return MassInEarthMasses.ToString("N4");
             }
         }
+
+        [JsonIgnore]
+        public string SurfacePressureView
+        {
+            get
+            {
+                if (SurfacePressure == 0.0)
+                    return "None";
+                if (SurfacePressure == Constants.Units.INCREDIBLY_LARGE_NUMBER)
+                    return "N/A";
+                return SurfacePressure.ToString("N4");
+            }
+        }
+
+        [JsonIgnore]
+        public string PlanetTypeView
+        {
+            get
+            {
+                if (IsMoon)
+                    return "Moon:" + PlanetType.ToString();
+                return PlanetType.ToString();
+            }
+        }
+
+        [JsonIgnore]
+        public double HydrosphereCoverInPercent { get { return HydrosphereCover * 100.0; } set { HydrosphereCover = value / 100.0; } }
+
+        [JsonIgnore]
+        public double CloudCoverInPercent { get { return CloudCover * 100.0; } set { CloudCover = value / 100.0; } }
+
+        [JsonIgnore]
+        public double IceCoverInPercent { get { return IceCover * 100.0; } set { IceCover = value / 100.0; } }
+
         
 
         public Planet() : base()
