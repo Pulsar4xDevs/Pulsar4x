@@ -46,7 +46,7 @@ namespace Pulsar4X.Lib
 					double iAngle2 = angle + Math.PI * 2 / (2.0 * nodes * 4) * Math.Pow (1 - excentricy * Math.Cos (iAngle1), 2.0) / Math.Pow (1 - excentricy * excentricy, 1.5);
 					angle = 0.5 * (iAngle1 + iAngle2);
 				}
-				table [j, nodes] = angle;
+				table [j, nodes - 1] = angle;
 			}
 		}
 

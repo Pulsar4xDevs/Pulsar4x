@@ -238,6 +238,13 @@ namespace Pulsar4X.WinForms.Controls
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
+                col.DataPropertyName = "Radius";
+                col.HeaderText = "Radius";
+                col.DefaultCellStyle.Format = "N4";
+                StarsDataGridView.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
                 col.DataPropertyName = "Mass";
                 col.HeaderText = "Mass";
                 col.DefaultCellStyle.Format = "N4";
@@ -254,13 +261,6 @@ namespace Pulsar4X.WinForms.Controls
             {
                 col.DataPropertyName = "Temperature";
                 col.HeaderText = "Temperature";
-                col.DefaultCellStyle.Format = "N4";
-                StarsDataGridView.Columns.Add(col);
-            }
-            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            {
-                col.DataPropertyName = "Radius";
-                col.HeaderText = "Radius";
                 col.DefaultCellStyle.Format = "N4";
                 StarsDataGridView.Columns.Add(col);
             }

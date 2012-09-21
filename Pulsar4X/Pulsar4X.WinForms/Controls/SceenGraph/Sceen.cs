@@ -168,10 +168,12 @@ namespace Pulsar4X.WinForms.Controls.SceenGraph
                 {
 
                     Random rnd = new Random();
-                    float fAngle = rnd.Next(0, 360);
+                    float fAngle = 0.0f; // rnd.Next(0, 360);
                     fAngle = MathHelper.DegreesToRadians(fAngle);
-                    v3StarPos.X = (float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
-                    v3StarPos.Y = (float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
+                    double x, y;
+                    Pulsar4X.Lib.OrbitTable.Instance.FindCordsFromAngle(oStar, (double)fAngle, out x, out y);
+                    v3StarPos.X = (float)(x * dKMperAUdevby10); //(float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
+                    v3StarPos.Y = (float)(y * dKMperAUdevby10);    //(float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis * dKMperAUdevby10);
                     oCurrStar = new StarElement(oStar, false);
 

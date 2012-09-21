@@ -329,7 +329,7 @@
             // labelPressure
             // 
             this.labelPressure.AutoSize = true;
-            this.labelPressure.Location = new System.Drawing.Point(10, 149);
+            this.labelPressure.Location = new System.Drawing.Point(10, 147);
             this.labelPressure.Name = "labelPressure";
             this.labelPressure.Size = new System.Drawing.Size(74, 13);
             this.labelPressure.TabIndex = 17;
@@ -338,7 +338,7 @@
             // labelTemperature
             // 
             this.labelTemperature.AutoSize = true;
-            this.labelTemperature.Location = new System.Drawing.Point(10, 124);
+            this.labelTemperature.Location = new System.Drawing.Point(10, 123);
             this.labelTemperature.Name = "labelTemperature";
             this.labelTemperature.Size = new System.Drawing.Size(83, 13);
             this.labelTemperature.TabIndex = 16;
@@ -347,7 +347,7 @@
             // Oxygen
             // 
             this.Oxygen.AutoSize = true;
-            this.Oxygen.Location = new System.Drawing.Point(10, 101);
+            this.Oxygen.Location = new System.Drawing.Point(10, 99);
             this.Oxygen.Name = "Oxygen";
             this.Oxygen.Size = new System.Drawing.Size(69, 13);
             this.Oxygen.TabIndex = 14;
@@ -356,7 +356,7 @@
             // labelGravity
             // 
             this.labelGravity.AutoSize = true;
-            this.labelGravity.Location = new System.Drawing.Point(10, 79);
+            this.labelGravity.Location = new System.Drawing.Point(10, 75);
             this.labelGravity.Name = "labelGravity";
             this.labelGravity.Size = new System.Drawing.Size(57, 13);
             this.labelGravity.TabIndex = 13;
@@ -365,7 +365,7 @@
             // PressureTextBox
             // 
             this.PressureTextBox.Enabled = false;
-            this.PressureTextBox.Location = new System.Drawing.Point(149, 150);
+            this.PressureTextBox.Location = new System.Drawing.Point(149, 144);
             this.PressureTextBox.Name = "PressureTextBox";
             this.PressureTextBox.Size = new System.Drawing.Size(41, 20);
             this.PressureTextBox.TabIndex = 12;
@@ -375,7 +375,7 @@
             // TempMaxTextBox
             // 
             this.TempMaxTextBox.Enabled = false;
-            this.TempMaxTextBox.Location = new System.Drawing.Point(149, 124);
+            this.TempMaxTextBox.Location = new System.Drawing.Point(149, 120);
             this.TempMaxTextBox.Name = "TempMaxTextBox";
             this.TempMaxTextBox.Size = new System.Drawing.Size(41, 20);
             this.TempMaxTextBox.TabIndex = 11;
@@ -385,7 +385,7 @@
             // TempMinTextBox
             // 
             this.TempMinTextBox.Enabled = false;
-            this.TempMinTextBox.Location = new System.Drawing.Point(98, 124);
+            this.TempMinTextBox.Location = new System.Drawing.Point(98, 120);
             this.TempMinTextBox.Name = "TempMinTextBox";
             this.TempMinTextBox.Size = new System.Drawing.Size(45, 20);
             this.TempMinTextBox.TabIndex = 10;
@@ -395,7 +395,7 @@
             // OxygenMaxTextBox
             // 
             this.OxygenMaxTextBox.Enabled = false;
-            this.OxygenMaxTextBox.Location = new System.Drawing.Point(149, 98);
+            this.OxygenMaxTextBox.Location = new System.Drawing.Point(149, 96);
             this.OxygenMaxTextBox.Name = "OxygenMaxTextBox";
             this.OxygenMaxTextBox.Size = new System.Drawing.Size(41, 20);
             this.OxygenMaxTextBox.TabIndex = 9;
@@ -405,7 +405,7 @@
             // OxygenMinTextBox
             // 
             this.OxygenMinTextBox.Enabled = false;
-            this.OxygenMinTextBox.Location = new System.Drawing.Point(98, 98);
+            this.OxygenMinTextBox.Location = new System.Drawing.Point(98, 96);
             this.OxygenMinTextBox.Name = "OxygenMinTextBox";
             this.OxygenMinTextBox.Size = new System.Drawing.Size(45, 20);
             this.OxygenMinTextBox.TabIndex = 8;
