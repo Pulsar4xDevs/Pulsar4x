@@ -161,7 +161,7 @@ namespace Pulsar4X.WinForms.Controls
             SizeChanged += new System.EventHandler(this.OnSizeChange);              // Setup Size Changed Enet Handler.
             MouseMove += new MouseEventHandler(OnMouseMove);                        // Setup Mouse Move Event handler
             MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
-            MouseUp += new MouseEventHandler(OnMouseUp);                        // Setup Mouse Down Event handler.
+            MouseUp += new MouseEventHandler(OnMouseUp);                            // Setup Mouse Down Event handler.
             MouseHover += new EventHandler(GLCanvas_OnMouseHover);
             KeyDown += new KeyEventHandler(OnKeyDown);
             //MouseUp += new MouseEventHandler(OnMouseUp);
@@ -211,7 +211,7 @@ namespace Pulsar4X.WinForms.Controls
         /// <param name="e">        Event information to send to registered event handlers. </param>
         private void OnMouseMove(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Right)
             {
                 Vector3 v3PanEndLocation;
                 v3PanEndLocation.X = e.Location.X;
@@ -236,7 +236,7 @@ namespace Pulsar4X.WinForms.Controls
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
             // An left mouse down, start pan.
-            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Left))
+            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Right))
             {
                 Cursor.Current = Cursors.NoMove2D;
                 m_v3PanStartLocation.X = e.Location.X;
