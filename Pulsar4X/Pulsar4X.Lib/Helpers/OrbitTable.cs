@@ -24,7 +24,7 @@ namespace Pulsar4X.Lib
 
 		private static uint nodes = 100;		//Each table point reprsents 1/(2n)th of an orbital period
 		private static int N_orbits = 40;	//Each each orbital excentricy has a different profile.
-		private static double[,] table = new double[N_orbits+1, nodes];
+		private static double[,] table = new double[N_orbits+1, nodes+1];
 
 		private OrbitTable ()
 		{
@@ -46,13 +46,14 @@ namespace Pulsar4X.Lib
 					double iAngle2 = angle + Math.PI * 2 / (2.0 * nodes * 4) * Math.Pow (1 - excentricy * Math.Cos (iAngle1), 2.0) / Math.Pow (1 - excentricy * excentricy, 1.5);
 					angle = 0.5 * (iAngle1 + iAngle2);
 				}
-				table [j, nodes - 1] = angle;
+				table [j, nodes] = angle;
 			}
 		}
 
 
 		public void FindPolarPosition(OrbitingEntity theOrbit, long secondsSinceEpoch, out double angle, out double radius)
 		{
+            // TODO: Use orbit entity's orbitperiod
 			long orbitPeriod = (long) (Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / (theOrbit.Mass*Constants.Units.GRAV_CONSTANT)));
             double orbitFraction = 1.0 * ((secondsSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
 			bool mirrorSide = false;

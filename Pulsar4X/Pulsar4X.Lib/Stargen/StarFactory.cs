@@ -84,10 +84,12 @@ namespace Pulsar4X.Stargen
                 star.Color = ColorLookup[star.Spectrum][0];
 
                 if (i > 1)
+                {
                     star.SemiMajorAxis = MathUtilities.Random.NextDouble(0.5, 50);
-                else
-                    star.SemiMajorAxis = 0.0;
-                star.Eccentricity = MathUtilities.Random.RandomEccentricity();
+                    star.Eccentricity = MathUtilities.Random.RandomEccentricity();
+                    star.Parent = stars[0];
+                }
+               
 
                 stars.Add(star);
             }

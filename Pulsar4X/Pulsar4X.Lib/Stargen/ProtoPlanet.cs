@@ -31,6 +31,10 @@ namespace Pulsar4X.Stargen
         {
             SetCloudDensity();
             SetCriticalLimit();
+            if (IsMoon)
+                Planet.Parent = MoonOf.Planet;
+            else
+                Planet.Parent = Star;
         }
 
         private void SetCriticalLimit()
