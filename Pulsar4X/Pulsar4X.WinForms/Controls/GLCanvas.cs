@@ -26,6 +26,10 @@ namespace Pulsar4X.WinForms.Controls
         /// <summary> Used for testing for OpenGL Errors. </summary>
         protected ErrorCode m_eGLError;
 
+        public delegate void InputHandlers(KeyEventArgs k, MouseEventArgs m);
+
+        public InputHandlers InputHandler;
+
         /// <summary>
         /// Our Projections/ViewMatricies.
         /// </summary>
@@ -159,6 +163,7 @@ namespace Pulsar4X.WinForms.Controls
             MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
             MouseUp += new MouseEventHandler(OnMouseUp);                        // Setup Mouse Down Event handler.
             MouseHover += new EventHandler(GLCanvas_OnMouseHover);
+            KeyDown += new KeyEventHandler(OnKeyDown);
             //MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
         }
@@ -261,6 +266,11 @@ namespace Pulsar4X.WinForms.Controls
             v3CurPosWorldCorrds = v3CurPosWorldCorrds / ZoomFactor;
 
            // Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            InputHandler(e, null);
         }
 
         

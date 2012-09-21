@@ -58,6 +58,7 @@ namespace Pulsar4X.WinForms.Controls
                 m_GLCanvas.Size = this.Size;
                 //this.Dock = DockStyle.Fill;
                 m_GLCanvas.Dock = DockStyle.Fill;
+                m_GLCanvas.InputHandler += InputProcessor;
                 this.Controls.Add(m_GLCanvas);
                 RefreshStarSystem();
             }
@@ -277,6 +278,61 @@ namespace Pulsar4X.WinForms.Controls
         {
             Vector3 v3PanAmount = new Vector3(0, 10.0f, 0);
             m_GLCanvas.Pan(ref v3PanAmount);
+        }
+
+        public void InputProcessor(KeyEventArgs k, MouseEventArgs m)
+        {
+            if (k != null)
+            {
+                switch (k.KeyCode)
+                {
+                    case Keys.W:
+                        {
+                            Vector3 v3PanAmount = new Vector3(0, -10.0f, 0);
+                            m_GLCanvas.Pan(ref v3PanAmount);
+                            break;
+                        }
+                    case Keys.S:
+                        {
+                            Vector3 v3PanAmount = new Vector3(0, 10.0f, 0);
+                            m_GLCanvas.Pan(ref v3PanAmount);
+                            break;
+                        }
+                    case Keys.A:
+                        {
+                            Vector3 v3PanAmount = new Vector3(10.0f, 0, 0);
+                            m_GLCanvas.Pan(ref v3PanAmount);
+                            break;
+                        }
+                    case Keys.D:
+                        {
+                            Vector3 v3PanAmount = new Vector3(-10.0f, 0, 0);
+                            m_GLCanvas.Pan(ref v3PanAmount);
+                            break;
+                        }
+                    case Keys.Add:
+                    case Keys.E:
+                        {
+                            m_GLCanvas.IncreaseZoomScaler();
+                            UpdateScaleLabels();
+                            break;
+                        }
+                    case Keys.Subtract:
+                    case Keys.Q:
+                        {
+                            m_GLCanvas.DecreaseZoomScaler();
+                            UpdateScaleLabels();
+                            break;
+                        }
+                    case Keys.R:
+                        {
+                            m_GLCanvas.CenterOnZero();
+                            m_GLCanvas.ZoomFactor = m_oCurrentSceen.DefaultZoomScaler;
+                            m_oCurrentSceen.Refresh();
+                            break;
+                        }
+                }
+            }
         }
 
     }
