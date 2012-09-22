@@ -125,8 +125,8 @@ namespace Pulsar4X.WinForms.Helpers
 
             // Configure Text Paramaters:
             //GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Modulate);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Nearest);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Linear);
 
             // Load data by telling OpenGL to build mipmaps out of bitmap data
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, oRawTextureData.Scan0);
