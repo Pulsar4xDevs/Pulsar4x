@@ -34,7 +34,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.NoOfSystemsTextBox = new System.Windows.Forms.TextBox();
             this.GenerateButton = new System.Windows.Forms.Button();
-            this.CancelButton = new System.Windows.Forms.Button();
+            this.CloseButton = new System.Windows.Forms.Button();
             this.Timelabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -89,15 +89,15 @@
             this.GenerateButton.UseVisualStyleBackColor = true;
             this.GenerateButton.Click += new System.EventHandler(this.GenerateButton_Click);
             // 
-            // CancelButton
+            // CloseButton
             // 
-            this.CancelButton.Location = new System.Drawing.Point(154, 66);
-            this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(75, 23);
-            this.CancelButton.TabIndex = 6;
-            this.CancelButton.Text = "Cancel";
-            this.CancelButton.UseVisualStyleBackColor = true;
-            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            this.CloseButton.Location = new System.Drawing.Point(154, 66);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(75, 23);
+            this.CloseButton.TabIndex = 6;
+            this.CloseButton.Text = "Close";
+            this.CloseButton.UseVisualStyleBackColor = true;
+            this.CloseButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 
             // Timelabel
             // 
@@ -113,7 +113,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(249, 127);
             this.Controls.Add(this.Timelabel);
-            this.Controls.Add(this.CancelButton);
+            this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.GenerateButton);
             this.Controls.Add(this.NoOfSystemsTextBox);
             this.Controls.Add(this.label1);
@@ -137,7 +137,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox NoOfSystemsTextBox;
         private System.Windows.Forms.Button GenerateButton;
-        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button CloseButton;
         private System.Windows.Forms.Label Timelabel;
     }
 }

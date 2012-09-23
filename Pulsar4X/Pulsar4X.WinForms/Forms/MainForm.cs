@@ -102,6 +102,12 @@ namespace Pulsar4X
             dialog.ShowDialog();
         }
 
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Pulsar4X.WinForms.Forms.Options oOpt = new WinForms.Forms.Options();
+            oOpt.ShowDialog();
+        }
+
 
     }
 }

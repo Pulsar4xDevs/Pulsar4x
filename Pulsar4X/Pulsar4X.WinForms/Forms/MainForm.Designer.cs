@@ -32,8 +32,6 @@
             this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.selectDefaultRaceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gameInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addThemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addShipNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.spaceMasterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.spaceMasterOnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,6 +47,8 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.informationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainPanel = new System.Windows.Forms.Panel();
+            this.saveGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -77,8 +77,7 @@
             this.gameToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.selectDefaultRaceToolStripMenuItem,
             this.gameInfoToolStripMenuItem,
-            this.addThemeToolStripMenuItem,
-            this.addShipNamesToolStripMenuItem,
+            this.saveGameToolStripMenuItem,
             this.exitToolStripMenuItem});
             this.gameToolStripMenuItem.Name = "gameToolStripMenuItem";
             this.gameToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.G)));
@@ -96,18 +95,6 @@
             this.gameInfoToolStripMenuItem.Name = "gameInfoToolStripMenuItem";
             this.gameInfoToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
             this.gameInfoToolStripMenuItem.Text = "Game Info";
-            // 
-            // addThemeToolStripMenuItem
-            // 
-            this.addThemeToolStripMenuItem.Name = "addThemeToolStripMenuItem";
-            this.addThemeToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.addThemeToolStripMenuItem.Text = "Add Theme";
-            // 
-            // addShipNamesToolStripMenuItem
-            // 
-            this.addShipNamesToolStripMenuItem.Name = "addShipNamesToolStripMenuItem";
-            this.addShipNamesToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
-            this.addShipNamesToolStripMenuItem.Text = "Add Ship Names";
             // 
             // exitToolStripMenuItem
             // 
@@ -173,6 +160,8 @@
             // 
             // gameParametersToolStripMenuItem
             // 
+            this.gameParametersToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.optionsToolStripMenuItem});
             this.gameParametersToolStripMenuItem.Name = "gameParametersToolStripMenuItem";
             this.gameParametersToolStripMenuItem.Size = new System.Drawing.Size(112, 20);
             this.gameParametersToolStripMenuItem.Text = "Game Parameters";
@@ -225,6 +214,19 @@
             this.MainPanel.Size = new System.Drawing.Size(1008, 706);
             this.MainPanel.TabIndex = 2;
             // 
+            // saveGameToolStripMenuItem
+            // 
+            this.saveGameToolStripMenuItem.Name = "saveGameToolStripMenuItem";
+            this.saveGameToolStripMenuItem.Size = new System.Drawing.Size(174, 22);
+            this.saveGameToolStripMenuItem.Text = "Save Game";
+            // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.optionsToolStripMenuItem.Text = "Options";
+            this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -259,8 +261,6 @@
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem informationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem gameInfoToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addThemeToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem addShipNamesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem spaceMasterOnToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem spaceMasterOffToolStripMenuItem;
@@ -268,6 +268,8 @@
         private System.Windows.Forms.Panel MainPanel;
         private System.Windows.Forms.ToolStripMenuItem systemMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem commanderNameThemesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveGameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
     }
 }
 
