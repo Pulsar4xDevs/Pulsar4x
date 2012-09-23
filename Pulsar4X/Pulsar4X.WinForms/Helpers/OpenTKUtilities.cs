@@ -125,14 +125,26 @@ namespace Pulsar4X.WinForms
             oOpenGLVersionCheck.TopMost = false;
             oOpenGLVersionCheck.Show();
             oOpenGLVersionCheck.Hide();
-            
-            string szOpenGLVersion = GL.GetString(StringName.Version);
-            int iMajor = int.Parse(szOpenGLVersion[0].ToString());      // extracts the major verion number an converts it to a int.
-            int iMinor = int.Parse(szOpenGLVersion[2].ToString());      // same again for minor verion number.
 
-            #if DEBUG
-                logger.Debug("Highest OpenGL Version Initialised is " + szOpenGLVersion);  
-            #endif
+            string szOpenGLVersion;
+            int iMajor, iMinor;
+            try
+            {
+                szOpenGLVersion = GL.GetString(StringName.Version);
+                iMajor = int.Parse(szOpenGLVersion[0].ToString());      // extracts the major verion number an converts it to a int.
+                iMinor = int.Parse(szOpenGLVersion[2].ToString());      // same again for minor verion number.
+                #if DEBUG
+                    logger.Debug("Highest OpenGL Version Initialised is " + szOpenGLVersion);  
+                #endif
+            }
+            catch (System.NullReferenceException e)
+            {
+                // Problem occured when trying to get open GL Verion, Logg and assume 2.0 so program exacution can continue:
+                logger.Error("Error Getting OpenGL Version, Assumong version 2.0!");
+                iMajor = 2;
+                iMinor = 0;
+            }
+            
 
             if (iMajor == 1)
             {
