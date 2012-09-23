@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SubForm));
             this.MainPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
@@ -49,7 +48,6 @@
             this.AutoScrollMinSize = new System.Drawing.Size(1008, 706);
             this.ClientSize = new System.Drawing.Size(1008, 730);
             this.Controls.Add(this.MainPanel);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "SubForm";
             this.Text = "SubForm";
             this.Load += new System.EventHandler(this.SubForm_Load);
