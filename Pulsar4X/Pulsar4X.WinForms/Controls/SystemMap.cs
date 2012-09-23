@@ -42,7 +42,7 @@ namespace Pulsar4X.WinForms.Controls
             VM = new GLStarSystemViewModel();
 
             SystemSelectComboBox.Bind(c => c.DataSource, VM, d => d.StarSystems);
-            SystemSelectComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem);
+            SystemSelectComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem, DataSourceUpdateMode.OnPropertyChanged);
             SystemSelectComboBox.DisplayMember = "Name";
 
             this.Bind(c => c.CurrentStarSystem, VM, d => d.CurrentStarSystem);
