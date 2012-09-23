@@ -162,7 +162,7 @@ namespace Pulsar4X.WinForms.Controls
             MouseMove += new MouseEventHandler(OnMouseMove);                        // Setup Mouse Move Event handler
             MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
             MouseUp += new MouseEventHandler(OnMouseUp);                            // Setup Mouse Down Event handler.
-            MouseHover += new EventHandler(GLCanvas_OnMouseHover);
+            //MouseHover += new EventHandler(GLCanvas_OnMouseHover);
             KeyDown += new KeyEventHandler(OnKeyDown);
             //MouseUp += new MouseEventHandler(OnMouseUp);
             //Application.Idle += Application_Idle;
@@ -370,7 +370,6 @@ namespace Pulsar4X.WinForms.Controls
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.Name = "GLCanvas";
             this.ResumeLayout(false);
-
         }
     }
 }

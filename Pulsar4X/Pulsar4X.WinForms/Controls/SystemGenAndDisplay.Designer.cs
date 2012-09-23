@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.labelName = new System.Windows.Forms.Label();
             this.GeneralInfoGroupBox = new System.Windows.Forms.GroupBox();
             this.ControllingEmpireComboBox = new System.Windows.Forms.ComboBox();
@@ -140,6 +141,7 @@
             this.OptAsteroisShowRadioButton = new System.Windows.Forms.RadioButton();
             this.OptAsteroidsHideRadioButton = new System.Windows.Forms.RadioButton();
             this.ExportSaveFileDialog = new System.Windows.Forms.SaveFileDialog();
+            this.InfoToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.GeneralInfoGroupBox.SuspendLayout();
             this.groupBoxEnvironTolerances.SuspendLayout();
             this.groupBoxStars.SuspendLayout();
@@ -216,6 +218,7 @@
             this.NameComboBox.Size = new System.Drawing.Size(160, 21);
             this.NameComboBox.TabIndex = 14;
             this.NameComboBox.Text = "NameComboBox";
+            this.InfoToolTip.SetToolTip(this.NameComboBox, "Select Star System to Display.");
             // 
             // AgetextBox
             // 
@@ -527,6 +530,7 @@
             this.ExportButton.Size = new System.Drawing.Size(85, 23);
             this.ExportButton.TabIndex = 21;
             this.ExportButton.Text = "Export";
+            this.InfoToolTip.SetToolTip(this.ExportButton, "Export all Systems to a JSON file.");
             this.ExportButton.UseVisualStyleBackColor = true;
             this.ExportButton.Click += new System.EventHandler(this.ExportButton_Click);
             // 
@@ -537,6 +541,7 @@
             this.GenGalaxyButton.Size = new System.Drawing.Size(85, 23);
             this.GenGalaxyButton.TabIndex = 20;
             this.GenGalaxyButton.Text = "Gen Galaxy";
+            this.InfoToolTip.SetToolTip(this.GenGalaxyButton, "Generate Multipul Systems.");
             this.GenGalaxyButton.UseVisualStyleBackColor = true;
             this.GenGalaxyButton.Click += new System.EventHandler(this.GenGalaxyButton_Click);
             // 
@@ -547,6 +552,7 @@
             this.GenSystemButton.Size = new System.Drawing.Size(85, 23);
             this.GenSystemButton.TabIndex = 19;
             this.GenSystemButton.Text = "Gen System";
+            this.InfoToolTip.SetToolTip(this.GenSystemButton, "Generate a single system.");
             this.GenSystemButton.UseVisualStyleBackColor = true;
             this.GenSystemButton.Click += new System.EventHandler(this.GenSystemButton_Click);
             // 
@@ -613,6 +619,7 @@
             this.DeleteSystemButton.Size = new System.Drawing.Size(85, 23);
             this.DeleteSystemButton.TabIndex = 8;
             this.DeleteSystemButton.Text = "Delete System";
+            this.InfoToolTip.SetToolTip(this.DeleteSystemButton, "Delete the currently selected System");
             this.DeleteSystemButton.UseVisualStyleBackColor = true;
             this.DeleteSystemButton.Click += new System.EventHandler(this.DeleteSystemButton_Click);
             // 
@@ -1523,5 +1530,6 @@
         private System.Windows.Forms.Button GenGalaxyButton;
         private System.Windows.Forms.Button ExportButton;
         private System.Windows.Forms.SaveFileDialog ExportSaveFileDialog;
+        private System.Windows.Forms.ToolTip InfoToolTip;
     }
 }

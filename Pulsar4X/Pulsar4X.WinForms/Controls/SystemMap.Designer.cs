@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.FPSLabel = new System.Windows.Forms.Label();
             this.ControlsPanel = new System.Windows.Forms.Panel();
             this.ScaleGroupBox = new System.Windows.Forms.GroupBox();
@@ -42,6 +43,7 @@
             this.PanDownButton = new System.Windows.Forms.Button();
             this.ZoomInButton = new System.Windows.Forms.Button();
             this.SystemSelectComboBox = new System.Windows.Forms.ComboBox();
+            this.InfoToolTip = new System.Windows.Forms.ToolTip(this.components);
             this.ControlsPanel.SuspendLayout();
             this.ScaleGroupBox.SuspendLayout();
             this.ViewControlsGroupBox.SuspendLayout();
@@ -56,6 +58,7 @@
             this.FPSLabel.Size = new System.Drawing.Size(36, 13);
             this.FPSLabel.TabIndex = 2;
             this.FPSLabel.Text = " FPS: ";
+            this.InfoToolTip.SetToolTip(this.FPSLabel, "FPS - Should be 16 - 18 on most systems.");
             // 
             // ControlsPanel
             // 
@@ -65,7 +68,7 @@
             this.ControlsPanel.Controls.Add(this.ViewControlsGroupBox);
             this.ControlsPanel.Controls.Add(this.FPSLabel);
             this.ControlsPanel.Controls.Add(this.SystemSelectComboBox);
-            this.ControlsPanel.Location = new System.Drawing.Point(4, 4);
+            this.ControlsPanel.Location = new System.Drawing.Point(3, 7);
             this.ControlsPanel.Name = "ControlsPanel";
             this.ControlsPanel.Size = new System.Drawing.Size(200, 674);
             this.ControlsPanel.TabIndex = 3;
@@ -91,6 +94,7 @@
             this.KmScaleLabel.Size = new System.Drawing.Size(52, 13);
             this.KmScaleLabel.TabIndex = 1;
             this.KmScaleLabel.Text = "Scale Km";
+            this.InfoToolTip.SetToolTip(this.KmScaleLabel, "The width of the screen in Km");
             // 
             // AUScaleLabel
             // 
@@ -101,6 +105,7 @@
             this.AUScaleLabel.Size = new System.Drawing.Size(52, 13);
             this.AUScaleLabel.TabIndex = 2;
             this.AUScaleLabel.Text = "Scale AU";
+            this.InfoToolTip.SetToolTip(this.AUScaleLabel, "The Width of the screen in AU");
             // 
             // ViewControlsGroupBox
             // 
@@ -127,6 +132,7 @@
             this.PanRightButton.Size = new System.Drawing.Size(26, 23);
             this.PanRightButton.TabIndex = 6;
             this.PanRightButton.Text = "->";
+            this.InfoToolTip.SetToolTip(this.PanRightButton, "Pan Right (R)");
             this.PanRightButton.UseVisualStyleBackColor = true;
             this.PanRightButton.Click += new System.EventHandler(this.PanRightButton_Click);
             // 
@@ -138,6 +144,7 @@
             this.ResetViewButton.Size = new System.Drawing.Size(64, 23);
             this.ResetViewButton.TabIndex = 9;
             this.ResetViewButton.Text = "&Reset";
+            this.InfoToolTip.SetToolTip(this.ResetViewButton, "Reset View (R)");
             this.ResetViewButton.UseVisualStyleBackColor = true;
             this.ResetViewButton.Click += new System.EventHandler(this.ResetViewButton_Click);
             // 
@@ -149,6 +156,7 @@
             this.PanUpButton.Size = new System.Drawing.Size(23, 23);
             this.PanUpButton.TabIndex = 3;
             this.PanUpButton.Text = "^";
+            this.InfoToolTip.SetToolTip(this.PanUpButton, "Pan Up (W)");
             this.PanUpButton.UseVisualStyleBackColor = true;
             this.PanUpButton.Click += new System.EventHandler(this.PanUpButton_Click);
             // 
@@ -160,17 +168,19 @@
             this.PanLeftButton.Size = new System.Drawing.Size(26, 23);
             this.PanLeftButton.TabIndex = 4;
             this.PanLeftButton.Text = "<-";
+            this.InfoToolTip.SetToolTip(this.PanLeftButton, "Pan Left (A)");
             this.PanLeftButton.UseVisualStyleBackColor = true;
             this.PanLeftButton.Click += new System.EventHandler(this.PanLeftButton_Click);
             // 
             // ZoomOutButton
             // 
             this.ZoomOutButton.ForeColor = System.Drawing.Color.Black;
-            this.ZoomOutButton.Location = new System.Drawing.Point(155, 19);
+            this.ZoomOutButton.Location = new System.Drawing.Point(114, 18);
             this.ZoomOutButton.Name = "ZoomOutButton";
             this.ZoomOutButton.Size = new System.Drawing.Size(23, 23);
             this.ZoomOutButton.TabIndex = 8;
             this.ZoomOutButton.Text = "-";
+            this.InfoToolTip.SetToolTip(this.ZoomOutButton, "Zoom out (Q or -)");
             this.ZoomOutButton.UseVisualStyleBackColor = true;
             this.ZoomOutButton.Click += new System.EventHandler(this.ZoomOutButton_Click);
             // 
@@ -182,17 +192,19 @@
             this.PanDownButton.Size = new System.Drawing.Size(23, 23);
             this.PanDownButton.TabIndex = 5;
             this.PanDownButton.Text = "v";
+            this.InfoToolTip.SetToolTip(this.PanDownButton, "Pan Down (S)");
             this.PanDownButton.UseVisualStyleBackColor = true;
             this.PanDownButton.Click += new System.EventHandler(this.PanDownButton_Click);
             // 
             // ZoomInButton
             // 
             this.ZoomInButton.ForeColor = System.Drawing.Color.Black;
-            this.ZoomInButton.Location = new System.Drawing.Point(114, 18);
+            this.ZoomInButton.Location = new System.Drawing.Point(155, 19);
             this.ZoomInButton.Name = "ZoomInButton";
             this.ZoomInButton.Size = new System.Drawing.Size(23, 23);
             this.ZoomInButton.TabIndex = 7;
             this.ZoomInButton.Text = "+";
+            this.InfoToolTip.SetToolTip(this.ZoomInButton, "Zoom in (E or +)");
             this.ZoomInButton.UseVisualStyleBackColor = true;
             this.ZoomInButton.Click += new System.EventHandler(this.ZoomInButton_Click);
             // 
@@ -206,6 +218,11 @@
             this.SystemSelectComboBox.Name = "SystemSelectComboBox";
             this.SystemSelectComboBox.Size = new System.Drawing.Size(190, 21);
             this.SystemSelectComboBox.TabIndex = 0;
+            this.InfoToolTip.SetToolTip(this.SystemSelectComboBox, "Select a Star System to view");
+            // 
+            // InfoToolTip
+            // 
+            this.InfoToolTip.ShowAlways = true;
             // 
             // SystemMap
             // 
@@ -244,5 +261,6 @@
         private System.Windows.Forms.Button PanUpButton;
         private System.Windows.Forms.GroupBox ScaleGroupBox;
         private System.Windows.Forms.GroupBox ViewControlsGroupBox;
+        public System.Windows.Forms.ToolTip InfoToolTip;
     }
 }

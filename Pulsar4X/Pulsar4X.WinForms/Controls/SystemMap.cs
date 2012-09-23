@@ -56,10 +56,11 @@ namespace Pulsar4X.WinForms.Controls
             {
                 m_GLCanvas = OpenTKUtilities.Instance.CreateGLCanvas(); //new GLCanvas30();
                 m_GLCanvas.Size = this.Size;
-                //this.Dock = DockStyle.Fill;
+                this.Dock = DockStyle.Fill;
                 m_GLCanvas.Dock = DockStyle.Fill;
                 m_GLCanvas.InputHandler += InputProcessor;
                 this.Controls.Add(m_GLCanvas);
+                m_GLCanvas.Parent = this;
                 RefreshStarSystem();
             }
             catch (System.NotSupportedException ex)
@@ -225,13 +226,13 @@ namespace Pulsar4X.WinForms.Controls
         private void SystemMap_MouseHover(object sender, EventArgs e)
         {
             // get mouse position in control coords:
-            Point oCursorPosition = m_GLCanvas.PointToClient(Cursor.Position);
+            //Point oCursorPosition = m_GLCanvas.PointToClient(Cursor.Position);
 
             // Convert to be world coords:
-            Vector3 v3CurPosWorldCorrds = new Vector3((m_GLCanvas.Size.Width / 2) - oCursorPosition.X, (m_GLCanvas.Size.Height / 2) - oCursorPosition.Y, 0);
-            v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_GLCanvas.ZoomFactor;
+            //Vector3 v3CurPosWorldCorrds = new Vector3((m_GLCanvas.Size.Width / 2) - oCursorPosition.X, (m_GLCanvas.Size.Height / 2) - oCursorPosition.Y, 0);
+            //v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_GLCanvas.ZoomFactor;
 
-            Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
+            //Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
         }
 
         private void ResetViewButton_Click(object sender, EventArgs e)
@@ -359,7 +360,6 @@ namespace Pulsar4X.WinForms.Controls
         {
             InputProcessor(e, null);
         }
-
     }
 }
 

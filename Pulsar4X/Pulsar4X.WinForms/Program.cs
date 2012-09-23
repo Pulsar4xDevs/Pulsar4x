@@ -22,8 +22,8 @@ namespace Pulsar4X.WinForms
             // Create Splash Scrren:
             Forms.StartupSplashScreen.ShowSplashScreen();
 
-            AppDomain.CurrentDomain.FirstChanceException += new EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs>(CurrentDomain_FirstChanceException);
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            //AppDomain.CurrentDomain.FirstChanceException += new EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs>(CurrentDomain_FirstChanceException);
+            //AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
             Forms.StartupSplashScreen.SetStatus("Loading Configuration...");
             Forms.StartupSplashScreen.Progress = 0.2;
