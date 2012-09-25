@@ -107,6 +107,7 @@ namespace Pulsar4X.WinForms.ViewModels
                     }
                 }
                 PlanetSource.DataSource = planetslist;
+                OnPropertyChanged(() => PlanetSource);
 
             }
         }
