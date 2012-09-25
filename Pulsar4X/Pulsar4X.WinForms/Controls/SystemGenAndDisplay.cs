@@ -295,6 +295,7 @@ namespace Pulsar4X.WinForms.Controls
             if (sel.Count > 0)
             {
                 VM.CurrentStar = (Star)sel[0].DataBoundItem;
+                PlanetsDataGridView.DataSource = VM.PlanetSource;
             }
         }
 
