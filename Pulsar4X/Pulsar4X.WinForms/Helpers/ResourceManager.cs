@@ -249,7 +249,11 @@ namespace Pulsar4X.WinForms.Helpers
             try
             {
                 // Get Texture path:
-                if (oXMLReader.ReadToNextSibling("Font"))
+                if (oXMLReader.ReadToNextSibling("Font")) // works on windows.
+                {
+                    szTextureFile = oXMLReader.GetAttribute("texture");
+                }
+                else if (oXMLReader.ReadToDescendant("Font")) // works on linux!
                 {
                     szTextureFile = oXMLReader.GetAttribute("texture");
                 }
