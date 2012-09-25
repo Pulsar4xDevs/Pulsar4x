@@ -125,7 +125,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 col.DataPropertyName = "Radius";
                 col.HeaderText = "Equitorial Radius (Km)";
-                col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Format = "N1";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 PlanetsDataGridView.Columns.Add(col);
@@ -161,7 +161,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 col.DataPropertyName = "OrbitalPeriod";
                 col.HeaderText = "Year (Earth Days)";
-                col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Format = "N2";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 PlanetsDataGridView.Columns.Add(col);
@@ -196,7 +196,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 col.DataPropertyName = "EscapeVelocity";
                 col.HeaderText = "Escape Velocity (cm/s)";
-                col.DefaultCellStyle.Format = "N4";
+                col.DefaultCellStyle.Format = "N2";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 PlanetsDataGridView.Columns.Add(col);

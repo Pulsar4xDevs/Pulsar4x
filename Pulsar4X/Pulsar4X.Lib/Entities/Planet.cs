@@ -77,7 +77,7 @@ namespace Pulsar4X.Entities
             {
                 if (SurfaceTemperature == Constants.Units.INCREDIBLY_LARGE_NUMBER)
                     return "N/A";
-                return SurfaceTemperature.ToString("N4");
+                return SurfaceTemperature.ToString("N1");
             }
         }
 
@@ -123,6 +123,8 @@ namespace Pulsar4X.Entities
                     return "None";
                 if (SurfacePressure == Constants.Units.INCREDIBLY_LARGE_NUMBER)
                     return "N/A";
+                if (SurfacePressure < 0.0001)
+                    return "Trace";
                 return SurfacePressure.ToString("N4");
             }
         }
