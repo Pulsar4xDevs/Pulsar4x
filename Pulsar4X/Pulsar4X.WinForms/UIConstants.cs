@@ -75,16 +75,16 @@ namespace Pulsar4X.WinForms
         /// <summary>
         /// About Box Text.
         /// </summary>
-        public const string ABOUT_BOX_TEXT =    "Pulsa4X\n" +
+        public const string ABOUT_BOX_TEXT =    "Pulsar4X\n" +
                                                 "A Fan work recreation of Aurora4x in C#\n" +
                                                 "Version 0.0.0.2 Pre-Alpha\n\n" +
-                                                "Contributors: Antagonist, clement, HailRyan, Nathan, SnopyDogy, Sublight.\n" +
-                                                "Testers: joe \n" +
+                                                "Contributors:\n Antagonist, clement, HailRyan, Nathan, SnopyDogy, Sublight\n\n" +
+                                                "Testers:\n joe \n\n" +
                                                 "Hosting Provided by: Eric Luken \n\n" + 
-                                                "Forums: http://aurora2.pentarch.org/index.php/board,169.0.html \n" +
-                                                "Wiki: http://pulsar4x.pentarch.org/wiki/index.php?title=Main_Page \n" +
-                                                "GitHub Org: https://github.com/Pulsar4xDevs \n" +
-                                                "Image of the Crab Nebula (a Pulsar ;), Credit to NASA and Hubble";
+                                                "Forums:\n http://aurora2.pentarch.org/index.php/board,169.0.html \n\n" +
+                                                "Wiki:\n http://pulsar4x.pentarch.org/wiki/index.php?title=Main_Page \n\n" +
+                                                "GitHub Org:\n https://github.com/Pulsar4xDevs \n\n" +
+                                                "Left: Image of the Crab Nebula (a Pulsar ;), Credit to NASA and Hubble";
 
 
         public const float ZOOM_DEFAULT_SCALLER = 1.0f;

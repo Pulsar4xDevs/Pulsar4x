@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.OKButton = new System.Windows.Forms.Button();
-            this.AboutTextBox = new System.Windows.Forms.RichTextBox();
             this.PulsarLogoPicBox = new System.Windows.Forms.PictureBox();
+            this.AboutTextBox = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.PulsarLogoPicBox)).BeginInit();
             this.SuspendLayout();
             // 
@@ -44,27 +44,29 @@
             this.OKButton.UseVisualStyleBackColor = true;
             this.OKButton.Click += new System.EventHandler(this.OKButton_Click);
             // 
-            // AboutTextBox
-            // 
-            this.AboutTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.AboutTextBox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.AboutTextBox.Location = new System.Drawing.Point(293, 13);
-            this.AboutTextBox.Name = "AboutTextBox";
-            this.AboutTextBox.ReadOnly = true;
-            this.AboutTextBox.Size = new System.Drawing.Size(279, 308);
-            this.AboutTextBox.TabIndex = 1;
-            this.AboutTextBox.Text = "";
-            // 
             // PulsarLogoPicBox
             // 
             this.PulsarLogoPicBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.PulsarLogoPicBox.ImageLocation = "./Resources/Textures/SplashScreen.png";
             this.PulsarLogoPicBox.Location = new System.Drawing.Point(13, 13);
             this.PulsarLogoPicBox.Name = "PulsarLogoPicBox";
-            this.PulsarLogoPicBox.Size = new System.Drawing.Size(274, 337);
+            this.PulsarLogoPicBox.Size = new System.Drawing.Size(249, 337);
             this.PulsarLogoPicBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.PulsarLogoPicBox.TabIndex = 0;
             this.PulsarLogoPicBox.TabStop = false;
+            // 
+            // AboutTextBox
+            // 
+            this.AboutTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.AboutTextBox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.AboutTextBox.Location = new System.Drawing.Point(268, 13);
+            this.AboutTextBox.Name = "AboutTextBox";
+            this.AboutTextBox.ReadOnly = true;
+            this.AboutTextBox.ShortcutsEnabled = false;
+            this.AboutTextBox.Size = new System.Drawing.Size(304, 308);
+            this.AboutTextBox.TabIndex = 1;
+            this.AboutTextBox.TabStop = false;
+            this.AboutTextBox.Text = "";
             // 
             // AboutBox
             // 
@@ -74,6 +76,7 @@
             this.Controls.Add(this.OKButton);
             this.Controls.Add(this.AboutTextBox);
             this.Controls.Add(this.PulsarLogoPicBox);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "AboutBox";
             this.Text = "AboutBox";
             this.Load += new System.EventHandler(this.AboutBox_Load);
@@ -85,7 +88,7 @@
         #endregion
 
         private System.Windows.Forms.Button OKButton;
-        private System.Windows.Forms.RichTextBox AboutTextBox;
         private System.Windows.Forms.PictureBox PulsarLogoPicBox;
+        private System.Windows.Forms.RichTextBox AboutTextBox;
     }
 }
