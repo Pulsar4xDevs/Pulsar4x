@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
@@ -15,9 +16,15 @@ namespace Pulsar4X.Entities
         public double Radius { get; set; }
 
         /// <summary>
-        /// semi-major axis of solar orbit (in AU)
+        /// semi-major axis of orbit (in AU)
         /// </summary>
         public double SemiMajorAxis { get; set; }
+
+        /// <summary>
+        /// semi-major axis of solar orbit (in AU)
+        /// </summary>
+        [JsonIgnore]
+        public double SolarSemiMajorAxis { get { return (IsMoon ? Parent.SemiMajorAxis : SemiMajorAxis); } }
 
         /// <summary>
         /// eccentricity of solar orbit

@@ -741,7 +741,7 @@ namespace Pulsar4X.Stargen
             {
                 planet.Albedo = Constants.Sol.Earth.ALBEDO;
 
-                effectiveTemp = EffTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, planet.Albedo);
+                effectiveTemp = EffTemp(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis, planet.Albedo);
                 greenhouseTemp = GreenRise(Opacity(planet.MolecularWeightRetained, planet.SurfacePressure), effectiveTemp, planet.SurfacePressure);
                 planet.SurfaceTemperature = effectiveTemp + greenhouseTemp;
 
@@ -794,7 +794,7 @@ namespace Pulsar4X.Stargen
                                                     planet.IceCover,
                                                     planet.SurfacePressure);
 
-            effectiveTemp = EffTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, planet.Albedo);
+            effectiveTemp = EffTemp(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis, planet.Albedo);
             greenhouseTemp = GreenRise(Opacity(planet.MolecularWeightRetained, planet.SurfacePressure), effectiveTemp, planet.SurfacePressure);
             planet.SurfaceTemperature = effectiveTemp + greenhouseTemp;
 
@@ -815,7 +815,7 @@ namespace Pulsar4X.Stargen
 
         public static void IterateSurfaceTemp(Planet planet)
         {
-            var initialTemp = EstTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, planet.Albedo);
+            var initialTemp = EstTemp(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis, planet.Albedo);
 
             CalculateSurfaceTemp(planet, true, 0, 0, 0, 0, 0);
 

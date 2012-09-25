@@ -403,12 +403,12 @@ namespace Pulsar4X.Stargen
             planet.RiseInTemperatureDueToGreenhouse = 0;
             planet.IsInResonantRotation = false;
 
-            planet.OrbitZone = EnviroUtilities.OrbitalZone(planet.Primary.Luminosity, planet.SemiMajorAxis);
-            planet.AxialTilt = EnviroUtilities.Inclination(planet.SemiMajorAxis);
+            planet.OrbitZone = EnviroUtilities.OrbitalZone(planet.Primary.Luminosity, planet.SolarSemiMajorAxis);
+            planet.AxialTilt = EnviroUtilities.Inclination(planet.SolarSemiMajorAxis);
 
             initOrbitPosition(planet);
 
-            planet.ExoSphericTemperature = Constants.Sol.Earth.EXOSPHERE_TEMP / Math.Pow(planet.SemiMajorAxis / planet.Primary.EcoSphereRadius, 2.0);
+            planet.ExoSphericTemperature = Constants.Sol.Earth.EXOSPHERE_TEMP / Math.Pow(planet.SolarSemiMajorAxis / planet.Primary.EcoSphereRadius, 2.0);
             planet.RootMeanSquaredVelocity = EnviroUtilities.RootMeanSquareVelocity(Constants.Gases.MolecularWeights.MOL_NITROGEN, planet.ExoSphericTemperature);
             planet.RadiusOfCore = EnviroUtilities.KothariRadius(planet.MassOfDust, false, planet.OrbitZone);
 
@@ -416,7 +416,7 @@ namespace Pulsar4X.Stargen
             // Then if mass > Earth, it's at least 5% gas and retains He, it's
             // some flavor of gas giant.
 
-            planet.Density = EnviroUtilities.EmpiricalDensity(planet.Mass, planet.SemiMajorAxis, planet.Primary.EcoSphereRadius, true);
+            planet.Density = EnviroUtilities.EmpiricalDensity(planet.Mass, planet.SolarSemiMajorAxis, planet.Primary.EcoSphereRadius, true);
             planet.Radius = EnviroUtilities.VolumeRadius(planet.Mass, planet.Density);
 
             planet.SurfaceAcceleration = EnviroUtilities.Acceleration(planet.Mass, planet.Radius);
@@ -488,14 +488,14 @@ namespace Pulsar4X.Stargen
                 planet.CloudCover = 1.0;
                 planet.IceCover = 0.0;
                 planet.SurfaceGravity = Constants.Units.INCREDIBLY_LARGE_NUMBER;
-                planet.EstimatedTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, planet.Albedo);
-                planet.EstimatedTerrestrialTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, Constants.Sol.Earth.ALBEDO);
+                planet.EstimatedTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis, planet.Albedo);
+                planet.EstimatedTerrestrialTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis, Constants.Sol.Earth.ALBEDO);
             }
             else
             {
-                planet.EstimatedTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis, Constants.Sol.Earth.ALBEDO);
+                planet.EstimatedTemperature = EnviroUtilities.EstTemp(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis, Constants.Sol.Earth.ALBEDO);
                 planet.SurfaceGravity = EnviroUtilities.Gravity(planet.SurfaceAcceleration);
-                planet.HasGreenhouseEffect = EnviroUtilities.Greenhouse(planet.Primary.EcoSphereRadius, planet.SemiMajorAxis);
+                planet.HasGreenhouseEffect = EnviroUtilities.Greenhouse(planet.Primary.EcoSphereRadius, planet.SolarSemiMajorAxis);
                 planet.VolatileGasInventory = EnviroUtilities.VolInventory(planet.Mass, planet.EscapeVelocity, planet.RootMeanSquaredVelocity,
                                                                                     planet.Primary.Mass, planet.OrbitZone, planet.HasGreenhouseEffect,
                                                                                     (planet.MassOfGas / planet.Mass) > 0.000001);
@@ -580,6 +580,7 @@ namespace Pulsar4X.Stargen
                     // Create a copy of the moons list
                     var moonList = planet.Moons.ToList();
                     var count = 0;
+                    var hillSphere = planet.SemiMajorAxis * (1.0 - planet.Eccentricity) * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
                     for (int n = 0; n < moonList.Count; n++)
                     {
                         bool pass = true;
@@ -596,8 +597,7 @@ namespace Pulsar4X.Stargen
 
                             //TODO: Look at adding atmosphere call to this
                             var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
-                            var hillSphere = planet.SemiMajorAxis * (1.0-planet.Eccentricity) * Constants.Units.KM_PER_AU * Math.Pow((planet.Mass / (3.0 * planet.Primary.Mass)), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
-
+                            
                             //if ((rocheLimit * 3.0) < hillSphere)
                             if (moon.SemiMajorAxis < rocheLimit)
                             {
