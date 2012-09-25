@@ -43,16 +43,20 @@ namespace Pulsar4X
             // Load in the dragable tabs here, setup ref. list to all tabs?
             //m_MainTabControl.Size = MainPanel.Size;
             m_MainTabControl.MinimumSize = new System.Drawing.Size(1008, 706);
+#if OPENGL
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[3]);
+#endif
             //m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[0]);
             m_MainTabControl.TabPages.Add(Pulsar4X.WinForms.Controls.UIController.g_aTabPages[9]);
 
             MainPanel.Controls.Add(m_MainTabControl);
             
             // close splash screen:
+#if SPLASHSCREEN
             Pulsar4X.WinForms.Forms.StartupSplashScreen.SetStatus("Starting...");
             Pulsar4X.WinForms.Forms.StartupSplashScreen.Progress = 0.9;
             Pulsar4X.WinForms.Forms.StartupSplashScreen.CloseForm();
+#endif
         }
 
 
@@ -71,7 +75,9 @@ namespace Pulsar4X
         private void systemMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Show System Map.
+#if OPENGL
             WinForms.Controls.UIController.ShowTab(WinForms.UIConstants.UITabs.SYSTEM_MAP_INDEX);
+#endif
         }
 
 

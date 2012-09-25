@@ -40,11 +40,12 @@ solution "Pulsar4X"
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
-			defines { "DEBUG" }
+			defines { "DEBUG", "OPENGL", "SPLASHSCREEN" }
 			flags { "Symbols" }
 			
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
+			defines { "OPENGL", "SPLASHSCREEN" }
 			flags { "Optimize" }
 					
 	-- Lib Project, contains game files
