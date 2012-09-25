@@ -57,8 +57,8 @@ namespace Pulsar4X.WinForms
             Forms.StartupSplashScreen.Progress = 0.7;
 #endif
 #if OPENGL
-            bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise();  // Get the best possible version of OpenGL
-            //bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise(OpenTKUtilities.GLVersion.OpenGL2X); // force GL2.0
+            //bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise();  // Get the best possible version of OpenGL
+            bool bOpenTKInitOK = OpenTKUtilities.Instance.Initialise(OpenTKUtilities.GLVersion.OpenGL2X); // force GL2.0
             if (bOpenTKInitOK == false)
             {
                 // Log error with open TK:

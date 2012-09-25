@@ -55,12 +55,12 @@ namespace Pulsar4X.WinForms.Controls
             try
             {
                 m_GLCanvas = OpenTKUtilities.Instance.CreateGLCanvas(); //new GLCanvas30();
-                m_GLCanvas.Size = this.Size;
+                //m_GLCanvas.Size = this.Size;
                 this.Dock = DockStyle.Fill;
                 m_GLCanvas.Dock = DockStyle.Fill;
                 m_GLCanvas.InputHandler += InputProcessor;
                 this.Controls.Add(m_GLCanvas);
-                m_GLCanvas.Parent = this;
+                //m_GLCanvas.Parent = this;
                 RefreshStarSystem();
             }
             catch (System.NotSupportedException ex)
@@ -116,7 +116,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 return;
             }
-            else if (m_GLCanvas.m_bLoaded == false)
+            else if (m_GLCanvas.Loaded == false)
             {
                 return;
             }

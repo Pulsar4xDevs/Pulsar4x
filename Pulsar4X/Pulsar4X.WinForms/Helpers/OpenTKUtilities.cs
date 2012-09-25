@@ -203,12 +203,12 @@ namespace Pulsar4X.WinForms
                     // Not Supported
                     throw new NotSupportedException();
                 case GLVersion.OpenGL2X:
-                    return new GLCanves20();
+                    return new GLCanvas((float)1.0f);
                 case GLVersion.OpenGL3X:
-                    return new GLCanvas30();
+                    return new GLCanvas((int)1);
                 case GLVersion.OpenGL4X:
                     // not implimented yet, retrun a version 3 instead:
-                    return new GLCanvas30();
+                    return new GLCanvas((int)1);
                 default:
                     // Not Supported
                     throw new NotSupportedException();

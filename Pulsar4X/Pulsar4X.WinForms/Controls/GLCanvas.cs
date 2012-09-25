@@ -15,12 +15,17 @@ using log4net;
 namespace Pulsar4X.WinForms.Controls
 {
     /// <summary>
-    /// An Customised version of GLControle, Used as a base for the OpenGL Version Specifc dervied classes.
+    /// An Customised version of GLControl, Used as a base for the OpenGL Version Specifc dervied classes.
     /// </summary>
-    public abstract class GLCanvas : OpenTK.GLControl
+    public class GLCanvas : OpenTK.GLControl
     {
 
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLCanvas));
+
+        // for testing:
+        System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
+        double m_dAccumulator = 0;
+        int m_iFrameCounter = 0;
 
 
         /// <summary> Used for testing for OpenGL Errors. </summary>
@@ -51,7 +56,19 @@ namespace Pulsar4X.WinForms.Controls
         /// <summary>
         /// used to determine if this control hase bee sucessfully loaded.
         /// </summary>
-        public bool m_bLoaded = false;
+        private bool m_bLoaded = false;
+
+        public bool Loaded
+        {
+            get
+            {
+                return m_bLoaded;
+            }
+            set
+            {
+                m_bLoaded = value;
+            }
+        }
 
         /// <summary> 
         /// The zoom scaler, make this smaller to zoom out, larger to zoom in.
@@ -152,6 +169,32 @@ namespace Pulsar4X.WinForms.Controls
             RegisterEventHandlers();
         }
 
+        /// <summary>
+        /// Creates the GLCanvas as an OpenGL 2.0 context
+        /// </summary>
+        /// <param name="a_version20"> Pass through a float to force this constructor.</param>
+        public GLCanvas(float a_version20)
+            : base(new GraphicsMode(32, 24, 8, 4), 2, 0, GraphicsContextFlags.Debug)
+        {
+            RegisterEventHandlers();
+            #if DEBUG
+                logger.Info("UI: Creating an OpenGL 2.0+ GLCanvas");
+            #endif
+        }
+
+        /// <summary>
+        /// Creates the GLCanvas as an OpenGL 3.2 context.
+        /// </summary>
+        /// <param name="a_version30">Pass through a int to force this constructor.</param>
+        public GLCanvas(int a_version30)
+            : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Debug)
+        {
+            RegisterEventHandlers();
+            #if DEBUG
+                logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
+            #endif
+        }
+
         /// <summary> Registers the event handlers. </summary>
         private void RegisterEventHandlers()
         {
@@ -165,10 +208,150 @@ namespace Pulsar4X.WinForms.Controls
             //MouseHover += new EventHandler(GLCanvas_OnMouseHover);
             KeyDown += new KeyEventHandler(OnKeyDown);
             //MouseUp += new MouseEventHandler(OnMouseUp);
-            //Application.Idle += Application_Idle;
+            Application.Idle += new EventHandler(Application_Idle);
         }
 
-        public abstract void OnLoad(object sender, EventArgs e);
+        private void InitOpenGL30()
+        {
+            this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
+            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
+            Loaded = true;           // So we know we have a valid Loaded OpenGL context.
+
+            #if DEBUG
+                m_eGLError = GL.GetError();
+                if (m_eGLError != ErrorCode.NoError)
+                {
+                    logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+                }   
+            #endif
+            //GL.ShadeModel(ShadingModel.Smooth);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.ReadBuffer(ReadBufferMode.Back);
+            GL.DrawBuffer(DrawBufferMode.Back);
+            GL.DepthFunc(DepthFunction.Lequal);
+            GL.DepthMask(true);
+            GL.Disable(EnableCap.StencilTest);
+            GL.StencilMask(0xFFFFFFFF);
+            GL.StencilFunc(StencilFunction.Equal, 0x00000000, 0x00000001);
+            GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+            GL.FrontFace(FrontFaceDirection.Ccw);
+            GL.CullFace(CullFaceMode.Back);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Blend);
+            GL.ClearColor(System.Drawing.Color.MidnightBlue);
+            GL.ClearDepth(1.0);
+            GL.ClearStencil(0);
+            //GL.Enable(EnableCap.VertexArray);
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
+            } 
+                
+            logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
+            // Log out OpeGL specific stuff if debug build.
+            logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
+            logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
+            logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
+            logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Error Check, InvalidEnum or NoError Expected: " + m_eGLError.ToString());
+            }    
+
+            m_oShaderProgram = new GLUtilities.GLShader();
+
+            // Setup Our View Port, this sets Our Projection and View Matricies.
+            SetupViewPort(0, 0, this.Size.Width, this.Size.Height);
+
+            m_oSW.Start();
+        }
+
+        private void InitOpenGL20()
+        {
+            this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
+            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
+            Loaded = true;           // So we know we have a valid Loaded OpenGL context.
+
+            #if DEBUG
+                m_eGLError = GL.GetError();
+                if (m_eGLError != ErrorCode.NoError)
+                {
+                    logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+                }   
+            #endif
+            //GL.ShadeModel(ShadingModel.Smooth);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.ReadBuffer(ReadBufferMode.Back);
+            GL.DrawBuffer(DrawBufferMode.Back);
+            GL.DepthFunc(DepthFunction.Lequal);
+            GL.DepthMask(true);
+            GL.Disable(EnableCap.StencilTest);
+            GL.StencilMask(0xFFFFFFFF);
+            GL.StencilFunc(StencilFunction.Equal, 0x00000000, 0x00000001);
+            GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
+            GL.FrontFace(FrontFaceDirection.Ccw);
+            GL.CullFace(CullFaceMode.Back);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.DepthTest);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Blend);
+            GL.ClearColor(System.Drawing.Color.MidnightBlue);
+            GL.ClearDepth(1.0);
+            GL.ClearStencil(0);
+            GL.Enable(EnableCap.VertexArray);
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
+            }  
+
+            Program.logger.Info("UI: GLCanvas2.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
+                // Log out OpeGL specific stuff if debug build.
+            logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
+            logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
+            logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
+            logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
+                logger.Info("OpenGL Error Check, InvalidEnum or NoError Expected: " + m_eGLError.ToString());
+            }
+            
+            m_oShaderProgram = new GLUtilities.GLShader();
+
+            // Setup Our View Port, this sets Our Projection and View Matricies.
+            SetupViewPort(0, 0, this.Size.Width, this.Size.Height);
+
+            m_oSW.Start();
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // GLCanvas
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.Name = "GLCanvas";
+            this.ResumeLayout(false);
+        }
+
+        public void OnLoad(object sender, EventArgs e)
+        {
+            if (OpenTKUtilities.Instance.SupportedOpenGLVersion == OpenTKUtilities.GLVersion.OpenGL2X)
+            {
+                InitOpenGL20();
+            }
+            else if (OpenTKUtilities.Instance.SupportedOpenGLVersion == OpenTKUtilities.GLVersion.OpenGL3X
+                    || OpenTKUtilities.Instance.SupportedOpenGLVersion == OpenTKUtilities.GLVersion.OpenGL4X)
+            {
+                InitOpenGL30();
+            }
+        }
 
         /// <summary> Executes the size change action. </summary>
         /// <remarks> Must be overloaded by the inherited classes. 
@@ -176,7 +359,15 @@ namespace Pulsar4X.WinForms.Controls
         /// 		  If these matricies are not updates then the view will be cut off and not draw for the whole screen. </remarks>
         /// <param name="sender">   Source of the event. </param>
         /// <param name="e">        Event information to send to registered event handlers. </param>
-        public abstract void OnSizeChange(object sender, EventArgs e);
+        public void OnSizeChange(object sender, EventArgs e)
+        {
+            if (m_bLoaded == true)
+            {
+                // When we are resized by our parent as pert of the docking, we will need to adjust our projection and view matricies 
+                // to reflect the new viewing area:
+                SetupViewPort(0, 0, this.Size.Width, this.Size.Height);  // Setup viewport again.
+            }
+        }
 
         /// <summary>   Paints this window, Calles the Render() functio to make sure our sceen is rendered. </summary>
         /// <param name="sender">   Source of the event. </param>
@@ -189,7 +380,6 @@ namespace Pulsar4X.WinForms.Controls
             }
 
             Render();
-            this.Invalidate();
         }
 
         /// <summary>   Event handler. Called by Application for idle events. Keeps the Canvas rendering evan when nothing is happening! </summary>
@@ -347,29 +537,88 @@ namespace Pulsar4X.WinForms.Controls
             }
         }
 
-        public abstract void IncreaseZoomScaler();
-
-        public abstract void DecreaseZoomScaler();
-
-        public abstract void Pan(ref Vector3 a_v3PanAmount);
-
-        public abstract void CenterOnZero();
-
-        public abstract void CenterOn(ref Vector3 a_v3Location);
-
-        public abstract void Render();
-
-        public abstract void TestFunc(int a_itest);
-
-        private void InitializeComponent()
+        public void IncreaseZoomScaler()
         {
-            this.SuspendLayout();
-            // 
-            // GLCanvas
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.Name = "GLCanvas";
-            this.ResumeLayout(false);
+            float fOldZoomSxaler = m_fZoomScaler;
+            m_fZoomScaler *= UIConstants.ZOOM_IN_FACTOR;
+
+            if (m_fZoomScaler > UIConstants.ZOOM_MAXINUM_VALUE)
+            {
+                m_fZoomScaler = UIConstants.ZOOM_MAXINUM_VALUE;
+            }
+
+            RecalculateViewMatrix(fOldZoomSxaler);
+            SceenToRender.ZoomSclaer = m_fZoomScaler;
+            SceenToRender.Refresh();                    // called so sceen elements can adjust to new zoom value.
+            this.Invalidate();
+        }
+
+        public void DecreaseZoomScaler()
+        {
+            float fOldZoomSxaler = m_fZoomScaler;
+            m_fZoomScaler *= UIConstants.ZOOM_OUT_FACTOR;
+
+            if (m_fZoomScaler < UIConstants.ZOOM_MINIMUM_VALUE)
+            {
+                m_fZoomScaler = UIConstants.ZOOM_MINIMUM_VALUE;
+            }
+
+            RecalculateViewMatrix(fOldZoomSxaler);
+            SceenToRender.ZoomSclaer = m_fZoomScaler;
+            SceenToRender.Refresh();                    // called so sceen elements can adjust to new zoom value.
+            this.Invalidate();
+        }
+
+        public void Pan(ref Vector3 a_v3PanAmount)
+        {
+            m_v3ViewOffset = m_v3ViewOffset + a_v3PanAmount;
+            RecalculateViewMatrix();
+            SceenToRender.ViewOffset = m_v3ViewOffset;
+            this.Invalidate();
+        }
+
+        public void CenterOnZero()
+        {
+            m_v3ViewOffset = Vector3.Zero;  // sero out offset.
+            RecalculateViewMatrix();
+            SceenToRender.ViewOffset = m_v3ViewOffset;
+            this.Invalidate();
+        }
+
+        public void CenterOn(ref Vector3 a_v3Location)
+        {
+            m_v3ViewOffset = a_v3Location;                  // set offset.
+            RecalculateViewMatrix();
+            SceenToRender.ViewOffset = m_v3ViewOffset;
+            this.Invalidate();
+        }
+
+        public void Render()
+        {
+            this.MakeCurrent();                            // Make this Canvas Current, just in case there is more then one canves open.
+
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit); // Clear Back buffer of previous frame.
+
+            // call render on the sceen:
+            if (SceenToRender != null)
+            {
+                SceenToRender.Render();
+            }
+
+            GraphicsContext.CurrentContext.SwapBuffers();
+
+            // Calc FPS:
+            m_oSW.Stop();
+            m_dAccumulator += m_oSW.Elapsed.TotalMilliseconds;
+            m_iFrameCounter++;
+            if (m_dAccumulator > 2000)
+            {
+                m_fps = (float)m_dAccumulator / (float)m_iFrameCounter;
+                m_dAccumulator -= 2000;
+                m_iFrameCounter = 0;
+            }
+            m_oSW.Reset();
+            m_oSW.Start();
         }
     }
 }
