@@ -463,7 +463,6 @@ namespace Pulsar4X.WinForms.Controls
             InputHandler(e, null);
         }
 
-        
         /// <summary>
         /// Sets up the OpenGL viewport/camera.
         /// </summary>
@@ -480,12 +479,6 @@ namespace Pulsar4X.WinForms.Controls
             // Setup our Projection Matrix, This defines how the 2D image seen on screen is created from our 3d world.
             // this will give us a 2d perspective looking Down onto the X,Y plane with 0,0 being the centre of the screen (by default)
             m_m4ProjectionMatrix = Matrix4.CreateOrthographic(a_iViewportWidth, a_iViewPortHeight, -10, 10);
-            
-            // This will setup a projection where 0,0 is in the bottom left of the screen and we are looking at the X,Y plane from above (i think, i might be below).
-            //Matrix4 m_m4ProjectionMatrix2 = new Matrix4(new Vector4((2.0f / a_iViewportWidth), 0, 0, 0),
-            //                                    new Vector4(0, (2.0f / a_iViewPortHeight), 0, 0),
-            //                                    new Vector4(0, 0, 1, 0),
-            //                                    new Vector4(-1, -1, 1, 1));
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
             m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
@@ -495,7 +488,6 @@ namespace Pulsar4X.WinForms.Controls
                 m_oShaderProgram.SetViewMatrix(ref m_m4ViewMatrix);
             }
         }
-
 
         public virtual Vector3 ConvertScreenCoordsToWorldCoords(Vector3 a_v3ScreenCoords)
         {
