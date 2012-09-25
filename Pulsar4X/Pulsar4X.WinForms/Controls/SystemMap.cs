@@ -45,7 +45,11 @@ namespace Pulsar4X.WinForms.Controls
             SystemSelectComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentStarSystem, DataSourceUpdateMode.OnPropertyChanged);
             SystemSelectComboBox.DisplayMember = "Name";
 
-            this.Bind(c => c.CurrentStarSystem, VM, d => d.CurrentStarSystem);
+            // This doesn't work under linux or mac
+            //this.Bind(c => c.CurrentStarSystem, VM, d => d.CurrentStarSystem);
+
+            VM.StarSystemChanged += (s, args) => CurrentStarSystem = VM.CurrentStarSystem;
+            CurrentStarSystem = VM.CurrentStarSystem;
 
             SystemSelectComboBox.SelectedIndexChanged += (s, args) => SystemSelectComboBox.DataBindings["SelectedItem"].WriteValue();
         }

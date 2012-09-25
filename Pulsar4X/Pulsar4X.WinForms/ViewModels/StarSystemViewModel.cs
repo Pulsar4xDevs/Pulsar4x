@@ -121,9 +121,9 @@ namespace Pulsar4X.WinForms.ViewModels
         {
             // Just gen a Starsystem
             StarSystems = GameState.Instance.StarSystems;
-            CurrentStarSystem = GameState.Instance.StarSystems.First();
-            CurrentStar = CurrentStarSystem.Stars.First();
-            CurrentPlanet = CurrentStar.Planets.First();
+            CurrentStarSystem = GameState.Instance.StarSystems.FirstOrDefault();
+            CurrentStar = CurrentStarSystem.Stars.FirstOrDefault();
+            CurrentPlanet = CurrentStar.Planets.FirstOrDefault();
         }
 
         private void OnPropertyChanged(Expression<Func<object>> property)

@@ -27,17 +27,25 @@ namespace Pulsar4X.WinForms.ViewModels
                 {
                     _currentstarsystem = value;
                     OnPropertyChanged(() => CurrentStarSystem);
+                    OnStarSystemChanged();
                 }
             }
         }
 
         public GLStarSystemViewModel()
         {
-            CurrentStarSystem = GameState.Instance.StarSystems.First();
+            CurrentStarSystem = GameState.Instance.StarSystems.FirstOrDefault();
 
             StarSystems = GameState.Instance.StarSystems;
         }
 
+        private void OnStarSystemChanged()
+        {
+            if (StarSystemChanged != null)
+            {
+                StarSystemChanged(this, new EventArgs());
+            }
+        }
 
         private void OnPropertyChanged(Expression<Func<object>> property)
         {
@@ -49,5 +57,7 @@ namespace Pulsar4X.WinForms.ViewModels
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public event EventHandler StarSystemChanged;
     }
 }
