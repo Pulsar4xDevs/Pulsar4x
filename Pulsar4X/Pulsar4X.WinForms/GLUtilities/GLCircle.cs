@@ -228,10 +228,32 @@ namespace Pulsar4X.WinForms.GLUtilities
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
             GL.BindVertexArray(m_uiVextexArrayHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
+            if (OpenTKUtilities.Instance.SupportedOpenGLVersion == OpenTKUtilities.GLVersion.OpenGL2X)
+            {
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
+            }
 
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
+            m_oShaderProgram.StartUsing(ref a_m4Projection);
+            m_oShaderProgram.StartUsing(ref a_m4View);
+
+            OpenTKUtilities.Use2DTexture(m_uiTextureID);
+
+            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+        }
+
+        public override void Render(ref Matrix4 a_m4View)
+        {
+            GL.BindVertexArray(m_uiVextexArrayHandle);
+            if (OpenTKUtilities.Instance.SupportedOpenGLVersion == OpenTKUtilities.GLVersion.OpenGL2X)
+            {
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
+            }
+
+            m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
+            m_oShaderProgram.StartUsing(ref a_m4View);
 
             OpenTKUtilities.Use2DTexture(m_uiTextureID);
 
@@ -240,18 +262,12 @@ namespace Pulsar4X.WinForms.GLUtilities
 
         public override void Render()
         {
-            //if (OpenTKUtilities.Instance.SupportedOpenGLVersion >= OpenTKUtilities.GLVersion.OpenGL3X)
-            //{
-            //    GL.BindVertexArray(m_uiVextexArrayHandle);
-            //}
-            //else
-            //{
-            //    GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
-            //    GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
-            //}
             GL.BindVertexArray(m_uiVextexArrayHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
+            if (OpenTKUtilities.Instance.SupportedOpenGLVersion == OpenTKUtilities.GLVersion.OpenGL2X)
+            {
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
+            }
 
             m_oShaderProgram.StartUsing(ref m_m4ModelMatrix);
 
