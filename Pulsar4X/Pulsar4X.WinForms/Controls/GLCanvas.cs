@@ -174,7 +174,7 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         /// <param name="a_version20"> Pass through a float to force this constructor.</param>
         public GLCanvas(float a_version20)
-            : base(new GraphicsMode(32, 24, 8, 4), 2, 0, GraphicsContextFlags.Debug)
+            : base(new GraphicsMode(32, 24, 8, 4), 2, 0, GraphicsContextFlags.Default)
         {
             RegisterEventHandlers();
             #if DEBUG
@@ -187,7 +187,7 @@ namespace Pulsar4X.WinForms.Controls
         /// </summary>
         /// <param name="a_version30">Pass through a int to force this constructor.</param>
         public GLCanvas(int a_version30)
-            : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Debug)
+            : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Default)
         {
             RegisterEventHandlers();
             #if DEBUG
