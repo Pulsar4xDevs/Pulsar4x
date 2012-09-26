@@ -60,7 +60,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 m_GLCanvas = OpenTKUtilities.Instance.CreateGLCanvas(); //new GLCanvas30();
                 m_GLCanvas.Size = this.Size;
-                //this.Dock = DockStyle.Fill;
+                this.Dock = DockStyle.Fill;
                 //m_GLCanvas.Dock = DockStyle.Fill;
                 m_GLCanvas.InputHandler += InputProcessor;
                 this.Controls.Add(m_GLCanvas);
@@ -352,6 +352,10 @@ namespace Pulsar4X.WinForms.Controls
         private void SystemMap_SizeChanged(object sender, EventArgs e)
         {
             // update Scale lables for new screen size:
+            if (m_GLCanvas != null)
+            {
+                m_GLCanvas.Size = this.Size;
+            }
             UpdateScaleLabels();
         }
 
