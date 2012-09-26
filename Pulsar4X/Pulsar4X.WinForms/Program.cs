@@ -76,14 +76,14 @@ namespace Pulsar4X.WinForms
             logger.Info("Program Ended");
         }
 
-        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            logger.Error("Unhandled Exception!", (Exception)e.ExceptionObject);
-        }
+        //static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        //{
+        //    logger.Error("Unhandled Exception!", (Exception)e.ExceptionObject);
+        //}
 
-        static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
-        {
-            logger.Error("First chance exception!", e.Exception);
-        }
+        //static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+        //{
+        //    logger.Error("First chance exception!", e.Exception);
+        //}
     }
 }
