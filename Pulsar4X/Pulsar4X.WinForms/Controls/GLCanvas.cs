@@ -213,8 +213,8 @@ namespace Pulsar4X.WinForms.Controls
 
         private void InitOpenGL30()
         {
-            this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
-            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
+            //this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
+            GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
             Loaded = true;           // So we know we have a valid Loaded OpenGL context.
 
             #if DEBUG
@@ -272,8 +272,8 @@ namespace Pulsar4X.WinForms.Controls
 
         private void InitOpenGL20()
         {
-            this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
-            //GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
+            //this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
+            GraphicsContext.CurrentContext.VSync = true; // this prevents us using 100% GPU/CPU.
             Loaded = true;           // So we know we have a valid Loaded OpenGL context.
 
             #if DEBUG

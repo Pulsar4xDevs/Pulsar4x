@@ -77,7 +77,7 @@ namespace Pulsar4X.WinForms
         /// </summary>
         public const string ABOUT_BOX_TEXT =    "Pulsar4X\n" +
                                                 "A Fan work recreation of Aurora4x in C#\n" +
-                                                "Version 0.0.0.2 Pre-Alpha\n\n" +
+                                                "Alpha 1\n\n" +
                                                 "Contributors:\n Antagonist, clement, HailRyan, Nathan, SnopyDogy, Sublight\n\n" +
                                                 "Testers:\n joe \n\n" +
                                                 "Hosting Provided by: Eric Luken \n\n" + 
