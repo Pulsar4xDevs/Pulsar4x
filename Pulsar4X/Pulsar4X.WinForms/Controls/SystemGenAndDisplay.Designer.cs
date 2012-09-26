@@ -870,11 +870,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GroupBoxStartData.AutoSize = true;
             this.GroupBoxStartData.Controls.Add(this.StarsDatatabControl);
-            this.GroupBoxStartData.Location = new System.Drawing.Point(3, 155);
+            this.GroupBoxStartData.Location = new System.Drawing.Point(3, 153);
             this.GroupBoxStartData.Margin = new System.Windows.Forms.Padding(0);
             this.GroupBoxStartData.Name = "GroupBoxStartData";
             this.GroupBoxStartData.Padding = new System.Windows.Forms.Padding(0);
-            this.GroupBoxStartData.Size = new System.Drawing.Size(1001, 301);
+            this.GroupBoxStartData.Size = new System.Drawing.Size(1001, 300);
             this.GroupBoxStartData.TabIndex = 3;
             this.GroupBoxStartData.TabStop = false;
             // 
@@ -889,7 +889,7 @@
             this.StarsDatatabControl.Location = new System.Drawing.Point(0, 13);
             this.StarsDatatabControl.Name = "StarsDatatabControl";
             this.StarsDatatabControl.SelectedIndex = 0;
-            this.StarsDatatabControl.Size = new System.Drawing.Size(1001, 288);
+            this.StarsDatatabControl.Size = new System.Drawing.Size(1001, 287);
             this.StarsDatatabControl.TabIndex = 5;
             // 
             // PlanetDataTabPage
@@ -898,7 +898,7 @@
             this.PlanetDataTabPage.Location = new System.Drawing.Point(4, 22);
             this.PlanetDataTabPage.Name = "PlanetDataTabPage";
             this.PlanetDataTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.PlanetDataTabPage.Size = new System.Drawing.Size(993, 262);
+            this.PlanetDataTabPage.Size = new System.Drawing.Size(993, 261);
             this.PlanetDataTabPage.TabIndex = 0;
             this.PlanetDataTabPage.Text = "Planet Data";
             this.PlanetDataTabPage.UseVisualStyleBackColor = true;
@@ -909,7 +909,7 @@
             this.PlanetsDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.PlanetsDataGridView.Location = new System.Drawing.Point(3, 3);
             this.PlanetsDataGridView.Name = "PlanetsDataGridView";
-            this.PlanetsDataGridView.Size = new System.Drawing.Size(987, 256);
+            this.PlanetsDataGridView.Size = new System.Drawing.Size(987, 255);
             this.PlanetsDataGridView.TabIndex = 0;
             // 
             // JumpPointsTabPage

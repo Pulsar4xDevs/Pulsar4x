@@ -132,7 +132,7 @@
             this.PanRightButton.Size = new System.Drawing.Size(26, 23);
             this.PanRightButton.TabIndex = 6;
             this.PanRightButton.Text = "->";
-            this.InfoToolTip.SetToolTip(this.PanRightButton, "Pan Right (R)");
+            this.InfoToolTip.SetToolTip(this.PanRightButton, "Pan Right (D)");
             this.PanRightButton.UseVisualStyleBackColor = true;
             this.PanRightButton.Click += new System.EventHandler(this.PanRightButton_Click);
             // 

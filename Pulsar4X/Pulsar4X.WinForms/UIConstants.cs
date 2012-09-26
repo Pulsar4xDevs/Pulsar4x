@@ -46,7 +46,6 @@ namespace Pulsar4X.WinForms
             /// Name/Title for System Generation and Display tab.
             /// </summary>
             public const string     SYSTEM_GENERATION_AND_DISPLAY_NAME = "System Generation and Display";
- 
         }
 
         /// <summary>
@@ -94,7 +93,5 @@ namespace Pulsar4X.WinForms
         public const float ZOOM_MAXINUM_VALUE = 32768.0f;                   // At this scale we are looking a 0.3m per pixel.
         public const float DEFAULT_PAN_AMOUNT = 25.0f;
         public static OpenTK.Vector2 DEFAULT_TEXT_SIZE = new OpenTK.Vector2(16, 16);
-
-
     }
 }
