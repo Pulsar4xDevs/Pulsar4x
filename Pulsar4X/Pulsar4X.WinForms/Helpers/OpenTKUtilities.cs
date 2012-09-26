@@ -141,7 +141,7 @@ namespace Pulsar4X.WinForms
             {
                 // Problem occured when trying to get open GL Verion, Logg and assume 2.0 so program exacution can continue:
                 logger.Error("Error Getting OpenGL Version, Assuming version 2.0!");
-                iMajor = 2;
+                iMajor = 3;
                 iMinor = 0;
             }
             

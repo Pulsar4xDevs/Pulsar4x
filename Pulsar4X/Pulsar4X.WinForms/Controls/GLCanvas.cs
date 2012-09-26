@@ -208,7 +208,7 @@ namespace Pulsar4X.WinForms.Controls
             //MouseHover += new EventHandler(GLCanvas_OnMouseHover);
             KeyDown += new KeyEventHandler(OnKeyDown);
             //MouseUp += new MouseEventHandler(OnMouseUp);
-            Application.Idle += new EventHandler(Application_Idle);
+            //Application.Idle += new EventHandler(Application_Idle);
         }
 
         private void InitOpenGL30()

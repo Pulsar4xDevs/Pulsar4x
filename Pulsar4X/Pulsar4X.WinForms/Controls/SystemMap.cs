@@ -59,9 +59,9 @@ namespace Pulsar4X.WinForms.Controls
             try
             {
                 m_GLCanvas = OpenTKUtilities.Instance.CreateGLCanvas(); //new GLCanvas30();
-                //m_GLCanvas.Size = this.Size;
-                this.Dock = DockStyle.Fill;
-                m_GLCanvas.Dock = DockStyle.Fill;
+                m_GLCanvas.Size = this.Size;
+                //this.Dock = DockStyle.Fill;
+                //m_GLCanvas.Dock = DockStyle.Fill;
                 m_GLCanvas.InputHandler += InputProcessor;
                 this.Controls.Add(m_GLCanvas);
                 //m_GLCanvas.Parent = this;
