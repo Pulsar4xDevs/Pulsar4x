@@ -369,6 +369,16 @@ namespace Pulsar4X.WinForms.Controls
         {
             InputProcessor(e, null);
         }
+
+        private void SystemSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_GLCanvas != null)
+            {
+                m_GLCanvas.Focus();
+                RefreshStarSystem();
+                m_GLCanvas.Invalidate();
+            }
+        }
     }
 }
 

@@ -219,6 +219,7 @@
             this.SystemSelectComboBox.Size = new System.Drawing.Size(190, 21);
             this.SystemSelectComboBox.TabIndex = 0;
             this.InfoToolTip.SetToolTip(this.SystemSelectComboBox, "Select a Star System to view");
+            this.SystemSelectComboBox.SelectedIndexChanged += new System.EventHandler(this.SystemSelectComboBox_SelectedIndexChanged);
             // 
             // InfoToolTip
             // 
