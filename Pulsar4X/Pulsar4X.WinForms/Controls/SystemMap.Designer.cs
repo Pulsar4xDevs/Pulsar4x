@@ -211,6 +211,7 @@
             // SystemSelectComboBox
             // 
             this.SystemSelectComboBox.BackColor = System.Drawing.Color.MidnightBlue;
+            this.SystemSelectComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.SystemSelectComboBox.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.SystemSelectComboBox.ForeColor = System.Drawing.Color.White;
             this.SystemSelectComboBox.FormattingEnabled = true;
