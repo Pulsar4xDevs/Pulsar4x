@@ -218,7 +218,7 @@ void main()
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
-            if (iShaderError != 1)
+            if (iShaderError != 1 || iShaderError != 0)
             {
                 logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + GL.GetShaderInfoLog(m_iShaderProgramHandle)); // Log Result!
                 iShaderError = 1;
