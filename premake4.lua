@@ -64,9 +64,13 @@ solution "Pulsar4X"
 			}
 		files { 
 			"Pulsar4X/Pulsar4X.Lib/**.cs",
+			"Pulsar4X/Pulsar4X.Lib/Data/**"
 			}
 			
 		configuration { "windows", "Release" }
+			
+		configuration "Data/**"
+			buildaction "copy"
 			
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.Lib/bin/Debug"
