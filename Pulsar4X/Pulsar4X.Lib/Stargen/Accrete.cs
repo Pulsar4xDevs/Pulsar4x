@@ -17,7 +17,7 @@ namespace Pulsar4X.Stargen
         private readonly double _maximumStellarAge;
         private readonly StarFactory _starFactory;
 
-        public Random rnd;
+        private Random rnd;
 
         public Accrete(double minStellarAge, double maxStellarAge, bool genMoons, Random rnd = null)
         {
@@ -30,7 +30,7 @@ namespace Pulsar4X.Stargen
             else
                 this.rnd = rnd;
 
-            _starFactory = new StarFactory(_minimumStellarAge, _maximumStellarAge);
+            _starFactory = new StarFactory(_minimumStellarAge, _maximumStellarAge, this.rnd);
         }
 
         public StarSystem Create(string name)
@@ -100,7 +100,7 @@ namespace Pulsar4X.Stargen
                     var protoPlanet = new ProtoPlanet()
                     {
                         Star = star,
-                        SemiMajorAxis = MathUtilities.Random.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
+                        SemiMajorAxis = rnd.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
                         Eccentricity = rnd.RandomEccentricity(),
                         //Eccentricity = 0.99,
                         DustMass = Constants.Stargen.PROTOPLANET_MASS,
@@ -404,7 +404,7 @@ namespace Pulsar4X.Stargen
             planet.IsInResonantRotation = false;
 
             planet.OrbitZone = EnviroUtilities.OrbitalZone(planet.Primary.Luminosity, planet.SolarSemiMajorAxis);
-            planet.AxialTilt = EnviroUtilities.Inclination(planet.SolarSemiMajorAxis);
+            planet.AxialTilt = Inclination(planet.SolarSemiMajorAxis);
 
             initOrbitPosition(planet);
 
@@ -483,7 +483,7 @@ namespace Pulsar4X.Stargen
                 planet.BoilingPoint = Constants.Units.INCREDIBLY_LARGE_NUMBER;
                 planet.SurfaceTemperature = Constants.Units.INCREDIBLY_LARGE_NUMBER;
                 planet.RiseInTemperatureDueToGreenhouse = 0;
-                planet.Albedo = MathUtilities.About(Constants.Units.GAS_GIANT_ALBEDO, 0.1);
+                planet.Albedo = rnd.About(Constants.Units.GAS_GIANT_ALBEDO, 0.1);
                 planet.HydrosphereCover = 1.0;
                 planet.CloudCover = 1.0;
                 planet.IceCover = 0.0;
@@ -640,8 +640,8 @@ namespace Pulsar4X.Stargen
             if (entity.Parent != null)
             {
                 entity.OrbitalPeriod = EnviroUtilities.Period(entity.SemiMajorAxis, entity.Mass, entity.Parent.Mass);
-                entity.LongitudeOfApogee = MathUtilities.Random.NextDouble(0.0, 2 * Math.PI);
-                entity.TimeSinceApogee = Convert.ToInt64(MathUtilities.Random.NextDouble(0.0, entity.OrbitalPeriod * Constants.Units.SECONDS_PER_HOUR * 24.0));
+                entity.LongitudeOfApogee = rnd.NextDouble(0.0, 2 * Math.PI);
+                entity.TimeSinceApogee = Convert.ToInt64(rnd.NextDouble(0.0, entity.OrbitalPeriod * Constants.Units.SECONDS_PER_HOUR * 24.0));
             }
         
         }
@@ -731,6 +731,18 @@ namespace Pulsar4X.Stargen
 
 
             }
+        }
+
+        /// <summary>
+        ///	 The orbital radius is expected in units of Astronomical Units (AU).	
+        ///	 Inclination is returned in units of degrees.
+        /// </summary>
+        /// <param name="orbRadius"></param>
+        /// <returns></returns>
+        private int Inclination(double orbRadius)
+        {
+            var temp = (int)(Math.Pow(orbRadius, 0.2) * rnd.About(Constants.Sol.Earth.AXIAL_TILT, 0.4));
+            return (temp % 360);
         }
 
         /// <summary>

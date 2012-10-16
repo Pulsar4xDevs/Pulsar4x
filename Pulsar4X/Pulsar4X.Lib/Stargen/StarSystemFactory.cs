@@ -27,11 +27,17 @@ namespace Pulsar4X.Stargen
             _generateMoons = genMoons;
         }
         
-        public StarSystem Create(string name)
+        public StarSystem Create(string name, int seed = -1)
         {
+            Random rnd;
+            if (seed > -1)
+                rnd = new Random(seed);
+            else
+                rnd = new Random();
+
             if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name cannot be null or empty.");
 
-            var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge,  _generateMoons);
+            var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge,  _generateMoons, rnd);
             var ss = accrete.Create(name);
 
             if (logger.IsDebugEnabled)

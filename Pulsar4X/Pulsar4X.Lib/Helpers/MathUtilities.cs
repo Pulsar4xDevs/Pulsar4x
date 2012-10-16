@@ -5,17 +5,17 @@ namespace Pulsar4X
     public static class MathUtilities
     {
         // TODO: This should be OUT of this class
-        public static Random Random;
+        //public static Random Random;
 
         static MathUtilities()
         {
-            Random = new Random();
+            //Random = new Random();
         }
 
-        public static double About(double value, double variation)
+        /*public static double About(double value, double variation)
         {
             return (value + (value * Random.NextDouble(-variation, variation)));
-        }
+        }*/
 
         /* function for 'soft limiting' temperatures */
         public static double Limit(double x)

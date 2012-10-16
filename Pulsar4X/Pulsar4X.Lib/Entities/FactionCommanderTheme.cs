@@ -7,6 +7,8 @@ namespace Pulsar4X.Entities
 {
     public class FactionCommanderTheme
     {
+        private Random rnd;
+
         private List<Tuple<int, Guid>> _distributions;
         /// <summary>
         /// Each Commander Theme for the owning faction has a percentage distribution
@@ -27,6 +29,7 @@ namespace Pulsar4X.Entities
         {
             Distributions = new List<Tuple<int, Guid>>();
             _spreads = new List<Tuple<int, Guid>>();
+            rnd = new Random();
         }
 
         private List<Tuple<int, Guid>> _spreads;
@@ -49,7 +52,7 @@ namespace Pulsar4X.Entities
         /// <returns></returns>
         public string GetName(NamePosition position, bool isFemale = false)
         {
-            var randomInt = MathUtilities.Random.Next(1, 101);
+            var randomInt = rnd.Next(1, 101);
 
             foreach (var option in Distributions)
             {
@@ -64,7 +67,7 @@ namespace Pulsar4X.Entities
                     if (entryCount < 1)
                         throw new ArgumentOutOfRangeException(theme.Name, "No valid entries found in Commander Name Theme");
 
-                    var randomIndex = MathUtilities.Random.Next(0, entryCount);
+                    var randomIndex = rnd.Next(0, entryCount);
                     return query[randomIndex].Name;
 
                 }

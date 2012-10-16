@@ -10,8 +10,15 @@ namespace Pulsar4X.Stargen
         private readonly double _minimumAge;
         private readonly double _maximumAge;
 
-        public StarFactory(double minAge, double maxAge)
+        public Random rnd;
+
+        public StarFactory(double minAge, double maxAge, Random rnd = null)
         {
+            if (rnd == null)
+                this.rnd = new Random();
+            else
+                this.rnd = rnd;
+
             _minimumAge = minAge;
             _maximumAge = maxAge;
         }
@@ -73,11 +80,11 @@ namespace Pulsar4X.Stargen
                 star.Luminosity = Luminosity(star.Mass);
                 star.EcoSphereRadius = EcoSphereRadius(star.Luminosity);
                 star.Life = StellarLife(star.Mass, star.Luminosity);
-                star.Age = MathUtilities.Random.NextDouble(_minimumAge, Math.Max(_maximumAge, star.Life));
-                star.SpectrumAdjustment = MathUtilities.Random.Next(0, 10);
+                star.Age = rnd.NextDouble(_minimumAge, Math.Max(_maximumAge, star.Life));
+                star.SpectrumAdjustment = rnd.Next(0, 10);
 
                 star.Temperature = TempLookup[star.Spectrum][star.SpectrumAdjustment];
-                star.Temperature += MathUtilities.Random.randomNormal() * (star.Temperature / 200.0);
+                star.Temperature += rnd.randomNormal() * (star.Temperature / 200.0);
 
                 star.Radius = Radius(star.Luminosity, star.Temperature);
 
@@ -85,8 +92,8 @@ namespace Pulsar4X.Stargen
 
                 if (i > 1)
                 {
-                    star.SemiMajorAxis = MathUtilities.Random.NextDouble(0.5, 50);
-                    star.Eccentricity = MathUtilities.Random.RandomEccentricity();
+                    star.SemiMajorAxis = rnd.NextDouble(0.5, 50);
+                    star.Eccentricity = rnd.RandomEccentricity();
                     star.Parent = stars[0];
                 }
                
@@ -102,19 +109,19 @@ namespace Pulsar4X.Stargen
             switch (spectrum)
             {
                 case StarSpectrum.O:
-                    return MathUtilities.Random.NextDouble(16.0, 150.0);
+                    return rnd.NextDouble(16.0, 150.0);
                 case StarSpectrum.B:
-                    return MathUtilities.Random.NextDouble(2.1, 16.0);
+                    return rnd.NextDouble(2.1, 16.0);
                 case StarSpectrum.A:
-                    return MathUtilities.Random.NextDouble(1.4, 2.1);
+                    return rnd.NextDouble(1.4, 2.1);
                 case StarSpectrum.F:
-                    return MathUtilities.Random.NextDouble(1.04, 1.4);
+                    return rnd.NextDouble(1.04, 1.4);
                 case StarSpectrum.G:
-                    return MathUtilities.Random.NextDouble(.8, 1.04);
+                    return rnd.NextDouble(.8, 1.04);
                 case StarSpectrum.K:
-                    return MathUtilities.Random.NextDouble(.45, .8);
+                    return rnd.NextDouble(.45, .8);
                 case StarSpectrum.M:
-                    return MathUtilities.Random.NextDouble(.07, .45);
+                    return rnd.NextDouble(.07, .45);
                 default:
                     throw new ArgumentException(string.Format("Unknown Spectrum: {0}", spectrum.ToString()));
             }
@@ -134,7 +141,7 @@ namespace Pulsar4X.Stargen
             return StarSpectrum.G;
 
             //TODO: Add support for age of galaxy if we want that, right now it just does medium age
-            var chance = MathUtilities.Random.NextDouble();
+            var chance = rnd.NextDouble();
             if (chance < SpectrumOChance)
                 return StarSpectrum.O;
             if (chance < SpectrumBChance)
@@ -205,7 +212,7 @@ namespace Pulsar4X.Stargen
             // 2/3rds of star systems in the Milky Way are single stars
             // 1/3rd are binary or multiple (trinary or higher is unstable)
             // will break the 1/3rd into two parts, 2/9ths binary, 1/9th trinary
-            var rand = MathUtilities.Random.Next(1, 10);
+            var rand = rnd.Next(1, 10);
             switch (rand)
             {
                 case 1:

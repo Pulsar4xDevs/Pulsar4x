@@ -228,18 +228,7 @@ namespace Pulsar4X.Stargen
             return 3;
         }
         
-        /// <summary>
-        ///	 The orbital radius is expected in units of Astronomical Units (AU).	
-        ///	 Inclination is returned in units of degrees.
-        /// </summary>
-        /// <param name="orbRadius"></param>
-        /// <returns></returns>
-        public static int Inclination(double orbRadius)
-        {
-            var temp = (int)(Math.Pow(orbRadius, 0.2) * MathUtilities.About(Constants.Sol.Earth.AXIAL_TILT, 0.4));
-            return (temp % 360);
-        }
-        
+       
         /// <summary>
         ///	 This function implements the escape velocity calculation.	Note that	
         ///	it appears that Fogg's eq.15 is incorrect.								
