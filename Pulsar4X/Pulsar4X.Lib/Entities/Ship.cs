@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
@@ -27,7 +28,10 @@ namespace Pulsar4X.Entities
         public int MaxCrew { get; set; }
         public int MaxLifeSupport { get; set; }
         public int DamageControlRating { get; set; }
-        public int ArmourThickness { get; set; }
-        public int ArmorWidth { get; set; }
+
+        //public int ArmourThickness { get; set; }
+        //public int ArmorWidth { get; set; }
+
+        public Armor ShipArmor;
     }
 }
