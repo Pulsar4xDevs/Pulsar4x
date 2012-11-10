@@ -5,7 +5,8 @@ solution "Pulsar4X"
 	configurations { "Debug", "Release" }
 	location "Pulsar4X"
 	framework "4.0"
-	
+
+if (_OPTIONS.os == "windows") then
 	-- WinForms Project, main UI project
 	project "Pulsar4X.WinForms"
 		kind "WindowedApp"
@@ -45,8 +46,52 @@ solution "Pulsar4X"
 			
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
-			defines { "OPENGL", "SPLASHSCREEN" }
+			defines {"OPENGL", "SPLASHSCREEN" }
 			flags { "Optimize" }
+
+else
+	-- GTKForms Project, main UI project
+	project "Pulsar4X.GTKForms"
+		kind "WindowedApp"
+		language "C#"
+		location "Pulsar4X/Pulsar4X.GTKForms"
+		objdir "Pulsar4X/Pulsar4X.GTKForms/obj"
+		links { -- Add any needed references here
+			"Pulsar4X.Lib",
+			"System",
+			"atk-sharp",
+			"gdk-sharp",
+			"glade-sharp",
+			"gtk-sharp",
+			"Mono.Posix",
+			"pango-sharp",
+			log4netlib(),
+			jsonlib(),
+			}
+		files { 
+			"Pulsar4X/Pulsar4X.GTKForms/**.cs",
+			"Pulsar4X/Pulsar4X.GTKForms/**.stetic",
+			"Pulsar4X/Pulsar4X.GTKForms/**.config"
+			}
+		excludes {
+			"Pulsar4X/Pulsar4X.WinForms/bin/**",
+			"Pulsar4X/Pulsar4X.WinForms/obj/**"
+			}
+		
+		configuration "Resources/**"
+			buildaction "copy"
+		
+		configuration "Debug"
+			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
+			defines { "DEBUG", 'OPENGL', 'GTKFORM', "SPLASHSCREEN" }
+			flags { "Symbols" }
+			
+		configuration "Release"
+			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
+			defines { "GTKFORM", 'OPENGL', "SPLASHSCREEN" }
+			flags { "Optimize" }
+end
+
 					
 	-- Lib Project, contains game files
 	project "Pulsar4X.Lib"
