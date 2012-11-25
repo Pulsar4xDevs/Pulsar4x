@@ -128,7 +128,7 @@ namespace Pulsar4X.UI.Helpers
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)TextureMagFilter.Linear);
 
             // Load data by telling OpenGL to build mipmaps out of bitmap data
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, oRawTextureData.Scan0);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, oRawTextureData.Scan0);
 
             logger.Info("OpenGL Loading Texture " + a_szTextureFile + ": " + GL.GetError().ToString());
 

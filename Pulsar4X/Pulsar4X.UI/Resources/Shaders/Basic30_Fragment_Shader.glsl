@@ -2,8 +2,7 @@
                                                                              
 precision highp float;
                                                                   
-uniform sampler2D TextureSampler; 
-uniform sampler2D TextureSampler2;
+uniform sampler2D TextureSampler;
                                                        
 in vec4 PixelColour;                                                                    
 in vec2 TexCoord;
