@@ -80,5 +80,25 @@ namespace Pulsar4X.UI.Helpers
             m_oSystemGenAndDisplay = new Handlers.SystemGenAndDisplay();
             m_oSystemMap = new Handlers.SystemMap();
         }
+
+        #region PublicMethods
+
+        /// <summary>
+        /// Enables SM mode.
+        /// </summary>
+        public void SMOn()
+        {
+            m_oSystemGenAndDisplay.SMOn();
+        }
+
+        /// <summary>
+        /// Disables SM mode
+        /// </summary>
+        public void SMOff()
+        {
+            m_oSystemGenAndDisplay.SMOff();
+        }
+
+        #endregion
     }
 }

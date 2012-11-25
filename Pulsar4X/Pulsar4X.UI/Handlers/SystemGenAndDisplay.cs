@@ -78,9 +78,6 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.AutoRenameButton.Click += new EventHandler(AutoRenameButton_Click);
             m_oControlsPanel.AddColonyButton.Click += new EventHandler(AddColonyButton_Click);
             m_oControlsPanel.ExportButton.Click += new EventHandler(ExportButton_Click);
-
-            // for now just enable ther SM stuff.
-            m_oControlsPanel.OnSMEnable();
         }
 
         #region EventHandlers
@@ -172,6 +169,16 @@ namespace Pulsar4X.UI.Handlers
         public void ShowControlsPanel(DockPanel a_oDockPanel)
         {
             m_oControlsPanel.Show(a_oDockPanel, DockState.DockLeft);
+        }
+
+        public void SMOn()
+        {
+            m_oControlsPanel.OnSMEnable();
+        }
+
+        public void SMOff()
+        {
+            m_oControlsPanel.OnSMDisable();
         }
 
         #endregion

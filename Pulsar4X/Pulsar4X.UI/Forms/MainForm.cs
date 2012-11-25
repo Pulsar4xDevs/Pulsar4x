@@ -38,17 +38,33 @@ namespace Pulsar4X.UI.Forms
         {
             // Setup Events:
             exitToolStripMenuItem.Click += new EventHandler(exitToolStripMenuItem_Click);
-            systemInformationToolStripMenuItem.Click += new EventHandler(systemInformationToolStripMenuItem_Click);
             aboutToolStripMenuItem.Click += new EventHandler(aboutToolStripMenuItem_Click);
+            systemInformationToolStripMenuItem.Click += new EventHandler(systemInformationToolStripMenuItem_Click);
+            m_oSystemViewToolStripButton.Click += new EventHandler(systemInformationToolStripMenuItem_Click);
             systemMapToolStripMenuItem.Click += new EventHandler(systemMapToolStripMenuItem_Click);
+            m_oSystemMapToolStripButton.Click += new EventHandler(systemMapToolStripMenuItem_Click);
 
-            // Set up the proportion of the windows used by docing panels at diufferent locations:
+            sMOnToolStripMenuItem.Click += new EventHandler(sMOnToolStripMenuItem_Click);
+            sMOffToolStripMenuItem.Click += new EventHandler(sMOffToolStripMenuItem_Click);
+
+            // Set up the proportion of the windows used by docing panels at different locations:
             m_oDockPanel.DockBottomPortion = 0.2f;
             m_oDockPanel.DockLeftPortion = 0.2f;
             m_oDockPanel.DockRightPortion = 0.2f;
         }
 
+
         #region MenuAndToolStripEvents
+
+        void sMOffToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.SMOff();
+        }
+
+        void sMOnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.SMOn();
+        }
 
         void systemMapToolStripMenuItem_Click(object sender, EventArgs e)
         {

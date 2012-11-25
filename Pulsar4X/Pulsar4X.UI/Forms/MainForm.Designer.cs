@@ -28,20 +28,26 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.m_oMainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.gameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.spaceMasterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.empireToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.systemMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_oToolStripContainer = new System.Windows.Forms.ToolStripContainer();
             this.m_oMainToolStrip = new System.Windows.Forms.ToolStrip();
-            this.systemMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.m_oSystemViewToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.m_oSystemMapToolStripButton = new System.Windows.Forms.ToolStripButton();
+            this.sMOnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sMOffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_oMainMenuStrip.SuspendLayout();
             this.m_oToolStripContainer.TopToolStripPanel.SuspendLayout();
             this.m_oToolStripContainer.SuspendLayout();
+            this.m_oMainToolStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oMainMenuStrip
@@ -75,6 +81,9 @@
             // 
             // spaceMasterToolStripMenuItem
             // 
+            this.spaceMasterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sMOnToolStripMenuItem,
+            this.sMOffToolStripMenuItem});
             this.spaceMasterToolStripMenuItem.Name = "spaceMasterToolStripMenuItem";
             this.spaceMasterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
             this.spaceMasterToolStripMenuItem.Size = new System.Drawing.Size(89, 20);
@@ -89,6 +98,13 @@
             this.empireToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.empireToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.empireToolStripMenuItem.Text = "&Empire";
+            // 
+            // systemMapToolStripMenuItem
+            // 
+            this.systemMapToolStripMenuItem.Name = "systemMapToolStripMenuItem";
+            this.systemMapToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
+            this.systemMapToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.systemMapToolStripMenuItem.Text = "System Map";
             // 
             // systemInformationToolStripMenuItem
             // 
@@ -131,17 +147,45 @@
             // m_oMainToolStrip
             // 
             this.m_oMainToolStrip.Dock = System.Windows.Forms.DockStyle.None;
+            this.m_oMainToolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.m_oSystemMapToolStripButton,
+            this.m_oSystemViewToolStripButton});
             this.m_oMainToolStrip.Location = new System.Drawing.Point(3, 0);
             this.m_oMainToolStrip.Name = "m_oMainToolStrip";
-            this.m_oMainToolStrip.Size = new System.Drawing.Size(111, 25);
+            this.m_oMainToolStrip.Size = new System.Drawing.Size(58, 25);
             this.m_oMainToolStrip.TabIndex = 0;
             // 
-            // systemMapToolStripMenuItem
+            // m_oSystemViewToolStripButton
             // 
-            this.systemMapToolStripMenuItem.Name = "systemMapToolStripMenuItem";
-            this.systemMapToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.systemMapToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.systemMapToolStripMenuItem.Text = "System Map";
+            this.m_oSystemViewToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.m_oSystemViewToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("m_oSystemViewToolStripButton.Image")));
+            this.m_oSystemViewToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.m_oSystemViewToolStripButton.Name = "m_oSystemViewToolStripButton";
+            this.m_oSystemViewToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.m_oSystemViewToolStripButton.Text = "System View";
+            // 
+            // m_oSystemMapToolStripButton
+            // 
+            this.m_oSystemMapToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.m_oSystemMapToolStripButton.Image = ((System.Drawing.Image)(resources.GetObject("m_oSystemMapToolStripButton.Image")));
+            this.m_oSystemMapToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.m_oSystemMapToolStripButton.Name = "m_oSystemMapToolStripButton";
+            this.m_oSystemMapToolStripButton.Size = new System.Drawing.Size(23, 22);
+            this.m_oSystemMapToolStripButton.Text = "System Map";
+            // 
+            // sMOnToolStripMenuItem
+            // 
+            this.sMOnToolStripMenuItem.Name = "sMOnToolStripMenuItem";
+            this.sMOnToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.sMOnToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.sMOnToolStripMenuItem.Text = "SM On";
+            // 
+            // sMOffToolStripMenuItem
+            // 
+            this.sMOffToolStripMenuItem.Name = "sMOffToolStripMenuItem";
+            this.sMOffToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.sMOffToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
+            this.sMOffToolStripMenuItem.Text = "SM Off";
             // 
             // MainForm
             // 
@@ -161,6 +205,8 @@
             this.m_oToolStripContainer.TopToolStripPanel.PerformLayout();
             this.m_oToolStripContainer.ResumeLayout(false);
             this.m_oToolStripContainer.PerformLayout();
+            this.m_oMainToolStrip.ResumeLayout(false);
+            this.m_oMainToolStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -179,5 +225,9 @@
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem systemInformationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem systemMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton m_oSystemMapToolStripButton;
+        private System.Windows.Forms.ToolStripButton m_oSystemViewToolStripButton;
+        private System.Windows.Forms.ToolStripMenuItem sMOnToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sMOffToolStripMenuItem;
     }
 }
