@@ -78,6 +78,12 @@ function log4netlib()
 	end
 end
 
+-- Find the required DockPanelSuite library
+function dockPanelSuiteLib()
+	-- should work for mono and .net
+	return os.findlib("WeifenLuo.WinFormsUI.Docking") or "Pulsar4X/deps/DockPanelSuite/WeifenLuo.WinFormsUI.Docking.dll";
+end
+
 -- Find the required json library
 function jsonlib()
 	if (_OPTIONS.dotnet == "mono") then

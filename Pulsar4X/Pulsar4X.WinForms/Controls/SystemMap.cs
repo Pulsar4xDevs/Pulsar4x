@@ -82,7 +82,7 @@ namespace Pulsar4X.WinForms.Controls
             {
                 // then we have scrolled down, so zoom out!!
                 m_GLCanvas.DecreaseZoomScaler();
-                UpdateScaleLabels();                
+                UpdateScaleLabels();
             }
             else if (e.Delta >= 120)
             {
