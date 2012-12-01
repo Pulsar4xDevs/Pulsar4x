@@ -23,7 +23,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void TestSetup()
         {
-            _gameState = new GameState();
+            _gameState = GameState.Instance;
             _gameState.Name = "Test Game";
             _gameState.Species = new BindingList<Species>();
             _gameState.Factions = new BindingList<Faction>();
