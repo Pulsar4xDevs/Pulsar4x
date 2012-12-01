@@ -273,7 +273,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_oSW.Start();
         }
 
-        private void InitOpenGL20()
+        private void InitOpenGL21()
         {
             //this.Context.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
             GraphicsContext.CurrentContext.SwapInterval = 1; // this prevents us using 100% GPU/CPU
@@ -324,7 +324,7 @@ namespace Pulsar4X.UI.GLUtilities
                 logger.Info("OpenGL Error Check, InvalidEnum or NoError Expected: " + m_eGLError.ToString());
             }
 
-            m_oEffect = new GLUtilities.GLEffectBasic30("./Resources/Shaders/Basic20_Vertex_Shader.glsl", "./Resources/Shaders/Basic20_Fragment_Shader.glsl");
+            m_oEffect = new GLUtilities.GLEffectBasic21("./Resources/Shaders/Basic20_Vertex_Shader.glsl", "./Resources/Shaders/Basic20_Fragment_Shader.glsl");
 
             // Setup Our View Port, this sets Our Projection and View Matricies.
             SetupViewPort(0, 0, this.Size.Width, this.Size.Height);
@@ -351,6 +351,7 @@ namespace Pulsar4X.UI.GLUtilities
                 OpenGLVersion = GL.GetString(StringName.Version);
                 OpenGLVersionMajor = int.Parse(OpenGLVersion[0].ToString());      // extracts the major verion number an converts it to a int.
                 OpenGLVersionMinor = int.Parse(OpenGLVersion[2].ToString());      // same again for minor verion number.
+               // OpenGLVersionMajor = 2; - uncomment to force GL 2.0 - for testing
 #if DEBUG
                 logger.Debug("Highest OpenGL Version Initialised is " + OpenGLVersion);
 #endif
@@ -367,7 +368,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             if (OpenGLVersionMajor == 2)
             {
-                InitOpenGL20();
+                InitOpenGL21();
             }
             else if (OpenGLVersionMajor == 3 || OpenGLVersionMajor == 4)
             {

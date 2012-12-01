@@ -12,14 +12,14 @@ using log4net;
 namespace Pulsar4X.UI.GLUtilities
 {
     /// <summary>
-    /// Most Basic type of GL effect/Shaders, Works with openGL 3.0 or higher.
+    /// Most Basic type of GL effect/Shaders, Works with openGL 2.X
     /// </summary>
-    public class GLEffectBasic30 : GLEffect
+    public class GLEffectBasic21 : GLEffect
     {
         /// <summary>   Constructor. </summary>
         /// <param name="a_szVertShaderFile">   The Vertex shader file. </param>
         /// <param name="a_szFragShaderFile">   The fragment shader file. </param>
-        public GLEffectBasic30(string a_szVertShaderFile, string a_szFragShaderFile)
+        public GLEffectBasic21(string a_szVertShaderFile, string a_szFragShaderFile)
         {
             // Load Shader source files:
             string szVertShaderSource = "";
@@ -42,7 +42,7 @@ namespace Pulsar4X.UI.GLUtilities
             string szShaderError;
 
             int iGLVertexShader = GL.CreateShader(ShaderType.VertexShader);    // Get a shader handle from open GL
-            GL.ShaderSource(iGLVertexShader, szVertShaderSource);          // Let OpenGL know about the source code for the shandle provided.
+            GL.ShaderSource(iGLVertexShader, szVertShaderSource);                  // Let OpenGL know about the source code for the shandle provided.
             GL.CompileShader(iGLVertexShader);                                 // Tell OpenGL to compile the shaders gened above.
 
             GL.GetShader(iGLVertexShader, ShaderParameter.CompileStatus, out iShaderError);
@@ -73,7 +73,6 @@ namespace Pulsar4X.UI.GLUtilities
             GL.BindAttribLocation(m_iShaderProgramHandle, 0, "VertexPosition"); // Binds the vertex position Variable in the shader program to the index 0.
             GL.BindAttribLocation(m_iShaderProgramHandle, 1, "VertexColour");   // Binds the vertex color Variable in the shader program to the index 1.
             GL.BindAttribLocation(m_iShaderProgramHandle, 2, "UVCord");         // Binds the vertex UC coords Variable in the shader program to the index 2.
-            GL.BindFragDataLocation(m_iShaderProgramHandle, 0, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3.
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
             GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
@@ -84,6 +83,7 @@ namespace Pulsar4X.UI.GLUtilities
                 iShaderError = 1;
             }
 
+            logger.Info("OpenGL Pre Bind Matricies to Shader Code: " + GL.GetError().ToString());
             // The Following Bind our Projection, view (camera) and model Matricies in c# to the corosponding vars in the shader program
             // it is what allows us to update a matrix in c# and have the GPU do all the calculations for Transformations on next render.
             m_aiShaderMatrixLocations = new int[3];     // create memory.
