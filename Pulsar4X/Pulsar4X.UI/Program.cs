@@ -23,10 +23,9 @@ namespace Pulsar4X.UI
             logger.Info("Program Started");
 
             // gen star system:
-            var ssf = new StarSystemFactory(true);
-            GameState.Instance.StarSystems.Add(ssf.Create("Test"));
-            GameState.Instance.StarSystems.Add(ssf.Create("Foo"));
-            GameState.Instance.StarSystems.Add(ssf.Create("Bar"));
+            GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Test"));
+            GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Foo"));
+            GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Bar"));
 
             Application.EnableVisualStyles();
 

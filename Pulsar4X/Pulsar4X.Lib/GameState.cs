@@ -27,7 +27,7 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Use this function to Init the game with a random specific Seed, if you do not need to specify a seed then you can just access it via Instance.
+        /// Constructor.
         /// </summary>
         public static void Initialise()
         {

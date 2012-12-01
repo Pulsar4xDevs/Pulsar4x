@@ -31,6 +31,7 @@ namespace Pulsar4X.UI.ViewModels
                 //NotifyPropertyChanged("CurrentStarSystem");
                 OnPropertyChanged(() => CurrentStarSystem);
                 CurrentStarSystemAge = _currentstarsystem.Stars[0].Age.ToString();
+                Seed = _currentstarsystem.Seed.ToString();
                 Stars = new BindingList<Star>(_currentstarsystem.Stars);
                 StarsSource.DataSource = Stars;
                 OnPropertyChanged(() => Stars);
@@ -45,14 +46,32 @@ namespace Pulsar4X.UI.ViewModels
             set
             {
                 // safty check:
-                if (_currentstarsystemage == null)
-                {
-                    return;
-                }
+                //if (_currentstarsystemage == null)
+                //{
+                //    return;
+                //}
 
                 _currentstarsystemage = value;
                 //NotifyPropertyChanged("CurrentStarSystemAge");
                 OnPropertyChanged(() => CurrentStarSystemAge);
+            }
+        }
+
+        private string _seed;
+        public string Seed
+        {
+            get { return _seed; }
+            set
+            {
+                // safty check:
+                //if (_seed == null)
+                //{
+                //    return;
+                //}
+
+                _seed = value;
+                //NotifyPropertyChanged("CurrentStarSystemAge");
+                OnPropertyChanged(() => Seed);
             }
         }
 

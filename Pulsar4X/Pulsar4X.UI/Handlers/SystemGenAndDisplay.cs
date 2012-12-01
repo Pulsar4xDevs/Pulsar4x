@@ -26,9 +26,7 @@ namespace Pulsar4X.UI.Handlers
 
         public StarSystemViewModel VM { get; set; }
 
-        // Some Temp Vars until we work out a better way to do Gen Systems from here.
-        StarSystemFactory ssf = new StarSystemFactory(true);
-        int m_iNumberOfNewSystemsGened = 0;
+        private int m_iNumberOfNewSystemsGened = 0;
 
         public SystemGenAndDisplay()
         {
@@ -45,6 +43,10 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.SystemSelectionComboBox.DisplayMember = "Name";
 
             m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += (s, args) => m_oControlsPanel.SystemSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
+
+            // bind text boxes:
+            m_oControlsPanel.AgeTextBox.Bind(c => c.Text, VM, d => d.CurrentStarSystemAge);
+            m_oControlsPanel.SeedTextBox.Bind(c => c.Text, VM, d => d.Seed);
 
             // Setup the stars Grid
             m_oDataPanel.StarDataGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -127,8 +129,15 @@ namespace Pulsar4X.UI.Handlers
 
         void GenSystemButton_Click(object sender, EventArgs e)
         {
-            m_iNumberOfNewSystemsGened++;
-            GameState.Instance.StarSystems.Add(ssf.Create("Gened System " + m_iNumberOfNewSystemsGened.ToString()));
+            Dialogs.InputBasic InpuDialog = new Dialogs.InputBasic("Enter Seed", "Enter System Seed", "-1");
+            InpuDialog.ShowDialog();
+            if (InpuDialog.DialogResult == DialogResult.OK)
+            {
+                m_iNumberOfNewSystemsGened++;
+                GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Gened System " + m_iNumberOfNewSystemsGened.ToString(), InpuDialog.InputInt));
+            }
+            // cleanup input box:
+            InpuDialog.Close();
         }
 
         void StarsDataGrid_SelectionChanged(object sender, EventArgs e)

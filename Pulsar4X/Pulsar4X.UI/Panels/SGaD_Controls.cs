@@ -125,6 +125,17 @@ namespace Pulsar4X.UI.Panels
             }
         }
 
+        /// <summary>
+        /// Contains the system Seed.
+        /// </summary>
+        public TextBox SeedTextBox
+        {
+            get
+            {
+                return m_oSeedTextBox;
+            }
+        }
+
         private ToolTip m_oToolTip;
 
         #endregion
@@ -137,12 +148,18 @@ namespace Pulsar4X.UI.Panels
             m_oToolTip.ShowAlways = true;
 
             // Define some default values for the textboxes.
-            m_oAgeTextBox.Enabled = false;
+            m_oAgeTextBox.Enabled = true;
+            m_oAgeTextBox.ReadOnly = true;
             m_oAgeTextBox.Text = "0.0";
-            m_oSystemTypeTextBox.Enabled = false;
+            m_oSystemTypeTextBox.Enabled = true;
+            m_oSystemTypeTextBox.ReadOnly = true;
             m_oSystemTypeTextBox.Text = "Single Star";
-            m_oDisscoveredDateTextBox.Enabled = false;
+            m_oDisscoveredDateTextBox.Enabled = true;
+            m_oDisscoveredDateTextBox.ReadOnly = true;
             m_oDisscoveredDateTextBox.Text = "1st Jan 2025";
+            m_oSeedTextBox.Text = "-1";
+            m_oSeedTextBox.Enabled = true;
+            m_oSeedTextBox.ReadOnly = true;
 
             // Set SM controls disabled by default:
             OnSMDisable();
