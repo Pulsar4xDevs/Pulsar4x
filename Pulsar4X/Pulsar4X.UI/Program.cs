@@ -28,10 +28,10 @@ namespace Pulsar4X.UI
             GameState.Instance.StarSystems.Add(ssf.Create("Foo"));
             GameState.Instance.StarSystems.Add(ssf.Create("Bar"));
 
+            Application.EnableVisualStyles();
+
             // Init our UI Controller:
             Helpers.UIController.Instance.Initialise();
-
-            Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Forms.MainForm());
 

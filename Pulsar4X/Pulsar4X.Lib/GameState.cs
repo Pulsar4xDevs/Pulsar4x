@@ -12,6 +12,7 @@ namespace Pulsar4X
     {
 
         #region Singleton
+
         private static GameState instance;
         public static GameState Instance
         {
@@ -24,7 +25,39 @@ namespace Pulsar4X
                 return instance;
             }
         }
+
+        /// <summary>
+        /// Use this function to Init the game with a random specific Seed, if you do not need to specify a seed then you can just access it via Instance.
+        /// </summary>
+        public static void Initialise()
+        {
+            if (instance == null)
+            {
+                instance = new GameState();
+            }
+        }
+
+        private GameState()
+        {
+            m_oStarSystemFactory = new Stargen.StarSystemFactory();
+        }
+
         #endregion
+
+        private Stargen.StarSystemFactory m_oStarSystemFactory;
+        public Stargen.StarSystemFactory StarSystemFactory
+        {
+            get
+            {
+                return m_oStarSystemFactory;
+            }
+        }
+
+        public void Load()
+        {
+            // Load From db
+            throw new NotImplementedException();
+        }
 
         public void Commit()
         {
@@ -35,8 +68,7 @@ namespace Pulsar4X
         #region Game Meta data
         public string Name { get; set; }
         public string SaveDirectoryPath { get; set; }
-        #endregion
-        
+        #endregion    
 
 #region Entities
 

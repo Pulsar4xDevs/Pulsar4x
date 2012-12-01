@@ -12,6 +12,8 @@ namespace Pulsar4X.Entities
     {
         public BindingList<Star> Stars { get; set; }
 
+        public int Seed { get; set; }
+
         public StarSystem()
             : this(string.Empty)
         {
