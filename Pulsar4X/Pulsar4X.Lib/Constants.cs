@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
+using System.Drawing;
 
 namespace Pulsar4X
 {
@@ -586,6 +587,120 @@ namespace Pulsar4X
             public const double JIMS_FUDGE = 1.004;
 
             public const double CLOUD_ECCENTRICITY = 0.2D;
+        }
+
+        public class StarColor
+        {
+            private Dictionary<string, Color> m_dicStarColors;
+
+            private static StarColor m_oStarColor;
+
+            private StarColor()
+            {
+                m_dicStarColors = new Dictionary<string, Color>();
+
+                // note the following colors are source fron:
+                // http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
+                // where this source did not provide a color an aproiximation was done using 
+                // the next class above and below the missing one. The are comented as such.
+                m_dicStarColors["O5"] = Color.FromArgb(255, 155, 176, 255);
+                m_dicStarColors["O6"] = Color.FromArgb(255, 162, 184, 255);
+                m_dicStarColors["O7"] = Color.FromArgb(255, 157, 177, 255);
+                m_dicStarColors["O8"] = Color.FromArgb(255, 157, 177, 255);
+                m_dicStarColors["O9"] = Color.FromArgb(255, 154, 178, 255);
+                m_dicStarColors["O9.5"] = Color.FromArgb(255, 164, 186, 255);
+
+                m_dicStarColors["B0"] = Color.FromArgb(255, 156, 178, 255);
+                m_dicStarColors["B0.5"] = Color.FromArgb(255, 167, 188, 255);
+                m_dicStarColors["B1"] = Color.FromArgb(255, 160, 182, 255);
+                m_dicStarColors["B2"] = Color.FromArgb(255, 160, 180, 255);
+                m_dicStarColors["B3"] = Color.FromArgb(255, 165, 185, 255);
+                m_dicStarColors["B4"] = Color.FromArgb(255, 164, 184, 255);
+                m_dicStarColors["B5"] = Color.FromArgb(255, 170, 191, 255);
+                m_dicStarColors["B6"] = Color.FromArgb(255, 172, 189, 255);
+                m_dicStarColors["B7"] = Color.FromArgb(255, 173, 191, 255);
+                m_dicStarColors["B8"] = Color.FromArgb(255, 177, 195, 255);
+                m_dicStarColors["B9"] = Color.FromArgb(255, 181, 198, 255);
+
+                m_dicStarColors["A0"] = Color.FromArgb(255, 185, 201, 255);
+                m_dicStarColors["A1"] = Color.FromArgb(255, 181, 199, 255);
+                m_dicStarColors["A2"] = Color.FromArgb(255, 187, 203, 255);
+                m_dicStarColors["A3"] = Color.FromArgb(255, 191, 207, 255);
+                m_dicStarColors["A4"] = Color.FromArgb(255, 195, 210, 255);
+                m_dicStarColors["A5"] = Color.FromArgb(255, 202, 215, 255);
+                m_dicStarColors["A6"] = Color.FromArgb(255, 199, 212, 255);
+                m_dicStarColors["A7"] = Color.FromArgb(255, 200, 213, 255);
+                m_dicStarColors["A8"] = Color.FromArgb(255, 213, 222, 255);
+                m_dicStarColors["A9"] = Color.FromArgb(255, 219, 224, 255);
+
+                m_dicStarColors["F0"] = Color.FromArgb(255, 224, 229, 255);
+                m_dicStarColors["F1"] = Color.FromArgb(255, 230, 234, 255);   // This value is estimated using F0 and F2 values.
+                m_dicStarColors["F2"] = Color.FromArgb(255, 236, 239, 255);
+                m_dicStarColors["F3"] = Color.FromArgb(255, 227, 230, 255);
+                m_dicStarColors["F4"] = Color.FromArgb(255, 224, 226, 255);
+                m_dicStarColors["F5"] = Color.FromArgb(255, 248, 247, 255);
+                m_dicStarColors["F6"] = Color.FromArgb(255, 244, 241, 255);
+                m_dicStarColors["F7"] = Color.FromArgb(255, 246, 243, 255);
+                m_dicStarColors["F8"] = Color.FromArgb(255, 255, 247, 252);
+                m_dicStarColors["F9"] = Color.FromArgb(255, 255, 247, 252);
+
+                m_dicStarColors["G0"] = Color.FromArgb(255, 255, 248, 252);
+                m_dicStarColors["G1"] = Color.FromArgb(255, 255, 247, 248);
+                m_dicStarColors["G2"] = Color.FromArgb(255, 255, 245, 242);
+                m_dicStarColors["G3"] = Color.FromArgb(255, 255, 243, 233);
+                m_dicStarColors["G4"] = Color.FromArgb(255, 255, 241, 229);
+                m_dicStarColors["G5"] = Color.FromArgb(255, 255, 244, 234);
+                m_dicStarColors["G6"] = Color.FromArgb(255, 255, 244, 235);
+                m_dicStarColors["G7"] = Color.FromArgb(255, 255, 244, 235);
+                m_dicStarColors["G8"] = Color.FromArgb(255, 255, 237, 222);
+                m_dicStarColors["G9"] = Color.FromArgb(255, 255, 239, 221);
+
+                m_dicStarColors["K0"] = Color.FromArgb(255, 255, 238, 221);
+                m_dicStarColors["K1"] = Color.FromArgb(255, 255, 224, 188);
+                m_dicStarColors["K2"] = Color.FromArgb(255, 255, 227, 196);
+                m_dicStarColors["K3"] = Color.FromArgb(255, 255, 222, 195);
+                m_dicStarColors["K4"] = Color.FromArgb(255, 255, 216, 181);
+                m_dicStarColors["K5"] = Color.FromArgb(255, 255, 210, 161);
+                m_dicStarColors["K6"] = Color.FromArgb(255, 255, 204, 151);  // This value is estimated using K5 and K7 values.
+                m_dicStarColors["K7"] = Color.FromArgb(255, 255, 199, 142);
+                m_dicStarColors["K8"] = Color.FromArgb(255, 255, 209, 174);
+                m_dicStarColors["K9"] = Color.FromArgb(255, 255, 200, 161);  // This value is estimated using K8 and M0 values.
+
+                m_dicStarColors["M0"] = Color.FromArgb(255, 255, 195, 139);
+                m_dicStarColors["M1"] = Color.FromArgb(255, 255, 204, 142);
+                m_dicStarColors["M2"] = Color.FromArgb(255, 255, 196, 131);
+                m_dicStarColors["M3"] = Color.FromArgb(255, 255, 206, 129);
+                m_dicStarColors["M4"] = Color.FromArgb(255, 255, 201, 127);
+                m_dicStarColors["M5"] = Color.FromArgb(255, 255, 204, 111);
+                m_dicStarColors["M6"] = Color.FromArgb(255, 255, 195, 112);
+                m_dicStarColors["M7"] = Color.FromArgb(255, 255, 197, 110);   // This value is estimated using M6 and M8 values.
+                m_dicStarColors["M8"] = Color.FromArgb(255, 255, 198, 109);
+                m_dicStarColors["M9"] = Color.FromArgb(255, 255, 233, 154);
+
+                m_dicStarColors["O"] = Color.FromArgb(255, 155, 176, 255);
+                m_dicStarColors["B"] = Color.FromArgb(255, 170, 191, 255);
+                m_dicStarColors["A"] = Color.FromArgb(255, 202, 215, 255);
+                m_dicStarColors["F"] = Color.FromArgb(255, 248, 247, 255);
+                m_dicStarColors["G"] = Color.FromArgb(255, 255, 244, 234);
+                m_dicStarColors["K"] = Color.FromArgb(255, 255, 210, 161);
+                m_dicStarColors["M"] = Color.FromArgb(255, 255, 204, 111);
+                m_dicStarColors["N"] = Color.FromArgb(255, 255, 157, 000);
+            }
+
+            public static Color LookupColor(string a_szSpectralClass)
+            {
+                if (m_oStarColor == null)
+                {
+                    m_oStarColor = new StarColor();
+                }
+
+                if (m_oStarColor.m_dicStarColors[a_szSpectralClass] != null)
+                {
+                    return m_oStarColor.m_dicStarColors[a_szSpectralClass];
+                }
+
+                return Color.White;
+            }
         }
     }
 }

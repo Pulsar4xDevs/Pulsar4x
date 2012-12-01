@@ -138,7 +138,7 @@ namespace Pulsar4X.Stargen
         private StarSpectrum GenerateSpectrum()
         {
             //TODO: Remove, temporary hack to create more Sol-sized stars
-            return StarSpectrum.G;
+            //return StarSpectrum.G;
 
             //TODO: Add support for age of galaxy if we want that, right now it just does medium age
             var chance = rnd.NextDouble();

@@ -181,7 +181,7 @@ namespace Pulsar4X.UI.SceenGraph
                     GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultShader,
                         Vector3.Zero,                                                                      // base around parent star pos.
                         oStar, //(float)(oStar.SemiMajorAxis * dKMperAUdevby10) / 2,
-                        Color.FromArgb(255, 255, 255, 0),  // yellow.
+                        Pulsar4X.Constants.StarColor.LookupColor(oStar.Class),
                         UIConstants.Textures.DEFAULT_TEXTURE);
                     oCurrStar.AddPrimitive(oStarOrbitCirc);
                 }
@@ -192,7 +192,7 @@ namespace Pulsar4X.UI.SceenGraph
                 GLUtilities.GLQuad oStarQuad = new GLUtilities.GLQuad(a_oDefaultShader,
                                                                         v3StarPos,
                                                                         new Vector2(fStarSize, fStarSize),
-                                                                        Color.FromArgb(255, 255, 255, 0),    // yellow!
+                                                                        Pulsar4X.Constants.StarColor.LookupColor(oStar.Class),
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
                 // create name lable:
                 GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultShader,
