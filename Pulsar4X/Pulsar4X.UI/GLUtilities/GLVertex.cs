@@ -29,7 +29,7 @@ namespace Pulsar4X.UI.GLUtilities
         /// the half size float provide 10bits, i.e. more than enough, while still saving on copying 2 bytes of data
         /// to the graphics card each call (or 8 bytes for a quad!!).
         /// </summary>
-        public OpenTK.Vector4h  m_v4Color;
+        public OpenTK.Vector4  m_v4Color;
 
         /// <summary>
         /// The Texture "UV" coordinates for this vertex.
@@ -51,7 +51,7 @@ namespace Pulsar4X.UI.GLUtilities
         //    m_v2UV.Y = 0;
         //}
 
-        public GLVertex(OpenTK.Vector4 a_v4Position, OpenTK.Vector4h a_v4Color, OpenTK.Vector2 a_v2UV)
+        public GLVertex(OpenTK.Vector4 a_v4Position, OpenTK.Vector4 a_v4Color, OpenTK.Vector2 a_v2UV)
         {
             m_v4Position = a_v4Position;
             m_v4Color = a_v4Color;
@@ -62,19 +62,19 @@ namespace Pulsar4X.UI.GLUtilities
         {
             m_v4Position = a_v4Position;
             // We order the color RGBA because this is the order expected by OpenGL/Graphics card.
-            m_v4Color.X = (OpenTK.Half)(a_oColor.R * 8);
-            m_v4Color.Y = (OpenTK.Half)(a_oColor.G * 8);
-            m_v4Color.Z = (OpenTK.Half)(a_oColor.B * 8);
-            m_v4Color.W = (OpenTK.Half)(a_oColor.A * 8);
+            m_v4Color.X = a_oColor.R / 255.0f;
+            m_v4Color.Y = a_oColor.G / 255.0f;
+            m_v4Color.Z = a_oColor.B / 255.0f;
+            m_v4Color.W = a_oColor.A / 255.0f;
             m_v2UV = a_v2UV;
         }
 
         public void SetColor(System.Drawing.Color a_oColor)
         {
-            m_v4Color.X = (OpenTK.Half)(a_oColor.R * 8);
-            m_v4Color.Y = (OpenTK.Half)(a_oColor.G * 8);
-            m_v4Color.Z = (OpenTK.Half)(a_oColor.B * 8);
-            m_v4Color.W = (OpenTK.Half)(a_oColor.A * 8);
+            m_v4Color.X = a_oColor.R / 255.0f;
+            m_v4Color.Y = a_oColor.G / 255.0f;
+            m_v4Color.Z = a_oColor.B / 255.0f;
+            m_v4Color.W = a_oColor.A / 255.0f;
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Pulsar4X.UI.GLUtilities
             //int temp = Vector3.SizeInBytes + Vector4h.SizeInBytes + Vector2.SizeInBytes;
             //GLVertex temp3 = new GLVertex();
             //int temp2 = System.Runtime.InteropServices.Marshal.SizeOf(temp3);
-            return (Vector4.SizeInBytes + Vector4h.SizeInBytes + Vector2.SizeInBytes);
+            return (Vector4.SizeInBytes + Vector4.SizeInBytes + Vector2.SizeInBytes);
         }
 
         // Note the below code can be used to test that this struct is Bittable. It return true as of 26/8/12.

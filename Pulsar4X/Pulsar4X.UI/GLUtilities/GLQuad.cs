@@ -91,8 +91,8 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);    // Switch back to our Buffer Object as the current buffer.
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), 0);  // Tells OpenGL about the first three doubles in the vbo, i.e the position of the vertex.
-            GL.VertexAttribPointer(1, 4, VertexAttribPointerType.HalfFloat, true, GLVertex.SizeInBytes(), Vector4.SizeInBytes); // tells OpenGL about the 4 half floats used to repesent color.
-            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector4.SizeInBytes + Vector4h.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
+            GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, true, GLVertex.SizeInBytes(), Vector4.SizeInBytes); // tells OpenGL about the 4 half floats used to repesent color.
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector4.SizeInBytes + Vector4.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
             //#if DEBUG
             //        logger.Info("OpenGL Create Vertes Attribute Pointers: " + GL.GetError().ToString());
             //#endif
