@@ -127,13 +127,13 @@ namespace Pulsar4X.Stargen
             }
         }
 
-        private const double SpectrumOChance = 1 / 3000000;
-        private const double SpectrumBChance = 1 / 800;
-        private const double SpectrumAChance = 1 / 160;
-        private const double SpectrumFChance = 1 / 33;
-        private const double SpectrumGChance = 1 / 13;
-        private const double SpectrumKChance = 1 / 8;
-        private const double SpectrumMChance = 76 / 100;
+        private static double SpectrumOChance = 0.00003; //1.0f / 3000000.0f;
+        private static double SpectrumBChance = 0.13; //1.0f / 800.0f;
+        private static double SpectrumAChance = 0.6; //1.0f / 160.0f;
+        private static double SpectrumFChance = 3.0; // 1.0f / 33.0f;
+        private static double SpectrumGChance = 7.6; // 1.0f / 13.0f;
+        private static double SpectrumKChance = 12.1; // 1.0f / 8.0f;
+        //private static double SpectrumMChance = 76.45; // 76.0f / 100.0f;
 
         private StarSpectrum GenerateSpectrum()
         {
@@ -141,7 +141,7 @@ namespace Pulsar4X.Stargen
             //return StarSpectrum.G;
 
             //TODO: Add support for age of galaxy if we want that, right now it just does medium age
-            var chance = rnd.NextDouble();
+            var chance = rnd.NextDouble(0.0, 100);
             if (chance < SpectrumOChance)
                 return StarSpectrum.O;
             if (chance < SpectrumBChance)
