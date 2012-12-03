@@ -201,6 +201,17 @@ namespace Pulsar4X.UI.GLUtilities
                     m_lQuads[i].Verticies[3].m_v2UV.Y = oGLUVCoords.m_v2UVMin.Y;    // 1 , 0
                     m_lQuads[i].UpdateVBOs();
                 }
+                else
+                {
+                    m_oFontData.m_dicCharMap.TryGetValue(' ', out oGLUVCoords); // get value for space!
+                    m_lQuads[i].Verticies[0].m_v2UV.X = oGLUVCoords.m_v2UVMin.X;    // 0, 1
+                    m_lQuads[i].Verticies[0].m_v2UV.Y = oGLUVCoords.m_v2UVMax.Y;    // 0, 1
+                    m_lQuads[i].Verticies[1].m_v2UV = oGLUVCoords.m_v2UVMax;    // 1, 1
+                    m_lQuads[i].Verticies[2].m_v2UV = oGLUVCoords.m_v2UVMin;    // 0, 0
+                    m_lQuads[i].Verticies[3].m_v2UV.X = oGLUVCoords.m_v2UVMax.X;    // 1 , 0
+                    m_lQuads[i].Verticies[3].m_v2UV.Y = oGLUVCoords.m_v2UVMin.Y;    // 1 , 0
+                    m_lQuads[i].UpdateVBOs();
+                }
             }
         }
     }
