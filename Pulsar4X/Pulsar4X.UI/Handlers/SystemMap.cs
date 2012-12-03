@@ -66,7 +66,6 @@ namespace Pulsar4X.UI.Handlers
         public GLStarSystemViewModel VM { get; set; }
 
 
-
         public SystemMap()
         {
             m_oViewPortPanel = new Panels.SysMap_ViewPort();
@@ -108,10 +107,7 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.ZoomOutButton.Click += new EventHandler(ZoomOutButton_Click);
             m_oControlsPanel.ResetViewButton.Click += new EventHandler(ResetViewButton_Click);
             m_oViewPortPanel.SizeChanged += new EventHandler(ViewPort_SizeChanged);
-
         }
-
-
 
         #region EventHandlers
 
@@ -219,12 +215,36 @@ namespace Pulsar4X.UI.Handlers
 
         public void ShowViewPortPanel(DockPanel a_oDockPanel)
         {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oViewPortPanel.Show(a_oDockPanel, DockState.Document);
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        public void ActivatePortPanel()
+        {
+            if (!m_oViewPortPanel.IsActivated)
+            {
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+                m_oViewPortPanel.Activate();
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+            }
         }
 
         public void ShowControlsPanel(DockPanel a_oDockPanel)
         {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oControlsPanel.Show(a_oDockPanel, DockState.DockLeft);
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        public void ActivateControlsPanel()
+        {
+            if (!m_oControlsPanel.IsActivated)
+            {
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+                m_oControlsPanel.Activate();
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+            }
         }
 
         /// <summary>

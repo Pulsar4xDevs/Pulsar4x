@@ -53,10 +53,15 @@ namespace Pulsar4X.UI.Forms
             m_oDockPanel.DockBottomPortion = 0.2f;
             m_oDockPanel.DockLeftPortion = 0.2f;
             m_oDockPanel.DockRightPortion = 0.2f;
+            m_oDockPanel.ActiveDocumentChanged += new EventHandler(m_oDockPanel_ActiveDocumentChanged);
         }
 
-
         #region MenuAndToolStripEvents
+
+        void m_oDockPanel_ActiveDocumentChanged(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.DockPanelActiveDocumentChanged(m_oDockPanel);
+        }
 
         void sMOffToolStripMenuItem_Click(object sender, EventArgs e)
         {

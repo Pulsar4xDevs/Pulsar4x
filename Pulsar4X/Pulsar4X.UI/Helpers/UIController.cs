@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using WeifenLuo.WinFormsUI.Docking;
 
 namespace Pulsar4X.UI.Helpers
 {
@@ -55,6 +56,10 @@ namespace Pulsar4X.UI.Helpers
             }
         }
 
+        private Type m_oLastActivatedPanelType = null;
+
+        public bool SuspendAutoPanelDisplay { get; set; }
+
         /// <summary>
         /// Constructor that prevents a default instance of this class from being created.
         /// </summary>
@@ -75,6 +80,8 @@ namespace Pulsar4X.UI.Helpers
             {
                 IsRunningOnMono = false;
             }
+
+            SuspendAutoPanelDisplay = false;
 
             // now init ui handlers
             m_oSystemGenAndDisplay = new Handlers.SystemGenAndDisplay();
@@ -97,6 +104,27 @@ namespace Pulsar4X.UI.Helpers
         public void SMOff()
         {
             m_oSystemGenAndDisplay.SMOff();
+        }
+
+        /// <summary>
+        /// This Function will update the active/shown Panels on a DockPanel based on the current active panel.
+        /// </summary>
+        /// <param name="a_oDockPanel">The Dockpanel</param>
+        public void DockPanelActiveDocumentChanged(DockPanel a_oDockPanel)
+        {
+            if (SuspendAutoPanelDisplay)
+            {
+                return; // do nothing because we dont want to :)
+            }
+
+            if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.SGaD_DataPanel))
+            {
+                m_oSystemGenAndDisplay.ActivateControlsPanel();
+            }
+            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.SysMap_ViewPort))
+            {
+                m_oSystemMap.ActivateControlsPanel();
+            }
         }
 
         #endregion

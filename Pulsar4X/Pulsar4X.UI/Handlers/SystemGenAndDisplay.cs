@@ -171,13 +171,31 @@ namespace Pulsar4X.UI.Handlers
 
         public void ShowDataPanel(DockPanel a_oDockPanel)
         {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oDataPanel.Show(a_oDockPanel, DockState.Document);
             m_oDataPanel.SetSplitterDistance(110);
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        public void ActivateDataPanel()
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oDataPanel.Activate();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
         public void ShowControlsPanel(DockPanel a_oDockPanel)
         {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oControlsPanel.Show(a_oDockPanel, DockState.DockLeft);
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        public void ActivateControlsPanel()
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oControlsPanel.Activate();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
         public void SMOn()
