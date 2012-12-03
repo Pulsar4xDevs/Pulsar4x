@@ -7,8 +7,19 @@ namespace Pulsar4X.Entities
 {
     public abstract class StarSystemEntity : GameEntity
     {
+        /// <summary>
+        /// System X coordinante in AU
+        /// </summary>
         public double XSystem { get; set; }
+
+        /// <summary>
+        /// System Y coordinante in AU
+        /// </summary>
         public double YSystem { get; set; }
+
+        /// <summary>
+        /// System Z coordinante in AU
+        /// </summary>
         public double ZSystem { get; set; }
 
         /// <summary>

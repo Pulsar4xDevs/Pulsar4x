@@ -128,9 +128,9 @@ namespace Pulsar4X.UI.GLUtilities
             : base()
         {
             // Save some stuff to member vars:
-            double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
+            //double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
             m_v3Position = a_v3Pos;
-            m_v2Size.X = (float)(a_oOrbitEntity.SemiMajorAxis * dKMperAUdevby10);
+            m_v2Size.X = (float)(a_oOrbitEntity.SemiMajorAxis);
 
             // set verts to 360, looks good at any zoom.
             int iNumOfVerts = 360;

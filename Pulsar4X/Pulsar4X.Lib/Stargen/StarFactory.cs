@@ -141,7 +141,7 @@ namespace Pulsar4X.Stargen
             //return StarSpectrum.G;
 
             //TODO: Add support for age of galaxy if we want that, right now it just does medium age
-            var chance = rnd.NextDouble(0.0, 100);
+            var chance = rnd.NextDouble(0.0, 100.0);
             if (chance < SpectrumOChance)
                 return StarSpectrum.O;
             if (chance < SpectrumBChance)
