@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
@@ -19,6 +20,9 @@ namespace Pulsar4X.UI.Handlers
 {
     public class SystemMap
     {
+        // System Map Logger:
+        public static readonly ILog logger = LogManager.GetLogger(typeof(SystemMap));
+
         /// <summary>
         /// Panel that contains the System map view port (i.e. openGL canvas).
         /// </summary>
@@ -34,8 +38,10 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         GLCanvas m_oGLCanvas;
 
-        // System Map Logger:
-        public static readonly ILog logger = LogManager.GetLogger(typeof(SystemMap));
+        /// <summary>
+        /// Keeps tract of the start location when calculation Panning.
+        /// </summary>
+        Vector3 m_v3PanStartLocation;
 
         /// <summary> The currnet star system </summary>
         private Pulsar4X.Entities.StarSystem m_oCurrnetSystem;
@@ -89,15 +95,12 @@ namespace Pulsar4X.UI.Handlers
 
             // register event handlers:
             m_oGLCanvas.InputHandler += InputProcessor;
-            m_oGLCanvas.Paint += new PaintEventHandler(m_oGLCanvas.OnPaint);
-            m_oGLCanvas.KeyDown += new KeyEventHandler(m_oGLCanvas.OnKeyDown);
-            m_oGLCanvas.MouseDown += new MouseEventHandler(m_oGLCanvas.OnMouseDown);
-            m_oGLCanvas.MouseMove += new MouseEventHandler(m_oGLCanvas.OnMouseMove);
-            m_oGLCanvas.MouseUp += new MouseEventHandler(m_oGLCanvas.OnMouseUp);
-            m_oGLCanvas.MouseHover += new EventHandler(m_oGLCanvas.OnMouseHover);
-            m_oGLCanvas.SizeChanged += new EventHandler(m_oGLCanvas.OnSizeChange);
+            m_oGLCanvas.KeyDown += new KeyEventHandler(OnKeyDown);
+            m_oGLCanvas.MouseDown += new MouseEventHandler(OnMouseDown);
+            m_oGLCanvas.MouseMove += new MouseEventHandler(OnMouseMove);
+            m_oGLCanvas.MouseUp += new MouseEventHandler(OnMouseUp);
+            m_oGLCanvas.MouseHover += new EventHandler(OnMouseHover);
             m_oGLCanvas.MouseWheel += new MouseEventHandler(OnMouseWheel);
-            Application.Idle += new EventHandler(m_oGLCanvas.Application_Idle);
 
             m_oControlsPanel.PanUpButton.Click += new EventHandler(PanUpButton_Click);
             m_oControlsPanel.PanDownButton.Click += new EventHandler(PanDownButton_Click);
@@ -111,9 +114,78 @@ namespace Pulsar4X.UI.Handlers
 
         #region EventHandlers
 
+        /// <summary>   Executes the mouse move action. i.e. Panning </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
+        public void OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                Vector3 v3PanEndLocation;
+                v3PanEndLocation.X = e.Location.X;
+                v3PanEndLocation.Y = e.Location.Y;
+                v3PanEndLocation.Z = 0.0f;
+
+                Vector3 v3PanAmount = (v3PanEndLocation - m_v3PanStartLocation);
+
+                v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
+                m_oGLCanvas.Pan(ref v3PanAmount);
+
+                m_v3PanStartLocation.X = e.Location.X;
+                m_v3PanStartLocation.Y = e.Location.Y;
+                m_v3PanStartLocation.Z = 0.0f;
+
+                m_oGLCanvas.Invalidate();
+            }
+        }
+
+
+        /// <summary>   Executes the mouse down action. i.e. Start panning </summary>
+        /// <param name="sender">   Source of the event. </param>
+        /// <param name="e">        Event information to send to registered event handlers. </param>
+        public void OnMouseDown(object sender, MouseEventArgs e)
+        {
+            // An left mouse down, start pan.
+            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Right))
+            {
+                Cursor.Current = Cursors.NoMove2D;
+                m_v3PanStartLocation.X = e.Location.X;
+                m_v3PanStartLocation.Y = e.Location.Y;
+                m_v3PanStartLocation.Z = 0.0f;
+            }
+            else if (e.Button.Equals(System.Windows.Forms.MouseButtons.Middle))
+            {
+                // on middle or mouse wheel button, centre!
+                m_oGLCanvas.CenterOnZero();
+            }
+
+            m_oGLCanvas.Invalidate();
+        }
+
+        public void OnMouseUp(object sender, MouseEventArgs e)
+        {
+            // reset cursor:
+            Cursor.Current = Cursors.Default;
+
+            m_oGLCanvas.Invalidate();
+        }
+
+        public void OnMouseHover(object sender, EventArgs e)
+        {
+            // get mouse position in control coords:
+            Point oCursorPosition = m_oGLCanvas.PointToClient(Cursor.Position);
+
+            // Convert to be world coords:
+            Vector3 v3CurPosWorldCorrds = new Vector3((m_oGLCanvas.Size.Width / 2) - oCursorPosition.X, (m_oGLCanvas.Size.Height / 2) - oCursorPosition.Y, 0);
+            v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
+
+            // Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
+        }
+
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             InputProcessor(e, null);
+            m_oGLCanvas.Invalidate();
         }
 
         private void SystemSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)

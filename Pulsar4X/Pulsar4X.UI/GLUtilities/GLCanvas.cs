@@ -205,13 +205,7 @@ namespace Pulsar4X.UI.GLUtilities
             Load += new System.EventHandler(this.OnLoad);                           // Setup Load Event Handler
             Paint += new System.Windows.Forms.PaintEventHandler(this.OnPaint);      // Setup Paint Event Handler
             SizeChanged += new System.EventHandler(this.OnSizeChange);              // Setup Size Changed Enet Handler.
-            MouseMove += new MouseEventHandler(OnMouseMove);                        // Setup Mouse Move Event handler
-            MouseDown += new MouseEventHandler(OnMouseDown);                        // Setup Mouse Down Event handler.
-            MouseUp += new MouseEventHandler(OnMouseUp);                            // Setup Mouse Down Event handler.
-            //MouseHover += new EventHandler(GLCanvas_OnMouseHover);
-            KeyDown += new KeyEventHandler(OnKeyDown);
-            //MouseUp += new MouseEventHandler(OnMouseUp);
-            //Application.Idle += new EventHandler(Application_Idle);
+            Application.Idle += new EventHandler(Application_Idle);                 // make sure we render when UI is otherwise idle!
         }
 
         private void InitOpenGL30()
@@ -417,81 +411,6 @@ namespace Pulsar4X.UI.GLUtilities
                 return;
             }
 
-            this.Invalidate();
-        }
-
-
-        /// <summary>   Executes the mouse move action. i.e. Panning </summary>
-        /// <param name="sender">   Source of the event. </param>
-        /// <param name="e">        Event information to send to registered event handlers. </param>
-        public void OnMouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                Vector3 v3PanEndLocation;
-                v3PanEndLocation.X = e.Location.X;
-                v3PanEndLocation.Y = e.Location.Y;
-                v3PanEndLocation.Z = 0.0f;
-
-                Vector3 v3PanAmount = (v3PanEndLocation - m_v3PanStartLocation);
-
-                v3PanAmount.Y = -v3PanAmount.Y; // we flip Y to make the panning go in the right direction.
-                this.Pan(ref v3PanAmount);
-
-                m_v3PanStartLocation.X = e.Location.X;
-                m_v3PanStartLocation.Y = e.Location.Y;
-                m_v3PanStartLocation.Z = 0.0f;
-
-                this.Invalidate();
-            }
-        }
-
-
-        /// <summary>   Executes the mouse down action. i.e. Start panning </summary>
-        /// <param name="sender">   Source of the event. </param>
-        /// <param name="e">        Event information to send to registered event handlers. </param>
-        public void OnMouseDown(object sender, MouseEventArgs e)
-        {
-            // An left mouse down, start pan.
-            if (e.Button.Equals(System.Windows.Forms.MouseButtons.Right))
-            {
-                Cursor.Current = Cursors.NoMove2D;
-                m_v3PanStartLocation.X = e.Location.X;
-                m_v3PanStartLocation.Y = e.Location.Y;
-                m_v3PanStartLocation.Z = 0.0f;
-            }
-            else if (e.Button.Equals(System.Windows.Forms.MouseButtons.Middle))
-            {
-                // on middle or mouse wheel button, centre!
-                this.CenterOnZero();
-            }
-
-            this.Invalidate();
-        }
-
-        public void OnMouseUp(object sender, MouseEventArgs e)
-        {
-            // reset cursor:
-            Cursor.Current = Cursors.Default;
-
-            this.Invalidate();
-        }
-
-        public void OnMouseHover(object sender, EventArgs e)
-        {
-            // get mouse position in control coords:
-            Point oCursorPosition = PointToClient(Cursor.Position);
-
-            // Convert to be world coords:
-            Vector3 v3CurPosWorldCorrds = new Vector3((Size.Width / 2) - oCursorPosition.X, (Size.Height / 2) - oCursorPosition.Y, 0);
-            v3CurPosWorldCorrds = v3CurPosWorldCorrds / ZoomFactor;
-
-           // Guid oEntity = m_oCurrentSceen.GetElementAtCoords(v3CurPosWorldCorrds);
-        }
-
-        public void OnKeyDown(object sender, KeyEventArgs e)
-        {
-            InputHandler(e, null);
             this.Invalidate();
         }
 
