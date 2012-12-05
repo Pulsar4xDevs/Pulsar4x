@@ -63,14 +63,7 @@ namespace Pulsar4X.UI.ViewModels
             get { return _seed; }
             set
             {
-                // safty check:
-                //if (_seed == null)
-                //{
-                //    return;
-                //}
-
                 _seed = value;
-                //NotifyPropertyChanged("CurrentStarSystemAge");
                 OnPropertyChanged(() => Seed);
             }
         }

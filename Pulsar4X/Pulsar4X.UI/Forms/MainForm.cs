@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
+using Pulsar4X.UI.ViewModels;
 
 namespace Pulsar4X.UI.Forms
 {
     public partial class MainForm : Form
     {
         DockPanel m_oDockPanel;
+        MenuViewModel VM;
 
         public MainForm()
         {
@@ -34,6 +36,12 @@ namespace Pulsar4X.UI.Forms
             }
 
             m_oToolStripContainer.ContentPanel.Controls.Add(m_oDockPanel);
+
+            // setup viewmodel:
+            VM = new MenuViewModel();
+
+            // bind menu items to game data:
+            this.Bind(c => c.Text, VM, d => d.GameDateTime);
         }
 
         private void MainForm_Load(object sender, EventArgs e)

@@ -40,6 +40,7 @@ namespace Pulsar4X
         private GameState()
         {
             m_oStarSystemFactory = new Stargen.StarSystemFactory();
+            m_oGameDateTime = new DateTime(2025, 1, 1); // sets the date to 1 Jan 2025, just like aurora!!!
         }
 
         #endregion
@@ -70,7 +71,25 @@ namespace Pulsar4X
         public string SaveDirectoryPath { get; set; }
         #endregion    
 
-#region Entities
+        #region Game Data
+
+        DateTime m_oGameDateTime;
+
+        public DateTime GameDateTime
+        {
+            get
+            {
+                return m_oGameDateTime;
+            }
+            set
+            {
+                m_oGameDateTime = value; 
+            }
+        }
+
+        #endregion
+
+        #region Entities
 
         private BindingList<Species> _species;
         public BindingList<Species> Species
