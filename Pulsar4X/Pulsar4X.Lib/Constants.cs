@@ -532,7 +532,7 @@ namespace Pulsar4X
         /// <summary>
         /// Constants specifically used in the stargen module
         /// </summary>
-        public class Stargen
+        public static class Stargen
         {
             /// <summary>
             /// Initial mass of injected protoplanet
@@ -701,6 +701,26 @@ namespace Pulsar4X
 
                 return Color.White;
             }
+        }
+
+        public static class Minerals
+        {
+            public enum MinerialNames
+            {
+                Duranium,
+                Neutronium,
+                Corbomite,
+                Tritanium,
+                Boronide,
+                Mercassium,
+                Vendarite,
+                Sorium,
+                Uridium,
+                Corundium,
+                Gallicite
+            }
+
+            public const int NO_OF_MINERIALS = 11;
         }
     }
 }

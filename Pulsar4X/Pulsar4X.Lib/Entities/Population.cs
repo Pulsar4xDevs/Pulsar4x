@@ -6,11 +6,11 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
-    public class Population
+    public class Population : GameEntity
     {
-        public Guid Id { get; set; }
+        #region Properties
+
         public Faction Faction { get; set; }
-        public string Name { get; set; }
 
         /// <summary>
         /// Planet the population is attached to
@@ -20,19 +20,37 @@ namespace Pulsar4X.Entities
         public int CivilianPopulation { get; set; }
         public int FuelStockpile { get; set; }
 
-        // TODO: store minerals as individual properties? or define constants for each mineral type and
-        // store the values in a dictionary keyed off constants?
-        public decimal Duranium { get; set; }
-        public decimal Neutronium { get; set; }
-        public decimal Corbomite { get; set; }
-        public decimal Tritanium { get; set; }
-        public decimal Boronide { get; set; }
-        public decimal Mercassium { get; set; }
-        public decimal Vendarite { get; set; }
-        public decimal Sorium { get; set; }
-        public decimal Uridium { get; set; }
-        public decimal Corundium { get; set; }
-        public decimal Gallicite { get; set; }
+        int[] m_aiMinerials;
+        public int[] Minerials
+        {
+            get
+            {
+                return m_aiMinerials;
+            }
+            set
+            {
+                m_aiMinerials = value;
+            }
+        }
+
+        #endregion
+
+        public Population(Planet a_oPlanet, Faction a_oFaction)
+        {
+            // initialise minerials:
+            m_aiMinerials = new int[Constants.Minerals.NO_OF_MINERIALS];
+            for (int i = 0; i < Constants.Minerals.NO_OF_MINERIALS; ++i)
+            {
+                m_aiMinerials[i] = 0;
+            }
+
+            CivilianPopulation = 0;
+            FuelStockpile = 0;
+
+            Faction = a_oFaction;
+            Planet = a_oPlanet;
+            Planet.Populations.Add(this); // add us to the list of pops on the planet!
+        }
 
     }
 }

@@ -6,10 +6,8 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
-    public class Species
+    public class Species : GameEntity
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
         public double BaseGravity { get; set; }
         public double MinimumGravityConstraint { get; set; }
         public double MaximumGravityConstraint { get; set; }
