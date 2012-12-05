@@ -24,7 +24,7 @@ namespace Pulsar4X.UI.Forms
             m_oDockPanel = new DockPanel();
             m_oDockPanel.DocumentStyle = DocumentStyle.DockingWindow;
             m_oDockPanel.Dock = DockStyle.Fill;
-            m_oDockPanel.BackgroundImage = new Bitmap("./Resources/Textures/PulsarLogo.png");
+            m_oDockPanel.BackgroundImage = new Bitmap(UIConstants.PULSAR4X_LOGO);
             m_oDockPanel.BackgroundImageLayout = ImageLayout.Center;
 
             // set Mono only stuff:

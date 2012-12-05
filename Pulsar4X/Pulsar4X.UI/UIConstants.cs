@@ -42,6 +42,8 @@ namespace Pulsar4X.UI
         public const float DEFAULT_PAN_AMOUNT = 25.0f;
         public static OpenTK.Vector2 DEFAULT_TEXT_SIZE = new OpenTK.Vector2(16, 16);
 
+        public const string PULSAR4X_LOGO = "./Resources/Textures/PulsarLogo.png";
+
         /// <summary>
         /// Texture File Paths.
         /// </summary>

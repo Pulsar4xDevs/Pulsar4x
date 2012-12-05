@@ -25,6 +25,8 @@ namespace Pulsar4X.UI.Dialogs
         private void AboutBox_Load(object sender, EventArgs e)
         {
             AboutTextBox.Text = UIConstants.ABOUT_BOX_TEXT;
+            m_oPulsarLogoPicBox.ImageLocation = UIConstants.PULSAR4X_LOGO;
+            m_oPulsarLogoPicBox.SizeMode = PictureBoxSizeMode.CenterImage;
         }
     }
 }
