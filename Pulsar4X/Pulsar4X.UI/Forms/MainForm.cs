@@ -53,6 +53,7 @@ namespace Pulsar4X.UI.Forms
             m_oSystemViewToolStripButton.Click += new EventHandler(systemInformationToolStripMenuItem_Click);
             systemMapToolStripMenuItem.Click += new EventHandler(systemMapToolStripMenuItem_Click);
             m_oSystemMapToolStripButton.Click += new EventHandler(systemMapToolStripMenuItem_Click);
+            commanderNamesToolStripMenuItem.Click += new EventHandler(commanderNamesToolStripMenuItem_Click);
 
             sMOnToolStripMenuItem.Click += new EventHandler(sMOnToolStripMenuItem_Click);
             sMOffToolStripMenuItem.Click += new EventHandler(sMOffToolStripMenuItem_Click);
@@ -65,6 +66,12 @@ namespace Pulsar4X.UI.Forms
         }
 
         #region MenuAndToolStripEvents
+
+        void commanderNamesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Dialogs.CommanderNameThemesDialog oForm = new Dialogs.CommanderNameThemesDialog();
+            oForm.ShowDialog();
+        }
 
         void m_oDockPanel_ActiveDocumentChanged(object sender, EventArgs e)
         {
