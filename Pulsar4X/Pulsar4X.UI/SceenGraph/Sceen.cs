@@ -135,10 +135,13 @@ namespace Pulsar4X.UI.SceenGraph
         public Sceen()
         {
             MeasureMode = false;
+            m_v3ViewOffset = Vector3.Zero;
         }
 
         public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect)
         {
+            // set member vars:
+            m_v3ViewOffset = Vector3.Zero;
             MeasureMode = false;
 
             // Set Sceen Vars:
@@ -149,7 +152,7 @@ namespace Pulsar4X.UI.SceenGraph
             m_oMeasurementElement = new MeasurementElement();
             m_oMeasurementElement.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), Color.Yellow, UIConstants.Textures.DEFAULT_TEXTURE);
             m_oMeasurementElement.AddPrimitive(m_oMeasurementElement.PrimaryPrimitive);
-            m_oMeasurementElement.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), Color.Yellow, UIConstants.Textures.DEFAULT_GLFONT2, "");
+            m_oMeasurementElement.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, Color.Yellow, UIConstants.Textures.DEFAULT_GLFONT2, "");
 
             // Creat Working Vars:
             //double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
@@ -334,6 +337,8 @@ namespace Pulsar4X.UI.SceenGraph
             {
                 oElement.Refresh(m_fZoomScaler);
             }
+
+            m_oMeasurementElement.Refresh(m_fZoomScaler);
         }
 
         /// <summary>

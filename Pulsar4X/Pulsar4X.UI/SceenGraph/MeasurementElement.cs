@@ -68,6 +68,8 @@ namespace Pulsar4X.UI.SceenGraph
 
         public override void Refresh(float a_fZoomScaler)
         {
+            // Adjust the size of the text so it is always 10 point:
+            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler; 
         }
 
     }
