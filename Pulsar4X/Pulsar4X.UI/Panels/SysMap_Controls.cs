@@ -108,6 +108,39 @@ namespace Pulsar4X.UI.Panels
             }
         }
 
+        /// <summary>
+        /// Create a new map marker button.
+        /// </summary>
+        public Button CreateMapMarkerButton
+        {
+            get
+            {
+                return m_oCreateMapMarkerButton;
+            }
+        }
+
+        /// <summary>
+        /// Delete the selected map marker button.
+        /// </summary>
+        public Button DeleteMapMarkerButton
+        {
+            get
+            {
+                return m_oDeleteMapMarkerButton;
+            }
+        }
+
+        /// <summary>
+        /// Lists the map markers.
+        /// </summary>
+        public ListBox MapMarkersListBox
+        {
+            get
+            {
+                return m_oMapMarkersListBox;
+            }
+        }
+
         private ToolTip m_oToolTip;
 
         #endregion
@@ -135,6 +168,8 @@ namespace Pulsar4X.UI.Panels
             m_oToolTip.SetToolTip(m_oSystemSelectionComboBox, "Select the system you wish to view");
             m_oToolTip.SetToolTip(m_oZoomInButton, "Zooms in (E)");
             m_oToolTip.SetToolTip(m_oZoomOutButton, "Zooms out (Q)");
+            m_oToolTip.SetToolTip(m_oCreateMapMarkerButton, "Create a new map marker on the map on next left click.");
+            m_oToolTip.SetToolTip(m_oDeleteMapMarkerButton, "Deletes the selected map marker");
         }
     }
 }

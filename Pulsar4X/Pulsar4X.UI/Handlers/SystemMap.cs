@@ -76,6 +76,7 @@ namespace Pulsar4X.UI.Handlers
 
         public GLStarSystemViewModel VM { get; set; }
 
+        private bool m_bCreateMapMarkerOnNextClick = false;
 
         public SystemMap()
         {
@@ -106,6 +107,9 @@ namespace Pulsar4X.UI.Handlers
             m_oGLCanvas.MouseUp += new MouseEventHandler(OnMouseUp);
             m_oGLCanvas.MouseHover += new EventHandler(OnMouseHover);
             m_oGLCanvas.MouseWheel += new MouseEventHandler(OnMouseWheel);
+            m_oGLCanvas.Click += new EventHandler(m_oGLCanvas_Click);
+
+            m_oViewPortPanel.SizeChanged += new EventHandler(ViewPort_SizeChanged);
 
             m_oControlsPanel.PanUpButton.Click += new EventHandler(PanUpButton_Click);
             m_oControlsPanel.PanDownButton.Click += new EventHandler(PanDownButton_Click);
@@ -114,10 +118,48 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.ZoomInButton.Click += new EventHandler(ZoomInButton_Click);
             m_oControlsPanel.ZoomOutButton.Click += new EventHandler(ZoomOutButton_Click);
             m_oControlsPanel.ResetViewButton.Click += new EventHandler(ResetViewButton_Click);
-            m_oViewPortPanel.SizeChanged += new EventHandler(ViewPort_SizeChanged);
+            m_oControlsPanel.CreateMapMarkerButton.Click += new EventHandler(CreateMapMarkerButton_Click);
+            m_oControlsPanel.DeleteMapMarkerButton.Click += new EventHandler(DeleteMapMarkerButton_Click);
+            m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += new EventHandler(SystemSelectComboBox_SelectedIndexChanged);
+            
         }
 
         #region EventHandlers
+
+        void m_oGLCanvas_Click(object sender, EventArgs e)
+        {
+            if (m_bCreateMapMarkerOnNextClick == true)
+            {
+                Point oCursorPosition = m_oGLCanvas.PointToClient(Cursor.Position);
+                // Convert to be world coords:
+                Vector3 v3CurPosWorldCorrds = new Vector3(oCursorPosition.X - (m_oGLCanvas.Size.Width / 2), oCursorPosition.Y - (m_oGLCanvas.Size.Height / 2), 0);
+                v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
+                v3CurPosWorldCorrds.Y = -v3CurPosWorldCorrds.Y;
+
+                // add screen offset:
+                v3CurPosWorldCorrds = v3CurPosWorldCorrds - (m_oCurrentSceen.ViewOffset / m_oCurrentSceen.ZoomSclaer);
+
+                m_oCurrentSceen.AddMapMarker(v3CurPosWorldCorrds, m_oGLCanvas.DefaultEffect);
+
+                m_bCreateMapMarkerOnNextClick = false;
+
+                m_oControlsPanel.MapMarkersListBox.Refresh();
+            }
+        }
+
+        void DeleteMapMarkerButton_Click(object sender, EventArgs e)
+        {
+            MapMarker oMarker = m_oControlsPanel.MapMarkersListBox.SelectedItem as MapMarker;
+            if (oMarker != null)
+            {
+                m_oCurrentSceen.MapMarkers.Remove(oMarker);
+            }
+        }
+
+        void CreateMapMarkerButton_Click(object sender, EventArgs e)
+        {
+            m_bCreateMapMarkerOnNextClick = true;
+        }
 
         /// <summary>   Executes the mouse move action. i.e. Panning </summary>
         /// <param name="sender">   Source of the event. </param>
@@ -241,6 +283,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oGLCanvas.Focus();
                 RefreshStarSystem();
                 m_oGLCanvas.Invalidate();
+                m_oControlsPanel.MapMarkersListBox.DataSource = m_oCurrentSceen.MapMarkers;
             }
         }
 

@@ -38,10 +38,18 @@
             this.m_oPanDownButton = new System.Windows.Forms.Button();
             this.m_oPanUpButton = new System.Windows.Forms.Button();
             this.m_oScaleGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oScaleKMLabel = new System.Windows.Forms.Label();
             this.m_oScaleAULabel = new System.Windows.Forms.Label();
+            this.m_oScaleKMLabel = new System.Windows.Forms.Label();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.m_oMarkerTabPage = new System.Windows.Forms.TabPage();
+            this.m_oMapMarkersListBox = new System.Windows.Forms.ListBox();
+            this.m_oCreateMapMarkerButton = new System.Windows.Forms.Button();
+            this.m_oDeleteMapMarkerButton = new System.Windows.Forms.Button();
+            this.m_oTtabControl = new System.Windows.Forms.TabControl();
             this.m_oViewControlsGroupBox.SuspendLayout();
             this.m_oScaleGroupBox.SuspendLayout();
+            this.m_oMarkerTabPage.SuspendLayout();
+            this.m_oTtabControl.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oSystemSelectionComboBox
@@ -142,15 +150,6 @@
             this.m_oScaleGroupBox.TabStop = false;
             this.m_oScaleGroupBox.Text = "Scale";
             // 
-            // m_oScaleKMLabel
-            // 
-            this.m_oScaleKMLabel.AutoSize = true;
-            this.m_oScaleKMLabel.Location = new System.Drawing.Point(7, 16);
-            this.m_oScaleKMLabel.Name = "m_oScaleKMLabel";
-            this.m_oScaleKMLabel.Size = new System.Drawing.Size(22, 13);
-            this.m_oScaleKMLabel.TabIndex = 0;
-            this.m_oScaleKMLabel.Text = "Km";
-            // 
             // m_oScaleAULabel
             // 
             this.m_oScaleAULabel.AutoSize = true;
@@ -160,11 +159,86 @@
             this.m_oScaleAULabel.TabIndex = 1;
             this.m_oScaleAULabel.Text = "AU";
             // 
+            // m_oScaleKMLabel
+            // 
+            this.m_oScaleKMLabel.AutoSize = true;
+            this.m_oScaleKMLabel.Location = new System.Drawing.Point(7, 16);
+            this.m_oScaleKMLabel.Name = "m_oScaleKMLabel";
+            this.m_oScaleKMLabel.Size = new System.Drawing.Size(22, 13);
+            this.m_oScaleKMLabel.TabIndex = 0;
+            this.m_oScaleKMLabel.Text = "Km";
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(175, 401);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // m_oMarkerTabPage
+            // 
+            this.m_oMarkerTabPage.Controls.Add(this.m_oDeleteMapMarkerButton);
+            this.m_oMarkerTabPage.Controls.Add(this.m_oCreateMapMarkerButton);
+            this.m_oMarkerTabPage.Controls.Add(this.m_oMapMarkersListBox);
+            this.m_oMarkerTabPage.Location = new System.Drawing.Point(4, 22);
+            this.m_oMarkerTabPage.Name = "m_oMarkerTabPage";
+            this.m_oMarkerTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.m_oMarkerTabPage.Size = new System.Drawing.Size(175, 401);
+            this.m_oMarkerTabPage.TabIndex = 0;
+            this.m_oMarkerTabPage.Text = "Map Markers";
+            this.m_oMarkerTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oMapMarkersListBox
+            // 
+            this.m_oMapMarkersListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oMapMarkersListBox.FormattingEnabled = true;
+            this.m_oMapMarkersListBox.Location = new System.Drawing.Point(3, 35);
+            this.m_oMapMarkersListBox.Name = "m_oMapMarkersListBox";
+            this.m_oMapMarkersListBox.Size = new System.Drawing.Size(169, 355);
+            this.m_oMapMarkersListBox.TabIndex = 0;
+            // 
+            // m_oCreateMapMarkerButton
+            // 
+            this.m_oCreateMapMarkerButton.Location = new System.Drawing.Point(9, 7);
+            this.m_oCreateMapMarkerButton.Name = "m_oCreateMapMarkerButton";
+            this.m_oCreateMapMarkerButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oCreateMapMarkerButton.TabIndex = 1;
+            this.m_oCreateMapMarkerButton.Text = "Create";
+            this.m_oCreateMapMarkerButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oDeleteMapMarkerButton
+            // 
+            this.m_oDeleteMapMarkerButton.Location = new System.Drawing.Point(90, 6);
+            this.m_oDeleteMapMarkerButton.Name = "m_oDeleteMapMarkerButton";
+            this.m_oDeleteMapMarkerButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oDeleteMapMarkerButton.TabIndex = 2;
+            this.m_oDeleteMapMarkerButton.Text = "Delete";
+            this.m_oDeleteMapMarkerButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oTtabControl
+            // 
+            this.m_oTtabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oTtabControl.Controls.Add(this.m_oMarkerTabPage);
+            this.m_oTtabControl.Controls.Add(this.tabPage2);
+            this.m_oTtabControl.Location = new System.Drawing.Point(13, 207);
+            this.m_oTtabControl.Name = "m_oTtabControl";
+            this.m_oTtabControl.SelectedIndex = 0;
+            this.m_oTtabControl.Size = new System.Drawing.Size(183, 427);
+            this.m_oTtabControl.TabIndex = 3;
+            // 
             // SysMap_Controls
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(208, 562);
+            this.ClientSize = new System.Drawing.Size(208, 646);
+            this.Controls.Add(this.m_oTtabControl);
             this.Controls.Add(this.m_oScaleGroupBox);
             this.Controls.Add(this.m_oViewControlsGroupBox);
             this.Controls.Add(this.m_oSystemSelectionComboBox);
@@ -173,6 +247,8 @@
             this.m_oViewControlsGroupBox.ResumeLayout(false);
             this.m_oScaleGroupBox.ResumeLayout(false);
             this.m_oScaleGroupBox.PerformLayout();
+            this.m_oMarkerTabPage.ResumeLayout(false);
+            this.m_oTtabControl.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -191,5 +267,11 @@
         private System.Windows.Forms.Button m_oPanUpButton;
         private System.Windows.Forms.Label m_oScaleAULabel;
         private System.Windows.Forms.Label m_oScaleKMLabel;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabPage m_oMarkerTabPage;
+        private System.Windows.Forms.Button m_oDeleteMapMarkerButton;
+        private System.Windows.Forms.Button m_oCreateMapMarkerButton;
+        private System.Windows.Forms.ListBox m_oMapMarkersListBox;
+        private System.Windows.Forms.TabControl m_oTtabControl;
     }
 }

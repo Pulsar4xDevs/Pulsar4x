@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.ComponentModel;
 using Pulsar4X;
 using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
@@ -29,6 +32,19 @@ namespace Pulsar4X.UI.SceenGraph
             get
             {
                 return m_lElements;
+            }
+        }
+
+        private BindingList<MapMarker> m_lMapMarkers = new BindingList<MapMarker>();
+
+        /// <summary>
+        /// Gets a list of the Map Markers in the sceen.
+        /// </summary>
+        public BindingList<MapMarker> MapMarkers
+        {
+            get
+            {
+                return m_lMapMarkers;
             }
         }
 
@@ -322,6 +338,11 @@ namespace Pulsar4X.UI.SceenGraph
                 oElement.Render();
             }
 
+            foreach (SceenElement oElement in m_lMapMarkers)
+            {
+                oElement.Render();
+            }
+
             if (MeasureMode == true)
             {
                 m_oMeasurementElement.Render();
@@ -334,6 +355,11 @@ namespace Pulsar4X.UI.SceenGraph
         public void Refresh()
         {
             foreach (SceenElement oElement in m_lElements)
+            {
+                oElement.Refresh(m_fZoomScaler);
+            }
+
+            foreach (SceenElement oElement in m_lMapMarkers)
             {
                 oElement.Refresh(m_fZoomScaler);
             }
@@ -381,6 +407,29 @@ namespace Pulsar4X.UI.SceenGraph
                 temp.PosEnd = a_v3Pos;
             }
             m_oMeasurementElement.Lable.Text = a_szMeasure;
+        }
+
+        public void AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect)
+        {
+            MapMarker oMapMarker = new MapMarker();
+
+            GLUtilities.GLQuad oMarkerQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                        a_v3Pos,
+                                                                        new Vector2(0.0001f, 0.0001f),
+                                                                        Color.Tan,
+                                                                        UIConstants.Textures.DEFAULT_PLANET_ICON);
+            // create name lable:
+            string name = "WP" + (m_lMapMarkers.Count + 1).ToString();
+            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, a_v3Pos,
+                UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT, name);
+
+            oMapMarker.AddPrimitive(oMarkerQuad);
+            oMapMarker.PrimaryPrimitive = oMarkerQuad;
+            oMapMarker.Lable = oNameLable;
+
+            m_lMapMarkers.Add(oMapMarker);
+
+            Refresh();
         }
 
         /// <summary>
