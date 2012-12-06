@@ -149,7 +149,7 @@ namespace Pulsar4X.UI.SceenGraph
             m_oMeasurementElement = new MeasurementElement();
             m_oMeasurementElement.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), Color.Yellow, UIConstants.Textures.DEFAULT_TEXTURE);
             m_oMeasurementElement.AddPrimitive(m_oMeasurementElement.PrimaryPrimitive);
-            m_oMeasurementElement.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, Color.Yellow, UIConstants.Textures.DEFAULT_GLFONT, "");
+            m_oMeasurementElement.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), Color.Yellow, UIConstants.Textures.DEFAULT_GLFONT2, "");
 
             // Creat Working Vars:
             //double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
@@ -368,13 +368,14 @@ namespace Pulsar4X.UI.SceenGraph
             m_oMeasurementElement.Lable.Position = a_v3Pos;
         }
 
-        public void SetMeasurementEndPos(Vector3 a_v3Pos)
+        public void SetMeasurementEndPos(Vector3 a_v3Pos, string a_szMeasure)
         {
             GLLine temp = m_oMeasurementElement.PrimaryPrimitive as GLLine;
             if (temp != null)
             {
                 temp.PosEnd = a_v3Pos;
             }
+            m_oMeasurementElement.Lable.Text = a_szMeasure;
         }
 
         /// <summary>

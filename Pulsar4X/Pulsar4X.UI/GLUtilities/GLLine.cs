@@ -31,13 +31,6 @@ namespace Pulsar4X.UI.GLUtilities
             }
         }
 
-        public void UpdateStartPos(Vector3 a_v3Pos)
-        {
-            Position = a_v3Pos;
-            m_aoVerticies[0].m_v4Position = new Vector4(a_v3Pos.X, a_v3Pos.Y, a_v3Pos.Z, 1.0f);
-            UpdateVBOs();
-        }
-
         /// <summary>   Constructor. </summary>
         /// <param name="a_oEffect"> The shader program to use. </param>
         /// <param name="a_v2Pos">          The position of the quad (centre). </param>

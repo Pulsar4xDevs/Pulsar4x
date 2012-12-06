@@ -77,11 +77,6 @@ namespace Pulsar4X.UI.GLUtilities
         protected Vector3 m_v3ViewOffset = new Vector3(0, 0, 0);
 
         /// <summary>
-        /// Keeps tract of the start location when calculation Panning.
-        /// </summary>
-        Vector3 m_v3PanStartLocation;
-
-        /// <summary>
         /// The Current Sceen for the Canvas to Render.
         /// </summary>
         protected SceenGraph.Sceen m_oSceenToRender;

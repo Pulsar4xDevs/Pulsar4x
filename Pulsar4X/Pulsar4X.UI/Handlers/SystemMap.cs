@@ -150,9 +150,11 @@ namespace Pulsar4X.UI.Handlers
                 v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
                 v3CurPosWorldCorrds.Y = -v3CurPosWorldCorrds.Y;
 
+                // calc the dist measured.
                 v3CurPosWorldCorrds.X -= m_v3MeasurementStartLocation.X;
                 v3CurPosWorldCorrds.Y -= m_v3MeasurementStartLocation.Y;
-                m_oCurrentSceen.SetMeasurementEndPos(v3CurPosWorldCorrds);
+                float fLeng = v3CurPosWorldCorrds.Length;
+                m_oCurrentSceen.SetMeasurementEndPos(v3CurPosWorldCorrds, fLeng.ToString() + "AU");
             }
         }
 
