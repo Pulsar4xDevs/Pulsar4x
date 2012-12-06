@@ -30,6 +30,6 @@ namespace Pulsar4X.Entities
         public int DamageControlRating { get; set; }
         public int FuelCapacity { get; set; }
 
-        public ArmorDef ShipArmorDef { get; set; }
+        public ArmorDefTN ShipArmorDef { get; set; }
     }
 }

@@ -19,44 +19,68 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Ship Class armor definition. each copy of a ship will point to their shipclass, which points to this for important and hopefully static data.
     /// </summary>
-	public class ArmorDef
+	public class ArmorDefTN
 	{
         /// <summary>
         /// Armor coverage of surface area of the ship per HullSpace(50.0 ton increment). This will vary with techlevel and can be updated. CalcArmor requires this.
         /// </summary>
-        public ushort ArmorPerHS { get; set; }		
+        private ushort ArmorPerHS;
+        public ushort armorPerHS
+        {
+            get { return ArmorPerHS; }
+        }
 
         /// <summary>
         /// Number of armor layers, CalcArmor needs to know this as well.
         /// </summary>
-        public ushort Depth { get; set; }		
+        private ushort Depth;
+        public ushort depth
+        {
+            get { return Depth; }
+        }
 
         /// <summary>
         /// Overall size of the armor, this is added to the ship proper. CalcArmor calculates this.
         /// </summary>
-        public double Size { get; set; }
+        private double Size;
+        public double size
+        {
+            get { return Size; }
+        }
         
         /// <summary>
         /// Area coverage of the armor, Cost and column # both require this.
         /// </summary>
-        public double Area { get; set; }
+        private double Area;
+        public double area
+        {
+            get { return Area; }
+        }
 
         /// <summary>
         /// Cost of the Armor. Ship costs, repair cost, and material resource costs will depend on this. It is naively equal to area in terms of per numbers, but resources required
         /// will vary with tech level. In Aurora costs shift from duranium to neutronium for example.
         /// </summary>
-        public double Cost { get; set; }
+        private double Cost;
+        public double cost
+        {
+            get { return Cost; }
+        }
 
         /// <summary>
         /// Column number counts how many columns of armor this ship can have, and hence how well protected it is from normal damage.
         /// This is determined by taking the overall strength requirement divided by the depth of the armor.
         /// </summary>
-        public ushort CNum { get; set; }
+        private ushort CNum;
+        public ushort cNum
+        {
+            get { return CNum; }
+        }
 
         /// <summary>
         /// Just an empty constructor. I don't really need this, the main show is in CalcArmor.
         /// </summary>
-	    public ArmorDef()
+	    public ArmorDefTN()
 	    {
 		    Size = 0.0;
 		    Cost = 0.0;
@@ -146,38 +170,60 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
     }
     /// <summary>
-    /// End of Class ArmorDef
+    /// End of Class ArmorDefTN
     /// </summary>
     
     /// <summary>
     /// Armor contains ship data itself. each ship will have its own copy of this.
     /// </summary>
-    public class Armor
+    public class ArmorTN
     {
         /// <summary>
         /// isDamaged controls whether or not armorColumns has been populated yet. 
         /// </summary>
-        public bool isDamaged { get; set; }
+        private bool IsDamaged;
+        public bool isDamaged
+        {
+            get { return IsDamaged; }
+        }
 
         /// <summary>
         /// armorColumns contains the actual data that will need to be looked up
         /// </summary>
-        public BindingList<ushort> armorColumns { get; set; }
+        private BindingList<ushort> ArmorColumns;
+        public BindingList<ushort> armorColumns
+        {
+            get { return ArmorColumns; }
+        }
 
         /// <summary>
         /// armorDamage is an easily stored listing of the damage that the ship has taken
         /// Column # is the key, and value is how much damage has been done to that column( DepthValue to Zero ).
         /// </summary>
-        public Dictionary<ushort, ushort> armorDamage { get; set; }
+        private Dictionary<ushort, ushort> ArmorDamage;
+        public Dictionary<ushort, ushort> armorDamage
+        {
+            get { return ArmorDamage; }
+        }
+
+        /// <summary>
+        /// ArmorDef contains the definitions for this component
+        /// </summary>
+        private ArmorDefTN ArmorDef;
+        public ArmorDefTN armorDef
+        {
+            get { return ArmorDef; }
+        }
 
         /// <summary>
         /// the actual ship armor constructor does nothing with armorColumns or armorDamage yet.
         /// </summary>
-        public Armor()
+        public ArmorTN(ArmorDefTN protectionDef)
         {
-            isDamaged = false;
-            armorColumns = new BindingList<ushort>();
-            armorDamage = new Dictionary<ushort, ushort>();
+            IsDamaged = false;
+            ArmorColumns = new BindingList<ushort>();
+            ArmorDamage = new Dictionary<ushort, ushort>();
+            ArmorDef = protectionDef;
         }
 
         /// <summary>
@@ -190,13 +236,13 @@ namespace Pulsar4X.Entities.Components
         public void SetDamage(ushort ColumnCount, ushort Depth, ushort Column, ushort DamageValue)
         {
             ushort newDepth;
-            if (isDamaged == false)
+            if (IsDamaged == false)
             {
                 for (ushort loop = 0; loop < ColumnCount; loop++)
                 {
                     if (loop != Column)
                     {
-                        armorColumns.Add(Depth);
+                        ArmorColumns.Add(Depth);
                     }
                     else
                     {
@@ -207,30 +253,30 @@ namespace Pulsar4X.Entities.Components
                         if (newDepth < 0)
                             newDepth = 0;
 
-                        armorColumns.Add(newDepth);
-                        armorDamage.Add(Column, newDepth);
+                        ArmorColumns.Add(newDepth);
+                        ArmorDamage.Add(Column, newDepth);
                     }
                 }
                 /// <summary>
                 /// end for ColumnCount
                 /// </summary>
-                isDamaged = true;
+                IsDamaged = true;
             }
             /// <summary>
             /// end if isDamaged = false
             /// </summary>
             else
             {
-                newDepth = (ushort)(armorColumns[Column] - DamageValue);
-                armorColumns[Column] = newDepth;
+                newDepth = (ushort)(ArmorColumns[Column] - DamageValue);
+                ArmorColumns[Column] = newDepth;
 
-                if (armorDamage.ContainsKey(Column) == true)
+                if (ArmorDamage.ContainsKey(Column) == true)
                 {
-                    armorDamage[Column] = newDepth;
+                    ArmorDamage[Column] = newDepth;
                 }
                 else
                 {
-                    armorDamage.Add(Column, newDepth);
+                    ArmorDamage.Add(Column, newDepth);
                 }
             }
             /// <summary>
@@ -247,17 +293,17 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Depth">Armor Depth, this will be called from ship which will have access to ship class and therefore this number</param>
         public void RepairSingleBlock(ushort Depth)
         {
-            ushort mostDamaged = armorDamage.Min().Key;
+            ushort mostDamaged = ArmorDamage.Min().Key;
 
-            ushort repair = (ushort)(armorDamage.Min().Value + 1);
-            armorDamage[mostDamaged] = repair;
-            armorColumns[mostDamaged] = repair;
+            ushort repair = (ushort)(ArmorDamage.Min().Value + 1);
+            ArmorDamage[mostDamaged] = repair;
+            ArmorColumns[mostDamaged] = repair;
 
-            if (armorDamage[mostDamaged] == Depth)
+            if (ArmorDamage[mostDamaged] == Depth)
             {
-                armorDamage.Remove(mostDamaged);
+                ArmorDamage.Remove(mostDamaged);
 
-                if (armorDamage.Count == 0)
+                if (ArmorDamage.Count == 0)
                 {
                     RepairAllArmor();
                 }
@@ -270,13 +316,13 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void RepairAllArmor()
         {
-            isDamaged = false;
-            armorDamage.Clear();
-            armorColumns.Clear();
+            IsDamaged = false;
+            ArmorDamage.Clear();
+            ArmorColumns.Clear();
         }
     }
     /// <summary>
-    /// End of Class Armor
+    /// End of Class ArmorTN
     /// </summary>
 }
 /// <summary>

@@ -33,6 +33,6 @@ namespace Pulsar4X.Entities
         public int MaxLifeSupport { get; set; }
         public int DamageControlRating { get; set; }
 
-        public Armor ShipArmor { get; set; }
+        public ArmorTN ShipArmor { get; set; }
     }
 }

@@ -17,23 +17,23 @@ namespace Pulsar4X.Tests
             ShipClass ts2 = new ShipClass();
             Ship ts = new Ship();
 
-            ts2.ShipArmorDef = new ArmorDef();
-            ts.ShipArmor = new Armor();
+            ts2.ShipArmorDef = new ArmorDefTN();
+            ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
 
             ts2.ShipArmorDef.CalcArmor(5, 38.0, 5);
 
-            Console.WriteLine("ArmorPerHS: {0}", ts2.ShipArmorDef.ArmorPerHS);
-            Console.WriteLine("Size: {0}", ts2.ShipArmorDef.Size);
-            Console.WriteLine("Cost: {0}", ts2.ShipArmorDef.Cost);
-            Console.WriteLine("Area: {0}", ts2.ShipArmorDef.Area);
-            Console.WriteLine("Depth: {0}", ts2.ShipArmorDef.Depth);
-            Console.WriteLine("Column Number: {0}", ts2.ShipArmorDef.CNum);
+            Console.WriteLine("ArmorPerHS: {0}", ts2.ShipArmorDef.armorPerHS);
+            Console.WriteLine("Size: {0}", ts2.ShipArmorDef.size);
+            Console.WriteLine("Cost: {0}", ts2.ShipArmorDef.cost);
+            Console.WriteLine("Area: {0}", ts2.ShipArmorDef.area);
+            Console.WriteLine("Depth: {0}", ts2.ShipArmorDef.depth);
+            Console.WriteLine("Column Number: {0}", ts2.ShipArmorDef.cNum);
 
             Console.WriteLine("isDamaged: {0}", ts.ShipArmor.isDamaged);
 
 
-            ts.ShipArmor.SetDamage(ts2.ShipArmorDef.CNum, ts2.ShipArmorDef.Depth, 4, 1);
-            for (int loop = 0; loop < ts2.ShipArmorDef.CNum; loop++)
+            ts.ShipArmor.SetDamage(ts2.ShipArmorDef.cNum, ts2.ShipArmorDef.depth, 4, 1);
+            for (int loop = 0; loop < ts2.ShipArmorDef.cNum; loop++)
             {
                 Console.WriteLine("Column Value: {0}", ts.ShipArmor.armorColumns[loop]);
             }
@@ -41,12 +41,12 @@ namespace Pulsar4X.Tests
 
             Console.WriteLine("isDamaged: {0}", ts.ShipArmor.isDamaged);
 
-            ts.ShipArmor.RepairSingleBlock(ts2.ShipArmorDef.Depth);
+            ts.ShipArmor.RepairSingleBlock(ts2.ShipArmorDef.depth);
 
             Console.WriteLine("isDamaged: {0}", ts.ShipArmor.isDamaged);
 
-            ts.ShipArmor.SetDamage(ts2.ShipArmorDef.CNum, ts2.ShipArmorDef.Depth, 4, 1);
-            for (int loop = 0; loop < ts2.ShipArmorDef.CNum; loop++)
+            ts.ShipArmor.SetDamage(ts2.ShipArmorDef.cNum, ts2.ShipArmorDef.depth, 4, 1);
+            for (int loop = 0; loop < ts2.ShipArmorDef.cNum; loop++)
             {
                 Console.WriteLine("Column Value: {0}", ts.ShipArmor.armorColumns[loop]);
             }
@@ -57,6 +57,8 @@ namespace Pulsar4X.Tests
             ts.ShipArmor.RepairAllArmor();
 
             Console.WriteLine("isDamaged: {0}", ts.ShipArmor.isDamaged);
+
+            Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ts.ShipArmor.armorDef.cost, ts.ShipArmor.armorDef.area, ts.ShipArmor.armorDef.size);
 
 
 
