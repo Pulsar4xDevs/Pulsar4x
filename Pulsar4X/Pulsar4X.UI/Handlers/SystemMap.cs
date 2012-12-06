@@ -470,53 +470,41 @@ namespace Pulsar4X.UI.Handlers
         {
             if (k != null)
             {
-                switch (k.KeyCode)
+                if (k.KeyCode == Keys.W)
                 {
-                    case Keys.W:
-                        {
-                            Vector3 v3PanAmount = new Vector3(0, -UIConstants.DEFAULT_PAN_AMOUNT, 0);
-                            m_oGLCanvas.Pan(ref v3PanAmount);
-                            break;
-                        }
-                    case Keys.S:
-                        {
-                            Vector3 v3PanAmount = new Vector3(0, UIConstants.DEFAULT_PAN_AMOUNT, 0);
-                            m_oGLCanvas.Pan(ref v3PanAmount);
-                            break;
-                        }
-                    case Keys.A:
-                        {
-                            Vector3 v3PanAmount = new Vector3(UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
-                            m_oGLCanvas.Pan(ref v3PanAmount);
-                            break;
-                        }
-                    case Keys.D:
-                        {
-                            Vector3 v3PanAmount = new Vector3(-UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
-                            m_oGLCanvas.Pan(ref v3PanAmount);
-                            break;
-                        }
-                    case Keys.Add:
-                    case Keys.E:
-                        {
-                            m_oGLCanvas.IncreaseZoomScaler();
-                            UpdateScaleLabels();
-                            break;
-                        }
-                    case Keys.Subtract:
-                    case Keys.Q:
-                        {
-                            m_oGLCanvas.DecreaseZoomScaler();
-                            UpdateScaleLabels();
-                            break;
-                        }
-                    case Keys.R:
-                        {
-                            m_oGLCanvas.CenterOnZero();
-                            m_oGLCanvas.ZoomFactor = m_oCurrentSceen.DefaultZoomScaler;
-                            m_oCurrentSceen.Refresh();
-                            break;
-                        }
+                    Vector3 v3PanAmount = new Vector3(0, -UIConstants.DEFAULT_PAN_AMOUNT, 0);
+                    m_oGLCanvas.Pan(ref v3PanAmount);
+                }
+                if (k.KeyCode == Keys.S)
+                {
+                    Vector3 v3PanAmount = new Vector3(0, UIConstants.DEFAULT_PAN_AMOUNT, 0);
+                    m_oGLCanvas.Pan(ref v3PanAmount);
+                }
+                if (k.KeyCode == Keys.A)
+                {
+                    Vector3 v3PanAmount = new Vector3(UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
+                    m_oGLCanvas.Pan(ref v3PanAmount);
+                }
+                if (k.KeyCode == Keys.D)
+                {
+                    Vector3 v3PanAmount = new Vector3(-UIConstants.DEFAULT_PAN_AMOUNT, 0, 0);
+                    m_oGLCanvas.Pan(ref v3PanAmount);
+                }
+                if (k.KeyCode == Keys.E)
+                {
+                    m_oGLCanvas.IncreaseZoomScaler();
+                    UpdateScaleLabels();
+                }
+                if (k.KeyCode == Keys.Q)
+                {
+                    m_oGLCanvas.DecreaseZoomScaler();
+                    UpdateScaleLabels();
+                }
+                if (k.KeyCode == Keys.R)
+                {
+                    m_oGLCanvas.CenterOnZero();
+                    m_oGLCanvas.ZoomFactor = m_oCurrentSceen.DefaultZoomScaler;
+                    m_oCurrentSceen.Refresh();
                 }
             }
 
