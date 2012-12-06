@@ -43,6 +43,11 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         Vector3 m_v3PanStartLocation;
 
+        /// <summary>
+        /// Keeps tract of the start location when calculation a measurement.
+        /// </summary>
+        Vector3 m_v3MeasurementStartLocation;
+
         /// <summary> The currnet star system </summary>
         private Pulsar4X.Entities.StarSystem m_oCurrnetSystem;
 
@@ -137,6 +142,18 @@ namespace Pulsar4X.UI.Handlers
 
                 m_oGLCanvas.Invalidate();
             }
+            else if (e.Button == MouseButtons.Left && m_oCurrentSceen.MeasureMode == true)
+            {
+                Point oCursorPosition = m_oGLCanvas.PointToClient(Cursor.Position);
+                // Convert to be world coords:
+                Vector3 v3CurPosWorldCorrds = new Vector3(oCursorPosition.X - (m_oGLCanvas.Size.Width / 2), oCursorPosition.Y - (m_oGLCanvas.Size.Height / 2), 0);
+                v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
+                v3CurPosWorldCorrds.Y = -v3CurPosWorldCorrds.Y;
+
+                v3CurPosWorldCorrds.X -= m_v3MeasurementStartLocation.X;
+                v3CurPosWorldCorrds.Y -= m_v3MeasurementStartLocation.Y;
+                m_oCurrentSceen.SetMeasurementEndPos(v3CurPosWorldCorrds);
+            }
         }
 
 
@@ -153,6 +170,25 @@ namespace Pulsar4X.UI.Handlers
                 m_v3PanStartLocation.Y = e.Location.Y;
                 m_v3PanStartLocation.Z = 0.0f;
             }
+            else if (e.Button.Equals(System.Windows.Forms.MouseButtons.Left))
+            {
+                Point oCursorPosition = m_oGLCanvas.PointToClient(Cursor.Position);
+                // Convert to be world coords:
+                Vector3 v3CurPosWorldCorrds = new Vector3(oCursorPosition.X - (m_oGLCanvas.Size.Width / 2), oCursorPosition.Y - (m_oGLCanvas.Size.Height / 2), 0);
+                v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
+                v3CurPosWorldCorrds.Y = -v3CurPosWorldCorrds.Y;
+
+                if (m_oCurrentSceen.MeasureMode == false)
+                {
+
+                    // on left button down, enable MesureMode
+                    m_oCurrentSceen.MeasureMode = true;
+
+                    // Set mesurement Start position:
+                    m_oCurrentSceen.SetMeasurementStartPos(v3CurPosWorldCorrds);
+                    m_v3MeasurementStartLocation = v3CurPosWorldCorrds;
+                }
+            }
             else if (e.Button.Equals(System.Windows.Forms.MouseButtons.Middle))
             {
                 // on middle or mouse wheel button, centre!
@@ -166,6 +202,9 @@ namespace Pulsar4X.UI.Handlers
         {
             // reset cursor:
             Cursor.Current = Cursors.Default;
+
+            // cleamre measurement:
+            m_oCurrentSceen.MeasureMode = false;
 
             m_oGLCanvas.Invalidate();
         }

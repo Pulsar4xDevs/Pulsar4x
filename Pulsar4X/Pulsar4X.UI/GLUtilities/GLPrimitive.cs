@@ -71,6 +71,7 @@ namespace Pulsar4X.UI.GLUtilities
             set
             {
                 m_v3Position = value;
+                //UpdatePos((int)m_v3Position.X, (int)m_v3Position.Y);
             }
         }
 
@@ -119,6 +120,8 @@ namespace Pulsar4X.UI.GLUtilities
         /// A handle to the shader program to be used by this Primitive. 
         /// </summary>
         protected GLEffect m_oEffect;
+
+        protected System.Drawing.Color m_oColor; 
 
         /// <summary>   
         /// Default constructor. 

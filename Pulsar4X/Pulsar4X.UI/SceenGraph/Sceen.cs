@@ -123,19 +123,33 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
+        /// <summary>   Gets or sets a value indicating whether the measure mode is active. </summary>
+        public bool MeasureMode { get; set; }
+
+        /// <summary> Used to draw a measurement on the screen. </summary>
+        private MeasurementElement m_oMeasurementElement;
 
         /// <summary>
         /// Default Constructor.
         /// </summary>
         public Sceen()
         {
+            MeasureMode = false;
         }
 
         public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect)
         {
+            MeasureMode = false;
+
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;
             SceenID = a_oStarSystem.Id;
+            
+            // Create measurement element:
+            m_oMeasurementElement = new MeasurementElement();
+            m_oMeasurementElement.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), Color.Yellow, UIConstants.Textures.DEFAULT_TEXTURE);
+            m_oMeasurementElement.AddPrimitive(m_oMeasurementElement.PrimaryPrimitive);
+            m_oMeasurementElement.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, Color.Yellow, UIConstants.Textures.DEFAULT_GLFONT, "");
 
             // Creat Working Vars:
             //double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
@@ -304,6 +318,11 @@ namespace Pulsar4X.UI.SceenGraph
             {
                 oElement.Render();
             }
+
+            if (MeasureMode == true)
+            {
+                m_oMeasurementElement.Render();
+            }
         }
 
         /// <summary>
@@ -341,6 +360,21 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             return oElementID;
+        }
+
+        public void SetMeasurementStartPos(Vector3 a_v3Pos)
+        {
+            m_oMeasurementElement.PrimaryPrimitive.Position = a_v3Pos;
+            m_oMeasurementElement.Lable.Position = a_v3Pos;
+        }
+
+        public void SetMeasurementEndPos(Vector3 a_v3Pos)
+        {
+            GLLine temp = m_oMeasurementElement.PrimaryPrimitive as GLLine;
+            if (temp != null)
+            {
+                temp.PosEnd = a_v3Pos;
+            }
         }
 
         /// <summary>

@@ -12,19 +12,39 @@ using log4net;
 
 namespace Pulsar4X.UI.GLUtilities
 {
-   
-    /// <summary>
-    /// A Quad Primitive
-    /// </summary>
-    class GLQuad : GLPrimitive
+    class GLLine : GLPrimitive
     {
+        private Vector3 m_V3PosEnd;  
+      
+        public Vector3 PosEnd
+        {
+            get
+            {
+                return m_V3PosEnd;
+            }
+            set
+            {
+                m_V3PosEnd = value;
+                // work out our new size and position:
+                m_aoVerticies[1].m_v4Position = new Vector4(m_V3PosEnd.X, m_V3PosEnd.Y, m_V3PosEnd.Z, 1.0f);
+                UpdateVBOs();
+            }
+        }
+
+        public void UpdateStartPos(Vector3 a_v3Pos)
+        {
+            Position = a_v3Pos;
+            m_aoVerticies[0].m_v4Position = new Vector4(a_v3Pos.X, a_v3Pos.Y, a_v3Pos.Z, 1.0f);
+            UpdateVBOs();
+        }
+
         /// <summary>   Constructor. </summary>
         /// <param name="a_oEffect"> The shader program to use. </param>
         /// <param name="a_v2Pos">          The position of the quad (centre). </param>
         /// <param name="a_v2Size">         Size of the Quad. </param>
         /// <param name="a_oColor">         The color to apply to the quad. </param>
         /// <param name="a_szTexture">      (optional) the texture file. </param>
-        public GLQuad(GLEffect a_oEffect, Vector3 a_v3Pos, Vector2 a_v2Size, System.Drawing.Color a_oColor, string a_szTexture = "")
+        public GLLine(GLEffect a_oEffect, Vector3 a_v3Pos, Vector2 a_v2Size, System.Drawing.Color a_oColor, string a_szTexture = "")
             : base()
         {
             // Setup Member Vars:
@@ -33,8 +53,8 @@ namespace Pulsar4X.UI.GLUtilities
             m_v3Position = a_v3Pos;
             m_oEffect = a_oEffect;
             m_m4ModelMatrix = Matrix4.Identity;
-            ///< @todo make quads scale better, so it can scale on X or Y...
-            m_m4ModelMatrix = Matrix4.Scale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);  // x and y should be the same, so scale by X
+            m_m4ModelMatrix = Matrix4.CreateTranslation(a_v3Pos);
+            m_V3PosEnd = Vector3.Zero;
 
             if (a_szTexture != "")
             {
@@ -46,28 +66,17 @@ namespace Pulsar4X.UI.GLUtilities
                 m_uiTextureID = 0; // set texture to none!
             }
 
-            // calculate the Y scale to X, as we are using X for our scale in our matrix.
-            float fYScale = 1;
-            if (a_v2Size.X != 0)
-            {
-                fYScale = a_v2Size.Y / a_v2Size.X;
-            }
-
-            //setup our quads vertcies:
-            m_aoVerticies = new GLVertex[4];
-            m_aoVerticies[0] = new GLVertex(new Vector4(-0.5f, -0.5f * fYScale, 0.0f, 1.0f), a_oColor, new Vector2(0.0f, 1.0f));
-            m_aoVerticies[1] = new GLVertex(new Vector4(0.5f, -0.5f * fYScale, 0.0f, 1.0f), a_oColor, new Vector2(1.0f, 1.0f));
-            m_aoVerticies[2] = new GLVertex(new Vector4(-0.5f, 0.5f * fYScale, 0.0f, 1.0f), a_oColor, new Vector2(0.0f, 0.0f));
-            m_aoVerticies[3] = new GLVertex(new Vector4(0.5f, 0.5f * fYScale, 0.0f, 1.0f), a_oColor, new Vector2(1.0f, 0.0f));
-
-            // Setup Draw order. *this apears to have no effect under GL2.X*
-            m_auiIndicies = new ushort[4];
-            m_auiIndicies[0] = 0;
-            m_auiIndicies[1] = 1;
-            m_auiIndicies[2] = 2;
-            m_auiIndicies[3] = 3;
+            //setup our lines vertcies:
+            m_aoVerticies = new GLVertex[2];
+            m_aoVerticies[0] = new GLVertex(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), a_oColor, new Vector2(0.0f, 0.0f));
+            m_aoVerticies[1] = new GLVertex(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), a_oColor, new Vector2(1.0f, 1.0f));
             
 
+            // Setup Draw order. *this apears to have no effect under GL2.X*
+            m_auiIndicies = new ushort[2];
+            m_auiIndicies[0] = 0;
+            m_auiIndicies[1] = 1;
+            
             // tell OpenGL about our VBOs:
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
             GL.BindVertexArray(m_uiVextexArrayHandle);                      // Lets OpenGL that this is the current "active" vertex array.
@@ -103,17 +112,22 @@ namespace Pulsar4X.UI.GLUtilities
             GL.EnableVertexAttribArray(2);
 
            // #if DEBUG
-            //    logger.Info("OpenGL Create Quad Primitive: " + GL.GetError().ToString());
+            //    logger.Info("OpenGL Create Line Primitive: " + GL.GetError().ToString());
             //#endif
         }
 
         public override void UpdateVBOs()
         {
             GL.BindVertexArray(m_uiVextexArrayHandle);
-            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
-            GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle); // Lets Open GL know that this is the current active buffer object.
-            GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(m_auiIndicies.Length * sizeof(ushort)), m_auiIndicies, BufferUsageHint.StaticDraw); // Tells OpenGL how the data is structured.
+            GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);
+
+            GL.BufferSubData<GLVertex>(BufferTarget.ArrayBuffer, IntPtr.Zero, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies);
+
+            //GL.BindVertexArray(m_uiVextexArrayHandle);
+            //GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
+            //GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
+            //GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle); // Lets Open GL know that this is the current active buffer object.
+            //GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(m_auiIndicies.Length * sizeof(ushort)), m_auiIndicies, BufferUsageHint.StaticDraw); // Tells OpenGL how the data is structured.
         }
 
         public override void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
@@ -128,7 +142,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render(ref Matrix4 a_m4View)
@@ -142,7 +156,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render()
@@ -158,7 +172,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
 }
