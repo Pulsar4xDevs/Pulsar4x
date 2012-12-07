@@ -47,6 +47,8 @@ namespace Pulsar4X.Entities
             CivilianPopulation = 0;
             FuelStockpile = 0;
 
+            Name = "Earth";  // just a default Value!
+
             Faction = a_oFaction;
             Planet = a_oPlanet;
             Planet.Populations.Add(this); // add us to the list of pops on the planet!

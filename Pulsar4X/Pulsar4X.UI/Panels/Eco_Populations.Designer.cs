@@ -31,7 +31,7 @@
             this.FactionGroupBox = new System.Windows.Forms.GroupBox();
             this.PopulatedSystemGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oFactionSelectionComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oPopulationsTreeView = new System.Windows.Forms.TreeView();
+            this.m_oPopulationsListBox = new System.Windows.Forms.ListBox();
             this.FactionGroupBox.SuspendLayout();
             this.PopulatedSystemGroupBox.SuspendLayout();
             this.SuspendLayout();
@@ -52,7 +52,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.PopulatedSystemGroupBox.AutoSize = true;
-            this.PopulatedSystemGroupBox.Controls.Add(this.m_oPopulationsTreeView);
+            this.PopulatedSystemGroupBox.Controls.Add(this.m_oPopulationsListBox);
             this.PopulatedSystemGroupBox.Location = new System.Drawing.Point(2, 61);
             this.PopulatedSystemGroupBox.Name = "PopulatedSystemGroupBox";
             this.PopulatedSystemGroupBox.Size = new System.Drawing.Size(200, 376);
@@ -68,13 +68,14 @@
             this.m_oFactionSelectionComboBox.Size = new System.Drawing.Size(183, 21);
             this.m_oFactionSelectionComboBox.TabIndex = 0;
             // 
-            // m_oPopulationsTreeView
+            // m_oPopulationsListBox
             // 
-            this.m_oPopulationsTreeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.m_oPopulationsTreeView.Location = new System.Drawing.Point(3, 16);
-            this.m_oPopulationsTreeView.Name = "m_oPopulationsTreeView";
-            this.m_oPopulationsTreeView.Size = new System.Drawing.Size(194, 357);
-            this.m_oPopulationsTreeView.TabIndex = 0;
+            this.m_oPopulationsListBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.m_oPopulationsListBox.FormattingEnabled = true;
+            this.m_oPopulationsListBox.Location = new System.Drawing.Point(3, 16);
+            this.m_oPopulationsListBox.Name = "m_oPopulationsListBox";
+            this.m_oPopulationsListBox.Size = new System.Drawing.Size(194, 357);
+            this.m_oPopulationsListBox.TabIndex = 0;
             // 
             // Eco_Populations
             // 
@@ -97,6 +98,6 @@
         private System.Windows.Forms.GroupBox FactionGroupBox;
         private System.Windows.Forms.ComboBox m_oFactionSelectionComboBox;
         private System.Windows.Forms.GroupBox PopulatedSystemGroupBox;
-        private System.Windows.Forms.TreeView m_oPopulationsTreeView;
+        private System.Windows.Forms.ListBox m_oPopulationsListBox;
     }
 }

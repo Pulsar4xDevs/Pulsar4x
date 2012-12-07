@@ -62,6 +62,7 @@ namespace Pulsar4X.UI.ViewModels
             {
                 _currentPopulation = value;
                 OnPropertyChanged(() => CurrentPopulation);
+                OnPopulationChanged();
             }
         }
 
@@ -84,6 +85,13 @@ namespace Pulsar4X.UI.ViewModels
             }
         }
 
+        private void OnPopulationChanged()
+        {
+            if (PopulationChanged != null)
+            {
+                PopulationChanged(this, new EventArgs());
+            }
+        }
 
         private void OnPropertyChanged(Expression<Func<object>> property)
         {
@@ -95,5 +103,7 @@ namespace Pulsar4X.UI.ViewModels
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public event EventHandler PopulationChanged;
     }
 }

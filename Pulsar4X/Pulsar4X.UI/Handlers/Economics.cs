@@ -42,10 +42,17 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.SummaryDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
             m_oSummaryPanel.SummaryDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.SummaryDataGrid.AutoGenerateColumns = false;
-            AddCellsToSummaryDataGrid();
+            SetupSummaryDataGrid();
+            RefreshSummaryCells();
 
-            // Setup Pops tree View
-            //m_oPopulationsPanel
+            // Setup Pops List box
+            m_oPopulationsPanel.PopulationsListBox.Bind(c => c.DataSource, VM, d => d.Populations);
+            m_oPopulationsPanel.PopulationsListBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
+            m_oPopulationsPanel.PopulationsListBox.DisplayMember = "Name";
+            //VM.PopulationChanged += (s, args) => CurrentStarSystem = VM.CurrentStarSystem;
+             
+            // setup Event handlers:
+
         }
 
         #region EventHandlers
@@ -92,8 +99,56 @@ namespace Pulsar4X.UI.Handlers
 
         #region PrivateMethods
 
-        private void AddCellsToSummaryDataGrid()
+        private void SetupSummaryDataGrid()
         {
+            // Add coloums:
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.HeaderText = "Item";
+                m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.HeaderText = "Amount";
+                m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.HeaderText = "Installation";
+                m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.HeaderText = "Number or Level";
+                m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
+            }
+
+            // Add Rows:
+            for (int i = 0; i < 35; ++i)
+            {
+                using (DataGridViewRow row = new DataGridViewRow())
+                {
+                    m_oSummaryPanel.SummaryDataGrid.Rows.Add(row);
+                }
+            }
+
+            // Setup item Colomn:
+            m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[0].Value = "Species";
+            m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[0].Value = "Population";
+            m_oSummaryPanel.SummaryDataGrid.Rows[31].Cells[0].Value = "Tectonics";
+
+
+
+            // Setup Installation Colomn
+            m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[2].Value = "Fuel Reserves";
+        }
+
+        public void RefreshSummaryCells()
+        {
+            m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[1].Value = VM.CurrentFaction.Species.Name;
+            m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[1].Value = VM.CurrentPopulation.CivilianPopulation.ToString();
+            //m_oSummaryPanel.SummaryDataGrid.Rows[31].Cells[1].Value = VM.CurrentPopulation.Planet.;  - No tetonics???
+            m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[3].Value = VM.CurrentPopulation.FuelStockpile.ToString();
         }
 
         #endregion

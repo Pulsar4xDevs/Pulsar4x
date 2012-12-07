@@ -28,11 +28,11 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// Lists the Populated Systems for the selected faction.
         /// </summary>
-        public TreeView PopulationsTreeView
+        public ListBox PopulationsListBox
         {
             get
             {
-                return m_oPopulationsTreeView;
+                return m_oPopulationsListBox;
             }
         }
 

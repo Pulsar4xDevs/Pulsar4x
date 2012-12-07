@@ -23,6 +23,19 @@ namespace Pulsar4X.Entities
         public Species()
         {
             GasConstraints = new List<SpeciesGasConstraint>();
+
+            // set default values:
+            Name = "Human";
+            BaseGravity = 1.0;
+            MinimumGravityConstraint = 0.1;
+            MaximumGravityConstraint = 1.9;
+            BasePressure = 1.0;
+            MinimumPressureConstraint = 0.4;
+            MaximumPressureConstraint = 2.0;
+            BaseTemperature = 14.0;
+            MinimumTemperatureConstraint = -15.0;
+            MaximumTemperatureConstraint = 45.0;
+
         }
 
         public double ColonyCost(Planet planet)

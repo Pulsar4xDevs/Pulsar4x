@@ -25,12 +25,22 @@ namespace Pulsar4X.Entities
         {
             Name = "Human Federation";
             Species = new Species(); // go with the default Species!
+
+            KnownSystems = new BindingList<StarSystem>();
+            TaskForces = new BindingList<TaskForce>();
+            Commanders = new BindingList<Commander>();
+            Populations = new BindingList<Population>();
         }
 
         public Faction(string a_oName, Species a_oSpecies)
         {
             Name = a_oName;
             Species = a_oSpecies;
+
+            KnownSystems = new BindingList<StarSystem>();
+            TaskForces = new BindingList<TaskForce>();
+            Commanders = new BindingList<Commander>();
+            Populations = new BindingList<Population>();
         }
     }
 }
