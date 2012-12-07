@@ -56,6 +56,17 @@ namespace Pulsar4X.UI.Helpers
             }
         }
 
+        Handlers.Economics m_oEconomics;
+
+        public Handlers.Economics Economics
+        {
+            get
+            {
+                return m_oEconomics;
+            }
+        }
+
+
         private Type m_oLastActivatedPanelType = null;
 
         public bool SuspendAutoPanelDisplay { get; set; }
@@ -86,6 +97,7 @@ namespace Pulsar4X.UI.Helpers
             // now init ui handlers
             m_oSystemGenAndDisplay = new Handlers.SystemGenAndDisplay();
             m_oSystemMap = new Handlers.SystemMap();
+            m_oEconomics = new Handlers.Economics();
         }
 
         #region PublicMethods
@@ -124,6 +136,10 @@ namespace Pulsar4X.UI.Helpers
             else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.SysMap_ViewPort))
             {
                 m_oSystemMap.ActivateControlsPanel();
+            }
+            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Eco_Summary))
+            {
+                m_oEconomics.ActivatePopulationsPanel();
             }
         }
 
