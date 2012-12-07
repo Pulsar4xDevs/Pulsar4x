@@ -144,7 +144,7 @@ namespace Pulsar4X.UI.ViewModels
 
         public StarSystemViewModel()
         {
-            // Just gen a Starsystem
+            // Bind to list of star systems:
             StarSystems = GameState.Instance.StarSystems;
 
             // safty check
