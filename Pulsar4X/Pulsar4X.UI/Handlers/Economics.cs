@@ -102,11 +102,13 @@ namespace Pulsar4X.UI.Handlers
         private void SetupSummaryDataGrid()
         {
             // Add coloums:
+            Padding newPadding = new Padding(2, 0, 2, 0);
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = "Item";
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                col.DefaultCellStyle.Padding = newPadding;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
@@ -114,6 +116,7 @@ namespace Pulsar4X.UI.Handlers
                 col.HeaderText = "Amount";
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                col.DefaultCellStyle.Padding = newPadding;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
@@ -121,6 +124,7 @@ namespace Pulsar4X.UI.Handlers
                 col.HeaderText = "Installation";
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                col.DefaultCellStyle.Padding = newPadding;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
@@ -128,14 +132,17 @@ namespace Pulsar4X.UI.Handlers
                 col.HeaderText = "Number or Level";
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                col.DefaultCellStyle.Padding = newPadding;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
 
             // Add Rows:
-            for (int i = 0; i < 35; ++i)
+            for (int i = 0; i < 33; ++i)
             {
                 using (DataGridViewRow row = new DataGridViewRow())
                 {
+                    // setup row height. note that by default they are 22 pixels in height!
+                    row.Height = 18;
                     m_oSummaryPanel.SummaryDataGrid.Rows.Add(row);
                 }
             }
@@ -148,21 +155,39 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[0].Value = "   Manufacturing (20.0%)";
             m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[0].Value = "Anual Growth Rate";
 
+            m_oSummaryPanel.SummaryDataGrid.Rows[14].Cells[0].Value = "Current Infrastructure";
+
             m_oSummaryPanel.SummaryDataGrid.Rows[31].Cells[0].Value = "Tectonics";
 
-
-
             // Setup Installation Colomn
-            m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[2].Value = "Fuel Reserves";
-            m_oSummaryPanel.SummaryDataGrid.Rows[18].Cells[2].Value = "Maintenance Supplies";
-            m_oSummaryPanel.SummaryDataGrid.Rows[21].Cells[2].Value = "EM Signature of Colony";
-            m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[2].Value = "Economic Production Modifier";
-            m_oSummaryPanel.SummaryDataGrid.Rows[24].Cells[2].Value = "Manufacturing Efficiency Modifier";
-            m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[2].Value = "Political Status Production Modifier";
-            m_oSummaryPanel.SummaryDataGrid.Rows[26].Cells[2].Value = "Political Status Wealth/Trade Modifier";
-            m_oSummaryPanel.SummaryDataGrid.Rows[27].Cells[2].Value = "Political Status Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[0].Cells[2].Value = "Military Academy";
+            m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[2].Value = "Deep Space Tracking Station";
+            m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[2].Value = "Maintenance Facility Maximum Ship Size";
 
+            m_oSummaryPanel.SummaryDataGrid.Rows[4].Cells[2].Value = "Shipyards / Slipways";
+            m_oSummaryPanel.SummaryDataGrid.Rows[5].Cells[2].Value = "Maintenance Facilities";
+            m_oSummaryPanel.SummaryDataGrid.Rows[6].Cells[2].Value = "Construction Factories";
+            m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[2].Value = "Ordnance Factories";
+            m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[2].Value = "Fighter Factories";
+            m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[2].Value = "Fuel Refineries";
+            m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[2].Value = "Mines";
+            m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[2].Value = "Automated Mines";
+            m_oSummaryPanel.SummaryDataGrid.Rows[12].Cells[2].Value = "Research Labs";
+            m_oSummaryPanel.SummaryDataGrid.Rows[13].Cells[2].Value = "Ground Force Training Facilities";
+            m_oSummaryPanel.SummaryDataGrid.Rows[14].Cells[2].Value = "Financial Centre";
+            m_oSummaryPanel.SummaryDataGrid.Rows[15].Cells[2].Value = "Mass Driver";
+            m_oSummaryPanel.SummaryDataGrid.Rows[16].Cells[2].Value = "Sector Command";
+            m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[2].Value = "Spaceport";
+            m_oSummaryPanel.SummaryDataGrid.Rows[18].Cells[2].Value = "Terraforming Installation";
 
+            m_oSummaryPanel.SummaryDataGrid.Rows[20].Cells[2].Value = "Fuel Reserves";
+            m_oSummaryPanel.SummaryDataGrid.Rows[21].Cells[2].Value = "Maintenance Supplies";
+            m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[2].Value = "EM Signature of Colony";
+            m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[2].Value = "Economic Production Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[26].Cells[2].Value = "Manufacturing Efficiency Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[27].Cells[2].Value = "Political Status Production Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[28].Cells[2].Value = "Political Status Wealth/Trade Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[29].Cells[2].Value = "Political Status Modifier";
         }
 
         public void RefreshSummaryCells()
@@ -174,15 +199,38 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[1].Value = VM.CurrentPopulation.PopulationWorkingInManufacturing.ToString() + "m";
             m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = VM.CurrentPopulation.PopulationGrowthRate.ToString() + "%";
 
+            m_oSummaryPanel.SummaryDataGrid.Rows[14].Cells[1].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
+
             //m_oSummaryPanel.SummaryDataGrid.Rows[31].Cells[1].Value = VM.CurrentPopulation.Planet.;  - No tetonics???
-            m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[3].Value = VM.CurrentPopulation.FuelStockpile.ToString();
-            m_oSummaryPanel.SummaryDataGrid.Rows[18].Cells[3].Value = VM.CurrentPopulation.MaintenanceSupplies.ToString();
-            m_oSummaryPanel.SummaryDataGrid.Rows[21].Cells[3].Value = VM.CurrentPopulation.EMSignature.ToString();
-            m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[3].Value = (VM.CurrentPopulation.ModifierEconomicProduction * 100).ToString() + "%";
-            m_oSummaryPanel.SummaryDataGrid.Rows[24].Cells[3].Value = (VM.CurrentPopulation.ModifierManfacturing * 100).ToString() + "%";
-            m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[3].Value = (VM.CurrentPopulation.ModifierProduction * 100).ToString() + "%";
-            m_oSummaryPanel.SummaryDataGrid.Rows[26].Cells[3].Value = (VM.CurrentPopulation.ModifierWealthAndTrade * 100).ToString() + "%";
-            m_oSummaryPanel.SummaryDataGrid.Rows[27].Cells[3].Value = (VM.CurrentPopulation.ModifierPoliticalStability * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[0].Cells[3].Value = "Level " + VM.CurrentPopulation.Installations[(int)Installation.InstallationType.MilitaryAcademy].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[3].Value = "Level " + VM.CurrentPopulation.Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[3].Value = (VM.CurrentPopulation.Installations[(int)Installation.InstallationType.MaintenanceFacility].Number * 200).ToString() + " tons";
+
+            int iShipyards = (int)(VM.CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number + VM.CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+            m_oSummaryPanel.SummaryDataGrid.Rows[4].Cells[3].Value =  iShipyards.ToString() + " / ";
+            m_oSummaryPanel.SummaryDataGrid.Rows[5].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.MaintenanceFacility].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[6].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.ConstructionFactory].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.OrdnanceFactory].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.FighterFactory].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.FuelRefinery].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.Mine].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.AutomatedMine].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[12].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.ResearchLab].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[13].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.GroundForceTrainingFacility].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[14].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.FinancialCentre].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[15].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.MassDriver].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[16].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.SectorCommand].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.Spaceport].Number.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[18].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.TerraformingInstallation].Number.ToString();
+
+            m_oSummaryPanel.SummaryDataGrid.Rows[20].Cells[3].Value = VM.CurrentPopulation.FuelStockpile.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[21].Cells[3].Value = VM.CurrentPopulation.MaintenanceSupplies.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[3].Value = VM.CurrentPopulation.EMSignature.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[3].Value = (VM.CurrentPopulation.ModifierEconomicProduction * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[26].Cells[3].Value = (VM.CurrentPopulation.ModifierManfacturing * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[27].Cells[3].Value = (VM.CurrentPopulation.ModifierProduction * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[28].Cells[3].Value = (VM.CurrentPopulation.ModifierWealthAndTrade * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[29].Cells[3].Value = (VM.CurrentPopulation.ModifierPoliticalStability * 100).ToString() + "%";
         }
 
         #endregion

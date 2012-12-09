@@ -31,6 +31,8 @@ namespace Pulsar4X.Entities
             TerraformingInstallation
         }
 
+        public const int NO_OF_INSTALLATIONS = 19;
+ 
         public InstallationType Type { get; set; }
         public int Cost { get; set; }
         public float Number { get; set; }
@@ -59,7 +61,8 @@ namespace Pulsar4X.Entities
         {
             Number = 0;
             Mass = 25000;
-            Type = a_eType; 
+            Type = a_eType;
+            m_aiMinerialsCost = new int[Constants.Minerals.NO_OF_MINERIALS];
 
             switch (a_eType)
             {

@@ -73,6 +73,21 @@ namespace Pulsar4X.Entities
             }
         }
 
+        Installation[] m_aoInstallations;
+        public Installation[] Installations
+        {
+            get
+            {
+                return m_aoInstallations;
+            }
+            set
+            {
+                m_aoInstallations = value;
+            }
+        }
+
+
+
         public float ModifierEconomicProduction { get; set; }
         public float ModifierManfacturing { get; set; }
         public float ModifierProduction { get; set; }
@@ -88,6 +103,12 @@ namespace Pulsar4X.Entities
             for (int i = 0; i < Constants.Minerals.NO_OF_MINERIALS; ++i)
             {
                 m_aiMinerials[i] = 0;
+            }
+
+            m_aoInstallations = new Installation[Installation.NO_OF_INSTALLATIONS];
+            for (int i = 0; i < Installation.NO_OF_INSTALLATIONS; ++i)
+            {
+                m_aoInstallations[i] = new Installation((Installation.InstallationType)i);
             }
 
             CivilianPopulation = 0;
