@@ -30,6 +30,7 @@ namespace Pulsar4X.UI
             // gen Faction and a pop:
             Entities.Faction oNewFaction = new Entities.Faction();
             oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
+            oNewFaction.Populations.First().CivilianPopulation = 100.0f;
             GameState.Instance.Factions.Add(oNewFaction);
 
             Application.EnableVisualStyles();

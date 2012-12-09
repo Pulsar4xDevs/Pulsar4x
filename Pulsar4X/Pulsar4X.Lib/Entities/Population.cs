@@ -17,8 +17,48 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Planet Planet { get; set; }
 
-        public int CivilianPopulation { get; set; }
+        public float CivilianPopulation { get; set; }
+        public float PopulationGrowthRate { get; set; }
         public int FuelStockpile { get; set; }
+        public float MaintenanceSupplies { get; set; }
+
+
+        public float PopulationWorkingInAgriAndEnviro
+        {
+            get
+            {
+                // 5% of civi pop
+                return CivilianPopulation * 0.05f;
+            }
+        }
+
+        public float PopulationWorkingInServiceIndustries
+        {
+            get
+            {
+                // 75% of Civi Pop
+                return CivilianPopulation * 0.75f;
+            }
+        }
+
+        public float PopulationWorkingInManufacturing
+        {
+            get
+            {
+                // 20% of civi pop
+                return CivilianPopulation * 0.20f;
+            }
+        }
+
+        public int EMSignature
+        {
+            get
+            {
+                // Todo: Proper Formula for EM Sig!
+                return (int)((CivilianPopulation * CivilianPopulation) / 10);
+            }
+        }
+
 
         int[] m_aiMinerials;
         public int[] Minerials
@@ -33,6 +73,12 @@ namespace Pulsar4X.Entities
             }
         }
 
+        public float ModifierEconomicProduction { get; set; }
+        public float ModifierManfacturing { get; set; }
+        public float ModifierProduction { get; set; }
+        public float ModifierWealthAndTrade { get; set; }
+        public float ModifierPoliticalStability { get; set; }
+
         #endregion
 
         public Population(Planet a_oPlanet, Faction a_oFaction)
@@ -45,7 +91,14 @@ namespace Pulsar4X.Entities
             }
 
             CivilianPopulation = 0;
+            PopulationGrowthRate = 0.1f;
             FuelStockpile = 0;
+            MaintenanceSupplies = 0;
+            ModifierEconomicProduction = 1.0f;
+            ModifierManfacturing = 1.0f;
+            ModifierPoliticalStability = 1.0f;
+            ModifierProduction = 1.0f;
+            ModifierWealthAndTrade = 1.0f;
 
             Name = "Earth";  // just a default Value!
 

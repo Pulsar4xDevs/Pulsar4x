@@ -105,21 +105,29 @@ namespace Pulsar4X.UI.Handlers
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = "Item";
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = "Amount";
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = "Installation";
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = "Number or Level";
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
             }
 
@@ -135,20 +143,46 @@ namespace Pulsar4X.UI.Handlers
             // Setup item Colomn:
             m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[0].Value = "Species";
             m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[0].Value = "Population";
+            m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[0].Value = "   Agriculture and Enviromental (5.0%)";
+            m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[0].Value = "   Service Industries (75.0%)";
+            m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[0].Value = "   Manufacturing (20.0%)";
+            m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[0].Value = "Anual Growth Rate";
+
             m_oSummaryPanel.SummaryDataGrid.Rows[31].Cells[0].Value = "Tectonics";
 
 
 
             // Setup Installation Colomn
             m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[2].Value = "Fuel Reserves";
+            m_oSummaryPanel.SummaryDataGrid.Rows[18].Cells[2].Value = "Maintenance Supplies";
+            m_oSummaryPanel.SummaryDataGrid.Rows[21].Cells[2].Value = "EM Signature of Colony";
+            m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[2].Value = "Economic Production Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[24].Cells[2].Value = "Manufacturing Efficiency Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[2].Value = "Political Status Production Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[26].Cells[2].Value = "Political Status Wealth/Trade Modifier";
+            m_oSummaryPanel.SummaryDataGrid.Rows[27].Cells[2].Value = "Political Status Modifier";
+
+
         }
 
         public void RefreshSummaryCells()
         {
             m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[1].Value = VM.CurrentFaction.Species.Name;
-            m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[1].Value = VM.CurrentPopulation.CivilianPopulation.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[1].Value = VM.CurrentPopulation.CivilianPopulation.ToString() + "m";
+            m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[1].Value = VM.CurrentPopulation.PopulationWorkingInAgriAndEnviro.ToString() + "m";
+            m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[1].Value = VM.CurrentPopulation.PopulationWorkingInServiceIndustries.ToString() + "m";
+            m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[1].Value = VM.CurrentPopulation.PopulationWorkingInManufacturing.ToString() + "m";
+            m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[1].Value = VM.CurrentPopulation.PopulationGrowthRate.ToString() + "%";
+
             //m_oSummaryPanel.SummaryDataGrid.Rows[31].Cells[1].Value = VM.CurrentPopulation.Planet.;  - No tetonics???
             m_oSummaryPanel.SummaryDataGrid.Rows[17].Cells[3].Value = VM.CurrentPopulation.FuelStockpile.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[18].Cells[3].Value = VM.CurrentPopulation.MaintenanceSupplies.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[21].Cells[3].Value = VM.CurrentPopulation.EMSignature.ToString();
+            m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[3].Value = (VM.CurrentPopulation.ModifierEconomicProduction * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[24].Cells[3].Value = (VM.CurrentPopulation.ModifierManfacturing * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[3].Value = (VM.CurrentPopulation.ModifierProduction * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[26].Cells[3].Value = (VM.CurrentPopulation.ModifierWealthAndTrade * 100).ToString() + "%";
+            m_oSummaryPanel.SummaryDataGrid.Rows[27].Cells[3].Value = (VM.CurrentPopulation.ModifierPoliticalStability * 100).ToString() + "%";
         }
 
         #endregion
