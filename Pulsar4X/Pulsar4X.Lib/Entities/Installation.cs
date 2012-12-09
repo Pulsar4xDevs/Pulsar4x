@@ -33,6 +33,8 @@ namespace Pulsar4X.Entities
 
         public InstallationType Type { get; set; }
         public int Cost { get; set; }
+        public float Number { get; set; }
+        public int Mass { get; set; }
 
         int[] m_aiMinerialsCost;
         public int[] MinerialsCost
@@ -49,11 +51,16 @@ namespace Pulsar4X.Entities
 
         public Installation()
         {
+            Number = 0;
+            Mass = 25000;
         }
 
         public Installation(InstallationType a_eType)
         {
+            Number = 0;
+            Mass = 25000;
             Type = a_eType; 
+
             switch (a_eType)
             {
                 case InstallationType.AutomatedMine:
@@ -70,6 +77,7 @@ namespace Pulsar4X.Entities
                         Cost = 2400;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 1200;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = 1200;
+                        Mass = 100000;
                         break;
                     }
                 case InstallationType.ConstructionFactory:
@@ -118,6 +126,7 @@ namespace Pulsar4X.Entities
                         Cost = 2400;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 1200;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = 1200;
+                        Mass = 100000;
                         break;
                     }
                 case InstallationType.Infrastructure:
@@ -154,7 +163,7 @@ namespace Pulsar4X.Entities
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = 300;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = 300;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 300;
-
+                        Mass = 100000;
                         break;
                     }
                 case InstallationType.Mine:
@@ -171,6 +180,7 @@ namespace Pulsar4X.Entities
                         Cost = 2400;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 1200;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = 1200;
+                        Mass = 100000;
                         break;
                     }
                 case InstallationType.OrdnanceFactory:
@@ -187,6 +197,7 @@ namespace Pulsar4X.Entities
                         Cost = 2400;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 1200;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Mercassium] = 1200;
+                        Mass = 100000;
                         break;
                     }
                 case InstallationType.SectorCommand:
@@ -197,6 +208,7 @@ namespace Pulsar4X.Entities
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = 600;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Mercassium] = 600;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = 600;
+                        Mass = 100000;
                         break;
                     }
                 case InstallationType.Spaceport:
@@ -208,6 +220,7 @@ namespace Pulsar4X.Entities
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = 150;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Mercassium] = 300;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = 300;
+                        Mass = 50000;
                         break;
                     }
                 case InstallationType.TerraformingInstallation:
@@ -216,6 +229,7 @@ namespace Pulsar4X.Entities
                         Cost = 600;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 300;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = 300;
+                        Mass = 50000;
                         break;
                     }
             }
