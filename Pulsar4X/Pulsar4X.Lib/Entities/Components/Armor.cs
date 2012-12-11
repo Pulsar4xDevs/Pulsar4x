@@ -134,7 +134,7 @@ namespace Pulsar4X.Entities.Components
 		    {
 			    done = false;
 			    lastPro = -1;
-	    		    volume = Math.Ceiling( sizeOfCraft + Size );
+	    		volume = Math.Ceiling( sizeOfCraft + Size );
 		
                 /// <summary>
                 /// While Armor does not yet fully cover the ship and itself.
