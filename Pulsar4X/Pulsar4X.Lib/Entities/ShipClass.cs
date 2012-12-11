@@ -8,7 +8,7 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
-    public class ShipClass
+    public class ShipClassTN
     {
         public Guid Id { get; set; }
         public Faction Faction { get; set; }
@@ -22,7 +22,6 @@ namespace Pulsar4X.Entities
         /// In 50 ton increments
         /// </summary>
         public decimal Size { get; set; }
-        public int ThermalSignature { get; set; }
         public int CrossSection { get; set; }
         public int RequiredRank { get; set; }
         public int CrewSize { get; set; }
@@ -30,6 +29,22 @@ namespace Pulsar4X.Entities
         public int DamageControlRating { get; set; }
         public int FuelCapacity { get; set; }
 
+        /// <summary>
+        /// Armor statistics that matter to the class itself.
+        /// </summary>
         public ArmorDefTN ShipArmorDef { get; set; }
+
+        /// <summary>
+        /// each ship class can only have one type of engine, though several copies may be present.
+        /// </summary>
+        public EngineDefTN ShipEngineDef { get; set; }
+        public ushort ShipEngineCount;
+
+        /// <summary>
+        /// Ship class Engine statistics.
+        /// </summary>
+        public int MaxEnginePower { get; set; }
+        public int MaxThermalSignature { get; set; }
+        public int MaxSpeed { get; set; }
     }
 }

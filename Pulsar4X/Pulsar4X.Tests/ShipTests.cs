@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
+using System.ComponentModel;
 
 namespace Pulsar4X.Tests
 {
@@ -14,8 +15,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void testArmor()
         {
-            ShipClass ts2 = new ShipClass();
-            Ship ts = new Ship();
+            ShipClassTN ts2 = new ShipClassTN();
+            ShipTN ts = new ShipTN();
 
             ts2.ShipArmorDef = new ArmorDefTN();
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
@@ -59,9 +60,33 @@ namespace Pulsar4X.Tests
             Console.WriteLine("isDamaged: {0}", ts.ShipArmor.isDamaged);
 
             Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ts.ShipArmor.armorDef.cost, ts.ShipArmor.armorDef.area, ts.ShipArmor.armorDef.size);
+        }
 
+        [Test]
+        public void testEngine()
+        {
+            ShipClassTN ts2 = new ShipClassTN();
+            ShipTN ts = new ShipTN();
 
+            ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive",32,2.65f,0.6f,0.75f,2,37,-1.0f);
+            ts2.ShipEngineCount = 1;
 
+            EngineTN temp = new EngineTN(ts2.ShipEngineDef);
+
+            ts.ShipEngine = new BindingList<EngineTN>();
+            ts.ShipEngine.Add(temp);
+
+            EngineDefTN tst = ts.ShipEngine[0].engineDef;
+
+            Console.WriteLine("Name: {0}", tst.name);
+            Console.WriteLine("EngineBase: {0}, PowerMod: {1}, FuelConMod: {2}, ThermalReduction: {3}, Size: {4},HyperMod: {5}",
+                              tst.engineBase, tst.powerMod, tst.fuelConsumptionMod, tst.thermalReduction, tst.engineSize, tst.hyperDriveMod);
+            Console.WriteLine("EnginePower: {0}, FuelUsePerHour: {1}", tst.enginePower, tst.fuelUsePerHour);
+            Console.WriteLine("EngineSize: {0}, EngineHTK: {1}", tst.engineSize, tst.htk);
+            Console.WriteLine("ThermalSignature: {0}, ExpRisk: {1}", tst.thermalSignature, tst.expRisk);
+            Console.WriteLine("IsMilitary: {0}", tst.isMilitary);
+            Console.WriteLine("Crew: {0}", tst.crew);
+            Console.WriteLine("Cost: {0}", tst.cost);
         }
     }
 

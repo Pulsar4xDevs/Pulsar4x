@@ -11,28 +11,41 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
-    public class Ship
+    public class ShipTN
     {
         public Guid Id { get; set; }
         public Faction Faction { get; set; }
 
-        public ShipClass ShipClass { get; set; }
+        public ShipClassTN ShipClass { get; set; }
 
         public string Name { get; set; }
         public string ClassNotes { get; set; }
         public string Notes { get; set; }
 
-        public int ThermalSignature { get; set; }
+
         public int CrossSection { get; set; }
         public int CurrentFuel { get; set; }
         public int FuelCapacity { get; set; }
-        public int CurrentSpeed { get; set; }
-        public int MaxSpeed { get; set; }
         public int CurrentCrew { get; set; }
         public int MaxCrew { get; set; }
         public int MaxLifeSupport { get; set; }
         public int DamageControlRating { get; set; }
 
+        /// <summary>
+        /// The ship will have an armor layering.
+        /// </summary>
         public ArmorTN ShipArmor { get; set; }
+
+        /// <summary>
+        /// Ships can potentially have multiple engines, though they must all be of the same type.
+        /// </summary>
+        public BindingList<EngineTN> ShipEngine { get; set; }
+
+        /// <summary>
+        /// Engine related ship statistics. Maximum values are in ship class.
+        /// </summary>
+        public int CurrentEnginePower { get; set; }
+        public int CurrentThermalSignature { get; set; }
+        public int CurrentSpeed { get; set; }
     }
 }
