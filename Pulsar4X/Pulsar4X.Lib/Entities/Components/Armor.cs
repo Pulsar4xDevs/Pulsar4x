@@ -61,8 +61,8 @@ namespace Pulsar4X.Entities.Components
         /// Cost of the Armor. Ship costs, repair cost, and material resource costs will depend on this. It is naively equal to area in terms of per numbers, but resources required
         /// will vary with tech level. In Aurora costs shift from duranium to neutronium for example.
         /// </summary>
-        private double Cost;
-        public double cost
+        private decimal Cost;
+        public decimal cost
         {
             get { return Cost; }
         }
@@ -83,7 +83,7 @@ namespace Pulsar4X.Entities.Components
 	    public ArmorDefTN()
 	    {
 		    Size = 0.0;
-		    Cost = 0.0;
+		    Cost = 0.0m;
 		    Area = 0.0;
 	    }
 
@@ -162,7 +162,7 @@ namespace Pulsar4X.Entities.Components
 		    }
 
 		    Area = ( area * Depth ) / 4.0;
-		    Cost = Area;
+		    Cost = (decimal)Area;
 		    CNum = (ushort)Math.Floor( strengthReq / (double)Depth );
 	    }
         /// <summary>

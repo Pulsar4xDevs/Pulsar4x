@@ -46,5 +46,14 @@ namespace Pulsar4X.Entities
         public int MaxEnginePower { get; set; }
         public int MaxThermalSignature { get; set; }
         public int MaxSpeed { get; set; }
+
+        /// <summary>
+        /// List of passive sensor types, and how many of each that there are in this ship.
+        /// Likewise the best possible sensors are stored.
+        /// </summary>
+        public BindingList<PassiveSensorDefTN> ShipPSensorDef { get; set; }
+        public BindingList<ushort> ShipPSensorCount { get; set; }
+        public int BestThermalRating { get; set; }
+        public int BestEMRating { get; set; }
     }
 }

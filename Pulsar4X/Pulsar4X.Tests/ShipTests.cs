@@ -88,6 +88,41 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Crew: {0}", tst.crew);
             Console.WriteLine("Cost: {0}", tst.cost);
         }
+
+        [Test]
+        public void testPSensor()
+        {
+            ShipClassTN ts2 = new ShipClassTN();
+            ShipTN ts = new ShipTN();
+
+            PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, false, 1.0f, 1);
+
+            ts2.ShipPSensorDef = new BindingList<PassiveSensorDefTN>();
+            ts2.ShipPSensorCount = new BindingList<ushort>();
+            ts2.ShipPSensorDef.Add(PSensorDefTest);
+            ts2.ShipPSensorCount.Add(1);
+
+            PassiveSensorTN PSensorTest = new PassiveSensorTN(ts2.ShipPSensorDef[0]);
+
+            ts.ShipPSensor = new BindingList<PassiveSensorTN>();
+            ts.ShipPSensor.Add(PSensorTest);
+
+
+            PassiveSensorDefTN tst3 = ts.ShipPSensor[0].pSensorDef;
+
+            Console.WriteLine("Name: {0}", tst3.name);
+            Console.WriteLine("Size: {0}, HTK: {1}, Hardening: {2}", tst3.size, tst3.htk, tst3.hardening);
+            Console.WriteLine("Rating: {0}, Range: {1}", tst3.rating, tst3.range);
+            Console.WriteLine("IsMilitary: {0}", tst3.isMilitary);
+            Console.WriteLine("Crew: {0}", tst3.crew);
+            Console.WriteLine("Cost: {0}", tst3.cost);
+
+            for (ushort loop = 80; loop < 120; loop++)
+            {
+                Console.WriteLine("Signature:{0} Detection Range in KM:{1}", loop, tst3.GetPassiveDetectionRange(loop));
+            }
+
+        }
     }
 
 

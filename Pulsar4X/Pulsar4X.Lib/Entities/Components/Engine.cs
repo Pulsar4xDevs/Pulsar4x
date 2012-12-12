@@ -86,8 +86,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Cost of the engine. 1/2EP * (0.25 * ThermalReductionTechLevel).
         /// </summary>
-        private ushort Cost;
-        public ushort cost
+        private decimal Cost;
+        public decimal cost
         {
             get { return Cost; }
         }
@@ -209,13 +209,13 @@ namespace Pulsar4X.Entities.Components
             /// Cost is 1/2 of EnginePower modified by thermal reduction tech.
             /// </summary>
             float ThermalReductionCostMod = (float)((float)(ThmRedTech-1) * 0.25f);
-            Cost = (ushort)((ushort)(((float)EnginePower / 2.0f) * (float)ThermalReductionCostMod) + (ushort)(((float)EnginePower / 2.0f)));
+            Cost = (decimal)((ushort)(((float)EnginePower / 2.0f) * (float)ThermalReductionCostMod) + (ushort)(((float)EnginePower / 2.0f)));
 
             /// <summary>
             /// Cost may not dip below 5.
             /// </summary>
             if (Cost < 5)
-                Cost = (ushort)5;
+                Cost = 5;
 
             /// <summary>
             /// Crew required is EngineSize * Power Mod with a minimum of 1 crewman required.

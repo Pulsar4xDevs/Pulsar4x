@@ -47,5 +47,15 @@ namespace Pulsar4X.Entities
         public int CurrentEnginePower { get; set; }
         public int CurrentThermalSignature { get; set; }
         public int CurrentSpeed { get; set; }
+
+
+        /// <summary>
+        /// List of passive sensors that this craft will have.
+        /// every ship has a base sensitivity 1 thermal and EM sensor, those won't be in this list however.
+        /// Best ratings store the best currently working sensor detection, these are where that default will be.
+        /// </summary>
+        public BindingList<PassiveSensorTN> ShipPSensor { get; set; }
+        public int BestThermalRating { get; set; }
+        public int BestEMRating { get; set; }
     }
 }
