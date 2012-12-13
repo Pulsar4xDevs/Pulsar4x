@@ -102,12 +102,12 @@ else
 		links { -- Add any needed references here
 			"Pulsar4X.Lib",
 			"System",
-			"atk-sharp",
-			"gdk-sharp",
-			"glade-sharp",
-			"gtk-sharp",
+			"atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f",
+			"gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f",
+			"glade-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f",
+			"gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f",
 			"Mono.Posix",
-			"pango-sharp",
+			"pango-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f",
 			log4netlib(),
 			jsonlib(),
 			}

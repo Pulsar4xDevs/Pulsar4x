@@ -279,4 +279,26 @@ namespace Pulsar4X.Entities.Components
     ///<summary>
     /// End EngineTN Class
     /// </summary>
+
+	public class NewtonianEngine : BasicNewtonian
+	{
+		public double isReactionless;
+
+		public double maxThrust;
+
+		public double power;
+
+		public double maxSpeed;
+
+		public double burnRate;
+
+		public NewtonianEngine () : base ()
+		{
+			Type = NewtonianType.Engine;
+		}
+
+		//TODO: Impliment Engine mechanics
+	}
+
+
 }

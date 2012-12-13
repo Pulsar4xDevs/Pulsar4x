@@ -102,8 +102,8 @@ namespace Pulsar4X.GTKForms.Controls
 
 				planetList[starCount].Clear ();
 				foreach (Entities.Planet aPlanet in aStar.Planets) {
-					planetList[starCount].AppendValues (aPlanet.Name, aPlanet.PlanetTypeView, aPlanet.SurfaceTemperatureView, aPlanet.MassOfGasInEarthMassesView,
-					                         aPlanet.SemiMajorAxis, aPlanet.SurfacePressure, aPlanet.Radius);
+					planetList[starCount].AppendValues (aPlanet.Name, aPlanet.PlanetTypeView, aPlanet.SurfaceTemperatureView, aPlanet.SurfaceGravityView,
+					                                    aPlanet.MassOfGasInEarthMassesView, aPlanet.SemiMajorAxis, aPlanet.SurfacePressure, aPlanet.Radius);
 				}
 
 				switch(starCount)
