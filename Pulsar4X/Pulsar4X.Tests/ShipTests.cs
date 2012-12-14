@@ -121,7 +121,40 @@ namespace Pulsar4X.Tests
             {
                 Console.WriteLine("Signature:{0} Detection Range in KM:{1}", loop, tst3.GetPassiveDetectionRange(loop));
             }
+        }
 
+        [Test]
+        public void testASensor()
+        {
+            ShipClassTN ts2 = new ShipClassTN();
+            ShipTN ts = new ShipTN();
+
+            ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36,24,185, false, 1.0f, 1);
+
+            ts2.ShipASensorDef = new BindingList<ActiveSensorDefTN>();
+            ts2.ShipASensorCount = new BindingList<ushort>();
+            ts2.ShipASensorDef.Add(ASensorDefTest);
+            ts2.ShipASensorCount.Add(1);
+
+            ActiveSensorTN ASensorTest = new ActiveSensorTN(ts2.ShipASensorDef[0]);
+
+            ts.ShipASensor = new BindingList<ActiveSensorTN>();
+            ts.ShipASensor.Add(ASensorTest);
+
+
+            ActiveSensorDefTN tst3 = ts.ShipASensor[0].aSensorDef;
+
+            Console.WriteLine("Name: {0}", tst3.name);
+            Console.WriteLine("Size: {0}, HTK: {1}, Hardening: {2}", tst3.size, tst3.htk, tst3.hardening);
+            Console.WriteLine("GPS: {0}, Range: {1}", tst3.gps, tst3.maxRange);
+            Console.WriteLine("IsMilitary: {0}", tst3.isMilitary);
+            Console.WriteLine("Crew: {0}", tst3.crew);
+            Console.WriteLine("Cost: {0}", tst3.cost);
+
+            for (ushort loop = 80; loop < 120; loop++)
+            {
+                Console.WriteLine("Resolution:{0} Detection Range in KM:{1}", loop, tst3.GetActiveDetectionRange(loop,-1));
+            }
         }
     }
 

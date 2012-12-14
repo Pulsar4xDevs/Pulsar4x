@@ -11,6 +11,6 @@ namespace Pulsar4X.Entities
         public Guid Id { get; set; }
         public Faction Faction { get; set; }
         public string Name { get; set; }
-        public List<Fleet> Fleets { get; set; }
+        public List<TaskGroup> Fleets { get; set; }
     }
 }

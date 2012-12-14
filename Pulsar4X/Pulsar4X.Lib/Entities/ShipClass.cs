@@ -22,7 +22,6 @@ namespace Pulsar4X.Entities
         /// In 50 ton increments
         /// </summary>
         public decimal Size { get; set; }
-        public int CrossSection { get; set; }
         public int RequiredRank { get; set; }
         public int CrewSize { get; set; }
         public int MaxLifeSupport { get; set; }
@@ -55,5 +54,13 @@ namespace Pulsar4X.Entities
         public BindingList<ushort> ShipPSensorCount { get; set; }
         public int BestThermalRating { get; set; }
         public int BestEMRating { get; set; }
+
+        /// <summary>
+        /// List of active sensors, as well as the number of each, and the TCS and EM signatures of the craft.
+        /// </summary>
+        public BindingList<ActiveSensorDefTN> ShipASensorDef { get; set; }
+        public BindingList<ushort> ShipASensorCount { get; set; }
+        public int TotalCrossSection { get; set; }
+        public int MaxEMSignature { get; set; }
     }
 }

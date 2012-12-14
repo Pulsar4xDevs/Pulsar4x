@@ -142,7 +142,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="sens">Sensitivity per HS of the sensor.</param>
         /// <param name="TOrE">Thermal/EM identifier for this sensor. false = thermal, true = EM</param>
         /// <param name="hard">Chance of destruction from electronic damage. 1.0 to 0.1</param>
-        /// <param name="hardTech">Tech level of sensor hardening.</param>
+        /// <param name="hardTech">Tech level of sensor hardening. This is to be adjusted downward by one, so level 0 is level 1.</param>
         public PassiveSensorDefTN(string title, float HS, byte sens, bool TOrE, float hard, byte hardTech)
         {
            
@@ -182,7 +182,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Crew and cost are related to size, sensitivity, and hardening.
             /// </summary>
-            Crew = (byte)(Size * 5.0);
+            Crew = (byte)(Size * 2.0);
             Cost = (decimal)((Size * (float)Sensitivity) + ((Size * (float)Sensitivity) * 0.25f * (float)(hardTech-1)));
 
             if (Size <= 1.0)
