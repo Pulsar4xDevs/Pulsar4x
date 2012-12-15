@@ -98,7 +98,9 @@ namespace Pulsar4X.Entities.Components
 	    public void CalcArmor(ushort armorPerHS, double sizeOfCraft, ushort armorDepth)
 	    {
             /// <summary>
-            /// Bounds checking as armorDepth is a short
+            /// Bounds checking as armorDepth is a short, but then so is the value passed...
+            /// well armor can't be 0 layers atleast.
+            /// </summary>
             if (armorDepth < 1)
                 armorDepth = 1;
             if (armorDepth > 65535)
@@ -324,6 +326,136 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// End of Class ArmorTN
     /// </summary>
+
+    /// <summary>
+    /// Armor rules for newtonian, feel free to rename.
+    /// </summary>
+    public class ArmorDefNA
+    {
+        /// <summary>
+        /// How resistant to damage each box of armor is
+        /// </summary>
+        private ushort MJPerBox;
+        public ushort mJPerBox
+        {
+            get { return MJPerBox; }
+        }
+
+        /// <summary>
+        /// Size in tons of the armor layering
+        /// </summary>
+        private int Size;
+        public int size
+        {
+            get { return Size; }
+        }
+
+        /// <summary>
+        /// Area of armor coverage.
+        /// </summary>
+        private float Area;
+        public float area
+        {
+            get { return Area; }
+        }
+
+        /// <summary>
+        /// # of armor layers
+        /// </summary>
+        private ushort Depth;
+        public ushort depth
+        {
+            get { return Depth; }
+        }
+
+        /// <summary>
+        /// Cost of the armor layering.
+        /// </summary>
+        private decimal Cost;
+        public decimal cost
+        {
+            get { return Cost; }
+        }
+
+        private ushort ColumnNumber;
+        public ushort columnNumber
+        {
+            get { return ColumnNumber; }
+        }
+
+        /// <summary>
+        /// This constructor initializes armor statistics for CalcArmor.
+        /// </summary>
+        /// <param name="MJBox">Megajoules per armor box, how resistant to damage each part of the armor is</param>
+        public ArmorDefNA(ushort MJBox)
+        {
+            MJPerBox = MJBox;
+            Size = 0;
+            Area = 0.0f;
+            Cost = 0.0m;
+        }
+
+        /// <summary>
+        /// Since MJ per box is not part of CalcArmor in the way that HSPerArmor is for TN rules I need a new function to update Armor for NA.
+        /// </summary>
+        /// <param name="MJBox">New megajoules per box stat</param>
+        public void UpdateArmorType(ushort MJBox)
+        {
+            MJPerBox = MJBox;
+        }
+
+        /// <summary>
+        /// CalcArmor is mostly a copy of the function in TN, but it is a simpler one due to not having a varying amount of armor per HS.
+        /// </summary>
+        /// <param name="SizeInTonsOfShip">Each ton of the ship is equal to 10m^3 of volume for this calculation.</param>
+        /// <param name="depth">The number of armor layers desired.</param>
+        public void CalcArmor(int SizeInTonsOfShip, ushort depth)
+        {
+            if (depth < 1)
+                depth = 1;
+
+            Depth = depth;
+
+            /// <summary>
+            /// Armor calculation is as follows:
+            /// First Volume of a sphere: V = 4/3 * pi * r^3 r^3 = 3V/4pi. Hullsize is the value for volume. radius is what needs to be determined
+            /// Actually, Volume is now ship tonnage * 10.
+            /// From radius the armor area can be derived: A = 4 * pi * r^2
+            /// Area / 4.0 is the required strength area that needs to be covered.
+            /// </summary>
+
+
+            int loop;
+            double volume, radius3, radius2, radius=0.0, area = 0.0;
+            double temp1 = 1.0 / 3.0;
+            double pi = 3.14159654;
+
+            /// <summary>
+            /// Size must be initialized to 0.0 for this
+            /// Armor is being totally recalculated every time this is run, the previous result is thrown out.
+            /// </summary>
+            Size = 0;
+
+            /// <summary>
+            /// For each layer of Depth.
+            /// </summary>
+            for (loop = 0; loop < Depth; loop++)
+            {
+                volume = Math.Ceiling((double)(SizeInTonsOfShip + Size));
+                
+                radius3 = (3.0 * volume) / (4.0 * pi);
+                radius = Math.Pow(radius3, temp1);
+                radius2 = Math.Pow(radius, 2.0);
+                area = (4.0 * pi) * radius2;
+
+                Size = Size + (int)Math.Round((double)(area / 100.0));
+            }
+
+            Area = (float)area;
+            Cost = (decimal)Area;
+            ColumnNumber = (ushort)(radius * 2.0);
+        }
+    }
 }
 /// <summary>
 /// End of Namespace Pulsar4X.Entites.Components

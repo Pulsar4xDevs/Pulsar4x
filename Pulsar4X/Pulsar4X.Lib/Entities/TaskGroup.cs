@@ -8,7 +8,7 @@ using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
-    public class TaskGroup
+    public class TaskGroupTN
     {
         public Guid Id { get; set; }
         public Faction Faction { get; set; }
