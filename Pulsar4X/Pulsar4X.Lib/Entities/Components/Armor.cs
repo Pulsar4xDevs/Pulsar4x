@@ -330,26 +330,8 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Armor rules for newtonian, feel free to rename.
     /// </summary>
-    public class ArmorDefNA
+    public class ArmorDefNA : BasicNewtonian
     {
-        /// <summary>
-        /// How resistant to damage each box of armor is
-        /// </summary>
-        private ushort MJPerBox;
-        public ushort mJPerBox
-        {
-            get { return MJPerBox; }
-        }
-
-        /// <summary>
-        /// Size in tons of the armor layering
-        /// </summary>
-        private int Size;
-        public int size
-        {
-            get { return Size; }
-        }
-
         /// <summary>
         /// Area of armor coverage.
         /// </summary>
@@ -369,6 +351,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// ColumnNumber is 2*diameter, one row for each side of the ship. this is different from TN's calculation.
+        /// </summary>
+        private ushort ColumnNumber;
+        public ushort columnNumber
+        {
+            get { return ColumnNumber; }
+        }
+
+        /// <summary>
         /// Cost of the armor layering.
         /// </summary>
         private decimal Cost;
@@ -377,22 +368,19 @@ namespace Pulsar4X.Entities.Components
             get { return Cost; }
         }
 
-        private ushort ColumnNumber;
-        public ushort columnNumber
-        {
-            get { return ColumnNumber; }
-        }
-
         /// <summary>
         /// This constructor initializes armor statistics for CalcArmor.
         /// </summary>
         /// <param name="MJBox">Megajoules per armor box, how resistant to damage each part of the armor is</param>
         public ArmorDefNA(ushort MJBox)
         {
-            MJPerBox = MJBox;
-            Size = 0;
+            unitMass = 0;
             Area = 0.0f;
             Cost = 0.0m;
+
+
+            integrity = MJBox;
+            Type = NewtonianType.Other;
         }
 
         /// <summary>
@@ -401,7 +389,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="MJBox">New megajoules per box stat</param>
         public void UpdateArmorType(ushort MJBox)
         {
-            MJPerBox = MJBox;
+            integrity = MJBox;
         }
 
         /// <summary>
@@ -434,21 +422,22 @@ namespace Pulsar4X.Entities.Components
             /// Size must be initialized to 0.0 for this
             /// Armor is being totally recalculated every time this is run, the previous result is thrown out.
             /// </summary>
-            Size = 0;
+            unitMass = 0;
 
             /// <summary>
             /// For each layer of Depth.
             /// </summary>
             for (loop = 0; loop < Depth; loop++)
             {
-                volume = Math.Ceiling((double)(SizeInTonsOfShip + Size));
+                volume = Math.Ceiling((double)(SizeInTonsOfShip + unitMass));
+                volume = volume * 10;
                 
                 radius3 = (3.0 * volume) / (4.0 * pi);
                 radius = Math.Pow(radius3, temp1);
                 radius2 = Math.Pow(radius, 2.0);
                 area = (4.0 * pi) * radius2;
 
-                Size = Size + (int)Math.Round((double)(area / 100.0));
+                unitMass = unitMass + (int)Math.Round((double)(area / 100.0));
             }
 
             Area = (float)area;
