@@ -445,6 +445,161 @@ namespace Pulsar4X.Entities.Components
             ColumnNumber = (ushort)(radius * 2.0);
         }
     }
+    /// <summary>
+    /// End of ArmorDefNA
+    /// </summary>
+
+    /// <summary>
+    /// Armor contains ship data itself. each ship will have its own copy of this.
+    /// </summary>
+    public class ArmorNA
+    {
+        /// <summary>
+        /// isDamaged controls whether or not armorColumns has been populated yet. 
+        /// </summary>
+        private bool IsDamaged;
+        public bool isDamaged
+        {
+            get { return IsDamaged; }
+        }
+
+        /// <summary>
+        /// armorColumns contains the actual data that will need to be looked up
+        /// </summary>
+        private BindingList<ushort> ArmorColumns;
+        public BindingList<ushort> armorColumns
+        {
+            get { return ArmorColumns; }
+        }
+
+        /// <summary>
+        /// armorDamage is an easily stored listing of the damage that the ship has taken
+        /// Column # is the key, and value is how much damage has been done to that column( DepthValue to Zero ).
+        /// </summary>
+        private Dictionary<ushort, ushort> ArmorDamage;
+        public Dictionary<ushort, ushort> armorDamage
+        {
+            get { return ArmorDamage; }
+        }
+
+        /// <summary>
+        /// ArmorDef contains the definitions for this component
+        /// </summary>
+        private ArmorDefNA ArmorDef;
+        public ArmorDefNA armorDef
+        {
+            get { return ArmorDef; }
+        }
+
+        /// <summary>
+        /// the actual ship armor constructor does nothing with armorColumns or armorDamage yet.
+        /// </summary>
+        public ArmorNA(ArmorDefNA protectionDef)
+        {
+            IsDamaged = false;
+            ArmorColumns = new BindingList<ushort>();
+            ArmorDamage = new Dictionary<ushort, ushort>();
+            ArmorDef = protectionDef;
+        }
+
+        /// <summary>
+        /// SetDamage puts (CurrentDepth-DamageValue) damage into a specific column.
+        /// </summary>
+        /// <param name="ColumnCount">Total Columns, ship will have access to ship class which has armorDef.</param>
+        /// <param name="Depth">Full and pristine armor Depth.</param>
+        /// <param name="Column">The specific column to be damaged.</param>
+        /// <param name="DamageValue">How much damage has been done.</param>
+        public void SetDamage(ushort ColumnCount, ushort Depth, ushort Column, ushort DamageValue)
+        {
+            ushort newDepth;
+            if (IsDamaged == false)
+            {
+                for (ushort loop = 0; loop < ColumnCount; loop++)
+                {
+                    if (loop != Column)
+                    {
+                        ArmorColumns.Add(Depth);
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// I have to type cast this subtraction of a short from a short into a short with a short.
+                        /// </summary>
+                        newDepth = (ushort)(Depth - DamageValue);
+                        if (newDepth < 0)
+                            newDepth = 0;
+
+                        ArmorColumns.Add(newDepth);
+                        ArmorDamage.Add(Column, newDepth);
+                    }
+                }
+                /// <summary>
+                /// end for ColumnCount
+                /// </summary>
+                IsDamaged = true;
+            }
+            /// <summary>
+            /// end if isDamaged = false
+            /// </summary>
+            else
+            {
+                newDepth = (ushort)(ArmorColumns[Column] - DamageValue);
+                ArmorColumns[Column] = newDepth;
+
+                if (ArmorDamage.ContainsKey(Column) == true)
+                {
+                    ArmorDamage[Column] = newDepth;
+                }
+                else
+                {
+                    ArmorDamage.Add(Column, newDepth);
+                }
+            }
+            /// <summary>
+            /// end else if isDamaged = true
+            /// </summary>
+
+        }
+
+        /// <summary>
+        /// RepairSingleBlock undoes one point of damage from the worst damaged column.
+        /// If this totally fixes the column all damage to that column is repaired and it is removed from the list.
+        /// If all damage overall is repaired isDamaged is set to false, and the armorColumn is depopulated.
+        /// </summary>
+        /// <param name="Depth">Armor Depth, this will be called from ship which will have access to ship class and therefore this number</param>
+        public void RepairSingleBlock(ushort Depth)
+        {
+            ushort mostDamaged = ArmorDamage.Min().Key;
+
+            ushort repair = (ushort)(ArmorDamage.Min().Value + 1);
+            ArmorDamage[mostDamaged] = repair;
+            ArmorColumns[mostDamaged] = repair;
+
+            if (ArmorDamage[mostDamaged] == Depth)
+            {
+                ArmorDamage.Remove(mostDamaged);
+
+                if (ArmorDamage.Count == 0)
+                {
+                    RepairAllArmor();
+                }
+            }
+        }
+
+        /// <summary>
+        /// When the armor of a ship is repaired at a shipyard all damage is cleared.
+        /// Also convienently called from RepairSingleBlock if a hangar manages to complete all repairs.
+        /// </summary>
+        public void RepairAllArmor()
+        {
+            IsDamaged = false;
+            ArmorDamage.Clear();
+            ArmorColumns.Clear();
+        }
+    }
+    /// <summary>
+    /// End of Class ArmorNA
+    /// </summary>
 }
 /// <summary>
 /// End of Namespace Pulsar4X.Entites.Components
