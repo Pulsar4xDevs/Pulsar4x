@@ -167,6 +167,11 @@ namespace Pulsar4X.UI.Helpers
                 return; // do nothing if we dont have the full UI!!
             }
 
+            if (a_oDockPanel.ActiveDocument == null)
+            {
+                return; // another sainty check.
+            }
+
             if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.SGaD_DataPanel))
             {
                 m_oSystemGenAndDisplay.ActivateControlsPanel();
