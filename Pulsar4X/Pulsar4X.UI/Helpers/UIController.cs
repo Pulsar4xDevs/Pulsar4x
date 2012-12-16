@@ -161,6 +161,12 @@ namespace Pulsar4X.UI.Helpers
                 return; // do nothing because we dont want to :)
             }
 
+            if (a_oDockPanel == null || m_oSystemGenAndDisplay == null || m_oSystemMap == null
+                || m_oEconomics == null || m_oShips == null || m_oClassDesign == null)
+            {
+                return; // do nothing if we dont have the full UI!!
+            }
+
             if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.SGaD_DataPanel))
             {
                 m_oSystemGenAndDisplay.ActivateControlsPanel();
