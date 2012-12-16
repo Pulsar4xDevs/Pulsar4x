@@ -70,7 +70,7 @@ namespace Pulsar4X.UI.Panels
             }
         }
 
-        public CheckBox ShowCivilianDesigns
+        public CheckBox ShowCivilianDesignsCheckBox
         {
             get
             {
