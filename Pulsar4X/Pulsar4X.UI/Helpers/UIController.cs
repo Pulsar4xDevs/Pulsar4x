@@ -188,6 +188,11 @@ namespace Pulsar4X.UI.Helpers
             {
                 m_oShips.ActivateShipListPanel();
             }
+            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.ClassDes_DesignAndInfo))
+            {
+                m_oClassDesign.ActivateOptionsPanel();
+                m_oClassDesign.ActivatePropertiesPanel();
+            }
         }
 
         #endregion
