@@ -18,17 +18,8 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Class definitions for passive sensors. this follows TN rules, NA rules change ship signatures, but I don't know about sensor mechanics themselves.
     /// </summary>
-    public class PassiveSensorDefTN
+    public class PassiveSensorDefTN : ComponentDefTN
     {
-        /// <summary>
-        /// String identifier that will be displayed to the player.
-        /// </summary>
-        private string Name;
-        public string name
-        {
-            get { return Name; }
-        }
-
         /// <summary>
         /// Is this sensor a thermal sensor, or an EM one?
         /// false = thermal, true = EM.
@@ -37,15 +28,6 @@ namespace Pulsar4X.Entities.Components
         public bool thermalOrEM
         {
             get { return ThermalOrEM; }
-        }
-
-        /// <summary>
-        /// Sensors can range from 0.1HS to 50HS.
-        /// </summary>
-        private float Size;
-        public float size
-        {
-            get { return Size; }
         }
 
         /// <summary>
@@ -99,42 +81,6 @@ namespace Pulsar4X.Entities.Components
         private short LookUpTableMax;
 
         /// <summary>
-        /// Likelyhood of destruction due to normal damage.
-        /// </summary>
-        private byte HTK;
-        public byte htk
-        {
-            get { return HTK; }
-        }
-
-        /// <summary>
-        /// Cost of the sensor in wealth and minerals.
-        /// </summary>
-        private decimal Cost;
-        public decimal cost
-        {
-            get { return Cost; }
-        }
-
-        /// <summary>
-        /// Crew required to operate the sensor.
-        /// </summary>
-        private byte Crew;
-        public byte crew
-        {
-            get { return Crew; }
-        }
-
-        /// <summary>
-        /// Small sensors are not military, and thus don't incur maintenance failures.
-        /// </summary>
-        private bool IsMilitary;
-        public bool isMilitary
-        {
-            get { return IsMilitary; }
-        }
-
-        /// <summary>
         /// Given the input that aurora expects, this constructor will build an appropriate passive sensor.
         /// </summary>
         /// <param name="title">Name of the sensor.</param>
@@ -146,8 +92,8 @@ namespace Pulsar4X.Entities.Components
         public PassiveSensorDefTN(string title, float HS, byte sens, bool TOrE, float hard, byte hardTech)
         {
            
-            Name = title;
-            Size = HS;
+            name = title;
+            size = HS;
             Sensitivity = sens;
             ThermalOrEM = TOrE;
             Hardening = hard;
@@ -158,7 +104,7 @@ namespace Pulsar4X.Entities.Components
             /// Rating is the best way to compare sensors against each other.
             /// while Range tells me at what distance a signature of 1000 will be detected in KM.
             /// </summary>
-            Rating = Size * (float)Sensitivity;
+            Rating = size * (float)Sensitivity;
             Range = (int)(Rating * 1000000.0f);
 
             /// <summary>
@@ -174,21 +120,24 @@ namespace Pulsar4X.Entities.Components
             ///<summary>
             ///HTK is either 1 or 0, because all sensors are very weak to damage, especially electronic damage.
             ///</summary>
-            if(Size >= 1.0)
-                HTK = 1;
+            if(size >= 1.0)
+                htk = 1;
             else
-                HTK = 0;
+                htk = 0;
 
             /// <summary>
             /// Crew and cost are related to size, sensitivity, and hardening.
             /// </summary>
-            Crew = (byte)(Size * 2.0);
-            Cost = (decimal)((Size * (float)Sensitivity) + ((Size * (float)Sensitivity) * 0.25f * (float)(hardTech-1)));
+            crew = (byte)(size * 2.0);
+            cost = (decimal)((size * (float)Sensitivity) + ((size * (float)Sensitivity) * 0.25f * (float)(hardTech-1)));
 
-            if (Size <= 1.0)
-                IsMilitary = false;
+            if (size <= 1.0)
+                isMilitary = false;
             else
-                IsMilitary = true;
+                isMilitary = true;
+
+            isObsolete = false;
+            isSalvaged = false;
         }
 
 
@@ -233,17 +182,8 @@ namespace Pulsar4X.Entities.Components
     /// < summary>
     /// PassiveSensorTN contains the relevant and modifiable data that this sensor has, as well as a pointer to its definitions.
     /// </summary>
-    public class PassiveSensorTN
+    public class PassiveSensorTN : ComponentTN
     {
-        /// <summary>
-        /// Is this sensor intact?
-        /// </summary>
-        private bool IsDestroyed;
-        public bool isDestroyed
-        {
-            get { return IsDestroyed; }
-        }
-
         /// <summary>
         /// Related definitions for this sensor.
         /// </summary>
@@ -260,7 +200,7 @@ namespace Pulsar4X.Entities.Components
         public PassiveSensorTN(PassiveSensorDefTN definition)
         {
             PSensorDef = definition;
-            IsDestroyed = false;
+            isDestroyed = false;
         }
     }
     ///<summary>

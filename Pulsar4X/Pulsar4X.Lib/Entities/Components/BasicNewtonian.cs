@@ -47,6 +47,16 @@ namespace Pulsar4X.Entities.Components
 		/// </summary>
 		public double integrity { get; set; }
 
+        /// <summary>
+        /// user can mark components as obsolete
+        /// </summary>
+        public bool IsObsolete { get; set; }
+
+        /// <summary>
+        /// Components can be salvaged and used in designs, but not built natively.
+        /// </summary>
+        public bool IsSalvaged { get; set; }
+
 		/// <summary>
 		/// NewtonianType of Component
 		/// </summary>

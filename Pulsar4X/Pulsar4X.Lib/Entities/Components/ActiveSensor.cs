@@ -6,16 +6,8 @@ using System.ComponentModel;
 
 namespace Pulsar4X.Entities.Components
 {
-    public class ActiveSensorDefTN
+    public class ActiveSensorDefTN : ComponentDefTN
     {
-        /// <summary>
-        /// Title of active sensor class
-        /// </summary>
-        private string Name;
-        public string name
-        {
-            get { return Name; }
-        }
 
         /// <summary>
         /// Sensor Strength component of range.
@@ -42,15 +34,6 @@ namespace Pulsar4X.Entities.Components
         public ushort resolution
         {
             get { return Resolution; }
-        }
-
-        /// <summary>
-        /// Size of the Sensor
-        /// </summary>
-        private float Size;
-        public float size
-        {
-            get { return Size; }
         }
 
         /// <summary>
@@ -95,42 +78,6 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Likelyhood of destruction due to normal damage.
-        /// </summary>
-        private byte HTK;
-        public byte htk
-        {
-            get { return HTK; }
-        }
-
-        /// <summary>
-        /// Cost of the sensor in wealth and minerals.
-        /// </summary>
-        private decimal Cost;
-        public decimal cost
-        {
-            get { return Cost; }
-        }
-
-        /// <summary>
-        /// Crew required to operate the sensor.
-        /// </summary>
-        private byte Crew;
-        public byte crew
-        {
-            get { return Crew; }
-        }
-
-        /// <summary>
-        /// Small sensors are not military, and thus don't incur maintenance failures.
-        /// </summary>
-        private bool IsMilitary;
-        public bool isMilitary
-        {
-            get { return IsMilitary; }
-        }
-
-        /// <summary>
         /// Is this a Missile fire control or an active sensor? false = sensor, true = MFC. MFCs have 3x the range of search sensors.
         /// </summary>
         private bool IsMFC;
@@ -164,8 +111,8 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// basic sensor statistics.
             /// </summary>
-            Name = desc;
-            Size = HS;
+            name = desc;
+            size = HS;
             ActiveStrength = actStr;
             EMRecv = EMR;
             Resolution = Res;
@@ -175,32 +122,32 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Crew and cost are related to size, ActiveStrength, and hardening.
             /// </summary>
-            Crew = (byte)(Size * 2.0);
-            Cost = (decimal)((Size * (float)ActiveStrength) + ((Size * (float)ActiveStrength) * 0.25f * (float)(hardTech - 1)));
+            crew = (byte)(size * 2.0);
+            cost = (decimal)((size * (float)ActiveStrength) + ((size * (float)ActiveStrength) * 0.25f * (float)(hardTech - 1)));
 
 
             ///<summary>
             ///Small sensors are civilian, large are military.
             ///</summary>
-            if (Size <= 1.0)
-                IsMilitary = false;
+            if (size <= 1.0)
+                isMilitary = false;
             else
-                IsMilitary = true;
+                isMilitary = true;
 
             ///<summary>
             ///HTK is either 1 or 0, because all sensors are very weak to damage, especially electronic damage.
             ///</summary>
-            if (Size >= 1.0)
-                HTK = 1;
+            if (size >= 1.0)
+                htk = 1;
             else
-                HTK = 0;
+                htk = 0;
 
             ///<summary>
             ///GPS is the value that a ship's EM signature will be increased by when this sensor is active.
             ///</summary>
-            GPS = (int)((float)ActiveStrength * Size * (float)Resolution);
+            GPS = (int)((float)ActiveStrength * size * (float)Resolution);
 
-            MaxRange = (int)((float)ActiveStrength * Size * (float)Math.Sqrt((double)Resolution) * (float)EMRecv * 10000.0f);
+            MaxRange = (int)((float)ActiveStrength * size * (float)Math.Sqrt((double)Resolution) * (float)EMRecv * 10000.0f);
 
             if (IsMFC == true)
             {
@@ -302,7 +249,7 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Active sensor component definition.
     /// </summary>
-    public class ActiveSensorTN
+    public class ActiveSensorTN : ComponentTN
     {
         /// <summary>
         /// What statistics define this sensor?
@@ -311,15 +258,6 @@ namespace Pulsar4X.Entities.Components
         public ActiveSensorDefTN aSensorDef
         {
             get { return ASensorDef; }
-        }
-
-        /// <summary>
-        /// Is this component destroyed?
-        /// </summary>
-        private bool IsDestroyed;
-        public bool isDestroyed
-        {
-            get { return IsDestroyed; }
         }
 
         /// <summary>
@@ -339,7 +277,7 @@ namespace Pulsar4X.Entities.Components
         public ActiveSensorTN(ActiveSensorDefTN define)
         {
             ASensorDef = define;
-            IsDestroyed = false;
+            isDestroyed = false;
             IsActive = false;
         }
     }

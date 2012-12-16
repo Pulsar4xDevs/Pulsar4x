@@ -18,7 +18,7 @@ namespace Pulsar4X.Tests
             ShipClassTN ts2 = new ShipClassTN();
             ShipTN ts = new ShipTN();
 
-            ts2.ShipArmorDef = new ArmorDefTN();
+            ts2.ShipArmorDef = new ArmorDefTN("Duranium Armour");
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
 
             ts2.ShipArmorDef.CalcArmor(5, 38.0, 5);
@@ -63,6 +63,51 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void testArmorNA()
+        {
+            ArmorDefNA ArmorTestDefNA = new ArmorDefNA("High Density Duranium",80);
+            ArmorTestDefNA.CalcArmor(5918, 3);
+
+            ArmorNA ArmorTestNA = new ArmorNA(ArmorTestDefNA);
+
+            Console.WriteLine("Size: {0}", ArmorTestDefNA.unitMass);
+            Console.WriteLine("Cost: {0}", ArmorTestDefNA.cost);
+            Console.WriteLine("Area: {0}", ArmorTestDefNA.area);
+            Console.WriteLine("Depth: {0}", ArmorTestDefNA.depth);
+            Console.WriteLine("Column Number: {0}", ArmorTestDefNA.columnNumber);
+
+            Console.WriteLine("isDamaged: {0}", ArmorTestNA.isDamaged);
+
+            ArmorTestNA.SetDamage(ArmorTestDefNA.columnNumber, ArmorTestDefNA.depth, 4, 1);
+            for (int loop = 0; loop < ArmorTestDefNA.columnNumber; loop++)
+            {
+                Console.WriteLine("Column Value: {0}", ArmorTestNA.armorColumns[loop]);
+            }
+            Console.WriteLine("Damage Key: {0}, Column Value: {1}", ArmorTestNA.armorDamage.Min().Key, ArmorTestNA.armorDamage.Min().Value);
+
+            Console.WriteLine("isDamaged: {0}", ArmorTestNA.isDamaged);
+
+            ArmorTestNA.RepairSingleBlock(ArmorTestDefNA.depth);
+
+            Console.WriteLine("isDamaged: {0}", ArmorTestNA.isDamaged);
+
+            ArmorTestNA.SetDamage(ArmorTestDefNA.columnNumber, ArmorTestDefNA.depth, 4, 1);
+            for (int loop = 0; loop < ArmorTestDefNA.columnNumber; loop++)
+            {
+                Console.WriteLine("Column Value: {0}", ArmorTestNA.armorColumns[loop]);
+            }
+            Console.WriteLine("Damage Key: {0}, Column Value: {1}", ArmorTestNA.armorDamage.Min().Key, ArmorTestNA.armorDamage.Min().Value);
+
+            Console.WriteLine("isDamaged: {0}", ArmorTestNA.isDamaged);
+
+            ArmorTestNA.RepairAllArmor();
+
+            Console.WriteLine("isDamaged: {0}", ArmorTestNA.isDamaged);
+
+            Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ArmorTestNA.armorDef.cost, ArmorTestNA.armorDef.area, ArmorTestNA.armorDef.unitMass);
+        }
+
+        [Test]
         public void testEngine()
         {
             ShipClassTN ts2 = new ShipClassTN();
@@ -80,9 +125,9 @@ namespace Pulsar4X.Tests
 
             Console.WriteLine("Name: {0}", tst.name);
             Console.WriteLine("EngineBase: {0}, PowerMod: {1}, FuelConMod: {2}, ThermalReduction: {3}, Size: {4},HyperMod: {5}",
-                              tst.engineBase, tst.powerMod, tst.fuelConsumptionMod, tst.thermalReduction, tst.engineSize, tst.hyperDriveMod);
+                              tst.engineBase, tst.powerMod, tst.fuelConsumptionMod, tst.thermalReduction, tst.size, tst.hyperDriveMod);
             Console.WriteLine("EnginePower: {0}, FuelUsePerHour: {1}", tst.enginePower, tst.fuelUsePerHour);
-            Console.WriteLine("EngineSize: {0}, EngineHTK: {1}", tst.engineSize, tst.htk);
+            Console.WriteLine("EngineSize: {0}, EngineHTK: {1}", tst.size, tst.htk);
             Console.WriteLine("ThermalSignature: {0}, ExpRisk: {1}", tst.thermalSignature, tst.expRisk);
             Console.WriteLine("IsMilitary: {0}", tst.isMilitary);
             Console.WriteLine("Crew: {0}", tst.crew);

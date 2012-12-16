@@ -19,7 +19,7 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Ship Class armor definition. each copy of a ship will point to their shipclass, which points to this for important and hopefully static data.
     /// </summary>
-	public class ArmorDefTN
+	public class ArmorDefTN : ComponentDefTN
 	{
         /// <summary>
         /// Armor coverage of surface area of the ship per HullSpace(50.0 ton increment). This will vary with techlevel and can be updated. CalcArmor requires this.
@@ -38,15 +38,6 @@ namespace Pulsar4X.Entities.Components
         {
             get { return Depth; }
         }
-
-        /// <summary>
-        /// Overall size of the armor, this is added to the ship proper. CalcArmor calculates this.
-        /// </summary>
-        private double Size;
-        public double size
-        {
-            get { return Size; }
-        }
         
         /// <summary>
         /// Area coverage of the armor, Cost and column # both require this.
@@ -55,16 +46,6 @@ namespace Pulsar4X.Entities.Components
         public double area
         {
             get { return Area; }
-        }
-
-        /// <summary>
-        /// Cost of the Armor. Ship costs, repair cost, and material resource costs will depend on this. It is naively equal to area in terms of per numbers, but resources required
-        /// will vary with tech level. In Aurora costs shift from duranium to neutronium for example.
-        /// </summary>
-        private decimal Cost;
-        public decimal cost
-        {
-            get { return Cost; }
         }
 
         /// <summary>
@@ -80,11 +61,22 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Just an empty constructor. I don't really need this, the main show is in CalcArmor.
         /// </summary>
-	    public ArmorDefTN()
+	    public ArmorDefTN(string Title)
 	    {
-		    Size = 0.0;
-		    Cost = 0.0m;
+            name = Title;
+		    size = 0.0f;
+		    cost = 0.0m;
 		    Area = 0.0;
+            htk = 1;
+
+            /// <summary>
+            /// Unused parts of componentDefTN
+            /// </summary>
+            crew = 0;
+            isObsolete = false;
+            isMilitary = false;
+            isSalvaged = false;
+
 	    }
 
         /// <summary>
@@ -127,7 +119,7 @@ namespace Pulsar4X.Entities.Components
             /// Size must be initialized to 0.0 for this
             /// Armor is being totally recalculated every time this is run, the previous result is thrown out.
             /// </summary>
-		    Size = 0.0; 
+		    size = 0.0f; 
 
             /// <summary>
             /// For each layer of Depth.
@@ -136,7 +128,7 @@ namespace Pulsar4X.Entities.Components
 		    {
 			    done = false;
 			    lastPro = -1;
-	    		volume = Math.Ceiling( sizeOfCraft + Size );
+	    		volume = Math.Ceiling( sizeOfCraft + (double)size );
 		
                 /// <summary>
                 /// While Armor does not yet fully cover the ship and itself.
@@ -153,18 +145,18 @@ namespace Pulsar4X.Entities.Components
 				    area *= (double)( loop + 1 );
 				    strengthReq = area / 4.0 ;
 
-				    Size = Math.Ceiling( ( strengthReq / (double) ArmorPerHS ) * 10.0 ) / 10.0;
-				    volume = Math.Ceiling(sizeOfCraft + Size);
+				    size = (float)Math.Ceiling( ( strengthReq / (double) ArmorPerHS ) * 10.0 ) / 10.0f;
+				    volume = Math.Ceiling(sizeOfCraft + (double)size);
 
-				    if( Size == lastPro )
+				    if( size == lastPro )
 					    done = true;
 
-				    lastPro = Size;
+				    lastPro = size;
 			    }
 		    }
 
 		    Area = ( area * Depth ) / 4.0;
-		    Cost = (decimal)Area;
+		    cost = (decimal)Area;
 		    CNum = (ushort)Math.Floor( strengthReq / (double)Depth );
 	    }
         /// <summary>
@@ -178,7 +170,7 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Armor contains ship data itself. each ship will have its own copy of this.
     /// </summary>
-    public class ArmorTN
+    public class ArmorTN : ComponentTN
     {
         /// <summary>
         /// isDamaged controls whether or not armorColumns has been populated yet. 
@@ -226,6 +218,11 @@ namespace Pulsar4X.Entities.Components
             ArmorColumns = new BindingList<ushort>();
             ArmorDamage = new Dictionary<ushort, ushort>();
             ArmorDef = protectionDef;
+
+            /// <summary>
+            /// This won't be used but will be set in any event.
+            /// </summary>
+            isDestroyed = false;
         }
 
         /// <summary>
@@ -372,8 +369,9 @@ namespace Pulsar4X.Entities.Components
         /// This constructor initializes armor statistics for CalcArmor.
         /// </summary>
         /// <param name="MJBox">Megajoules per armor box, how resistant to damage each part of the armor is</param>
-        public ArmorDefNA(ushort MJBox)
+        public ArmorDefNA(string Title,ushort MJBox)
         {
+            name = Title;
             unitMass = 0;
             Area = 0.0f;
             Cost = 0.0m;
@@ -442,7 +440,11 @@ namespace Pulsar4X.Entities.Components
 
             Area = (float)area;
             Cost = (decimal)Area;
-            ColumnNumber = (ushort)(radius * 2.0);
+
+            /// <summary>
+            /// ColumnNumber = Diameter * 2 = radius * 2 * 2.
+            /// </summary>
+            ColumnNumber = (ushort)(radius * 4.0);
         }
     }
     /// <summary>
