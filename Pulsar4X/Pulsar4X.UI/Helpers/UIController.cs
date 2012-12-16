@@ -58,6 +58,9 @@ namespace Pulsar4X.UI.Helpers
 
         Handlers.Economics m_oEconomics;
 
+        /// <summary>
+        /// Handler for all the Economic Screens.
+        /// </summary>
         public Handlers.Economics Economics
         {
             get
@@ -66,8 +69,31 @@ namespace Pulsar4X.UI.Helpers
             }
         }
 
+        Handlers.Ships m_oShips;
 
-        private Type m_oLastActivatedPanelType = null;
+        /// <summary>
+        /// Handler for all the Ship detials screens.
+        /// </summary>
+        public Handlers.Ships Ships
+        {
+            get
+            {
+                return m_oShips;
+            }
+        }
+
+        Handlers.ClassDesign m_oClassDesign;
+
+        /// <summary>
+        /// Handler for all Class Design Screens.
+        /// </summary>
+        public Handlers.ClassDesign ClassDesign
+        {
+            get
+            {
+                return m_oClassDesign;
+            }
+        }
 
         public bool SuspendAutoPanelDisplay { get; set; }
 
@@ -98,6 +124,8 @@ namespace Pulsar4X.UI.Helpers
             m_oSystemGenAndDisplay = new Handlers.SystemGenAndDisplay();
             m_oSystemMap = new Handlers.SystemMap();
             m_oEconomics = new Handlers.Economics();
+            m_oShips = new Handlers.Ships();
+            m_oClassDesign = new Handlers.ClassDesign();
         }
 
         #region PublicMethods
@@ -108,6 +136,8 @@ namespace Pulsar4X.UI.Helpers
         public void SMOn()
         {
             m_oSystemGenAndDisplay.SMOn();
+            m_oShips.SMOn();
+            m_oClassDesign.SMOn();
         }
 
         /// <summary>
@@ -116,6 +146,8 @@ namespace Pulsar4X.UI.Helpers
         public void SMOff()
         {
             m_oSystemGenAndDisplay.SMOff();
+            m_oShips.SMOff();
+            m_oClassDesign.SMOff();
         }
 
         /// <summary>
@@ -140,6 +172,10 @@ namespace Pulsar4X.UI.Helpers
             else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Eco_Summary))
             {
                 m_oEconomics.ActivatePopulationsPanel();
+            }
+            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Ships_Design))
+            {
+                m_oShips.ActivateShipListPanel();
             }
         }
 

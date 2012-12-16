@@ -36,6 +36,7 @@
             this.sMOnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sMOffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.empireToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.economicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,7 +48,8 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.m_oSystemMapToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.m_oSystemViewToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.economicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shipsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.classDesignToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_oMainMenuStrip.SuspendLayout();
             this.m_oToolStripContainer.TopToolStripPanel.SuspendLayout();
             this.m_oToolStripContainer.SuspendLayout();
@@ -113,11 +115,20 @@
             this.empireToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.economicsToolStripMenuItem,
             this.systemMapToolStripMenuItem,
+            this.classDesignToolStripMenuItem,
+            this.shipsToolStripMenuItem,
             this.systemInformationToolStripMenuItem});
             this.empireToolStripMenuItem.Name = "empireToolStripMenuItem";
             this.empireToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.empireToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.empireToolStripMenuItem.Text = "&Empire";
+            // 
+            // economicsToolStripMenuItem
+            // 
+            this.economicsToolStripMenuItem.Name = "economicsToolStripMenuItem";
+            this.economicsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
+            this.economicsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.economicsToolStripMenuItem.Text = "Economics";
             // 
             // systemMapToolStripMenuItem
             // 
@@ -213,12 +224,19 @@
             this.m_oSystemViewToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.m_oSystemViewToolStripButton.Text = "System View";
             // 
-            // economicsToolStripMenuItem
+            // shipsToolStripMenuItem
             // 
-            this.economicsToolStripMenuItem.Name = "economicsToolStripMenuItem";
-            this.economicsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.economicsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.economicsToolStripMenuItem.Text = "Economics";
+            this.shipsToolStripMenuItem.Name = "shipsToolStripMenuItem";
+            this.shipsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
+            this.shipsToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.shipsToolStripMenuItem.Text = "Ships";
+            // 
+            // classDesignToolStripMenuItem
+            // 
+            this.classDesignToolStripMenuItem.Name = "classDesignToolStripMenuItem";
+            this.classDesignToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
+            this.classDesignToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.classDesignToolStripMenuItem.Text = "Class Design";
             // 
             // MainForm
             // 
@@ -266,5 +284,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem commanderNamesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem economicsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem classDesignToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem shipsToolStripMenuItem;
     }
 }

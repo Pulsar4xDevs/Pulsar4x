@@ -55,6 +55,8 @@ namespace Pulsar4X.UI.Forms
             m_oSystemMapToolStripButton.Click += new EventHandler(systemMapToolStripMenuItem_Click);
             commanderNamesToolStripMenuItem.Click += new EventHandler(commanderNamesToolStripMenuItem_Click);
             economicsToolStripMenuItem.Click += new EventHandler(economicsToolStripMenuItem_Click);
+            shipsToolStripMenuItem.Click += new EventHandler(shipsToolStripMenuItem_Click);
+            classDesignToolStripMenuItem.Click += new EventHandler(classDesignToolStripMenuItem_Click);
 
             sMOnToolStripMenuItem.Click += new EventHandler(sMOnToolStripMenuItem_Click);
             sMOffToolStripMenuItem.Click += new EventHandler(sMOffToolStripMenuItem_Click);
@@ -66,9 +68,17 @@ namespace Pulsar4X.UI.Forms
             m_oDockPanel.ActiveDocumentChanged += new EventHandler(m_oDockPanel_ActiveDocumentChanged);
         }
 
-        
-
         #region MenuAndToolStripEvents
+
+        void classDesignToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.ClassDesign.ShowAllPanels(m_oDockPanel);
+        }
+
+        void shipsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.Ships.ShowAllPanels(m_oDockPanel);
+        }
 
         void economicsToolStripMenuItem_Click(object sender, EventArgs e)
         {
