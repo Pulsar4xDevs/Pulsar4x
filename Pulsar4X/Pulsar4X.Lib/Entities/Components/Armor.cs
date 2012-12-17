@@ -87,7 +87,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="armorPerHS"> armor Per Unit of Hull Space </param>
         /// <param name="sizeOfCraft"> In HullSpace increments </param>
         /// <param name="armorDepth"> Armor Layers </param>
-	    public void CalcArmor(ushort armorPerHS, double sizeOfCraft, ushort armorDepth)
+	    public void CalcArmor(string Title, ushort armorPerHS, double sizeOfCraft, ushort armorDepth)
 	    {
             /// <summary>
             /// Bounds checking as armorDepth is a short, but then so is the value passed...
@@ -97,6 +97,8 @@ namespace Pulsar4X.Entities.Components
                 armorDepth = 1;
             if (armorDepth > 65535)
                 armorDepth = 65535;
+
+            name = Title;
 
 		    ArmorPerHS = armorPerHS;
 		    Depth = armorDepth;

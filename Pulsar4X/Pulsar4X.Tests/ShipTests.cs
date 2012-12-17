@@ -15,13 +15,13 @@ namespace Pulsar4X.Tests
         [Test]
         public void testArmor()
         {
-            ShipClassTN ts2 = new ShipClassTN();
-            ShipTN ts = new ShipTN();
+            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipTN ts = new ShipTN(ts2);
 
             ts2.ShipArmorDef = new ArmorDefTN("Duranium Armour");
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
 
-            ts2.ShipArmorDef.CalcArmor(5, 38.0, 5);
+            ts2.ShipArmorDef.CalcArmor("Duranium Armor",5, 38.0, 5);
 
             Console.WriteLine("ArmorPerHS: {0}", ts2.ShipArmorDef.armorPerHS);
             Console.WriteLine("Size: {0}", ts2.ShipArmorDef.size);
@@ -110,8 +110,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void testEngine()
         {
-            ShipClassTN ts2 = new ShipClassTN();
-            ShipTN ts = new ShipTN();
+            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipTN ts = new ShipTN(ts2);
 
             ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive",32,2.65f,0.6f,0.75f,2,37,-1.0f);
             ts2.ShipEngineCount = 1;
@@ -137,10 +137,10 @@ namespace Pulsar4X.Tests
         [Test]
         public void testPSensor()
         {
-            ShipClassTN ts2 = new ShipClassTN();
-            ShipTN ts = new ShipTN();
+            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipTN ts = new ShipTN(ts2);
 
-            PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, false, 1.0f, 1);
+            PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, PassiveSensorType.Thermal, 1.0f, 1);
 
             ts2.ShipPSensorDef = new BindingList<PassiveSensorDefTN>();
             ts2.ShipPSensorCount = new BindingList<ushort>();
@@ -171,8 +171,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void testASensor()
         {
-            ShipClassTN ts2 = new ShipClassTN();
-            ShipTN ts = new ShipTN();
+            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipTN ts = new ShipTN(ts2);
 
             ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36,24,185, false, 1.0f, 1);
 
@@ -200,6 +200,54 @@ namespace Pulsar4X.Tests
             {
                 Console.WriteLine("Resolution:{0} Detection Range in KM:{1}", loop, tst3.GetActiveDetectionRange(loop,-1));
             }
+        }
+
+        [Test]
+        public void testShip()
+        {
+            /// <summary>
+            /// These would go into a faction component list I think
+            /// </summary>
+            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
+            ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
+            PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
+            PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
+
+            GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
+            GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
+            GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
+            GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
+
+            ShipClassTN TestClass = new ShipClassTN("Test Ship Class");
+
+            TestClass.AddCrewQuarters(CrewQ, 1);
+            TestClass.AddFuelStorage(FuelT, 1);
+            TestClass.AddEngineeringSpaces(EBay, 1);
+            TestClass.AddOtherComponent(Bridge, 1);
+
+            TestClass.AddEngine(EngDef, 1);
+
+            TestClass.AddPassiveSensor(ThPasDef, 1);
+            TestClass.AddPassiveSensor(EMPasDef, 1);
+
+            TestClass.AddActiveSensor(ActDef, 1);
+
+            Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK);
+
+            Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
+            TestClass.TotalFuelCapacity,TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge);
+            
+            Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
+
+            Console.WriteLine("Ship Engine Power: {0}, Ship Thermal Signature: {1}, Ship Fuel Use Per Hour: {2}", TestClass.MaxEnginePower, TestClass.MaxThermalSignature, TestClass.MaxFuelUsePerHour);
+
+            Console.WriteLine("Best TH: {0}, BestEM: {1}, Max EM Signature: {2}, Total Cross Section: {3}", TestClass.BestThermalRating, TestClass.BestEMRating, TestClass.MaxEMSignature, TestClass.TotalCrossSection);
+
+
+
+            ShipTN testShip = new ShipTN(TestClass);
+
+
         }
     }
 

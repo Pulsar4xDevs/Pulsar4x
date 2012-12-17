@@ -24,7 +24,6 @@ namespace Pulsar4X.Entities
 
         public int MaxLifeSupport { get; set; } //here is life support again.
 
-        public int PlanetaryProtectionValue { get; set; }
 
         /// <summary>
         /// The ship will have an armor layering.
@@ -128,5 +127,12 @@ namespace Pulsar4X.Entities
         public LinkedListNode<int> ThermalList;
         public LinkedListNode<int> EMList;
         public LinkedListNode<int> ActiveList;
+
+
+
+        public ShipTN(ShipClassTN ClassDefinition)
+        {
+
+        }
     }
 }

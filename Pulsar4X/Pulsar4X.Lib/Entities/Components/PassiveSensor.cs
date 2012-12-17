@@ -15,6 +15,13 @@ using System.ComponentModel;
 
 namespace Pulsar4X.Entities.Components
 {
+    public enum PassiveSensorType
+    {
+        Thermal,
+        EM,
+        TypeCount
+    }
+
     /// <summary>
     /// Class definitions for passive sensors. this follows TN rules, NA rules change ship signatures, but I don't know about sensor mechanics themselves.
     /// </summary>
@@ -22,10 +29,9 @@ namespace Pulsar4X.Entities.Components
     {
         /// <summary>
         /// Is this sensor a thermal sensor, or an EM one?
-        /// false = thermal, true = EM.
         /// </summary>
-        private bool ThermalOrEM;
-        public bool thermalOrEM
+        private PassiveSensorType ThermalOrEM;
+        public PassiveSensorType thermalOrEM
         {
             get { return ThermalOrEM; }
         }
@@ -89,7 +95,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="TOrE">Thermal/EM identifier for this sensor. false = thermal, true = EM</param>
         /// <param name="hard">Chance of destruction from electronic damage. 1.0 to 0.1</param>
         /// <param name="hardTech">Tech level of sensor hardening. This is to be adjusted downward by one, so level 0 is level 1.</param>
-        public PassiveSensorDefTN(string title, float HS, byte sens, bool TOrE, float hard, byte hardTech)
+        public PassiveSensorDefTN(string title, float HS, byte sens, PassiveSensorType TOrE, float hard, byte hardTech)
         {
            
             name = title;
