@@ -350,6 +350,56 @@ namespace Pulsar4X.UI.Panels
             this.Text = "Class Design Options";
             this.TabText = "Class Design Options";
             this.ToolTipText = "Class Design Options";
+
+            // events to make sure that only one sort button is active at a time.
+            m_oSortAlphaRadioButton.CheckedChanged += new EventHandler(m_oSortAlphaRadioButton_CheckedChanged);
+            m_oSortCostRadioButton.CheckedChanged += new EventHandler(m_oSortCostRadioButton_CheckedChanged);
+            m_oSortHullRadioButton.CheckedChanged += new EventHandler(m_oSortHullRadioButton_CheckedChanged);
+            m_oSortSizeRadioButton.CheckedChanged += new EventHandler(m_oSortSizeRadioButton_CheckedChanged);
         }
+
+        #region Events
+
+        void m_oSortSizeRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (m_oSortSizeRadioButton.Checked == true)
+            {
+                m_oSortCostRadioButton.Checked = false;
+                m_oSortHullRadioButton.Checked = false;
+                m_oSortAlphaRadioButton.Checked = false;
+            }
+        }
+
+        void m_oSortHullRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (m_oSortHullRadioButton.Checked == true)
+            {
+                m_oSortCostRadioButton.Checked = false;
+                m_oSortSizeRadioButton.Checked = false;
+                m_oSortAlphaRadioButton.Checked = false;
+            }
+        }
+
+        void m_oSortCostRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (m_oSortCostRadioButton.Checked == true)
+            {
+                m_oSortHullRadioButton.Checked = false;
+                m_oSortSizeRadioButton.Checked = false;
+                m_oSortAlphaRadioButton.Checked = false;
+            }
+        }
+
+        void m_oSortAlphaRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (m_oSortAlphaRadioButton.Checked == true)
+            {
+                m_oSortHullRadioButton.Checked = false;
+                m_oSortSizeRadioButton.Checked = false;
+                m_oSortCostRadioButton.Checked = false;
+            }
+        }
+
+        #endregion
     }
 }
