@@ -261,11 +261,11 @@ namespace Pulsar4X.Tests
             int FuelSource = 100000;
             int MSPSource = 100000;
 
-            testShip.Recrew(CrewSource);
-            testShip.Refuel(FuelSource);
-            testShip.Resupply(MSPSource);
+            CrewSource = testShip.Recrew(CrewSource);
+            FuelSource = testShip.Refuel(FuelSource);
+            MSPSource = testShip.Resupply(MSPSource);
 
-            Console.WriteLine("Current Crew/Fuel/MSP: {0}/{1}/{2} Source: {0}/{1}/{2}", testShip.CurrentCrew, testShip.CurrentFuel, testShip.CurrentMSP, CrewSource,FuelSource,MSPSource);
+            Console.WriteLine("Current Crew/Fuel/MSP: {0}/{1}/{2} Source: {3}/{4}/{5}", testShip.CurrentCrew, testShip.CurrentFuel, testShip.CurrentMSP, CrewSource,FuelSource,MSPSource);
 
             Console.WriteLine("Current EM Signature: {0}", testShip.CurrentEMSignature);
 
