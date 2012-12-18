@@ -267,6 +267,7 @@ namespace Pulsar4X.Entities.Components
         public bool isActive
         {
             get { return IsActive; }
+            set { IsActive = value; }
         }
 
 

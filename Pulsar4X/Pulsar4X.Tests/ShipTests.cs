@@ -220,9 +220,9 @@ namespace Pulsar4X.Tests
 
             ShipClassTN TestClass = new ShipClassTN("Test Ship Class");
 
-            TestClass.AddCrewQuarters(CrewQ, 1);
-            TestClass.AddFuelStorage(FuelT, 1);
-            TestClass.AddEngineeringSpaces(EBay, 1);
+            TestClass.AddCrewQuarters(CrewQ, 2);
+            TestClass.AddFuelStorage(FuelT, 2);
+            TestClass.AddEngineeringSpaces(EBay, 2);
             TestClass.AddOtherComponent(Bridge, 1);
 
             TestClass.AddEngine(EngDef, 1);
@@ -232,10 +232,10 @@ namespace Pulsar4X.Tests
 
             TestClass.AddActiveSensor(ActDef, 1);
 
-            Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK);
+            Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}, Tonnage: {4}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK, TestClass.SizeTons);
 
-            Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
-            TestClass.TotalFuelCapacity,TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge);
+            Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}, Total Required Crew: {6}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
+            TestClass.TotalFuelCapacity,TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
             
             Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
 
@@ -246,6 +246,42 @@ namespace Pulsar4X.Tests
 
 
             ShipTN testShip = new ShipTN(TestClass);
+
+            Console.WriteLine("Engine Power/Fuel Usage/Thermal Signature/Speed: {0}/{1}/{2}/{3}", testShip.CurrentEnginePower, testShip.CurrentFuelUsePerHour, testShip.CurrentThermalSignature,
+                testShip.CurrentSpeed);
+
+            testShip.SetSpeed(1000);
+
+            Console.WriteLine("Engine Power/Fuel Usage/Thermal Signature/Speed: {0}/{1}/{2}/{3}", testShip.CurrentEnginePower, testShip.CurrentFuelUsePerHour, testShip.CurrentThermalSignature,
+                testShip.CurrentSpeed);
+
+            Console.WriteLine("Current Crew/Fuel/MSP: {0}/{1}/{2}", testShip.CurrentCrew, testShip.CurrentFuel, testShip.CurrentMSP);
+
+            int CrewSource = 100000;
+            int FuelSource = 100000;
+            int MSPSource = 100000;
+
+            testShip.Recrew(CrewSource);
+            testShip.Refuel(FuelSource);
+            testShip.Resupply(MSPSource);
+
+            Console.WriteLine("Current Crew/Fuel/MSP: {0}/{1}/{2} Source: {0}/{1}/{2}", testShip.CurrentCrew, testShip.CurrentFuel, testShip.CurrentMSP, CrewSource,FuelSource,MSPSource);
+
+            Console.WriteLine("Current EM Signature: {0}", testShip.CurrentEMSignature);
+
+
+            bool isActive = true;
+            testShip.SetSensor(testShip.ShipASensor[0], isActive);
+
+            Console.WriteLine("Current EM Signature: {0}", testShip.CurrentEMSignature);
+
+            isActive = false;
+            testShip.SetSpeed(1500);
+            testShip.SetSensor(testShip.ShipASensor[0], isActive);
+
+            Console.WriteLine("Engine Power/Fuel Usage/Thermal Signature/Speed: {0}/{1}/{2}/{3}", testShip.CurrentEnginePower, testShip.CurrentFuelUsePerHour, testShip.CurrentThermalSignature,
+    testShip.CurrentSpeed);
+            Console.WriteLine("Current EM Signature: {0}", testShip.CurrentEMSignature);
 
 
         }
