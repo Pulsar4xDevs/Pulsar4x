@@ -173,9 +173,9 @@ namespace Pulsar4X.Entities
             /// All mobile ships need engines, orbitals and PDCs don't however.
             /// </summary>
             ShipEngine = new BindingList<EngineTN>();
-            EngineTN Engine = new EngineTN(ClassDefinition.ShipEngineDef);
             for (int loop = 0; loop < ClassDefinition.ShipEngineCount; loop++)
             {
+                EngineTN Engine = new EngineTN(ClassDefinition.ShipEngineDef);
                 ShipEngine.Add(Engine);
             }
             CurrentEnginePower = ClassDefinition.MaxEnginePower;
@@ -189,9 +189,9 @@ namespace Pulsar4X.Entities
             ShipPSensor = new BindingList<PassiveSensorTN>();
             for (int loop = 0; loop < ClassDefinition.ShipPSensorDef.Count; loop++)
             {
-                PassiveSensorTN PSensor = new PassiveSensorTN(ClassDefinition.ShipPSensorDef[loop]);
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipPSensorCount[loop]; loop2++)
                 {
+                    PassiveSensorTN PSensor = new PassiveSensorTN(ClassDefinition.ShipPSensorDef[loop]);
                     ShipPSensor.Add(PSensor);
                 }
             }
@@ -208,9 +208,9 @@ namespace Pulsar4X.Entities
             ShipASensor = new BindingList<ActiveSensorTN>();
             for (int loop = 0; loop < ClassDefinition.ShipASensorDef.Count; loop++)
             {
-                ActiveSensorTN ASensor = new ActiveSensorTN(ClassDefinition.ShipASensorDef[loop]);
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipASensorCount[loop]; loop2++)
                 {
+                    ActiveSensorTN ASensor = new ActiveSensorTN(ClassDefinition.ShipASensorDef[loop]);
                     ShipASensor.Add(ASensor);
                 }
             }
@@ -232,9 +232,10 @@ namespace Pulsar4X.Entities
         {
             for (int loop = 0; loop < fromList.Count; loop++)
             {
-                GeneralComponentTN NewComponent = new GeneralComponentTN(fromList[loop]);
+                
                 for (int loop2 = 0; loop2 < countList[loop]; loop2++)
                 {
+                    GeneralComponentTN NewComponent = new GeneralComponentTN(fromList[loop]);
                     AddList.Add(NewComponent);
                 }
             }

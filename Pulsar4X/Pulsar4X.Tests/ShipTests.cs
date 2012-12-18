@@ -247,6 +247,15 @@ namespace Pulsar4X.Tests
 
             ShipTN testShip = new ShipTN(TestClass);
 
+            testShip.CrewQuarters[0].isDestroyed = true;
+
+            for (int loop = 0; loop < testShip.CrewQuarters.Count; loop++)
+            {
+                Console.WriteLine("Crew Quarters {0} isDestroyed:{1}", loop + 1, testShip.CrewQuarters[loop].isDestroyed);
+            }
+
+            testShip.CrewQuarters[0].isDestroyed = false;
+
             Console.WriteLine("Engine Power/Fuel Usage/Thermal Signature/Speed: {0}/{1}/{2}/{3}", testShip.CurrentEnginePower, testShip.CurrentFuelUsePerHour, testShip.CurrentThermalSignature,
                 testShip.CurrentSpeed);
 
