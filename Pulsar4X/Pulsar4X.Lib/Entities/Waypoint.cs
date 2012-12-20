@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.Entities
 {
-    class Waypoint : StarSystemEntity
+    public class Waypoint : StarSystemEntity
     {
         /// <summary>
         /// Mass is totally unnecessary here.
