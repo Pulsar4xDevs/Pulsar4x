@@ -741,9 +741,6 @@ namespace Pulsar4X.Entities
                 }
             }
         }
-
-
-
     }
     /// <summary>
     /// End TaskGroupTN

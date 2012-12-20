@@ -12,6 +12,11 @@ namespace Pulsar4X.Entities
     {
         public BindingList<Star> Stars { get; set; }
 
+        /// <summary>
+        /// Each starsystem has its own list of waypoints.
+        /// </summary>
+        public BindingList<Waypoint> Waypoints { get; set; }
+
         public int Seed { get; set; }
 
         public StarSystem()
@@ -24,6 +29,8 @@ namespace Pulsar4X.Entities
             Id = Guid.NewGuid();
             Name = name;
             Stars = new BindingList<Star>();
+
+            Waypoints = new BindingList<Waypoint>();
         }
     }
 }
