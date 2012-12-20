@@ -32,5 +32,16 @@ namespace Pulsar4X.Entities
 
             Waypoints = new BindingList<Waypoint>();
         }
+
+        public void AddWaypoint(double XSystemAU, double YSystemAU)
+        {
+            Waypoint NewWP = new Waypoint(XSystemAU, YSystemAU);
+            Waypoints.Add(NewWP);
+        }
+
+        public void RemoveWaypoint(Waypoint Remove)
+        {
+            Waypoints.Remove(Remove);
+        }
     }
 }

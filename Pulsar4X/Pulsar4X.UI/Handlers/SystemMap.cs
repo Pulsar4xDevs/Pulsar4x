@@ -141,6 +141,18 @@ namespace Pulsar4X.UI.Handlers
 
                 m_oCurrentSceen.AddMapMarker(v3CurPosWorldCorrds, m_oGLCanvas.DefaultEffect);
 
+                /// <summary>
+                /// Calculate the scale of the map, and convert X/Y coordinates into AU coordinates
+                /// </summary>
+                double dAUScale = (float)(1.0 / (double)m_oGLCanvas.ZoomFactor);
+                double XS = v3CurPosWorldCorrds.X * dAUScale;
+                double YS = v3CurPosWorldCorrds.Y * dAUScale;
+
+                /// <summary>
+                /// Create waypoint on the back end to correspond to the front end display.
+                /// </summary>
+                m_oCurrnetSystem.AddWaypoint(XS,YS);
+
                 m_bCreateMapMarkerOnNextClick = false;
 
                 m_oControlsPanel.MapMarkersListBox.Refresh();
@@ -152,7 +164,14 @@ namespace Pulsar4X.UI.Handlers
             MapMarker oMarker = m_oControlsPanel.MapMarkersListBox.SelectedItem as MapMarker;
             if (oMarker != null)
             {
+                
                 m_oCurrentSceen.MapMarkers.Remove(oMarker);
+
+                /// <summary>
+                /// Delete the corresponding waypoint from the starsystem.
+                /// </summary>
+                if( m_oControlsPanel.MapMarkersListBox.SelectedIndex != -1 )
+                    m_oCurrnetSystem.RemoveWaypoint( m_oCurrnetSystem.Waypoints[m_oControlsPanel.MapMarkersListBox.SelectedIndex]);
             }
         }
 
