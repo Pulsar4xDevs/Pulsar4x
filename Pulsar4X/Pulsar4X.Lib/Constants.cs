@@ -69,6 +69,11 @@ namespace Pulsar4X
             /// </summary>
             public const double RADIANS_PER_ROTATION = 2.0 * Math.PI;
 
+            /// <summary>
+            /// RADIAN is the value of each degree in radians. PI/180.
+            /// </summary>
+            public const double RADIAN = Math.PI / 180.0;
+
             public const double ECCENTRICITY_COEFF = 0.077;	// Dole's was 0.077	
 
             public const double PROTOPLANET_MASS = 1.0E-15;	// Units of solar masses
@@ -721,6 +726,17 @@ namespace Pulsar4X
             }
 
             public const int NO_OF_MINERIALS = 11;
+        }
+
+        /// <summary>
+        /// ShipTN related constants here Right now, only the resolution max needs to be here.
+        /// </summary>
+        public static class ShipTN
+        {
+            /// <summary>
+            /// No sensor may have a resolution greater than 500 HS or about 25,000 tons.
+            /// </summary>
+            public const int ResolutionMax = 500;
         }
     }
 }

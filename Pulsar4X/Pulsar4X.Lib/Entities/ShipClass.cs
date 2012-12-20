@@ -74,7 +74,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<GeneralComponentDefTN> FuelTanks { get; set; }
         public BindingList<ushort> FuelTanksCount { get; set; }
-        public int TotalFuelCapacity { get; set; }
+        public float TotalFuelCapacity { get; set; }
 
         /// <summary>
         /// Engineering bay, Small Engineering Bay, Tiny Engineering Bay, Fighter Engineering Bay.
@@ -169,7 +169,7 @@ namespace Pulsar4X.Entities
 
             FuelTanks = new BindingList<GeneralComponentDefTN>();
             FuelTanksCount = new BindingList<ushort>();
-            TotalFuelCapacity = 0;
+            TotalFuelCapacity = 0.0f;
 
             EngineeringBays = new BindingList<GeneralComponentDefTN>();
             EngineeringBaysCount = new BindingList<ushort>();
@@ -392,7 +392,7 @@ namespace Pulsar4X.Entities
                 //***Else find and subtract the appropriate comp.***
             }
 
-            TotalFuelCapacity = TotalFuelCapacity + (int)(FuelT.size * (float)inc * 50000.0f);
+            TotalFuelCapacity = TotalFuelCapacity + (FuelT.size * (float)inc * 50000.0f);
 
             UpdateClass(FuelT, inc);
         }

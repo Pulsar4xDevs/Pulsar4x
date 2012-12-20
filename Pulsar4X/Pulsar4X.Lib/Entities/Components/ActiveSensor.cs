@@ -58,15 +58,10 @@ namespace Pulsar4X.Entities.Components
         /// Lookup table for ship resolutions
         /// </summary>
         private BindingList<int> LookUpST;
-        public BindingList<int> lookUPST
+        public BindingList<int> lookUpST
         {
             get { return LookUpST; }
         }
-
-        /// <summary>
-        /// Limit to the number of resolutions that a sensor may possess.
-        /// </summary>
-        private ushort ResolutionMax;
 
         /// <summary>
         /// Lookup table for missile resolutions
@@ -158,12 +153,10 @@ namespace Pulsar4X.Entities.Components
             LookUpST = new BindingList<int>();
             LookUpMT = new BindingList<int>();
 
-            ResolutionMax = 500;
-
             ///<summary>
             ///Initialize the ship lookup Table.
             ///</summary>
-            for (int loop = 0; loop < ResolutionMax; loop++)
+            for (int loop = 0; loop < Constants.ShipTN.ResolutionMax; loop++)
             {
                 ///<summary>
                 ///Sensor Resolution can't resolve this target at its MaxRange due to the target's smaller size
@@ -220,7 +213,7 @@ namespace Pulsar4X.Entities.Components
             ///<summary>
             ///limits of the arrays
             ///</summary>
-            if ( (TCS > 499 || TCS < 0) || (MSP > 14 || MSP < -1 ) )
+            if ( (TCS > (Constants.ShipTN.ResolutionMax - 1) || TCS < 0) || (MSP > 14 || MSP < -1 ) )
             {
                 return -1;
             }

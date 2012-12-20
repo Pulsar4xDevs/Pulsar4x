@@ -58,7 +58,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// How much fuel in total does the ship have. it will be divided equally among all tanks for convenience.
         /// </summary>
-        public int CurrentFuel { get; set; }
+        public float CurrentFuel { get; set; }
+
+        /// <summary>
+        /// Ship statistics track fuel use by the hour, but I need some way of determining if an engine has been running that long, hence this.
+        /// </summary>
+        public int FuelCounter { get; set; }
 
         /// <summary>
         /// Engineering bay, Small Engineering Bay, Tiny Engineering Bay, Fighter Engineering Bay.
@@ -154,7 +159,8 @@ namespace Pulsar4X.Entities
             /// </summary>
             FuelTanks = new BindingList<GeneralComponentTN>();
             AddComponents(FuelTanks, ClassDefinition.FuelTanks, ClassDefinition.FuelTanksCount);
-            CurrentFuel = 0;
+            CurrentFuel = 0.0f;
+            FuelCounter = 0;
 
             /// <summary>
             /// Engineering spaces must be on civ designs(atleast 1), but can be absent from military designs.
@@ -220,6 +226,10 @@ namespace Pulsar4X.Entities
             TotalCrossSection = ClassDefinition.TotalCrossSection;
             CurrentEMSignature = 0;
 
+            ThermalList = new LinkedListNode<int>(CurrentThermalSignature);
+            EMList = new LinkedListNode<int>(CurrentEMSignature);
+            ActiveList = new LinkedListNode<int>(TotalCrossSection);
+
         }
 
         /// <summary>
@@ -270,10 +280,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="FuelAvailable">Amount of Fuel that refueling source possesses.</param>
         /// <returns>Fuel left over to source after refueling.</returns>
-        public int Refuel(int FuelAvailable)
+        public float Refuel(float FuelAvailable)
         {
-            int FuelRequired = ShipClass.TotalFuelCapacity - CurrentFuel;
-            int FuelRemaining = FuelAvailable - FuelRequired;
+            float FuelRequired = ShipClass.TotalFuelCapacity - CurrentFuel;
+            float FuelRemaining = FuelAvailable - FuelRequired;
 
             if (FuelRequired <= FuelAvailable)
             {
@@ -323,10 +333,12 @@ namespace Pulsar4X.Entities
             if (Sensor.isActive == true && Sensor.isDestroyed == false && active == false)
             {
                 CurrentEMSignature = CurrentEMSignature - Sensor.aSensorDef.gps;
+                EMList.Value = CurrentEMSignature;
             }
             else if (Sensor.isActive == false && Sensor.isDestroyed == false && active == true)
             {
                 CurrentEMSignature = CurrentEMSignature + Sensor.aSensorDef.gps;
+                EMList.Value = CurrentEMSignature;
             }
             Sensor.isActive = active;
         }
@@ -347,6 +359,8 @@ namespace Pulsar4X.Entities
             CurrentEnginePower = (int)((float)ShipClass.MaxEnginePower * fraction);
             CurrentThermalSignature = (int)((float)ShipClass.MaxThermalSignature * fraction);
             CurrentFuelUsePerHour = ShipClass.MaxFuelUsePerHour * fraction;
+
+            ThermalList.Value = CurrentThermalSignature;
         }
 
 

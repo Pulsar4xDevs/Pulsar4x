@@ -267,7 +267,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Current Crew/Fuel/MSP: {0}/{1}/{2}", testShip.CurrentCrew, testShip.CurrentFuel, testShip.CurrentMSP);
 
             int CrewSource = 100000;
-            int FuelSource = 100000;
+            float FuelSource = 100000.0f;
             int MSPSource = 100000;
 
             CrewSource = testShip.Recrew(CrewSource);

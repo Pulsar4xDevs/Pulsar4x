@@ -5,6 +5,14 @@ using System.Text;
 
 namespace Pulsar4X.Entities
 {
+    public enum StarSystemEntityType
+    {
+        Body,
+        Waypoint,
+        TaskGroup,
+        TypeCount
+    }
+
     public abstract class StarSystemEntity : GameEntity
     {
         /// <summary>
@@ -21,6 +29,11 @@ namespace Pulsar4X.Entities
         /// System Z coordinante in AU
         /// </summary>
         public double ZSystem { get; set; }
+
+        /// <summary>
+        /// Type of entity that is represented here.
+        /// </summary>
+        public StarSystemEntityType SSEntity { get; set; }
 
         /// <summary>
         /// The Mass of this object.

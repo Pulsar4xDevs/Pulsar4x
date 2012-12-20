@@ -147,6 +147,8 @@ namespace Pulsar4X.Entities
             Moons = new BindingList<Planet>();
             Gases = new BindingList<Gas>();
             Populations = new BindingList<Population>();
+
+            SSEntity = StarSystemEntityType.Body;
         }
     }
 }
