@@ -168,6 +168,7 @@ namespace Pulsar4X.Entities
             TimeRequirement = 0;
             NewOrders = false;
             Orders = new BindingList<OrderType>();
+            OrderTarget = new BindingList<StarSystemEntity>();
 
             Ships = new BindingList<ShipTN>();
             ShipOutOfFuel = false;
@@ -194,7 +195,7 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// TaskGroupLookUpMT will be initialized to zero.
                 /// </summary>
-                TaskGroupLookUpST.Add(0);
+                TaskGroupLookUpMT.Add(0);
             }
 
             BestThermalCount = 0;
@@ -313,6 +314,7 @@ namespace Pulsar4X.Entities
                         if (Sort.Value >= NextNode.Value)
                         {
                             SortList.AddAfter(NextNode, Sort);
+                            done = true;
                         }
                     }
                 }
@@ -342,7 +344,12 @@ namespace Pulsar4X.Entities
         }
 
 
-
+        /// <summary>
+        /// SetActiveSensor activates a sensor on a ship in the taskforce, modifies the active que, and resorts EM if appropriate.
+        /// </summary>
+        /// <param name="ShipIndex">Ship the sensor is on.</param>
+        /// <param name="ShipSensorIndex">Which sensor we want to switch.</param>
+        /// <param name="state">State the sensor will be set to.</param>
         public void SetActiveSensor(int ShipIndex, int ShipSensorIndex, bool state)
         {
             int oldEMSignature = Ships[ShipIndex].CurrentEMSignature;
@@ -558,12 +565,12 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// First check if new sorting needs to be done.
             /// </summary>
-            if (ShipSignatureNode == SortList.First)
+            if (ShipSignatureNode == SortList.First && SortList.First.Next != null)
             {
                 if (ShipSignatureNode.Value < SortList.First.Next.Value)
                     sorted = true;
             }
-            else if (ShipSignatureNode == SortList.Last)
+            else if (ShipSignatureNode == SortList.Last && SortList.Last.Previous != null)
             {
                 if (ShipSignatureNode.Value > SortList.Last.Previous.Value)
                     sorted = true;
@@ -591,10 +598,12 @@ namespace Pulsar4X.Entities
                     if (SortList.First == SortList.Last)
                         done = true;
 
+                    
+
                     while (done == false)
                     {
                         Temp = Temp.Next;
-                        if (ShipSignatureNode.Value >= Temp.Value)
+                        if (ShipSignatureNode.Value >= Temp.Value && ShipSignatureNode != Temp)
                         {
                             SortList.Remove(ShipSignatureNode);
                             SortList.AddAfter(Temp, ShipSignatureNode);
@@ -628,6 +637,7 @@ namespace Pulsar4X.Entities
         {
             Orders.Add(Order);
             OrderTarget.Add(Destination);
+            NewOrders = true;
         }
 
 
@@ -672,7 +682,6 @@ namespace Pulsar4X.Entities
                 NewOrders = false;
             }
 
-
             if (TimeRequirement < TimeSlice)
             {
                 XSystem = OrderTarget[0].XSystem;
@@ -701,10 +710,15 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                SystemKmX = (double)TimeSlice * CurrentSpeedX;
-                SystemKmY = (double)TimeSlice * CurrentSpeedY;
+                SystemKmX = SystemKmX + ((double)TimeSlice * CurrentSpeedX);
+                SystemKmY = SystemKmY + ((double)TimeSlice * CurrentSpeedY);
+
+                XSystem = SystemKmX / Constants.Units.KM_PER_AU;
+                YSystem = SystemKmY / Constants.Units.KM_PER_AU;
 
                 UseFuel(TimeSlice);
+
+                TimeRequirement = TimeRequirement - TimeSlice;
             }
 
         }

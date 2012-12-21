@@ -211,7 +211,7 @@ namespace Pulsar4X.Tests
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
             ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
             PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
-            PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
+            PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("EM Sensor EM1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
 
             GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
             GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
@@ -289,13 +289,229 @@ namespace Pulsar4X.Tests
             testShip.SetSensor(testShip.ShipASensor[0], isActive);
 
             Console.WriteLine("Engine Power/Fuel Usage/Thermal Signature/Speed: {0}/{1}/{2}/{3}", testShip.CurrentEnginePower, testShip.CurrentFuelUsePerHour, testShip.CurrentThermalSignature,
-    testShip.CurrentSpeed);
+                testShip.CurrentSpeed);
             Console.WriteLine("Current EM Signature: {0}", testShip.CurrentEMSignature);
 
 
         }
+
+        [Test]
+        public void TGActiveSortThermalSortTest()
+        {
+            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
+
+            GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
+            GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
+            GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
+            GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
+
+            Faction FID = new Faction();
+            Planet planet = new Planet();
+
+
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+
+            for (int loop = 0; loop < 5; loop++)
+            {
+                ShipClassTN test = new ShipClassTN("Ship");
+                test.AddCrewQuarters(CrewQ, 2);
+                test.AddFuelStorage(FuelT, 2);
+                test.AddEngineeringSpaces(EBay, 2);
+                test.AddOtherComponent(Bridge, 1);
+
+                int add = 0;
+                switch(loop)
+                {
+                    case 0 : add = 2; break;
+                    case 1 : add = 4; break;
+                    case 2 : add = 1; break;
+                    case 3 : add = 5; break;
+                    case 4 : add = 3; break;
+                }
+                test.AddEngine(EngDef, (byte)add);
+
+                Console.WriteLine("Speed:{0}", test.MaxSpeed);
+
+                TaskGroup1.AddShip(test);
+            }
+
+            LinkedListNode<int> AS = TaskGroup1.ActiveSortList.First;
+            LinkedListNode<int> TS = TaskGroup1.ThermalSortList.First;
+            for(int loop = 0; loop < 5; loop++)
+            {
+                Console.WriteLine("AL:{0},TL:{1} || Ship{2} AL:{3},TL:{4} : {5} {6} {7} {8} {9} {10} {11}", AS.Value, TS.Value, loop,TaskGroup1.Ships[loop].ActiveList.Value, TaskGroup1.Ships[loop].ThermalList.Value, 
+                    TaskGroup1.Ships[loop].CurrentSpeed,TaskGroup1.Ships[loop].CurrentEnginePower,TaskGroup1.Ships[loop].CurrentThermalSignature, TaskGroup1.Ships[loop].ShipClass.MaxEnginePower,
+                    TaskGroup1.Ships[loop].ShipClass.MaxThermalSignature,TaskGroup1.Ships[loop].CurrentFuelUsePerHour,TaskGroup1.Ships[loop].ShipClass.MaxFuelUsePerHour);
+
+                AS = AS.Next;
+                TS = TS.Next;
+            }
+        }
+
+        [Test]
+        public void TGPassivesTest()
+        {
+            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
+            PassiveSensorDefTN ThPasDef1 = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
+            PassiveSensorDefTN ThPasDef2 = new PassiveSensorDefTN("Thermal Sensor TH1-6", 1.0f, 6, PassiveSensorType.Thermal, 1.0f, 1);
+            PassiveSensorDefTN ThPasDef3 = new PassiveSensorDefTN("Thermal Sensor TH1-8", 1.0f, 8, PassiveSensorType.Thermal, 1.0f, 1);
+            PassiveSensorDefTN ThPasDef4 = new PassiveSensorDefTN("Thermal Sensor TH1-11", 1.0f, 11, PassiveSensorType.Thermal, 1.0f, 1);
+
+
+            GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
+            GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
+            GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
+            GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
+
+            Faction FID = new Faction();
+            Planet planet = new Planet();
+
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+            for (int loop = 0; loop < 4; loop++)
+            {
+
+
+                ShipClassTN test = new ShipClassTN("Ship");
+                test.AddCrewQuarters(CrewQ, 2);
+                test.AddFuelStorage(FuelT, 2);
+                test.AddEngineeringSpaces(EBay, 2);
+                test.AddOtherComponent(Bridge, 1);
+
+                switch (loop)
+                {
+                    case 0: test.AddPassiveSensor(ThPasDef2, 5);
+                    break;
+                    case 1: test.AddPassiveSensor(ThPasDef1, 4);
+                    break;
+                    case 2: test.AddPassiveSensor(ThPasDef3, 7);
+                    break;
+                    case 3: test.AddPassiveSensor(ThPasDef4, 6);
+                    break;
+                }
+
+                TaskGroup1.AddShip(test);
+                Console.WriteLine("Best Thermal:{0},{1}", TaskGroup1.BestThermal.pSensorDef.rating, TaskGroup1.BestThermalCount);
+            }
+        }
+
+        [Test]
+        public void TGActiveTest()
+        {
+            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
+            ActiveSensorDefTN ActDef1 = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
+            ActiveSensorDefTN ActDef2 = new ActiveSensorDefTN("Search 500k - 1", 1.0f, 10, 5, 1, false, 1.0f, 1);
+            ActiveSensorDefTN ActDef3 = new ActiveSensorDefTN("Search 2.2M - 1000", 1.0f, 10, 5, 20, false, 1.0f, 1);
+            ActiveSensorDefTN ActDef4 = new ActiveSensorDefTN("Search 7M - 10000", 1.0f, 10, 5, 200, false, 1.0f, 1);
+
+            GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
+            GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
+            GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
+            GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
+
+
+            Faction FID = new Faction();
+            Planet planet = new Planet();
+
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+            for (int loop = 0; loop < 4; loop++)
+            {
+
+
+                ShipClassTN test = new ShipClassTN("Ship");
+                test.AddCrewQuarters(CrewQ, 2);
+                test.AddFuelStorage(FuelT, 2);
+                test.AddEngineeringSpaces(EBay, 2);
+                test.AddOtherComponent(Bridge, 1);
+
+                switch (loop)
+                {
+                    case 0: test.AddActiveSensor(ActDef2, 2);
+                        break;
+                    case 1: test.AddActiveSensor(ActDef1, 2);
+                        break;
+                    case 2: test.AddActiveSensor(ActDef3, 2);
+                        break;
+                    case 3: test.AddActiveSensor(ActDef4, 2);
+                        break;
+                }
+
+                TaskGroup1.AddShip(test);
+
+                TaskGroup1.SetActiveSensor(loop, 0, true);
+                TaskGroup1.SetActiveSensor(loop, 1, true);
+            }
+
+            LinkedListNode<int> EM = TaskGroup1.EMSortList.First;
+            for (int loop = 0; loop < 4; loop++)
+            {
+                Console.WriteLine("{0} {1}", TaskGroup1.Ships[loop].CurrentEMSignature, EM.Value);
+                EM = EM.Next;
+            }
+
+            for (int loop = 0; loop < Constants.ShipTN.ResolutionMax; loop++)
+            {
+                Console.WriteLine("{0} | {1}", TaskGroup1.TaskGroupLookUpST[loop],loop);
+            }
+
+            TaskGroup1.SetActiveSensor(2, 0, false);
+            TaskGroup1.SetActiveSensor(2, 1, false);
+
+            EM = TaskGroup1.EMSortList.First;
+            for (int loop = 0; loop < 4; loop++)
+            {
+                Console.WriteLine("{0} {1}", TaskGroup1.Ships[loop].CurrentEMSignature, EM.Value);
+                EM = EM.Next;
+            }
+
+            for (int loop = 0; loop < Constants.ShipTN.ResolutionMax; loop++)
+            {
+                Console.WriteLine("{0} | {1}", TaskGroup1.TaskGroupLookUpST[loop], loop);
+            }
+        }
+
+        //Issue/Follow Orders Test
+        [Test]
+        public void TGOrdersTest()
+        {
+            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
+
+            GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
+            GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
+            GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
+            GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
+
+
+            Faction FID = new Faction();
+            Planet planet = new Planet();
+            Waypoint WP1 = new Waypoint(0.1,0.1);
+
+            planet.XSystem = 0.0;
+            planet.YSystem = 0.0;
+
+
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+
+            ShipClassTN test = new ShipClassTN("Ship");
+            test.AddCrewQuarters(CrewQ, 2);
+            test.AddFuelStorage(FuelT, 2);
+            test.AddEngineeringSpaces(EBay, 2);
+            test.AddOtherComponent(Bridge, 1);
+            test.AddEngine(EngDef, 1);
+
+            TaskGroup1.AddShip(test);
+
+            TaskGroup1.Ships[0].Refuel(200000.0f);
+            TaskGroup1.IssueOrder(OrderType.Move, WP1);
+
+            Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
+
+            while (TaskGroup1.Orders.Count != 0)
+            {
+                TaskGroup1.FollowOrders(5);
+                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.SystemKmX, TaskGroup1.SystemKmY, TaskGroup1.XSystem, TaskGroup1.YSystem);
+            }
+
+            Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
+        }
     }
-
-
-
 }
