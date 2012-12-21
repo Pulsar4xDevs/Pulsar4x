@@ -20,6 +20,8 @@ namespace Pulsar4X.UI.Handlers
 {
     public class SystemMap
     {
+        #region Properties and Member Vars
+
         // System Map Logger:
         public static readonly ILog logger = LogManager.GetLogger(typeof(SystemMap));
 
@@ -70,6 +72,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        // List of sceens created for display.
         List<Sceen> m_lSystemSceens = new List<Sceen>();
 
         private Sceen m_oCurrentSceen;
@@ -77,6 +80,8 @@ namespace Pulsar4X.UI.Handlers
         public GLStarSystemViewModel VM { get; set; }
 
         private bool m_bCreateMapMarkerOnNextClick = false;
+
+        #endregion
 
         public SystemMap()
         {
@@ -99,8 +104,7 @@ namespace Pulsar4X.UI.Handlers
             m_oCurrnetSystem = VM.CurrentStarSystem;
             m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += (s, args) => m_oControlsPanel.SystemSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
 
-            // register event handlers:
-            m_oGLCanvas.InputHandler += InputProcessor;
+            // register event handlers:\
             m_oGLCanvas.KeyDown += new KeyEventHandler(OnKeyDown);
             m_oGLCanvas.MouseDown += new MouseEventHandler(OnMouseDown);
             m_oGLCanvas.MouseMove += new MouseEventHandler(OnMouseMove);
@@ -130,25 +134,29 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_bCreateMapMarkerOnNextClick == true)
             {
-                Point oCursorPosition = m_oGLCanvas.PointToClient(Cursor.Position);
-                // Convert to be world coords:
-                Vector3 v3CurPosWorldCorrds = new Vector3(oCursorPosition.X - (m_oGLCanvas.Size.Width / 2), oCursorPosition.Y - (m_oGLCanvas.Size.Height / 2), 0);
-                v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
-                v3CurPosWorldCorrds.Y = -v3CurPosWorldCorrds.Y;
+                // safty check:
+                if (m_oCurrentSceen != null)
+                {
+                    Point oCursorPosition = m_oGLCanvas.PointToClient(Cursor.Position);
+                    // Convert to be world coords:
+                    Vector3 v3CurPosWorldCorrds = new Vector3(oCursorPosition.X - (m_oGLCanvas.Size.Width / 2), oCursorPosition.Y - (m_oGLCanvas.Size.Height / 2), 0);
+                    v3CurPosWorldCorrds = v3CurPosWorldCorrds / m_oGLCanvas.ZoomFactor;
+                    v3CurPosWorldCorrds.Y = -v3CurPosWorldCorrds.Y;
 
-                // add screen offset:
-                v3CurPosWorldCorrds = v3CurPosWorldCorrds - (m_oCurrentSceen.ViewOffset / m_oCurrentSceen.ZoomSclaer);
+                    // add screen offset:
+                    v3CurPosWorldCorrds = v3CurPosWorldCorrds - (m_oCurrentSceen.ViewOffset / m_oCurrentSceen.ZoomSclaer);
 
-                m_oCurrentSceen.AddMapMarker(v3CurPosWorldCorrds, m_oGLCanvas.DefaultEffect);
+                    m_oCurrentSceen.AddMapMarker(v3CurPosWorldCorrds, m_oGLCanvas.DefaultEffect);
 
-                /// <summary>
-                /// Create waypoint on the back end to correspond to the front end display.
-                /// </summary>
-                m_oCurrnetSystem.AddWaypoint(v3CurPosWorldCorrds.X, v3CurPosWorldCorrds.Y);
+                    /// <summary>
+                    /// Create waypoint on the back end to correspond to the front end display.
+                    /// </summary>
+                    m_oCurrnetSystem.AddWaypoint(v3CurPosWorldCorrds.X, v3CurPosWorldCorrds.Y);
 
-                m_bCreateMapMarkerOnNextClick = false;
+                    m_bCreateMapMarkerOnNextClick = false;
 
-                m_oControlsPanel.MapMarkersListBox.Refresh();
+                    m_oControlsPanel.MapMarkersListBox.Refresh();
+                }
             }
         }
 
@@ -376,6 +384,10 @@ namespace Pulsar4X.UI.Handlers
 
         #region PublicMethods
 
+        /// <summary>
+        /// Shows all the System Map Panels.
+        /// </summary>
+        /// <param name="a_oDockPanel"> The target Docking Panel. </param>
         public void ShowAllPanels(DockPanel a_oDockPanel)
         {
             ShowViewPortPanel(a_oDockPanel);
@@ -386,6 +398,10 @@ namespace Pulsar4X.UI.Handlers
             UpdateScaleLabels();
         }
 
+        /// <summary>
+        /// Shows the View Port Panel.
+        /// </summary>
+        /// <param name="a_oDockPanel"> The target Docking Panel. </param>
         public void ShowViewPortPanel(DockPanel a_oDockPanel)
         {
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
@@ -393,6 +409,9 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
+        /// <summary>
+        /// Makes the View Port Panel Active.
+        /// </summary>
         public void ActivatePortPanel()
         {
             if (!m_oViewPortPanel.IsActivated)
@@ -403,6 +422,10 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// Shows the Controls Panel.
+        /// </summary>
+        /// <param name="a_oDockPanel"> The target Docking Panel. </param>
         public void ShowControlsPanel(DockPanel a_oDockPanel)
         {
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
@@ -410,6 +433,9 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
+        /// <summary>
+        /// Makes the Controls Panel Active.
+        /// </summary>
         public void ActivateControlsPanel()
         {
             if (!m_oControlsPanel.IsActivated)
@@ -478,6 +504,11 @@ namespace Pulsar4X.UI.Handlers
             Cursor.Current = Cursors.Default;
         }
 
+        /// <summary>
+        /// Processes Input for the system map.
+        /// </summary>
+        /// <param name="k"> Keyboard events, if none pass in null. </param>
+        /// <param name="m"> Mouse events, if none pass in null. </param>
         public void InputProcessor(KeyEventArgs k, MouseEventArgs m)
         {
             if (k != null)
@@ -554,17 +585,17 @@ namespace Pulsar4X.UI.Handlers
         }
 
 
+        /// <summary>
+        /// Updates the Scale labels on the UI.
+        /// </summary>
         private void UpdateScaleLabels()
         {
             if (m_oGLCanvas != null)
             {
-                double dKmscale = (m_oGLCanvas.Size.Width / m_oGLCanvas.ZoomFactor) * Constants.Units.KM_PER_AU;  // times by 10 to make scale the same as actual scale usid in drawing the systems.
+                double dKmscale = (m_oGLCanvas.Size.Width / m_oGLCanvas.ZoomFactor) * Constants.Units.KM_PER_AU;
                 float dAUScale = (float)(m_oGLCanvas.Size.Width / m_oGLCanvas.ZoomFactor);
                 m_oControlsPanel.ScaleKMLable.Text = "Km = " + dKmscale.ToString();
                 m_oControlsPanel.ScaleAULable.Text = "AU = " + dAUScale.ToString();
-
-                // Add FPS too for now:
-                //FPSLabel.Text = m_oGLCanvas.FPS.ToString();
             }
         }
 
