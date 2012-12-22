@@ -31,12 +31,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Tentative location in Km of the taskgroup.
         /// </summary>
-        public double SystemKmX { get; set; }
+        public float SystemKmX { get; set; }
 
         /// <summary>
         /// Tentative location in Km of the taskgroup.
         /// </summary>
-        public double SystemKmY { get; set; }
+        public float SystemKmY { get; set; }
 
         /// <summary>
         /// Are we orbiting a body?
@@ -687,8 +687,8 @@ namespace Pulsar4X.Entities
                 XSystem = OrderTarget[0].XSystem;
                 YSystem = OrderTarget[0].YSystem;
 
-                SystemKmX = XSystem * Constants.Units.KM_PER_AU;
-                SystemKmY = YSystem * Constants.Units.KM_PER_AU;
+                SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
+                SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
 
                 if (OrderTarget[0].SSEntity == StarSystemEntityType.Body)
                     IsOrbiting = true;
@@ -710,8 +710,8 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                SystemKmX = SystemKmX + ((double)TimeSlice * CurrentSpeedX);
-                SystemKmY = SystemKmY + ((double)TimeSlice * CurrentSpeedY);
+                SystemKmX = SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
+                SystemKmY = SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
 
                 XSystem = SystemKmX / Constants.Units.KM_PER_AU;
                 YSystem = SystemKmY / Constants.Units.KM_PER_AU;

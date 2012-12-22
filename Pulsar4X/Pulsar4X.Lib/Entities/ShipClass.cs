@@ -40,10 +40,29 @@ namespace Pulsar4X.Entities
         /// </summary>
         public float SizeHS { get; set; }
 
+        /// <summary>
+        /// Total Internal Hit to kill of all components. components need not all be destroyed in order for a ship to be destroyed however.
+        /// </summary>
         public int TotalHTK { get; set; }
 
+        /// <summary>
+        /// Is this ship a military or civilian flagged design?
+        /// </summary>
         public bool IsMilitary { get; set; }
+
+        /// <summary>
+        /// Has the user declared this design obsolete?
+        /// </summary>
+        public bool IsObsolete { get; set; }
+
+        /// <summary>
+        /// How many military grade components are part of this ship?
+        /// </summary>
         public int MilitaryComponentCount { get; set; }
+
+        /// <summary>
+        /// What is the perceived protection value this ship class provides to civilians.
+        /// </summary>
         public int PlanetaryProtectionValue { get; set; }
 
         /// <summary>
