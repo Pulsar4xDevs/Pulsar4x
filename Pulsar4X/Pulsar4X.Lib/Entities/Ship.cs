@@ -16,9 +16,24 @@ namespace Pulsar4X.Entities
         public Guid Id { get; set; }
         public Faction Faction { get; set; }
 
+        /// <summary>
+        /// Class of this ship.
+        /// </summary>
         public ShipClassTN ShipClass { get; set; }
 
+        /// <summary>
+        /// Name of the ship
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// Taskgroup the ship is part of.
+        /// </summary>
+        public TaskGroupTN ShipsTaskGroup { get; set; }
+
+        /// <summary>
+        /// Unused at the moment.
+        /// </summary>
         public string ClassNotes { get; set; }
         public string Notes { get; set; }
 
@@ -138,7 +153,15 @@ namespace Pulsar4X.Entities
 
         public ShipTN(ShipClassTN ClassDefinition)
         {
+            /// <summary>
+            /// Set the class definition
+            /// </summary>
             ShipClass = ClassDefinition;
+
+            /// <summary>
+            /// Inform the class that it has a new member.
+            /// </summary>
+            ClassDefinition.ShipsInClass.Add(this);
 
             /// <summary>
             /// All ships will have armor, and all ship defs should have armor before this point.

@@ -216,6 +216,11 @@ namespace Pulsar4X.Entities
             ShipTN ship = new ShipTN(shipDef);
             Ships.Add(ship);
 
+            /// <summary>
+            /// inform the ship of the taskgroup it belongs to.
+            /// </summary>
+            ship.ShipsTaskGroup = this;
+
             if (Ships.Count == 1)
             {
                 MaxSpeed = ship.ShipClass.MaxSpeed;

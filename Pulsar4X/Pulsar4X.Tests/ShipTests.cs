@@ -333,6 +333,7 @@ namespace Pulsar4X.Tests
                 Console.WriteLine("Speed:{0}", test.MaxSpeed);
 
                 TaskGroup1.AddShip(test);
+                Console.WriteLine("{0} {1}", TaskGroup1, TaskGroup1.Ships[loop].ShipsTaskGroup);
             }
 
             LinkedListNode<int> AS = TaskGroup1.ActiveSortList.First;

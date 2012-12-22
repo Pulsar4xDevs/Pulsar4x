@@ -26,6 +26,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public string Name { get; set; }
 
+        public BindingList<ShipTN> ShipsInClass { get; set; }
+
         /// <summary>
         /// cost in BP of the ship, not its mineral cost, not doing that just yet.
         /// </summary>
@@ -159,6 +161,8 @@ namespace Pulsar4X.Entities
         public ShipClassTN(string Title)
         {
             Name = Title;
+
+            ShipsInClass = new BindingList<ShipTN>();
 
             /// <summary>
             /// Sanity initializations
