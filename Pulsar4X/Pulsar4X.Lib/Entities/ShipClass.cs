@@ -243,11 +243,11 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// General Class update function, many things will change as a result of adding components, this function handles them all.
-        /// I think this function might be enough to handle subtracting components as well.
+        /// I think this function might be enough to handle subtracting components as well. Update: now subtracting.
         /// </summary>
         /// <param name="CDTN">Basic abstract class definition of the added component.</param>
         /// <param name="increment">The number of new components to be added.</param>
-        private void UpdateClass(ComponentDefTN Component, byte increment )
+        private void UpdateClass(ComponentDefTN Component, short increment )
         {
 
             /// <summary>
@@ -344,31 +344,47 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Adds the specified crew quarter component to the ship. Might Subtract later.
+        /// Adds the specified crew quarter component to the ship. Subtracts now.
         /// </summary>
         /// <param name="CrewQ">General Component Crew Quarter definition.</param>
-        /// <param name="inc">Number of crew quarters to add, possibly subtract.</param>
-        public void AddCrewQuarters(GeneralComponentDefTN CrewQ, byte inc)
+        /// <param name="inc">Number of crew quarters to add, or subtract.</param>
+        public void AddCrewQuarters(GeneralComponentDefTN CrewQ, short inc)
         {
             /// <summary>
-            /// Wrong type of generalComponent def sent to add crew quarters.
+            /// Wrong type of generalComponent def sent to add crew quarters. What error should be sent?
             /// </summary>
             if (CrewQ.componentType != GeneralType.Crew)
             {
                 return;
             }
 
-            if (inc >= 1)
+            int CrewIndex = CrewQuarters.IndexOf(CrewQ);
+            if (CrewIndex != -1)
+            {
+                CrewQuartersCount[CrewIndex] = (ushort)(CrewQuartersCount[CrewIndex] + (ushort)inc);
+            }
+            else if (CrewIndex == -1 && inc >= 1)
             {
                 CrewQuarters.Add(CrewQ);
-                CrewQuartersCount.Add(inc);
-
-                //***It occurs to me that additional components might be added after the 1st one, in which case search out that entry.***
-                //Probably should make this its own function if possible?
+                CrewQuartersCount.Add((ushort)inc);
             }
             else
             {
-                //***Else find and subtract the appropriate quarters.***
+                if (CrewIndex != -1)
+                {
+                    if (CrewQuartersCount[CrewIndex] == 0)
+                    {
+                        CrewQuartersCount.RemoveAt(CrewIndex);
+                        CrewQuarters.RemoveAt(CrewIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Perhaps some kind of error should be noted here.
+                    /// </summary>
+                    return;
+                }
             }
 
             /// <summary>
@@ -388,11 +404,11 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Adds the specified Fuel Tanks to the ship. Might Subtract later.
+        /// Adds the specified Fuel Tanks to the ship. Subtracts now.
         /// </summary>
         /// <param name="FuelT">Fuel tank definition</param>
         /// <param name="inc">number of fuel tanks.</param>
-        public void AddFuelStorage(GeneralComponentDefTN FuelT, byte inc)
+        public void AddFuelStorage(GeneralComponentDefTN FuelT, short inc)
         {
             /// <summary>
             /// Wrong type of generalComponent def sent to add Fuel Storage.
@@ -402,17 +418,33 @@ namespace Pulsar4X.Entities
                 return;
             }
 
-            if (inc >= 1)
+            int FuelIndex = FuelTanks.IndexOf(FuelT);
+            if (FuelIndex != -1)
+            {
+                FuelTanksCount[FuelIndex] = (ushort)(FuelTanksCount[FuelIndex] + (ushort)inc);
+            }
+            if (FuelIndex == -1 && inc >= 1)
             {
                 FuelTanks.Add(FuelT);
-                FuelTanksCount.Add(inc);
-
-                //***It occurs to me that additional components might be added after the 1st one, in which case search out that entry.***
-                //Probably should make this its own function if possible?
+                FuelTanksCount.Add((ushort)inc);
             }
             else
             {
-                //***Else find and subtract the appropriate comp.***
+                if (FuelIndex != -1)
+                {
+                    if (FuelTanksCount[FuelIndex] == 0)
+                    {
+                        FuelTanksCount.RemoveAt(FuelIndex);
+                        FuelTanks.RemoveAt(FuelIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Perhaps some kind of error should be noted here.
+                    /// </summary>
+                    return;
+                }
             }
 
             TotalFuelCapacity = TotalFuelCapacity + (FuelT.size * (float)inc * 50000.0f);
@@ -421,7 +453,7 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Adds engineering bays to the design. may subtract.
+        /// Adds engineering bays to the design. subtracts now.
         /// </summary>
         /// <param name="EBay">Component definition.</param>
         /// <param name="inc">Number of components.</param>
@@ -435,17 +467,35 @@ namespace Pulsar4X.Entities
                 return;
             }
 
-            if (inc >= 1)
+            int EBayIndex = EngineeringBays.IndexOf(EBay);
+
+            if (EBayIndex != -1)
+            {
+                EngineeringBaysCount[EBayIndex] = (ushort)(EngineeringBaysCount[EBayIndex] + (ushort)inc);
+            }
+
+            if (EBayIndex == 1 && inc >= 1)
             {
                 EngineeringBays.Add(EBay);
                 EngineeringBaysCount.Add(inc);
-
-                //***It occurs to me that additional components might be added after the 1st one, in which case search out that entry.***
-                //Probably should make this its own function if possible?
             }
             else
             {
-                //***Else find and subtract the appropriate comp.***
+                if (EBayIndex != -1)
+                {
+                    if (EngineeringBaysCount[EBayIndex] == 0)
+                    {
+                        EngineeringBaysCount.RemoveAt(EBayIndex);
+                        EngineeringBays.RemoveAt(EBayIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error message?
+                    /// </summary>
+                    return;
+                }
             }
 
             EngineeringHS = EngineeringHS + (EBay.size * (float)inc);
@@ -454,31 +504,48 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// AddOtherComponent handles specialty general components.
+        /// AddOtherComponent handles specialty general components. To Subtract add a negative number of the component.
         /// </summary>
         /// <param name="Other">The Component Definition.</param>
         /// <param name="inc">The number of components.</param>
-        public void AddOtherComponent(GeneralComponentDefTN Other, byte inc)
+        public void AddOtherComponent(GeneralComponentDefTN Other, short inc)
         {
             /// <summary>
             /// Wrong type of generalComponent def sent to add Other Component.
             /// </summary>
-            if (Other.componentType < GeneralType.MaintenanceBay)
+            if (Other.componentType < GeneralType.Bridge)
             {
                 return;
             }
 
-            if (inc >= 1)
+            int OtherCompIndex = OtherComponents.IndexOf(Other);
+            if (OtherCompIndex != -1)
+            {
+                OtherComponentsCount[OtherCompIndex] = (ushort)(OtherComponentsCount[OtherCompIndex] + (ushort)inc);
+            }
+            if (OtherCompIndex == -1 && inc >= 1)
             {
                 OtherComponents.Add(Other);
-                OtherComponentsCount.Add(inc);
-
-                //***It occurs to me that additional components might be added after the 1st one, in which case search out that entry.***
-                //Probably should make this its own function if possible?
+                OtherComponentsCount.Add((ushort)inc);
             }
             else
             {
-                //***Else find and subtract the appropriate comp.***
+                if (OtherCompIndex != -1)
+                {
+                    if (OtherComponentsCount[OtherCompIndex] == 0)
+                    {
+                        OtherComponentsCount.RemoveAt(OtherCompIndex);
+                        OtherComponents.RemoveAt(OtherCompIndex);
+                    }
+
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
             }
 
             if (Other.componentType == GeneralType.Bridge)
@@ -493,11 +560,11 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Right now all this function does is overwrite the previous engine entry if switching types.
-        /// I think I'll add a static variable to ComponentDefTN to deal with that.
+        /// I think I'll add a static variable to ComponentDefTN to deal with that. Can subtract.
         /// </summary>
         /// <param name="Engine">Engine Definition</param>
         /// <param name="inc">Number of engines to be added.</param>
-        public void AddEngine(EngineDefTN Engine, byte inc)
+        public void AddEngine(EngineDefTN Engine, short inc)
         {
             ShipEngineDef = Engine;
             ShipEngineCount = (ushort)(ShipEngineCount + (ushort)inc);
@@ -510,20 +577,39 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// AddPassiveSensor adds the specified sensor in quantity inc.
+        /// AddPassiveSensor adds the specified sensor in quantity inc. Can subtract.
         /// </summary>
         /// <param name="Sensor">Passive sensor definition</param>
         /// <param name="inc">Number of sensors to add.</param>
-        public void AddPassiveSensor(PassiveSensorDefTN Sensor, byte inc)
+        public void AddPassiveSensor(PassiveSensorDefTN Sensor, short inc)
         {
-            if (inc >= 1)
+            int SensorIndex = ShipPSensorDef.IndexOf(Sensor);
+            if (SensorIndex != -1)
+            {
+                ShipPSensorCount[SensorIndex] = (ushort)(ShipPSensorCount[SensorIndex] + (ushort)inc);
+            }
+            if (SensorIndex == -1 && inc >= 1)
             {
                 ShipPSensorDef.Add(Sensor);
-                ShipPSensorCount.Add(inc);
+                ShipPSensorCount.Add((ushort)inc);
             }
             else
             {
-                //***Find and subtract the appropriate component.***
+                if (SensorIndex != -1)
+                {
+                    if (ShipPSensorCount[SensorIndex] == 0)
+                    {
+                        ShipPSensorCount.RemoveAt(SensorIndex);
+                        ShipPSensorDef.RemoveAt(SensorIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
             }
 
             if (Sensor.thermalOrEM == PassiveSensorType.Thermal)
@@ -545,20 +631,39 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// AddActiveSensor adds the specified sensor in quantity inc.
+        /// AddActiveSensor adds the specified sensor in quantity inc. Can Subtract.
         /// </summary>
         /// <param name="Sensor">Active sensor definition</param>
         /// <param name="inc">Number of sensors to add.</param>
         public void AddActiveSensor(ActiveSensorDefTN Sensor, byte inc)
         {
-            if (inc >= 1)
+            int SensorIndex = ShipASensorDef.IndexOf(Sensor);
+            if (SensorIndex != -1)
+            {
+                ShipASensorCount[SensorIndex] = (ushort)(ShipASensorCount[SensorIndex] + (ushort)inc);
+            }
+            if (SensorIndex == -1 && inc >= 1)
             {
                 ShipASensorDef.Add(Sensor);
-                ShipASensorCount.Add(inc);
+                ShipASensorCount.Add((ushort)inc);
             }
             else
             {
-                //***Find and subtract the appropriate component.***
+                if (SensorIndex != -1)
+                {
+                    if (ShipASensorCount[SensorIndex] == 0)
+                    {
+                        ShipASensorCount.RemoveAt(SensorIndex);
+                        ShipASensorDef.RemoveAt(SensorIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
             }
 
             MaxEMSignature = MaxEMSignature + (Sensor.gps * (int)inc);

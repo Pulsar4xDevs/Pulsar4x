@@ -243,6 +243,34 @@ namespace Pulsar4X.Tests
 
             Console.WriteLine("Best TH: {0}, BestEM: {1}, Max EM Signature: {2}, Total Cross Section: {3}", TestClass.BestThermalRating, TestClass.BestEMRating, TestClass.MaxEMSignature, TestClass.TotalCrossSection);
 
+            TestClass.AddCrewQuarters(CrewQ,-1);
+
+            Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}, Tonnage: {4}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK, TestClass.SizeTons);
+
+            Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}, Total Required Crew: {6}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
+            TestClass.TotalFuelCapacity, TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
+
+            Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
+
+            Console.WriteLine("Ship Engine Power: {0}, Ship Thermal Signature: {1}, Ship Fuel Use Per Hour: {2}", TestClass.MaxEnginePower, TestClass.MaxThermalSignature, TestClass.MaxFuelUsePerHour);
+
+            Console.WriteLine("Best TH: {0}, BestEM: {1}, Max EM Signature: {2}, Total Cross Section: {3}", TestClass.BestThermalRating, TestClass.BestEMRating, TestClass.MaxEMSignature, TestClass.TotalCrossSection);
+
+            TestClass.AddCrewQuarters(CrewQ, -1);
+
+            Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}, Tonnage: {4}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK, TestClass.SizeTons);
+
+            Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}, Total Required Crew: {6}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
+            TestClass.TotalFuelCapacity, TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
+
+            Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
+
+            Console.WriteLine("Ship Engine Power: {0}, Ship Thermal Signature: {1}, Ship Fuel Use Per Hour: {2}", TestClass.MaxEnginePower, TestClass.MaxThermalSignature, TestClass.MaxFuelUsePerHour);
+
+            Console.WriteLine("Best TH: {0}, BestEM: {1}, Max EM Signature: {2}, Total Cross Section: {3}", TestClass.BestThermalRating, TestClass.BestEMRating, TestClass.MaxEMSignature, TestClass.TotalCrossSection);
+
+
+            TestClass.AddCrewQuarters(CrewQ, 2);
 
 
             ShipTN testShip = new ShipTN(TestClass);
@@ -422,7 +450,9 @@ namespace Pulsar4X.Tests
                 test.AddCrewQuarters(CrewQ, 2);
                 test.AddFuelStorage(FuelT, 2);
                 test.AddEngineeringSpaces(EBay, 2);
+                Console.WriteLine("Bridge isn't present: {0} {1}", test.OtherComponents.IndexOf(Bridge), test.HasBridge);
                 test.AddOtherComponent(Bridge, 1);
+                Console.WriteLine("Bridge is present: {0} {1}", test.OtherComponents.IndexOf(Bridge),test.HasBridge);
 
                 switch (loop)
                 {
