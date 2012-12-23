@@ -386,6 +386,20 @@ namespace Pulsar4X.Entities
             ThermalList.Value = CurrentThermalSignature;
         }
 
+        /// <summary>
+        /// Handle the consequences of a ship destruction.
+        /// Class, Taskgroup, and the new wreck all need to be dealt with.
+        /// </summary>
+        public void OnDestroyed()
+        {
+            ShipClass.ShipsInClass.Remove(this);
+            ShipsTaskGroup.Ships.Remove(this);
+
+            /// <summary>
+            /// A new wreck needs to be created with the surviving components, if any, and some fraction of the cost of the ship.
+            /// </summary>
+        }
+
 
     }
     /// <summary>
