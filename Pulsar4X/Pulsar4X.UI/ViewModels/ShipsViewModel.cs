@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
+using Pulsar4X.Lib;
 using Pulsar4X.UI.Helpers;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
@@ -11,9 +12,25 @@ using System.Linq.Expressions;
 
 namespace Pulsar4X.UI.ViewModels
 {
-    public class EconomicsViewModel : INotifyPropertyChanged
+    public class ShipsViewModel : INotifyPropertyChanged
     {
+
         #region Properties
+
+        public BindingList<Faction> Factions { get; set; }
+
+        private BindingList<ShipTN> _ships; 
+        public BindingList<ShipTN> Ships
+        {
+            get
+            {
+                return _ships;
+            }
+            set
+            {
+                _ships = value;
+            }
+        }
 
         private Faction _currentFaction;
         public Faction CurrentFaction
@@ -32,42 +49,15 @@ namespace Pulsar4X.UI.ViewModels
                     return;
                 }
 
-                Populations = _currentFaction.Populations;
+                //Ships = _currentFaction.;
             }
         }
 
-        public BindingList<Faction> Factions { get; set; }
-
-        private BindingList<Population> _populations;
-        public BindingList<Population> Populations
-        {
-            get { return _populations; }
-            set
-            {
-                _populations = value;
-                OnPropertyChanged(() => Populations);
-                CurrentPopulation = _populations[0];
-            }
-        }
-
-        private Population _currentPopulation;
-        public Population CurrentPopulation
-        {
-            get
-            {
-                return _currentPopulation;
-            }
-            set
-            {
-                _currentPopulation = value;
-                OnPropertyChanged(() => CurrentPopulation);
-                OnPopulationChanged();
-            }
-        }
 
         #endregion
 
-        public EconomicsViewModel()
+
+        public ShipsViewModel()
         {
             Factions = GameState.Instance.Factions;
 
@@ -76,20 +66,7 @@ namespace Pulsar4X.UI.ViewModels
                 return;
             }
 
-            CurrentFaction = Factions.FirstOrDefault();
-
-            if (Populations != null)
-            {
-                CurrentPopulation = Populations.FirstOrDefault();
-            }
-        }
-
-        private void OnPopulationChanged()
-        {
-            if (PopulationChanged != null)
-            {
-                PopulationChanged(this, new EventArgs());
-            }
+            
         }
 
         private void OnPropertyChanged(Expression<Func<object>> property)

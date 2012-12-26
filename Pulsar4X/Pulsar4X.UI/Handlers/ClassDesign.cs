@@ -20,12 +20,54 @@ namespace Pulsar4X.UI.Handlers
         Panels.ClassDes_Options m_oOptionsPanel;
         Panels.ClassDes_Properties m_oClassPropertiesPanel;
 
+        ClassDesignViewModel VM;
+
 
         public ClassDesign()
         {
+            // create panels:
             m_oClassPropertiesPanel = new Panels.ClassDes_Properties();
             m_oDesignAndInformationPanel = new Panels.ClassDes_DesignAndInfo();
             m_oOptionsPanel = new Panels.ClassDes_Options();
+
+            // creat ViewModel.
+            VM = new ClassDesignViewModel();
+
+            // setup bindings:
+            m_oOptionsPanel.FactionComboBox.Bind(c => c.DataSource, VM, d => d.Factions);
+            m_oOptionsPanel.FactionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
+            m_oOptionsPanel.FactionComboBox.DisplayMember = "Name";
+            m_oOptionsPanel.FactionComboBox.SelectedIndexChanged += (s, args) => m_oOptionsPanel.FactionComboBox.DataBindings["SelectedItem"].WriteValue();
+
+            m_oOptionsPanel.ClassComboBox.Bind(c => c.DataSource, VM, d => d.ShipDesigns);
+            m_oOptionsPanel.ClassComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentShipClass, DataSourceUpdateMode.OnPropertyChanged);
+            m_oOptionsPanel.ClassComboBox.DisplayMember = "Name";
+            m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += (s, args) => m_oOptionsPanel.ClassComboBox.DataBindings["SelectedItem"].WriteValue();
+
+            if (VM.CurrentShipClass != null)
+            {
+                m_oClassPropertiesPanel.ClassPropertyGrid.SelectedObject = VM.CurrentShipClass;
+            }
+
+
+            // Setup Events:
+            m_oOptionsPanel.NewButton.Click += new EventHandler(NewButton_Click);
+            m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += new EventHandler(ClassComboBox_SelectedIndexChanged);
+        }
+
+        void ClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (VM.CurrentShipClass != null)
+            {
+                m_oClassPropertiesPanel.ClassPropertyGrid.SelectedObject = VM.CurrentShipClass;
+            }
+        }
+
+        void NewButton_Click(object sender, EventArgs e)
+        {
+            ShipClassTN oNewShipClass = new ShipClassTN("New Class");
+            VM.ShipDesigns.Add(oNewShipClass);
+            m_oOptionsPanel.ClassComboBox.SelectedItem = oNewShipClass;
         }
 
 

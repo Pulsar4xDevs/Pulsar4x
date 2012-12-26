@@ -31,6 +31,9 @@
             this.m_oTextGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oDesignRichTextBox = new System.Windows.Forms.RichTextBox();
             this.m_oRangeBandsGroupBox = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.m_oRangeCustomTextBox = new System.Windows.Forms.TextBox();
+            this.m_oRangeCustomRadioButton = new System.Windows.Forms.RadioButton();
             this.m_oRange1000000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oRange500000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oRange20000RadioButton = new System.Windows.Forms.RadioButton();
@@ -40,9 +43,7 @@
             this.m_oTange100000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oRange10000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oTargetSpeedGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oRangeCustomRadioButton = new System.Windows.Forms.RadioButton();
-            this.m_oRangeCustomTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.m_oSpeedCustomTextBox = new System.Windows.Forms.TextBox();
             this.m_oSpeedCustomRadioButton = new System.Windows.Forms.RadioButton();
@@ -54,7 +55,6 @@
             this.m_oSpeed20000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oSpeed10000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oSpeed1000RadioButton = new System.Windows.Forms.RadioButton();
-            this.label3 = new System.Windows.Forms.Label();
             this.m_oTextGroupBox.SuspendLayout();
             this.m_oRangeBandsGroupBox.SuspendLayout();
             this.m_oTargetSpeedGroupBox.SuspendLayout();
@@ -66,9 +66,9 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oTextGroupBox.Controls.Add(this.m_oDesignRichTextBox);
-            this.m_oTextGroupBox.Location = new System.Drawing.Point(12, 12);
+            this.m_oTextGroupBox.Location = new System.Drawing.Point(4, 1);
             this.m_oTextGroupBox.Name = "m_oTextGroupBox";
-            this.m_oTextGroupBox.Size = new System.Drawing.Size(855, 547);
+            this.m_oTextGroupBox.Size = new System.Drawing.Size(863, 564);
             this.m_oTextGroupBox.TabIndex = 0;
             this.m_oTextGroupBox.TabStop = false;
             // 
@@ -77,7 +77,7 @@
             this.m_oDesignRichTextBox.Dock = System.Windows.Forms.DockStyle.Fill;
             this.m_oDesignRichTextBox.Location = new System.Drawing.Point(3, 16);
             this.m_oDesignRichTextBox.Name = "m_oDesignRichTextBox";
-            this.m_oDesignRichTextBox.Size = new System.Drawing.Size(849, 528);
+            this.m_oDesignRichTextBox.Size = new System.Drawing.Size(857, 545);
             this.m_oDesignRichTextBox.TabIndex = 0;
             this.m_oDesignRichTextBox.Text = "";
             // 
@@ -96,12 +96,38 @@
             this.m_oRangeBandsGroupBox.Controls.Add(this.m_oRange200000RadioButton);
             this.m_oRangeBandsGroupBox.Controls.Add(this.m_oTange100000RadioButton);
             this.m_oRangeBandsGroupBox.Controls.Add(this.m_oRange10000RadioButton);
-            this.m_oRangeBandsGroupBox.Location = new System.Drawing.Point(873, 12);
+            this.m_oRangeBandsGroupBox.Location = new System.Drawing.Point(873, 1);
             this.m_oRangeBandsGroupBox.Name = "m_oRangeBandsGroupBox";
-            this.m_oRangeBandsGroupBox.Size = new System.Drawing.Size(117, 263);
+            this.m_oRangeBandsGroupBox.Size = new System.Drawing.Size(117, 274);
             this.m_oRangeBandsGroupBox.TabIndex = 1;
             this.m_oRangeBandsGroupBox.TabStop = false;
             this.m_oRangeBandsGroupBox.Text = "Range Bands";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 223);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(87, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "(Units of 10k km)";
+            // 
+            // m_oRangeCustomTextBox
+            // 
+            this.m_oRangeCustomTextBox.Location = new System.Drawing.Point(27, 197);
+            this.m_oRangeCustomTextBox.Name = "m_oRangeCustomTextBox";
+            this.m_oRangeCustomTextBox.Size = new System.Drawing.Size(72, 20);
+            this.m_oRangeCustomTextBox.TabIndex = 9;
+            // 
+            // m_oRangeCustomRadioButton
+            // 
+            this.m_oRangeCustomRadioButton.AutoSize = true;
+            this.m_oRangeCustomRadioButton.Location = new System.Drawing.Point(7, 200);
+            this.m_oRangeCustomRadioButton.Name = "m_oRangeCustomRadioButton";
+            this.m_oRangeCustomRadioButton.Size = new System.Drawing.Size(14, 13);
+            this.m_oRangeCustomRadioButton.TabIndex = 8;
+            this.m_oRangeCustomRadioButton.TabStop = true;
+            this.m_oRangeCustomRadioButton.UseVisualStyleBackColor = true;
             // 
             // m_oRange1000000RadioButton
             // 
@@ -209,36 +235,19 @@
             this.m_oTargetSpeedGroupBox.Controls.Add(this.m_oSpeed1000RadioButton);
             this.m_oTargetSpeedGroupBox.Location = new System.Drawing.Point(875, 281);
             this.m_oTargetSpeedGroupBox.Name = "m_oTargetSpeedGroupBox";
-            this.m_oTargetSpeedGroupBox.Size = new System.Drawing.Size(115, 278);
+            this.m_oTargetSpeedGroupBox.Size = new System.Drawing.Size(121, 284);
             this.m_oTargetSpeedGroupBox.TabIndex = 2;
             this.m_oTargetSpeedGroupBox.TabStop = false;
             this.m_oTargetSpeedGroupBox.Text = "Target Speed";
             // 
-            // m_oRangeCustomRadioButton
+            // label3
             // 
-            this.m_oRangeCustomRadioButton.AutoSize = true;
-            this.m_oRangeCustomRadioButton.Location = new System.Drawing.Point(7, 200);
-            this.m_oRangeCustomRadioButton.Name = "m_oRangeCustomRadioButton";
-            this.m_oRangeCustomRadioButton.Size = new System.Drawing.Size(14, 13);
-            this.m_oRangeCustomRadioButton.TabIndex = 8;
-            this.m_oRangeCustomRadioButton.TabStop = true;
-            this.m_oRangeCustomRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oRangeCustomTextBox
-            // 
-            this.m_oRangeCustomTextBox.Location = new System.Drawing.Point(27, 197);
-            this.m_oRangeCustomTextBox.Name = "m_oRangeCustomTextBox";
-            this.m_oRangeCustomTextBox.Size = new System.Drawing.Size(66, 20);
-            this.m_oRangeCustomTextBox.TabIndex = 9;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 223);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(87, 13);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "(Units of 10k km)";
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(79, 201);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(40, 13);
+            this.label3.TabIndex = 22;
+            this.label3.Text = "k km/s";
             // 
             // label2
             // 
@@ -253,7 +262,7 @@
             // 
             this.m_oSpeedCustomTextBox.Location = new System.Drawing.Point(27, 198);
             this.m_oSpeedCustomTextBox.Name = "m_oSpeedCustomTextBox";
-            this.m_oSpeedCustomTextBox.Size = new System.Drawing.Size(40, 20);
+            this.m_oSpeedCustomTextBox.Size = new System.Drawing.Size(52, 20);
             this.m_oSpeedCustomTextBox.TabIndex = 20;
             // 
             // m_oSpeedCustomRadioButton
@@ -353,15 +362,6 @@
             this.m_oSpeed1000RadioButton.TabStop = true;
             this.m_oSpeed1000RadioButton.Text = "1000 km/s";
             this.m_oSpeed1000RadioButton.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(73, 201);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(40, 13);
-            this.label3.TabIndex = 22;
-            this.label3.Text = "k km/s";
             // 
             // Ships_Design
             // 

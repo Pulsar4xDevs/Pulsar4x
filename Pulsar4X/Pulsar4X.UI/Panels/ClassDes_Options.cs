@@ -17,7 +17,7 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// For selecting the current Faction
         /// </summary>
-        public ComboBox Faction
+        public ComboBox FactionComboBox
         {
             get
             {
@@ -28,7 +28,7 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// For selecting the current Class
         /// </summary>
-        public ComboBox Class
+        public ComboBox ClassComboBox
         {
             get
             {
@@ -39,7 +39,7 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// For selecting the Current Class Type
         /// </summary>
-        public ComboBox Type
+        public ComboBox TypeComboBox
         {
             get
             {
@@ -50,7 +50,7 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// For selecting the current Hull Type
         /// </summary>
-        public ComboBox Hull
+        public ComboBox HullComboBox
         {
             get
             {
