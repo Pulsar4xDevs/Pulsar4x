@@ -30,6 +30,8 @@ namespace Pulsar4X.UI.Handlers
             m_oDesignAndInformationPanel = new Panels.ClassDes_DesignAndInfo();
             m_oOptionsPanel = new Panels.ClassDes_Options();
 
+            m_oClassPropertiesPanel.ClassPropertyGrid.PropertySort = PropertySort.CategorizedAlphabetical;
+
             // creat ViewModel.
             VM = new ClassDesignViewModel();
 

@@ -13,70 +13,139 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Not using these yet, may not use some of them at all.
         /// </summary>
+        [Browsable(false)]
         public Guid Id { get; set; }
+
+        [Browsable(false)]
         public Faction Faction { get; set; }
+
+        [Browsable(false)]
         public int HullDescriptionId { get; set; }
-        public string Notes { get; set; }
-        public int RequiredRank { get; set; } 
+
+        [DisplayName("Required Rank"),
+        Category("Detials"),
+        Description("Minium Rank needed to command this Class of ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int RequiredRank { get; set; }
+
+        [Browsable(false)]
         public int MaxLifeSupport { get; set; } //not sure what life support is supposed to be? deployment time?
 
 
         /// <summary>
         /// Name of the class of craft.
         /// </summary>
+        [DisplayName("Class Name"), 
+        Category("Description"),
+        Description("The Name of the Class"),
+        Browsable(true),
+        ReadOnly(true)]
         public string Name { get; set; }
 
+        /// <summary>
+        /// Notes on this ship class, used by the UI/Player.
+        /// </summary>
+        [DisplayName("Notes"), 
+        Category("Description"),
+        Description("Notes on this ship class"),
+        Browsable(true),
+        ReadOnly(false)]
+        public string Notes { get; set; }
+
+        [Browsable(false)]
         public BindingList<ShipTN> ShipsInClass { get; set; }
 
         /// <summary>
-        /// cost in BP of the ship, not its mineral cost, not doing that just yet.
+        /// Cost in BP of the ship, not its mineral cost, not doing that just yet.
         /// </summary>
+        [DisplayName("Cost"), 
+        Category("Detials"),
+        Description("Cost in BP of the ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public decimal BuildPointCost { get; set; }
 
         /// <summary>
         /// Size in tons.
         /// </summary>
+        [DisplayName("Size in Tons"), 
+        Category("Detials"),
+        Description("Size in tons."),
+        Browsable(true),
+        ReadOnly(true)]
         public float SizeTons { get; set; }
+
         /// <summary>
         /// Size in tons / 50.0; 1HS = 50 tons.
         /// </summary>
+        [DisplayName("Size in HS"), 
+        Category("Detials"),
+        Description("Size in Hull Sizes (HS), 1HS = 50 tons."),
+        Browsable(true),
+        ReadOnly(true)]
         public float SizeHS { get; set; }
 
         /// <summary>
         /// Total Internal Hit to kill of all components. components need not all be destroyed in order for a ship to be destroyed however.
         /// </summary>
+        [DisplayName("Total HTK"), 
+        Category("Detials"),
+        Description("Total Internal Hit to kill of all components."),
+        Browsable(true),
+        ReadOnly(true)]
         public int TotalHTK { get; set; }
 
         /// <summary>
         /// Is this ship a military or civilian flagged design?
         /// </summary>
+        [Browsable(false)]
         public bool IsMilitary { get; set; }
 
         /// <summary>
         /// Has the user declared this design obsolete?
         /// </summary>
+        [Browsable(false)]
         public bool IsObsolete { get; set; }
 
         /// <summary>
         /// How many military grade components are part of this ship?
         /// </summary>
+        [Browsable(false)]
         public int MilitaryComponentCount { get; set; }
 
         /// <summary>
         /// What is the perceived protection value this ship class provides to civilians.
         /// </summary>
+        [DisplayName("Planetary Protection Value"), 
+        Category("Detials"),
+        Description("What is the perceived protection value this ship class provides to civilians."),
+        Browsable(true),
+        ReadOnly(true)]
         public int PlanetaryProtectionValue { get; set; }
 
         /// <summary>
         /// Armor statistics that matter to the class itself.
         /// </summary>
+        [Browsable(false)]
         public ArmorDefTN ShipArmorDef { get; set; }
 
         /// <summary>
         /// Crew Quarters, Small Crew Quarters, Tiny Crew Quarters.
         /// Every ship has a required crew amount, though for some small sensor only craft it might be 0.
         /// </summary>
+        [DisplayName("Crew Quarters"), 
+        Category("Component Lists"),
+        Description("List of Crew Quarters on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<GeneralComponentDefTN> CrewQuarters { get; set; }
+
+        [DisplayName("Crew Quarters Count"),
+        Category("Component Counts"),
+        Description("Number of Crew Quarters on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ushort> CrewQuartersCount { get; set; }
         public int TotalCrewQuarters { get; set; }
         public int TotalRequiredCrew { get; set; }
@@ -93,8 +162,25 @@ namespace Pulsar4X.Entities
         /// Fuel Tanks, Small Fuel Tanks, Tiny Fuel Tanks, Large Fuel Tanks, Very Large Fuel Tanks, Ultra Large Fuel Tanks.
         /// Should fuel compression be a tank type or an option? Base fuel storage is Tons * 1000.
         /// </summary>
+        [DisplayName("Fuel Tanks"),
+        Category("Component Lists"),
+        Description("List of Fuel Tanks on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<GeneralComponentDefTN> FuelTanks { get; set; }
+
+        [DisplayName("Fuel Tanks Count"),
+        Category("Component Counts"),
+        Description("Number of Fuel Tanks on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ushort> FuelTanksCount { get; set; }
+
+        [DisplayName("Total Fuel Capacity"),
+        Category("Detials"),
+        Description("The Total Fuel Capacity of the ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public float TotalFuelCapacity { get; set; }
 
         /// <summary>
@@ -102,13 +188,55 @@ namespace Pulsar4X.Entities
         /// Ebays give 3 benefits, they increase MSP, they give a minor boost to damage control and they reduce failure rate for military vessels.
         /// Base Ebay storage is handled in a bizarre manner. 4% hull space of ebays = normal failure rate, and enough parts in BP to cover 1/2 the cost of the ship.
         /// </summary>
+        [DisplayName("Engineering Bays"),
+        Category("Component Lists"),
+        Description("List of Engineering Bays on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<GeneralComponentDefTN> EngineeringBays { get; set; }
+
+        [DisplayName("Engineering Bays Count"),
+        Category("Component Counts"),
+        Description("Number of Engineering Bays on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ushort> EngineeringBaysCount { get; set; }
+
+        [DisplayName("Total MSP Capacity"),
+        Category("Engineering Detials"),
+        Description("The Total MSP Capacity of the ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public int TotalMSPCapacity { get; set; }
+
+        [DisplayName("Engineering HS"),
+        Category("Engineering Detials"),
+        Description("Total size, in HS, dedicated to Engineering bays."),
+        Browsable(true),
+        ReadOnly(true)]
         public float EngineeringHS { get; set; }
+
+        [DisplayName("Maintenance Life"),
+        Category("Engineering Detials"),
+        Description("The Maintenance Life of the ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public float MaintenanceLife { get; set; }
+
+        [DisplayName("Annual Failure Rate"),
+        Category("Engineering Detials"),
+        Description("The estimated Annual Failure Rate of the ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public float AnnualFailureRate { get; set; }
+
+        [DisplayName("Initial Failure Rate"),
+        Category("Engineering Detials"),
+        Description("The estimated Initial Failure Rate of the ship, i.e. the Failure rate when the Ship has just left the yard."),
+        Browsable(true),
+        ReadOnly(true)]
         public float InitialFailureRate { get; set; }
+
         public float YearOneFailureTotal { get; set; }
         public float YearFiveFailureTotal { get; set; }
         public int MaxDamageControlRating { get; set; }
@@ -118,39 +246,131 @@ namespace Pulsar4X.Entities
         /// Bridge, Flag Bridge, Damage Control, Improved Damage Control, Advanced Damage Control, Maintenance bay, Recreational Facility, Orbital Habitat.
         /// Each gives a fairly specialist benefit that not all ships will need, excepting the bridge of course.
         /// </summary>
+        [DisplayName("Other Components"),
+        Category("Component Lists"),
+        Description("List of Other Components on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<GeneralComponentDefTN> OtherComponents { get; set; }
+
+        [DisplayName("Other Componenmts Count"),
+        Category("Component Counts"),
+        Description("Number of Other Componenmts on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ushort> OtherComponentsCount { get; set; }
+        [Browsable(false)]
         public bool HasBridge;
 
         /// <summary>
         /// each ship class can only have one type of engine, though several copies may be present.
         /// </summary>
+        [DisplayName("Ship Engine Model"),
+        Category("Engine Stats"),
+        Description("The model/type of this ships engines"),
+        Browsable(true),
+        ReadOnly(true)]
         public EngineDefTN ShipEngineDef { get; set; }
+
+        [DisplayName("Max Fuel Usage"),
+        Category("Engine Stats"),
+        Description("The maximum fuel usage per hour of this ships engines"),
+        Browsable(true),
+        ReadOnly(true)]
         public float MaxFuelUsePerHour { get; set; }
-        public ushort ShipEngineCount;
+
+        [DisplayName("Engine Count"),
+        Category("Engine Stats"),
+        Description("The number of engines in this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public ushort ShipEngineCount { get; set; }
 
         /// <summary>
         /// Ship class Engine statistics.
         /// </summary>
+        [DisplayName("Max Engine Power"),
+        Category("Engine Stats"),
+        Description("The maximum power of this ships engines"),
+        Browsable(true),
+        ReadOnly(true)]
         public int MaxEnginePower { get; set; }
+
+        [DisplayName("Max Thermal Signature"),
+        Category("Engine Stats"),
+        Description("The maximum Thermal Signature generated by this ships engines"),
+        Browsable(true),
+        ReadOnly(true)]
         public int MaxThermalSignature { get; set; }
+
+        [DisplayName("Max Speed"),
+        Category("Engine Stats"),
+        Description("the Maximum speed of this ship"),
+        Browsable(true),
+        ReadOnly(true)]
         public int MaxSpeed { get; set; }
 
         /// <summary>
         /// List of passive sensor types, and how many of each that there are in this ship.
         /// Likewise the best possible sensors are stored.
         /// </summary>
+        [DisplayName("Passive Sensors"), 
+        Category("Component Lists"),
+        Description("List of passive sensors on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<PassiveSensorDefTN> ShipPSensorDef { get; set; }
+
+        [DisplayName("Passive Sensors Count"), 
+        Category("Component Counts"),
+        Description("Number of passive sensors on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ushort> ShipPSensorCount { get; set; }
+
+        [DisplayName("Best Thermal Rating"), 
+        Category("Detials"),
+        Description("Best Thermal Rating that can be detected by this ships passive sensors."),
+        Browsable(true),
+        ReadOnly(true)]
         public int BestThermalRating { get; set; }
+
+        [DisplayName("Best EM Rating"), 
+        Category("Detials"),
+        Description("Best EM Rating that can be detected by this ships passive sensors."),
+        Browsable(true),
+        ReadOnly(true)]
         public int BestEMRating { get; set; }
 
         /// <summary>
         /// List of active sensors, as well as the number of each, and the TCS and EM signatures of the craft.
         /// </summary>
+        [DisplayName("Active Sensors"), 
+        Category("Component Lists"),
+        Description("List of active sensors on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ActiveSensorDefTN> ShipASensorDef { get; set; }
+
+        [DisplayName("Active Sensors Count"), 
+        Category("Component Counts"),
+        Description("Number of active sensors on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
         public BindingList<ushort> ShipASensorCount { get; set; }
+
+        [DisplayName("Cross Cection"), 
+        Category("Detials"),
+        Description("Total Cross Section of this Class."),
+        Browsable(true),
+        ReadOnly(true)]
         public int TotalCrossSection { get; set; }
+
+        [DisplayName("Max EM Signature"), 
+        Category("Detials"),
+        Description("Max EM Signature of this class.."),
+        Browsable(true),
+        ReadOnly(true)]
         public int MaxEMSignature { get; set; }
 
 
