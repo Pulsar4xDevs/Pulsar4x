@@ -260,7 +260,7 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ushort> OtherComponentsCount { get; set; }
         [Browsable(false)]
-        public bool HasBridge;
+        public bool HasBridge { get; set; }
 
         /// <summary>
         /// each ship class can only have one type of engine, though several copies may be present.
