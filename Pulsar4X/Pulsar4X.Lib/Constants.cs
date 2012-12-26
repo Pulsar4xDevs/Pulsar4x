@@ -738,5 +738,16 @@ namespace Pulsar4X
             /// </summary>
             public const int ResolutionMax = 500;
         }
+
+        /// <summary>
+        /// Faction related goodness.
+        /// </summary>
+        public static class Faction
+        {
+            /// <summary>
+            /// FactionMax has to be relatively hard coded or else the sensor model goes to hell.
+            /// </summary>
+            public const int FactionMax = 64;
+        }
     }
 }

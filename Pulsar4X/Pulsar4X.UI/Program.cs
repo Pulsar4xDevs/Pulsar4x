@@ -28,7 +28,7 @@ namespace Pulsar4X.UI
             GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Foo"));
             GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Bar"));
             // gen Faction and a pop:
-            Entities.Faction oNewFaction = new Entities.Faction();
+            Entities.Faction oNewFaction = new Entities.Faction(0);
             oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
             oNewFaction.Populations.First().CivilianPopulation = 100.0f;
             GameState.Instance.Factions.Add(oNewFaction);

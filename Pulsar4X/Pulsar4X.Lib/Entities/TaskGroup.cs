@@ -29,14 +29,9 @@ namespace Pulsar4X.Entities
         public Faction Faction { get; set; }
 
         /// <summary>
-        /// Tentative location in Km of the taskgroup.
+        /// This TaskGroup's System Contact, which stores location about where the contact is.
         /// </summary>
-        public float SystemKmX { get; set; }
-
-        /// <summary>
-        /// Tentative location in Km of the taskgroup.
-        /// </summary>
-        public float SystemKmY { get; set; }
+        public SystemContact Contact { get; set; }
 
         /// <summary>
         /// Are we orbiting a body?
@@ -145,18 +140,24 @@ namespace Pulsar4X.Entities
         /// <param name="Title">Name</param>
         /// <param name="FID">Faction</param>
         /// <param name="StartingBody">body taskgroup will orbit at creation.</param>
-        public TaskGroupTN(string Title, Faction FID, StarSystemEntity StartingBody)
+        public TaskGroupTN(string Title, Faction FID, StarSystemEntity StartingBody, StarSystem StartingSystem)
         {
             Name = Title;
+
             Faction = FID;
 
             IsOrbiting = true;
             OrbitingBody = StartingBody;
 
-            XSystem = OrbitingBody.XSystem;
-            YSystem = OrbitingBody.YSystem;
-            ZSystem = OrbitingBody.ZSystem;
+            Contact = new SystemContact(Faction,this);
+
+            Contact.XSystem = OrbitingBody.XSystem;
+            Contact.YSystem = OrbitingBody.YSystem;
+            Contact.ZSystem = OrbitingBody.ZSystem;
+            Contact.CurrentSystem = StartingSystem;
+            
             m_dMass = 0.0;
+
             SSEntity = StarSystemEntityType.TaskGroup;
 
             CurrentSpeed = 0;
@@ -213,7 +214,7 @@ namespace Pulsar4X.Entities
         /// <param name="shipDef">definition of the ship to be added.</param>
         public void AddShip(ShipClassTN shipDef)
         {
-            ShipTN ship = new ShipTN(shipDef);
+            ShipTN ship = new ShipTN(shipDef,Ships.Count);
             Ships.Add(ship);
 
             /// <summary>
@@ -291,19 +292,37 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="SortList">LinkedList to add the node to.</param>
         /// <param name="Sort">LinkedListNode to be added.</param>
-        private void AddNodeToSort(LinkedList<int> SortList, LinkedListNode<int> Sort)
+        /// <param name="TEA">Thermal,EM,Active.</param>
+        private void AddNodeToSort(LinkedList<int> SortList, LinkedListNode<int> Sort, int TEA)
         {
+            int value = -1, Last = -1, First = -1, NewValue = -1 ;
+            switch (TEA)
+            {
+                case 0: value = Ships[Sort.Value].CurrentThermalSignature; 
+                        Last = Ships[SortList.Last()].CurrentThermalSignature;
+                        First = Ships[SortList.First()].CurrentThermalSignature;
+                break;
+                case 1: value = Ships[Sort.Value].CurrentEMSignature; 
+                        Last = Ships[SortList.Last()].CurrentEMSignature;
+                        First = Ships[SortList.First()].CurrentEMSignature;
+                break;
+                case 2: value = Ships[Sort.Value].TotalCrossSection;
+                        Last = Ships[SortList.Last()].TotalCrossSection;
+                        First = Ships[SortList.First()].TotalCrossSection;
+                break;
+            }
+
             if (SortList.Count == 0)
             {
                 SortList.AddFirst(Sort);
             }
             else
             {
-                if (Sort.Value > SortList.Last())
+                if (value > Last)
                 {
                     SortList.AddLast(Sort);
                 }
-                else if (Sort.Value <= SortList.First())
+                else if (value <= First)
                 {
                     SortList.AddFirst(Sort);
                 }
@@ -316,7 +335,17 @@ namespace Pulsar4X.Entities
                     {
                         NextNode = NextNode.Next;
 
-                        if (Sort.Value >= NextNode.Value)
+                        switch (TEA)
+                        {
+                            case 0: NewValue = Ships[NextNode.Next.Value].CurrentThermalSignature;
+                            break;
+                            case 1: NewValue = Ships[NextNode.Next.Value].CurrentEMSignature;
+                            break;
+                            case 2: NewValue = Ships[NextNode.Next.Value].TotalCrossSection;
+                            break;
+                        }
+
+                        if (value >= NewValue)
                         {
                             SortList.AddAfter(NextNode, Sort);
                             done = true;
@@ -332,9 +361,9 @@ namespace Pulsar4X.Entities
         /// <param name="Ship">Ship to be added.</param>
         public void AddShipToSort(ShipTN Ship)
         {
-            AddNodeToSort(ThermalSortList, Ship.ThermalList);
-            AddNodeToSort(EMSortList, Ship.EMList);
-            AddNodeToSort(ActiveSortList, Ship.ActiveList);
+            AddNodeToSort(ThermalSortList, Ship.ThermalList,0);
+            AddNodeToSort(EMSortList, Ship.EMList,1);
+            AddNodeToSort(ActiveSortList, Ship.ActiveList,2);
         }
 
 
@@ -344,8 +373,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetPositionFromOrbit()
         {
-            SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
-            SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
+            Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
+            Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
         }
 
 
@@ -660,8 +689,8 @@ namespace Pulsar4X.Entities
 
             if (NewOrders == true)
             {
-                double dX = SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
-                double dY = SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
+                double dX = Contact.SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
+                double dY = Contact.SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
 
                 CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
 
@@ -677,8 +706,8 @@ namespace Pulsar4X.Entities
                 CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign;
                 CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign;
 
-                dX = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - SystemKmX);
-                dY = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - SystemKmY);
+                dX = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
+                dY = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
 
                 double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
@@ -689,11 +718,7 @@ namespace Pulsar4X.Entities
 
             if (TimeRequirement < TimeSlice)
             {
-                XSystem = OrderTarget[0].XSystem;
-                YSystem = OrderTarget[0].YSystem;
-
-                SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
-                SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
+                Contact.UpdateLocation(OrderTarget[0].XSystem, OrderTarget[0].YSystem);
 
                 if (OrderTarget[0].SSEntity == StarSystemEntityType.Body)
                     IsOrbiting = true;
@@ -715,11 +740,11 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                SystemKmX = SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
-                SystemKmY = SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
+                Contact.SystemKmX = Contact.SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
+                Contact.SystemKmY = Contact.SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
 
-                XSystem = SystemKmX / Constants.Units.KM_PER_AU;
-                YSystem = SystemKmY / Constants.Units.KM_PER_AU;
+                Contact.XSystem = Contact.SystemKmX / Constants.Units.KM_PER_AU;
+                Contact.YSystem = Contact.SystemKmY / Constants.Units.KM_PER_AU;
 
                 UseFuel(TimeSlice);
 

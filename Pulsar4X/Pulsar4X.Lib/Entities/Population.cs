@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
+using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
@@ -16,6 +17,31 @@ namespace Pulsar4X.Entities
         /// Planet the population is attached to
         /// </summary>
         public Planet Planet { get; set; }
+
+        /// <summary>
+        /// The contact that this population is associated with.
+        /// </summary>
+        public SystemContact Contact { get; set; }
+
+        /// <summary>
+        /// Which factions have detected a thermal sig from this population?
+        /// </summary>
+        public BindingList<int> ThermalDetection { get; set; }
+
+        /// <summary>
+        /// Which factions have detected an EM signature?
+        /// </summary>
+        public BindingList<int> EMDetection { get; set; }
+
+        /// <summary>
+        /// Any active sensor in range detects a planet.
+        /// </summary>
+        public BindingList<int> ActiveDetection { get; set; }
+
+        /// <summary>
+        /// Populations with structures tend to emit a thermal signature. 5 per installation I believe.
+        /// </summary>
+        public int ThermalSignature { get; set; }
 
         public float CivilianPopulation { get; set; }
         public float PopulationGrowthRate { get; set; }
@@ -126,7 +152,17 @@ namespace Pulsar4X.Entities
             Faction = a_oFaction;
             Planet = a_oPlanet;
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
+
+            Contact = new SystemContact(Faction,this);
         }
 
+        /// <summary>
+        /// I am not sure if this will be necessary but since the population has detection statistics it should have a contact with an accessible
+        /// location to the SystemContactList.
+        /// </summary>
+        public void UpdateLocation()
+        {
+            Contact.UpdateLocation(Planet.XSystem, Planet.YSystem);
+        }
     }
 }

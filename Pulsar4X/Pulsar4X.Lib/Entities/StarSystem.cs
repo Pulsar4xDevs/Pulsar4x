@@ -19,6 +19,18 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<Waypoint> Waypoints { get; set; }
 
+        /// <summary>
+        /// Global List of all contacts within the system.
+        /// </summary>
+        public BindingList<SystemContact> SystemContactList { get; set; }
+
+        /// <summary>
+        /// List of faction contact lists. Here is where context starts getting confusing. This is a list of the last time the SystemContactList was pinged.
+        /// SystemContactList stores Location and pointers to Pop/TG signatures. These must be arrayed in order from Faction[0] to Faction[Max] Corresponding to
+        /// FactionContactLists[0] - [max]
+        /// </summary>
+        public BindingList<FactionSystemDetection> FactionDetectionLists { get; set; }
+
         public int Seed { get; set; }
 
         //public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystem));
@@ -35,8 +47,14 @@ namespace Pulsar4X.Entities
             Stars = new BindingList<Star>();
 
             Waypoints = new BindingList<Waypoint>();
+            SystemContactList = new BindingList<SystemContact>();
         }
 
+        /// <summary>
+        /// This function adds a waypoint to the system waypoint list, it is called by SystemMap.cs and connects the UI waypoint to the back end waypoints.
+        /// </summary>
+        /// <param name="XSystemAU">System Position X in AU</param>
+        /// <param name="YSystemAU">System Position Y in AU</param>
         public void AddWaypoint(double XSystemAU, double YSystemAU)
         {
             Waypoint NewWP = new Waypoint(XSystemAU, YSystemAU);
@@ -48,12 +66,58 @@ namespace Pulsar4X.Entities
             //logger.Info(YSystemAU.ToString());
         }
 
+        /// <summary>
+        /// This function removes a waypoint from the system waypoint list, it is called in SystemMap.cs and connects the UI to the backend.
+        /// </summary>
+        /// <param name="Remove"></param>
         public void RemoveWaypoint(Waypoint Remove)
         {
             //logger.Info("Waypoint Removed.");
             //logger.Info(Remove.XSystem.ToString());
             //logger.Info(Remove.YSystem.ToString());
             Waypoints.Remove(Remove);
+        }
+
+
+        /// <summary>
+        /// Systems have to store a global(or perhaps system wide) list of contacts. This function adds a contact in the event one is generated.
+        /// Generation events include construction, hangar launches, missile launches, and Jump Point Entry into the System.
+        /// </summary>
+        /// <param name="Contact">Contact to be added.</param>
+        public void AddContact(SystemContact Contact)
+        {
+
+            Contact.UpdateSystem(this);
+            SystemContactList.Add(Contact);
+
+            /// <summary>
+            /// Update all the faction contact lists with the new contact.
+            /// </summary>
+            for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+            {
+                FactionDetectionLists[loop].AddContact();
+            }
+        }
+
+
+        /// <summary>
+        /// This function removes contacts from the system wide contact list when a contact deletion event occurs.
+        /// This happens whenever a ship is scrapped or otherwise destroyed, ships/fighters land on a hangar, missiles hit their target or run out of endurance, and jump point exits.
+        /// </summary>
+        /// <param name="Contact">Contact to be removed.</param>
+        public void RemoveContact(SystemContact Contact)
+        {
+            int index = SystemContactList.IndexOf(Contact);
+
+            /// <summary>
+            /// Remove the contact from each of the faction contact lists as well as the System contact list.
+            /// </summary>
+            for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+            {
+                FactionDetectionLists[loop].RemoveContact(index);
+            }
+
+            SystemContactList.Remove(Contact);
         }
     }
 }

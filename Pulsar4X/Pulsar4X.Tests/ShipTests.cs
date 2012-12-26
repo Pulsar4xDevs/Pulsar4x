@@ -16,7 +16,7 @@ namespace Pulsar4X.Tests
         public void testArmor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2);
+            ShipTN ts = new ShipTN(ts2,0);
 
             ts2.ShipArmorDef = new ArmorDefTN("Duranium Armour");
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
@@ -111,7 +111,7 @@ namespace Pulsar4X.Tests
         public void testEngine()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2);
+            ShipTN ts = new ShipTN(ts2,0);
 
             ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive",32,2.65f,0.6f,0.75f,2,37,-1.0f);
             ts2.ShipEngineCount = 1;
@@ -138,7 +138,7 @@ namespace Pulsar4X.Tests
         public void testPSensor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2);
+            ShipTN ts = new ShipTN(ts2,0);
 
             PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, PassiveSensorType.Thermal, 1.0f, 1);
 
@@ -172,7 +172,7 @@ namespace Pulsar4X.Tests
         public void testASensor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2);
+            ShipTN ts = new ShipTN(ts2,0);
 
             ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36,24,185, false, 1.0f, 1);
 
@@ -273,7 +273,7 @@ namespace Pulsar4X.Tests
             TestClass.AddCrewQuarters(CrewQ, 2);
 
 
-            ShipTN testShip = new ShipTN(TestClass);
+            ShipTN testShip = new ShipTN(TestClass,0);
 
             testShip.CrewQuarters[0].isDestroyed = true;
 
@@ -333,11 +333,12 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
 
-            Faction FID = new Faction();
+            Faction FID = new Faction(0);
+            StarSystem System = new StarSystem();
             Planet planet = new Planet();
 
 
-            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
 
             for (int loop = 0; loop < 5; loop++)
             {
@@ -392,10 +393,11 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
 
-            Faction FID = new Faction();
+            Faction FID = new Faction(0);
+            StarSystem System = new StarSystem();
             Planet planet = new Planet();
 
-            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
             for (int loop = 0; loop < 4; loop++)
             {
 
@@ -438,10 +440,11 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
 
 
-            Faction FID = new Faction();
+            Faction FID = new Faction(0);
+            StarSystem System = new StarSystem();
             Planet planet = new Planet();
 
-            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
             for (int loop = 0; loop < 4; loop++)
             {
 
@@ -512,15 +515,18 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
 
 
-            Faction FID = new Faction();
+            Faction FID = new Faction(0);
+            StarSystem System = new StarSystem();
             Planet planet = new Planet();
+
+
             Waypoint WP1 = new Waypoint(0.1,0.1);
 
             planet.XSystem = 0.0;
             planet.YSystem = 0.0;
 
 
-            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet);
+            TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
 
             ShipClassTN test = new ShipClassTN("Ship");
             test.AddCrewQuarters(CrewQ, 2);
@@ -539,7 +545,7 @@ namespace Pulsar4X.Tests
             while (TaskGroup1.Orders.Count != 0)
             {
                 TaskGroup1.FollowOrders(5);
-                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.SystemKmX, TaskGroup1.SystemKmY, TaskGroup1.XSystem, TaskGroup1.YSystem);
+                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.SystemKmX, TaskGroup1.Contact.SystemKmY, TaskGroup1.Contact.XSystem, TaskGroup1.Contact.YSystem);
             }
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);

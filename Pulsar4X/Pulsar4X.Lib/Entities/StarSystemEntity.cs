@@ -10,6 +10,8 @@ namespace Pulsar4X.Entities
         Body,
         Waypoint,
         TaskGroup,
+        Population,
+        Missile,
         TypeCount
     }
 

@@ -150,8 +150,12 @@ namespace Pulsar4X.Entities
         public LinkedListNode<int> ActiveList;
 
 
-
-        public ShipTN(ShipClassTN ClassDefinition)
+        /// <summary>
+        /// ShipTN creates a ship of classDefinition in Index ShipIndex for the taskgroup ship list.
+        /// </summary>
+        /// <param name="ClassDefinition">Definition of the ship.</param>
+        /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
+        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex)
         {
             /// <summary>
             /// Set the class definition
@@ -249,10 +253,9 @@ namespace Pulsar4X.Entities
             TotalCrossSection = ClassDefinition.TotalCrossSection;
             CurrentEMSignature = 0;
 
-            ThermalList = new LinkedListNode<int>(CurrentThermalSignature);
-            EMList = new LinkedListNode<int>(CurrentEMSignature);
-            ActiveList = new LinkedListNode<int>(TotalCrossSection);
-
+            ThermalList = new LinkedListNode<int>(ShipIndex);
+            EMList = new LinkedListNode<int>(ShipIndex);
+            ActiveList = new LinkedListNode<int>(ShipIndex);
         }
 
         /// <summary>

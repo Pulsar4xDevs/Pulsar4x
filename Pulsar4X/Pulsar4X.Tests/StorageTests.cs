@@ -34,7 +34,7 @@ namespace Pulsar4X.Tests
             var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
             _gameState.Species.Add(species);
             var theme = new FactionTheme { Id = Guid.NewGuid(), Name = "Test Theme" };
-            _gameState.Factions.Add(new Faction { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, Title = "Mighty Humans", FactionTheme = theme });
+            _gameState.Factions.Add(new Faction(0) { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, Title = "Mighty Humans", FactionTheme = theme });
 
             var ssf = new StarSystemFactory(true);
             var ss = ssf.Create("Test Sol");

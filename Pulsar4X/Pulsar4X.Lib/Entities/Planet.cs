@@ -10,6 +10,12 @@ namespace Pulsar4X.Entities
 {
     public class Planet : OrbitingEntity
     {
+
+        /// <summary>
+        /// Star this body orbits around.
+        /// </summary>
+        public Star StarOrbited { get; set; }
+
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
         public BindingList<Gas> Gases { get; set; } //gases in atmosphere
         public BindingList<Population> Populations { get; set; } // list of Populations (colonies) on this planet.

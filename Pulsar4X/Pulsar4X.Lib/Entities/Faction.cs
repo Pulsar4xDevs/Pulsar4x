@@ -9,8 +9,18 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
-    public class Contacts
+    public class FactionSystemDetection
     {
+        /// <summary>
+        /// Faction that owns this list.
+        /// </summary>
+        public Faction Faction { get; set; }
+
+        /// <summary>
+        /// The system these contacts are stored for.
+        /// </summary>
+        public StarSystem System { get; set; }
+
         /// <summary>
         /// Last time this contact index was spotted via thermals.
         /// </summary>
@@ -26,17 +36,57 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<int> Active { get; set; }
 
-        public Contacts()
+        /// <summary>
+        /// Creates a faction contact list for the specified system.
+        /// </summary>
+        /// <param name="system">System indicated.</param>
+        public FactionSystemDetection(Faction Fact,StarSystem system)
         {
+            Faction = Fact;
+            System = system;
+
             Thermal = new BindingList<int>();
             EM = new BindingList<int>();
             Active = new BindingList<int>();
+
+            for (int loop = 0; loop < system.SystemContactList.Count; loop++)
+            {
+                Thermal.Add(0);
+                EM.Add(0);
+                Active.Add(0);
+            }
+        }
+
+        /// <summary>
+        /// pushes a contact onto the end of the list since that is where all new contacts will be added.
+        /// </summary>
+        public void AddContact()
+        {
+            Thermal.Add(0);
+            EM.Add(0);
+            Active.Add(0);
+        }
+
+        /// <summary>
+        /// Removes a contact at the specified index.
+        /// </summary>
+        /// <param name="RemIndex">index to be removed.</param>
+        public void RemoveContact(int RemIndex)
+        {
+            Thermal.RemoveAt(RemIndex);
+            EM.RemoveAt(RemIndex);
+            Active.RemoveAt(RemIndex);
         }
     }
 
 
     public class Faction : GameEntity
     {
+        /// <summary>
+        /// Factions have to know their own ID. this should be a 0 based index of the factionList where ever that ends up being.
+        /// </summary>
+        public int FactionID;
+
         public string Title { get; set; }
         public Species Species { get; set; }
 
@@ -66,10 +116,10 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// I'll just store every contact in every system potentially here right now.
         /// </summary>
-        public BindingList<Contacts> SystemContacts { get; set; }
+        public BindingList<FactionSystemDetection> SystemContacts { get; set; }
         
 
-        public Faction()
+        public Faction(int ID)
         {
             Name = "Human Federation";
             Species = new Species(); // go with the default Species!
@@ -84,9 +134,14 @@ namespace Pulsar4X.Entities
             TaskGroups = new BindingList<TaskGroupTN>();
 
             AddInitialComponents();
+
+            SystemContacts = new BindingList<FactionSystemDetection>();
+
+            FactionID = ID;
+
         }
 
-        public Faction(string a_oName, Species a_oSpecies)
+        public Faction(string a_oName, Species a_oSpecies, int ID)
         {
             Name = a_oName;
             Species = a_oSpecies;
@@ -101,6 +156,11 @@ namespace Pulsar4X.Entities
             TaskGroups = new BindingList<TaskGroupTN>();
 
             AddInitialComponents();
+
+            SystemContacts = new BindingList<FactionSystemDetection>();
+
+            FactionID = ID;
+
         }
 
         /// <summary>
@@ -134,6 +194,436 @@ namespace Pulsar4X.Entities
             ComponentList.ActiveSensorDef.Add(ActDef);
             ComponentList.PassiveSensorDef.Add(ThPasDef);
             ComponentList.PassiveSensorDef.Add(EMPasDef);
+        }
+
+        /// <summary>
+        /// Adds a list of contacts to the faction.
+        /// </summary>
+        /// <param name="system">Starsystem for the contacts.</param>
+        public void AddNewContactList(StarSystem system)
+        {
+            FactionSystemDetection NewContact = new FactionSystemDetection(this,system);
+            system.FactionDetectionLists.Add(NewContact);
+            SystemContacts.Add(NewContact);
+        
+        }
+
+        /// <summary>
+        /// Removes a list of contacts from the faction and from the system lists.
+        /// </summary>
+        /// <param name="ContactList">List to be removed</param>
+        public void RemoveContactList(FactionSystemDetection ContactList)
+        {
+            ContactList.System.FactionDetectionLists.Remove(ContactList);
+            SystemContacts.Remove(ContactList);
+        }
+
+
+        /// <summary>
+        /// Galaxy wide sensor sweep of all systems in which this faction has a presence. Here is where things start to get complicated.
+        /// </summary>
+        /// <param name="TimeSlice">Current TimeSlice, not sure about the exact units yet.</param>
+        public void SensorSweep(int TimeSlice)
+        {
+            /// <summary>
+            /// Loop through all DSTS. ***
+            /// </summary>
+
+            /// <summary>
+            /// Loop through all faction taskgroups.
+            /// </summary>
+            for (int loop = 0; loop < TaskGroups.Count; loop++)
+            {
+                StarSystem System = TaskGroups[loop].Contact.CurrentSystem;
+
+                /// <summary>
+                /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
+                /// </summary>
+                for (int loop2 = 0; loop2 < System.FactionDetectionLists[FactionID].Thermal.Count; loop2++)
+                {
+                    /// <summary>
+                    /// I don't own loop2, and it hasn't been fully detected yet.
+                    /// </summary>
+                    if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != TimeSlice &&
+                        System.FactionDetectionLists[FactionID].EM[loop2] != TimeSlice && System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice)
+                    {
+                        /// <summary>
+                        /// No fancy table here, please just work.
+                        /// </summary>
+                        float distX = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
+                        float distY = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
+                        float dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
+
+                        /// <summary>
+                        /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since
+                        /// multiple colonies really shouldn't happen.
+                        /// </summary>
+                        int sig = -1;
+                        int detection = -1;
+
+                        /// <summary>
+                        /// Handle population detection
+                        /// </summary>
+                        if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.Population)
+                        {
+                            sig = System.SystemContactList[loop2].Pop.ThermalSignature;
+                            detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+                            /// <summary>
+                            /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
+                            /// </summary>
+                            if (dist < (float)detection)
+                            {
+                                System.SystemContactList[loop2].Pop.ThermalDetection[FactionID] = TimeSlice;
+                                System.FactionDetectionLists[FactionID].Thermal[loop2] = TimeSlice;
+                            }
+
+                            sig = System.SystemContactList[loop2].Pop.EMSignature;
+                            detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+                            if (dist < (float)detection)
+                            {
+                                System.SystemContactList[loop2].Pop.EMDetection[FactionID] = TimeSlice;
+                                System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
+                            }
+
+                            sig = 499;
+                            /// <summary>
+                            /// The -1 is because a planet is most certainly not a missile.
+                            /// </summary>
+                            detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[ sig ]].aSensorDef.GetActiveDetectionRange(sig,-1);
+
+                            if (dist < (float)detection)
+                            {
+                                System.SystemContactList[loop2].Pop.ActiveDetection[FactionID] = TimeSlice;
+                                System.FactionDetectionLists[FactionID].Active[loop2] = TimeSlice;
+                            }
+                        }
+                        else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup )
+                        {
+
+                            /// <summary>
+                            /// Taskgroups have multiple signatures, so noDetection and allDetection become important.
+                            /// </summary>
+                            
+                            bool noDetection = false;
+                            bool allDetection = false;
+
+                            #region Ship Thermal Detection Code.
+
+                            if (System.FactionDetectionLists[FactionID].Thermal[loop2] != TimeSlice)
+                            {
+
+                                /// <summary>
+                                /// Get the best detection range for thermal signatures in loop.
+                                /// </summary>
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last();
+                                ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                sig = scratch.CurrentThermalSignature;
+                                detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+
+                                /// <summary>
+                                /// Good case, none of the ships are detected.
+                                /// </summary>
+                                if (dist > (float)detection)
+                                {
+                                    noDetection = true;
+                                }
+
+                                /// <summary>
+                                /// Atleast the biggest ship is detected.
+                                /// </summary
+                                if (noDetection == false)
+                                {
+                                    ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.First();
+                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                    sig = scratch.CurrentThermalSignature;
+                                    detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                    /// <summary>
+                                    /// Best case, everything is detected.
+                                    /// </summary>
+                                    if (dist < (float)detection)
+                                    {
+                                        allDetection = true;
+
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                        {
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = TimeSlice;
+                                        }
+                                        System.FactionDetectionLists[FactionID].Thermal[loop2] = TimeSlice;
+                                    }
+                                    else if (noDetection == false && allDetection == false)
+                                    {
+                                        /// <summary>
+                                        /// Worst case. some are detected, some aren't.
+                                        /// </summary>
+
+
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                        {
+                                            LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last;
+                                            bool done = false;
+
+                                            while (!done)
+                                            {
+                                                scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
+
+                                                if (scratch.ThermalDetection[FactionID] != TimeSlice)
+                                                {
+                                                    sig = scratch.CurrentThermalSignature;
+                                                    detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                                    if (dist <= (float)detection)
+                                                    {
+                                                        scratch.ThermalDetection[FactionID] = TimeSlice;
+                                                    }
+                                                    else
+                                                    {
+                                                        done = true;
+                                                        break;
+                                                    }
+                                                    node = node.Previous;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    /// <summary>
+                                    /// End else
+                                    /// </summary>
+                                }
+                            }
+                            #endregion
+
+                            #region Ship EM Detection Code.
+
+                            if (System.FactionDetectionLists[FactionID].EM[loop2] != TimeSlice)
+                            {
+                                noDetection = false;
+                                allDetection = false;
+
+                                /// <summary>
+                                /// Get the best detection range for EM signatures in loop.
+                                /// </summary>
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.Last();
+                                ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                sig = scratch.CurrentEMSignature;
+                                detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+
+                                /// <summary>
+                                /// Good case, none of the ships are detected.
+                                /// </summary>
+                                if (dist > (float)detection)
+                                {
+                                    noDetection = true;
+                                }
+
+                                /// <summary>
+                                /// Atleast the biggest ship is detected.
+                                /// </summary
+                                if (noDetection == false)
+                                {
+                                    ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.First();
+                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                    sig = scratch.CurrentEMSignature;
+                                    detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                    /// <summary>
+                                    /// Best case, everything is detected.
+                                    /// </summary>
+                                    if (dist < (float)detection)
+                                    {
+                                        allDetection = true;
+
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                        {
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = TimeSlice;
+                                        }
+                                        System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
+                                    }
+                                    else if (noDetection == false && allDetection == false)
+                                    {
+                                        /// <summary>
+                                        /// Worst case. some are detected, some aren't.
+                                        /// </summary>
+
+
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                        {
+                                            LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.EMSortList.Last;
+                                            bool done = false;
+
+                                            while (!done)
+                                            {
+                                                scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
+
+                                                if (scratch.EMDetection[FactionID] != TimeSlice)
+                                                {
+                                                    sig = scratch.CurrentEMSignature;
+
+                                                    /// <summary>
+                                                    /// here is where EM detection differs from Thermal detection:
+                                                    /// If a ship has a signature of 0 by this point(and we didn't already hit noDetection above,
+                                                    /// it means that one ship is emitting a signature, but that no other ships are.
+                                                    /// Mark the group as totally detected, but not the ships, this serves to tell me that the ships are undetectable
+                                                    /// in this case.
+                                                    /// </summary>
+                                                    if (sig == 0)
+                                                    {
+                                                        /// <summary>
+                                                        /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
+                                                        /// Mark the entire group as "spotted" because no other detection will occur.
+                                                        /// </summary>
+                                                        if (System.SystemContactList[loop2].TaskGroup.Ships[node.Previous.Value].EMDetection[FactionID] == TimeSlice)
+                                                        {
+                                                            System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
+                                                        }
+                                                        break;
+                                                    }
+
+                                                    detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                                    if (dist <= (float)detection)
+                                                    {
+                                                        scratch.EMDetection[FactionID] = TimeSlice;
+                                                    }
+                                                    else
+                                                    {
+                                                        done = true;
+                                                        break;
+                                                    }
+                                                    node = node.Previous;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    /// <summary>
+                                    /// End else
+                                    /// </summary>
+                                }
+                            }
+                            #endregion
+
+                            #region Ship Active Detection Code.
+
+                            if (System.FactionDetectionLists[FactionID].Active[loop2] == TimeSlice)
+                            {
+                                noDetection = false;
+                                allDetection = false;
+
+                                /// <summary>
+                                /// Get the best detection range for thermal signatures in loop.
+                                /// </summary>
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last();
+                                ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                sig = scratch.TotalCrossSection - 1;
+
+                                if (sig > Constants.ShipTN.ResolutionMax - 1)
+                                    sig = Constants.ShipTN.ResolutionMax - 1;
+
+                                detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig,-1);
+
+
+                                /// <summary>
+                                /// Good case, none of the ships are detected.
+                                /// </summary>
+                                if (dist > (float)detection)
+                                {
+                                    noDetection = true;
+                                }
+
+                                /// <summary>
+                                /// Atleast the biggest ship is detected.
+                                /// </summary
+                                if (noDetection == false)
+                                {
+                                    ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.First();
+                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                    sig = scratch.TotalCrossSection - 1;
+
+                                    if (sig > Constants.ShipTN.ResolutionMax - 1)
+                                        sig = Constants.ShipTN.ResolutionMax - 1;
+
+                                    detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+
+                                    /// <summary>
+                                    /// Best case, everything is detected.
+                                    /// </summary>
+                                    if (dist < (float)detection)
+                                    {
+                                        allDetection = true;
+
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                        {
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = TimeSlice;
+                                        }
+                                        System.FactionDetectionLists[FactionID].Active[loop2] = TimeSlice;
+                                    }
+                                    else if (noDetection == false && allDetection == false)
+                                    {
+                                        /// <summary>
+                                        /// Worst case. some are detected, some aren't.
+                                        /// </summary>
+
+
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                        {
+                                            LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last;
+                                            bool done = false;
+
+                                            while (!done)
+                                            {
+                                                scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
+
+                                                if (scratch.ActiveDetection[FactionID] != TimeSlice)
+                                                {
+                                                    sig = scratch.TotalCrossSection - 1;
+
+                                                    if (sig > Constants.ShipTN.ResolutionMax - 1)
+                                                        sig = Constants.ShipTN.ResolutionMax - 1;
+
+                                                    detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+
+                                                    if (dist <= (float)detection)
+                                                    {
+                                                        scratch.ActiveDetection[FactionID] = TimeSlice;
+                                                    }
+                                                    else
+                                                    {
+                                                        done = true;
+                                                        break;
+                                                    }
+                                                }
+                                                node = node.Previous;
+                                            }
+                                        }
+                                    }
+                                    /// <summary>
+                                    /// End else
+                                    /// </summary>
+                                }
+                            }
+                            #endregion
+                        }
+                        /// <summary>
+                        /// End if planet or Task Group
+                        /// </sumamry>
+                    }
+                    /// <summary>
+                    /// End if not globally detected.
+                    /// </summary>
+
+                }
+                /// <summary>
+                /// End for Faction Contact Lists
+                /// </summary>
+
+            }
+            /// <summary>
+            /// End for Faction TaskGroups.
+            /// </summary>
         }
     }
 }
