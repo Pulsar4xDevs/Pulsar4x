@@ -197,6 +197,24 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Adds a new taskgroup to the taskgroups list at location StartBody in System StartSystem.
+        /// </summary>
+        /// <param name="Title">Name.</param>
+        /// <param name="StartBody">Body with population that built the ship that will be put into the TG.</param>
+        /// <param name="StartSystem">System in which the TG starts in.</param>
+        public void AddNewTaskGroup(String Title,StarSystemEntity StartBody, StarSystem StartSystem)
+        {
+            TaskGroupTN TG = new TaskGroupTN(Title, this, StartBody, StartSystem);
+            TaskGroups.Add(TG);
+        }
+
+        public void AddNewShipDesign(String Title)
+        {
+            ShipClassTN Ship = new ShipClassTN(Title);
+            ShipDesigns.Add(Ship);
+        }
+
+        /// <summary>
         /// Adds a list of contacts to the faction.
         /// </summary>
         /// <param name="system">Starsystem for the contacts.</param>
@@ -251,7 +269,7 @@ namespace Pulsar4X.Entities
                         /// No fancy table here, please just work.
                         /// </summary>
                         float distX = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
-                        float distY = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
+                        float distY = (TaskGroups[loop].Contact.SystemKmY - System.SystemContactList[loop2].SystemKmY);
                         float dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
 
                         /// <summary>
@@ -287,7 +305,7 @@ namespace Pulsar4X.Entities
                                 System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
                             }
 
-                            sig = 499;
+                            sig = Constants.ShipTN.ResolutionMax - 1;
                             /// <summary>
                             /// The -1 is because a planet is most certainly not a missile.
                             /// </summary>
@@ -321,6 +339,7 @@ namespace Pulsar4X.Entities
                                 ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                 sig = scratch.CurrentThermalSignature;
                                 detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
 
 
                                 /// <summary>
@@ -508,7 +527,7 @@ namespace Pulsar4X.Entities
 
                             #region Ship Active Detection Code.
 
-                            if (System.FactionDetectionLists[FactionID].Active[loop2] == TimeSlice)
+                            if (System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice)
                             {
                                 noDetection = false;
                                 allDetection = false;
@@ -524,7 +543,6 @@ namespace Pulsar4X.Entities
                                     sig = Constants.ShipTN.ResolutionMax - 1;
 
                                 detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig,-1);
-
 
                                 /// <summary>
                                 /// Good case, none of the ships are detected.

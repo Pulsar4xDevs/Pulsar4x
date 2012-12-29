@@ -48,6 +48,7 @@ namespace Pulsar4X.Entities
 
             Waypoints = new BindingList<Waypoint>();
             SystemContactList = new BindingList<SystemContact>();
+            FactionDetectionLists = new BindingList<FactionSystemDetection>();
         }
 
         /// <summary>

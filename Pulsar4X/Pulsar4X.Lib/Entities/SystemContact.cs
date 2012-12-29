@@ -79,7 +79,7 @@ namespace Pulsar4X.Entities
             SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
 
             TaskGroup = TG;
-            SSEntity = TG.SSEntity;
+            SSEntity = StarSystemEntityType.TaskGroup;
         }
 
         /// <summary>

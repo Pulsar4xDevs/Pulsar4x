@@ -149,16 +149,21 @@ namespace Pulsar4X.Entities
             IsOrbiting = true;
             OrbitingBody = StartingBody;
 
+            SSEntity = StarSystemEntityType.TaskGroup;
+
             Contact = new SystemContact(Faction,this);
 
             Contact.XSystem = OrbitingBody.XSystem;
             Contact.YSystem = OrbitingBody.YSystem;
             Contact.ZSystem = OrbitingBody.ZSystem;
+            Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
+            Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
             Contact.CurrentSystem = StartingSystem;
+            StartingSystem.AddContact(Contact);
             
             m_dMass = 0.0;
 
-            SSEntity = StarSystemEntityType.TaskGroup;
+
 
             CurrentSpeed = 0;
             MaxSpeed = 0;
@@ -212,9 +217,9 @@ namespace Pulsar4X.Entities
         /// Adds a ship to a taskgroup, will call sorting and sensor handling.
         /// </summary>
         /// <param name="shipDef">definition of the ship to be added.</param>
-        public void AddShip(ShipClassTN shipDef)
+        public void AddShip(ShipClassTN shipDef, int CurrentTimeSlice)
         {
-            ShipTN ship = new ShipTN(shipDef,Ships.Count);
+            ShipTN ship = new ShipTN(shipDef,Ships.Count, CurrentTimeSlice);
             Ships.Add(ship);
 
             /// <summary>
@@ -242,6 +247,7 @@ namespace Pulsar4X.Entities
             }
 
             UpdatePassiveSensors(ship);
+
             AddShipToSort(ship);
         }
 
@@ -295,29 +301,29 @@ namespace Pulsar4X.Entities
         /// <param name="TEA">Thermal,EM,Active.</param>
         private void AddNodeToSort(LinkedList<int> SortList, LinkedListNode<int> Sort, int TEA)
         {
-            int value = -1, Last = -1, First = -1, NewValue = -1 ;
-            switch (TEA)
-            {
-                case 0: value = Ships[Sort.Value].CurrentThermalSignature; 
-                        Last = Ships[SortList.Last()].CurrentThermalSignature;
-                        First = Ships[SortList.First()].CurrentThermalSignature;
-                break;
-                case 1: value = Ships[Sort.Value].CurrentEMSignature; 
-                        Last = Ships[SortList.Last()].CurrentEMSignature;
-                        First = Ships[SortList.First()].CurrentEMSignature;
-                break;
-                case 2: value = Ships[Sort.Value].TotalCrossSection;
-                        Last = Ships[SortList.Last()].TotalCrossSection;
-                        First = Ships[SortList.First()].TotalCrossSection;
-                break;
-            }
-
             if (SortList.Count == 0)
             {
                 SortList.AddFirst(Sort);
             }
             else
             {
+                int value = -1, Last = -1, First = -1, NewValue = -1;
+                switch (TEA)
+                {
+                    case 0: value = Ships[Sort.Value].CurrentThermalSignature;
+                        Last = Ships[SortList.Last()].CurrentThermalSignature;
+                        First = Ships[SortList.First()].CurrentThermalSignature;
+                        break;
+                    case 1: value = Ships[Sort.Value].CurrentEMSignature;
+                        Last = Ships[SortList.Last()].CurrentEMSignature;
+                        First = Ships[SortList.First()].CurrentEMSignature;
+                        break;
+                    case 2: value = Ships[Sort.Value].TotalCrossSection;
+                        Last = Ships[SortList.Last()].TotalCrossSection;
+                        First = Ships[SortList.First()].TotalCrossSection;
+                        break;
+                }
+
                 if (value > Last)
                 {
                     SortList.AddLast(Sort);

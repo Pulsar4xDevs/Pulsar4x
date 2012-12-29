@@ -540,6 +540,7 @@ namespace Pulsar4X.Entities
             else
             {
                 //***list through the components to find the next biggest one.***
+
             }
         }
 

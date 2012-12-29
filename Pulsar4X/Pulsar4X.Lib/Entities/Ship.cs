@@ -155,7 +155,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
-        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex)
+        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice)
         {
             /// <summary>
             /// Set the class definition
@@ -256,6 +256,17 @@ namespace Pulsar4X.Entities
             ThermalList = new LinkedListNode<int>(ShipIndex);
             EMList = new LinkedListNode<int>(ShipIndex);
             ActiveList = new LinkedListNode<int>(ShipIndex);
+
+            ThermalDetection = new BindingList<int>();
+            EMDetection = new BindingList<int>();
+            ActiveDetection = new BindingList<int>();
+
+            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
+            {
+                ThermalDetection.Add(CurrentTimeSlice);
+                EMDetection.Add(CurrentTimeSlice);
+                ActiveDetection.Add(CurrentTimeSlice);
+            }
         }
 
         /// <summary>
@@ -359,12 +370,10 @@ namespace Pulsar4X.Entities
             if (Sensor.isActive == true && Sensor.isDestroyed == false && active == false)
             {
                 CurrentEMSignature = CurrentEMSignature - Sensor.aSensorDef.gps;
-                EMList.Value = CurrentEMSignature;
             }
             else if (Sensor.isActive == false && Sensor.isDestroyed == false && active == true)
             {
                 CurrentEMSignature = CurrentEMSignature + Sensor.aSensorDef.gps;
-                EMList.Value = CurrentEMSignature;
             }
             Sensor.isActive = active;
         }
@@ -385,8 +394,6 @@ namespace Pulsar4X.Entities
             CurrentEnginePower = (int)((float)ShipClass.MaxEnginePower * fraction);
             CurrentThermalSignature = (int)((float)ShipClass.MaxThermalSignature * fraction);
             CurrentFuelUsePerHour = ShipClass.MaxFuelUsePerHour * fraction;
-
-            ThermalList.Value = CurrentThermalSignature;
         }
 
         /// <summary>

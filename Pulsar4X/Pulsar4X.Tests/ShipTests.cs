@@ -16,7 +16,7 @@ namespace Pulsar4X.Tests
         public void testArmor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0);
+            ShipTN ts = new ShipTN(ts2,0,0);
 
             ts2.ShipArmorDef = new ArmorDefTN("Duranium Armour");
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
@@ -111,7 +111,7 @@ namespace Pulsar4X.Tests
         public void testEngine()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0);
+            ShipTN ts = new ShipTN(ts2,0,0);
 
             ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive",32,2.65f,0.6f,0.75f,2,37,-1.0f);
             ts2.ShipEngineCount = 1;
@@ -138,7 +138,7 @@ namespace Pulsar4X.Tests
         public void testPSensor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0);
+            ShipTN ts = new ShipTN(ts2,0,0);
 
             PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, PassiveSensorType.Thermal, 1.0f, 1);
 
@@ -172,7 +172,7 @@ namespace Pulsar4X.Tests
         public void testASensor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0);
+            ShipTN ts = new ShipTN(ts2,0,0);
 
             ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36,24,185, false, 1.0f, 1);
 
@@ -273,7 +273,7 @@ namespace Pulsar4X.Tests
             TestClass.AddCrewQuarters(CrewQ, 2);
 
 
-            ShipTN testShip = new ShipTN(TestClass,0);
+            ShipTN testShip = new ShipTN(TestClass,0,0);
 
             testShip.CrewQuarters[0].isDestroyed = true;
 
@@ -361,7 +361,7 @@ namespace Pulsar4X.Tests
 
                 Console.WriteLine("Speed:{0}", test.MaxSpeed);
 
-                TaskGroup1.AddShip(test);
+                TaskGroup1.AddShip(test,0);
                 Console.WriteLine("{0} {1}", TaskGroup1, TaskGroup1.Ships[loop].ShipsTaskGroup);
             }
 
@@ -420,7 +420,7 @@ namespace Pulsar4X.Tests
                     break;
                 }
 
-                TaskGroup1.AddShip(test);
+                TaskGroup1.AddShip(test,0);
                 Console.WriteLine("Best Thermal:{0},{1}", TaskGroup1.BestThermal.pSensorDef.rating, TaskGroup1.BestThermalCount);
             }
         }
@@ -469,7 +469,7 @@ namespace Pulsar4X.Tests
                         break;
                 }
 
-                TaskGroup1.AddShip(test);
+                TaskGroup1.AddShip(test,0);
 
                 TaskGroup1.SetActiveSensor(loop, 0, true);
                 TaskGroup1.SetActiveSensor(loop, 1, true);
@@ -535,7 +535,7 @@ namespace Pulsar4X.Tests
             test.AddOtherComponent(Bridge, 1);
             test.AddEngine(EngDef, 1);
 
-            TaskGroup1.AddShip(test);
+            TaskGroup1.AddShip(test,0);
 
             TaskGroup1.Ships[0].Refuel(200000.0f);
             TaskGroup1.IssueOrder(OrderType.Move, WP1);
@@ -549,6 +549,66 @@ namespace Pulsar4X.Tests
             }
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
+        }
+
+
+        [Test]
+        public void FactionSystemTest()
+        {
+            Faction PlayerFaction1 = new Faction(0);
+            Faction PlayerFaction2 = new Faction(1);
+
+            Waypoint Start1 = new Waypoint(1.0, 1.0);
+            Waypoint Start2 = new Waypoint(1.0005, 1.0005);
+
+            StarSystem System1 = new StarSystem();
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+            PlayerFaction2.AddNewShipDesign("Tribal");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddActiveSensor(PlayerFaction1.ComponentList.ActiveSensorDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddPassiveSensor(PlayerFaction1.ComponentList.PassiveSensorDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddPassiveSensor(PlayerFaction1.ComponentList.PassiveSensorDef[1], 1);
+
+            PlayerFaction2.ShipDesigns[0].AddEngine(PlayerFaction2.ComponentList.Engines[0], 1);
+            PlayerFaction2.ShipDesigns[0].AddCrewQuarters(PlayerFaction2.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction2.ShipDesigns[0].AddFuelStorage(PlayerFaction2.ComponentList.FuelStorage[0], 2);
+            PlayerFaction2.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction2.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction2.ShipDesigns[0].AddOtherComponent(PlayerFaction2.ComponentList.OtherComponents[0], 1);
+            PlayerFaction2.ShipDesigns[0].AddActiveSensor(PlayerFaction2.ComponentList.ActiveSensorDef[0], 1);
+            PlayerFaction2.ShipDesigns[0].AddPassiveSensor(PlayerFaction2.ComponentList.PassiveSensorDef[0], 1);
+            PlayerFaction2.ShipDesigns[0].AddPassiveSensor(PlayerFaction2.ComponentList.PassiveSensorDef[1], 1);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", Start1, System1);
+            PlayerFaction2.AddNewTaskGroup("P2 TG 01", Start2, System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0],0);
+            PlayerFaction2.TaskGroups[0].AddShip(PlayerFaction2.ShipDesigns[0],0);
+
+
+            PlayerFaction1.AddNewContactList(System1);
+            PlayerFaction2.AddNewContactList(System1);
+
+            PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
+            PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
+
+            Console.WriteLine("Time: 0");
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
+
+            PlayerFaction1.SensorSweep(5);
+            PlayerFaction2.SensorSweep(5);
+
+            Console.WriteLine("Time: 5");
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
         }
     }
 }

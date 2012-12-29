@@ -11,6 +11,9 @@ namespace Pulsar4X.Entities
     {
         #region Properties
 
+        /// <summary>
+        /// Which faction owns this population?
+        /// </summary>
         public Faction Faction { get; set; }
 
         /// <summary>
