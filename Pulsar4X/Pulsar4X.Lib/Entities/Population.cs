@@ -165,7 +165,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void UpdateLocation()
         {
-            Contact.UpdateLocation(Planet.XSystem, Planet.YSystem);
+            Contact.UpdateLocationInSystem(Planet.XSystem, Planet.YSystem);
         }
     }
 }

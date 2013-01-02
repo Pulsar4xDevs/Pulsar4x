@@ -20,6 +20,11 @@ namespace Pulsar4X.Entities
         public BindingList<Waypoint> Waypoints { get; set; }
 
         /// <summary>
+        /// Each system has links to other systems.
+        /// </summary>
+        public BindingList<JumpPoint> JumpPoints { get; set; }
+
+        /// <summary>
         /// Global List of all contacts within the system.
         /// </summary>
         public BindingList<SystemContact> SystemContactList { get; set; }
@@ -87,9 +92,18 @@ namespace Pulsar4X.Entities
         /// <param name="Contact">Contact to be added.</param>
         public void AddContact(SystemContact Contact)
         {
+            /// <summary>
+            /// Add a new entry to every distance table for every contact.
+            /// </summary>
+            for (int loop = 0; loop < SystemContactList.Count; loop++)
+            {
+                SystemContactList[loop].DistanceTable.Add(0.0f);
+                SystemContactList[loop].DistanceUpdate.Add(-1);
+            }
 
-            Contact.UpdateSystem(this);
+
             SystemContactList.Add(Contact);
+            Contact.UpdateSystem(this);
 
             /// <summary>
             /// Update all the faction contact lists with the new contact.
@@ -119,6 +133,12 @@ namespace Pulsar4X.Entities
             }
 
             SystemContactList.Remove(Contact);
+
+            for (int loop = 0; loop < SystemContactList.Count; loop++)
+            {
+                SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
+                SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
+            }
         }
     }
 }

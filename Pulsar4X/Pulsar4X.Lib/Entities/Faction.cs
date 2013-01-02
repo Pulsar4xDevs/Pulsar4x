@@ -49,12 +49,24 @@ namespace Pulsar4X.Entities
             EM = new BindingList<int>();
             Active = new BindingList<int>();
 
+            Thermal.RaiseListChangedEvents = false;
+            EM.RaiseListChangedEvents = false;
+            Active.RaiseListChangedEvents = false;
+
             for (int loop = 0; loop < system.SystemContactList.Count; loop++)
             {
                 Thermal.Add(0);
                 EM.Add(0);
                 Active.Add(0);
             }
+
+            Thermal.RaiseListChangedEvents = true;
+            EM.RaiseListChangedEvents = true;
+            Active.RaiseListChangedEvents = true;
+
+            Thermal.ResetBindings();
+            EM.ResetBindings();
+            Active.ResetBindings();
         }
 
         /// <summary>
@@ -116,7 +128,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// I'll just store every contact in every system potentially here right now.
         /// </summary>
-        public BindingList<FactionSystemDetection> SystemContacts { get; set; }
+        public Dictionary<StarSystem,FactionSystemDetection> SystemContacts { get; set; }
         
 
         public Faction(int ID)
@@ -135,7 +147,7 @@ namespace Pulsar4X.Entities
 
             AddInitialComponents();
 
-            SystemContacts = new BindingList<FactionSystemDetection>();
+            SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
 
             FactionID = ID;
 
@@ -157,7 +169,7 @@ namespace Pulsar4X.Entities
 
             AddInitialComponents();
 
-            SystemContacts = new BindingList<FactionSystemDetection>();
+            SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
 
             FactionID = ID;
 
@@ -222,7 +234,7 @@ namespace Pulsar4X.Entities
         {
             FactionSystemDetection NewContact = new FactionSystemDetection(this,system);
             system.FactionDetectionLists.Add(NewContact);
-            SystemContacts.Add(NewContact);
+            SystemContacts.Add(system,NewContact);
         
         }
 
@@ -233,7 +245,7 @@ namespace Pulsar4X.Entities
         public void RemoveContactList(FactionSystemDetection ContactList)
         {
             ContactList.System.FactionDetectionLists.Remove(ContactList);
-            SystemContacts.Remove(ContactList);
+            SystemContacts.Remove(ContactList.System);
         }
 
 
@@ -265,12 +277,28 @@ namespace Pulsar4X.Entities
                     if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != TimeSlice &&
                         System.FactionDetectionLists[FactionID].EM[loop2] != TimeSlice && System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice)
                     {
-                        /// <summary>
-                        /// No fancy table here, please just work.
-                        /// </summary>
-                        float distX = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
-                        float distY = (TaskGroups[loop].Contact.SystemKmY - System.SystemContactList[loop2].SystemKmY);
-                        float dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
+                        float dist;
+                        if (TaskGroups[loop].Contact.DistanceUpdate[loop2] == TimeSlice)
+                        {
+                            dist = TaskGroups[loop].Contact.DistanceTable[loop2];
+                        }
+                        else
+                        {
+                            float distX = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
+                            float distY = (TaskGroups[loop].Contact.SystemKmY - System.SystemContactList[loop2].SystemKmY);
+                            dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
+
+                            TaskGroups[loop].Contact.DistanceTable[loop2] = dist;
+                            TaskGroups[loop].Contact.DistanceUpdate[loop2] = TimeSlice;
+
+                            int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
+
+                            System.SystemContactList[loop2].DistanceTable[TGID] = dist;
+                            System.SystemContactList[loop2].DistanceUpdate[TGID] = TimeSlice;
+                        }
+
+
+                        
 
                         /// <summary>
                         /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since

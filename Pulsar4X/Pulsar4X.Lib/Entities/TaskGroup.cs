@@ -724,7 +724,7 @@ namespace Pulsar4X.Entities
 
             if (TimeRequirement < TimeSlice)
             {
-                Contact.UpdateLocation(OrderTarget[0].XSystem, OrderTarget[0].YSystem);
+                Contact.UpdateLocationInSystem(OrderTarget[0].XSystem, OrderTarget[0].YSystem);
 
                 if (OrderTarget[0].SSEntity == StarSystemEntityType.Body)
                     IsOrbiting = true;

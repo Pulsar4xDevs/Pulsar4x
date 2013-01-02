@@ -9,6 +9,7 @@ namespace Pulsar4X.Entities
     {
         Body,
         Waypoint,
+        JumpPoint,
         TaskGroup,
         Population,
         Missile,

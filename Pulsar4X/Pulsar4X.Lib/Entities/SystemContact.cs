@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
@@ -47,6 +48,17 @@ namespace Pulsar4X.Entities
         public TaskGroupTN TaskGroup { get; set; }
 
         /// <summary>
+        /// Distance between this contact and the other contacts in the system.
+        /// </summary>
+        public BindingList<float> DistanceTable { get; set; }
+
+        /// <summary>
+        /// Last timeslice the distance Table was updated.
+        /// </summary>
+        public BindingList<int> DistanceUpdate { get; set; }
+
+
+        /// <summary>
         /// Creates a new system contact.
         /// </summary>
         /// <param name="Fact">Faction of contact.</param>
@@ -62,6 +74,9 @@ namespace Pulsar4X.Entities
 
             Pop = pop;
             SSEntity = StarSystemEntityType.Population;
+
+            DistanceTable = new BindingList<float>();
+            DistanceUpdate = new BindingList<int>();
         }
 
         /// <summary>
@@ -80,6 +95,8 @@ namespace Pulsar4X.Entities
 
             TaskGroup = TG;
             SSEntity = StarSystemEntityType.TaskGroup;
+            DistanceTable = new BindingList<float>();
+            DistanceUpdate = new BindingList<int>();
         }
 
         /// <summary>
@@ -87,7 +104,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="X">X position in AU.</param>
         /// <param name="Y">Y Position in AU.</param>
-        public void UpdateLocation(double X, double Y)
+        public void UpdateLocationInSystem(double X, double Y)
         {
             XSystem = X;
             YSystem = Y;
@@ -97,12 +114,34 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Updates the system location of this contact.
+        /// Updates the system location of this contact. The 4 blocks of updates to the lists will, I hope, facilitate efficient updating of the binding list.
         /// </summary>
         /// <param name="system">new System.</param>
         public void UpdateSystem(StarSystem system)
         {
             CurrentSystem = system;
+
+            DistanceTable.Clear();
+            DistanceUpdate.Clear();
+
+            DistanceTable.RaiseListChangedEvents = false;
+            DistanceUpdate.RaiseListChangedEvents = false;
+
+            for (int loop = 0; loop < CurrentSystem.SystemContactList.Count; loop++)
+            {
+                DistanceTable.Add(0.0f);
+                DistanceUpdate.Add(-1);
+            }
+
+            DistanceTable.RaiseListChangedEvents = true;
+            DistanceUpdate.RaiseListChangedEvents = true;
+
+            /// <summary>
+            /// BindingLists apparently do a bunch of events every time they are changed.
+            /// This has hopefully circumvented that, with just 1 event.
+            /// </summary>
+            DistanceTable.ResetBindings();
+            DistanceUpdate.ResetBindings();
         }
     }
 }
