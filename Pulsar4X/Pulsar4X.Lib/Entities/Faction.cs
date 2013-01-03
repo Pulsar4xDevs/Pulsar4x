@@ -555,7 +555,7 @@ namespace Pulsar4X.Entities
 
                             #region Ship Active Detection Code.
 
-                            if (System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice)
+                            if (System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice && TaskGroups[loop].ActiveSensorQue.Count > 0)
                             {
                                 noDetection = false;
                                 allDetection = false;

@@ -561,7 +561,8 @@ namespace Pulsar4X.Tests
             Waypoint Start1 = new Waypoint(1.0, 1.0);
             Waypoint Start2 = new Waypoint(1.0005, 1.0005);
 
-            StarSystem System1 = new StarSystem();
+            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System2 = new StarSystem("Alpha Centauri");
 
             PlayerFaction1.AddNewShipDesign("Blucher");
             PlayerFaction2.AddNewShipDesign("Tribal");
@@ -594,10 +595,13 @@ namespace Pulsar4X.Tests
             PlayerFaction1.AddNewContactList(System1);
             PlayerFaction2.AddNewContactList(System1);
 
+            PlayerFaction1.AddNewContactList(System2);
+            PlayerFaction2.AddNewContactList(System2);
+
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            Console.WriteLine("Time: 0");
+            Console.WriteLine("Time: 0 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
@@ -605,10 +609,43 @@ namespace Pulsar4X.Tests
             PlayerFaction1.SensorSweep(5);
             PlayerFaction2.SensorSweep(5);
 
-            Console.WriteLine("Time: 5");
+            Console.WriteLine("Time: 5 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
+
+            PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, false);
+            PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, false);
+
+            PlayerFaction1.SensorSweep(10);
+            PlayerFaction2.SensorSweep(10);
+
+            Console.WriteLine("Time: 10 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
+
+            PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
+            PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
+
+            System1.AddJumpPoint(0.1, 0.2);
+            System2.AddJumpPoint(0.2, 0.1);
+
+            System1.JumpPoints[0].Connect = System2.JumpPoints[0];
+            System2.JumpPoints[0].Connect = System1.JumpPoints[0];
+
+            System1.JumpPoints[0].StandardTransit(PlayerFaction1.TaskGroups[0]);
+            System1.JumpPoints[0].StandardTransit(PlayerFaction2.TaskGroups[0]);
+
+            PlayerFaction1.SensorSweep(15);
+            PlayerFaction2.SensorSweep(15);
+
+            Console.WriteLine("Time: 15 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
+
+
         }
     }
 }

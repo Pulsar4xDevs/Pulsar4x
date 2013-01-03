@@ -569,10 +569,10 @@ namespace Pulsar4X.Entities
                         /// Replace inQue with the last item entry, and remove the last entry. I could have removed the entry in place, but then I couldn't just copy my code.
                         /// </summary>
                         ActiveSensorQue[inQue] = ActiveSensorQue[(ActiveSensorQue.Count - 1)];
-                        ActiveSensorCount[inQue] = ActiveSensorCount[(ActiveSensorQue.Count - 1)];
+                        ActiveSensorCount[inQue] = ActiveSensorCount[(ActiveSensorCount.Count - 1)];
 
                         ActiveSensorQue.RemoveAt((ActiveSensorQue.Count-1));
-                        ActiveSensorCount.RemoveAt((ActiveSensorQue.Count - 1));
+                        ActiveSensorCount.RemoveAt((ActiveSensorCount.Count - 1));
                     }
 
                 }

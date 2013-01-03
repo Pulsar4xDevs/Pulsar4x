@@ -170,7 +170,7 @@ namespace Pulsar4X.Entities.Components
         public int GetPassiveDetectionRange(int Signature)
         {
             int shipDet;
-            int shipSig = Signature - 1;
+            int shipSig = Signature;
 
 
             if (shipSig >= LookUpTableMax)

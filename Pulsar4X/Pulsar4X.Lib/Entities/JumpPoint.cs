@@ -51,8 +51,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="X">X in AU</param>
         /// <param name="Y">Y in AU</param>
-        public JumpPoint(double X, double Y)
+        public JumpPoint(StarSystem Sys, double X, double Y)
         {
+            System = Sys;
             XSystem = X;
             YSystem = Y;
             ZSystem = 0.0;
@@ -76,20 +77,64 @@ namespace Pulsar4X.Entities
         public void ExploreJP()
         {
             /// <summary>
-            /// A new system needs to be created.
+            /// A new system needs to be created, likewise atleast 1 connection JP needs to be created for this new system.
             /// Is the JP we transited closed on this new end?
             /// The Ship in question needs to have its data updated.
             /// The system we left needs its contacts and faction detection lists updated.
-            /// The faction might need to have some updating done to it.
+            /// The faction needs a contact list for the new/"new" system
             /// </summary>
         }
 
         /// <summary>
-        /// Simple transits happen here.
+        /// Simple transits happen here. Civilian ships, and military ships that are simply travelling will use this function.
+        /// there is a higher penalty associated with a standard transit, ships appear directly on the JP, but there is no TG size limitation.
         /// </summary>
-        public void TransitJP()
+        /// <param name="TransitTG"> Transiting TG</param>
+        /// <returns>Success or failure of transit as an integer code.</returns>
+        public int StandardTransit(TaskGroupTN TransitTG)
         {
+            /// <summary>
+            /// Jump Engine/Gate logic needs to be done here.
+            /// </summary>
+            /// 
 
+            System.RemoveContact(TransitTG.Contact);
+            Connect.System.AddContact(TransitTG.Contact);
+
+            TransitTG.Contact.UpdateLocationInSystem(XSystem, YSystem);
+
+            /// <summary>
+            /// Likewise, set Standard transit penalties for the TG
+            /// </summary>
+
+            return 1;
+        }
+
+        /// <summary>
+        /// Military Squadron jumps into a system are handled here. Ships jump away from the jp, and have a lower transit penalty than a standard transit,
+        /// but only the squadron size may make the jump.
+        /// </summary>
+        /// <param name="TransitTG">Transiting TG</param>
+        /// <returns>Success or failure of transit as an integer code.</returns>
+        public int SquadronTransit(TaskGroupTN TransitTG)
+        {
+            /// <summary>
+            /// Check Jump Engine logic here.
+            /// </summary>
+
+            System.RemoveContact(TransitTG.Contact);
+            Connect.System.AddContact(TransitTG.Contact);
+
+            /// <summary>
+            /// Add/subtract offset to X/Y for this.
+            /// <summary>
+            TransitTG.Contact.UpdateLocationInSystem(XSystem, YSystem);
+
+            /// <summary>
+            /// Set Squadron Transit penalties here
+            /// </summary>
+
+            return 1;
         }
     }
 }

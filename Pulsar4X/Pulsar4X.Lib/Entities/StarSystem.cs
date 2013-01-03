@@ -52,6 +52,7 @@ namespace Pulsar4X.Entities
             Stars = new BindingList<Star>();
 
             Waypoints = new BindingList<Waypoint>();
+            JumpPoints = new BindingList<JumpPoint>();
             SystemContactList = new BindingList<SystemContact>();
             FactionDetectionLists = new BindingList<FactionSystemDetection>();
         }
@@ -82,6 +83,17 @@ namespace Pulsar4X.Entities
             //logger.Info(Remove.XSystem.ToString());
             //logger.Info(Remove.YSystem.ToString());
             Waypoints.Remove(Remove);
+        }
+
+        /// <summary>
+        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function.
+        /// </summary>
+        /// <param name="XSystemAU">X Location in AU of JP.</param>
+        /// <param name="YSystemAU">Y Location in AU of JP.</param>
+        public void AddJumpPoint(double XSystemAU, double YSystemAU)
+        {
+            JumpPoint NewJP = new JumpPoint(this,XSystemAU,YSystemAU);
+            JumpPoints.Add(NewJP);
         }
 
 
