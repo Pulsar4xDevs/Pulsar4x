@@ -145,7 +145,7 @@ namespace Pulsar4X.Entities
             ShipDesigns = new BindingList<ShipClassTN>();
             TaskGroups = new BindingList<TaskGroupTN>();
 
-            AddInitialComponents();
+            ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
 
@@ -167,45 +167,12 @@ namespace Pulsar4X.Entities
             ShipDesigns = new BindingList<ShipClassTN>();
             TaskGroups = new BindingList<TaskGroupTN>();
 
-            AddInitialComponents();
+            ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
 
             FactionID = ID;
 
-        }
-
-        /// <summary>
-        /// Every faction will start with some components defined and ready to use, though the engines and sensors shouldn't be here just yet.
-        /// </summary>
-        public void AddInitialComponents()
-        {
-            GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, GeneralType.Crew);
-            GeneralComponentDefTN CrewQS = new GeneralComponentDefTN("Crew Quarters - Small", 0.2f, 0, 2.0m, GeneralType.Crew);
-            GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, GeneralType.Fuel);
-            GeneralComponentDefTN FuelTS = new GeneralComponentDefTN("Fuel Storage - Small", 0.2f, 0, 3.0m, GeneralType.Fuel);
-            GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, GeneralType.Engineering);
-            GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, GeneralType.Bridge);
-            
-            ComponentList.CrewQuarters.Add(CrewQ);
-            ComponentList.CrewQuarters.Add(CrewQS);
-            ComponentList.FuelStorage.Add(FuelT);
-            ComponentList.FuelStorage.Add(FuelTS);
-            ComponentList.EngineeringSpaces.Add(EBay);
-            ComponentList.OtherComponents.Add(Bridge);
-
-            /// <summary>
-            /// These components aren't really basic, but I'll put them in anyway.
-            /// </summary>
-            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
-            ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
-            PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
-            PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("EM Sensor EM1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
-
-            ComponentList.Engines.Add(EngDef);
-            ComponentList.ActiveSensorDef.Add(ActDef);
-            ComponentList.PassiveSensorDef.Add(ThPasDef);
-            ComponentList.PassiveSensorDef.Add(EMPasDef);
         }
 
         /// <summary>
@@ -366,7 +333,18 @@ namespace Pulsar4X.Entities
                                 int ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last();
                                 ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                 sig = scratch.CurrentThermalSignature;
-                                detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                /// <summary>
+                                /// Check to make sure the taskgroup has a thermal sensor available, otherwise use the default.
+                                /// </summary>
+                                if (TaskGroups[loop].BestThermalCount != 0)
+                                {
+                                    detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                }
+                                else
+                                {
+                                    detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                }
 
 
 
@@ -456,7 +434,19 @@ namespace Pulsar4X.Entities
                                 int ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.Last();
                                 ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                 sig = scratch.CurrentEMSignature;
-                                detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                /// <summary>
+                                /// Check to see if the taskgroup has an em sensor, and that said em sensor is not destroyed.
+                                /// otherwise use the default passive detection range.
+                                /// </summary>
+                                if (TaskGroups[loop].BestEMCount > 0)
+                                {
+                                    detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                }
+                                else
+                                {
+                                    detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                }
 
 
                                 /// <summary>

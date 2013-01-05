@@ -538,7 +538,7 @@ namespace Pulsar4X.Tests
             TaskGroup1.AddShip(test,0);
 
             TaskGroup1.Ships[0].Refuel(200000.0f);
-            TaskGroup1.IssueOrder(OrderType.Move, WP1);
+            TaskGroup1.IssueOrder(OrderType.MoveTo, WP1);
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
 

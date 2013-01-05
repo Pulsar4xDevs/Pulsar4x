@@ -10,10 +10,125 @@ namespace Pulsar4X.Entities
 {
     public enum OrderType
     {
-        Move,
+        /// <summary>
+        /// General Ship Orders:
+        /// </summary>
+        MoveTo,
+        ExtendedOrbit,
+        Picket,
         Recrew,
         Refuel,
         Resupply,
+        SendMessage,
+        EqualizeFuel,
+        EqualizeMSP,
+        ActivateTransponder,
+        DeactivateTransponder,
+
+        /// <summary>
+        /// Any Taskgroup of more than one vessel.
+        /// </summary>
+        DivideFleetToSingleShips,
+
+        /// <summary>
+        /// Any taskgroup that has sub task groups created from it, such as by a divide order.
+        /// </summary>
+        IncorporateSubfleet,
+
+        /// <summary>
+        /// Military Ship Specific orders:
+        /// </summary>
+        BeginOverhaul,
+
+
+        /// <summary>
+        /// Targeted on taskforce specific orders:
+        /// </summary>
+        Follow,
+        Join,
+        Absorb,
+
+        /// <summary>
+        /// JumpPoint Capable orders only:
+        /// </summary>
+        StandardTransit,
+        SquadronTransit,
+        TransitAndDivide,
+
+        /// <summary>
+        /// Cargo Hold specific orders when targeted on population/planet:
+        /// </summary>
+        LoadInstallation,
+        LoadShipComponent,
+        UnloadInstallation,
+        UnloadShipComponent,
+        UnloadAll,
+        LoadAllMinerals,
+        UnloadAllMinerals,
+        LoadMineral,
+        LoadMineralWhenX,
+        UnloadMineral,
+        LoadOrUnloadMineralsToReserve,
+
+        /// <summary>
+        /// Colony ship specific orders:
+        /// </summary>
+        LoadColonists,
+        UnloadColonists,
+
+        /// <summary>
+        /// GeoSurvey specific orders:
+        /// </summary>
+        GeoSurvey,
+        DetachNonGeoSurvey,
+
+        /// <summary>
+        /// Grav survey specific orders:
+        /// </summary>
+        GravSurvey,
+        DetachNonGravSurvey,
+
+        /// <summary>
+        /// Jump Gate Construction Module specific orders:
+        /// </summary>
+        BuildJumpGate,
+
+        /// <summary>
+        /// Tanker Specific:
+        /// </summary>
+        RefuelTargetFleet,
+        DetachTankers,
+        
+        /// <summary>
+        /// Supply Ship specific:
+        /// </summary>
+        ResupplyTargetFleet,
+        DetachSupplyShips,
+
+        /// <summary>
+        /// Collier Specific
+        /// </summary>
+        ReloadTargetFleet,
+        DetachColliers,
+
+        /// <summary>
+        /// Any taskgroup, but the target must be a TG with the appropriate ship to fulfill this order.
+        /// </summary>
+        RefuelFromTargetFleet,
+        ResupplyFromTargetFleet,
+        ReloadFromTargetFleet,
+
+        /// <summary>
+        /// Any taskgroup, but target must have hangar bays, perhaps check to see if capacity is available.
+        /// </summary>
+        LandOnAssignedMothership,
+        LandOnMotherShipNoAssign,
+        LandOnMothershipAssign,
+
+
+        /// <summary>
+        /// Number of orders available.
+        /// </summary>
         TypeCount
     }
     public class TaskGroupTN : StarSystemEntity

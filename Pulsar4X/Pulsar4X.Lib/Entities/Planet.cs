@@ -20,6 +20,12 @@ namespace Pulsar4X.Entities
         public BindingList<Gas> Gases { get; set; } //gases in atmosphere
         public BindingList<Population> Populations { get; set; } // list of Populations (colonies) on this planet.
 
+        /// <summary>
+        /// dictionary listing of which faction has surveyed this planetary body. dictionary might be superfluous, and this could merely be
+        /// accomplished by a bindinglist of factions, since only factions present will have surveyed the body.
+        /// </summary>
+        public Dictionary<Faction, bool> GeoSurveyList { get; set; }
+
         //TODO: Currently Id is only unique in the star it belongs to, not unique across multiple stars
         public PlanetTypes PlanetType { get; set; }
         public bool IsGasGiant { get; set; }
@@ -153,6 +159,8 @@ namespace Pulsar4X.Entities
             Moons = new BindingList<Planet>();
             Gases = new BindingList<Gas>();
             Populations = new BindingList<Population>();
+
+            GeoSurveyList = new Dictionary<Faction, bool>();
 
             SSEntity = StarSystemEntityType.Body;
         }
