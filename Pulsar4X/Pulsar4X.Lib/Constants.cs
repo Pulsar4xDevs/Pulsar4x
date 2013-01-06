@@ -749,5 +749,24 @@ namespace Pulsar4X
             /// </summary>
             public const int FactionMax = 64;
         }
+
+        /// <summary>
+        /// Tick times to complete said interval.
+        /// </summary>
+        public static class TimeInSeconds
+        {
+            public const uint FiveSeconds = 5;
+            public const uint ThirtySeconds = 30;
+            public const uint Minute = 60;
+            public const uint TwoMinutes = 120;
+            public const uint FiveMinutes = 300;
+            public const uint ThirtyMinutes = 1800;
+            public const uint Hour = 3600;
+            public const uint Day = 86400;
+            public const uint Week = 604800;
+            public const uint Month = 2592000;
+            public const uint Year = 31104000;
+            public const uint Century = 3110400000;
+        }
     }
 }

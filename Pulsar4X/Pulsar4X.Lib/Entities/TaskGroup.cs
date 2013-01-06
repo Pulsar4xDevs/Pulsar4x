@@ -131,6 +131,19 @@ namespace Pulsar4X.Entities
         /// </summary>
         TypeCount
     }
+
+    /// <summary>
+    /// What state is the taskgroup in regarding accepting additional orders?
+    /// </summary>
+    public enum OrderState
+    {
+        AcceptOrders,
+        DisallowOrdersPDC,
+        DisallowOrdersSB,
+        DisallowOrdersUnknownJump,
+        TypeCount
+    }
+
     public class TaskGroupTN : StarSystemEntity
     {
         /// <summary>
@@ -179,9 +192,24 @@ namespace Pulsar4X.Entities
         public BindingList<StarSystemEntity> OrderTarget { get; set; }
 
         /// <summary>
-        /// have new orders been set?
+        /// Which system do these orders take place in?
         /// </summary>
-        private bool NewOrders { get; set; }
+        public BindingList<StarSystem> OrderSystem { get; set; }
+
+        /// <summary>
+        /// What is the state of this taskgroup's ability to accept orders?
+        /// </summary>
+        public OrderState CanOrder { get; set; }
+
+        /// <summary>
+        /// Is this a set of new orders that various housekeeping needs to be done for?
+        /// </summary>
+        public bool NewOrders { get; set; }
+
+        /// <summary>
+        /// Total Distance ship will travel under current orders in AUs.
+        /// </summary>
+        public double TotalOrderDistance { get; set; }
 
         /// <summary>
         /// Speed along the X axis. 
@@ -196,7 +224,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Time to Complete current order.
         /// </summary>
-        public int TimeRequirement { get; set; }
+        public uint TimeRequirement { get; set; }
 
 
         /// <summary>
@@ -287,9 +315,21 @@ namespace Pulsar4X.Entities
             CurrentSpeedY = 0.0;
             CurrentHeading = 0.0;
             TimeRequirement = 0;
-            NewOrders = false;
+
             Orders = new BindingList<OrderType>();
             OrderTarget = new BindingList<StarSystemEntity>();
+            OrderSystem = new BindingList<StarSystem>();
+            TotalOrderDistance = 0.0;
+
+            /// <summary>
+            /// Change this for PDCS and starbases.
+            /// </summary>
+            CanOrder = OrderState.AcceptOrders;
+
+            /// <summary>
+            /// Ships start in the unordered state, so new orders will have to have GetHeading/speed/other functionality performed.
+            /// </summary>
+            NewOrders = true;
 
             Ships = new BindingList<ShipTN>();
             ShipOutOfFuel = false;
@@ -494,6 +534,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetPositionFromOrbit()
         {
+            Contact.XSystem = OrbitingBody.XSystem;
+            Contact.YSystem = OrbitingBody.YSystem;
             Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
             Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
         }
@@ -792,15 +834,63 @@ namespace Pulsar4X.Entities
         {
             Orders.Add(Order);
             OrderTarget.Add(Destination);
-            NewOrders = true;
+
+            int OrderCount = Orders.Count - 1;
+            double dX=0.0,dY=0.0, dZ;
+
+            if (Orders[OrderCount] == OrderType.StandardTransit || Orders[OrderCount] == OrderType.SquadronTransit || Orders[OrderCount] == OrderType.TransitAndDivide)
+            {
+                for (int loop = 0; loop < OrderSystem[OrderCount].JumpPoints.Count; loop++)
+                {
+                    if (OrderSystem[OrderCount].JumpPoints[loop].XSystem == Destination.XSystem && OrderSystem[OrderCount].JumpPoints[loop].YSystem == Destination.YSystem)
+                    {
+                        if (OrderSystem[OrderCount].JumpPoints[loop].IsExplored == false)
+                            CanOrder = OrderState.DisallowOrdersUnknownJump;
+
+                        break;
+                    }
+                }
+            }
+
+            if (OrderCount == 0)
+            {
+                if (IsOrbiting)
+                    GetPositionFromOrbit();
+
+                dX = Math.Abs(OrderTarget[OrderCount].XSystem - Contact.XSystem);
+                dY = Math.Abs(OrderTarget[OrderCount].YSystem - Contact.YSystem);
+
+                OrderSystem.Add(Contact.CurrentSystem);
+
+            }
+            else if (Orders[OrderCount-1] == OrderType.StandardTransit || Orders[OrderCount-1] == OrderType.SquadronTransit || Orders[OrderCount-1] == OrderType.TransitAndDivide)
+            {
+                for (int loop = 0; loop < OrderSystem[OrderCount-1].JumpPoints.Count; loop++)
+                {
+                    if (OrderSystem[OrderCount - 1].JumpPoints[loop].XSystem == Destination.XSystem && OrderSystem[OrderCount - 1].JumpPoints[loop].YSystem == Destination.YSystem)
+                    {
+                        dX = Math.Abs(OrderTarget[OrderCount].XSystem - OrderSystem[OrderCount - 1].JumpPoints[loop].Connect.XSystem);
+                        dY = Math.Abs(OrderTarget[OrderCount].YSystem - OrderSystem[OrderCount - 1].JumpPoints[loop].Connect.YSystem);
+                        OrderSystem.Add(OrderSystem[OrderCount - 1].JumpPoints[loop].Connect.System);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                dX = Math.Abs(OrderTarget[OrderCount].XSystem - OrderTarget[OrderCount - 1].XSystem);
+                dY = Math.Abs(OrderTarget[OrderCount].YSystem - OrderTarget[OrderCount - 1].YSystem);
+
+                OrderSystem.Add(OrderSystem[OrderCount-1]);
+            }
+            dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
+            TotalOrderDistance = TotalOrderDistance + dZ;
         }
 
-
         /// <summary>
-        /// TaskGroup order handling function 
+        /// GetHeading determines the direction the ship should face to get to its current ordered target.
         /// </summary>
-        /// <param name="TimeSlice">How much time the taskgroup is alloted to perform its orders. unit is in seconds</param>
-        public void FollowOrders(int TimeSlice)
+        public void GetHeading()
         {
             if (IsOrbiting)
             {
@@ -808,32 +898,58 @@ namespace Pulsar4X.Entities
                 IsOrbiting = false;
             }
 
+            double dX = Contact.SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
+            double dY = Contact.SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
+
+            CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
+        }
+
+        /// <summary>
+        /// GetSpeed gets the current X and Y velocities required by the current heading.
+        /// </summary>
+        public void GetSpeed()
+        {
+            double dX = Contact.SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
+            double dY = Contact.SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
+
+            double sign = 1.0;
+            if (dX > 0.0)
+            {
+                sign = -1.0;
+            }
+
+            /// <summary>
+            /// minor matrix multiplication here.
+            /// </summary>
+            CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign;
+            CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign;
+        }
+
+        /// <summary>
+        /// How long will this order take given the TaskGroup's current speed?
+        /// </summary>
+        public void GetTimeRequirement()
+        {
+            double dX = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
+            double dY = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
+            double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
+
+            TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed));
+        }
+
+
+        /// <summary>
+        /// TaskGroup order handling function 
+        /// </summary>
+        /// <param name="TimeSlice">How much time the taskgroup is alloted to perform its orders. unit is in seconds</param>
+        public void FollowOrders(uint TimeSlice)
+        {
             if (NewOrders == true)
             {
-                double dX = Contact.SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
-                double dY = Contact.SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
+                GetHeading();
+                GetSpeed();
 
-                CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
-
-                double sign = 1.0;
-                if (dX > 0.0)
-                {
-                    sign = -1.0;
-                }
-
-                /// <summary>
-                /// minor matrix multiplication here.
-                /// </summary>
-                CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign;
-                CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign;
-
-                dX = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
-                dY = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
-
-                double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
-
-                TimeRequirement = (int)Math.Ceiling((dZ / (double)CurrentSpeed));
-
+                GetTimeRequirement();
                 NewOrders = false;
             }
 
@@ -847,8 +963,6 @@ namespace Pulsar4X.Entities
                 OrderTarget.RemoveAt(0);
                 Orders.RemoveAt(0);
 
-                if(Orders.Count > 0 )
-                    NewOrders = true;
 
                 UseFuel(TimeRequirement);
 
@@ -856,8 +970,11 @@ namespace Pulsar4X.Entities
                 /// move on to next order if possible
                 /// </summary>
                 TimeSlice = TimeSlice - TimeRequirement;
-                if (TimeSlice > 0 && NewOrders == true)
+                if (TimeSlice > 0 && Orders.Count > 0)
+                {
+                    NewOrders = true;
                     FollowOrders(TimeSlice);
+                }
             }
             else
             {
@@ -881,11 +998,11 @@ namespace Pulsar4X.Entities
         /// UseFuel decrements ship fuel storage over time TimeSlice.
         /// </summary>
         /// <param name="TimeSlice">TimeSlice to use fuel over.</param>
-        public void UseFuel(int TimeSlice)
+        public void UseFuel(uint TimeSlice)
         {
             for (int loop = 0; loop < Ships.Count; loop++)
             {
-                Ships[loop].FuelCounter = Ships[loop].FuelCounter + TimeSlice;
+                Ships[loop].FuelCounter = Ships[loop].FuelCounter + (int)TimeSlice;
 
                 int hours = (int)Math.Floor((float)Ships[loop].FuelCounter / 3600.0f);
 
