@@ -113,6 +113,11 @@ namespace Pulsar4X.Entities
         public int CurrentSpeed { get; set; }
         public float CurrentFuelUsePerHour { get; set; }
 
+        /// <summary>
+        /// Ships can have several types of cargo holds and multiple of each.
+        /// </summary>
+        public BindingList<CargoTN> ShipCargo { get; set; }
+
 
         /// <summary>
         /// List of passive sensors that this craft will have.
@@ -215,6 +220,20 @@ namespace Pulsar4X.Entities
             CurrentThermalSignature = ClassDefinition.MaxThermalSignature;
             CurrentSpeed = ClassDefinition.MaxSpeed;
             CurrentFuelUsePerHour = ClassDefinition.MaxFuelUsePerHour;
+
+
+            /// <summary>
+            /// Usually only cargo ships and salvagers will have cargo holds.
+            /// </summary>
+            ShipCargo = new BindingList<CargoTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipCargoDef.Count; loop++)
+            {
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipCargoCount[loop]; loop2++)
+                {
+                    CargoTN cargo = new CargoTN(ClassDefinition.ShipCargoDef[loop]);
+                    ShipCargo.Add(cargo);
+                }
+            }
 
             /// <summary>
             /// Every ship will have a passive sensor rating, but very few will have specialized passive sensors.

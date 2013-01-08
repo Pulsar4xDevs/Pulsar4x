@@ -28,7 +28,8 @@ namespace Pulsar4X.Entities
             ResearchLab,
             SectorCommand,
             Spaceport,
-            TerraformingInstallation
+            TerraformingInstallation,
+            InstallationCount
         }
 
         public const int NO_OF_INSTALLATIONS = 19;
@@ -137,6 +138,7 @@ namespace Pulsar4X.Entities
                         Name = "Infrastructure";
                         Cost = 2;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 2;
+                        Mass = 2500;
                         break;
                     }
                 case InstallationType.MaintenanceFacility:

@@ -125,10 +125,16 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<TaskGroupTN> TaskGroups { get; set; }
 
+
         /// <summary>
         /// I'll just store every contact in every system potentially here right now.
         /// </summary>
         public Dictionary<StarSystem,FactionSystemDetection> SystemContacts { get; set; }
+
+        /// <summary>
+        /// Just a list of the available installation types for this faction.
+        /// </summary>
+        public BindingList<Installation> InstallationTypes { get; set; }
         
 
         public Faction(int ID)
@@ -151,6 +157,13 @@ namespace Pulsar4X.Entities
 
             FactionID = ID;
 
+            InstallationTypes = new BindingList<Installation>();
+            for (int loop = 0; loop < (int)Installation.InstallationType.InstallationCount; loop++)
+            {
+                Installation NewInst = new Installation((Installation.InstallationType)loop);
+                InstallationTypes.Add(NewInst);
+            }
+
         }
 
         public Faction(string a_oName, Species a_oSpecies, int ID)
@@ -172,6 +185,13 @@ namespace Pulsar4X.Entities
             SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
 
             FactionID = ID;
+
+            InstallationTypes = new BindingList<Installation>();
+            for (int loop = 0; loop < (int)Installation.InstallationType.InstallationCount; loop++)
+            {
+                Installation NewInst = new Installation((Installation.InstallationType)loop);
+                InstallationTypes.Add(NewInst);
+            }
 
         }
 
@@ -214,6 +234,8 @@ namespace Pulsar4X.Entities
             ContactList.System.FactionDetectionLists.Remove(ContactList);
             SystemContacts.Remove(ContactList.System);
         }
+
+
 
 
         /// <summary>

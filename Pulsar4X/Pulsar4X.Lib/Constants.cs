@@ -722,14 +722,15 @@ namespace Pulsar4X
                 Sorium,
                 Uridium,
                 Corundium,
-                Gallicite
+                Gallicite,
+                MinerialCount
             }
 
             public const int NO_OF_MINERIALS = 11;
         }
 
         /// <summary>
-        /// ShipTN related constants here Right now, only the resolution max needs to be here.
+        /// ShipTN related constants here right now.
         /// </summary>
         public static class ShipTN
         {
@@ -737,6 +738,21 @@ namespace Pulsar4X
             /// No sensor may have a resolution greater than 500 HS or about 25,000 tons.
             /// </summary>
             public const int ResolutionMax = 500;
+
+            /// <summary>
+            /// there are 50 tons per any single hull space.
+            /// </summary>
+            public const float TonsPerHS = 50.0f;
+
+            /// <summary>
+            /// In seconds per ton.
+            /// </summary>
+            public const int BaseCargoLoadTimePerTon = 36;
+
+            /// <summary>
+            /// In seconds per person. Each cryopod seems to be 1/2 of a ton.
+            /// </summary>
+            public const int BaseCryoLoadTimePerPerson = 18;
         }
 
         /// <summary>

@@ -352,6 +352,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ActiveSensorDefTN> ShipASensorDef { get; set; }
 
+        /// <summary>
+        /// Number of Active sensors of each type on this ship class.
+        /// </summary>
         [DisplayName("Active Sensors Count"), 
         Category("Component Counts"),
         Description("Number of active sensors on this ship."),
@@ -359,6 +362,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ushort> ShipASensorCount { get; set; }
 
+        /// <summary>
+        /// Total Cross Section is essentially the HS count in integer form for the sensor model.
+        /// </summary>
         [DisplayName("Cross Cection"), 
         Category("Detials"),
         Description("Total Cross Section of this Class."),
@@ -366,6 +372,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public int TotalCrossSection { get; set; }
 
+        /// <summary>
+        /// Largest possible EM signature for this ship class.
+        /// </summary>
         [DisplayName("Max EM Signature"), 
         Category("Detials"),
         Description("Max EM Signature of this class.."),
@@ -373,6 +382,68 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public int MaxEMSignature { get; set; }
 
+
+        /// <summary>
+        /// List of Cargo hold definitions present on this ship class.
+        /// </summary>
+        [DisplayName("Cargo holds"),
+        Category("Component Lists"),
+        Description("List of Cargo holds on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<CargoDefTN> ShipCargoDef { get; set; }
+        
+        /// <summary>
+        /// Counter for each Cargo hold definition.
+        /// </summary>
+        [DisplayName("Cargo Holds Count"),
+        Category("Component Counts"),
+        Description("Number of Cargo holds on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipCargoCount { get; set; }
+
+        /// <summary>
+        /// Sum of the cargo capacity of all ship holds.
+        /// </summary>
+        [DisplayName("Cargo Space"),
+        Category("Detials"),
+        Description("Amount of cargo, in tons, that this ship can carry."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TotalCargoCapacity { get; set; }
+
+
+        /// <summary>
+        /// Reduction of base load time for Cargo/cryo capacity.
+        /// </summary>
+        [DisplayName("Tractor Multiplier"),
+        Category("Detials"),
+        Description("Reduction modifier for base Cargo/Cryo load times onto the ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TractorMultiplier { get; set; }
+
+
+        /// <summary>
+        /// Full cargo load time of the ship class, not counting logistics leadership or spaceports.
+        /// </summary>
+        [DisplayName("Cargo Load Time"),
+        Category("Detials"),
+        Description("Load time of the cargo holds on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int CargoLoadTime { get; set; }
+
+        /// <summary>
+        /// Full cryo load time of the ship class, not counting logistics leadership or spaceports.
+        /// </summary>
+        [DisplayName("Cryo Load Time"),
+        Category("Detials"),
+        Description("Load time of the cryo storage on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int CryoLoadTime { get; set; }
 
         /// <summary>
         /// This constructor will initialize the craft class to a default conventional armored 0 space ship, with a deployment time of 3 months and a name of title.
@@ -437,6 +508,14 @@ namespace Pulsar4X.Entities
             MaxEnginePower = 0;
             MaxThermalSignature = 0;
             MaxSpeed = 0;
+
+            ShipCargoDef = new BindingList<CargoDefTN>();
+            ShipCargoCount = new BindingList<ushort>();
+            TotalCargoCapacity = 0;
+            TractorMultiplier = 1;
+            CargoLoadTime = 0;
+            CryoLoadTime = 0;
+
 
             ShipPSensorDef = new BindingList<PassiveSensorDefTN>();
             ShipPSensorCount = new BindingList<ushort>();
@@ -542,6 +621,10 @@ namespace Pulsar4X.Entities
                 //***list through the components to find the next biggest one.***
 
             }
+
+            CargoLoadTime = (TotalCargoCapacity * Constants.ShipTN.BaseCargoLoadTimePerTon) / TractorMultiplier;
+            CryoLoadTime = (SpareCryoBerths * Constants.ShipTN.BaseCryoLoadTimePerPerson) / TractorMultiplier;
+
         }
 
         /// <summary>
@@ -582,7 +665,7 @@ namespace Pulsar4X.Entities
             int CrewIndex = CrewQuarters.IndexOf(CrewQ);
             if (CrewIndex != -1)
             {
-                CrewQuartersCount[CrewIndex] = (ushort)(CrewQuartersCount[CrewIndex] + (ushort)inc);
+                CrewQuartersCount[CrewIndex] = (ushort)((short)CrewQuartersCount[CrewIndex] + inc);
             }
             else if (CrewIndex == -1 && inc >= 1)
             {
@@ -642,7 +725,7 @@ namespace Pulsar4X.Entities
             int FuelIndex = FuelTanks.IndexOf(FuelT);
             if (FuelIndex != -1)
             {
-                FuelTanksCount[FuelIndex] = (ushort)(FuelTanksCount[FuelIndex] + (ushort)inc);
+                FuelTanksCount[FuelIndex] = (ushort)((short)FuelTanksCount[FuelIndex] + inc);
             }
             if (FuelIndex == -1 && inc >= 1)
             {
@@ -692,7 +775,7 @@ namespace Pulsar4X.Entities
 
             if (EBayIndex != -1)
             {
-                EngineeringBaysCount[EBayIndex] = (ushort)(EngineeringBaysCount[EBayIndex] + (ushort)inc);
+                EngineeringBaysCount[EBayIndex] = (ushort)((short)EngineeringBaysCount[EBayIndex] + inc);
             }
 
             if (EBayIndex == 1 && inc >= 1)
@@ -742,7 +825,7 @@ namespace Pulsar4X.Entities
             int OtherCompIndex = OtherComponents.IndexOf(Other);
             if (OtherCompIndex != -1)
             {
-                OtherComponentsCount[OtherCompIndex] = (ushort)(OtherComponentsCount[OtherCompIndex] + (ushort)inc);
+                OtherComponentsCount[OtherCompIndex] = (ushort)((short)OtherComponentsCount[OtherCompIndex] + inc);
             }
             if (OtherCompIndex == -1 && inc >= 1)
             {
@@ -788,13 +871,54 @@ namespace Pulsar4X.Entities
         public void AddEngine(EngineDefTN Engine, short inc)
         {
             ShipEngineDef = Engine;
-            ShipEngineCount = (ushort)(ShipEngineCount + (ushort)inc);
+            ShipEngineCount = (ushort)((short)ShipEngineCount + inc);
 
             MaxEnginePower = MaxEnginePower + (int)(Engine.enginePower * (ushort)inc);
             MaxThermalSignature = MaxThermalSignature + (int)(Engine.thermalSignature * (ushort)inc);
             MaxFuelUsePerHour = MaxFuelUsePerHour + (Engine.fuelUsePerHour * (float)inc);
 
             UpdateClass(Engine, inc);
+        }
+
+        /// <summary>
+        /// AddCargoHold adds the specifed hold to the ship in quantity inc. will attempt to subtract if inc is negative.
+        /// </summary>
+        /// <param name="Cargo">Hold definition.</param>
+        /// <param name="inc">Amount to add or subtract.</param>
+        public void AddCargoHold(CargoDefTN Cargo, short inc)
+        {
+            int CargoIndex = ShipCargoDef.IndexOf(Cargo);
+            if (CargoIndex != -1)
+            {
+                ShipCargoCount[CargoIndex] = (ushort)((short)ShipCargoCount[CargoIndex] + inc);
+            }
+            if (CargoIndex == -1 && inc >= 1)
+            {
+                ShipCargoDef.Add(Cargo);
+                ShipCargoCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (CargoIndex != -1)
+                {
+                    if (ShipCargoCount[CargoIndex] == 0)
+                    {
+                        ShipCargoCount.RemoveAt(CargoIndex);
+                        ShipCargoDef.RemoveAt(CargoIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            TotalCargoCapacity = TotalCargoCapacity + Cargo.cargoCapacity;
+            UpdateClass(Cargo, inc);
+
         }
 
         /// <summary>
@@ -807,7 +931,7 @@ namespace Pulsar4X.Entities
             int SensorIndex = ShipPSensorDef.IndexOf(Sensor);
             if (SensorIndex != -1)
             {
-                ShipPSensorCount[SensorIndex] = (ushort)(ShipPSensorCount[SensorIndex] + (ushort)inc);
+                ShipPSensorCount[SensorIndex] = (ushort)((short)ShipPSensorCount[SensorIndex] + inc);
             }
             if (SensorIndex == -1 && inc >= 1)
             {
@@ -861,7 +985,7 @@ namespace Pulsar4X.Entities
             int SensorIndex = ShipASensorDef.IndexOf(Sensor);
             if (SensorIndex != -1)
             {
-                ShipASensorCount[SensorIndex] = (ushort)(ShipASensorCount[SensorIndex] + (ushort)inc);
+                ShipASensorCount[SensorIndex] = (ushort)((short)ShipASensorCount[SensorIndex] + inc);
             }
             if (SensorIndex == -1 && inc >= 1)
             {

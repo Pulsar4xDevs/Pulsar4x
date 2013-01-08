@@ -6,6 +6,13 @@ using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 
+/// <summary>
+/// Need a unified component list and component definition list for
+/// CargoListEntry in CargoTN.cs
+/// UpdateClass in ShipClass.cs
+/// eventual onDamage function for Ship.cs
+/// </summary>
+
 namespace Pulsar4X.Entities
 {
     public enum OrderType
@@ -24,6 +31,18 @@ namespace Pulsar4X.Entities
         EqualizeMSP,
         ActivateTransponder,
         DeactivateTransponder,
+
+        /// <summary>
+        /// TaskGroups with active sensors:
+        /// </summary>
+        ActivateSensors,
+        DeactivateSensors,
+
+        /// <summary>
+        /// Taskgroups with shield equipped ships:
+        /// </summary>
+        ActivateShields,
+        DeactivateShields,
 
         /// <summary>
         /// Any Taskgroup of more than one vessel.
@@ -125,6 +144,12 @@ namespace Pulsar4X.Entities
         LandOnMotherShipNoAssign,
         LandOnMothershipAssign,
 
+        /// <summary>
+        /// Tractor Equipped Ships:
+        /// </summary>
+        TractorSpecifiedShip,
+        TractorSpecifiedShipyard,
+        ReleaseAt,
 
         /// <summary>
         /// Number of orders available.
@@ -141,6 +166,8 @@ namespace Pulsar4X.Entities
         DisallowOrdersPDC,
         DisallowOrdersSB,
         DisallowOrdersUnknownJump,
+        DisallowOrdersFollowingTarget,
+        UnableToComply,
         TypeCount
     }
 
@@ -241,41 +268,59 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of all active sensors in this taskgroup, and the number of each.
         /// </summary>
-        public BindingList<ActiveSensorTN> ActiveSensorQue;
-        public BindingList<int> ActiveSensorCount;
+        public BindingList<ActiveSensorTN> ActiveSensorQue { get; set; }
+        public BindingList<int> ActiveSensorCount { get; set; }
 
         /// <summary>
         /// The best thermal sensor, and the number present in the fleet and undamaged.
         /// </summary>
-        public PassiveSensorTN BestThermal;
-        public int BestThermalCount;
+        public PassiveSensorTN BestThermal { get; set; }
+        public int BestThermalCount { get; set; }
 
         /// <summary>
         /// The best EM sensor, and the number present in the fleet and undamaged.
         /// </summary>
-        public PassiveSensorTN BestEM;
-        public int BestEMCount;
+        public PassiveSensorTN BestEM { get; set; }
+        public int BestEMCount { get; set; }
 
         /// <summary>
         /// Each sensor stores its own lookup characteristics for at what range a particular signature is detected, but the purpose of the taskgroup 
         /// lookup tables will be to store which sensor in the taskgroup active que is best at detecting a ship with the specified TCS.
         /// </summary>
-        public BindingList<int> TaskGroupLookUpST;
-        public BindingList<int> TaskGroupLookUpMT;
+        public BindingList<int> TaskGroupLookUpST { get; set; }
+        public BindingList<int> TaskGroupLookUpMT { get; set; }
 
         /// <summary>
         /// Each of these linked lists stores the index of the ships in the taskgroup, in the order from least to greatest of each respective signature.
         /// </summary>
-        public LinkedList<int> ThermalSortList;
-        public LinkedList<int> EMSortList;
-        public LinkedList<int> ActiveSortList;
+        public LinkedList<int> ThermalSortList { get; set; }
+        public LinkedList<int> EMSortList { get; set; }
+        public LinkedList<int> ActiveSortList { get; set; }
 
 
+        /// <summary>
+        /// Useless mass override for StarSystem Entity.
+        /// </summary>
         public override double Mass
         {
             get { return 0.0; }
             set { value = 0.0; }
         }
+
+        /// <summary>
+        /// Sum total of all cargo holds in the taskgroup.
+        /// </summary>
+        public int TotalCargoTonnage { get; set; }
+
+        /// <summary>
+        /// Space currently occupied in the taskgroup's holds.
+        /// </summary>
+        public int CurrentCargoTonnage { get; set; }
+
+        /// <summary>
+        /// List of installations in the cargo hold.
+        /// </summary>
+        public Dictionary<Installation.InstallationType,CargoListEntryTN> CargoList { get; set; }
 
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
@@ -366,6 +411,10 @@ namespace Pulsar4X.Entities
             EMSortList = new LinkedList<int>();
             ActiveSortList = new LinkedList<int>();
 
+            CargoList = new Dictionary<Installation.InstallationType,CargoListEntryTN>();
+            TotalCargoTonnage = 0;
+            CurrentCargoTonnage = 0;
+
         }
 
         /// <summary>
@@ -400,6 +449,8 @@ namespace Pulsar4X.Entities
             {
                 Ships[loop].SetSpeed(CurrentSpeed);
             }
+
+            TotalCargoTonnage = TotalCargoTonnage + shipDef.TotalCargoCapacity;
 
             UpdatePassiveSensors(ship);
 
@@ -1022,6 +1073,91 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Load cargo loads a specified installation type from a population, up to the limit in installations if possible.
+        /// </summary>
+        /// <param name="Pop">Population to load from.</param>
+        /// <param name="InstType">installation type to load.</param>
+        /// <param name="Limit">Limit in number of facilities to load.</param>
+        public void LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
+        {
+            int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
+
+            int TotalMass = Faction.InstallationTypes[(int)InstType].Mass * Limit;
+            int AvailableMass = (int)(Pop.Installations[(int)InstType].Number * (float)Faction.InstallationTypes[(int)InstType].Mass);
+
+            int MassToLoad = 0;
+
+            /// <summary>
+            /// In this case load as much as possible up to AvailableMass.
+            if (Limit == 0)
+            {
+                MassToLoad = Math.Min(RemainingTonnage, AvailableMass);
+
+            }
+            /// <summary>
+            /// In this case only load up to Total mass.
+            /// </summary>
+            else
+            {
+                MassToLoad = Math.Min(RemainingTonnage, TotalMass);
+            }
+
+            if (CargoList.ContainsKey(InstType))
+            {
+                CargoListEntryTN CLE = CargoList[InstType];
+                CLE.tons = CLE.tons + MassToLoad;
+
+            }
+            else
+            {
+                CargoListEntryTN CargoListEntry = new CargoListEntryTN(InstType, MassToLoad);
+                CargoList.Add(InstType, CargoListEntry);
+            }
+
+            CurrentCargoTonnage = CurrentCargoTonnage + MassToLoad;
+
+            Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number - (float)(MassToLoad / Faction.InstallationTypes[(int)InstType].Mass);
+        }
+
+        /// <summary>
+        /// Unload Cargo unloads a specified installation type from the taskgroup to a population. either all installations in this type are unloaded, or merely the limit are unloaded.
+        /// </summary>
+        /// <param name="Pop">Population to unload to.</param>
+        /// <param name="InstType">Installation type.</param>
+        /// <param name="Limit">Number of installations to unload.</param>
+        public void UnLoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
+        {
+            CargoListEntryTN CLE = CargoList[InstType];
+
+            int TotalMass = Faction.InstallationTypes[(int)InstType].Mass * Limit;
+            int MassToUnload = 0;
+
+            /// <summary>
+            /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
+            /// </summary>
+            if (Limit == 0)
+            {
+                MassToUnload = CLE.tons;
+            }
+            else
+            {
+                MassToUnload = Math.Min(CLE.tons, TotalMass);
+            }
+
+            CLE.tons = CLE.tons - MassToUnload;
+            CurrentCargoTonnage = CurrentCargoTonnage - MassToUnload;
+            if (MassToUnload == CLE.tons)
+            {
+                CargoList.Remove(InstType);
+            }
+
+            Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(MassToUnload / Faction.InstallationTypes[(int)InstType].Mass);
+            
+            int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
         }
     }
     /// <summary>
