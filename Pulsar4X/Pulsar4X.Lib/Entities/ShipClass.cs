@@ -415,6 +415,17 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// Sum of the troop bay capacity for the ship..
+        /// </summary>
+        [DisplayName("Troop Bay Capacity"),
+        Category("Detials"),
+        Description("Number of troops that the combined troop bays on this ship can accomodate."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TotalTroopCapacity { get; set; }
+
+
+        /// <summary>
         /// Reduction of base load time for Cargo/cryo capacity.
         /// </summary>
         [DisplayName("Tractor Multiplier"),
@@ -444,6 +455,16 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int CryoLoadTime { get; set; }
+
+        /// <summary>
+        /// Full Troop load time of the ship class, not counting logistics leadership or spaceports.
+        /// </summary>
+        [DisplayName("Troop Load Time"),
+        Category("Detials"),
+        Description("Load time of the troop bays on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TroopLoadTime { get; set; }
 
         /// <summary>
         /// This constructor will initialize the craft class to a default conventional armored 0 space ship, with a deployment time of 3 months and a name of title.
@@ -624,6 +645,7 @@ namespace Pulsar4X.Entities
 
             CargoLoadTime = (TotalCargoCapacity * Constants.ShipTN.BaseCargoLoadTimePerTon) / TractorMultiplier;
             CryoLoadTime = (SpareCryoBerths * Constants.ShipTN.BaseCryoLoadTimePerPerson) / TractorMultiplier;
+            TroopLoadTime = (TotalTroopCapacity * Constants.ShipTN.BaseTroopLoadTimePerCompany) / TractorMultiplier;
 
         }
 

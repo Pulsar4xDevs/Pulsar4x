@@ -21,5 +21,10 @@ namespace Pulsar4X.Entities
         public CommanderTypes CommanderType { get; set; }
         public int Rank { get; set; }
         public string RankName { get; set; }
+
+        /// <summary>
+        /// How much this officer contributes to loading and unloading ships.
+        /// </summary>
+        public float LogisticsBonus;
     }
 }

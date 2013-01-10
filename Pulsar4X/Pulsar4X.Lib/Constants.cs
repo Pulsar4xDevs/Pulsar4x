@@ -753,6 +753,181 @@ namespace Pulsar4X
             /// In seconds per person. Each cryopod seems to be 1/2 of a ton.
             /// </summary>
             public const int BaseCryoLoadTimePerPerson = 18;
+
+            /// <summary>
+            /// In Seconds per Company. About 48 hours each.
+            /// 5 Companies = 1 Battalion.
+            /// 4 Battalions + 1 BHQ = 5 Battalions = 1 Brigade
+            /// 4 Brigades + 1 DHQ = 21 Battalions = 1 Division
+            /// </summary>
+            public const int BaseTroopLoadTimePerCompany = 2880;
+
+            public enum OrderType
+            {
+                /// <summary>
+                /// General Ship Orders:
+                /// </summary>
+                MoveTo,
+                ExtendedOrbit,
+                Picket,
+                Recrew,
+                Refuel,
+                Resupply,
+                SendMessage,
+                EqualizeFuel,
+                EqualizeMSP,
+                ActivateTransponder,
+                DeactivateTransponder,
+
+                /// <summary>
+                /// TaskGroups with active sensors:
+                /// </summary>
+                ActivateSensors,
+                DeactivateSensors,
+
+                /// <summary>
+                /// Taskgroups with shield equipped ships:
+                /// </summary>
+                ActivateShields,
+                DeactivateShields,
+
+                /// <summary>
+                /// Any Taskgroup of more than one vessel.
+                /// </summary>
+                DivideFleetToSingleShips,
+
+                /// <summary>
+                /// Any taskgroup that has sub task groups created from it, such as by a divide order.
+                /// </summary>
+                IncorporateSubfleet,
+
+                /// <summary>
+                /// Military Ship Specific orders:
+                /// </summary>
+                BeginOverhaul,
+
+
+                /// <summary>
+                /// Targeted on taskforce specific orders:
+                /// </summary>
+                Follow,
+                Join,
+                Absorb,
+
+                /// <summary>
+                /// JumpPoint Capable orders only:
+                /// </summary>
+                StandardTransit,
+                SquadronTransit,
+                TransitAndDivide,
+
+                /// <summary>
+                /// Cargo Hold specific orders when targeted on population/planet:
+                /// </summary>
+                LoadInstallation,
+                LoadShipComponent,
+                UnloadInstallation,
+                UnloadShipComponent,
+                UnloadAll,
+                LoadAllMinerals,
+                UnloadAllMinerals,
+                LoadMineral,
+                LoadMineralWhenX,
+                UnloadMineral,
+                LoadOrUnloadMineralsToReserve,
+
+                /// <summary>
+                /// Colony ship specific orders:
+                /// </summary>
+                LoadColonists,
+                UnloadColonists,
+
+                /// <summary>
+                /// GeoSurvey specific orders:
+                /// </summary>
+                GeoSurvey,
+                DetachNonGeoSurvey,
+
+                /// <summary>
+                /// Grav survey specific orders:
+                /// </summary>
+                GravSurvey,
+                DetachNonGravSurvey,
+
+                /// <summary>
+                /// Jump Gate Construction Module specific orders:
+                /// </summary>
+                BuildJumpGate,
+
+                /// <summary>
+                /// Tanker Specific:
+                /// </summary>
+                RefuelTargetFleet,
+                DetachTankers,
+
+                /// <summary>
+                /// Supply Ship specific:
+                /// </summary>
+                ResupplyTargetFleet,
+                DetachSupplyShips,
+
+                /// <summary>
+                /// Collier Specific
+                /// </summary>
+                ReloadTargetFleet,
+                DetachColliers,
+
+                /// <summary>
+                /// Any taskgroup, but the target must be a TG with the appropriate ship to fulfill this order.
+                /// </summary>
+                RefuelFromTargetFleet,
+                ResupplyFromTargetFleet,
+                ReloadFromTargetFleet,
+
+                /// <summary>
+                /// Any taskgroup, but target must have hangar bays, perhaps check to see if capacity is available.
+                /// </summary>
+                LandOnAssignedMothership,
+                LandOnMotherShipNoAssign,
+                LandOnMothershipAssign,
+
+                /// <summary>
+                /// Tractor Equipped Ships:
+                /// </summary>
+                TractorSpecifiedShip,
+                TractorSpecifiedShipyard,
+                ReleaseAt,
+
+                /// <summary>
+                /// Number of orders available.
+                /// </summary>
+                TypeCount
+            }
+
+            /// <summary>
+            /// What state is the taskgroup in regarding accepting additional orders?
+            /// </summary>
+            public enum OrderState
+            {
+                AcceptOrders,
+                DisallowOrdersPDC,
+                DisallowOrdersSB,
+                DisallowOrdersUnknownJump,
+                DisallowOrdersFollowingTarget,
+                UnableToComply,
+                CurrentlyOverhauling,
+                CurrentlyLoading,
+                CurrentlyUnloading,
+                TypeCount
+            }
+
+            public enum LoadType
+            {
+                Cargo,
+                Cryo,
+                Troop,
+                TypeCount
+            }
         }
 
         /// <summary>

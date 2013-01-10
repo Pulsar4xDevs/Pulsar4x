@@ -22,6 +22,16 @@ namespace Pulsar4X.Entities
         public Planet Planet { get; set; }
 
         /// <summary>
+        /// Does this pop have an assigned governor?
+        /// </summary>
+        public bool GovernorPresent { get; set; }
+
+        /// <summary>
+        /// If so who is he?
+        /// </summary>
+        public Commander PopulationGovernor { get; set; }
+
+        /// <summary>
         /// The contact that this population is associated with.
         /// </summary>
         public SystemContact Contact { get; set; }
@@ -157,6 +167,8 @@ namespace Pulsar4X.Entities
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
 
             Contact = new SystemContact(Faction,this);
+
+            GovernorPresent = false;
         }
 
         /// <summary>
@@ -166,6 +178,25 @@ namespace Pulsar4X.Entities
         public void UpdateLocation()
         {
             Contact.UpdateLocationInSystem(Planet.XSystem, Planet.YSystem);
+        }
+
+        /// <summary>
+        /// How long does it take to load or unload from this population?
+        /// </summary>
+        /// <param name="TaskGroupTime">Time that the taskgroup will take barring any planetary modifiers. this is calculated beforehand.</param>
+        /// <returns>Time in seconds.</returns>
+        public int CalculateLoadTime(int TaskGroupTime)
+        {
+            float NumStarports = m_aoInstallations[(int)Installation.InstallationType.Spaceport].Number;
+
+            int TotalTime = TaskGroupTime;
+
+            if (GovernorPresent)
+                TotalTime = (int)((float)TaskGroupTime / ((NumStarports + 1.0f) * PopulationGovernor.LogisticsBonus));
+            else
+                TotalTime = (int)((float)TaskGroupTime / (NumStarports + 1.0f));
+
+            return TotalTime;
         }
     }
 }

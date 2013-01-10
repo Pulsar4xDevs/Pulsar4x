@@ -8,6 +8,11 @@ namespace Pulsar4X.Entities
     public class Waypoint : StarSystemEntity
     {
         /// <summary>
+        /// Starsystem this waypoint resides in.
+        /// </summary>
+        StarSystem System;
+
+        /// <summary>
         /// Mass is totally unnecessary here.
         /// </summary>
         public override double Mass 
@@ -16,8 +21,9 @@ namespace Pulsar4X.Entities
             set { value = 0.0; } 
         }
 
-        public Waypoint(double X, double Y)
+        public Waypoint(StarSystem Sys,double X, double Y)
         {
+            System = Sys;
             XSystem = X;
             YSystem = Y;
             ZSystem = 0.0;

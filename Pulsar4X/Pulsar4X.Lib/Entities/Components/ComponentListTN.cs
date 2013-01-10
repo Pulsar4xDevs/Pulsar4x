@@ -46,6 +46,11 @@ namespace Pulsar4X.Entities.Components
         public BindingList<ActiveSensorDefTN> ActiveSensorDef { get; set; }
 
         /// <summary>
+        /// Cargo holds,small, regular and perhaps larger variants.
+        /// </summary>
+        public BindingList<CargoDefTN> CargoHoldDef { get; set; }
+
+        /// <summary>
         /// ComponentDefList creates lists for every TN component. ClassTN and Faction should eventually both use this, but only faction does right now.
         /// </summary>
         public ComponentDefListTN()
@@ -58,6 +63,8 @@ namespace Pulsar4X.Entities.Components
             Engines = new BindingList<EngineDefTN>();
             PassiveSensorDef = new BindingList<PassiveSensorDefTN>();
             ActiveSensorDef = new BindingList<ActiveSensorDefTN>();
+
+            CargoHoldDef = new BindingList<CargoDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -82,7 +89,7 @@ namespace Pulsar4X.Entities.Components
             OtherComponents.Add(Bridge);
 
             /// <summary>
-            /// These components aren't really basic, but I'll put them in anyway.
+            /// These components aren't really basic, but I'll put them in anyway for the time being.
             /// </summary>
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
             ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
@@ -93,6 +100,16 @@ namespace Pulsar4X.Entities.Components
             ActiveSensorDef.Add(ActDef);
             PassiveSensorDef.Add(ThPasDef);
             PassiveSensorDef.Add(EMPasDef);
+
+
+            /// <summary>
+            /// Everyone starts with cargoholds.
+            /// </summary>
+            CargoDefTN Standard = new CargoDefTN("Cargo Hold - Standard", 500.0f, 50.0m, 5);
+            CargoDefTN Small = new CargoDefTN("Cargo Hold - Small", 100.0f, 12.5m, 2);
+
+            CargoHoldDef.Add(Standard);
+            CargoHoldDef.Add(Small);
         }
     }
 }

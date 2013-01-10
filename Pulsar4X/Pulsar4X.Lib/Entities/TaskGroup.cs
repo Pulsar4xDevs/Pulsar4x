@@ -11,165 +11,11 @@ using System.ComponentModel;
 /// CargoListEntry in CargoTN.cs
 /// UpdateClass in ShipClass.cs
 /// eventual onDamage function for Ship.cs
+/// onDestroyed function for Ship.cs
 /// </summary>
 
 namespace Pulsar4X.Entities
 {
-    public enum OrderType
-    {
-        /// <summary>
-        /// General Ship Orders:
-        /// </summary>
-        MoveTo,
-        ExtendedOrbit,
-        Picket,
-        Recrew,
-        Refuel,
-        Resupply,
-        SendMessage,
-        EqualizeFuel,
-        EqualizeMSP,
-        ActivateTransponder,
-        DeactivateTransponder,
-
-        /// <summary>
-        /// TaskGroups with active sensors:
-        /// </summary>
-        ActivateSensors,
-        DeactivateSensors,
-
-        /// <summary>
-        /// Taskgroups with shield equipped ships:
-        /// </summary>
-        ActivateShields,
-        DeactivateShields,
-
-        /// <summary>
-        /// Any Taskgroup of more than one vessel.
-        /// </summary>
-        DivideFleetToSingleShips,
-
-        /// <summary>
-        /// Any taskgroup that has sub task groups created from it, such as by a divide order.
-        /// </summary>
-        IncorporateSubfleet,
-
-        /// <summary>
-        /// Military Ship Specific orders:
-        /// </summary>
-        BeginOverhaul,
-
-
-        /// <summary>
-        /// Targeted on taskforce specific orders:
-        /// </summary>
-        Follow,
-        Join,
-        Absorb,
-
-        /// <summary>
-        /// JumpPoint Capable orders only:
-        /// </summary>
-        StandardTransit,
-        SquadronTransit,
-        TransitAndDivide,
-
-        /// <summary>
-        /// Cargo Hold specific orders when targeted on population/planet:
-        /// </summary>
-        LoadInstallation,
-        LoadShipComponent,
-        UnloadInstallation,
-        UnloadShipComponent,
-        UnloadAll,
-        LoadAllMinerals,
-        UnloadAllMinerals,
-        LoadMineral,
-        LoadMineralWhenX,
-        UnloadMineral,
-        LoadOrUnloadMineralsToReserve,
-
-        /// <summary>
-        /// Colony ship specific orders:
-        /// </summary>
-        LoadColonists,
-        UnloadColonists,
-
-        /// <summary>
-        /// GeoSurvey specific orders:
-        /// </summary>
-        GeoSurvey,
-        DetachNonGeoSurvey,
-
-        /// <summary>
-        /// Grav survey specific orders:
-        /// </summary>
-        GravSurvey,
-        DetachNonGravSurvey,
-
-        /// <summary>
-        /// Jump Gate Construction Module specific orders:
-        /// </summary>
-        BuildJumpGate,
-
-        /// <summary>
-        /// Tanker Specific:
-        /// </summary>
-        RefuelTargetFleet,
-        DetachTankers,
-        
-        /// <summary>
-        /// Supply Ship specific:
-        /// </summary>
-        ResupplyTargetFleet,
-        DetachSupplyShips,
-
-        /// <summary>
-        /// Collier Specific
-        /// </summary>
-        ReloadTargetFleet,
-        DetachColliers,
-
-        /// <summary>
-        /// Any taskgroup, but the target must be a TG with the appropriate ship to fulfill this order.
-        /// </summary>
-        RefuelFromTargetFleet,
-        ResupplyFromTargetFleet,
-        ReloadFromTargetFleet,
-
-        /// <summary>
-        /// Any taskgroup, but target must have hangar bays, perhaps check to see if capacity is available.
-        /// </summary>
-        LandOnAssignedMothership,
-        LandOnMotherShipNoAssign,
-        LandOnMothershipAssign,
-
-        /// <summary>
-        /// Tractor Equipped Ships:
-        /// </summary>
-        TractorSpecifiedShip,
-        TractorSpecifiedShipyard,
-        ReleaseAt,
-
-        /// <summary>
-        /// Number of orders available.
-        /// </summary>
-        TypeCount
-    }
-
-    /// <summary>
-    /// What state is the taskgroup in regarding accepting additional orders?
-    /// </summary>
-    public enum OrderState
-    {
-        AcceptOrders,
-        DisallowOrdersPDC,
-        DisallowOrdersSB,
-        DisallowOrdersUnknownJump,
-        DisallowOrdersFollowingTarget,
-        UnableToComply,
-        TypeCount
-    }
 
     public class TaskGroupTN : StarSystemEntity
     {
@@ -208,25 +54,12 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int MaxSpeed { get; set; }
 
-        /// <summary>
-        /// What orders is this taskforce currently under?
-        /// </summary>
-        public BindingList<OrderType> Orders { get; set; }
-
-        /// <summary>
-        /// What entity are those orders pointed at?
-        /// </summary>
-        public BindingList<StarSystemEntity> OrderTarget { get; set; }
-
-        /// <summary>
-        /// Which system do these orders take place in?
-        /// </summary>
-        public BindingList<StarSystem> OrderSystem { get; set; }
-
+        public BindingList<Orders> TaskGroupOrders { get; set; }
+        
         /// <summary>
         /// What is the state of this taskgroup's ability to accept orders?
         /// </summary>
-        public OrderState CanOrder { get; set; }
+        public Constants.ShipTN.OrderState CanOrder { get; set; }
 
         /// <summary>
         /// Is this a set of new orders that various housekeeping needs to be done for?
@@ -361,15 +194,14 @@ namespace Pulsar4X.Entities
             CurrentHeading = 0.0;
             TimeRequirement = 0;
 
-            Orders = new BindingList<OrderType>();
-            OrderTarget = new BindingList<StarSystemEntity>();
-            OrderSystem = new BindingList<StarSystem>();
+            TaskGroupOrders = new BindingList<Orders>();
+
             TotalOrderDistance = 0.0;
 
             /// <summary>
             /// Change this for PDCS and starbases.
             /// </summary>
-            CanOrder = OrderState.AcceptOrders;
+            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
 
             /// <summary>
             /// Ships start in the unordered state, so new orders will have to have GetHeading/speed/other functionality performed.
@@ -416,6 +248,8 @@ namespace Pulsar4X.Entities
             CurrentCargoTonnage = 0;
 
         }
+
+        #region Add Ship To TaskGroup
 
         /// <summary>
         /// Adds a ship to a taskgroup, will call sorting and sensor handling.
@@ -549,11 +383,11 @@ namespace Pulsar4X.Entities
 
                         switch (TEA)
                         {
-                            case 0: NewValue = Ships[NextNode.Next.Value].CurrentThermalSignature;
+                            case 0: NewValue = Ships[NextNode.Value].CurrentThermalSignature;
                             break;
-                            case 1: NewValue = Ships[NextNode.Next.Value].CurrentEMSignature;
+                            case 1: NewValue = Ships[NextNode.Value].CurrentEMSignature;
                             break;
-                            case 2: NewValue = Ships[NextNode.Next.Value].TotalCrossSection;
+                            case 2: NewValue = Ships[NextNode.Value].TotalCrossSection;
                             break;
                         }
 
@@ -577,21 +411,10 @@ namespace Pulsar4X.Entities
             AddNodeToSort(EMSortList, Ship.EMList,1);
             AddNodeToSort(ActiveSortList, Ship.ActiveList,2);
         }
+#endregion
 
 
-
-        /// <summary>
-        /// GetPositionFromOrbit returns systemKm from SystemAU. If a ship is orbiting a body it will move with that body.
-        /// </summary>
-        public void GetPositionFromOrbit()
-        {
-            Contact.XSystem = OrbitingBody.XSystem;
-            Contact.YSystem = OrbitingBody.YSystem;
-            Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
-            Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
-        }
-
-
+        #region Taskgroup Sensor activation and emissions sorting
         /// <summary>
         /// SetActiveSensor activates a sensor on a ship in the taskforce, modifies the active que, and resorts EM if appropriate.
         /// </summary>
@@ -874,68 +697,19 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// End SortShipBySignature
         /// </summary>
+#endregion
 
 
+        #region Taskgroup movement and position
         /// <summary>
-        /// Places an order into the que of orders.
+        /// GetPositionFromOrbit returns systemKm from SystemAU. If a ship is orbiting a body it will move with that body.
         /// </summary>
-        /// <param name="Order">Order is the order to be carried out.</param>
-        /// <param name="Destination">Destination of the waypoint/planet/TaskGroup we are moving towards.</param>
-        public void IssueOrder(OrderType Order, StarSystemEntity Destination)
+        public void GetPositionFromOrbit()
         {
-            Orders.Add(Order);
-            OrderTarget.Add(Destination);
-
-            int OrderCount = Orders.Count - 1;
-            double dX=0.0,dY=0.0, dZ;
-
-            if (Orders[OrderCount] == OrderType.StandardTransit || Orders[OrderCount] == OrderType.SquadronTransit || Orders[OrderCount] == OrderType.TransitAndDivide)
-            {
-                for (int loop = 0; loop < OrderSystem[OrderCount].JumpPoints.Count; loop++)
-                {
-                    if (OrderSystem[OrderCount].JumpPoints[loop].XSystem == Destination.XSystem && OrderSystem[OrderCount].JumpPoints[loop].YSystem == Destination.YSystem)
-                    {
-                        if (OrderSystem[OrderCount].JumpPoints[loop].IsExplored == false)
-                            CanOrder = OrderState.DisallowOrdersUnknownJump;
-
-                        break;
-                    }
-                }
-            }
-
-            if (OrderCount == 0)
-            {
-                if (IsOrbiting)
-                    GetPositionFromOrbit();
-
-                dX = Math.Abs(OrderTarget[OrderCount].XSystem - Contact.XSystem);
-                dY = Math.Abs(OrderTarget[OrderCount].YSystem - Contact.YSystem);
-
-                OrderSystem.Add(Contact.CurrentSystem);
-
-            }
-            else if (Orders[OrderCount-1] == OrderType.StandardTransit || Orders[OrderCount-1] == OrderType.SquadronTransit || Orders[OrderCount-1] == OrderType.TransitAndDivide)
-            {
-                for (int loop = 0; loop < OrderSystem[OrderCount-1].JumpPoints.Count; loop++)
-                {
-                    if (OrderSystem[OrderCount - 1].JumpPoints[loop].XSystem == Destination.XSystem && OrderSystem[OrderCount - 1].JumpPoints[loop].YSystem == Destination.YSystem)
-                    {
-                        dX = Math.Abs(OrderTarget[OrderCount].XSystem - OrderSystem[OrderCount - 1].JumpPoints[loop].Connect.XSystem);
-                        dY = Math.Abs(OrderTarget[OrderCount].YSystem - OrderSystem[OrderCount - 1].JumpPoints[loop].Connect.YSystem);
-                        OrderSystem.Add(OrderSystem[OrderCount - 1].JumpPoints[loop].Connect.System);
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                dX = Math.Abs(OrderTarget[OrderCount].XSystem - OrderTarget[OrderCount - 1].XSystem);
-                dY = Math.Abs(OrderTarget[OrderCount].YSystem - OrderTarget[OrderCount - 1].YSystem);
-
-                OrderSystem.Add(OrderSystem[OrderCount-1]);
-            }
-            dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
-            TotalOrderDistance = TotalOrderDistance + dZ;
+            Contact.XSystem = OrbitingBody.XSystem;
+            Contact.YSystem = OrbitingBody.YSystem;
+            Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
+            Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
         }
 
         /// <summary>
@@ -949,8 +723,8 @@ namespace Pulsar4X.Entities
                 IsOrbiting = false;
             }
 
-            double dX = Contact.SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
-            double dY = Contact.SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
+            double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
+            double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
 
             CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
         }
@@ -960,8 +734,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetSpeed()
         {
-            double dX = Contact.SystemKmX - (OrderTarget[0].XSystem * Constants.Units.KM_PER_AU);
-            double dY = Contact.SystemKmY - (OrderTarget[0].YSystem * Constants.Units.KM_PER_AU);
+            double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
+            double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
 
             double sign = 1.0;
             if (dX > 0.0)
@@ -981,11 +755,94 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetTimeRequirement()
         {
-            double dX = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
-            double dY = Math.Abs((OrderTarget[0].XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
+            double dX = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
+            double dY = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
             double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
             TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed));
+        }
+
+        /// <summary>
+        /// UseFuel decrements ship fuel storage over time TimeSlice.
+        /// </summary>
+        /// <param name="TimeSlice">TimeSlice to use fuel over.</param>
+        public void UseFuel(uint TimeSlice)
+        {
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                Ships[loop].FuelCounter = Ships[loop].FuelCounter + (int)TimeSlice;
+
+                int hours = (int)Math.Floor((float)Ships[loop].FuelCounter / 3600.0f);
+
+                if (hours >= 1)
+                {
+                    Ships[loop].FuelCounter = Ships[loop].FuelCounter - (3600 * hours);
+                    Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - (Ships[loop].CurrentFuelUsePerHour * hours);
+
+                    /// <summary>
+                    /// Ships have a grace period depending on TimeSlice choices, say they were running on fumes.
+                    /// or it can be done absolutely accurately if required.
+                    /// </summary>
+                    if (Ships[loop].CurrentFuel < 0.0f)
+                    {
+                        Ships[loop].CurrentFuel = 0.0f;
+                        ShipOutOfFuel = true;
+                    }
+                }
+            }
+        }
+
+#endregion
+
+
+        #region Taskgroup orders issuing,following,performing
+        /// <summary>
+        /// Places an order into the que of orders.
+        /// </summary>
+        /// <param name="Order">Order is the order to be carried out.</param>
+        /// <param name="Destination">Destination of the waypoint/planet/TaskGroup we are moving towards.</param>
+        /// <param name="Secondary">Secondary will be an enum ID for facility type,component,troop formation, or tractorable ship/shipyard. -1 if not present.</param>
+        public void IssueOrder(Orders OrderToTaskGroup)
+        {
+
+            TaskGroupOrders.Add(OrderToTaskGroup);
+
+            int OrderCount = TaskGroupOrders.Count - 1;
+            double dX = 0.0, dY = 0.0, dZ;
+
+            if (TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.StandardTransit || 
+                TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.SquadronTransit || 
+                TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
+            {
+                if (TaskGroupOrders[OrderCount].jumpPoint.IsExplored == false)
+                {
+                    CanOrder = Constants.ShipTN.OrderState.DisallowOrdersUnknownJump;
+                }
+            }
+
+            if (OrderCount == 0)
+            {
+                if (IsOrbiting)
+                    GetPositionFromOrbit();
+
+                dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - Contact.XSystem);
+                dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - Contact.YSystem);
+
+            }
+            else if (TaskGroupOrders[OrderCount - 1].typeOf == Constants.ShipTN.OrderType.StandardTransit ||
+                     TaskGroupOrders[OrderCount - 1].typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
+                     TaskGroupOrders[OrderCount - 1].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
+            {
+                dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.XSystem);
+                dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.YSystem);
+            }
+            else
+            {
+                dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - TaskGroupOrders[OrderCount - 1].target.XSystem);
+                dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - TaskGroupOrders[OrderCount - 1].target.YSystem);
+            }
+            dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
+            TotalOrderDistance = TotalOrderDistance + dZ;
         }
 
 
@@ -1006,22 +863,38 @@ namespace Pulsar4X.Entities
 
             if (TimeRequirement < TimeSlice)
             {
-                Contact.UpdateLocationInSystem(OrderTarget[0].XSystem, OrderTarget[0].YSystem);
-
-                if (OrderTarget[0].SSEntity == StarSystemEntityType.Body)
-                    IsOrbiting = true;
-
-                OrderTarget.RemoveAt(0);
-                Orders.RemoveAt(0);
-
-
+                /// <summary>
+                /// increase the taskgroup's fuel use counter.
+                /// </summary>
                 UseFuel(TimeRequirement);
+
+                /// <summary>
+                /// Move the taskgroup to the targeted location.
+                /// </summary>
+                Contact.UpdateLocationInSystem(TaskGroupOrders[0].target.XSystem, TaskGroupOrders[0].target.YSystem);
+
+                /// <summary>
+                /// Did we pull into orbit?
+                /// </summary>
+                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    IsOrbiting = true;
+                }
+
+                //***Currently worrking on this section.
+                uint timeRemaining = PerformOrders(TimeSlice);
+
+                TaskGroupOrders.RemoveAt(0);
+
+                //***
+
+                
 
                 /// <summary>
                 /// move on to next order if possible
                 /// </summary>
                 TimeSlice = TimeSlice - TimeRequirement;
-                if (TimeSlice > 0 && Orders.Count > 0)
+                if (TimeSlice > 0 && TaskGroupOrders.Count > 0)
                 {
                     NewOrders = true;
                     FollowOrders(TimeSlice);
@@ -1046,36 +919,27 @@ namespace Pulsar4X.Entities
         /// </summary>
 
         /// <summary>
-        /// UseFuel decrements ship fuel storage over time TimeSlice.
+        /// What order should be performed at the target location?
+        /// Update the state of the taskgroup if it is doing a blocking order. also fill out the timer for how long the ship will be blocked.
+        /// overhaul follow orders to make sure that this is handled.
         /// </summary>
-        /// <param name="TimeSlice">TimeSlice to use fuel over.</param>
-        public void UseFuel(uint TimeSlice)
+        public uint PerformOrders(uint TimeSlice)
         {
-            for (int loop = 0; loop < Ships.Count; loop++)
+            switch ((int)TaskGroupOrders[0].typeOf)
             {
-                Ships[loop].FuelCounter = Ships[loop].FuelCounter + (int)TimeSlice;
+                case (int)Constants.ShipTN.OrderType.LoadInstallation:
+                    int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                    int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+                break;
 
-                int hours = (int)Math.Floor((float)Ships[loop].FuelCounter / 3600.0f);
-
-                if (hours >= 1)
-                {
-                    Ships[loop].FuelCounter = Ships[loop].FuelCounter - (3600*hours);
-                    Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - (Ships[loop].CurrentFuelUsePerHour*hours);
-
-                    /// <summary>
-                    /// Ships have a grace period depending on TimeSlice choices, say they were running on fumes.
-                    /// or it can be done absolutely accurately if required.
-                    /// </summary>
-                    if (Ships[loop].CurrentFuel < 0.0f)
-                    {
-                        Ships[loop].CurrentFuel = 0.0f;
-                        ShipOutOfFuel = true;
-                    }
-                }
             }
+
+            return 0;
         }
+        #endregion
 
 
+        #region Taskgroup Cargo/Cryo/Troop/Component loading and unloading.
         /// <summary>
         /// Load cargo loads a specified installation type from a population, up to the limit in installations if possible.
         /// </summary>
@@ -1129,7 +993,7 @@ namespace Pulsar4X.Entities
         /// <param name="Pop">Population to unload to.</param>
         /// <param name="InstType">Installation type.</param>
         /// <param name="Limit">Number of installations to unload.</param>
-        public void UnLoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
+        public void UnloadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
             CargoListEntryTN CLE = CargoList[InstType];
 
@@ -1159,6 +1023,51 @@ namespace Pulsar4X.Entities
             
             int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
         }
+
+        /// <summary>
+        /// The taskgroup's longest load time member needs to be found, so this function will get the taskgroup side of things.
+        /// Another function on Population will handle pop's side of the calculation.
+        /// </summary>
+        /// <param name="Type">Type of cargo to load.</param>
+        /// <returns>Load time in seconds.</returns>
+        public int CalcTaskGroupLoadTime(Constants.ShipTN.LoadType Type)
+        {
+            int MaxLoadTime = 0;
+            float LogisticsBonus = 1.0f;
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipCommanded)
+                {
+                    LogisticsBonus = Ships[loop].ShipCommander.LogisticsBonus;
+                }
+                else
+                {
+                    LogisticsBonus = 1.0f; 
+                }
+
+                int ShipLoadTime = 0;
+
+                switch ((int)Type)
+                {
+                    case (int)Constants.ShipTN.LoadType.Cargo : ShipLoadTime = (int)((float)Ships[loop].ShipClass.CargoLoadTime / LogisticsBonus);
+                    break;
+                    case (int)Constants.ShipTN.LoadType.Cryo : ShipLoadTime = (int)((float)Ships[loop].ShipClass.CryoLoadTime / LogisticsBonus);
+                    break;
+                    case (int)Constants.ShipTN.LoadType.Troop: ShipLoadTime = (int)((float)Ships[loop].ShipClass.TroopLoadTime / LogisticsBonus);
+                    break;
+                }
+                if (ShipLoadTime > MaxLoadTime)
+                {
+                    MaxLoadTime = ShipLoadTime;
+                }
+            }
+
+            return MaxLoadTime;
+        }
+
+        #endregion
+
+
     }
     /// <summary>
     /// End TaskGroupTN

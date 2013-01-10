@@ -36,6 +36,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<FactionSystemDetection> FactionDetectionLists { get; set; }
 
+
         public int Seed { get; set; }
 
         //public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystem));
@@ -64,10 +65,8 @@ namespace Pulsar4X.Entities
         /// <param name="YSystemAU">System Position Y in AU</param>
         public void AddWaypoint(double XSystemAU, double YSystemAU)
         {
-            Waypoint NewWP = new Waypoint(XSystemAU, YSystemAU);
+            Waypoint NewWP = new Waypoint(this,XSystemAU, YSystemAU);
             Waypoints.Add(NewWP);
-
-
             //logger.Info("Waypoint added.");
             //logger.Info(XSystemAU.ToString());
             //logger.Info(YSystemAU.ToString());

@@ -520,7 +520,7 @@ namespace Pulsar4X.Tests
             Planet planet = new Planet();
 
 
-            Waypoint WP1 = new Waypoint(0.1,0.1);
+            Waypoint WP1 = new Waypoint(System,0.1,0.1);
 
             planet.XSystem = 0.0;
             planet.YSystem = 0.0;
@@ -538,11 +538,14 @@ namespace Pulsar4X.Tests
             TaskGroup1.AddShip(test,0);
 
             TaskGroup1.Ships[0].Refuel(200000.0f);
-            TaskGroup1.IssueOrder(OrderType.MoveTo, WP1);
+
+            Orders TGOrder = new Orders(Constants.ShipTN.OrderType.MoveTo, WP1, -1, WP1);
+
+            TaskGroup1.IssueOrder(TGOrder);
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
 
-            while (TaskGroup1.Orders.Count != 0)
+            while (TaskGroup1.TaskGroupOrders.Count != 0)
             {
                 TaskGroup1.FollowOrders(5);
                 Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.SystemKmX, TaskGroup1.Contact.SystemKmY, TaskGroup1.Contact.XSystem, TaskGroup1.Contact.YSystem);
@@ -558,11 +561,13 @@ namespace Pulsar4X.Tests
             Faction PlayerFaction1 = new Faction(0);
             Faction PlayerFaction2 = new Faction(1);
 
-            Waypoint Start1 = new Waypoint(1.0, 1.0);
-            Waypoint Start2 = new Waypoint(1.0005, 1.0005);
-
             StarSystem System1 = new StarSystem("Sol");
             StarSystem System2 = new StarSystem("Alpha Centauri");
+
+            Waypoint Start1 = new Waypoint(System1,1.0, 1.0);
+            Waypoint Start2 = new Waypoint(System1,1.0005, 1.0005);
+
+
 
             PlayerFaction1.AddNewShipDesign("Blucher");
             PlayerFaction2.AddNewShipDesign("Tribal");

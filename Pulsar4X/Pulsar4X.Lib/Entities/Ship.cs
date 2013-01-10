@@ -39,6 +39,16 @@ namespace Pulsar4X.Entities
 
         public int MaxLifeSupport { get; set; } //here is life support again.
 
+        /// <summary>
+        /// Does this ship have a commander assigned?
+        /// </summary>
+        public bool ShipCommanded { get; set; }
+
+        /// <summary>
+        /// Who is the commander of the ship.
+        /// </summary>
+        public Commander ShipCommander { get; set; }
+
 
         /// <summary>
         /// The ship will have an armor layering.
@@ -286,6 +296,8 @@ namespace Pulsar4X.Entities
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
             }
+
+            ShipCommanded = false;
         }
 
         /// <summary>
