@@ -864,38 +864,48 @@ namespace Pulsar4X.Entities
             if (TimeRequirement < TimeSlice)
             {
                 /// <summary>
-                /// increase the taskgroup's fuel use counter.
+                /// Is the movement phase over?
                 /// </summary>
-                UseFuel(TimeRequirement);
-
-                /// <summary>
-                /// Move the taskgroup to the targeted location.
-                /// </summary>
-                Contact.UpdateLocationInSystem(TaskGroupOrders[0].target.XSystem, TaskGroupOrders[0].target.YSystem);
-
-                /// <summary>
-                /// Did we pull into orbit?
-                /// </summary>
-                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                if (TimeRequirement != 0)
                 {
-                    IsOrbiting = true;
+                    TimeRequirement = 0;
+                    /// <summary>
+                    /// increase the taskgroup's fuel use counter.
+                    /// </summary>
+                    UseFuel(TimeRequirement);
+
+                    /// <summary>
+                    /// Move the taskgroup to the targeted location.
+                    /// </summary>
+                    Contact.UpdateLocationInSystem(TaskGroupOrders[0].target.XSystem, TaskGroupOrders[0].target.YSystem);
+
+                    /// <summary>
+                    /// Time requirement is the movement portion of the orders. subtract it here.
+                    /// </summary>
+                    TimeSlice = TimeSlice - TimeRequirement;
+
+                    /// <summary>
+                    /// Did we pull into orbit?
+                    /// </summary>
+                    if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                    {
+                        IsOrbiting = true;
+                    }
                 }
 
-                //***Currently worrking on this section.
-                uint timeRemaining = PerformOrders(TimeSlice);
+                /// <summary>
+                /// By now time requirement is 0 and the program has moved on to perform orders.
+                /// this will require additional time beyond time requirement.
+                /// </summary>
 
-                TaskGroupOrders.RemoveAt(0);
-
-                //***
-
-                
+                TimeSlice = PerformOrders(TimeSlice);
 
                 /// <summary>
                 /// move on to next order if possible
                 /// </summary>
-                TimeSlice = TimeSlice - TimeRequirement;
                 if (TimeSlice > 0 && TaskGroupOrders.Count > 0)
                 {
+                    TaskGroupOrders.RemoveAt(0);
                     NewOrders = true;
                     FollowOrders(TimeSlice);
                 }
@@ -927,14 +937,65 @@ namespace Pulsar4X.Entities
         {
             switch ((int)TaskGroupOrders[0].typeOf)
             {
+                /// <summary>
+                /// Perform no orders for moveto.
+                /// </summary>
+                case (int)Constants.ShipTN.OrderType.MoveTo:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                break;
+                
+                /// <summary>
+                /// Load Installation
+                /// </summary>
                 case (int)Constants.ShipTN.OrderType.LoadInstallation:
+                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                    {
+                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                    }
+
+                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                    {
+                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                    }
+                    else
+                    {
+                        TimeSlice = 0;
+                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                    }
+                break;
+
+                /// <summary>
+                /// Unload installation.
+                /// </summary>
+                case (int)Constants.ShipTN.OrderType.UnloadInstallation:
+                if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                {
                     int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
                     int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                    TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                }
+
+                if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                {
+                    TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    UnloadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                }
+                else
+                {
+                    TimeSlice = 0;
+                    TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                }
                 break;
 
             }
-
-            return 0;
+            return TimeSlice;
         }
         #endregion
 

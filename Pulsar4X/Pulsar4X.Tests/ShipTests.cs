@@ -539,7 +539,7 @@ namespace Pulsar4X.Tests
 
             TaskGroup1.Ships[0].Refuel(200000.0f);
 
-            Orders TGOrder = new Orders(Constants.ShipTN.OrderType.MoveTo, WP1, -1, WP1);
+            Orders TGOrder = new Orders(Constants.ShipTN.OrderType.MoveTo, -1, -1, WP1);
 
             TaskGroup1.IssueOrder(TGOrder);
 

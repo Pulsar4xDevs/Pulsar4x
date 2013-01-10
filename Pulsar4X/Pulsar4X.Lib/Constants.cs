@@ -762,6 +762,9 @@ namespace Pulsar4X
             /// </summary>
             public const int BaseTroopLoadTimePerCompany = 2880;
 
+            /// <summary>
+            /// I moved the following three enums here to constants to prevent taskgroup from ballooning in size beyond all recognition, I may move them back though once done.
+            /// </summary>
             public enum OrderType
             {
                 /// <summary>
