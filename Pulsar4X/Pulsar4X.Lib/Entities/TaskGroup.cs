@@ -903,11 +903,15 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// move on to next order if possible
                 /// </summary>
-                if (TimeSlice > 0 && TaskGroupOrders.Count > 0)
+                if (TimeSlice > 0)
                 {
                     TaskGroupOrders.RemoveAt(0);
-                    NewOrders = true;
-                    FollowOrders(TimeSlice);
+
+                    if (TaskGroupOrders.Count > 0)
+                    {
+                        NewOrders = true;
+                        FollowOrders(TimeSlice);
+                    }
                 }
             }
             else
@@ -964,8 +968,8 @@ namespace Pulsar4X.Entities
                     }
                     else
                     {
-                        TimeSlice = 0;
                         TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                        TimeSlice = 0;
                     }
                 break;
 
@@ -989,8 +993,8 @@ namespace Pulsar4X.Entities
                 }
                 else
                 {
-                    TimeSlice = 0;
                     TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                    TimeSlice = 0;
                 }
                 break;
 

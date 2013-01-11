@@ -241,8 +241,8 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Galaxy wide sensor sweep of all systems in which this faction has a presence. Here is where things start to get complicated.
         /// </summary>
-        /// <param name="TimeSlice">Current TimeSlice, not sure about the exact units yet.</param>
-        public void SensorSweep(int TimeSlice)
+        /// <param name="YearTickValue">The second count for the current year.</param>
+        public void SensorSweep(int YearTickValue)
         {
             /// <summary>
             /// Loop through all DSTS. ***
@@ -263,11 +263,11 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// I don't own loop2, and it hasn't been fully detected yet.
                     /// </summary>
-                    if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != TimeSlice &&
-                        System.FactionDetectionLists[FactionID].EM[loop2] != TimeSlice && System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice)
+                    if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue &&
+                        System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue && System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue)
                     {
                         float dist;
-                        if (TaskGroups[loop].Contact.DistanceUpdate[loop2] == TimeSlice)
+                        if (TaskGroups[loop].Contact.DistanceUpdate[loop2] == YearTickValue)
                         {
                             dist = TaskGroups[loop].Contact.DistanceTable[loop2];
                         }
@@ -278,12 +278,12 @@ namespace Pulsar4X.Entities
                             dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
 
                             TaskGroups[loop].Contact.DistanceTable[loop2] = dist;
-                            TaskGroups[loop].Contact.DistanceUpdate[loop2] = TimeSlice;
+                            TaskGroups[loop].Contact.DistanceUpdate[loop2] = YearTickValue;
 
                             int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
 
                             System.SystemContactList[loop2].DistanceTable[TGID] = dist;
-                            System.SystemContactList[loop2].DistanceUpdate[TGID] = TimeSlice;
+                            System.SystemContactList[loop2].DistanceUpdate[TGID] = YearTickValue;
                         }
 
 
@@ -309,8 +309,8 @@ namespace Pulsar4X.Entities
                             /// </summary>
                             if (dist < (float)detection)
                             {
-                                System.SystemContactList[loop2].Pop.ThermalDetection[FactionID] = TimeSlice;
-                                System.FactionDetectionLists[FactionID].Thermal[loop2] = TimeSlice;
+                                System.SystemContactList[loop2].Pop.ThermalDetection[FactionID] = YearTickValue;
+                                System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
                             }
 
                             sig = System.SystemContactList[loop2].Pop.EMSignature;
@@ -318,8 +318,8 @@ namespace Pulsar4X.Entities
 
                             if (dist < (float)detection)
                             {
-                                System.SystemContactList[loop2].Pop.EMDetection[FactionID] = TimeSlice;
-                                System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
+                                System.SystemContactList[loop2].Pop.EMDetection[FactionID] = YearTickValue;
+                                System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                             }
 
                             sig = Constants.ShipTN.ResolutionMax - 1;
@@ -330,8 +330,8 @@ namespace Pulsar4X.Entities
 
                             if (dist < (float)detection)
                             {
-                                System.SystemContactList[loop2].Pop.ActiveDetection[FactionID] = TimeSlice;
-                                System.FactionDetectionLists[FactionID].Active[loop2] = TimeSlice;
+                                System.SystemContactList[loop2].Pop.ActiveDetection[FactionID] = YearTickValue;
+                                System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                             }
                         }
                         else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup )
@@ -346,7 +346,7 @@ namespace Pulsar4X.Entities
 
                             #region Ship Thermal Detection Code.
 
-                            if (System.FactionDetectionLists[FactionID].Thermal[loop2] != TimeSlice)
+                            if (System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue)
                             {
 
                                 /// <summary>
@@ -397,9 +397,9 @@ namespace Pulsar4X.Entities
 
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = TimeSlice;
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = YearTickValue;
                                         }
-                                        System.FactionDetectionLists[FactionID].Thermal[loop2] = TimeSlice;
+                                        System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
                                     }
                                     else if (noDetection == false && allDetection == false)
                                     {
@@ -417,14 +417,14 @@ namespace Pulsar4X.Entities
                                             {
                                                 scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
 
-                                                if (scratch.ThermalDetection[FactionID] != TimeSlice)
+                                                if (scratch.ThermalDetection[FactionID] != YearTickValue)
                                                 {
                                                     sig = scratch.CurrentThermalSignature;
                                                     detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
 
                                                     if (dist <= (float)detection)
                                                     {
-                                                        scratch.ThermalDetection[FactionID] = TimeSlice;
+                                                        scratch.ThermalDetection[FactionID] = YearTickValue;
                                                     }
                                                     else
                                                     {
@@ -445,7 +445,7 @@ namespace Pulsar4X.Entities
 
                             #region Ship EM Detection Code.
 
-                            if (System.FactionDetectionLists[FactionID].EM[loop2] != TimeSlice)
+                            if (System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue)
                             {
                                 noDetection = false;
                                 allDetection = false;
@@ -498,9 +498,9 @@ namespace Pulsar4X.Entities
 
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = TimeSlice;
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = YearTickValue;
                                         }
-                                        System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
+                                        System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                     }
                                     else if (noDetection == false && allDetection == false)
                                     {
@@ -518,7 +518,7 @@ namespace Pulsar4X.Entities
                                             {
                                                 scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
 
-                                                if (scratch.EMDetection[FactionID] != TimeSlice)
+                                                if (scratch.EMDetection[FactionID] != YearTickValue)
                                                 {
                                                     sig = scratch.CurrentEMSignature;
 
@@ -535,9 +535,9 @@ namespace Pulsar4X.Entities
                                                         /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
                                                         /// Mark the entire group as "spotted" because no other detection will occur.
                                                         /// </summary>
-                                                        if (System.SystemContactList[loop2].TaskGroup.Ships[node.Previous.Value].EMDetection[FactionID] == TimeSlice)
+                                                        if (System.SystemContactList[loop2].TaskGroup.Ships[node.Previous.Value].EMDetection[FactionID] == YearTickValue)
                                                         {
-                                                            System.FactionDetectionLists[FactionID].EM[loop2] = TimeSlice;
+                                                            System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                                         }
                                                         break;
                                                     }
@@ -546,7 +546,7 @@ namespace Pulsar4X.Entities
 
                                                     if (dist <= (float)detection)
                                                     {
-                                                        scratch.EMDetection[FactionID] = TimeSlice;
+                                                        scratch.EMDetection[FactionID] = YearTickValue;
                                                     }
                                                     else
                                                     {
@@ -567,7 +567,7 @@ namespace Pulsar4X.Entities
 
                             #region Ship Active Detection Code.
 
-                            if (System.FactionDetectionLists[FactionID].Active[loop2] != TimeSlice && TaskGroups[loop].ActiveSensorQue.Count > 0)
+                            if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue && TaskGroups[loop].ActiveSensorQue.Count > 0)
                             {
                                 noDetection = false;
                                 allDetection = false;
@@ -615,9 +615,9 @@ namespace Pulsar4X.Entities
 
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = TimeSlice;
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = YearTickValue;
                                         }
-                                        System.FactionDetectionLists[FactionID].Active[loop2] = TimeSlice;
+                                        System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                     }
                                     else if (noDetection == false && allDetection == false)
                                     {
@@ -635,7 +635,7 @@ namespace Pulsar4X.Entities
                                             {
                                                 scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
 
-                                                if (scratch.ActiveDetection[FactionID] != TimeSlice)
+                                                if (scratch.ActiveDetection[FactionID] != YearTickValue)
                                                 {
                                                     sig = scratch.TotalCrossSection - 1;
 
@@ -646,7 +646,7 @@ namespace Pulsar4X.Entities
 
                                                     if (dist <= (float)detection)
                                                     {
-                                                        scratch.ActiveDetection[FactionID] = TimeSlice;
+                                                        scratch.ActiveDetection[FactionID] = YearTickValue;
                                                     }
                                                     else
                                                     {

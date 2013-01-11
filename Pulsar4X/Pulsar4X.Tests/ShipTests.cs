@@ -649,8 +649,123 @@ namespace Pulsar4X.Tests
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
+        }
+
+        [Test]
+        public void CargoLoadUnloadTest()
+        {
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
 
 
+            PlayerFaction1.AddNewShipDesign("Blucher");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCargoHold(PlayerFaction1.ComponentList.CargoHoldDef[1], 1);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P2 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+
+            System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 3.0f;
+            System1.Stars[0].Planets[0].Populations[1].Installations[(int)Installation.InstallationType.Infrastructure].Number = 0.0f;
+
+            Console.WriteLine("Infrastructure on P1 and P2:{0} {1}", System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number,
+                System1.Stars[0].Planets[0].Populations[1].Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+            PlayerFaction1.TaskGroups[0].LoadCargo(System1.Stars[0].Planets[0].Populations[0], Installation.InstallationType.Infrastructure, 1);
+
+            Console.WriteLine("Infrastructure on cargo tg after load in tons:{0}", PlayerFaction1.TaskGroups[0].CargoList[Installation.InstallationType.Infrastructure].tons);
+
+            PlayerFaction1.TaskGroups[0].UnloadCargo(System1.Stars[0].Planets[0].Populations[1], Installation.InstallationType.Infrastructure, 1);
+
+            Console.WriteLine("Infrastructure on P1 and P2:{0} {1}", System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number,
+    System1.Stars[0].Planets[0].Populations[1].Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+            Console.WriteLine("Infrastructure on cargo tg after unload :{0}", PlayerFaction1.TaskGroups[0].CargoList[Installation.InstallationType.Infrastructure].tons);
+        }
+
+        [Test]
+        public void CargoOrdersTest()
+        {
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+            System1.Stars[0].Planets.Add(pl2);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 2.0;
+            System1.Stars[0].Planets[1].YSystem = 2.0;
+
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCargoHold(PlayerFaction1.ComponentList.CargoHoldDef[1], 1);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+
+            System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 3.0f;
+            System1.Stars[0].Planets[1].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 0.0f;
+
+            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadInstallation, (int)Installation.InstallationType.Infrastructure, 1, System1.Stars[0].Planets[0].Populations[0]);
+            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadInstallation, (int)Installation.InstallationType.Infrastructure, 1, System1.Stars[0].Planets[1].Populations[0]);
+
+            PlayerFaction1.TaskGroups[0].IssueOrder(Load);
+            PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
+
+
+            Console.WriteLine("Infrastructure on P1 and P2:{0} {1}", System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number,
+                System1.Stars[0].Planets[1].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+
+            while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
+            {
+                Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
+    PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
+
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+
+                Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
+            }
+
+            Console.WriteLine("Infrastructure on P1 and P2:{0} {1}", System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number,
+    System1.Stars[0].Planets[1].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number);
+
+            Console.WriteLine("Infrastructure on cargo tg after unload :{0}", PlayerFaction1.TaskGroups[0].CargoList[Installation.InstallationType.Infrastructure].tons);
         }
     }
 }
