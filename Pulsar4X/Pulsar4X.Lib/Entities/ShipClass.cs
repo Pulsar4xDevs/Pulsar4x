@@ -426,6 +426,26 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// List of Cargo handling system types on this ship. there is no reason to ever put more than one type on a ship however.
+        /// </summary>
+        [DisplayName("Cargo Handling Systems"),
+        Category("Component Lists"),
+        Description("List of Cargo handling systems on this ship class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<CargoHandlingDefTN> ShipCHSDef { get; set; }
+
+        /// <summary>
+        /// Count of each Cargo handling system type on this ship.
+        /// </summary>
+        [DisplayName("Cargo Handling Systems Counts"),
+        Category("Component Counts"),
+        Description("Number of Cargo handling systems on this ship class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipCHSCount { get; set; }
+
+        /// <summary>
         /// Reduction of base load time for Cargo/cryo capacity.
         /// </summary>
         [DisplayName("Tractor Multiplier"),
@@ -533,9 +553,15 @@ namespace Pulsar4X.Entities
             ShipCargoDef = new BindingList<CargoDefTN>();
             ShipCargoCount = new BindingList<ushort>();
             TotalCargoCapacity = 0;
-            TractorMultiplier = 1;
             CargoLoadTime = 0;
+
+            ShipCHSDef = new BindingList<CargoHandlingDefTN>();
+            ShipCHSCount = new BindingList<ushort>();
+            TractorMultiplier = 1;
+
             CryoLoadTime = 0;
+
+            TroopLoadTime = 0;
 
 
             ShipPSensorDef = new BindingList<PassiveSensorDefTN>();
@@ -645,7 +671,7 @@ namespace Pulsar4X.Entities
 
             CargoLoadTime = (TotalCargoCapacity * Constants.ShipTN.BaseCargoLoadTimePerTon) / TractorMultiplier;
             CryoLoadTime = (SpareCryoBerths * Constants.ShipTN.BaseCryoLoadTimePerPerson) / TractorMultiplier;
-            TroopLoadTime = (TotalTroopCapacity * Constants.ShipTN.BaseTroopLoadTimePerCompany) / TractorMultiplier;
+            TroopLoadTime = (TotalTroopCapacity * Constants.ShipTN.BaseTroopLoadTime) / TractorMultiplier;
 
         }
 
@@ -940,8 +966,63 @@ namespace Pulsar4X.Entities
 
             TotalCargoCapacity = TotalCargoCapacity + Cargo.cargoCapacity;
             UpdateClass(Cargo, inc);
-
         }
+
+        /// <summary>
+        /// Add CHS adds a cargo handling tractor beam to the ship which shortens ship loading times.
+        /// the function should also be able to subtract them.
+        /// </summary>
+        /// <param name="CHS">Definition of the CHS to add or subtract.</param>
+        /// <param name="inc">number to add or to subtract.</param>
+        public void AddCargoHandlingSystem(CargoHandlingDefTN CHS, short inc)
+        {
+            int CHSIndex = ShipCHSDef.IndexOf(CHS);
+            if (CHSIndex != -1)
+            {
+                ShipCHSCount[CHSIndex] = (ushort)((short)ShipCHSCount[CHSIndex] + inc);
+            }
+            if (CHSIndex == -1 && inc >= 1)
+            {
+                ShipCHSDef.Add(CHS);
+                ShipCHSCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (CHSIndex != -1)
+                {
+                    if (ShipCHSCount[CHSIndex] == 0)
+                    {
+                        ShipCHSCount.RemoveAt(CHSIndex);
+                        ShipCHSDef.RemoveAt(CHSIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            /// <summary>
+            /// Tractor multiplier is always aleast 1, but not 1 + CHS value.
+            /// so either adjust upwards from 1, or if at 0 due to subtraction, reset to 1.
+            /// </summary>
+            if (TractorMultiplier == 1)
+            {
+                TractorMultiplier = (CHS.tractorMultiplier * (int)inc);
+            }
+            else
+            {
+                TractorMultiplier = TractorMultiplier + (CHS.tractorMultiplier * (int)inc);
+
+                if (TractorMultiplier == 0)
+                    TractorMultiplier = 1;
+            }
+            UpdateClass(CHS, inc);
+        }
+
 
         /// <summary>
         /// AddPassiveSensor adds the specified sensor in quantity inc. Can subtract.

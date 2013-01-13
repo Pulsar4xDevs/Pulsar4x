@@ -730,6 +730,7 @@ namespace Pulsar4X.Tests
             PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
             PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
             PlayerFaction1.ShipDesigns[0].AddCargoHold(PlayerFaction1.ComponentList.CargoHoldDef[1], 1);
+            PlayerFaction1.ShipDesigns[0].AddCargoHandlingSystem(PlayerFaction1.ComponentList.CargoHandleSystemDef[0], 1);
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 

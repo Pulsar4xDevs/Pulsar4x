@@ -755,12 +755,9 @@ namespace Pulsar4X
             public const int BaseCryoLoadTimePerPerson = 18;
 
             /// <summary>
-            /// In Seconds per Company. About 48 hours each.
-            /// 5 Companies = 1 Battalion.
-            /// 4 Battalions + 1 BHQ = 5 Battalions = 1 Brigade
-            /// 4 Brigades + 1 DHQ = 21 Battalions = 1 Division
+            /// In Aurora, load time is a constant 10 days for troop transports.
             /// </summary>
-            public const int BaseTroopLoadTimePerCompany = 2880;
+            public const int BaseTroopLoadTime = 864000;
 
             /// <summary>
             /// I moved the following three enums here to constants to prevent taskgroup from ballooning in size beyond all recognition, I may move them back though once done.

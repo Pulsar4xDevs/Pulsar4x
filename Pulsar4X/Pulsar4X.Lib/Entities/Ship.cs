@@ -128,6 +128,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<CargoTN> ShipCargo { get; set; }
 
+        /// <summary>
+        /// Ships with any kind of load capability will have a cargo handling system, or more.
+        /// </summary>
+        public BindingList<CargoHandlingTN> ShipCHS { get; set; }
+
 
         /// <summary>
         /// List of passive sensors that this craft will have.
@@ -244,6 +249,21 @@ namespace Pulsar4X.Entities
                     ShipCargo.Add(cargo);
                 }
             }
+
+            /// <summary>
+            /// Any ship with cargo holds, troop bays, cryo berths, or drop pods will benefit from a cargohandling system. though droppods benefit from the CHSes on other vessels as well.
+            /// </summary>
+            ShipCHS = new BindingList<CargoHandlingTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipCHSDef.Count; loop++)
+            {
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipCHSCount[loop]; loop2++)
+                {
+                    CargoHandlingTN CHS = new CargoHandlingTN(ClassDefinition.ShipCHSDef[loop]);
+                    ShipCHS.Add(CHS);
+                }
+            }
+
+
 
             /// <summary>
             /// Every ship will have a passive sensor rating, but very few will have specialized passive sensors.

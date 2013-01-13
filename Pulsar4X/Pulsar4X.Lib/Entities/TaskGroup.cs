@@ -954,6 +954,7 @@ namespace Pulsar4X.Entities
                 case (int)Constants.ShipTN.OrderType.LoadInstallation:
                     if (TaskGroupOrders[0].orderTimeRequirement == -1)
                     {
+                        CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
                         int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
                         int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
 
@@ -965,6 +966,7 @@ namespace Pulsar4X.Entities
                         TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                         TaskGroupOrders[0].orderTimeRequirement = 0;
                         LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                     }
                     else
                     {
@@ -979,6 +981,7 @@ namespace Pulsar4X.Entities
                 case (int)Constants.ShipTN.OrderType.UnloadInstallation:
                 if (TaskGroupOrders[0].orderTimeRequirement == -1)
                 {
+                    CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
                     int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
                     int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
 
@@ -990,6 +993,7 @@ namespace Pulsar4X.Entities
                     TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
                     TaskGroupOrders[0].orderTimeRequirement = 0;
                     UnloadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                 }
                 else
                 {
@@ -1004,7 +1008,7 @@ namespace Pulsar4X.Entities
         #endregion
 
 
-        #region Taskgroup Cargo/Cryo/Troop/Component loading and unloading.
+        #region Taskgroup Cargo(/Cryo/Troop/Component Not finished yet) loading and unloading.
         /// <summary>
         /// Load cargo loads a specified installation type from a population, up to the limit in installations if possible.
         /// </summary>

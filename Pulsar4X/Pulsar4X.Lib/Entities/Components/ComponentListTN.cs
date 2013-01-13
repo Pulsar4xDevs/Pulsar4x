@@ -50,6 +50,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public BindingList<CargoDefTN> CargoHoldDef { get; set; }
 
+        public BindingList<CargoHandlingDefTN> CargoHandleSystemDef { get; set; }
+
         /// <summary>
         /// ComponentDefList creates lists for every TN component. ClassTN and Faction should eventually both use this, but only faction does right now.
         /// </summary>
@@ -65,6 +67,8 @@ namespace Pulsar4X.Entities.Components
             ActiveSensorDef = new BindingList<ActiveSensorDefTN>();
 
             CargoHoldDef = new BindingList<CargoDefTN>();
+
+            CargoHandleSystemDef = new BindingList<CargoHandlingDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -110,6 +114,13 @@ namespace Pulsar4X.Entities.Components
 
             CargoHoldDef.Add(Standard);
             CargoHoldDef.Add(Small);
+
+
+            /// <summary>
+            /// Only TN starts begin with this component for now. the improved,advanced, and grav-assisted variants have to be researched.
+            /// </summary>
+            CargoHandlingDefTN CHS = new CargoHandlingDefTN("Cargo Handling System", 5);
+            CargoHandleSystemDef.Add(CHS);
         }
     }
 }
