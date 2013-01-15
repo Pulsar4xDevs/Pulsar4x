@@ -54,6 +54,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int MaxSpeed { get; set; }
 
+        /// <summary>
+        /// Orders that this taskgroup is under.
+        /// </summary>
         public BindingList<Orders> TaskGroupOrders { get; set; }
         
         /// <summary>
@@ -156,6 +159,16 @@ namespace Pulsar4X.Entities
         public Dictionary<Installation.InstallationType,CargoListEntryTN> CargoList { get; set; }
 
         /// <summary>
+        /// Sum total of all cryo bays in the taskgroup.
+        /// </summary>
+        public int TotalCryoCapacity { get; set; }
+
+        /// <summary>
+        /// Currently occupied cryostorage.
+        /// </summary>
+        public int CurrentCryoStorage { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -247,6 +260,9 @@ namespace Pulsar4X.Entities
             TotalCargoTonnage = 0;
             CurrentCargoTonnage = 0;
 
+            TotalCryoCapacity = 0;
+            CurrentCryoStorage = 0;
+
         }
 
         #region Add Ship To TaskGroup
@@ -285,6 +301,7 @@ namespace Pulsar4X.Entities
             }
 
             TotalCargoTonnage = TotalCargoTonnage + shipDef.TotalCargoCapacity;
+            TotalCryoCapacity = TotalCryoCapacity + shipDef.SpareCryoBerths;
 
             UpdatePassiveSensors(ship);
 
@@ -942,14 +959,14 @@ namespace Pulsar4X.Entities
             switch ((int)TaskGroupOrders[0].typeOf)
             {
                 /// <summary>
-                /// Perform no orders for moveto.
+                /// Perform no orders for moveto:
                 /// </summary>
                 case (int)Constants.ShipTN.OrderType.MoveTo:
                     TaskGroupOrders[0].orderTimeRequirement = 0;
                 break;
                 
                 /// <summary>
-                /// Load Installation
+                /// Load Installation:
                 /// </summary>
                 case (int)Constants.ShipTN.OrderType.LoadInstallation:
                     if (TaskGroupOrders[0].orderTimeRequirement == -1)
@@ -976,30 +993,84 @@ namespace Pulsar4X.Entities
                 break;
 
                 /// <summary>
-                /// Unload installation.
+                /// Unload installation:
                 /// </summary>
                 case (int)Constants.ShipTN.OrderType.UnloadInstallation:
-                if (TaskGroupOrders[0].orderTimeRequirement == -1)
-                {
-                    CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
-                    int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
-                    int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                    {
+                        CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
+                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
 
-                    TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
-                }
+                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                    }
 
-                if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
-                {
-                    TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
-                    TaskGroupOrders[0].orderTimeRequirement = 0;
-                    UnloadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
-                    CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
-                }
-                else
-                {
-                    TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
-                    TimeSlice = 0;
-                }
+                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                    {
+                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        UnloadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                    }
+                    else
+                    {
+                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                        TimeSlice = 0;
+                    }
+                break;
+
+                /// <summary>
+                /// Load Colonists:
+                /// </summary>
+                case (int) Constants.ShipTN.OrderType.LoadColonists :
+                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                    {
+                        CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
+                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cryo);
+                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                    }
+
+                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                    {
+                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary);
+                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                    }
+                    else
+                    {
+                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                        TimeSlice = 0;
+                    }
+                break;
+
+                /// <summary>
+                /// Unload Colonists:
+                /// </summary>
+                case (int)Constants.ShipTN.OrderType.UnloadColonists:
+                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                    {
+                        CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
+                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cryo);
+                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                    }
+
+                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                    {
+                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        UnloadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary);
+                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                    }
+                    else
+                    {
+                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                        TimeSlice = 0;
+                    }
                 break;
 
             }
@@ -1008,7 +1079,7 @@ namespace Pulsar4X.Entities
         #endregion
 
 
-        #region Taskgroup Cargo(/Cryo/Troop/Component Not finished yet) loading and unloading.
+        #region Taskgroup Cargo/Cryo (/Troop/Component Not finished yet) loading and unloading.
         /// <summary>
         /// Load cargo loads a specified installation type from a population, up to the limit in installations if possible.
         /// </summary>
@@ -1089,8 +1160,57 @@ namespace Pulsar4X.Entities
             }
 
             Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(MassToUnload / Faction.InstallationTypes[(int)InstType].Mass);
-            
-            int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
+        }
+
+        /// <summary>
+        /// LoadColonists loads the specified population from pop into the taskgroup's cryo bays.
+        /// </summary>
+        /// <param name="Pop">Population to load from.</param>
+        /// <param name="Limit">Limit on colonists who can be put onto taskgroup.</param>
+        public void LoadColonists(Population Pop, int Limit)
+        {
+            int Colonists = 0;
+            int RemainingCryo = TotalCryoCapacity - CurrentCryoStorage;
+            int AvailablePopulation = (int)Math.Floor(Pop.CivilianPopulation * 1000000.0f);
+
+            if (Limit == 0)
+            {
+                Colonists = Math.Min(RemainingCryo, AvailablePopulation);
+            }
+            else
+            {
+                if (Limit > AvailablePopulation)
+                    Limit = AvailablePopulation;
+
+                Colonists = Math.Min(RemainingCryo, Limit);
+            }
+
+            CurrentCryoStorage = CurrentCryoStorage + Colonists;
+            Pop.CivilianPopulation = Pop.CivilianPopulation - ((float)Colonists / 1000000.0f);
+        }
+
+        /// <summary>
+        /// Unload colonists transfers colonists from the taskgroup to a population.
+        /// </summary>
+        /// <param name="Pop">Receiving population.</param>
+        /// <param name="Limit">Colonists limit.</param>
+        public void UnloadColonists(Population Pop, int Limit)
+        {
+            int Colonists = CurrentCryoStorage;
+
+            if (Limit == 0)
+            {
+                CurrentCryoStorage = 0;
+            }
+            else
+            {
+                if (Limit > CurrentCryoStorage)
+                    Limit = CurrentCryoStorage;
+
+                Colonists = Limit; 
+                CurrentCryoStorage = CurrentCryoStorage - Limit;
+            }
+            Pop.CivilianPopulation = Pop.CivilianPopulation + ((float)Colonists / 1000000.0f);  
         }
 
         /// <summary>

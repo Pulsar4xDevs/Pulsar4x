@@ -129,6 +129,11 @@ namespace Pulsar4X.Entities
         public BindingList<CargoTN> ShipCargo { get; set; }
 
         /// <summary>
+        /// Ships can also have several cryo storage bays and bay types.
+        /// </summary>
+        public BindingList<ColonyTN> ShipColony { get; set; }
+
+        /// <summary>
         /// Ships with any kind of load capability will have a cargo handling system, or more.
         /// </summary>
         public BindingList<CargoHandlingTN> ShipCHS { get; set; }
@@ -249,6 +254,20 @@ namespace Pulsar4X.Entities
                     ShipCargo.Add(cargo);
                 }
             }
+
+            /// <summary>
+            /// While only colonyships will have the major bays, just about any craft can have an emergency cryo bay.
+            /// </summary>
+            ShipColony = new BindingList<ColonyTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipColonyDef.Count; loop++)
+            {
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipColonyCount[loop]; loop2++)
+                {
+                    ColonyTN colony = new ColonyTN(ClassDefinition.ShipColonyDef[loop]);
+                    ShipColony.Add(colony);
+                }
+            }
+            CurrentCryo = 0;
 
             /// <summary>
             /// Any ship with cargo holds, troop bays, cryo berths, or drop pods will benefit from a cargohandling system. though droppods benefit from the CHSes on other vessels as well.

@@ -61,6 +61,9 @@ namespace Pulsar4X.Entities
 
         }
 
+        /// <summary>
+        /// storage for waypoint targeted orders.
+        /// </summary>
         private Waypoint WayPoint { get; set; }
         public Waypoint wayPoint 
         {

@@ -38,6 +38,9 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public BindingList<PassiveSensorDefTN> PassiveSensorDef { get; set; }
 
+        /// <summary>
+        /// Default passive sensor suite that all ships must as a minimum possess.
+        /// </summary>
         public PassiveSensorDefTN DefaultPassives { get; set; }
 
         /// <summary>
@@ -50,7 +53,17 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public BindingList<CargoDefTN> CargoHoldDef { get; set; }
 
+        /// <summary>
+        /// Cryogenic storage: standard, small, and emergency.
+        /// </summary>
+        public BindingList<ColonyDefTN> ColonyBayDef { get; set; }
+
+        /// <summary>
+        /// Cargo handling systems which decrease load times.
+        /// </summary>
         public BindingList<CargoHandlingDefTN> CargoHandleSystemDef { get; set; }
+
+
 
         /// <summary>
         /// ComponentDefList creates lists for every TN component. ClassTN and Faction should eventually both use this, but only faction does right now.
@@ -67,8 +80,10 @@ namespace Pulsar4X.Entities.Components
             ActiveSensorDef = new BindingList<ActiveSensorDefTN>();
 
             CargoHoldDef = new BindingList<CargoDefTN>();
-
+            ColonyBayDef = new BindingList<ColonyDefTN>();
             CargoHandleSystemDef = new BindingList<CargoHandlingDefTN>();
+
+
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -109,11 +124,22 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Everyone starts with cargoholds.
             /// </summary>
-            CargoDefTN Standard = new CargoDefTN("Cargo Hold - Standard", 500.0f, 50.0m, 5);
-            CargoDefTN Small = new CargoDefTN("Cargo Hold - Small", 100.0f, 12.5m, 2);
+            CargoDefTN CargoStandard = new CargoDefTN("Cargo Hold - Standard", 500.0f, 50.0m, 5);
+            CargoDefTN CargoSmall = new CargoDefTN("Cargo Hold - Small", 100.0f, 12.5m, 2);
 
-            CargoHoldDef.Add(Standard);
-            CargoHoldDef.Add(Small);
+            CargoHoldDef.Add(CargoStandard);
+            CargoHoldDef.Add(CargoSmall);
+
+            /// <summary>
+            /// Cryostorage is a TN only starting option. otherwise it must be researched.
+            /// </summary>
+            ColonyDefTN ColonyStandard = new ColonyDefTN("Cryogenic Storage - Standard", 50.0f, 100.0m, 10);
+            ColonyDefTN ColonySmall = new ColonyDefTN("Cryogenic Storage - Small", 5.0f, 20.0m, 2);
+            ColonyDefTN ColonyEmergency = new ColonyDefTN("Cryogenic Storage - Emergency", 1.0f, 5.0m, 0);
+
+            ColonyBayDef.Add(ColonyStandard);
+            ColonyBayDef.Add(ColonySmall);
+            ColonyBayDef.Add(ColonyEmergency);
 
 
             /// <summary>

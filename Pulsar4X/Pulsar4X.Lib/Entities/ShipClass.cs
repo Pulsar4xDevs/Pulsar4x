@@ -415,6 +415,27 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// List of Colony bay definitions present on this ship class.
+        /// </summary>
+        [DisplayName("Cryo Storage Bays"),
+        Category("Component Lists"),
+        Description("List of Cryo Storage Bays on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ColonyDefTN> ShipColonyDef { get; set; }
+
+        /// <summary>
+        /// Counter for each colony bay definition.
+        /// </summary>
+        [DisplayName("Cryo storage Count"),
+        Category("Component Counts"),
+        Description("Number of Cryo storage bays on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipColonyCount { get; set; }
+
+
+        /// <summary>
         /// Sum of the troop bay capacity for the ship..
         /// </summary>
         [DisplayName("Troop Bay Capacity"),
@@ -559,6 +580,8 @@ namespace Pulsar4X.Entities
             ShipCHSCount = new BindingList<ushort>();
             TractorMultiplier = 1;
 
+            ShipColonyDef = new BindingList<ColonyDefTN>();
+            ShipColonyCount = new BindingList<ushort>();
             CryoLoadTime = 0;
 
             TroopLoadTime = 0;
@@ -724,7 +747,7 @@ namespace Pulsar4X.Entities
             {
                 if (CrewIndex != -1)
                 {
-                    if (CrewQuartersCount[CrewIndex] == 0)
+                    if (CrewQuartersCount[CrewIndex] <= 0)
                     {
                         CrewQuartersCount.RemoveAt(CrewIndex);
                         CrewQuarters.RemoveAt(CrewIndex);
@@ -784,7 +807,7 @@ namespace Pulsar4X.Entities
             {
                 if (FuelIndex != -1)
                 {
-                    if (FuelTanksCount[FuelIndex] == 0)
+                    if (FuelTanksCount[FuelIndex] <= 0)
                     {
                         FuelTanksCount.RemoveAt(FuelIndex);
                         FuelTanks.RemoveAt(FuelIndex);
@@ -835,7 +858,7 @@ namespace Pulsar4X.Entities
             {
                 if (EBayIndex != -1)
                 {
-                    if (EngineeringBaysCount[EBayIndex] == 0)
+                    if (EngineeringBaysCount[EBayIndex] <= 0)
                     {
                         EngineeringBaysCount.RemoveAt(EBayIndex);
                         EngineeringBays.RemoveAt(EBayIndex);
@@ -884,7 +907,7 @@ namespace Pulsar4X.Entities
             {
                 if (OtherCompIndex != -1)
                 {
-                    if (OtherComponentsCount[OtherCompIndex] == 0)
+                    if (OtherComponentsCount[OtherCompIndex] <= 0)
                     {
                         OtherComponentsCount.RemoveAt(OtherCompIndex);
                         OtherComponents.RemoveAt(OtherCompIndex);
@@ -949,7 +972,7 @@ namespace Pulsar4X.Entities
             {
                 if (CargoIndex != -1)
                 {
-                    if (ShipCargoCount[CargoIndex] == 0)
+                    if (ShipCargoCount[CargoIndex] <= 0)
                     {
                         ShipCargoCount.RemoveAt(CargoIndex);
                         ShipCargoDef.RemoveAt(CargoIndex);
@@ -964,8 +987,48 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            TotalCargoCapacity = TotalCargoCapacity + Cargo.cargoCapacity;
+            TotalCargoCapacity = TotalCargoCapacity + (Cargo.cargoCapacity * inc);
             UpdateClass(Cargo, inc);
+        }
+
+        /// <summary>
+        /// AddColonyBay adds the specified cryo storage definition to the ship class definition in quantity inc, or will subtract them.
+        /// </summary>
+        /// <param name="Colony">Definition to add.</param>
+        /// <param name="inc">Count of colony bay definitions.</param>
+        public void AddColonyBay(ColonyDefTN Colony, short inc)
+        {
+            int ColonyIndex = ShipColonyDef.IndexOf(Colony);
+            if (ColonyIndex != -1)
+            {
+                ShipColonyCount[ColonyIndex] = (ushort)((short)ShipColonyCount[ColonyIndex] + inc);
+            }
+            if (ColonyIndex == -1 && inc >= 1)
+            {
+                ShipColonyDef.Add(Colony);
+                ShipColonyCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (ColonyIndex != -1)
+                {
+                    if (ShipColonyCount[ColonyIndex] <= 0)
+                    {
+                        ShipColonyCount.RemoveAt(ColonyIndex);
+                        ShipColonyDef.RemoveAt(ColonyIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+        
+            SpareCryoBerths = SpareCryoBerths + (Colony.cryoBerths * inc);
+            UpdateClass(Colony, inc);
         }
 
         /// <summary>
@@ -990,7 +1053,7 @@ namespace Pulsar4X.Entities
             {
                 if (CHSIndex != -1)
                 {
-                    if (ShipCHSCount[CHSIndex] == 0)
+                    if (ShipCHSCount[CHSIndex] <= 0)
                     {
                         ShipCHSCount.RemoveAt(CHSIndex);
                         ShipCHSDef.RemoveAt(CHSIndex);
@@ -1045,7 +1108,7 @@ namespace Pulsar4X.Entities
             {
                 if (SensorIndex != -1)
                 {
-                    if (ShipPSensorCount[SensorIndex] == 0)
+                    if (ShipPSensorCount[SensorIndex] <= 0)
                     {
                         ShipPSensorCount.RemoveAt(SensorIndex);
                         ShipPSensorDef.RemoveAt(SensorIndex);
@@ -1099,7 +1162,7 @@ namespace Pulsar4X.Entities
             {
                 if (SensorIndex != -1)
                 {
-                    if (ShipASensorCount[SensorIndex] == 0)
+                    if (ShipASensorCount[SensorIndex] <= 0)
                     {
                         ShipASensorCount.RemoveAt(SensorIndex);
                         ShipASensorDef.RemoveAt(SensorIndex);
