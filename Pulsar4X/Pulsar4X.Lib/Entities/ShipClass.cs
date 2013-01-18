@@ -97,6 +97,24 @@ namespace Pulsar4X.Entities
         public int TotalHTK { get; set; }
 
         /// <summary>
+        /// Is this ship a tanker?
+        /// </summary>
+        [Browsable(false)]
+        public bool IsTanker { get; set; }
+
+        /// <summary>
+        /// Is this ship a resupply vessel?
+        /// </summary>
+        [Browsable(false)]
+        public bool IsSupply { get; set; }
+
+        /// <summary>
+        /// Is this ship an ammunition collier?
+        /// </summary>
+        [Browsable(false)]
+        public bool IsCollier { get; set; }
+
+        /// <summary>
         /// Is this ship a military or civilian flagged design?
         /// </summary>
         [Browsable(false)]

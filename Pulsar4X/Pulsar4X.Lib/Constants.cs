@@ -770,9 +770,9 @@ namespace Pulsar4X
                 MoveTo,
                 ExtendedOrbit,
                 Picket,
-                Recrew,
-                Refuel,
-                Resupply,
+                LoadCrewFromColony,
+                RefuelFromColony,
+                ResupplyFromColony,
                 SendMessage,
                 EqualizeFuel,
                 EqualizeMSP,
@@ -863,19 +863,26 @@ namespace Pulsar4X
                 /// Tanker Specific:
                 /// </summary>
                 RefuelTargetFleet,
+                UnloadFuelToPlanet,
                 DetachTankers,
 
                 /// <summary>
                 /// Supply Ship specific:
                 /// </summary>
                 ResupplyTargetFleet,
+                UnloadSuppliesToPlanet,
                 DetachSupplyShips,
 
                 /// <summary>
-                /// Collier Specific
+                /// Collier Specific:
                 /// </summary>
                 ReloadTargetFleet,
                 DetachColliers,
+
+                /// <summary>
+                /// Any ship with a magazine:
+                /// </summary>
+                UnloadOrdnanceToPlanet,
 
                 /// <summary>
                 /// Any taskgroup, but the target must be a TG with the appropriate ship to fulfill this order.

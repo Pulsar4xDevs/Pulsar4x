@@ -958,13 +958,130 @@ namespace Pulsar4X.Entities
         {
             switch ((int)TaskGroupOrders[0].typeOf)
             {
+
+                #region MoveTo
                 /// <summary>
                 /// Perform no orders for moveto:
                 /// </summary>
                 case (int)Constants.ShipTN.OrderType.MoveTo:
                     TaskGroupOrders[0].orderTimeRequirement = 0;
                 break;
-                
+                #endregion
+
+                #region Refuel
+                case (int)Constants.ShipTN.OrderType.RefuelFromColony:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    for(int loop = 0; loop < Ships.Count; loop++)
+                    {
+                        if (TaskGroupOrders[0].pop.FuelStockpile == 0.0f)
+                        {
+                            /// <summary>
+                            /// Orders could not be carried out.
+                            /// </summary>
+                            break;
+                        }
+                        TaskGroupOrders[0].pop.FuelStockpile = Ships[loop].Refuel(TaskGroupOrders[0].pop.FuelStockpile);
+                    }
+                break;
+                #endregion
+
+                #region Refuel Target Fleet
+                case (int)Constants.ShipTN.OrderType.RefuelTargetFleet:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    /// <summary>
+                    /// A specific tanker list could come in handy here.
+                    /// </summary>
+                    int FuelPlace = 0;
+                    for (int loop = 0; loop < Ships.Count; loop++)
+                    {
+
+                        if (Ships[loop].ShipClass.IsTanker == true)
+                        {
+                            float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                            float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+                            for (int loop2 = FuelPlace; loop2 < TaskGroupOrders[0].taskGroup.Ships.Count; loop2++)
+                            {
+                                if (AvailableFuel <= 0.0f)
+                                {
+                                    /// <summary>
+                                    /// This tanker is done.
+                                    /// </summary>
+                                    break;
+                                }
+                                AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop2].Refuel(AvailableFuel);
+                                FuelPlace++;
+                            }
+                            Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                        }
+                    }
+
+                    if (FuelPlace != TaskGroupOrders[0].taskGroup.Ships.Count ||
+                        TaskGroupOrders[0].taskGroup.Ships.Last().CurrentFuel != TaskGroupOrders[0].taskGroup.Ships.Last().ShipClass.TotalFuelCapacity)
+                    {
+                        /// <summary>
+                        /// Order could not be carried out.
+                        /// </summary>
+                    }
+                break;
+                #endregion
+
+                #region Refuel from Target Fleet
+                case (int)Constants.ShipTN.OrderType.RefuelFromTargetFleet:
+                    FuelPlace = 0;
+                    for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
+                    {
+                        if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsTanker == true)
+                        {
+                            float FuelCutoff = TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                            float AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel - FuelCutoff;
+
+                            for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
+                            {
+                                if (AvailableFuel <= 0.0f)
+                                {
+                                    /// <summary>
+                                    /// This Tanker is finished.
+                                    /// </summary>
+                                    break;
+                                }
+
+                                AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
+                                FuelPlace++;
+                            }
+                            TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                        }
+                    }
+
+                    if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
+                    {
+                        /// <summary>
+                        /// Order could not be carried out.
+                        /// </summary>
+                    }
+                break;
+                #endregion
+
+                #region Unload 90% of Fuel to planet
+                case (int)Constants.ShipTN.OrderType.UnloadFuelToPlanet:
+                for (int loop = 0; loop < Ships.Count; loop++)
+                {
+
+                    if (Ships[loop].ShipClass.IsTanker == true)
+                    {
+                        float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                        float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+
+                        if (AvailableFuel > 0.0f)
+                        {
+                            TaskGroupOrders[0].pop.FuelStockpile = TaskGroupOrders[0].pop.FuelStockpile + AvailableFuel;
+                            Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - AvailableFuel;
+                        }
+                    }
+                }
+                break;
+                #endregion
+
+                #region Load Installation
                 /// <summary>
                 /// Load Installation:
                 /// </summary>
@@ -991,7 +1108,9 @@ namespace Pulsar4X.Entities
                         TimeSlice = 0;
                     }
                 break;
+                #endregion
 
+                #region Unload Installation
                 /// <summary>
                 /// Unload installation:
                 /// </summary>
@@ -1018,7 +1137,9 @@ namespace Pulsar4X.Entities
                         TimeSlice = 0;
                     }
                 break;
+                #endregion
 
+                #region Load Colonists
                 /// <summary>
                 /// Load Colonists:
                 /// </summary>
@@ -1045,7 +1166,9 @@ namespace Pulsar4X.Entities
                         TimeSlice = 0;
                     }
                 break;
+                #endregion
 
+                #region Unload Colonists
                 /// <summary>
                 /// Unload Colonists:
                 /// </summary>
@@ -1072,6 +1195,7 @@ namespace Pulsar4X.Entities
                         TimeSlice = 0;
                     }
                 break;
+                #endregion
 
             }
             return TimeSlice;

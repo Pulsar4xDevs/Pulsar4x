@@ -768,5 +768,67 @@ namespace Pulsar4X.Tests
 
             Console.WriteLine("Infrastructure on cargo tg after unload :{0}", PlayerFaction1.TaskGroups[0].CargoList[Installation.InstallationType.Infrastructure].tons);
         }
+
+
+        [Test]
+        public void ColonyOrdersTest()
+        {
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+            System1.Stars[0].Planets.Add(pl2);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 2.0;
+            System1.Stars[0].Planets[1].YSystem = 2.0;
+
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddColonyBay(PlayerFaction1.ComponentList.ColonyBayDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCargoHandlingSystem(PlayerFaction1.ComponentList.CargoHandleSystemDef[0], 1);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+
+            System1.Stars[0].Planets[0].Populations[0].CivilianPopulation = 5.0f;
+            System1.Stars[0].Planets[1].Populations[0].CivilianPopulation = 1.0f;
+
+            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadColonists, 9000, -1, System1.Stars[0].Planets[0].Populations[0]);
+            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadColonists, 9000, -1, System1.Stars[0].Planets[1].Populations[0]);
+
+            PlayerFaction1.TaskGroups[0].IssueOrder(Load);
+            PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
+
+            while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
+            {
+                Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
+    PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
+
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+
+                Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
+            }
+
+            Console.WriteLine("Population on P1 and P2:{0} {1}", System1.Stars[0].Planets[0].Populations[0].CivilianPopulation,
+    System1.Stars[0].Planets[1].Populations[0].CivilianPopulation);
+        }
     }
 }
