@@ -80,12 +80,22 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Order limits or perhaps delay time.
+        /// Order limits. how much to load and unload for example.
         /// </summary>
         private int Tertiary { get; set; }
         public int tertiary
         {
             get { return Tertiary; }
+        }
+
+        /// <summary>
+        /// How long should the taskgroup wait before performing this order?
+        /// </summary>
+        private int OrderDelay { get; set; }
+        public int orderDelay
+        {
+            get { return OrderDelay; }
+            set { OrderDelay = value; }
         }
 
         /// <summary>
@@ -103,15 +113,17 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="TypeOrder">Type</param>
         /// <param name="SecondaryOrder">Any secondary order specification such as installation type.</param>
-        /// <param name="TertiaryOrder"> Any Tertiary order such as limits or delay time offsets.</param>
+        /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
+        /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="TaskGroupOrder">The TaskGroup in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, TaskGroupTN TaskGroupOrder)
+        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, TaskGroupTN TaskGroupOrder)
         {
             TypeOf = TypeOrder;
-            Target = TaskGroupOrder;
+            Target = TaskGroupOrder.Contact;
             Secondary = SecondaryOrder;
             Tertiary = TertiaryOrder;
             TaskGroup = TaskGroupOrder;
+            OrderDelay = Delay;
 
             OrderTimeRequirement = -1;
         }
@@ -121,15 +133,17 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="TypeOrder">Type</param>
         /// <param name="SecondaryOrder">Any secondary order specification such as installation type.</param>
-        /// <param name="TertiaryOrder"> Any Tertiary order such as limits or delay time offsets.</param>
+        /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
+        /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="PlanetOrder">The Planet in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, Planet PlanetOrder)
+        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Planet PlanetOrder)
         {
             TypeOf = TypeOrder;
             Target = PlanetOrder;
             Secondary = SecondaryOrder;
             Tertiary = TertiaryOrder;
             Body = PlanetOrder;
+            OrderDelay = Delay;
 
             OrderTimeRequirement = -1;
         }
@@ -139,15 +153,18 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="TypeOrder">Type</param>
         /// <param name="SecondaryOrder">Any secondary order specification such as installation type.</param>
-        /// <param name="TertiaryOrder"> Any Tertiary order such as limits or delay time offsets.</param>
+        /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
+        /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="PopOrder">The Population in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, Population PopOrder)
+        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Population PopOrder)
         {
             TypeOf = TypeOrder;
             Target = PopOrder.Planet;
             Secondary = SecondaryOrder;
             Tertiary = TertiaryOrder;
             Pop = PopOrder;
+            OrderDelay = Delay;
+
 
             OrderTimeRequirement = -1;
         }
@@ -157,15 +174,18 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="TypeOrder">Type</param>
         /// <param name="SecondaryOrder">Any secondary order specification such as installation type.</param>
-        /// <param name="TertiaryOrder"> Any Tertiary order such as limits or delay time offsets.</param>
+        /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
+        /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="JPOrder">The Jump Point in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, JumpPoint JPOrder)
+        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, JumpPoint JPOrder)
         {
             TypeOf = TypeOrder;
             Target = JPOrder;
             Secondary = SecondaryOrder;
             Tertiary = TertiaryOrder;
             JumpPoint = JPOrder;
+            OrderDelay = Delay;
+
 
             OrderTimeRequirement = -1;
         }
@@ -175,15 +195,18 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="TypeOrder">Type</param>
         /// <param name="SecondaryOrder">Any secondary order specification such as installation type.</param>
-        /// <param name="TertiaryOrder"> Any Tertiary order such as limits or delay time offsets.</param>
+        /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
+        /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="WPOrder">The Way Point in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, Waypoint WPOrder)
+        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Waypoint WPOrder)
         {
             TypeOf = TypeOrder;
             Target = WPOrder;
             Secondary = SecondaryOrder;
             Tertiary = TertiaryOrder;
             WayPoint = WPOrder;
+            OrderDelay = Delay;
+
 
             OrderTimeRequirement = -1;
         }

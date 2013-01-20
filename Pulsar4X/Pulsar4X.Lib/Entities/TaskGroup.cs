@@ -717,7 +717,7 @@ namespace Pulsar4X.Entities
 #endregion
 
 
-        #region Taskgroup movement and position
+        #region Taskgroup movement and position as well as time requirement,heading and speed.
         /// <summary>
         /// GetPositionFromOrbit returns systemKm from SystemAU. If a ship is orbiting a body it will move with that body.
         /// </summary>
@@ -773,7 +773,7 @@ namespace Pulsar4X.Entities
         public void GetTimeRequirement()
         {
             double dX = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
-            double dY = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
+            double dY = Math.Abs((TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
             double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
             TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed));
@@ -821,6 +821,8 @@ namespace Pulsar4X.Entities
         /// <param name="Secondary">Secondary will be an enum ID for facility type,component,troop formation, or tractorable ship/shipyard. -1 if not present.</param>
         public void IssueOrder(Orders OrderToTaskGroup)
         {
+            if(TaskGroupOrders.Count == 0)
+                NewOrders = true;
 
             TaskGroupOrders.Add(OrderToTaskGroup);
 
@@ -877,7 +879,6 @@ namespace Pulsar4X.Entities
                 GetTimeRequirement();
                 NewOrders = false;
             }
-
             if (TimeRequirement < TimeSlice)
             {
                 /// <summary>
@@ -885,7 +886,6 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 if (TimeRequirement != 0)
                 {
-                    TimeRequirement = 0;
                     /// <summary>
                     /// increase the taskgroup's fuel use counter.
                     /// </summary>
@@ -895,11 +895,13 @@ namespace Pulsar4X.Entities
                     /// Move the taskgroup to the targeted location.
                     /// </summary>
                     Contact.UpdateLocationInSystem(TaskGroupOrders[0].target.XSystem, TaskGroupOrders[0].target.YSystem);
+                    TotalOrderDistance = TotalOrderDistance - (double)(CurrentSpeed * TimeRequirement);
 
                     /// <summary>
                     /// Time requirement is the movement portion of the orders. subtract it here.
                     /// </summary>
                     TimeSlice = TimeSlice - TimeRequirement;
+                    TimeRequirement = 0;
 
                     /// <summary>
                     /// Did we pull into orbit?
@@ -907,6 +909,7 @@ namespace Pulsar4X.Entities
                     if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     {
                         IsOrbiting = true;
+                        OrbitingBody = TaskGroupOrders[0].target;
                     }
                 }
 
@@ -929,19 +932,33 @@ namespace Pulsar4X.Entities
                         NewOrders = true;
                         FollowOrders(TimeSlice);
                     }
+                    else
+                    {
+                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                    }
                 }
             }
             else
             {
+                /// <summary>
+                /// Update last position, current position, order distance, fuel counter, Time requirement, and timeslice:
+                /// </summary>
+                Contact.LastXSystem = Contact.XSystem;
+                Contact.LastYSystem = Contact.YSystem;
+
                 Contact.SystemKmX = Contact.SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
                 Contact.SystemKmY = Contact.SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
 
                 Contact.XSystem = Contact.SystemKmX / Constants.Units.KM_PER_AU;
                 Contact.YSystem = Contact.SystemKmY / Constants.Units.KM_PER_AU;
 
+                TotalOrderDistance = TotalOrderDistance - (double)(CurrentSpeed * TimeSlice);
+
                 UseFuel(TimeSlice);
 
                 TimeRequirement = TimeRequirement - TimeSlice;
+
+                TimeSlice = 0;
             }
 
         }
@@ -956,247 +973,300 @@ namespace Pulsar4X.Entities
         /// </summary>
         public uint PerformOrders(uint TimeSlice)
         {
-            switch ((int)TaskGroupOrders[0].typeOf)
+            if (TaskGroupOrders[0].orderDelay >= TimeSlice)
             {
+                TaskGroupOrders[0].orderDelay = TaskGroupOrders[0].orderDelay - (int)TimeSlice;
+                TimeSlice = 0;
+            }
+            else if (TaskGroupOrders[0].orderDelay < TimeSlice)
+            {
+                TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderDelay;
+                TaskGroupOrders[0].orderDelay = 0;
 
-                #region MoveTo
-                /// <summary>
-                /// Perform no orders for moveto:
-                /// </summary>
-                case (int)Constants.ShipTN.OrderType.MoveTo:
-                    TaskGroupOrders[0].orderTimeRequirement = 0;
-                break;
-                #endregion
-
-                #region Refuel
-                case (int)Constants.ShipTN.OrderType.RefuelFromColony:
-                    TaskGroupOrders[0].orderTimeRequirement = 0;
-                    for(int loop = 0; loop < Ships.Count; loop++)
-                    {
-                        if (TaskGroupOrders[0].pop.FuelStockpile == 0.0f)
-                        {
-                            /// <summary>
-                            /// Orders could not be carried out.
-                            /// </summary>
-                            break;
-                        }
-                        TaskGroupOrders[0].pop.FuelStockpile = Ships[loop].Refuel(TaskGroupOrders[0].pop.FuelStockpile);
-                    }
-                break;
-                #endregion
-
-                #region Refuel Target Fleet
-                case (int)Constants.ShipTN.OrderType.RefuelTargetFleet:
-                    TaskGroupOrders[0].orderTimeRequirement = 0;
-                    /// <summary>
-                    /// A specific tanker list could come in handy here.
-                    /// </summary>
-                    int FuelPlace = 0;
-                    for (int loop = 0; loop < Ships.Count; loop++)
-                    {
-
-                        if (Ships[loop].ShipClass.IsTanker == true)
-                        {
-                            float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                            float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
-                            for (int loop2 = FuelPlace; loop2 < TaskGroupOrders[0].taskGroup.Ships.Count; loop2++)
-                            {
-                                if (AvailableFuel <= 0.0f)
-                                {
-                                    /// <summary>
-                                    /// This tanker is done.
-                                    /// </summary>
-                                    break;
-                                }
-                                AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop2].Refuel(AvailableFuel);
-                                FuelPlace++;
-                            }
-                            Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
-                        }
-                    }
-
-                    if (FuelPlace != TaskGroupOrders[0].taskGroup.Ships.Count ||
-                        TaskGroupOrders[0].taskGroup.Ships.Last().CurrentFuel != TaskGroupOrders[0].taskGroup.Ships.Last().ShipClass.TotalFuelCapacity)
-                    {
-                        /// <summary>
-                        /// Order could not be carried out.
-                        /// </summary>
-                    }
-                break;
-                #endregion
-
-                #region Refuel from Target Fleet
-                case (int)Constants.ShipTN.OrderType.RefuelFromTargetFleet:
-                    FuelPlace = 0;
-                    for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
-                    {
-                        if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsTanker == true)
-                        {
-                            float FuelCutoff = TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                            float AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel - FuelCutoff;
-
-                            for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
-                            {
-                                if (AvailableFuel <= 0.0f)
-                                {
-                                    /// <summary>
-                                    /// This Tanker is finished.
-                                    /// </summary>
-                                    break;
-                                }
-
-                                AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
-                                FuelPlace++;
-                            }
-                            TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
-                        }
-                    }
-
-                    if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
-                    {
-                        /// <summary>
-                        /// Order could not be carried out.
-                        /// </summary>
-                    }
-                break;
-                #endregion
-
-                #region Unload 90% of Fuel to planet
-                case (int)Constants.ShipTN.OrderType.UnloadFuelToPlanet:
-                for (int loop = 0; loop < Ships.Count; loop++)
+                switch ((int)TaskGroupOrders[0].typeOf)
                 {
 
-                    if (Ships[loop].ShipClass.IsTanker == true)
-                    {
-                        float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                        float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+                    #region MoveTo
+                    /// <summary>
+                    /// Perform no orders for moveto:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.MoveTo:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        break;
+                    #endregion
 
-                        if (AvailableFuel > 0.0f)
+                    #region Refuel
+                    case (int)Constants.ShipTN.OrderType.RefuelFromColony:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
                         {
-                            TaskGroupOrders[0].pop.FuelStockpile = TaskGroupOrders[0].pop.FuelStockpile + AvailableFuel;
-                            Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - AvailableFuel;
+                            if (TaskGroupOrders[0].pop.FuelStockpile == 0.0f)
+                            {
+                                /// <summary>
+                                /// Orders could not be carried out.
+                                /// </summary>
+                                break;
+                            }
+                            TaskGroupOrders[0].pop.FuelStockpile = Ships[loop].Refuel(TaskGroupOrders[0].pop.FuelStockpile);
                         }
-                    }
+                        break;
+                    #endregion
+
+                    #region Refuel Target Fleet
+                    case (int)Constants.ShipTN.OrderType.RefuelTargetFleet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        /// <summary>
+                        /// A specific tanker list could come in handy here. But this shouldn't be run every tick so it won't be that big an issue.
+                        /// </summary>
+                        int FuelPlace = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+
+                            if (Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+                                for (int loop2 = FuelPlace; loop2 < TaskGroupOrders[0].taskGroup.Ships.Count; loop2++)
+                                {
+                                    if (AvailableFuel <= 0.0f)
+                                    {
+                                        /// <summary>
+                                        /// This tanker is done.
+                                        /// </summary>
+                                        break;
+                                    }
+                                    AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop2].Refuel(AvailableFuel);
+                                    FuelPlace++;
+                                }
+                                Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                            }
+                        }
+
+                        if (FuelPlace != TaskGroupOrders[0].taskGroup.Ships.Count ||
+                            TaskGroupOrders[0].taskGroup.Ships.Last().CurrentFuel != TaskGroupOrders[0].taskGroup.Ships.Last().ShipClass.TotalFuelCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                        break;
+                    #endregion
+
+                    #region Refuel From Own Tankers
+                    case (int)Constants.ShipTN.OrderType.RefuelFromOwnTankers:
+                        FuelPlace = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+
+                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
+                                {
+                                    /// <summary>
+                                    /// Don't refuel tankers from each other.
+                                    /// </summary>
+                                    if (Ships[loop2].ShipClass.IsTanker == false)
+                                    {
+                                        if (AvailableFuel <= 0.0f)
+                                        {
+                                            /// <summary>
+                                            /// This Tanker is finished.
+                                            /// </sumamry>
+                                            break;
+                                        }
+
+                                        AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
+                                        FuelPlace++;
+                                    }
+                                }
+                                Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                            }
+                        }
+
+                        if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                        break;
+                    #endregion
+
+                    #region Refuel from Target Fleet
+                    case (int)Constants.ShipTN.OrderType.RefuelFromTargetFleet:
+                        FuelPlace = 0;
+                        for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
+                        {
+                            if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel - FuelCutoff;
+
+                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
+                                {
+                                    if (AvailableFuel <= 0.0f)
+                                    {
+                                        /// <summary>
+                                        /// This Tanker is finished.
+                                        /// </summary>
+                                        break;
+                                    }
+
+                                    AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
+                                    FuelPlace++;
+                                }
+                                TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                            }
+                        }
+
+                        if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                        break;
+                    #endregion
+
+                    #region Unload 90% of Fuel to planet
+                    case (int)Constants.ShipTN.OrderType.UnloadFuelToPlanet:
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+
+                            if (Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+
+                                if (AvailableFuel > 0.0f)
+                                {
+                                    TaskGroupOrders[0].pop.FuelStockpile = TaskGroupOrders[0].pop.FuelStockpile + AvailableFuel;
+                                    Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - AvailableFuel;
+                                }
+                            }
+                        }
+                        break;
+                    #endregion
+
+                    #region Load Installation
+                    /// <summary>
+                    /// Load Installation:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.LoadInstallation:
+                        if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                        {
+                            CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
+                            int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                            int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                            TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                        }
+
+                        if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                        {
+                            TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+                            LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                            TimeSlice = 0;
+                        }
+                        break;
+                    #endregion
+
+                    #region Unload Installation
+                    /// <summary>
+                    /// Unload installation:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.UnloadInstallation:
+                        if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                        {
+                            CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
+                            int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                            int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                            TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                        }
+
+                        if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                        {
+                            TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+                            UnloadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                            TimeSlice = 0;
+                        }
+                        break;
+                    #endregion
+
+                    #region Load Colonists
+                    /// <summary>
+                    /// Load Colonists:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.LoadColonists:
+                        if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                        {
+                            CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
+                            int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cryo);
+                            int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                            TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                        }
+
+                        if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                        {
+                            TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+                            LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].tertiary);
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                            TimeSlice = 0;
+                        }
+                        break;
+                    #endregion
+
+                    #region Unload Colonists
+                    /// <summary>
+                    /// Unload Colonists:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.UnloadColonists:
+                        if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                        {
+                            CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
+                            int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cryo);
+                            int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                            TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                        }
+
+                        if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                        {
+                            TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+                            UnloadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].tertiary);
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                            TimeSlice = 0;
+                        }
+                        break;
+                    #endregion
+
                 }
-                break;
-                #endregion
-
-                #region Load Installation
-                /// <summary>
-                /// Load Installation:
-                /// </summary>
-                case (int)Constants.ShipTN.OrderType.LoadInstallation:
-                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
-                    {
-                        CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
-                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
-                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
-
-                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
-                    }
-
-                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
-                    {
-                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
-                        LoadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
-                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
-                    }
-                    else
-                    {
-                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
-                        TimeSlice = 0;
-                    }
-                break;
-                #endregion
-
-                #region Unload Installation
-                /// <summary>
-                /// Unload installation:
-                /// </summary>
-                case (int)Constants.ShipTN.OrderType.UnloadInstallation:
-                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
-                    {
-                        CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
-                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
-                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
-
-                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
-                    }
-
-                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
-                    {
-                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
-                        UnloadCargo(TaskGroupOrders[0].pop, (Installation.InstallationType)TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
-                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
-                    }
-                    else
-                    {
-                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
-                        TimeSlice = 0;
-                    }
-                break;
-                #endregion
-
-                #region Load Colonists
-                /// <summary>
-                /// Load Colonists:
-                /// </summary>
-                case (int) Constants.ShipTN.OrderType.LoadColonists :
-                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
-                    {
-                        CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
-                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cryo);
-                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
-
-                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
-                    }
-
-                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
-                    {
-                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
-                        LoadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary);
-                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
-                    }
-                    else
-                    {
-                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
-                        TimeSlice = 0;
-                    }
-                break;
-                #endregion
-
-                #region Unload Colonists
-                /// <summary>
-                /// Unload Colonists:
-                /// </summary>
-                case (int)Constants.ShipTN.OrderType.UnloadColonists:
-                    if (TaskGroupOrders[0].orderTimeRequirement == -1)
-                    {
-                        CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
-                        int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cryo);
-                        int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
-
-                        TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
-                    }
-
-                    if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
-                    {
-                        TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
-                        UnloadColonists(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary);
-                        CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
-                    }
-                    else
-                    {
-                        TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
-                        TimeSlice = 0;
-                    }
-                break;
-                #endregion
-
             }
             return TimeSlice;
         }

@@ -220,6 +220,7 @@ namespace Pulsar4X.Entities
             EngineeringBays = new BindingList<GeneralComponentTN>();
             AddComponents(EngineeringBays, ClassDefinition.EngineeringBays, ClassDefinition.EngineeringBaysCount);
             CurrentDamageControlRating = ClassDefinition.MaxDamageControlRating;
+            CurrentMSP = ShipClass.TotalMSPCapacity;
 
             /// <summary>
             /// All remaining components that are of a more specialized nature. These do not have to be present, except bridges on ships bigger than 1K tons.

@@ -29,6 +29,16 @@ namespace Pulsar4X.Entities
         public float SystemKmY { get; set; }
 
         /// <summary>
+        /// where the contact was on the last tick.
+        /// </summary>
+        public double LastXSystem { get; set; }
+
+        /// <summary>
+        /// Where the contact was on the last tick.
+        /// </summary>
+        public double LastYSystem { get; set; }
+
+        /// <summary>
         /// Utterly useless Mass value included due to compiler demanding it.
         /// </summary>
         public override double Mass
@@ -68,6 +78,8 @@ namespace Pulsar4X.Entities
             faction = Fact;
             XSystem = pop.Planet.XSystem;
             YSystem = pop.Planet.YSystem;
+            LastXSystem = XSystem;
+            LastYSystem = YSystem;
 
             SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
             SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
@@ -89,6 +101,8 @@ namespace Pulsar4X.Entities
             faction = Fact;
             XSystem = TG.XSystem;
             YSystem = TG.YSystem;
+            LastXSystem = XSystem;
+            LastYSystem = YSystem;
 
             SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
             SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
@@ -106,6 +120,8 @@ namespace Pulsar4X.Entities
         /// <param name="Y">Y Position in AU.</param>
         public void UpdateLocationInSystem(double X, double Y)
         {
+            LastXSystem = XSystem;
+            LastYSystem = YSystem;
             XSystem = X;
             YSystem = Y;
 

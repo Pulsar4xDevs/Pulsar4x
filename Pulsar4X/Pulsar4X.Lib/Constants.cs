@@ -863,6 +863,7 @@ namespace Pulsar4X
                 /// Tanker Specific:
                 /// </summary>
                 RefuelTargetFleet,
+                RefuelFromOwnTankers,
                 UnloadFuelToPlanet,
                 DetachTankers,
 
@@ -870,6 +871,7 @@ namespace Pulsar4X
                 /// Supply Ship specific:
                 /// </summary>
                 ResupplyTargetFleet,
+                ResupplyFromOwnSupplyShips,
                 UnloadSuppliesToPlanet,
                 DetachSupplyShips,
 
@@ -877,6 +879,7 @@ namespace Pulsar4X
                 /// Collier Specific:
                 /// </summary>
                 ReloadTargetFleet,
+                ReloadFromOwnColliers,
                 DetachColliers,
 
                 /// <summary>

@@ -543,11 +543,16 @@ namespace Pulsar4X.Entities
             SizeTons = 0.0f;
             TotalHTK = 0;
             IsMilitary = false;
+            IsTanker = false;
+            IsSupply = false;
+            IsCollier = false;
             MilitaryComponentCount = 0;
             PlanetaryProtectionValue = 0;
 
             ShipArmorDef = new ArmorDefTN("Conventional Armor");
             NewArmor("Conventional Armor", 2, 1);
+
+            BuildPointCost = ShipArmorDef.cost;
 
             CrewQuarters = new BindingList<GeneralComponentDefTN>();
             CrewQuartersCount = new BindingList<ushort>();
@@ -694,8 +699,14 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// MSP capacity and later maintenance will change. ***The rest of maintenance is not yet finished***.
             /// </summary>
-            float EngPercent = SizeHS / EngineeringHS;
-            TotalMSPCapacity = (int)((float)BuildPointCost * (EngPercent / 8.0f));
+            if (EngineeringHS == 0.0f)
+            {
+                TotalMSPCapacity = 0;
+            }
+            else
+            {
+                TotalMSPCapacity = (int)((float)BuildPointCost * ((SizeHS / EngineeringHS) / 8.0f)); 
+            }
 
             /// <summary>
             /// Max repair can change.
@@ -867,7 +878,7 @@ namespace Pulsar4X.Entities
                 EngineeringBaysCount[EBayIndex] = (ushort)((short)EngineeringBaysCount[EBayIndex] + inc);
             }
 
-            if (EBayIndex == 1 && inc >= 1)
+            if (EBayIndex == -1 && inc >= 1)
             {
                 EngineeringBays.Add(EBay);
                 EngineeringBaysCount.Add(inc);
