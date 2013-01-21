@@ -952,5 +952,126 @@ namespace Pulsar4X.Tests
                 System1.Stars[0].Planets[1].Populations[0].FuelStockpile);
 
         }
+
+
+        [Test]
+        public void TaskGroupMSPOrdersTest()
+        {
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            Planet pl3 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+            System1.Stars[0].Planets.Add(pl2);
+            System1.Stars[0].Planets.Add(pl3);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 0.0;
+            System1.Stars[0].Planets[1].YSystem = 3.0;
+
+            System1.Stars[0].Planets[2].XSystem = 0.0;
+            System1.Stars[0].Planets[2].YSystem = 0.0;
+
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+            PlayerFaction1.AddNewShipDesign("Tribal");
+            PlayerFaction1.AddNewShipDesign("Ohio");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 10);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].IsSupply = true;
+
+            PlayerFaction1.ShipDesigns[1].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[1].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[1].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[1].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 10);
+            PlayerFaction1.ShipDesigns[1].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[1].IsSupply = true;
+
+            PlayerFaction1.ShipDesigns[2].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[2].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[2].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[2].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[2].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[2].IsSupply = false;
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[2], System1);
+            PlayerFaction1.AddNewTaskGroup("P1 TG 02", System1.Stars[0].Planets[1], System1);
+            PlayerFaction1.AddNewTaskGroup("P1 TG 03", System1.Stars[0].Planets[1], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[2], 0);
+            PlayerFaction1.TaskGroups[1].AddShip(PlayerFaction1.ShipDesigns[1], 0);
+            PlayerFaction1.TaskGroups[2].AddShip(PlayerFaction1.ShipDesigns[2], 0);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].Refuel(100000.0f);
+            PlayerFaction1.TaskGroups[0].Ships[1].Refuel(100000.0f);
+            PlayerFaction1.TaskGroups[1].Ships[0].Refuel(100000.0f);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].CurrentMSP = 0;
+            PlayerFaction1.TaskGroups[0].Ships[1].CurrentMSP = 0;
+            PlayerFaction1.TaskGroups[2].Ships[0].CurrentMSP = 60;
+            
+
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+
+            System1.Stars[0].Planets[0].Populations[0].MaintenanceSupplies = 1000000;
+            System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies = 10;
+
+            PlayerFaction1.TaskGroups[1].IsOrbiting = false;
+            PlayerFaction1.TaskGroups[1].Contact.XSystem = 3.0;
+            PlayerFaction1.TaskGroups[1].Contact.YSystem = 0.0;
+            PlayerFaction1.TaskGroups[1].Contact.SystemKmX = (float)(PlayerFaction1.TaskGroups[1].Contact.XSystem * Constants.Units.KM_PER_AU);
+            PlayerFaction1.TaskGroups[1].Contact.SystemKmY = (float)(PlayerFaction1.TaskGroups[1].Contact.YSystem * Constants.Units.KM_PER_AU);
+
+            Orders ResupplyFromColony = new Orders(Constants.ShipTN.OrderType.ResupplyFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
+            PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromColony);
+
+            Orders ResupplyFromTargetFleet = new Orders(Constants.ShipTN.OrderType.ResupplyFromTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[1]);
+            PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromTargetFleet);
+
+            Orders ResupplyTargetFleet = new Orders(Constants.ShipTN.OrderType.ResupplyTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[2]);
+            PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyTargetFleet);
+
+            Orders ResupplyFromOwnSupplyShips = new Orders(Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
+            PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromOwnSupplyShips);
+
+            Orders UnloadSuppliesToPop = new Orders(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
+            PlayerFaction1.TaskGroups[0].IssueOrder(UnloadSuppliesToPop);
+
+            uint tickCount = 0;
+
+            while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
+            {
+                Console.WriteLine("===================={0} {1} {2}====================", tickCount, PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count, PlayerFaction1.TaskGroups[0].TimeRequirement);
+                Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.XSystem, PlayerFaction1.TaskGroups[0].Contact.YSystem);
+                Console.WriteLine("MSP:s1:{0} s2:{1} s3:{2} s4:{3} P1:{4} P2:{5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[0].Ships[1].CurrentMSP,
+                    PlayerFaction1.TaskGroups[1].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[2].Ships[0].CurrentMSP, System1.Stars[0].Planets[0].Populations[0].MaintenanceSupplies,
+                    System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies);
+
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.Hour);
+                tickCount = tickCount + Constants.TimeInSeconds.Hour;
+
+
+            }
+
+            Console.WriteLine("===================={0} {1} {2}====================", tickCount, PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count, PlayerFaction1.TaskGroups[0].TimeRequirement);
+            Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.XSystem, PlayerFaction1.TaskGroups[0].Contact.YSystem);
+            Console.WriteLine("MSP:s1:{0} s2:{1} s3:{2} s4:{3} P1:{4} P2:{5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[0].Ships[1].CurrentMSP,
+                PlayerFaction1.TaskGroups[1].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[2].Ships[0].CurrentMSP, System1.Stars[0].Planets[0].Populations[0].MaintenanceSupplies,
+                System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies);
+
+        }
     }
 }

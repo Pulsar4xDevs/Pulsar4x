@@ -59,7 +59,7 @@ namespace Pulsar4X.Entities
         public float CivilianPopulation { get; set; }
         public float PopulationGrowthRate { get; set; }
         public float FuelStockpile { get; set; }
-        public float MaintenanceSupplies { get; set; }
+        public int MaintenanceSupplies { get; set; }
 
 
         public float PopulationWorkingInAgriAndEnviro

@@ -995,7 +995,7 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
-                    #region Refuel
+                    #region Refuel From Colony
                     case (int)Constants.ShipTN.OrderType.RefuelFromColony:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
                         for (int loop = 0; loop < Ships.Count; loop++)
@@ -1012,142 +1012,21 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
-                    #region Refuel Target Fleet
-                    case (int)Constants.ShipTN.OrderType.RefuelTargetFleet:
+                    #region Resupply From Colony
+                    case (int)Constants.ShipTN.OrderType.ResupplyFromColony:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
-                        /// <summary>
-                        /// A specific tanker list could come in handy here. But this shouldn't be run every tick so it won't be that big an issue.
-                        /// </summary>
-                        int FuelPlace = 0;
                         for (int loop = 0; loop < Ships.Count; loop++)
                         {
-
-                            if (Ships[loop].ShipClass.IsTanker == true)
+                            if (TaskGroupOrders[0].pop.MaintenanceSupplies == 0)
                             {
-                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
-                                for (int loop2 = FuelPlace; loop2 < TaskGroupOrders[0].taskGroup.Ships.Count; loop2++)
-                                {
-                                    if (AvailableFuel <= 0.0f)
-                                    {
-                                        /// <summary>
-                                        /// This tanker is done.
-                                        /// </summary>
-                                        break;
-                                    }
-                                    AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop2].Refuel(AvailableFuel);
-                                    FuelPlace++;
-                                }
-                                Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                                /// <summary>
+                                /// Order could not be carried out.
+                                /// </summary>
+                                break;
                             }
+                            TaskGroupOrders[0].pop.MaintenanceSupplies = Ships[loop].Resupply(TaskGroupOrders[0].pop.MaintenanceSupplies);
                         }
-
-                        if (FuelPlace != TaskGroupOrders[0].taskGroup.Ships.Count ||
-                            TaskGroupOrders[0].taskGroup.Ships.Last().CurrentFuel != TaskGroupOrders[0].taskGroup.Ships.Last().ShipClass.TotalFuelCapacity)
-                        {
-                            /// <summary>
-                            /// Order could not be carried out.
-                            /// </summary>
-                        }
-                        break;
-                    #endregion
-
-                    #region Refuel From Own Tankers
-                    case (int)Constants.ShipTN.OrderType.RefuelFromOwnTankers:
-                        FuelPlace = 0;
-                        for (int loop = 0; loop < Ships.Count; loop++)
-                        {
-                            if (Ships[loop].ShipClass.IsTanker == true)
-                            {
-                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
-
-                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
-                                {
-                                    /// <summary>
-                                    /// Don't refuel tankers from each other.
-                                    /// </summary>
-                                    if (Ships[loop2].ShipClass.IsTanker == false)
-                                    {
-                                        if (AvailableFuel <= 0.0f)
-                                        {
-                                            /// <summary>
-                                            /// This Tanker is finished.
-                                            /// </sumamry>
-                                            break;
-                                        }
-
-                                        AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
-                                        FuelPlace++;
-                                    }
-                                }
-                                Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
-                            }
-                        }
-
-                        if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
-                        {
-                            /// <summary>
-                            /// Order could not be carried out.
-                            /// </summary>
-                        }
-                        break;
-                    #endregion
-
-                    #region Refuel from Target Fleet
-                    case (int)Constants.ShipTN.OrderType.RefuelFromTargetFleet:
-                        FuelPlace = 0;
-                        for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
-                        {
-                            if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsTanker == true)
-                            {
-                                float FuelCutoff = TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                                float AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel - FuelCutoff;
-
-                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
-                                {
-                                    if (AvailableFuel <= 0.0f)
-                                    {
-                                        /// <summary>
-                                        /// This Tanker is finished.
-                                        /// </summary>
-                                        break;
-                                    }
-
-                                    AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
-                                    FuelPlace++;
-                                }
-                                TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
-                            }
-                        }
-
-                        if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
-                        {
-                            /// <summary>
-                            /// Order could not be carried out.
-                            /// </summary>
-                        }
-                        break;
-                    #endregion
-
-                    #region Unload 90% of Fuel to planet
-                    case (int)Constants.ShipTN.OrderType.UnloadFuelToPlanet:
-                        for (int loop = 0; loop < Ships.Count; loop++)
-                        {
-
-                            if (Ships[loop].ShipClass.IsTanker == true)
-                            {
-                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
-
-                                if (AvailableFuel > 0.0f)
-                                {
-                                    TaskGroupOrders[0].pop.FuelStockpile = TaskGroupOrders[0].pop.FuelStockpile + AvailableFuel;
-                                    Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - AvailableFuel;
-                                }
-                            }
-                        }
-                        break;
+                    break;
                     #endregion
 
                     #region Load Installation
@@ -1264,6 +1143,295 @@ namespace Pulsar4X.Entities
                             TimeSlice = 0;
                         }
                         break;
+                    #endregion
+
+                    #region Refuel Target Fleet
+                    case (int)Constants.ShipTN.OrderType.RefuelTargetFleet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        /// <summary>
+                        /// A specific tanker list could come in handy here. But this shouldn't be run every tick so it won't be that big an issue.
+                        /// </summary>
+                        int FuelPlace = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+
+                            if (Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+                                for (int loop2 = FuelPlace; loop2 < TaskGroupOrders[0].taskGroup.Ships.Count; loop2++)
+                                {
+                                    if (AvailableFuel <= 0.0f)
+                                    {
+                                        /// <summary>
+                                        /// This tanker is done.
+                                        /// </summary>
+                                        break;
+                                    }
+
+                                    /// <summary>
+                                    /// I want refuel target fleet to refuel all ships, even tankers.
+                                    /// </summary>
+                                    AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop2].Refuel(AvailableFuel);
+                                    FuelPlace++;
+                                }
+
+                                /// <summary>
+                                /// If the ship was below the fuel cutoff originally, that will be reflected in available fuel so this should cause no issues.
+                                /// </summary>
+                                Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                            }
+                        }
+
+                        if (FuelPlace != TaskGroupOrders[0].taskGroup.Ships.Count ||
+                            TaskGroupOrders[0].taskGroup.Ships.Last().CurrentFuel != TaskGroupOrders[0].taskGroup.Ships.Last().ShipClass.TotalFuelCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                        break;
+                    #endregion
+
+                    #region Refuel From Own Tankers
+                    case (int)Constants.ShipTN.OrderType.RefuelFromOwnTankers:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        FuelPlace = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+
+                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
+                                {
+                                    /// <summary>
+                                    /// Don't refuel tankers from each other.
+                                    /// </summary>
+                                    if (Ships[loop2].ShipClass.IsTanker == false)
+                                    {
+                                        if (AvailableFuel <= 0.0f)
+                                        {
+                                            /// <summary>
+                                            /// This Tanker is finished.
+                                            /// </sumamry>
+                                            break;
+                                        }
+
+                                        AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
+                                        FuelPlace++;
+                                    }
+                                }
+                                Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                            }
+                        }
+
+                        if (FuelPlace != Ships.Count || (Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity && Ships.Last().ShipClass.IsTanker == false))
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                        break;
+                    #endregion
+
+                    #region Refuel From Target Fleet
+                    case (int)Constants.ShipTN.OrderType.RefuelFromTargetFleet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        FuelPlace = 0;
+                        for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
+                        {
+                            if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel - FuelCutoff;
+
+                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
+                                {
+                                    if (AvailableFuel <= 0.0f)
+                                    {
+                                        /// <summary>
+                                        /// This Tanker is finished.
+                                        /// </summary>
+                                        break;
+                                    }
+
+                                    AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
+                                    FuelPlace++;
+                                }
+                                TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                            }
+                        }
+
+                        if (FuelPlace != Ships.Count || Ships.Last().CurrentFuel != Ships.Last().ShipClass.TotalFuelCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                        break;
+                    #endregion
+
+                    #region Unload 90% Of Fuel To Planet
+                    case (int)Constants.ShipTN.OrderType.UnloadFuelToPlanet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+
+                            if (Ships[loop].ShipClass.IsTanker == true)
+                            {
+                                float FuelCutoff = Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = Ships[loop].CurrentFuel - FuelCutoff;
+
+                                if (AvailableFuel > 0.0f)
+                                {
+                                    TaskGroupOrders[0].pop.FuelStockpile = TaskGroupOrders[0].pop.FuelStockpile + AvailableFuel;
+                                    Ships[loop].CurrentFuel = Ships[loop].CurrentFuel - AvailableFuel;
+                                }
+                            }
+                        }
+                        break;
+                    #endregion
+
+                    #region Resupply Target Fleet
+                    case (int) Constants.ShipTN.OrderType.ResupplyTargetFleet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        int SupplyPlace = 0;
+                        /// <summary>
+                        /// Likewise a Supply ship specific list could come in handy.
+                        /// </summary>
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipClass.IsSupply == true)
+                            {
+                                int MSPCutoff = (Ships[loop].ShipClass.TotalMSPCapacity / 10);
+                                int AvailableMSP = Ships[loop].CurrentMSP - MSPCutoff;
+
+                                for (int loop2 = SupplyPlace; loop2 < TaskGroupOrders[0].taskGroup.Ships.Count; loop2++)
+                                {
+                                    if (AvailableMSP <= 0)
+                                    {
+                                        ///<summary>
+                                        ///This supply ship is finished.
+                                        ///</summary>
+                                        break;
+                                    }
+                                    AvailableMSP = TaskGroupOrders[0].taskGroup.Ships[loop2].Resupply(AvailableMSP);
+                                    SupplyPlace++;
+                                }
+                                Ships[loop].CurrentMSP = MSPCutoff + AvailableMSP;
+                            }
+                        }
+
+                        if (SupplyPlace != TaskGroupOrders[0].taskGroup.Ships.Count ||
+                            TaskGroupOrders[0].taskGroup.Ships.Last().CurrentMSP != TaskGroupOrders[0].taskGroup.Ships.Last().ShipClass.TotalMSPCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                    break;
+                    #endregion
+
+                    #region Resupply From Own Supply Ships
+                    case (int)Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        SupplyPlace = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipClass.IsSupply == true)
+                            {
+                                int MSPCutoff = (Ships[loop].ShipClass.TotalMSPCapacity / 10);
+                                int AvailableMSP = Ships[loop].CurrentMSP - MSPCutoff;
+
+                                for (int loop2 = SupplyPlace; loop2 < Ships.Count; loop2++)
+                                {
+                                    /// <summary>
+                                    /// Don't resupply supply ships from each other, or juggle as it will henceforth be refered to.
+                                    /// </summary>
+                                    if (Ships[loop2].ShipClass.IsSupply == false)
+                                    {
+                                        if (AvailableMSP <= 0)
+                                        {
+                                            /// <summary>
+                                            /// This supply ship is finished.
+                                            /// </summary>
+                                            break;
+                                        }
+
+                                        AvailableMSP = Ships[loop2].Resupply(AvailableMSP);
+                                        SupplyPlace++;
+                                    }
+                                }
+                                Ships[loop].CurrentMSP = MSPCutoff + AvailableMSP;
+                            }
+                        }
+
+                        if(SupplyPlace != Ships.Count || (Ships.Last().CurrentMSP != Ships.Last().ShipClass.TotalMSPCapacity && Ships.Last().ShipClass.IsSupply == false ) )
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                    break;
+                    #endregion
+
+                    #region Resupply From Target Fleet
+                    case (int) Constants.ShipTN.OrderType.ResupplyFromTargetFleet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        SupplyPlace = 0;
+                        for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
+                        {
+                            if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsSupply == true)
+                            {
+                                int MSPCutoff = (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalMSPCapacity / 10);
+                                int AvailableMSP = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentMSP - MSPCutoff;
+
+                                for (int loop2 = SupplyPlace; loop2 < Ships.Count; loop2++)
+                                {
+                                    if (AvailableMSP <= 0)
+                                    {
+                                        /// <summary>
+                                        /// This supply ship is done.
+                                        /// </summary>
+                                        break;
+                                    }
+
+                                    AvailableMSP = Ships[loop2].Resupply(AvailableMSP);
+                                    SupplyPlace++;
+                                }
+                                TaskGroupOrders[0].taskGroup.Ships[loop].CurrentMSP = MSPCutoff + AvailableMSP;
+                            }
+                        }
+
+                        if (SupplyPlace != Ships.Count || Ships.Last().CurrentMSP != Ships.Last().ShipClass.TotalMSPCapacity)
+                        {
+                            /// <summary>
+                            /// Order could not be carried out.
+                            /// </summary>
+                        }
+                    break;
+                    #endregion
+
+                    #region Unload 90% Of Supplies To Planet
+                    case (int)Constants.ShipTN.OrderType.UnloadSuppliesToPlanet:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipClass.IsSupply == true)
+                            {
+                                int MSPCutoff = (Ships[loop].ShipClass.TotalMSPCapacity / 10);
+                                int AvailableMSP = Ships[loop].CurrentMSP - MSPCutoff;
+
+                                if (AvailableMSP > 0)
+                                {
+                                    TaskGroupOrders[0].pop.MaintenanceSupplies = TaskGroupOrders[0].pop.MaintenanceSupplies + AvailableMSP;
+                                    Ships[loop].CurrentMSP = Ships[loop].CurrentMSP - AvailableMSP;
+                                }
+                            }
+                        }
+                    break;
                     #endregion
 
                 }
