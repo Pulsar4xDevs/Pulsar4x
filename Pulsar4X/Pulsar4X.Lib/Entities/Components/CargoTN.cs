@@ -16,7 +16,23 @@ namespace Pulsar4X.Entities.Components
             get { return CargoType; }
         }
 
-        //*** do something for ship component here since those can be cargo entries.
+        /// <summary>
+        /// Type of component, chiefly this contains component size.
+        /// </summary>
+        private ComponentDefTN CargoComponentType;
+        public ComponentDefTN cargoComponentType
+        {
+            get { return CargoComponentType; }
+        }
+
+        /// <summary>
+        /// CCI is the index from the faction list of components of this component.
+        /// </summary>
+        private int CargoComponentIndex;
+        public int cargoComponentIndex
+        {
+            get { return CargoComponentIndex; }
+        }
 
         /// <summary>
         /// Size of Installation being carried.
@@ -36,6 +52,13 @@ namespace Pulsar4X.Entities.Components
         public CargoListEntryTN(Installation.InstallationType Type, int SizeInTons)
         {
             CargoType = Type;
+            Tons = SizeInTons;
+        }
+
+        public CargoListEntryTN(ComponentDefTN Type, int Index, int SizeInTons)
+        {
+            CargoComponentType = Type;
+            CargoComponentIndex = Index;
             Tons = SizeInTons;
         }
     }
@@ -64,6 +87,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="CrewRequirement">Required crew.</param>
         public CargoDefTN(string Title, float HS, decimal ComponentCost, byte CrewRequirement)
         {
+            componentType = ComponentTypeTN.CargoHold;
+
             name = Title;
             size = HS;
             cost = ComponentCost;

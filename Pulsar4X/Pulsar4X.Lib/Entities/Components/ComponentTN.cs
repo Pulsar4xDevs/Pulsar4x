@@ -6,6 +6,32 @@ using System.Text;
 namespace Pulsar4X.Entities.Components
 {
     /// <summary>
+    /// List of Components:
+    /// </summary>
+    public enum ComponentTypeTN
+    {
+        Crew,
+        Fuel,
+        Engineering,
+        Bridge,
+        MaintenanceBay,
+        FlagBridge,
+        DamageControl,
+        OrbitalHabitat,
+        RecFacility,
+
+        Armor,
+        Engine,
+        PassiveSensor,
+        ActiveSensor,
+        CargoHold,
+        CargoHandlingSystem,
+        CryoStorage,
+
+        TypeCount
+    }
+
+    /// <summary>
     /// Parent class for all TN component definitions.
     /// </summary>
     public abstract class ComponentDefTN
@@ -89,6 +115,16 @@ namespace Pulsar4X.Entities.Components
             get { return IsSalvaged; }
             set { IsSalvaged = value; }
         }
+
+        /// <summary>
+        /// What type of component is this?
+        /// </summary>
+        private ComponentTypeTN ComponentType;
+        public ComponentTypeTN componentType
+        {
+            get { return ComponentType; }
+            set { ComponentType = value; }
+        }
     }
     /// <summary>
     /// End ComponentDefTN class
@@ -100,6 +136,10 @@ namespace Pulsar4X.Entities.Components
     public abstract class ComponentTN
     {
         /// <summary>
+        /// Need a component type, probably an enum, and an index for the componentList of this faction
+        /// </summary>
+
+        /// <summary>
         /// Is this component working, or has it suffered critical damage
         /// </summary>
         private bool IsDestroyed;
@@ -107,6 +147,16 @@ namespace Pulsar4X.Entities.Components
         {
             get { return IsDestroyed; }
             set { IsDestroyed = value; }
+        }
+
+        /// <summary>
+        /// which component on the ship is this?
+        /// </summary>
+        private int ComponentIndex;
+        public int componentIndex
+        {
+            get { return ComponentIndex; }
+            set { ComponentIndex = value; }
         }
     }
 }

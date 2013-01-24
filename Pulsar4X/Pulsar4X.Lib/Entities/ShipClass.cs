@@ -132,6 +132,19 @@ namespace Pulsar4X.Entities
         [Browsable(false)]
         public int MilitaryComponentCount { get; set; }
 
+
+        /// <summary>
+        /// Internal listing of component definitions for max repair calculation.
+        /// </summary>
+        [Browsable(false)]
+        public BindingList<ComponentDefTN> ListOfComponentDefs { get; set; }
+
+        /// <summary>
+        /// Internal listing of component definition counts for max repair calculation.
+        /// </summary>
+        [Browsable(false)]
+        public BindingList<short> ListOfComponentDefsCount { get; set; }
+
         /// <summary>
         /// What is the perceived protection value this ship class provides to civilians.
         /// </summary>
@@ -549,6 +562,9 @@ namespace Pulsar4X.Entities
             MilitaryComponentCount = 0;
             PlanetaryProtectionValue = 0;
 
+            ListOfComponentDefs = new BindingList<ComponentDefTN>();
+            ListOfComponentDefsCount = new BindingList<short>();
+
             ShipArmorDef = new ArmorDefTN("Conventional Armor");
             NewArmor("Conventional Armor", 2, 1);
 
@@ -641,6 +657,36 @@ namespace Pulsar4X.Entities
         /// <param name="increment">The number of new components to be added.</param>
         private void UpdateClass(ComponentDefTN Component, short increment )
         {
+            int CIndex = ListOfComponentDefs.IndexOf(Component);
+            if (CIndex != -1)
+            {
+                ListOfComponentDefsCount[CIndex] = (short)(ListOfComponentDefsCount[CIndex] + increment);
+            }
+            else if (CIndex == -1 && increment >= 1)
+            {
+                ListOfComponentDefs.Add(Component);
+                ListOfComponentDefsCount.Add(increment);
+            }
+            else
+            {
+                if (CIndex != -1)
+                {
+                    if (ListOfComponentDefsCount[CIndex] <= 0)
+                    {
+                        ListOfComponentDefsCount.RemoveAt(CIndex);
+                        ListOfComponentDefs.RemoveAt(CIndex);
+                    }
+                }
+                else
+                {
+
+                    /// <summary>
+                    /// This is an error condition that may need to be handled at some point.
+                    /// </summary>
+                    return;
+                }
+            }
+
 
             /// <summary>
             /// Size of the craft has to be adjusted
@@ -717,8 +763,20 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                //***list through the components to find the next biggest one.***
+                CIndex = ListOfComponentDefs.IndexOf(Component);
+                if (CIndex == -1)
+                {
+                    decimal tempCost = 0.0m;
+                    for (int loop = 0; loop < ListOfComponentDefs.Count; loop++)
+                    {
+                        if (ListOfComponentDefs[loop].cost > tempCost)
+                        {
+                            tempCost = ListOfComponentDefs[loop].cost;
+                        }
+                    }
 
+                    MaxRepair = (int)tempCost;
+                }
             }
 
             CargoLoadTime = (TotalCargoCapacity * Constants.ShipTN.BaseCargoLoadTimePerTon) / TractorMultiplier;
@@ -757,7 +815,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Wrong type of generalComponent def sent to add crew quarters. What error should be sent?
             /// </summary>
-            if (CrewQ.componentType != GeneralType.Crew)
+            if (CrewQ.componentType != ComponentTypeTN.Crew)
             {
                 return;
             }
@@ -817,7 +875,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Wrong type of generalComponent def sent to add Fuel Storage.
             /// </summary>
-            if (FuelT.componentType != GeneralType.Fuel)
+            if (FuelT.componentType != ComponentTypeTN.Fuel)
             {
                 return;
             }
@@ -866,7 +924,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Wrong type of generalComponent def sent to add Engineering Spaces.
             /// </summary>
-            if (EBay.componentType != GeneralType.Engineering)
+            if (EBay.componentType != ComponentTypeTN.Engineering)
             {
                 return;
             }
@@ -917,7 +975,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Wrong type of generalComponent def sent to add Other Component.
             /// </summary>
-            if (Other.componentType < GeneralType.Bridge)
+            if (Other.componentType < ComponentTypeTN.Bridge)
             {
                 return;
             }
@@ -952,7 +1010,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            if (Other.componentType == GeneralType.Bridge)
+            if (Other.componentType == ComponentTypeTN.Bridge)
             {
                 HasBridge = true;
 

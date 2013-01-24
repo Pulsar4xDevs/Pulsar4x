@@ -23,6 +23,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="TractorMult">Tractor multiplier that the CHS possesses.</param>
         public CargoHandlingDefTN(string Title, int TractorMult)
         {
+            componentType = ComponentTypeTN.CargoHandlingSystem;
+
             name = Title;
             TractorMultiplier = TractorMult;
 

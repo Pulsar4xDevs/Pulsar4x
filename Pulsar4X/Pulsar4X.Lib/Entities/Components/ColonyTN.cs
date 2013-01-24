@@ -25,6 +25,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="CrewRequirement">Crew requirement of the component.</param>
         public ColonyDefTN(string Title, float Size, decimal ComponentCost, byte CrewRequirement)
         {
+            componentType = ComponentTypeTN.CryoStorage;
+
             name = Title;
             size = Size;
             cost = ComponentCost;

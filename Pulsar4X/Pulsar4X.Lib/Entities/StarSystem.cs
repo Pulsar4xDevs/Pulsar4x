@@ -145,6 +145,10 @@ namespace Pulsar4X.Entities
 
             SystemContactList.Remove(Contact);
 
+            /// <summary>
+            /// Distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
+            /// causes no issues with distance calculations.
+            /// </summary>
             for (int loop = 0; loop < SystemContactList.Count; loop++)
             {
                 SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);

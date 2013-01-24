@@ -235,6 +235,7 @@ namespace Pulsar4X.Entities
             for (int loop = 0; loop < ClassDefinition.ShipEngineCount; loop++)
             {
                 EngineTN Engine = new EngineTN(ClassDefinition.ShipEngineDef);
+                Engine.componentIndex = ShipEngine.Count;
                 ShipEngine.Add(Engine);
             }
             CurrentEnginePower = ClassDefinition.MaxEnginePower;
@@ -252,6 +253,7 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipCargoCount[loop]; loop2++)
                 {
                     CargoTN cargo = new CargoTN(ClassDefinition.ShipCargoDef[loop]);
+                    cargo.componentIndex = ShipCargo.Count;
                     ShipCargo.Add(cargo);
                 }
             }
@@ -265,6 +267,7 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipColonyCount[loop]; loop2++)
                 {
                     ColonyTN colony = new ColonyTN(ClassDefinition.ShipColonyDef[loop]);
+                    colony.componentIndex = ShipColony.Count;
                     ShipColony.Add(colony);
                 }
             }
@@ -279,6 +282,7 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipCHSCount[loop]; loop2++)
                 {
                     CargoHandlingTN CHS = new CargoHandlingTN(ClassDefinition.ShipCHSDef[loop]);
+                    CHS.componentIndex = ShipCHS.Count;
                     ShipCHS.Add(CHS);
                 }
             }
@@ -294,6 +298,7 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipPSensorCount[loop]; loop2++)
                 {
                     PassiveSensorTN PSensor = new PassiveSensorTN(ClassDefinition.ShipPSensorDef[loop]);
+                    PSensor.componentIndex = ShipPSensor.Count;
                     ShipPSensor.Add(PSensor);
                 }
             }
@@ -313,6 +318,7 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipASensorCount[loop]; loop2++)
                 {
                     ActiveSensorTN ASensor = new ActiveSensorTN(ClassDefinition.ShipASensorDef[loop]);
+                    ASensor.componentIndex = ShipASensor.Count;
                     ShipASensor.Add(ASensor);
                 }
             }
@@ -354,6 +360,7 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < countList[loop]; loop2++)
                 {
                     GeneralComponentTN NewComponent = new GeneralComponentTN(fromList[loop]);
+                    NewComponent.componentIndex = AddList.Count;
                     AddList.Add(NewComponent);
                 }
             }

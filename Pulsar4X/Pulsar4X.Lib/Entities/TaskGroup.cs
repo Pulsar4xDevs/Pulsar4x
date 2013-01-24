@@ -9,7 +9,6 @@ using System.ComponentModel;
 /// <summary>
 /// Need a unified component list and component definition list for
 /// CargoListEntry in CargoTN.cs
-/// UpdateClass in ShipClass.cs
 /// eventual onDamage function for Ship.cs
 /// onDestroyed function for Ship.cs
 /// </summary>
@@ -1003,8 +1002,11 @@ namespace Pulsar4X.Entities
                             if (TaskGroupOrders[0].pop.FuelStockpile == 0.0f)
                             {
                                 /// <summary>
-                                /// Orders could not be carried out.
+                                /// Orders could not be carried out. A sample message log is below, something like this will need to be done for every type of message.
                                 /// </summary>
+                                /*DateTime TimeOfMessage = new DateTime();
+                                MessageEntry NewMessage = new MessageEntry(Contact.CurrentSystem, Contact, TimeOfMessage, (int)TimeSlice, "Refueling order could not be completed.");
+                                this.Faction.MessageLog.Add(NewMessage);*/
                                 break;
                             }
                             TaskGroupOrders[0].pop.FuelStockpile = Ships[loop].Refuel(TaskGroupOrders[0].pop.FuelStockpile);

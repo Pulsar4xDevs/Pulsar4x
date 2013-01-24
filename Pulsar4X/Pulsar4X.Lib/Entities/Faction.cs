@@ -91,6 +91,53 @@ namespace Pulsar4X.Entities
         }
     }
 
+    public class MessageEntry
+    {
+        /// <summary>
+        /// which starsystem does this message occur in.
+        /// </summary>
+        public StarSystem Location { get; set; }
+
+        /// <summary>
+        /// Which tg/planet/pop are we referencing?
+        /// </summary>
+        public StarSystemEntity entity { get; set; }
+
+        /// <summary>
+        /// When was this message sent?
+        /// </summary>
+        public DateTime TimeOfMessage { get; set; }
+
+        /// <summary>
+        /// How long since the last time increment?
+        /// </summary>
+        
+        public int TimeSlice { get; set; }
+        /// <summary>
+        /// Text of the message for the log.
+        /// </summary>
+        public string Text { get; set; }
+
+
+        /// <summary>
+        /// MessageEntry constructs a specific message with the relevant location, time, and entity(if applicable). 
+        /// </summary>
+        /// <param name="Loc">Starsystem message is from.</param>
+        /// <param name="Ref">Starsystementity the message refers to.</param>
+        /// <param name="Time">Game time of message.</param>
+        /// <param name="timeSlice">Time since last increment.</param>
+        /// <param name="text">text of the message.</param>
+        public MessageEntry(StarSystem Loc, StarSystemEntity Ref, DateTime Time, int timeSlice, string text)
+        {
+            Location = Loc;
+            entity = Ref;
+            TimeOfMessage = Time;
+            TimeSlice = timeSlice;
+            Text = text;
+        }
+
+    }
+
 
     public class Faction : GameEntity
     {
@@ -135,6 +182,8 @@ namespace Pulsar4X.Entities
         /// Just a list of the available installation types for this faction.
         /// </summary>
         public BindingList<Installation> InstallationTypes { get; set; }
+
+        public BindingList<MessageEntry> MessageLog { get; set; }
         
 
         public Faction(int ID)
@@ -163,6 +212,8 @@ namespace Pulsar4X.Entities
                 Installation NewInst = new Installation((Installation.InstallationType)loop);
                 InstallationTypes.Add(NewInst);
             }
+
+            MessageLog = new BindingList<MessageEntry>();
 
         }
 
@@ -193,6 +244,7 @@ namespace Pulsar4X.Entities
                 InstallationTypes.Add(NewInst);
             }
 
+            MessageLog = new BindingList<MessageEntry>();
         }
 
         /// <summary>

@@ -114,6 +114,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="HyperMod">If  this engine is hyper capable, and how much this modifies the size of the engine.</param>
         public EngineDefTN(string EngName, byte EngBase, float EngPowMod, float FuelCon, float ThmRed, byte ThmRedTech, float EngSize, float HyperMod)
         {
+            componentType = ComponentTypeTN.Engine;
+
             /// <summary>
             /// EngineDef stores all of these variables, so move them over.
             /// </summary>

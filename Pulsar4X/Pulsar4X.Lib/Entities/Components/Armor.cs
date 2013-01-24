@@ -77,6 +77,7 @@ namespace Pulsar4X.Entities.Components
             isMilitary = false;
             isSalvaged = false;
 
+            componentType = ComponentTypeTN.Armor;
 	    }
 
         /// <summary>
