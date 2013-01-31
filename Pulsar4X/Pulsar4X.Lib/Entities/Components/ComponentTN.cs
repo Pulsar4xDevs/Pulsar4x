@@ -34,18 +34,8 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Parent class for all TN component definitions.
     /// </summary>
-    public abstract class ComponentDefTN
+    public abstract class ComponentDefTN : GameEntity
     {
-        /// <summary>
-        /// The Name of this component that will be user entered, and displayed to the player.
-        /// </summary>
-        private string Name;
-        public string name
-        {
-            get { return Name; }
-            set { Name = value; }
-        }
-
         /// <summary>
         /// Crew requirement for the component, some components have a crew requirement of 0.
         /// </summary>
@@ -133,7 +123,7 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// ComponentTN is the parent class for all TN components.
     /// </summary>
-    public abstract class ComponentTN
+    public abstract class ComponentTN : GameEntity
     {
         /// <summary>
         /// Need a component type, probably an enum, and an index for the componentList of this faction

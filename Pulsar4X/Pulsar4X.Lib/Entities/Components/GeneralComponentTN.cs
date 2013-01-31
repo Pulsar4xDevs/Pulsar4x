@@ -22,7 +22,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="GeneralComponentType">What type of component is this? see the enum in ComponentTN.cs for a list.</param>
         public GeneralComponentDefTN(string Title, float ComponentSize, byte ComponentCrew, decimal ComponentCost, ComponentTypeTN GeneralComponentType)
         {
-            name = Title;
+            Name = Title;
             size = ComponentSize;
             crew = ComponentCrew;
             cost = ComponentCost;

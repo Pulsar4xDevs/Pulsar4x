@@ -123,7 +123,7 @@ namespace Pulsar4X.Tests
 
             EngineDefTN tst = ts.ShipEngine[0].engineDef;
 
-            Console.WriteLine("Name: {0}", tst.name);
+            Console.WriteLine("Name: {0}", tst.Name);
             Console.WriteLine("EngineBase: {0}, PowerMod: {1}, FuelConMod: {2}, ThermalReduction: {3}, Size: {4},HyperMod: {5}",
                               tst.engineBase, tst.powerMod, tst.fuelConsumptionMod, tst.thermalReduction, tst.size, tst.hyperDriveMod);
             Console.WriteLine("EnginePower: {0}, FuelUsePerHour: {1}", tst.enginePower, tst.fuelUsePerHour);
@@ -155,7 +155,7 @@ namespace Pulsar4X.Tests
 
             PassiveSensorDefTN tst3 = ts.ShipPSensor[0].pSensorDef;
 
-            Console.WriteLine("Name: {0}", tst3.name);
+            Console.WriteLine("Name: {0}", tst3.Name);
             Console.WriteLine("Size: {0}, HTK: {1}, Hardening: {2}", tst3.size, tst3.htk, tst3.hardening);
             Console.WriteLine("Rating: {0}, Range: {1}", tst3.rating, tst3.range);
             Console.WriteLine("IsMilitary: {0}", tst3.isMilitary);
@@ -174,7 +174,7 @@ namespace Pulsar4X.Tests
             ShipClassTN ts2 = new ShipClassTN("Test");
             ShipTN ts = new ShipTN(ts2,0,0);
 
-            ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36,24,185, false, 1.0f, 1);
+            ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36, 24, 185, false, 1.0f, 1);
 
             ts2.ShipASensorDef = new BindingList<ActiveSensorDefTN>();
             ts2.ShipASensorCount = new BindingList<ushort>();
@@ -189,7 +189,7 @@ namespace Pulsar4X.Tests
 
             ActiveSensorDefTN tst3 = ts.ShipASensor[0].aSensorDef;
 
-            Console.WriteLine("Name: {0}", tst3.name);
+            Console.WriteLine("Name: {0}", tst3.Name);
             Console.WriteLine("Size: {0}, HTK: {1}, Hardening: {2}", tst3.size, tst3.htk, tst3.hardening);
             Console.WriteLine("GPS: {0}, Range: {1}", tst3.gps, tst3.maxRange);
             Console.WriteLine("IsMilitary: {0}", tst3.isMilitary);

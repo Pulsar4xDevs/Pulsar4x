@@ -119,7 +119,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// EngineDef stores all of these variables, so move them over.
             /// </summary>
-            name = EngName;
+            Name = EngName;
             EngineBase = EngBase;
             PowerMod = EngPowMod;
             FuelConsumptionMod = FuelCon;

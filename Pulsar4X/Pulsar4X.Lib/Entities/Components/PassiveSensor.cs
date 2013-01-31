@@ -99,7 +99,7 @@ namespace Pulsar4X.Entities.Components
         {
             componentType = ComponentTypeTN.PassiveSensor;
            
-            name = title;
+            Name = title;
             size = HS;
             Sensitivity = sens;
             ThermalOrEM = TOrE;

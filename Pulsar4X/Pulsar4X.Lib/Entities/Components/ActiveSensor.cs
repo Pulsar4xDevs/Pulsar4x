@@ -108,7 +108,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// basic sensor statistics.
             /// </summary>
-            name = desc;
+            Name = desc;
             size = HS;
             ActiveStrength = actStr;
             EMRecv = EMR;

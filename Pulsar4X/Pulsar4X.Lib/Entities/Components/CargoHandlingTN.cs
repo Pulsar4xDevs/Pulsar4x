@@ -25,7 +25,7 @@ namespace Pulsar4X.Entities.Components
         {
             componentType = ComponentTypeTN.CargoHandlingSystem;
 
-            name = Title;
+            Name = Title;
             TractorMultiplier = TractorMult;
 
             size = 2.0f;

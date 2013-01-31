@@ -26,15 +26,6 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// CCI is the index from the faction list of components of this component.
-        /// </summary>
-        private int CargoComponentIndex;
-        public int cargoComponentIndex
-        {
-            get { return CargoComponentIndex; }
-        }
-
-        /// <summary>
         /// Size of Installation being carried.
         /// </summary>
         private int Tons;
@@ -55,10 +46,9 @@ namespace Pulsar4X.Entities.Components
             Tons = SizeInTons;
         }
 
-        public CargoListEntryTN(ComponentDefTN Type, int Index, int SizeInTons)
+        public CargoListEntryTN(ComponentDefTN Type, int SizeInTons)
         {
             CargoComponentType = Type;
-            CargoComponentIndex = Index;
             Tons = SizeInTons;
         }
     }
@@ -89,7 +79,7 @@ namespace Pulsar4X.Entities.Components
         {
             componentType = ComponentTypeTN.CargoHold;
 
-            name = Title;
+            Name = Title;
             size = HS;
             cost = ComponentCost;
             crew = CrewRequirement;

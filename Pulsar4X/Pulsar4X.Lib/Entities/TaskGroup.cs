@@ -158,6 +158,11 @@ namespace Pulsar4X.Entities
         public Dictionary<Installation.InstallationType,CargoListEntryTN> CargoList { get; set; }
 
         /// <summary>
+        /// List of all components in the cargo holds.
+        /// </summary>
+        public Dictionary<ComponentDefTN, CargoListEntryTN> CargoComponentList { get; set; }
+
+        /// <summary>
         /// Sum total of all cryo bays in the taskgroup.
         /// </summary>
         public int TotalCryoCapacity { get; set; }
@@ -1461,6 +1466,7 @@ namespace Pulsar4X.Entities
 
             /// <summary>
             /// In this case load as much as possible up to AvailableMass.
+            /// </summary>
             if (Limit == 0)
             {
                 MassToLoad = Math.Min(RemainingTonnage, AvailableMass);
@@ -1575,6 +1581,104 @@ namespace Pulsar4X.Entities
                 CurrentCryoStorage = CurrentCryoStorage - Limit;
             }
             Pop.CivilianPopulation = Pop.CivilianPopulation + ((float)Colonists / 1000000.0f);  
+        }
+
+        /// <summary>
+        /// LoadComponents picks up a set number of components from population pop's component stockpile.
+        /// </summary>
+        /// <param name="Pop">Population of the component pickup.</param>
+        /// <param name="ComponentIndex">location in pop.ComponentStockpile.</param>
+        /// <param name="Limit">Number of said components to pick up if not all of them.</param>
+        public void LoadComponents(Population Pop, int ComponentIndex, int Limit)
+        {
+            int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
+            int TotalMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * (float)Limit); 
+            int AvailableMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * Pop.ComponentStockpileCount[ComponentIndex]);
+
+            int MassToLoad = 0;
+
+            /// <summary>
+            /// In this case load as much as possible up to AvailableMass.
+            /// </summary>
+            if (Limit == 0)
+            {
+                MassToLoad = Math.Min(RemainingTonnage, AvailableMass);
+
+            }
+            /// <summary>
+            /// In this case only load up to Total mass.
+            /// </summary>
+            else
+            {
+                MassToLoad = Math.Min(RemainingTonnage, TotalMass);
+            }
+
+            if (CargoComponentList.ContainsKey(Pop.ComponentStockpile[ComponentIndex]))
+            {
+                CargoListEntryTN CLE = CargoComponentList[Pop.ComponentStockpile[ComponentIndex]];
+                CLE.tons = CLE.tons + MassToLoad;
+
+            }
+            else
+            {
+                CargoListEntryTN CargoListEntry = new CargoListEntryTN(Pop.ComponentStockpile[ComponentIndex], MassToLoad);
+                CargoComponentList.Add(Pop.ComponentStockpile[ComponentIndex], CargoListEntry);
+            }
+
+            CurrentCargoTonnage = CurrentCargoTonnage + MassToLoad;
+
+            Pop.ComponentStockpileCount[ComponentIndex] = Pop.ComponentStockpileCount[ComponentIndex] - ((float)MassToLoad / (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS));
+
+            if (Pop.ComponentStockpileCount[ComponentIndex] == 0)
+            {
+                Pop.ComponentStockpile.RemoveAt(ComponentIndex);
+                Pop.ComponentStockpileCount.RemoveAt(ComponentIndex);
+            }
+        }
+
+        /// <summary>
+        /// Unloads the specified component to population pop.
+        /// </summary>
+        /// <param name="Pop">Population receiving shipment.</param>
+        /// <param name="Component">Component to be unloaded. I'm not particularly happy with how this is being done right now.</param>
+        /// <param name="Limit">Limit to unloading.</param>
+        public void UnloadComponents(Population Pop, ComponentDefTN Component, int Limit)
+        {
+            CargoListEntryTN CLE = CargoComponentList[Component];
+
+            int TotalMass = (int)(Component.size * Constants.ShipTN.TonsPerHS * (float)Limit);
+            int MassToUnload = 0;
+
+            /// <summary>
+            /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
+            /// </summary>
+            if (Limit == 0)
+            {
+                MassToUnload = CLE.tons;
+            }
+            else
+            {
+                MassToUnload = Math.Min(CLE.tons, TotalMass);
+            }
+
+            CLE.tons = CLE.tons - MassToUnload;
+            CurrentCargoTonnage = CurrentCargoTonnage - MassToUnload;
+            if (MassToUnload == CLE.tons)
+            {
+                CargoComponentList.Remove(Component);
+            }
+
+            int CSIndex = Pop.ComponentStockpile.IndexOf(Component);
+
+            if (CSIndex == -1)
+            {
+                Pop.ComponentStockpile.Add(Component);
+                Pop.ComponentStockpileCount.Add((float)MassToUnload / (Component.size * Constants.ShipTN.TonsPerHS));
+            }
+            else
+            {
+                Pop.ComponentStockpileCount[CSIndex] = Pop.ComponentStockpileCount[CSIndex] + ((float)MassToUnload / (Component.size * Constants.ShipTN.TonsPerHS));
+            }
         }
 
         /// <summary>

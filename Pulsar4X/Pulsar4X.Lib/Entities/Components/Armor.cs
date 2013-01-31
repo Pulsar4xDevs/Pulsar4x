@@ -63,7 +63,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
 	    public ArmorDefTN(string Title)
 	    {
-            name = Title;
+            Name = Title;
 		    size = 0.0f;
 		    cost = 0.0m;
 		    Area = 0.0;
@@ -99,7 +99,7 @@ namespace Pulsar4X.Entities.Components
             if (armorDepth > 65535)
                 armorDepth = 65535;
 
-            name = Title;
+            Name = Title;
 
 		    ArmorPerHS = armorPerHS;
 		    Depth = armorDepth;

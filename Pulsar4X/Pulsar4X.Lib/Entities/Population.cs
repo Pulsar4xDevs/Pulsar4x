@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.ComponentModel;
+using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
@@ -133,6 +136,17 @@ namespace Pulsar4X.Entities
         public float ModifierWealthAndTrade { get; set; }
         public float ModifierPoliticalStability { get; set; }
 
+
+        /// <summary>
+        /// This population's stored TN components. 
+        /// </summary>
+        public BindingList<ComponentDefTN> ComponentStockpile { get; set; }
+
+        /// <summary>
+        /// The number of each component.
+        /// </summary>
+        public BindingList<float> ComponentStockpileCount { get; set; }
+
         #endregion
 
         public Population(Planet a_oPlanet, Faction a_oFaction)
@@ -169,6 +183,11 @@ namespace Pulsar4X.Entities
             Contact = new SystemContact(Faction,this);
 
             GovernorPresent = false;
+
+            ComponentStockpile = new BindingList<ComponentDefTN>();
+            ComponentStockpileCount = new BindingList<float>();
+
+            
         }
 
         /// <summary>

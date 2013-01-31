@@ -27,7 +27,7 @@ namespace Pulsar4X.Entities.Components
         {
             componentType = ComponentTypeTN.CryoStorage;
 
-            name = Title;
+            Name = Title;
             size = Size;
             cost = ComponentCost;
             crew = CrewRequirement;

@@ -727,7 +727,7 @@ namespace Pulsar4X.Entities
             BuildPointCost = BuildPointCost - ShipArmorDef.cost;
             SizeHS = SizeHS - ShipArmorDef.size;
 
-            ShipArmorDef.CalcArmor(ShipArmorDef.name, ShipArmorDef.armorPerHS, SizeHS, ShipArmorDef.depth);
+            ShipArmorDef.CalcArmor(ShipArmorDef.Name, ShipArmorDef.armorPerHS, SizeHS, ShipArmorDef.depth);
 
             BuildPointCost = BuildPointCost + ShipArmorDef.cost;
             SizeHS = SizeHS + ShipArmorDef.size;
