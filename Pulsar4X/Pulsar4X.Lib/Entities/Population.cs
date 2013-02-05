@@ -147,6 +147,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<float> ComponentStockpileCount { get; set; }
 
+        /// <summary>
+        /// Where in the stockpile any particular component is. guid = the guid of the componentdef and int is the array location.
+        /// </summary>
+        public Dictionary<Guid, int> ComponentStockpileLookup { get; set; }
+
         #endregion
 
         public Population(Planet a_oPlanet, Faction a_oFaction)
@@ -186,7 +191,7 @@ namespace Pulsar4X.Entities
 
             ComponentStockpile = new BindingList<ComponentDefTN>();
             ComponentStockpileCount = new BindingList<float>();
-
+            ComponentStockpileLookup = new Dictionary<Guid, int>();
             
         }
 
@@ -216,6 +221,64 @@ namespace Pulsar4X.Entities
                 TotalTime = (int)((float)TaskGroupTime / (NumStarports + 1.0f));
 
             return TotalTime;
+        }
+
+
+        /// <summary>
+        /// Add Components to stockpile places increment number of componentDefs into the planetary stockpile.
+        /// </summary>
+        /// <param name="ComponentDef">Component to be added. This is the class all components inherit from, not any particular type of component.</param>
+        /// <param name="increment">Number to add to the stockpile.</param>
+        public void AddComponentsToStockpile(ComponentDefTN ComponentDef, float increment)
+        {
+            if (ComponentStockpileLookup.ContainsKey(ComponentDef.Id) == true)
+            {
+                ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] = ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] + increment;
+            }
+            else
+            {
+                ComponentStockpile.Add(ComponentDef);
+                ComponentStockpileCount.Add(increment);
+                ComponentStockpileLookup.Add(ComponentDef.Id, ComponentStockpile.IndexOf(ComponentDef));
+            }
+        }
+
+        /// <summary>
+        /// TakeComponents from Stockpile takes the specified number of components out of the stockpile, and returns how many were subtracted.
+        /// </summary>
+        /// <param name="ComponentDef">Component def to be removed.</param>
+        /// <param name="decrement">number to remove</param>
+        /// <returns>number that were removed.</returns>
+        public float TakeComponentsFromStockpile(ComponentDefTN ComponentDef, float decrement)
+        {
+            float Components = 0.0f;
+            if (ComponentStockpileLookup.ContainsKey(ComponentDef.Id) == true)
+            {
+                Components = ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]];
+
+                if (Components - decrement <= 0.0f)
+                {
+                    ComponentStockpile.RemoveAt(ComponentStockpileLookup[ComponentDef.Id]);
+                    ComponentStockpileCount.RemoveAt(ComponentStockpileLookup[ComponentDef.Id]);
+                    ComponentStockpileLookup.Remove(ComponentDef.Id);
+
+                    return Components;
+                }
+                else
+                {
+                    Components = Components - decrement;
+                    ComponentStockpileCount[ComponentStockpileLookup[ComponentDef.Id]] = Components;
+                }
+            }
+            else
+            {
+                /// <summary>
+                /// Invalid remove request sent from somewhere. Error reporting? logs?
+                /// </summary>
+                return -1.0f;
+            }
+
+            return decrement;
         }
     }
 }

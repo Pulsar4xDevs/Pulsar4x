@@ -11,6 +11,9 @@ using System.ComponentModel;
 /// CargoListEntry in CargoTN.cs
 /// eventual onDamage function for Ship.cs
 /// onDestroyed function for Ship.cs
+/// 
+/// Move component and Cargo loads to be on ship by ship basis
+/// SystemContact list for faction.
 /// </summary>
 
 namespace Pulsar4X.Entities
@@ -153,16 +156,6 @@ namespace Pulsar4X.Entities
         public int CurrentCargoTonnage { get; set; }
 
         /// <summary>
-        /// List of installations in the cargo hold.
-        /// </summary>
-        public Dictionary<Installation.InstallationType,CargoListEntryTN> CargoList { get; set; }
-
-        /// <summary>
-        /// List of all components in the cargo holds.
-        /// </summary>
-        public Dictionary<ComponentDefTN, CargoListEntryTN> CargoComponentList { get; set; }
-
-        /// <summary>
         /// Sum total of all cryo bays in the taskgroup.
         /// </summary>
         public int TotalCryoCapacity { get; set; }
@@ -260,7 +253,6 @@ namespace Pulsar4X.Entities
             EMSortList = new LinkedList<int>();
             ActiveSortList = new LinkedList<int>();
 
-            CargoList = new Dictionary<Installation.InstallationType,CargoListEntryTN>();
             TotalCargoTonnage = 0;
             CurrentCargoTonnage = 0;
 
@@ -1065,6 +1057,35 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
+                    #region Load Ship Component
+                    /// <summary>
+                    /// Load Ship Component:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.LoadShipComponent:
+                        if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                        {
+                            CanOrder = Constants.ShipTN.OrderState.CurrentlyLoading;
+                            int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                            int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                            TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                        }
+
+                        if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                        {
+                            TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+                            LoadComponents(TaskGroupOrders[0].pop, TaskGroupOrders[0].secondary, TaskGroupOrders[0].tertiary);
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                            TimeSlice = 0;
+                        }
+                    break;
+                    #endregion
+
                     #region Unload Installation
                     /// <summary>
                     /// Unload installation:
@@ -1091,7 +1112,62 @@ namespace Pulsar4X.Entities
                             TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
                             TimeSlice = 0;
                         }
-                        break;
+                    break;
+                    #endregion
+
+                    #region Unload Ship Component
+                    /// <summary>
+                    /// Unload Ship Component:
+                    /// </summary>
+                    case (int)Constants.ShipTN.OrderType.UnloadShipComponent:
+                        if (TaskGroupOrders[0].orderTimeRequirement == -1)
+                        {
+                            CanOrder = Constants.ShipTN.OrderState.CurrentlyUnloading;
+                            int TaskGroupLoadTime = CalcTaskGroupLoadTime(Constants.ShipTN.LoadType.Cargo);
+                            int PlanetaryLoadTime = TaskGroupOrders[0].pop.CalculateLoadTime(TaskGroupLoadTime);
+
+                            TaskGroupOrders[0].orderTimeRequirement = PlanetaryLoadTime;
+                        }
+
+                        if (TimeSlice > TaskGroupOrders[0].orderTimeRequirement)
+                        {
+                            TimeSlice = TimeSlice - (uint)TaskGroupOrders[0].orderTimeRequirement;
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+
+                            ComponentDefTN UnloadOrder = null;
+                            int TGComponentCount = 0;
+
+                            for (int loop = 0; loop < Ships.Count; loop++)
+                            {
+                                if (Ships[loop].CargoComponentList.Count != 0)
+                                {
+                                    foreach( KeyValuePair<ComponentDefTN,CargoListEntryTN> pair in Ships[loop].CargoComponentList)
+                                    {
+                                        if(TaskGroupOrders[0].secondary == TGComponentCount)
+                                        {
+                                            UnloadOrder = pair.Key;
+                                            TGComponentCount = -1;
+                                            break;
+                                        }
+
+                                        TGComponentCount++;
+                                    }
+
+                                    if (TGComponentCount == -1)
+                                        break;
+                                }
+                            }
+
+                            UnloadComponents(TaskGroupOrders[0].pop, UnloadOrder, TaskGroupOrders[0].tertiary);
+                            CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
+                        }
+                        else
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
+                            TimeSlice = 0;
+                        }
+
+                    break;
                     #endregion
 
                     #region Load Colonists
@@ -1448,7 +1524,7 @@ namespace Pulsar4X.Entities
         #endregion
 
 
-        #region Taskgroup Cargo/Cryo (/Troop/Component Not finished yet) loading and unloading.
+        #region Taskgroup Cargo/Cryo/Component (/Troop Not finished yet) loading and unloading.
         /// <summary>
         /// Load cargo loads a specified installation type from a population, up to the limit in installations if possible.
         /// </summary>
@@ -1457,8 +1533,7 @@ namespace Pulsar4X.Entities
         /// <param name="Limit">Limit in number of facilities to load.</param>
         public void LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
-            int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
-
+            int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
             int TotalMass = Faction.InstallationTypes[(int)InstType].Mass * Limit;
             int AvailableMass = (int)(Pop.Installations[(int)InstType].Number * (float)Faction.InstallationTypes[(int)InstType].Mass);
 
@@ -1469,7 +1544,7 @@ namespace Pulsar4X.Entities
             /// </summary>
             if (Limit == 0)
             {
-                MassToLoad = Math.Min(RemainingTonnage, AvailableMass);
+                MassToLoad = Math.Min(RemainingTaskGroupTonnage, AvailableMass);
 
             }
             /// <summary>
@@ -1477,24 +1552,49 @@ namespace Pulsar4X.Entities
             /// </summary>
             else
             {
-                MassToLoad = Math.Min(RemainingTonnage, TotalMass);
+                MassToLoad = Math.Min(RemainingTaskGroupTonnage, TotalMass);
             }
 
-            if (CargoList.ContainsKey(InstType))
-            {
-                CargoListEntryTN CLE = CargoList[InstType];
-                CLE.tons = CLE.tons + MassToLoad;
-
-            }
-            else
-            {
-                CargoListEntryTN CargoListEntry = new CargoListEntryTN(InstType, MassToLoad);
-                CargoList.Add(InstType, CargoListEntry);
-            }
-
+            /// <summary>
+            /// Mark the taskgroup total cargo tonnage
+            /// </summary>
             CurrentCargoTonnage = CurrentCargoTonnage + MassToLoad;
 
+            /// <summary>
+            /// Decrement the installation count on the planet.
+            /// </summary>
             Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number - (float)(MassToLoad / Faction.InstallationTypes[(int)InstType].Mass);
+
+            /// <summary>
+            /// Now start loading mass onto each ship.
+            /// </summary>
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                int RemainingShipTonnage = Ships[loop].ShipClass.TotalCargoCapacity - Ships[loop].CurrentCargoTonnage;
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && RemainingShipTonnage != 0)
+                {   
+                    int ShipMassToLoad = Math.Min(MassToLoad,RemainingShipTonnage);
+
+                    /// <summary>
+                    /// Load the mass onto the taskgroup as a whole for display purposes.
+                    /// The actual mass will go into the ship cargoholds.
+                    /// </summary>
+                    if (Ships[loop].CargoList.ContainsKey(InstType))
+                    {
+                        CargoListEntryTN CLE = Ships[loop].CargoList[InstType];
+                        CLE.tons = CLE.tons + ShipMassToLoad;
+
+                    }
+                    else
+                    {
+                        CargoListEntryTN CargoListEntry = new CargoListEntryTN(InstType, ShipMassToLoad);
+                        Ships[loop].CargoList.Add(InstType, CargoListEntry);
+                    }
+
+                    MassToLoad = MassToLoad - ShipMassToLoad;
+                    Ships[loop].CurrentCargoTonnage = ShipMassToLoad;
+                }
+            }
         }
 
         /// <summary>
@@ -1505,31 +1605,36 @@ namespace Pulsar4X.Entities
         /// <param name="Limit">Number of installations to unload.</param>
         public void UnloadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
-            CargoListEntryTN CLE = CargoList[InstType];
-
             int TotalMass = Faction.InstallationTypes[(int)InstType].Mass * Limit;
-            int MassToUnload = 0;
-
-            /// <summary>
-            /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
-            /// </summary>
-            if (Limit == 0)
+            for (int loop = 0; loop < Ships.Count; loop++)
             {
-                MassToUnload = CLE.tons;
-            }
-            else
-            {
-                MassToUnload = Math.Min(CLE.tons, TotalMass);
-            }
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && Ships[loop].CurrentCargoTonnage != 0 && Ships[loop].CargoList.ContainsKey(InstType) == true)
+                {
+                    CargoListEntryTN CLE = Ships[loop].CargoList[InstType];
+                    int ShipMassToUnload = 0;
 
-            CLE.tons = CLE.tons - MassToUnload;
-            CurrentCargoTonnage = CurrentCargoTonnage - MassToUnload;
-            if (MassToUnload == CLE.tons)
-            {
-                CargoList.Remove(InstType);
-            }
+                    if (Limit == 0)
+                    {
+                        ShipMassToUnload = CLE.tons;
+                    }
+                    else
+                    {
+                        ShipMassToUnload = Math.Min(CLE.tons, TotalMass);
+                        TotalMass = TotalMass - ShipMassToUnload;
+                    }
 
-            Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(MassToUnload / Faction.InstallationTypes[(int)InstType].Mass);
+                    if (ShipMassToUnload == CLE.tons)
+                    {
+                        Ships[loop].CargoList.Remove(InstType);
+                    }
+
+                    CLE.tons = CLE.tons - ShipMassToUnload;
+                    CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
+
+                    Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(ShipMassToUnload / Faction.InstallationTypes[(int)InstType].Mass);
+                }
+            }
+            
         }
 
         /// <summary>
@@ -1539,24 +1644,40 @@ namespace Pulsar4X.Entities
         /// <param name="Limit">Limit on colonists who can be put onto taskgroup.</param>
         public void LoadColonists(Population Pop, int Limit)
         {
-            int Colonists = 0;
-            int RemainingCryo = TotalCryoCapacity - CurrentCryoStorage;
-            int AvailablePopulation = (int)Math.Floor(Pop.CivilianPopulation * 1000000.0f);
-
-            if (Limit == 0)
+            for (int loop = 0; loop < Ships.Count; loop++)
             {
-                Colonists = Math.Min(RemainingCryo, AvailablePopulation);
-            }
-            else
-            {
-                if (Limit > AvailablePopulation)
-                    Limit = AvailablePopulation;
+                if (Ships[loop].ShipClass.SpareCryoBerths != 0)
+                {
+                    int Colonists = 0;
 
-                Colonists = Math.Min(RemainingCryo, Limit);
-            }
+                    int RemainingTaskGroupCryo = TotalCryoCapacity - CurrentCryoStorage;
+                    int RemainingShipCryo = Ships[loop].ShipClass.SpareCryoBerths - Ships[loop].CurrentCryoStorage;
+                    int AvailablePopulation = (int)Math.Floor(Pop.CivilianPopulation * 1000000.0f);
 
-            CurrentCryoStorage = CurrentCryoStorage + Colonists;
-            Pop.CivilianPopulation = Pop.CivilianPopulation - ((float)Colonists / 1000000.0f);
+                    if (Limit == 0)
+                    {
+                        Colonists = Math.Min(RemainingShipCryo, AvailablePopulation);
+                    }
+                    else
+                    {
+                        if (Limit > AvailablePopulation)
+                            Limit = AvailablePopulation;
+
+                        Colonists = Math.Min(RemainingShipCryo, Limit);
+                    }
+
+                    /// <summary>
+                    /// Add colonists to taskgroup cryo storage and ship current cryo storage. I'll keep the information duplication for the time being.
+                    /// </summary>
+                    CurrentCryoStorage = CurrentCryoStorage + Colonists;
+                    Ships[loop].CurrentCryoStorage = Ships[loop].CurrentCryoStorage + Colonists;
+
+                    /// <summary>
+                    /// Remove civilian population in accordance with the colonists loaded.
+                    /// </summary>
+                    Pop.CivilianPopulation = Pop.CivilianPopulation - ((float)Colonists / 1000000.0f);
+                }
+            }
         }
 
         /// <summary>
@@ -1566,21 +1687,31 @@ namespace Pulsar4X.Entities
         /// <param name="Limit">Colonists limit.</param>
         public void UnloadColonists(Population Pop, int Limit)
         {
-            int Colonists = CurrentCryoStorage;
+            if (Limit > CurrentCryoStorage)
+                Limit = CurrentCryoStorage;
 
-            if (Limit == 0)
+            for (int loop = 0; loop < Ships.Count; loop++)
             {
-                CurrentCryoStorage = 0;
-            }
-            else
-            {
-                if (Limit > CurrentCryoStorage)
-                    Limit = CurrentCryoStorage;
+                if (Ships[loop].CurrentCryoStorage != 0)
+                {
+                    int Colonists;
 
-                Colonists = Limit; 
-                CurrentCryoStorage = CurrentCryoStorage - Limit;
+                    if (Limit == 0)
+                    {
+                        Colonists = Ships[loop].CurrentCryoStorage;
+                        CurrentCryoStorage = CurrentCryoStorage - Ships[loop].CurrentCryoStorage;
+                        Ships[loop].CurrentCryoStorage = 0;
+                    }
+                    else
+                    {
+                        Colonists = Math.Min(Limit, Ships[loop].CurrentCryoStorage);
+
+                        Ships[loop].CurrentCryoStorage = Ships[loop].CurrentCryoStorage - Colonists;
+                        CurrentCryoStorage = CurrentCryoStorage - Colonists;
+                    }
+                    Pop.CivilianPopulation = Pop.CivilianPopulation + ((float)Colonists / 1000000.0f);
+                }
             }
-            Pop.CivilianPopulation = Pop.CivilianPopulation + ((float)Colonists / 1000000.0f);  
         }
 
         /// <summary>
@@ -1613,26 +1744,54 @@ namespace Pulsar4X.Entities
                 MassToLoad = Math.Min(RemainingTonnage, TotalMass);
             }
 
-            if (CargoComponentList.ContainsKey(Pop.ComponentStockpile[ComponentIndex]))
+            /// <summary>
+            /// All of these may not be loaded.
+            float ComponentLoadCount = (float)MassToLoad / (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS);
+
+            for (int loop = 0; loop < Ships.Count; loop++)
             {
-                CargoListEntryTN CLE = CargoComponentList[Pop.ComponentStockpile[ComponentIndex]];
-                CLE.tons = CLE.tons + MassToLoad;
+                if (Ships[loop].ShipClass.TotalCargoCapacity != 0)
+                {
+                    int RemainingShipTonnage = Ships[loop].ShipClass.TotalCargoCapacity - Ships[loop].CurrentCargoTonnage;
+                    int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
+                    float ShipComponentLoadCount= (float)ShipMassToLoad / (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS);
 
-            }
-            else
-            {
-                CargoListEntryTN CargoListEntry = new CargoListEntryTN(Pop.ComponentStockpile[ComponentIndex], MassToLoad);
-                CargoComponentList.Add(Pop.ComponentStockpile[ComponentIndex], CargoListEntry);
-            }
+                    /// <summary>
+                    /// Don't break up these components.
+                    /// </summary>
+                    if (Pop.ComponentStockpile[ComponentIndex].isDivisible == false)
+                    {
+                        ShipComponentLoadCount = (float)Math.Floor(ShipComponentLoadCount);
+                    }
 
-            CurrentCargoTonnage = CurrentCargoTonnage + MassToLoad;
 
-            Pop.ComponentStockpileCount[ComponentIndex] = Pop.ComponentStockpileCount[ComponentIndex] - ((float)MassToLoad / (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS));
+                    /// <summary>
+                    /// Tell the population to remove the specified components. ComponentLoadCount may be too high, in which case the lower value will be returned.
+                    /// Likewise mass to load will be updated based on this.
+                    /// </summary>
+                    ShipComponentLoadCount = Pop.TakeComponentsFromStockpile(Pop.ComponentStockpile[ComponentIndex], ShipComponentLoadCount);
+                    ShipMassToLoad = (int)(ShipComponentLoadCount * (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS));
 
-            if (Pop.ComponentStockpileCount[ComponentIndex] == 0)
-            {
-                Pop.ComponentStockpile.RemoveAt(ComponentIndex);
-                Pop.ComponentStockpileCount.RemoveAt(ComponentIndex);
+                    if (Ships[loop].CargoComponentList.ContainsKey(Pop.ComponentStockpile[ComponentIndex]))
+                    {
+                        CargoListEntryTN CLE = Ships[loop].CargoComponentList[Pop.ComponentStockpile[ComponentIndex]];
+                        CLE.tons = CLE.tons + ShipMassToLoad;
+
+                    }
+                    else
+                    {
+                        CargoListEntryTN CargoListEntry = new CargoListEntryTN(Pop.ComponentStockpile[ComponentIndex], ShipMassToLoad);
+                        Ships[loop].CargoComponentList.Add(Pop.ComponentStockpile[ComponentIndex], CargoListEntry);
+                    }
+
+                    /// <summary>
+                    /// CurrentCargoTonnage has to be added here, as non-divisible components may not be loadable.
+                    /// </summary>
+                    CurrentCargoTonnage = CurrentCargoTonnage + ShipMassToLoad;
+                    Ships[loop].CurrentCargoTonnage = Ships[loop].CurrentCargoTonnage + ShipMassToLoad;
+
+                    MassToLoad = MassToLoad - ShipMassToLoad;
+                }
             }
         }
 
@@ -1644,40 +1803,40 @@ namespace Pulsar4X.Entities
         /// <param name="Limit">Limit to unloading.</param>
         public void UnloadComponents(Population Pop, ComponentDefTN Component, int Limit)
         {
-            CargoListEntryTN CLE = CargoComponentList[Component];
-
             int TotalMass = (int)(Component.size * Constants.ShipTN.TonsPerHS * (float)Limit);
-            int MassToUnload = 0;
 
-            /// <summary>
-            /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
-            /// </summary>
-            if (Limit == 0)
+            for (int loop = 0; loop < Ships.Count; loop++)
             {
-                MassToUnload = CLE.tons;
-            }
-            else
-            {
-                MassToUnload = Math.Min(CLE.tons, TotalMass);
-            }
+                if (Ships[loop].CurrentCargoTonnage != 0 && Ships[loop].CargoComponentList.ContainsKey(Component) == true)
+                {
+                    CargoListEntryTN CLE = Ships[0].CargoComponentList[Component];
 
-            CLE.tons = CLE.tons - MassToUnload;
-            CurrentCargoTonnage = CurrentCargoTonnage - MassToUnload;
-            if (MassToUnload == CLE.tons)
-            {
-                CargoComponentList.Remove(Component);
-            }
+                    int ShipMassToUnload;
+                    /// <summary>
+                    /// Limit == 0 means unload all, else unload to limit if limit is lower than total tonnage.
+                    /// </summary>
+                    if (Limit == 0)
+                    {
+                        ShipMassToUnload = CLE.tons;
+                    }
+                    else
+                    {
+                        ShipMassToUnload = Math.Min(CLE.tons, TotalMass);
+                        TotalMass = TotalMass - ShipMassToUnload;
+                    }
 
-            int CSIndex = Pop.ComponentStockpile.IndexOf(Component);
+                    if (ShipMassToUnload == CLE.tons)
+                    {
+                        Ships[0].CargoComponentList.Remove(Component);
+                    }
 
-            if (CSIndex == -1)
-            {
-                Pop.ComponentStockpile.Add(Component);
-                Pop.ComponentStockpileCount.Add((float)MassToUnload / (Component.size * Constants.ShipTN.TonsPerHS));
-            }
-            else
-            {
-                Pop.ComponentStockpileCount[CSIndex] = Pop.ComponentStockpileCount[CSIndex] + ((float)MassToUnload / (Component.size * Constants.ShipTN.TonsPerHS));
+                    CLE.tons = CLE.tons - ShipMassToUnload;
+                    CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
+
+                    float ComponentUnloadCount = (float)(ShipMassToUnload / (Component.size * Constants.ShipTN.TonsPerHS));
+
+                    Pop.AddComponentsToStockpile(Component, ComponentUnloadCount);
+                }
             }
         }
 

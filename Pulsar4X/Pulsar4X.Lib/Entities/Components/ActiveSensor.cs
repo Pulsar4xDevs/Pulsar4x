@@ -103,6 +103,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="hardTech">Level of electronic hardening tech. Adjusted downwards by 1, so that level 0 is level 1, and so on.</param>
         public ActiveSensorDefTN(string desc, float HS, byte actStr, byte EMR, ushort Res, bool MFC, float hard, byte hardTech)
         {
+            Id = Guid.NewGuid();
+
             componentType = ComponentTypeTN.ActiveSensor;
 
             /// <summary>
@@ -199,6 +201,10 @@ namespace Pulsar4X.Entities.Components
                     lookUpMT.Add(LookUpST[0]);//size 1 is size 1
                 }
             }
+
+            isSalvaged = false;
+            isObsolete = false;
+            isDivisible = false;
         }
         ///<summary>
         ///End ActiveSensorDefTN()

@@ -25,6 +25,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="CrewRequirement">Crew requirement of the component.</param>
         public ColonyDefTN(string Title, float Size, decimal ComponentCost, byte CrewRequirement)
         {
+            Id = Guid.NewGuid();
+
             componentType = ComponentTypeTN.CryoStorage;
 
             Name = Title;
@@ -37,6 +39,11 @@ namespace Pulsar4X.Entities.Components
             /// Cryoberths are 4 per ton, and size is in HS which is 50 tons.
             /// </summary>
             CryoBerths = (int)(size * Constants.ShipTN.TonsPerHS * 4.0f);
+
+            isSalvaged = false;
+            isObsolete = false;
+            isMilitary = false;
+            isDivisible = false;
         }
     }
 

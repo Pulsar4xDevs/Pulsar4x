@@ -23,6 +23,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="TractorMult">Tractor multiplier that the CHS possesses.</param>
         public CargoHandlingDefTN(string Title, int TractorMult)
         {
+            Id = Guid.NewGuid();
+
             componentType = ComponentTypeTN.CargoHandlingSystem;
 
             Name = Title;
@@ -31,6 +33,11 @@ namespace Pulsar4X.Entities.Components
             size = 2.0f;
             cost = 10.0m;
             crew = 10;
+
+            isSalvaged = false;
+            isObsolete = false;
+            isMilitary = false;
+            isDivisible = false;
         }
     }
 

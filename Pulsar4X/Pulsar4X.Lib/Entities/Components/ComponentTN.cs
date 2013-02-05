@@ -107,6 +107,16 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Can this component be divided into smaller pieces during a cargo load?
+        /// </summary>
+        private bool IsDivisible;
+        public bool isDivisible
+        {
+            get { return IsDivisible; }
+            set { IsDivisible = value; }
+        }
+
+        /// <summary>
         /// What type of component is this?
         /// </summary>
         private ComponentTypeTN ComponentType;

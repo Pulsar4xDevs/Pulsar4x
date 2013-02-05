@@ -11,20 +11,14 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
-    public class ShipTN
+    public class ShipTN : GameEntity
     {
-        public Guid Id { get; set; }
         public Faction Faction { get; set; }
 
         /// <summary>
         /// Class of this ship.
         /// </summary>
         public ShipClassTN ShipClass { get; set; }
-
-        /// <summary>
-        /// Name of the ship
-        /// </summary>
-        public string Name { get; set; }
 
         /// <summary>
         /// Taskgroup the ship is part of.
@@ -68,7 +62,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// How many crew/POWs are in cryo stasis.
         /// </summary>
-        public int CurrentCryo;
+        public int CurrentCryoStorage;
 
         /// <summary>
         /// How long has the ship been out on patrol. 1.0 = Max deployment time.
@@ -127,6 +121,21 @@ namespace Pulsar4X.Entities
         /// Ships can have several types of cargo holds and multiple of each.
         /// </summary>
         public BindingList<CargoTN> ShipCargo { get; set; }
+
+        /// <summary>
+        /// Just how much is this specific ship holding.
+        /// </summary>
+        public int CurrentCargoTonnage{ get; set; }
+
+        /// <summary>
+        /// List of installations in the cargo hold.
+        /// </summary>
+        public Dictionary<Installation.InstallationType, CargoListEntryTN> CargoList { get; set; }
+
+        /// <summary>
+        /// List of all components in the cargo holds.
+        /// </summary>
+        public Dictionary<ComponentDefTN, CargoListEntryTN> CargoComponentList { get; set; }
 
         /// <summary>
         /// Ships can also have several cryo storage bays and bay types.
@@ -203,7 +212,7 @@ namespace Pulsar4X.Entities
             CrewQuarters = new BindingList<GeneralComponentTN>();
             AddComponents(CrewQuarters, ClassDefinition.CrewQuarters, ClassDefinition.CrewQuartersCount);
             CurrentCrew = 0;
-            CurrentCryo = 0;
+            CurrentCryoStorage = 0;
             CurrentDeployment = 0.0f;
 
             /// <summary>
@@ -257,6 +266,9 @@ namespace Pulsar4X.Entities
                     ShipCargo.Add(cargo);
                 }
             }
+            CurrentCargoTonnage = 0;
+            CargoList = new Dictionary<Installation.InstallationType, CargoListEntryTN>();
+            CargoComponentList = new Dictionary<ComponentDefTN, CargoListEntryTN>();
 
             /// <summary>
             /// While only colonyships will have the major bays, just about any craft can have an emergency cryo bay.
@@ -271,7 +283,7 @@ namespace Pulsar4X.Entities
                     ShipColony.Add(colony);
                 }
             }
-            CurrentCryo = 0;
+            CurrentCryoStorage = 0;
 
             /// <summary>
             /// Any ship with cargo holds, troop bays, cryo berths, or drop pods will benefit from a cargohandling system. though droppods benefit from the CHSes on other vessels as well.

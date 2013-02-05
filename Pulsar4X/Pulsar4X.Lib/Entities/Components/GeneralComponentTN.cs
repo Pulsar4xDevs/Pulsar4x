@@ -22,11 +22,15 @@ namespace Pulsar4X.Entities.Components
         /// <param name="GeneralComponentType">What type of component is this? see the enum in ComponentTN.cs for a list.</param>
         public GeneralComponentDefTN(string Title, float ComponentSize, byte ComponentCrew, decimal ComponentCost, ComponentTypeTN GeneralComponentType)
         {
+            Id = Guid.NewGuid();
+
             Name = Title;
             size = ComponentSize;
             crew = ComponentCrew;
             cost = ComponentCost;
             componentType = GeneralComponentType;
+
+            isDivisible = false;
 
             if (componentType <= ComponentTypeTN.MaintenanceBay)
             {
@@ -42,6 +46,7 @@ namespace Pulsar4X.Entities.Components
             else if (componentType == ComponentTypeTN.OrbitalHabitat || componentType == ComponentTypeTN.RecFacility)
             {
                 htk = 25;
+                isDivisible = true;
             }
 
             isMilitary = false;

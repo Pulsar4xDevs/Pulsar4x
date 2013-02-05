@@ -97,6 +97,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="hardTech">Tech level of sensor hardening. This is to be adjusted downward by one, so level 0 is level 1.</param>
         public PassiveSensorDefTN(string title, float HS, byte sens, PassiveSensorType TOrE, float hard, byte hardTech)
         {
+            Id = Guid.NewGuid();
             componentType = ComponentTypeTN.PassiveSensor;
            
             Name = title;
@@ -145,6 +146,7 @@ namespace Pulsar4X.Entities.Components
 
             isObsolete = false;
             isSalvaged = false;
+            isDivisible = false;
         }
 
 

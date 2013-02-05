@@ -77,6 +77,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="CrewRequirement">Required crew.</param>
         public CargoDefTN(string Title, float HS, decimal ComponentCost, byte CrewRequirement)
         {
+            Id = Guid.NewGuid();
+
             componentType = ComponentTypeTN.CargoHold;
 
             Name = Title;
@@ -85,6 +87,11 @@ namespace Pulsar4X.Entities.Components
             crew = CrewRequirement;
 
             CargoCapacity = (int)(size * Constants.ShipTN.TonsPerHS);
+
+            isSalvaged = false;
+            isObsolete = false;
+            isMilitary = false;
+            isDivisible = false;
 
         }
     }
