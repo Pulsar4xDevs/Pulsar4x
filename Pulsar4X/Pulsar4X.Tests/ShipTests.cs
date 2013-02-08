@@ -1119,6 +1119,7 @@ namespace Pulsar4X.Tests
 
             /// <summary>
             /// The 1st 0 after the ordertype is for the ComponentStockpile[0] and CargoComponentList[0] index respectively.
+            /// </summary>
             Orders Load = new Orders(Constants.ShipTN.OrderType.LoadShipComponent, 0, 0, 0, System1.Stars[0].Planets[0].Populations[0]);
             Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadShipComponent, 0, 0, 0, System1.Stars[0].Planets[1].Populations[0]);
 

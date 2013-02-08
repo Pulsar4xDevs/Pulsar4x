@@ -149,6 +149,12 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// List of ship components for DAC/OnDamage/Wreck functionality
+        /// </summary>
+        public BindingList<ComponentTN> ShipComponents { get; set; }
+
+
+        /// <summary>
         /// List of passive sensors that this craft will have.
         /// every ship has a base sensitivity 1 thermal and EM sensor, those won't be in this list however.
         /// Best ratings store the best currently working sensor detection, these are where that default will be.
@@ -246,6 +252,7 @@ namespace Pulsar4X.Entities
                 EngineTN Engine = new EngineTN(ClassDefinition.ShipEngineDef);
                 Engine.componentIndex = ShipEngine.Count;
                 ShipEngine.Add(Engine);
+                ShipComponents.Add(Engine);
             }
             CurrentEnginePower = ClassDefinition.MaxEnginePower;
             CurrentThermalSignature = ClassDefinition.MaxThermalSignature;
@@ -264,6 +271,7 @@ namespace Pulsar4X.Entities
                     CargoTN cargo = new CargoTN(ClassDefinition.ShipCargoDef[loop]);
                     cargo.componentIndex = ShipCargo.Count;
                     ShipCargo.Add(cargo);
+                    ShipComponents.Add(cargo);
                 }
             }
             CurrentCargoTonnage = 0;
@@ -281,6 +289,7 @@ namespace Pulsar4X.Entities
                     ColonyTN colony = new ColonyTN(ClassDefinition.ShipColonyDef[loop]);
                     colony.componentIndex = ShipColony.Count;
                     ShipColony.Add(colony);
+                    ShipComponents.Add(colony);
                 }
             }
             CurrentCryoStorage = 0;
@@ -296,6 +305,7 @@ namespace Pulsar4X.Entities
                     CargoHandlingTN CHS = new CargoHandlingTN(ClassDefinition.ShipCHSDef[loop]);
                     CHS.componentIndex = ShipCHS.Count;
                     ShipCHS.Add(CHS);
+                    ShipComponents.Add(CHS);
                 }
             }
 
@@ -312,6 +322,7 @@ namespace Pulsar4X.Entities
                     PassiveSensorTN PSensor = new PassiveSensorTN(ClassDefinition.ShipPSensorDef[loop]);
                     PSensor.componentIndex = ShipPSensor.Count;
                     ShipPSensor.Add(PSensor);
+                    ShipComponents.Add(PSensor);
                 }
             }
             /// <summary>
@@ -332,6 +343,7 @@ namespace Pulsar4X.Entities
                     ActiveSensorTN ASensor = new ActiveSensorTN(ClassDefinition.ShipASensorDef[loop]);
                     ASensor.componentIndex = ShipASensor.Count;
                     ShipASensor.Add(ASensor);
+                    ShipComponents.Add(ASensor);
                 }
             }
             /// <summary>
@@ -374,6 +386,7 @@ namespace Pulsar4X.Entities
                     GeneralComponentTN NewComponent = new GeneralComponentTN(fromList[loop]);
                     NewComponent.componentIndex = AddList.Count;
                     AddList.Add(NewComponent);
+                    ShipComponents.Add(NewComponent);
                 }
             }
         }
