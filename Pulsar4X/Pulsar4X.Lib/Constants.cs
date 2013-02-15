@@ -969,5 +969,74 @@ namespace Pulsar4X
             public const uint Year = 31104000;
             public const uint Century = 3110400000;
         }
+
+        /// <summary>
+        /// Beam Weapon constants are related to tech values.
+        /// </summary>
+        public static class BeamWeaponTN
+        {
+            public static byte[] Capacitor = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 25 };
+            /// <summary>
+            /// Point blank damage value for each calibre of railgun.
+            /// </summary>
+            public static byte[] RailGunDamage = { 1, 2, 3, 4, 5, 7, 9, 12, 16, 20 };
+
+            /// <summary>
+            /// Size value for each calibre of railgun from 10cm to 50cm.
+            /// </summary>
+            public static byte[] RailGunSize = { 3, 5, 6, 7, 8, 9, 10, 11, 13, 15 };
+
+            /// <summary>
+            /// Point blank damage values for lasers and plasma for each tech level from 10cm to 80cm, plasmas lack 10 and 12cm guns however.
+            /// Also the power consumption values for mesons and HPMs.
+            /// </summary>
+            public static byte[] LaserDamage = { 3, 4, 6, 10, 16, 24, 32, 40, 64, 96, 128, 168 };
+
+            /// <summary>
+            /// Shared damage values for advanced lasers and plasma.
+            /// </summary>
+            public static byte[] AdvancedLaserDamage = { 4, 5, 8, 12, 20, 30, 40, 50, 80, 120, 160, 210 };
+
+            /// <summary>
+            /// Size of each calibre gun for lasers,plasma,microwave, and mesons from 10cm to 80cm.
+            /// </summary>
+            public static byte[] LaserSize = { 3, 4, 4, 6, 8, 9, 11, 12, 16, 19, 22, 25 };
+
+            /// <summary>
+            /// Damage for each Particle beam.
+            /// </summary>
+            public static byte[] ParticleDamage = { 2, 3, 4, 6, 9, 12, 16, 20, 25, 36, 50 };
+
+            /// <summary>
+            /// Damage for advanced particle beams;
+            /// </summary>
+            public static byte[] AdvancedParticleDamage = { 3, 4, 5, 8, 11, 15, 20, 25, 32, 45, 64 };
+
+            /// <summary>
+            /// Power requirement for each Particle beam.
+            /// </summary>
+            public static byte[] ParticlePower = { 5, 7, 10, 15, 22, 30, 40, 48, 64, 90, 125 };
+
+            /// <summary>
+            /// Size of each Particle beam. Not the advanced particle beams however.
+            /// </summary>
+            public static byte[] ParticleSize = { 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 22 };
+
+            /// <summary>
+            /// Range modifier for particle beam technology, in 10k units.
+            /// </summary>
+            public static ushort[] ParticleRange = { 60, 100, 150, 200, 240, 320, 400, 500, 640, 800, 1000, 1200 };
+
+            /// <summary>
+            /// Size reduction and accuracy modifiers for Gauss weapons.
+            /// </summary>
+            public static float[] GaussSize =     { 6.0f, 5.0f,  4.0f,  3.0f, 2.0f,  1.5f,  1.0f,  0.75f,  0.6f, 0.5f };
+            public static float[] GaussAccuracy = { 1.0f, 0.85f, 0.67f, 0.5f, 0.33f, 0.25f, 0.17f, 0.125f, 0.1f, 0.08f };
+
+            /// <summary>
+            /// How many shots this weapon takes every time it fires.
+            /// </summary>
+            public static byte[] GaussShots = { 1, 2, 3, 4, 5, 6, 8 };
+        }
     }
 }

@@ -21,12 +21,28 @@ namespace Pulsar4X.Entities.Components
         RecFacility,
 
         Armor,
+        
         Engine,
+        
         PassiveSensor,
         ActiveSensor,
+        
         CargoHold,
         CargoHandlingSystem,
         CryoStorage,
+        
+        BeamFireControl,
+        Rail,
+        Gauss,
+        Plasma,
+        Laser,
+        Meson,
+        Microwave,
+        Particle,
+        AdvRail,
+        AdvLaser,
+        AdvPlasma,
+        AdvParticle,
 
         TypeCount
     }

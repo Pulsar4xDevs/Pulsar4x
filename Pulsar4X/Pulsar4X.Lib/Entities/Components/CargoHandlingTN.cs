@@ -34,6 +34,9 @@ namespace Pulsar4X.Entities.Components
             cost = 10.0m;
             crew = 10;
 
+
+            htk = 1;
+
             isSalvaged = false;
             isObsolete = false;
             isMilitary = false;

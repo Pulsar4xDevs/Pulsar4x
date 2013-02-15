@@ -86,6 +86,8 @@ namespace Pulsar4X.Entities.Components
             cost = ComponentCost;
             crew = CrewRequirement;
 
+            htk = 1;
+
             CargoCapacity = (int)(size * Constants.ShipTN.TonsPerHS);
 
             isSalvaged = false;

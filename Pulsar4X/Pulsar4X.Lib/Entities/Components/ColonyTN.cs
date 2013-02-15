@@ -34,6 +34,8 @@ namespace Pulsar4X.Entities.Components
             cost = ComponentCost;
             crew = CrewRequirement;
 
+            htk = 1;
+
 
             /// <summary>
             /// Cryoberths are 4 per ton, and size is in HS which is 50 tons.
