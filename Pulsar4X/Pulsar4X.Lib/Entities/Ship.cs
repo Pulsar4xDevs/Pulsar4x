@@ -526,7 +526,7 @@ namespace Pulsar4X.Entities
             /// Armor Penetration.
             /// </summary>
             ushort Columns = ShipArmor.armorDef.cNum;
-            ushort left, right;
+            short left, right;
 
             ushort ImpactLevel = ShipArmor.armorDef.depth;
             if(ShipArmor.isDamaged == true)
@@ -547,8 +547,8 @@ namespace Pulsar4X.Entities
                     Table = DamageValuesTN.MissileTable[Damage-1];
                 break;
             }
-            left = (ushort)(HitLocation - 1);
-            right = (ushort)(HitLocation + 1);
+            left = (short)(HitLocation - 1);
+            right = (short)(HitLocation + 1);
             internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
             if (Type == DamageTypeTN.Plasma)
             {
@@ -560,9 +560,9 @@ namespace Pulsar4X.Entities
             {
                 if (left < 0)
                 {
-                    left = Columns;
+                    left = (short)(Columns-1);
                 }
-                if (right > Columns)
+                if (right >= Columns)
                 {
                     right = 0;
                 }
@@ -571,9 +571,9 @@ namespace Pulsar4X.Entities
                 /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
                 /// </summary>
                 if(ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
-                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, left, Table.damageTemplate[Table.hitPoint - loop]));
+                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
                 if(ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
-                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, right, Table.damageTemplate[Table.hitPoint + loop]));
+                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
 
                 left--;
                 right++;
