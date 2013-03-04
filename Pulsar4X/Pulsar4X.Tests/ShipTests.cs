@@ -1134,7 +1134,7 @@ namespace Pulsar4X.Tests
             while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
             {
                 Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
-    PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
+                   PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
 
                 PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
 
@@ -1145,6 +1145,73 @@ namespace Pulsar4X.Tests
                 System1.Stars[0].Planets[1].Populations[0].ComponentStockpileCount[0]);
 
             Console.WriteLine("CargoList count on Ships[0] after unload :{0}", PlayerFaction1.TaskGroups[0].Ships[0].CargoComponentList.Count);
+        }
+
+        [Test]
+        public void ShipDamageModel()
+        {
+            DamageValuesTN.init();
+
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+            System1.Stars[0].Planets.Add(pl2);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 2.0;
+            System1.Stars[0].Planets[1].YSystem = 2.0;
+
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+
+            PlayerFaction1.ShipDesigns[0].NewArmor("Conventional", 2, 5);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
+
+            ushort Columns = PlayerFaction1.TaskGroups[0].Ships[0].ShipArmor.armorDef.cNum;
+            Random Gen = new Random();
+            ushort HitLocation = (ushort)Gen.Next(0, Columns);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation);
+            HitLocation = (ushort)Gen.Next(0, Columns);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation);
+            HitLocation = (ushort)Gen.Next(0, Columns);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation);
+
+            Console.WriteLine("Damage Template:");
+            for (int loop = 0; loop < DamageValuesTN.MissileTable[3].damageTemplate.Count; loop++)
+            {
+                Console.WriteLine("{0} ", DamageValuesTN.MissileTable[3].damageTemplate[loop]);
+            }
+
+            Console.WriteLine("Armor:");
+            for (int loop = 0; loop < PlayerFaction1.TaskGroups[0].Ships[0].ShipArmor.armorColumns.Count; loop++)
+            {
+                Console.WriteLine("{0} ", PlayerFaction1.TaskGroups[0].Ships[0].ShipArmor.armorColumns[loop]);
+            }
+
+            foreach (KeyValuePair<ushort,ushort> pair in PlayerFaction1.TaskGroups[0].Ships[0].ShipArmor.armorDamage)
+            {
+                Console.WriteLine("{0} {1} ", pair.Key, pair.Value);
+            }
         }
     }
 }

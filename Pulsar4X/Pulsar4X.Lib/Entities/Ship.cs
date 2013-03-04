@@ -208,6 +208,12 @@ namespace Pulsar4X.Entities
             ClassDefinition.ShipsInClass.Add(this);
 
             /// <summary>
+            /// Make sure to initialize this important variable that everything uses.
+            /// </summary>
+            ShipComponents = new BindingList<ComponentTN>();
+
+
+            /// <summary>
             /// All ships will have armor, and all ship defs should have armor before this point.
             /// </summary.
             ShipArmor = new ArmorTN(ClassDefinition.ShipArmorDef);
@@ -497,6 +503,88 @@ namespace Pulsar4X.Entities
             CurrentEnginePower = (int)((float)ShipClass.MaxEnginePower * fraction);
             CurrentThermalSignature = (int)((float)ShipClass.MaxThermalSignature * fraction);
             CurrentFuelUsePerHour = ShipClass.MaxFuelUsePerHour * fraction;
+        }
+
+        /// <summary>
+        /// Damage goes through a 3 part process, 1st shields subtract damage, then armor blocks damage, then internals take the hits.
+        /// if 20 rolls happen without an internal in the list being targeted then call OnDestroyed(); Mesons skip to the internal damage section.
+        /// Microwaves do shield damage, then move to the special electronic only DAC.
+        /// </summary>
+        /// <param name="Type">Type of damage, for armor penetration.</param>
+        /// <param name="Value">How much damage is being done.</param>
+        /// <param name="HitLocation">Where the damage is inflicted.</param>
+        public void OnDamaged(DamageTypeTN Type, ushort Value, ushort HitLocation)
+        {
+            ushort Damage = Value;
+            ushort internalDamage = 0;
+            /// <summary>
+            /// Handle Shield Damage.
+            /// </summary>
+            
+
+            /// <summary>
+            /// Armor Penetration.
+            /// </summary>
+            ushort Columns = ShipArmor.armorDef.cNum;
+            ushort left, right;
+
+            ushort ImpactLevel = ShipArmor.armorDef.depth;
+            if(ShipArmor.isDamaged == true)
+                ImpactLevel = ShipArmor.armorColumns[HitLocation];
+
+            DamageTableTN Table;
+            switch(Type)
+            {
+                case DamageTypeTN.Beam : Table = DamageValuesTN.EnergyTable[Damage-1];
+                break;
+                case DamageTypeTN.Kinetic : Table = DamageValuesTN.KineticTable[Damage-1];
+                break;
+                case DamageTypeTN.Missile : Table = DamageValuesTN.MissileTable[Damage-1];
+                break;
+                case DamageTypeTN.Plasma : Table = DamageValuesTN.PlasmaTable[Damage-1];
+                break;
+                default :
+                    Table = DamageValuesTN.MissileTable[Damage-1];
+                break;
+            }
+            left = (ushort)(HitLocation - 1);
+            right = (ushort)(HitLocation + 1);
+            internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
+            if (Type == DamageTypeTN.Plasma)
+            {
+                internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
+                right++;
+            }
+
+            for (int loop = 1; loop <= Table.halfSpread; loop++)
+            {
+                if (left < 0)
+                {
+                    left = Columns;
+                }
+                if (right > Columns)
+                {
+                    right = 0;
+                }
+
+                /// <summary>
+                /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
+                /// </summary>
+                if(ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
+                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, left, Table.damageTemplate[Table.hitPoint - loop]));
+                if(ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
+                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, right, Table.damageTemplate[Table.hitPoint + loop]));
+
+                left--;
+                right++;
+            }    
+            
+
+            /// <summary>
+            /// Internal Component Damage. Each component with an HTK >0 can take atleast 1 hit. a random number is rolled over the entire dac. the selected component's HTK
+            /// is tested against the internal damage value, and if greater than the damage value the component has a chance of surviving. otherwise, the component is destroyed, damage
+            /// is reduced, and the next component is chosen.
+            /// </summary>
         }
 
         /// <summary>

@@ -184,7 +184,6 @@ namespace Pulsar4X.Entities
         public BindingList<Installation> InstallationTypes { get; set; }
 
         public BindingList<MessageEntry> MessageLog { get; set; }
-        
 
         public Faction(int ID)
         {
@@ -214,7 +213,6 @@ namespace Pulsar4X.Entities
             }
 
             MessageLog = new BindingList<MessageEntry>();
-
         }
 
         public Faction(string a_oName, Species a_oSpecies, int ID)

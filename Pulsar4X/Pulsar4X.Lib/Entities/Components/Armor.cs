@@ -236,9 +236,12 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Depth">Full and pristine armor Depth.</param>
         /// <param name="Column">The specific column to be damaged.</param>
         /// <param name="DamageValue">How much damage has been done.</param>
-        public void SetDamage(ushort ColumnCount, ushort Depth, ushort Column, ushort DamageValue)
+        /// <returns>Damage that passes through to internal components.</returns>
+        public int SetDamage(ushort ColumnCount, ushort Depth, ushort Column, ushort DamageValue)
         {
-            ushort newDepth;
+            int RemainingDamage = 0;
+
+            int newDepth;
             if (IsDamaged == false)
             {
                 for (ushort loop = 0; loop < ColumnCount; loop++)
@@ -249,15 +252,15 @@ namespace Pulsar4X.Entities.Components
                     }
                     else
                     {
-                        /// <summary>
-                        /// I have to type cast this subtraction of a short from a short into a short with a short.
-                        /// </summary>
-                        newDepth = (ushort)(Depth - DamageValue);
+                        newDepth = Depth - DamageValue;
                         if (newDepth < 0)
+                        {
+                            RemainingDamage = newDepth * -1;
                             newDepth = 0;
+                        }
 
-                        ArmorColumns.Add(newDepth);
-                        ArmorDamage.Add(Column, newDepth);
+                        ArmorColumns.Add((ushort)newDepth);
+                        ArmorDamage.Add(Column, (ushort)newDepth);
                     }
                 }
                 /// <summary>
@@ -270,22 +273,32 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             else
             {
-                newDepth = (ushort)(ArmorColumns[Column] - DamageValue);
-                ArmorColumns[Column] = newDepth;
+                if (ArmorColumns[Column] == 0)
+                    return DamageValue;
+
+                newDepth = ArmorColumns[Column] - DamageValue;
+                if (newDepth < 0)
+                {
+                    RemainingDamage = newDepth * -1;
+                    newDepth = 0;
+                }
+
+
+                ArmorColumns[Column] = (ushort)newDepth;
 
                 if (ArmorDamage.ContainsKey(Column) == true)
                 {
-                    ArmorDamage[Column] = newDepth;
+                    ArmorDamage[Column] = (ushort)newDepth;
                 }
                 else
                 {
-                    ArmorDamage.Add(Column, newDepth);
+                    ArmorDamage.Add(Column, (ushort)newDepth);
                 }
             }
             /// <summary>
             /// end else if isDamaged = true
             /// </summary>
-
+            return RemainingDamage;
         }
 
         /// <summary>
@@ -515,9 +528,11 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Depth">Full and pristine armor Depth.</param>
         /// <param name="Column">The specific column to be damaged.</param>
         /// <param name="DamageValue">How much damage has been done.</param>
-        public void SetDamage(ushort ColumnCount, ushort Depth, ushort Column, ushort DamageValue)
+        /// <returns>Remaining damage that passes through to internals.</returns>
+        public int SetDamage(ushort ColumnCount, ushort Depth, ushort Column, ushort DamageValue)
         {
-            ushort newDepth;
+            int RemainingDamage = 0;
+            int newDepth;
             if (IsDamaged == false)
             {
                 for (ushort loop = 0; loop < ColumnCount; loop++)
@@ -531,12 +546,15 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// I have to type cast this subtraction of a short from a short into a short with a short.
                         /// </summary>
-                        newDepth = (ushort)(Depth - DamageValue);
+                        newDepth = Depth - DamageValue;
                         if (newDepth < 0)
+                        {
+                            RemainingDamage = newDepth * -1;
                             newDepth = 0;
+                        }
 
-                        ArmorColumns.Add(newDepth);
-                        ArmorDamage.Add(Column, newDepth);
+                        ArmorColumns.Add((ushort)newDepth);
+                        ArmorDamage.Add(Column, (ushort)newDepth);
                     }
                 }
                 /// <summary>
@@ -549,22 +567,31 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             else
             {
-                newDepth = (ushort)(ArmorColumns[Column] - DamageValue);
-                ArmorColumns[Column] = newDepth;
+                if (ArmorColumns[Column] == 0)
+                    return DamageValue;
+
+                newDepth = ArmorColumns[Column] - DamageValue;
+                if (newDepth < 0)
+                {
+                    RemainingDamage = newDepth * -1;
+                    newDepth = 0;
+                }
+
+                ArmorColumns[Column] = (ushort)newDepth;
 
                 if (ArmorDamage.ContainsKey(Column) == true)
                 {
-                    ArmorDamage[Column] = newDepth;
+                    ArmorDamage[Column] = (ushort)newDepth;
                 }
                 else
                 {
-                    ArmorDamage.Add(Column, newDepth);
+                    ArmorDamage.Add(Column, (ushort)newDepth);
                 }
             }
             /// <summary>
             /// end else if isDamaged = true
             /// </summary>
-
+            return RemainingDamage;
         }
 
         /// <summary>

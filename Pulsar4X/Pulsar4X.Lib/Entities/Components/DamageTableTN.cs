@@ -56,12 +56,30 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Since damage fans out from a point of initial impact, halfspread is useful for certain calculations.
+        /// </summary>
+        private int HalfSpread;
+        public int halfSpread
+        {
+            get { return HalfSpread; }
+        }
+
+        /// <summary>
         /// The template for damage from this weapon.
         /// </summary>
         private BindingList<ushort> DamageTemplate;
         public BindingList<ushort> damageTemplate
         {
             get { return DamageTemplate; }
+        }
+
+        /// <summary>
+        /// Where in the template is the point of the highest penetration?
+        /// </summary>
+        private byte HitPoint;
+        public byte hitPoint
+        {
+            get { return HitPoint; }
         }
 
 
@@ -118,10 +136,13 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Initialize the damage template.
             /// </summary>
-            for (int loop = 0; loop < 50; loop++)
+            DamageTemplate = new BindingList<ushort>();
+            for (int loop = 0; loop < 200; loop++)
             {
                 DamageTemplate.Add(0);
             }
+
+            HitPoint = 100;
 
             /// <summary>
             /// Plasmas actually have what is effectively 1/2 penetration.
@@ -131,29 +152,29 @@ namespace Pulsar4X.Entities.Components
 
                 if (RemainingDamage > Penetration)
                 {
-                    DamageTemplate[25] = Penetration;
+                    DamageTemplate[HitPoint] = Penetration;
                     RemainingDamage = RemainingDamage - Penetration;
                 }
                 else
                 {
-                    DamageTemplate[25] = (ushort)RemainingDamage;
+                    DamageTemplate[HitPoint] = (ushort)RemainingDamage;
                     RemainingDamage = 0;
                 }
 
                 /// <summary>
                 /// Do damage spread.
                 /// </summary>
-                while (RemainingDamage != 0)
+                while (RemainingDamage > 0)
                 {
                     float DamagePerColumn = (float)((float)RemainingDamage / (float)(Spread + 2));
                     if (DamagePerColumn >= Penetration)
                     {
-                        int HalfSpread = (int)((float)(Spread + 1) / 2.0f);
+                        HalfSpread = (int)((float)(Spread + 1) / 2.0f);
                         /// <summary>
-                        /// 25 is the arbitrary midpoint for the damage template for the time being, and two is added to spread value every iteration of this
+                        /// 100 is the arbitrary midpoint for the damage template for the time being, and two is added to spread value every iteration of this
                         /// while loop.
                         /// </summary>
-                        for (int loop = (25 - HalfSpread); loop < (25 + HalfSpread); loop++)
+                        for (int loop = (HitPoint - HalfSpread); loop <= (HitPoint + HalfSpread); loop++)
                         {
                             DamageTemplate[loop] = (ushort)(DamageTemplate[loop] + (ushort)Penetration);
                             RemainingDamage = RemainingDamage - Penetration;
@@ -164,18 +185,17 @@ namespace Pulsar4X.Entities.Components
                     else
                     {
                         int BasePerColumn = (int)Math.Floor(DamagePerColumn);
-                        int HalfSpread = (int)((float)(Spread + 1) / 2.0f);
-
+                        HalfSpread = (int)((float)(Spread + 1) / 2.0f);
                         if (BasePerColumn > 0)
                         {
-                            for (int loop = (25 - HalfSpread); loop < (25 + HalfSpread); loop++)
+                            for (int loop = (HitPoint - HalfSpread); loop <= (HitPoint + HalfSpread); loop++)
                             {
                                 DamageTemplate[loop] = (ushort)(DamageTemplate[loop] + (ushort)BasePerColumn);
                                 RemainingDamage = RemainingDamage - BasePerColumn;
                             }
                         }
 
-                        for (int loop = (25 - HalfSpread); loop < (25 + HalfSpread); loop++)
+                        for (int loop = (HitPoint - HalfSpread); loop <= (HitPoint + HalfSpread); loop++)
                         {
                             DamageTemplate[loop] = (ushort)(DamageTemplate[loop] + 1);
                             RemainingDamage = RemainingDamage - 1;
@@ -196,34 +216,100 @@ namespace Pulsar4X.Entities.Components
 
                 if (RemainingDamage == 1)
                 {
-                    DamageTemplate[25] = 1;
+                    DamageTemplate[HitPoint] = 1;
                     RemainingDamage = 0;
                 }
                 else
                 {
-                    DamageTemplate[25] = 1;
-                    DamageTemplate[26] = 1;
+                    DamageTemplate[HitPoint] = 1;
+                    DamageTemplate[HitPoint+1] = 1;
                     RemainingDamage = RemainingDamage - 2;
 
                     Spread = 2;
 
                     while (RemainingDamage != 0)
                     {
-                        int HalfSpread = Spread / 2;
-                        for (int loop = (25 - HalfSpread); loop < (26 + HalfSpread); loop++)
-                        {
-                            DamageTemplate[loop] = (ushort)(DamageTemplate[loop] + (ushort)1);
-                            RemainingDamage = RemainingDamage - 1;
+                        HalfSpread = Spread / 2;
 
+                        for (int loop = HalfSpread; loop >=0; loop--)
+                        {
+                            DamageTemplate[HitPoint - loop] = (ushort)(DamageTemplate[HitPoint - loop] + (ushort)1);
+
+                            RemainingDamage = RemainingDamage - 1;
+                            if (RemainingDamage == 0)
+                                break;
+
+                            DamageTemplate[HitPoint + loop + 1] = (ushort)(DamageTemplate[HitPoint + loop + 1] + (ushort)1);
+
+                            RemainingDamage = RemainingDamage - 1;
                             if (RemainingDamage == 0)
                                 break;
                         }
+
                         Spread = Spread + 2;
                     }
-                }
+                }  
+            }
 
-                
+            /// <summary>
+            /// Remove the excess 0s from the template.
+            /// </summary>
+
+            int limit = DamageTemplate.Count;
+            for (int loop = limit-1; loop >= 0; loop--)
+            {
+                if (DamageTemplate[loop] == 0)
+                {
+                    DamageTemplate.RemoveAt(loop);
+
+                    if (loop < HitPoint)
+                        HitPoint--;
+                }
             }
         }
     }
+
+        /// <summary>
+        /// Damage Table kludge.
+        /// </summary>
+        public static class DamageValuesTN
+        {
+            public static BindingList<DamageTableTN> EnergyTable;
+
+            public static BindingList<DamageTableTN> PlasmaTable;
+
+            public static BindingList<DamageTableTN> KineticTable;
+
+            public static BindingList<DamageTableTN> MissileTable;
+
+            /// <summary>
+            /// Provisional Damage table location. Check out program.cs for where this is initialized.
+            /// </summary>
+            public static void init()
+            {
+                EnergyTable = new BindingList<DamageTableTN>();
+                PlasmaTable = new BindingList<DamageTableTN>();
+                KineticTable = new BindingList<DamageTableTN>();
+                MissileTable = new BindingList<DamageTableTN>();
+                for (int loop = 0; loop < 210; loop++)
+                {
+                    DamageTableTN EV = new DamageTableTN(DamageTypeTN.Beam, (ushort)(loop + 1));
+                    DamageTableTN PV = new DamageTableTN(DamageTypeTN.Plasma, (ushort)(loop + 1));
+                    EnergyTable.Add(EV);
+                    PlasmaTable.Add(PV);
+                }
+
+                for (int loop = 0; loop < 80; loop++)
+                {
+                    DamageTableTN KV = new DamageTableTN(DamageTypeTN.Kinetic, (ushort)(loop + 1));
+                    KineticTable.Add(KV);
+                }
+
+                for (int loop = 0; loop < 3000; loop++)
+                {
+                    DamageTableTN MV = new DamageTableTN(DamageTypeTN.Missile, (ushort)(loop + 1));
+                    MissileTable.Add(MV);
+                }
+            }
+        }
 }

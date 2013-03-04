@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using Pulsar4X.Stargen;
 using log4net.Config;
 using log4net;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.UI
 {
@@ -34,6 +35,10 @@ namespace Pulsar4X.UI
             GameState.Instance.Factions.Add(oNewFaction);
 
             Application.EnableVisualStyles();
+
+            //Initialize damage values.
+            DamageValuesTN.init();
+            
 
             // Init our UI Controller:
             Helpers.UIController.Instance.Initialise();

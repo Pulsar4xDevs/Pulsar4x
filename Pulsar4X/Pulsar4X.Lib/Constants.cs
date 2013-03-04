@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
 using System.Drawing;
+using Pulsar4X.Entities.Components;
+using System.ComponentModel;
 
 namespace Pulsar4X
 {
