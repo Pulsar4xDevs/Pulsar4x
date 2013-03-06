@@ -369,7 +369,14 @@ namespace Pulsar4X.UI.GLUtilities
             {
                 InitOpenGL21();
             }
-            else if (OpenGLVersionMajor == 3 || OpenGLVersionMajor == 4)
+            else if (OpenGLVersionMajor == 3)
+            {
+                if (OpenGLVersionMinor >= 2)
+                    InitOpenGL30();
+                else
+                    InitOpenGL21();
+            }
+            else if (OpenGLVersionMajor >= 4)
             {
                 InitOpenGL30();
             }
