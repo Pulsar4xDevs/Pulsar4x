@@ -1,5 +1,15 @@
 dofile "functions.lua"
 
+newoption {
+   trigger     = "UI",
+   value		= "UI",
+   description = "Forces the use of a UI project",
+   allowed = {
+	{ "winforms", "Winforms UI" },
+	{ "GTK", "GTK" }
+	}
+}
+
 -- Solution
 solution "Pulsar4X"
 	configurations { "Debug", "Release" }
@@ -48,7 +58,7 @@ solution "Pulsar4X"
 	--		defines { "OPENGL", "SPLASHSCREEN" }
 	--		flags { "Optimize" }
 
-if (_OPTIONS.os == "windows") then
+if ((os.get() == "windows" and _OPTIONS.UI ~= "GTK") or _OPTIONS.UI == "winforms") then
 	-- WinForms Project, main UI project
 	project "Pulsar4X.UI"
 		kind "WindowedApp"
