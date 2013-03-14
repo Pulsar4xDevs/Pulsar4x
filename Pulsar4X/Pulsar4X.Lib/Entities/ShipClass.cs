@@ -10,6 +10,7 @@ namespace Pulsar4X.Entities
 {
     public class ShipClassTN
     {
+        #region Class Members
         /// <summary>
         /// Not using these yet, may not use some of them at all.
         /// </summary>
@@ -144,6 +145,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         [Browsable(false)]
         public BindingList<short> ListOfComponentDefsCount { get; set; }
+
+        /// <summary>
+        /// List of where each component group falls on the ships hull distribution. size less than 1 components each have DAC of atleast 1.
+        /// </summary>
+        public Dictionary<ComponentDefTN,int> DamageAllocationChart { get; set; }
 
         /// <summary>
         /// What is the perceived protection value this ship class provides to civilians.
@@ -537,7 +543,9 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int TroopLoadTime { get; set; }
+        #endregion
 
+        #region Constructor
         /// <summary>
         /// This constructor will initialize the craft class to a default conventional armored 0 space ship, with a deployment time of 3 months and a name of title.
         /// </summary>
@@ -564,6 +572,7 @@ namespace Pulsar4X.Entities
 
             ListOfComponentDefs = new BindingList<ComponentDefTN>();
             ListOfComponentDefsCount = new BindingList<short>();
+            DamageAllocationChart = new Dictionary<ComponentDefTN,int>();
 
             ShipArmorDef = new ArmorDefTN("Conventional Armor");
             NewArmor("Conventional Armor", 2, 1);
@@ -636,6 +645,7 @@ namespace Pulsar4X.Entities
             TotalCrossSection = 0;
             MaxEMSignature = 0;
         }
+        #endregion
 
         /// <summary>
         /// Sets deployment time and alters crew requirement statistics.
@@ -664,8 +674,12 @@ namespace Pulsar4X.Entities
             }
             else if (CIndex == -1 && increment >= 1)
             {
+                /// <summary>
+                /// The damage allocation chart values will be recalculated later in this very function. A DAC of -1 is obviously indicative of an error.
+                /// </summary>
                 ListOfComponentDefs.Add(Component);
                 ListOfComponentDefsCount.Add(increment);
+                DamageAllocationChart.Add(Component, -1);
             }
             else
             {
@@ -673,6 +687,7 @@ namespace Pulsar4X.Entities
                 {
                     if (ListOfComponentDefsCount[CIndex] <= 0)
                     {
+                        DamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
                         ListOfComponentDefsCount.RemoveAt(CIndex);
                         ListOfComponentDefs.RemoveAt(CIndex);
                     }
@@ -783,6 +798,24 @@ namespace Pulsar4X.Entities
             CryoLoadTime = (SpareCryoBerths * Constants.ShipTN.BaseCryoLoadTimePerPerson) / TractorMultiplier;
             TroopLoadTime = (TotalTroopCapacity * Constants.ShipTN.BaseTroopLoadTime) / TractorMultiplier;
 
+            int DAC = 0;
+            for (int loop = 0; loop < ListOfComponentDefs.Count; loop++)
+            {
+                if (ListOfComponentDefs[loop].size < 1.0)
+                {
+                    int localDAC = ListOfComponentDefsCount[loop];
+
+                    DamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + DAC;
+                    DAC = DAC + localDAC;
+                }
+                else
+                {
+                    int localDAC = (int)(Math.Floor(ListOfComponentDefs[loop].size)) * ListOfComponentDefsCount[loop];
+
+                    DamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + DAC;
+                    DAC = DAC + localDAC;
+                }
+            }
         }
 
         /// <summary>

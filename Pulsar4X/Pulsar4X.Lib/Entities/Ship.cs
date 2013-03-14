@@ -153,6 +153,25 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<ComponentTN> ShipComponents { get; set; }
 
+        /// <summary>
+        /// In shipclass is a member ListOfComponentDefs. This will store the starting index of each of these in ShipComponents.
+        /// </summary>
+        public BindingList<ushort> ComponentDefIndex { get; set; }
+
+        /// <summary>
+        /// List of destroyed components for damage control.
+        /// </summary>
+        public BindingList<ComponentTN> DestroyedComponents { get; set; }
+
+        /// <summary>
+        /// Component currently being repaired by damage control.
+        /// </summary>
+        public ComponentTN DamageControlTarget { get; set; }
+
+        /// <summary>
+        /// List of components to be repaired by damage control in the order specified by player. 0 first, count last.
+        /// </summary>
+        public BindingList<ComponentTN> DamageControlQue { get; set; }
 
         /// <summary>
         /// List of passive sensors that this craft will have.
@@ -197,6 +216,8 @@ namespace Pulsar4X.Entities
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
         public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice)
         {
+            int index;
+
             /// <summary>
             /// Set the class definition
             /// </summary>
@@ -211,6 +232,29 @@ namespace Pulsar4X.Entities
             /// Make sure to initialize this important variable that everything uses.
             /// </summary>
             ShipComponents = new BindingList<ComponentTN>();
+
+            /// <summary>
+            /// Likewise the ListOfComponentDefs counterpart here is important.
+            ComponentDefIndex = new BindingList<ushort>();
+            for (int loop = 0; loop < ClassDefinition.ListOfComponentDefs.Count; loop++)
+            {
+                ComponentDefIndex.Add(0);
+            }
+
+            /// <summary>
+            /// List of components that have been destroyed.
+            /// </summary>
+            DestroyedComponents = new BindingList<ComponentTN>();
+
+            /// <summary>
+            /// When the destroyed components list is populated it can be selected from to put components here to be repaired.
+            /// </summary>
+            DamageControlQue = new BindingList<ComponentTN>();
+
+            /// <summary>
+            /// Not yet set.
+            /// </summary>
+            DamageControlTarget = null;
 
 
             /// <summary>
@@ -253,6 +297,8 @@ namespace Pulsar4X.Entities
             /// All mobile ships need engines, orbitals and PDCs don't however.
             /// </summary>
             ShipEngine = new BindingList<EngineTN>();
+            index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipEngineDef);
+            ComponentDefIndex[index] = (ushort)ShipComponents.Count;
             for (int loop = 0; loop < ClassDefinition.ShipEngineCount; loop++)
             {
                 EngineTN Engine = new EngineTN(ClassDefinition.ShipEngineDef);
@@ -272,6 +318,8 @@ namespace Pulsar4X.Entities
             ShipCargo = new BindingList<CargoTN>();
             for (int loop = 0; loop < ClassDefinition.ShipCargoDef.Count; loop++)
             {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipCargoDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipCargoCount[loop]; loop2++)
                 {
                     CargoTN cargo = new CargoTN(ClassDefinition.ShipCargoDef[loop]);
@@ -290,6 +338,8 @@ namespace Pulsar4X.Entities
             ShipColony = new BindingList<ColonyTN>();
             for (int loop = 0; loop < ClassDefinition.ShipColonyDef.Count; loop++)
             {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipColonyDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipColonyCount[loop]; loop2++)
                 {
                     ColonyTN colony = new ColonyTN(ClassDefinition.ShipColonyDef[loop]);
@@ -306,6 +356,8 @@ namespace Pulsar4X.Entities
             ShipCHS = new BindingList<CargoHandlingTN>();
             for (int loop = 0; loop < ClassDefinition.ShipCHSDef.Count; loop++)
             {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipCHSDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipCHSCount[loop]; loop2++)
                 {
                     CargoHandlingTN CHS = new CargoHandlingTN(ClassDefinition.ShipCHSDef[loop]);
@@ -323,6 +375,8 @@ namespace Pulsar4X.Entities
             ShipPSensor = new BindingList<PassiveSensorTN>();
             for (int loop = 0; loop < ClassDefinition.ShipPSensorDef.Count; loop++)
             {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipPSensorDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipPSensorCount[loop]; loop2++)
                 {
                     PassiveSensorTN PSensor = new PassiveSensorTN(ClassDefinition.ShipPSensorDef[loop]);
@@ -344,6 +398,8 @@ namespace Pulsar4X.Entities
             ShipASensor = new BindingList<ActiveSensorTN>();
             for (int loop = 0; loop < ClassDefinition.ShipASensorDef.Count; loop++)
             {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipASensorDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
                 for (int loop2 = 0; loop2 < ClassDefinition.ShipASensorCount[loop]; loop2++)
                 {
                     ActiveSensorTN ASensor = new ActiveSensorTN(ClassDefinition.ShipASensorDef[loop]);
@@ -386,7 +442,8 @@ namespace Pulsar4X.Entities
         {
             for (int loop = 0; loop < fromList.Count; loop++)
             {
-                
+                int index = ShipClass.ListOfComponentDefs.IndexOf(fromList[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
                 for (int loop2 = 0; loop2 < countList[loop]; loop2++)
                 {
                     GeneralComponentTN NewComponent = new GeneralComponentTN(fromList[loop]);
@@ -512,7 +569,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Type">Type of damage, for armor penetration.</param>
         /// <param name="Value">How much damage is being done.</param>
-        /// <param name="HitLocation">Where the damage is inflicted.</param>
+        /// <param name="HitLocation">Where Armor damage is inflicted. Temporary argument for the time being. remove these when rngs are resolved.</param>
         public void OnDamaged(DamageTypeTN Type, ushort Value, ushort HitLocation)
         {
             ushort Damage = Value;
@@ -584,7 +641,167 @@ namespace Pulsar4X.Entities
             /// Internal Component Damage. Each component with an HTK >0 can take atleast 1 hit. a random number is rolled over the entire dac. the selected component's HTK
             /// is tested against the internal damage value, and if greater than the damage value the component has a chance of surviving. otherwise, the component is destroyed, damage
             /// is reduced, and the next component is chosen.
+            /// DAC Should be redone as a binary tree at some later date.
             /// </summary>
+            int Attempts = 0;
+            Random DacRNG = new Random(HitLocation);
+
+            while (Attempts < 20 && internalDamage > 0)
+            {
+                int DACHit = DacRNG.Next(1, ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[ShipClass.ListOfComponentDefs.Count - 1]]);
+
+                int localDAC = 1;
+                int previousDAC = 1;
+                int destroy = -1;
+                for (int loop = 0; loop < ShipClass.ListOfComponentDefs.Count; loop++)
+                {
+                    localDAC = ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[loop]];
+                    if (DACHit <= localDAC)
+                    {
+                        float size = ShipClass.ListOfComponentDefs[loop].size;
+                        int count = ShipClass.ListOfComponentDefsCount[loop];
+                        int total = (int)(size * count);
+                        if (total < 1)
+                            total = 1;
+
+                        destroy = (int)Math.Floor(((float)(DACHit - previousDAC)/(float)total));
+
+                        /// <summary>
+                        /// By this point total should definitely be >= destroy. destroy is the HS of the group being hit.
+                        /// Should I try to find the exact component hit, or merely loop through all of them?
+                        /// internalDamage: Damage done to all internals
+                        /// destroy: component to destroy from shipClass.ListOfComponentDefs
+                        /// ComponentDefIndex[loop] where in ShipComponents this definition group is.
+                        /// </summary>
+
+                        int DamageDone = DestroyComponent(ShipClass.ListOfComponentDefs[loop].componentType, loop, internalDamage, destroy, DacRNG);
+
+                        /// <summary>
+                        /// No components are left to destroy, so short circuit the loops,destroy the ship, and create a wreck.
+                        /// </summary>
+                        if (DestroyedComponents.Count == ShipComponents.Count)
+                        {
+                            Attempts = 20;
+                            internalDamage = 0;
+                            break;
+                        }
+
+
+                        if (DamageDone == -1)
+                        {
+                            Attempts++;
+                            if (Attempts == 20)
+                            {
+                                internalDamage = 0;
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            internalDamage = (ushort)(internalDamage - (ushort)DamageDone);
+                            break;
+                        }
+                    }
+                    previousDAC = localDAC + 1;
+                }
+            }
+
+            if (Attempts == 20)
+            {
+                OnDestroyed();
+            }
+        }
+
+        public int DestroyComponent(ComponentTypeTN Type, int componentIndex, int Damage, int ComponentIndex, Random DacRNG)
+        {
+            int ID = ComponentDefIndex[componentIndex];
+
+            if(ShipComponents[ID].isDestroyed == true)
+            {
+                return -1;
+            }
+
+
+            switch (Type)
+            {
+                /// <summary>
+                /// All instances of a component are put in group listings, so the start of this particular component type will always need to be found unfortunately.
+                /// perhaps something can be done to speed this process up.
+                /// 
+                /// Need to mark all crew quarters as destroyed if that happens for a design.
+                /// Pass componentDef to this function instead of ID?
+                /// Need an OnDestroyed() function for each component?
+                /// Check to see if components are already destroyed.
+                /// put everything in the log.
+                /// </summary>
+                case ComponentTypeTN.Crew:
+                    
+                    if (ShipClass.ListOfComponentDefs[componentIndex].htk == 0)
+                    {
+                        ShipComponents[ID].isDestroyed = true;
+                        return Damage;
+                    }
+                    else if (ShipClass.ListOfComponentDefs[componentIndex].htk != 0)
+                    {
+                        if (ShipClass.ListOfComponentDefs[componentIndex].htk <= Damage)
+                        {
+                            ShipComponents[ID].isDestroyed = true;
+                            return Damage - ShipClass.ListOfComponentDefs[componentIndex].htk;
+                        }
+                        else
+                        {
+                            int htkTest = DacRNG.Next(1, ShipClass.ListOfComponentDefs[componentIndex].htk);
+
+                            if (htkTest == ShipClass.ListOfComponentDefs[componentIndex].htk)
+                            {
+                                ShipComponents[ID].isDestroyed = true;
+                                return 0;
+                            }
+                            else
+                            {
+                                return 0;
+                            }
+                        }
+                    }
+
+
+
+                break;
+                case ComponentTypeTN.Fuel:
+                case ComponentTypeTN.Engineering:
+                case ComponentTypeTN.Bridge:
+                case ComponentTypeTN.MaintenanceBay:
+                case ComponentTypeTN.FlagBridge:
+                case ComponentTypeTN.DamageControl:
+                case ComponentTypeTN.OrbitalHabitat:
+                case ComponentTypeTN.RecFacility:
+                case ComponentTypeTN.Armor:
+                case ComponentTypeTN.Engine:
+                case ComponentTypeTN.PassiveSensor:
+                case ComponentTypeTN.ActiveSensor:
+                case ComponentTypeTN.CargoHold:
+                case ComponentTypeTN.CargoHandlingSystem:
+                case ComponentTypeTN.CryoStorage:
+                case ComponentTypeTN.BeamFireControl:
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.Gauss:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvRail:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.AdvParticle:
+                break;
+            }
+            return Damage;
+        }
+
+        public void RepairComponent(ComponentTypeTN Type, int ComponentIndex)
+        {
+
         }
 
         /// <summary>

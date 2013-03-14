@@ -7,6 +7,7 @@ namespace Pulsar4X.Entities.Components
 {
     /// <summary>
     /// List of Components:
+    /// Be especially sure to update Ship.cs OnDamage's DAC function when adding to this list.
     /// </summary>
     public enum ComponentTypeTN
     {

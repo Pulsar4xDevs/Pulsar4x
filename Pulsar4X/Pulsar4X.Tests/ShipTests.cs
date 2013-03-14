@@ -1212,6 +1212,14 @@ namespace Pulsar4X.Tests
             {
                 Console.WriteLine("{0} {1} ", pair.Key, pair.Value);
             }
+
+            int DAC = 1;
+            for (int loop = 0; loop < PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs.Count; loop++)
+            {
+                Console.WriteLine("{0} {1}-{2}", PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop], DAC,
+                    PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.DamageAllocationChart[PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop]]);
+                DAC = PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.DamageAllocationChart[PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop]] + 1;
+            }
         }
     }
 }
