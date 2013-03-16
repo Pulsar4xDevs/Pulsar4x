@@ -233,7 +233,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[3].Value = (VM.CurrentPopulation.Installations[(int)Installation.InstallationType.MaintenanceFacility].Number * 200).ToString() + " tons";
 
                 int iShipyards = (int)(VM.CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number + VM.CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
-                m_oSummaryPanel.SummaryDataGrid.Rows[4].Cells[3].Value = iShipyards.ToString() + " / ";
+                m_oSummaryPanel.SummaryDataGrid.Rows[4].Cells[3].Value = iShipyards.ToString() + " / <Slipways>";
                 m_oSummaryPanel.SummaryDataGrid.Rows[5].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.MaintenanceFacility].Number.ToString();
                 m_oSummaryPanel.SummaryDataGrid.Rows[6].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.ConstructionFactory].Number.ToString();
                 m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[3].Value = VM.CurrentPopulation.Installations[(int)Installation.InstallationType.OrdnanceFactory].Number.ToString();

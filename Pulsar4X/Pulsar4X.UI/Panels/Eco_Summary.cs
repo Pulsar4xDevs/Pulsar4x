@@ -38,6 +38,13 @@ namespace Pulsar4X.UI.Panels
             // create and add out data grid:
             m_oSummaryDataGrid = new DataGridView();
             m_oSummaryDataGrid.Dock = DockStyle.Fill;
+            m_oSummaryDataGrid.AllowUserToAddRows = false;
+            m_oSummaryDataGrid.AllowUserToDeleteRows = false;
+            m_oSummaryDataGrid.AllowUserToOrderColumns = false;
+            m_oSummaryDataGrid.AllowUserToResizeColumns = true;
+            m_oSummaryDataGrid.AllowUserToResizeRows = true;
+            m_oSummaryDataGrid.ReadOnly = true;
+            m_oSummaryDataGrid.Enabled = false;
             this.Controls.Add(m_oSummaryDataGrid);
         }
     }
