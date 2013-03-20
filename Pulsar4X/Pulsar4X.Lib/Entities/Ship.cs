@@ -254,6 +254,7 @@ namespace Pulsar4X.Entities
 
             /// <summary>
             /// Likewise the ListOfComponentDefs counterpart here is important.
+            /// </summary>
             ComponentDefIndex = new BindingList<ushort>();
             for (int loop = 0; loop < ClassDefinition.ListOfComponentDefs.Count; loop++)
             {
@@ -330,7 +331,9 @@ namespace Pulsar4X.Entities
             /// </summary>
             ShipEngine = new BindingList<EngineTN>();
             index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipEngineDef);
-            ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+            if (index != -1)
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+
             for (int loop = 0; loop < ClassDefinition.ShipEngineCount; loop++)
             {
                 EngineTN Engine = new EngineTN(ClassDefinition.ShipEngineDef);
@@ -363,7 +366,7 @@ namespace Pulsar4X.Entities
             CurrentCargoTonnage = 0;
             CargoList = new Dictionary<Installation.InstallationType, CargoListEntryTN>();
             CargoComponentList = new Dictionary<ComponentDefTN, CargoListEntryTN>();
-
+       
             /// <summary>
             /// While only colonyships will have the major bays, just about any craft can have an emergency cryo bay.
             /// </summary>
@@ -399,8 +402,6 @@ namespace Pulsar4X.Entities
                 }
             }
 
-
-
             /// <summary>
             /// Every ship will have a passive sensor rating, but very few will have specialized passive sensors.
             /// </summary>
@@ -417,6 +418,7 @@ namespace Pulsar4X.Entities
                     ShipComponents.Add(PSensor);
                 }
             }
+
             /// <summary>
             /// These two can and will change if the ship takes damage to its sensors.
             /// </summary>
@@ -440,6 +442,7 @@ namespace Pulsar4X.Entities
                     ShipComponents.Add(ASensor);
                 }
             }
+
             /// <summary>
             /// This won't change, but it should be here for convenience during sensor sweeps.
             /// </summary>
