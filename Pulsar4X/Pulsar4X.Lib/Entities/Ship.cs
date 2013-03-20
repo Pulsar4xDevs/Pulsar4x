@@ -60,6 +60,11 @@ namespace Pulsar4X.Entities
         public int CurrentCrew;
 
         /// <summary>
+        /// How many additional berths this vessel has. negative numbers indicate overloaded crew quarters and chance of environmental failures.
+        /// </summary>
+        public int SpareBerths;
+
+        /// <summary>
         /// How many crew/POWs are in cryo stasis.
         /// </summary>
         public int CurrentCryoStorage;
@@ -80,6 +85,11 @@ namespace Pulsar4X.Entities
         public float CurrentFuel { get; set; }
 
         /// <summary>
+        /// How much fuel can the ship carry?
+        /// </summary>
+        public float CurrentFuelCapacity { get; set; }
+
+        /// <summary>
         /// Ship statistics track fuel use by the hour, but I need some way of determining if an engine has been running that long, hence this.
         /// </summary>
         public int FuelCounter { get; set; }
@@ -94,6 +104,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int CurrentMSP { get; set; }
 
+        /// <summary>
+        /// How much Maintenance supply can be carried by this ship?
+        /// </summary>
+        public int CurrentMSPCapacity { get; set; }
         /// <summary>
         /// Bridge, Flag Bridge, Damage Control, Improved Damage Control, Advanced Damage Control, Maintenance bay, Recreational Facility, Orbital Habitat.
         /// </summary>
@@ -162,6 +176,11 @@ namespace Pulsar4X.Entities
         /// List of destroyed components for damage control.
         /// </summary>
         public BindingList<ComponentTN> DestroyedComponents { get; set; }
+
+        /// <summary>
+        /// Remaining hit to kill of the ship.
+        /// </summary>
+        public int ShipHTK { get; set; }
 
         /// <summary>
         /// Component currently being repaired by damage control.
@@ -247,6 +266,11 @@ namespace Pulsar4X.Entities
             DestroyedComponents = new BindingList<ComponentTN>();
 
             /// <summary>
+            /// How much damage can the ship take?
+            /// </summary>
+            ShipHTK = ShipClass.TotalHTK;
+
+            /// <summary>
             /// When the destroyed components list is populated it can be selected from to put components here to be repaired.
             /// </summary>
             DamageControlQue = new BindingList<ComponentTN>();
@@ -267,7 +291,13 @@ namespace Pulsar4X.Entities
             /// </summary>
             CrewQuarters = new BindingList<GeneralComponentTN>();
             AddComponents(CrewQuarters, ClassDefinition.CrewQuarters, ClassDefinition.CrewQuartersCount);
+
+            /// <summary>
+            /// Subtract crew from crew pool if ship is not conscript staffed Here:
+            /// </summary>
+
             CurrentCrew = 0;
+            SpareBerths = ShipClass.TotalCrewQuarters;
             CurrentCryoStorage = 0;
             CurrentDeployment = 0.0f;
 
@@ -277,6 +307,7 @@ namespace Pulsar4X.Entities
             FuelTanks = new BindingList<GeneralComponentTN>();
             AddComponents(FuelTanks, ClassDefinition.FuelTanks, ClassDefinition.FuelTanksCount);
             CurrentFuel = 0.0f;
+            CurrentFuelCapacity = ShipClass.TotalFuelCapacity;
             FuelCounter = 0;
 
             /// <summary>
@@ -286,6 +317,7 @@ namespace Pulsar4X.Entities
             AddComponents(EngineeringBays, ClassDefinition.EngineeringBays, ClassDefinition.EngineeringBaysCount);
             CurrentDamageControlRating = ClassDefinition.MaxDamageControlRating;
             CurrentMSP = ShipClass.TotalMSPCapacity;
+            CurrentMSPCapacity = ShipClass.TotalMSPCapacity;
 
             /// <summary>
             /// All remaining components that are of a more specialized nature. These do not have to be present, except bridges on ships bigger than 1K tons.
@@ -467,10 +499,12 @@ namespace Pulsar4X.Entities
             if (CrewRequired <= CrewAvailable)
             {
                 CurrentCrew = CurrentCrew + CrewRequired;
+                SpareBerths = ShipClass.TotalCrewQuarters - CurrentCrew;
             }
             else
             {
                 CurrentCrew = CurrentCrew + CrewAvailable;
+                SpareBerths = ShipClass.TotalCrewQuarters - CurrentCrew;
                 CrewRemaining = 0;
             }
 
@@ -659,12 +693,10 @@ namespace Pulsar4X.Entities
                     if (DACHit <= localDAC)
                     {
                         float size = ShipClass.ListOfComponentDefs[loop].size;
-                        int count = ShipClass.ListOfComponentDefsCount[loop];
-                        int total = (int)(size * count);
-                        if (total < 1)
-                            total = 1;
+                        if (size < 1.0)
+                            size = 1.0f;
 
-                        destroy = (int)Math.Floor(((float)(DACHit - previousDAC)/(float)total));
+                        destroy = (int)Math.Floor(((float)(DACHit - previousDAC)/(float)size));
 
                         /// <summary>
                         /// By this point total should definitely be >= destroy. destroy is the HS of the group being hit.
@@ -696,6 +728,11 @@ namespace Pulsar4X.Entities
                             }
                             break;
                         }
+                        else if (DamageDone == -2)
+                        {
+                            Attempts = 20;
+                            break;
+                        }
                         else
                         {
                             internalDamage = (ushort)(internalDamage - (ushort)DamageDone);
@@ -712,70 +749,107 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public int DestroyComponent(ComponentTypeTN Type, int componentIndex, int Damage, int ComponentIndex, Random DacRNG)
+        /// <summary>
+        /// Destroy component handles destroying individual components of a ship, updating the ships data, and taskgroup data as needed.
+        /// </summary>
+        /// <param name="Type">Type of component destroyed</param>
+        /// <param name="componentIndex">Where in the shipClass.ListOfComponentDefs this component resides</param>
+        /// <param name="Damage">How much damage is to be applied in the attempt to destroy the component</param>
+        /// <param name="ComponentIndex">Which </param>
+        /// <param name="DacRNG"></param>
+        /// <returns></returns>
+        public int DestroyComponent(ComponentTypeTN Type, int ComponentListDefIndex, int Damage, int ComponentIndex, Random DacRNG)
         {
-            int ID = ComponentDefIndex[componentIndex];
+            if (Damage >= ShipHTK)
+                return -2;
+
+            int ID = ComponentDefIndex[ComponentListDefIndex] + ComponentIndex;
 
             if(ShipComponents[ID].isDestroyed == true)
             {
                 return -1;
             }
 
+            int DamageReturn = -1;
+
+            if (ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk == 0)
+            {
+                ShipComponents[ID].isDestroyed = true;
+                DamageReturn = Damage;
+            }
+            else if (ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk != 0)
+            {
+                if (ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk <= Damage)
+                {
+                    ShipComponents[ID].isDestroyed = true;
+                    DamageReturn = Damage - ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk;
+                }
+                else
+                {
+                    int htkTest = DacRNG.Next(1, ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk);
+
+                    if (htkTest == ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk)
+                    {
+                        ShipComponents[ID].isDestroyed = true;
+                        DamageReturn = 0;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Copy the component over to the destroyed components list and decrement the ships remaining HTK value.
+            DestroyedComponents.Add(ShipComponents[ID]);
+            ShipHTK = ShipHTK - ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk;
+
+            /// <summary>
+            /// Do Crew destruction here at some point.
+            /// </summary>
+
 
             switch (Type)
             {
                 /// <summary>
-                /// All instances of a component are put in group listings, so the start of this particular component type will always need to be found unfortunately.
-                /// perhaps something can be done to speed this process up.
-                /// 
-                /// Need to mark all crew quarters as destroyed if that happens for a design.
-                /// Pass componentDef to this function instead of ID?
-                /// Need an OnDestroyed() function for each component?
-                /// Check to see if components are already destroyed.
+                /// To Do:
                 /// put everything in the log.
                 /// </summary>
                 case ComponentTypeTN.Crew:
-                    
-                    if (ShipClass.ListOfComponentDefs[componentIndex].htk == 0)
-                    {
-                        ShipComponents[ID].isDestroyed = true;
-                        return Damage;
-                    }
-                    else if (ShipClass.ListOfComponentDefs[componentIndex].htk != 0)
-                    {
-                        if (ShipClass.ListOfComponentDefs[componentIndex].htk <= Damage)
-                        {
-                            ShipComponents[ID].isDestroyed = true;
-                            return Damage - ShipClass.ListOfComponentDefs[componentIndex].htk;
-                        }
-                        else
-                        {
-                            int htkTest = DacRNG.Next(1, ShipClass.ListOfComponentDefs[componentIndex].htk);
-
-                            if (htkTest == ShipClass.ListOfComponentDefs[componentIndex].htk)
-                            {
-                                ShipComponents[ID].isDestroyed = true;
-                                return 0;
-                            }
-                            else
-                            {
-                                return 0;
-                            }
-                        }
-                    }
-
-
-
+                    SpareBerths = SpareBerths - (int)(CrewQuarters[ShipComponents[ID].componentIndex].genCompDef.size / ShipClass.TonsPerMan);
                 break;
+
                 case ComponentTypeTN.Fuel:
+                    float Fuel = FuelTanks[ShipComponents[ID].componentIndex].genCompDef.size * 50000.0f;
+                    float FuelPercentage = Fuel / ShipClass.TotalFuelCapacity;
+                    float FuelLoss = FuelPercentage * CurrentFuel;
+                    CurrentFuel = CurrentFuel - FuelLoss;
+                    CurrentFuelCapacity = CurrentFuelCapacity - Fuel;
+                break;
+
                 case ComponentTypeTN.Engineering:
+                    float MSP = EngineeringBays[ShipComponents[ID].componentIndex].genCompDef.size;
+                    float MSPPercentage = MSP / ShipClass.TotalMSPCapacity;
+                    float MSPLoss = MSPPercentage * CurrentMSP;
+                    CurrentMSP = CurrentMSP - (int)MSPLoss;
+                    CurrentMSPCapacity = CurrentMSPCapacity - (int)((float)ShipClass.BuildPointCost * (( MSP / ShipClass.SizeHS ) / 0.08f));
+                    CurrentDamageControlRating = CurrentDamageControlRating - 1;
+                break;
+
                 case ComponentTypeTN.Bridge:
+                break;
                 case ComponentTypeTN.MaintenanceBay:
+                break;
                 case ComponentTypeTN.FlagBridge:
+                break;
                 case ComponentTypeTN.DamageControl:
+                break;
                 case ComponentTypeTN.OrbitalHabitat:
+                break;
                 case ComponentTypeTN.RecFacility:
-                case ComponentTypeTN.Armor:
+                break;
+
                 case ComponentTypeTN.Engine:
                 case ComponentTypeTN.PassiveSensor:
                 case ComponentTypeTN.ActiveSensor:
@@ -796,12 +870,65 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.AdvParticle:
                 break;
             }
-            return Damage;
+            return DamageReturn;
         }
 
         public void RepairComponent(ComponentTypeTN Type, int ComponentIndex)
         {
+            /// <summary>
+            /// Subtract MSPs in damage control function, not necessary here.
+            /// </summary>
+            /// 
+            ShipComponents[ComponentIndex].isDestroyed = false;
+            switch(Type)
+            {
+                case ComponentTypeTN.Crew :
+                    SpareBerths = SpareBerths + (int)(CrewQuarters[ShipComponents[ComponentIndex].componentIndex].genCompDef.size / ShipClass.TonsPerMan);
+                break;
 
+                case ComponentTypeTN.Fuel :
+                    CurrentFuelCapacity = CurrentFuelCapacity + (FuelTanks[ShipComponents[ComponentIndex].componentIndex].genCompDef.size * 50000.0f);
+                break;
+
+                case ComponentTypeTN.Engineering :
+                    float MSP = EngineeringBays[ShipComponents[ComponentIndex].componentIndex].genCompDef.size;
+                    CurrentMSPCapacity = CurrentMSPCapacity + (int)((float)ShipClass.BuildPointCost * (( MSP / ShipClass.SizeHS ) / 0.08f));
+                    CurrentDamageControlRating = CurrentDamageControlRating + 1;
+                break;
+
+                case ComponentTypeTN.Bridge:
+                break;
+                case ComponentTypeTN.MaintenanceBay:
+                break;
+                case ComponentTypeTN.FlagBridge:
+                break;
+                case ComponentTypeTN.DamageControl:
+                break;
+                case ComponentTypeTN.OrbitalHabitat:
+                break;
+                case ComponentTypeTN.RecFacility:
+                break;
+
+                case ComponentTypeTN.Engine:
+                case ComponentTypeTN.PassiveSensor:
+                case ComponentTypeTN.ActiveSensor:
+                case ComponentTypeTN.CargoHold:
+                case ComponentTypeTN.CargoHandlingSystem:
+                case ComponentTypeTN.CryoStorage:
+                case ComponentTypeTN.BeamFireControl:
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.Gauss:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvRail:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.AdvParticle:
+                break;
+            }
         }
 
         /// <summary>

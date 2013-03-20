@@ -766,7 +766,7 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                TotalMSPCapacity = (int)((float)BuildPointCost * ((SizeHS / EngineeringHS) / 8.0f)); 
+                TotalMSPCapacity = (int)((float)BuildPointCost * ((EngineeringHS / SizeHS) / 0.08f)); 
             }
 
             /// <summary>

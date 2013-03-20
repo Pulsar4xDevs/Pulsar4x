@@ -273,6 +273,10 @@ namespace Pulsar4X.Entities
             Ships.Add(ship);
 
             /// <summary>
+            /// Refuel and ReCrew this ship
+            /// </summary>
+
+            /// <summary>
             /// inform the ship of the taskgroup it belongs to.
             /// </summary>
             ship.ShipsTaskGroup = this;

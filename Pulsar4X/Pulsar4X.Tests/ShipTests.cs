@@ -235,7 +235,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}, Tonnage: {4}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK, TestClass.SizeTons);
 
             Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}, Total Required Crew: {6}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
-            TestClass.TotalFuelCapacity,TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
+            TestClass.TotalFuelCapacity,TestClass.TotalMSPCapacity, (TestClass.EngineeringHS / TestClass.SizeHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
             
             Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
 
@@ -248,7 +248,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}, Tonnage: {4}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK, TestClass.SizeTons);
 
             Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}, Total Required Crew: {6}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
-            TestClass.TotalFuelCapacity, TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
+            TestClass.TotalFuelCapacity, TestClass.TotalMSPCapacity, (TestClass.EngineeringHS / TestClass.SizeHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
 
             Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
 
@@ -261,7 +261,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Size: {0}, Crew: {1}, Cost: {2}, HTK: {3}, Tonnage: {4}", TestClass.SizeHS, TestClass.TotalRequiredCrew, TestClass.BuildPointCost, TestClass.TotalHTK, TestClass.SizeTons);
 
             Console.WriteLine("HS Accomodations/Required: {0}/{1}, Total Fuel Capacity: {2}, Total MSP: {3}, Engineering percentage: {4}, Has Bridge: {5}, Total Required Crew: {6}", TestClass.AccomHSAvailable, TestClass.AccomHSRequirement,
-            TestClass.TotalFuelCapacity, TestClass.TotalMSPCapacity, (TestClass.SizeHS / TestClass.EngineeringHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
+            TestClass.TotalFuelCapacity, TestClass.TotalMSPCapacity, (TestClass.EngineeringHS / TestClass.SizeHS), TestClass.HasBridge, TestClass.TotalRequiredCrew);
 
             Console.WriteLine("Armor Size: {0}, Cost: {1}", TestClass.ShipArmorDef.size, TestClass.ShipArmorDef.cost);
 
