@@ -124,12 +124,20 @@ namespace Pulsar4X.Entities
         public BindingList<EngineTN> ShipEngine { get; set; }
 
         /// <summary>
-        /// Engine related ship statistics. Maximum values are in ship class.
+        /// Engine related ship statistics:
+        /// Engine Power: Current and current max(for damage purposes) power with which the engine can push the ship forward.
+        /// ThermalSignature: Current and Current max signature the ship generates when operating its engines.
+        /// Speed: Speed the ship is travelling at, and current max attainable speed.
+        /// FuelusePerHour: Litres of fuel the engine consumes per hour, along with the maximum amount that can be consumed.
         /// </summary>
         public int CurrentEnginePower { get; set; }
+        public int CurrentMaxEnginePower { get; set; }
         public int CurrentThermalSignature { get; set; }
+        public int CurrentMaxThermalSignature { get; set; }
         public int CurrentSpeed { get; set; }
+        public int CurrentMaxSpeed { get; set; }
         public float CurrentFuelUsePerHour { get; set; }
+        public float CurrentMaxFuelUsePerHour { get; set; }
 
         /// <summary>
         /// Ships can have several types of cargo holds and multiple of each.
@@ -161,6 +169,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<CargoHandlingTN> ShipCHS { get; set; }
 
+        /// <summary>
+        /// Ships with CHS systems have a tractor multiplier that reduces load time for cargo, but these can be damaged.
+        /// </summary>
+        public int CurrentTractorMultiplier { get; set; }
 
         /// <summary>
         /// List of ship components for DAC/OnDamage/Wreck functionality
@@ -342,9 +354,13 @@ namespace Pulsar4X.Entities
                 ShipComponents.Add(Engine);
             }
             CurrentEnginePower = ClassDefinition.MaxEnginePower;
+            CurrentMaxEnginePower = CurrentEnginePower;
             CurrentThermalSignature = ClassDefinition.MaxThermalSignature;
+            CurrentMaxThermalSignature = CurrentThermalSignature;
             CurrentSpeed = ClassDefinition.MaxSpeed;
+            CurrentMaxSpeed = CurrentSpeed;
             CurrentFuelUsePerHour = ClassDefinition.MaxFuelUsePerHour;
+            CurrentMaxFuelUsePerHour = CurrentFuelUsePerHour;
 
 
             /// <summary>
@@ -401,6 +417,7 @@ namespace Pulsar4X.Entities
                     ShipComponents.Add(CHS);
                 }
             }
+            CurrentTractorMultiplier = ShipClass.TractorMultiplier;
 
             /// <summary>
             /// Every ship will have a passive sensor rating, but very few will have specialized passive sensors.
@@ -585,18 +602,21 @@ namespace Pulsar4X.Entities
         /// Another house keeping function, this will be called at the TG level, but sets several ship statistics that are important.
         /// </summary>
         /// <param name="Speed">New speed which the craft should attempt to meet.</param>
-        public void SetSpeed(int Speed)
+        /// <returns>Speed the ship is set to.</returns>
+        public int SetSpeed(int Speed)
         {
-            if (ShipClass.MaxSpeed < Speed)
-                CurrentSpeed = ShipClass.MaxSpeed;
+            if (CurrentMaxSpeed < Speed)
+                CurrentSpeed = CurrentMaxSpeed;
             else
                 CurrentSpeed = Speed;
 
-            float fraction = (float)CurrentSpeed / (float)ShipClass.MaxSpeed;
+            float fraction = (float)CurrentSpeed / (float)CurrentMaxSpeed;
 
-            CurrentEnginePower = (int)((float)ShipClass.MaxEnginePower * fraction);
-            CurrentThermalSignature = (int)((float)ShipClass.MaxThermalSignature * fraction);
-            CurrentFuelUsePerHour = ShipClass.MaxFuelUsePerHour * fraction;
+            CurrentEnginePower = (int)((float)CurrentMaxEnginePower * fraction);
+            CurrentThermalSignature = (int)((float)CurrentMaxThermalSignature * fraction);
+            CurrentFuelUsePerHour = CurrentMaxFuelUsePerHour * fraction;
+
+            return CurrentSpeed;
         }
 
         /// <summary>
@@ -754,13 +774,14 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Destroy component handles destroying individual components of a ship, updating the ships data, and taskgroup data as needed.
+        /// crew destruction and logging remain to be done.
         /// </summary>
         /// <param name="Type">Type of component destroyed</param>
         /// <param name="componentIndex">Where in the shipClass.ListOfComponentDefs this component resides</param>
         /// <param name="Damage">How much damage is to be applied in the attempt to destroy the component</param>
         /// <param name="ComponentIndex">Which </param>
         /// <param name="DacRNG"></param>
-        /// <returns></returns>
+        /// <returns>Damage remaining after component destruction, or special message indicating no component to destroy(-1)/ship is totally destroyed(-2)</returns>
         public int DestroyComponent(ComponentTypeTN Type, int ComponentListDefIndex, int Damage, int ComponentIndex, Random DacRNG)
         {
             if (Damage >= ShipHTK)
@@ -840,6 +861,9 @@ namespace Pulsar4X.Entities
                     CurrentDamageControlRating = CurrentDamageControlRating - 1;
                 break;
 
+                /// <summary>
+                /// Nothing special for these yet.
+                /// </summary>
                 case ComponentTypeTN.Bridge:
                 break;
                 case ComponentTypeTN.MaintenanceBay:
@@ -854,12 +878,110 @@ namespace Pulsar4X.Entities
                 break;
 
                 case ComponentTypeTN.Engine:
+                    /// <summary>
+                    /// All engines have to be the same, so engine 0 is used for these for convienience.
+                    /// </summary>
+                    CurrentMaxEnginePower = CurrentMaxEnginePower - ShipEngine[0].engineDef.enginePower;
+                    CurrentMaxThermalSignature = CurrentMaxThermalSignature - ShipEngine[0].engineDef.thermalSignature;
+                    CurrentMaxFuelUsePerHour = CurrentMaxFuelUsePerHour - ShipEngine[0].engineDef.fuelUsePerHour;
+                    CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
+                    if (CurrentSpeed > CurrentMaxSpeed)
+                        SetSpeed(CurrentMaxSpeed);
+                break;
+
                 case ComponentTypeTN.PassiveSensor:
+                    /// <summary>
+                    /// Performance could be improved here by storing a sorted linked list of all passive sensors if need be.
+                    /// I don't believe that sensor destruction events will be common enough to necessitate that however.
+                    /// </summary>
+                    if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.thermalOrEM == PassiveSensorType.EM)
+                    {
+                        if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.rating == BestEMRating)
+                        {
+                            ShipsTaskGroup.BestEMCount--;
+
+                            if (ShipsTaskGroup.BestEMCount == 0)
+                            {
+                                for (int loop = 0; loop < ShipsTaskGroup.Ships.Count; loop++)
+                                {
+                                    for (int loop2 = 0; loop2 < ShipsTaskGroup.Ships[loop].ShipPSensor.Count; loop2++)
+                                    {
+                                        if (ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.EM &&
+                                            ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].isDestroyed == false)
+                                        {
+                                            if (ShipsTaskGroup.BestEMCount == 0 || ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.rating > ShipsTaskGroup.BestEM.pSensorDef.rating )
+                                            {
+                                                ShipsTaskGroup.BestEM = ShipsTaskGroup.Ships[loop].ShipPSensor[loop2];
+                                                ShipsTaskGroup.BestEMCount = 1;
+                                            }
+                                            else if (ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.rating == ShipsTaskGroup.BestEM.pSensorDef.rating)
+                                            {
+                                                ShipsTaskGroup.BestEMCount++;
+                                            }
+                                        }
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.rating == BestThermalRating)
+                        {
+                            ShipsTaskGroup.BestThermalCount--;
+
+                            if (ShipsTaskGroup.BestThermalCount == 0)
+                            {
+                                for (int loop = 0; loop < ShipsTaskGroup.Ships.Count; loop++)
+                                {
+                                    for (int loop2 = 0; loop2 < ShipsTaskGroup.Ships[loop].ShipPSensor.Count; loop2++)
+                                    {
+                                        if (ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.Thermal &&
+                                            ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].isDestroyed == false)
+                                        {
+                                            if (ShipsTaskGroup.BestThermalCount == 0 || ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.rating > ShipsTaskGroup.BestThermal.pSensorDef.rating)
+                                            {
+                                                ShipsTaskGroup.BestThermal = ShipsTaskGroup.Ships[loop].ShipPSensor[loop2];
+                                                ShipsTaskGroup.BestThermalCount = 1;
+                                            }
+                                            else if (ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.rating == ShipsTaskGroup.BestThermal.pSensorDef.rating)
+                                            {
+                                                ShipsTaskGroup.BestThermalCount++;
+                                            }
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                break;
                 case ComponentTypeTN.ActiveSensor:
+                    /// <summary>
+                    /// Luckily this function already takes care of active sensors being deactivated and removed from the sort lists.
+                    /// </summary>
+                    ShipsTaskGroup.SetActiveSensor(ShipsTaskGroup.Ships.IndexOf(this), ShipComponents[ID].componentIndex, false);
+                break;
+
                 case ComponentTypeTN.CargoHold:
+                    /// <summary>
+                    /// Cargo should be destroyed here.
+                    /// </summary>
+                break;
+
                 case ComponentTypeTN.CargoHandlingSystem:
+                    CurrentTractorMultiplier = CurrentTractorMultiplier - ShipCHS[ShipComponents[ID].componentIndex].cargoHandleDef.tractorMultiplier;
+                break;
                 case ComponentTypeTN.CryoStorage:
+                    /// <summary>
+                    /// Colonists in stasis or lifeboat rescuees should be destroyed here.
+                    /// </summary>
+                break;
+
+
                 case ComponentTypeTN.BeamFireControl:
+                break;
                 case ComponentTypeTN.Rail:
                 case ComponentTypeTN.Gauss:
                 case ComponentTypeTN.Plasma:
@@ -899,6 +1021,9 @@ namespace Pulsar4X.Entities
                     CurrentDamageControlRating = CurrentDamageControlRating + 1;
                 break;
 
+                /// <summary>
+                /// Nothing special is done for these yet.
+                /// </summary>
                 case ComponentTypeTN.Bridge:
                 break;
                 case ComponentTypeTN.MaintenanceBay:
@@ -913,12 +1038,61 @@ namespace Pulsar4X.Entities
                 break;
 
                 case ComponentTypeTN.Engine:
+                    /// <summary>
+                    /// All engines have to be the same, so engine 0 is used for these for convienience.
+                    /// </summary>
+                    CurrentMaxEnginePower = CurrentMaxEnginePower + ShipEngine[0].engineDef.enginePower;
+                    CurrentMaxThermalSignature = CurrentMaxThermalSignature + ShipEngine[0].engineDef.thermalSignature;
+                    CurrentMaxFuelUsePerHour = CurrentMaxFuelUsePerHour + ShipEngine[0].engineDef.fuelUsePerHour;
+                    CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
+                        SetSpeed(CurrentMaxSpeed);
+                break;
                 case ComponentTypeTN.PassiveSensor:
+                    if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.thermalOrEM == PassiveSensorType.EM)
+                    {
+                        if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.rating > ShipsTaskGroup.BestEM.pSensorDef.rating)
+                        {
+                            ShipsTaskGroup.BestEM = ShipPSensor[ShipComponents[ComponentIndex].componentIndex];
+                            ShipsTaskGroup.BestEMCount = 1;
+                        }
+                        else if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.rating == ShipsTaskGroup.BestEM.pSensorDef.rating)
+                        {
+                            ShipsTaskGroup.BestEMCount++;
+                        }
+                    }
+                    else
+                    {
+                        if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.rating > ShipsTaskGroup.BestThermal.pSensorDef.rating)
+                        {
+                            ShipsTaskGroup.BestThermal = ShipPSensor[ShipComponents[ComponentIndex].componentIndex];
+                            ShipsTaskGroup.BestThermalCount = 1;
+                        }
+                        else if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.rating == ShipsTaskGroup.BestThermal.pSensorDef.rating)
+                        {
+                            ShipsTaskGroup.BestThermalCount++;
+                        }
+                    }
+                break;
+
+                /// <summary>
+                /// Nothing special for these yet.
+                /// </summary>
                 case ComponentTypeTN.ActiveSensor:
+                break;
                 case ComponentTypeTN.CargoHold:
+                break;
+
                 case ComponentTypeTN.CargoHandlingSystem:
+                CurrentTractorMultiplier = CurrentTractorMultiplier + ShipCHS[ShipComponents[ComponentIndex].componentIndex].cargoHandleDef.tractorMultiplier;
+                break;
+
+                /// <summary>
+                /// Nothing special for these yet. Weapon links won't be restored.
+                /// </summary>
                 case ComponentTypeTN.CryoStorage:
+                break;
                 case ComponentTypeTN.BeamFireControl:
+                break;
                 case ComponentTypeTN.Rail:
                 case ComponentTypeTN.Gauss:
                 case ComponentTypeTN.Plasma:
@@ -949,6 +1123,19 @@ namespace Pulsar4X.Entities
         }
 
 
+        /// <summary>
+        /// Links specified weapon to the selected BFC. Sanity check to make sure both are on the same ship?
+        /// </summary>
+        /// <param name="BFC">Beam Fire Controller</param>
+        /// <param name="Weapon">Beam Weapon</param>
+        public void LinkWeaponToBeamFC(BeamFireControlTN BFC, BeamTN Weapon)
+        {
+            if (BFC.linkedWeapons.IndexOf(Weapon) == -1)
+            {
+                BFC.linkedWeapons.Add(Weapon);
+                Weapon.fireController = BFC;
+            }
+        }
     }
     /// <summary>
     /// End of ShipTN class

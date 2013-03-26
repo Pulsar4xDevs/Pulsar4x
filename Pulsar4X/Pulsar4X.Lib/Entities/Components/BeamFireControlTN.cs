@@ -209,14 +209,26 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Weapon and ECM Link.
+        /// ECCMs Linked to this BFC.
         /// </summary>
+
+        /// <summary>
+        /// Weapons linked to this BFC.
+        /// </summary>
+        private BindingList<BeamTN> LinkedWeapons;
+        public BindingList<BeamTN> linkedWeapons
+        {
+            get { return LinkedWeapons; }
+            set { LinkedWeapons = value; }
+        }
 
 
         public BeamFireControlTN(BeamFireControlDefTN definition)
         {
             BeamFireControlDef = definition;
             isDestroyed = false;
+
+            LinkedWeapons = new BindingList<BeamTN>();
         }
     }
 }
