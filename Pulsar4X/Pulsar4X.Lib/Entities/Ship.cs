@@ -239,6 +239,16 @@ namespace Pulsar4X.Entities
         public LinkedListNode<int> EMList;
         public LinkedListNode<int> ActiveList;
 
+        /// <summary>
+        /// Any ship with a beam weapon will need atleast one  fire control for that weapon.
+        /// </summary>
+        public BindingList<BeamFireControlTN> ShipBFC { get; set; }
+
+        /// <summary>
+        /// Certain military warships will have beam weapons.
+        /// </summary>
+        public BindingList<BeamTN> ShipBeam { get; set; }
+
 
         /// <summary>
         /// ShipTN creates a ship of classDefinition in Index ShipIndex for the taskgroup ship list.
@@ -482,6 +492,34 @@ namespace Pulsar4X.Entities
             }
 
             ShipCommanded = false;
+
+            ShipBFC = new BindingList<BeamFireControlTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipBFCDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipBFCDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipBFCCount[loop]; loop2++)
+                {
+                    BeamFireControlTN BFC = new BeamFireControlTN(ClassDefinition.ShipBFCDef[loop]);
+                    BFC.componentIndex = ShipBFC.Count;
+                    ShipBFC.Add(BFC);
+                    ShipComponents.Add(BFC);
+                }
+            }
+
+            ShipBeam = new BindingList<BeamTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipBeamDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipBeamDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipBeamCount[loop]; loop2++)
+                {
+                    BeamTN Beam = new BeamTN(ClassDefinition.ShipBeamDef[loop]);
+                    Beam.componentIndex = ShipBeam.Count;
+                    ShipBeam.Add(Beam);
+                    ShipComponents.Add(Beam);
+                }
+            }
         }
 
         /// <summary>
@@ -981,6 +1019,7 @@ namespace Pulsar4X.Entities
 
 
                 case ComponentTypeTN.BeamFireControl:
+                    UnlinkAllWeapons(ShipBFC[ShipComponents[ID].componentIndex]);
                 break;
                 case ComponentTypeTN.Rail:
                 case ComponentTypeTN.Gauss:
@@ -993,6 +1032,8 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.AdvLaser:
                 case ComponentTypeTN.AdvPlasma:
                 case ComponentTypeTN.AdvParticle:
+                    UnlinkWeapon(ShipBeam[ShipComponents[ID].componentIndex]);
+                    ShipBeam[ShipComponents[ID].componentIndex].currentCapacitor = 0;
                 break;
             }
             return DamageReturn;
@@ -1135,6 +1176,32 @@ namespace Pulsar4X.Entities
                 BFC.linkedWeapons.Add(Weapon);
                 Weapon.fireController = BFC;
             }
+        }
+
+        /// <summary>
+        /// Unlinks the specified beam weapon from its fire controller.
+        /// </summary>
+        /// <param name="Weapon">beam weapon to be cleared.</param>
+        public void UnlinkWeapon(BeamTN Weapon)
+        {
+            if (Weapon.fireController != null)
+            {
+                Weapon.fireController.linkedWeapons.Remove(Weapon);
+                Weapon.fireController = null;
+            }
+        }
+
+        /// <summary>
+        /// Removes all weapon links to the specified BFC
+        /// </summary>
+        /// <param name="BFC">Beam fire Control to be cleared.</param>
+        public void UnlinkAllWeapons(BeamFireControlTN BFC)
+        {
+            for (int loop = 0; loop < BFC.linkedWeapons.Count; loop++)
+            {
+                BFC.linkedWeapons[loop].fireController = null;
+            }
+            BFC.linkedWeapons.Clear();
         }
     }
     /// <summary>

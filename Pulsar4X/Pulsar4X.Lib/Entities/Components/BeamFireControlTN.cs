@@ -194,6 +194,11 @@ namespace Pulsar4X.Entities.Components
                 float Accuracy = Tracking / (float)(((float)loop+1.0f)/100.0f);
                 TrackingAccuracyTable.Add(Accuracy);
             }
+
+            isMilitary = true;
+            isSalvaged = false;
+            isObsolete = false;
+            isDivisible = false;
         }
     }
 
@@ -209,7 +214,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// ECCMs Linked to this BFC.
+        /// ECCMs Linked to this BFC. Update DestroyComponents when eccm is added.
         /// </summary>
 
         /// <summary>

@@ -543,6 +543,35 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int TroopLoadTime { get; set; }
+
+
+        [DisplayName("Beam Fire Controls"),
+        Category("Component Lists"),
+        Description("List of Beam Fire Controls on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<BeamFireControlDefTN> ShipBFCDef { get; set; }
+
+        [DisplayName("Beam Fire Control Counts"),
+        Category("Component Counts"),
+        Description("Count of Beam Fire Controls on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipBFCCount { get; set; }
+
+        [DisplayName("Beam Weapons"),
+        Category("Component Lists"),
+        Description("List of Beam Weapons on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<BeamDefTN> ShipBeamDef { get; set; }
+
+        [DisplayName("Beam Weapon Counts"),
+        Category("Component Counts"),
+        Description("Count of Beam Weapons on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipBeamCount { get; set; }
         #endregion
 
         #region Constructor
@@ -644,6 +673,11 @@ namespace Pulsar4X.Entities
             ShipASensorCount = new BindingList<ushort>();
             TotalCrossSection = 0;
             MaxEMSignature = 0;
+
+            ShipBFCDef = new BindingList<BeamFireControlDefTN>();
+            ShipBFCCount = new BindingList<ushort>();
+            ShipBeamDef = new BindingList<BeamDefTN>();
+            ShipBeamCount = new BindingList<ushort>();
         }
         #endregion
 
@@ -1300,6 +1334,84 @@ namespace Pulsar4X.Entities
             MaxEMSignature = MaxEMSignature + (Sensor.gps * (int)inc);
 
             UpdateClass(Sensor, inc);
+        }
+
+        /// <summary>
+        /// Add BFC adds or subtracts the selected fire control for beam weapons to the ship class.
+        /// </summary>
+        /// <param name="BFC">Beam fire control</param>
+        /// <param name="inc">Number to add or subtract</param>
+        public void AddBeamFireControl(BeamFireControlDefTN BFC, byte inc)
+        {
+            int BFCIndex = ShipBFCDef.IndexOf(BFC);
+            if (BFCIndex != -1)
+            {
+                ShipBFCCount[BFCIndex] = (ushort)((short)ShipBFCCount[BFCIndex] + inc);
+            }
+            else if (BFCIndex == -1 && inc >= 1)
+            {
+                ShipBFCDef.Add(BFC);
+                ShipBFCCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (BFCIndex != -1)
+                {
+                    if (ShipBFCCount[BFCIndex] <= 0)
+                    {
+                        ShipBFCCount.RemoveAt(BFCIndex);
+                        ShipBFCDef.RemoveAt(BFCIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            UpdateClass(BFC, inc);
+        }
+
+        /// <summary>
+        /// Add Beam weapon adds or subtracts the specified beam weapon to the ship class in increment inc.
+        /// </summary>
+        /// <param name="Beam">Beam weapon</param>
+        /// <param name="inc">increment to add or subtract</param>
+        public void AddBeamWeapon(BeamDefTN Beam, byte inc)
+        {
+            int BeamIndex = ShipBeamDef.IndexOf(Beam);
+            if (BeamIndex != -1)
+            {
+                ShipBeamCount[BeamIndex] = (ushort)((short)ShipBeamCount[BeamIndex] + inc);
+            }
+            else if (BeamIndex == -1 && inc >= 1)
+            {
+                ShipBeamDef.Add(Beam);
+                ShipBeamCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (BeamIndex != -1)
+                {
+                    if (ShipBeamCount[BeamIndex] <= 0)
+                    {
+                        ShipBeamCount.RemoveAt(BeamIndex);
+                        ShipBeamDef.RemoveAt(BeamIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            UpdateClass(Beam, inc);
         }
     }
 }

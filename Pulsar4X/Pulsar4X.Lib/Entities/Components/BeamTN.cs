@@ -454,6 +454,7 @@ namespace Pulsar4X.Entities.Components
         public ushort currentCapacitor
         {
             get { return CurrentCapacitor; }
+            set { CurrentCapacitor = value; }
         }
 
         /// <summary>
