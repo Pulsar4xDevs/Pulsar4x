@@ -1172,11 +1172,14 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewShipDesign("Blucher");
 
-            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
-            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
-            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
-            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
-            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddActiveSensor(PlayerFaction1.ComponentList.ActiveSensorDef[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddBeamFireControl(PlayerFaction1.ComponentList.BeamFireControlDef[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddBeamWeapon(PlayerFaction1.ComponentList.BeamWeaponDef[0], 5);
 
             PlayerFaction1.ShipDesigns[0].NewArmor("Conventional", 2, 5);
 
@@ -1216,10 +1219,33 @@ namespace Pulsar4X.Tests
             int DAC = 1;
             for (int loop = 0; loop < PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs.Count; loop++)
             {
-                Console.WriteLine("{0} {1}-{2}", PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop], DAC,
-                    PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.DamageAllocationChart[PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop]]);
+                Console.WriteLine("{0} {1}-{2} {3}", PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop], DAC,
+                    PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.DamageAllocationChart[PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop]],
+                    PlayerFaction1.TaskGroups[0].Ships[0].ComponentDefIndex[loop]);
+
                 DAC = PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.DamageAllocationChart[PlayerFaction1.TaskGroups[0].Ships[0].ShipClass.ListOfComponentDefs[loop]] + 1;
             }
+
+            for(int loop2 = 0; loop2 < PlayerFaction1.TaskGroups[0].Ships[0].ShipComponents.Count; loop2++)
+            {
+                Console.WriteLine("{0} {1} {2}", loop2, PlayerFaction1.TaskGroups[0].Ships[0].ShipComponents[loop2], PlayerFaction1.TaskGroups[0].Ships[0].ShipComponents[loop2].componentIndex);
+            }
+
+            Console.WriteLine("{0} {1} {2} {3} {4} {5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxEnginePower, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxThermalSignature,
+    PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxFuelUsePerHour, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxSpeed, PlayerFaction1.TaskGroups[0].Ships[0].CurrentSpeed,
+    PlayerFaction1.TaskGroups[0].Ships[0].ShipEngine[2].isDestroyed);
+
+            int test = PlayerFaction1.TaskGroups[0].Ships[0].DestroyComponent(ComponentTypeTN.Engine, 0, 5, 2, Gen);
+
+            Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}", test, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxEnginePower, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxThermalSignature,
+                PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxFuelUsePerHour, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxSpeed, PlayerFaction1.TaskGroups[0].Ships[0].CurrentSpeed,
+                PlayerFaction1.TaskGroups[0].Ships[0].ShipEngine[2].isDestroyed);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].RepairComponent(ComponentTypeTN.Engine, 22);
+
+            Console.WriteLine("{0} {1} {2} {3} {4} {5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxEnginePower, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxThermalSignature,
+    PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxFuelUsePerHour, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxSpeed, PlayerFaction1.TaskGroups[0].Ships[0].CurrentSpeed,
+    PlayerFaction1.TaskGroups[0].Ships[0].ShipEngine[2].isDestroyed);
         }
     }
 }

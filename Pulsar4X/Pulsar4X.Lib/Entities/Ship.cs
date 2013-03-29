@@ -817,8 +817,8 @@ namespace Pulsar4X.Entities
         /// <param name="Type">Type of component destroyed</param>
         /// <param name="componentIndex">Where in the shipClass.ListOfComponentDefs this component resides</param>
         /// <param name="Damage">How much damage is to be applied in the attempt to destroy the component</param>
-        /// <param name="ComponentIndex">Which </param>
-        /// <param name="DacRNG"></param>
+        /// <param name="ComponentIndex">Which component specifically.</param>
+        /// <param name="DacRNG">Current RNG kludge</param>
         /// <returns>Damage remaining after component destruction, or special message indicating no component to destroy(-1)/ship is totally destroyed(-2)</returns>
         public int DestroyComponent(ComponentTypeTN Type, int ComponentListDefIndex, int Damage, int ComponentIndex, Random DacRNG)
         {
@@ -1044,7 +1044,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Subtract MSPs in damage control function, not necessary here.
             /// </summary>
-            /// 
+
             ShipComponents[ComponentIndex].isDestroyed = false;
             switch(Type)
             {
@@ -1157,6 +1157,11 @@ namespace Pulsar4X.Entities
         {
             ShipClass.ShipsInClass.Remove(this);
             ShipsTaskGroup.Ships.Remove(this);
+
+            if (ShipsTaskGroup.Ships.Count == 0)
+            {
+                Faction.TaskGroups.Remove(ShipsTaskGroup);
+            }
 
             /// <summary>
             /// A new wreck needs to be created with the surviving components, if any, and some fraction of the cost of the ship.

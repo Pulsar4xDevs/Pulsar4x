@@ -63,6 +63,16 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public BindingList<CargoHandlingDefTN> CargoHandleSystemDef { get; set; }
 
+        /// <summary>
+        /// Beam fire controls, which are necessary to direct beam weapons.
+        /// </summary>
+        public BindingList<BeamFireControlDefTN> BeamFireControlDef { get; set; }
+
+        /// <summary>
+        /// All beam weapons which shoot other ships
+        /// </summary>
+        public BindingList<BeamDefTN> BeamWeaponDef { get; set; }
+
 
 
         /// <summary>
@@ -83,7 +93,8 @@ namespace Pulsar4X.Entities.Components
             ColonyBayDef = new BindingList<ColonyDefTN>();
             CargoHandleSystemDef = new BindingList<CargoHandlingDefTN>();
 
-
+            BeamFireControlDef = new BindingList<BeamFireControlDefTN>();
+            BeamWeaponDef = new BindingList<BeamDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -115,10 +126,16 @@ namespace Pulsar4X.Entities.Components
             PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
             PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("EM Sensor EM1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
 
+            BeamFireControlDefTN BFCDef = new BeamFireControlDefTN("Fire Control S01 10-1250", 10000.0f, 1250.0f, 1.0f, 1.0f, false, false, 1.0f, 1);
+            BeamDefTN BeamDef = new BeamDefTN("10cm C1 Infrared Laser", ComponentTypeTN.Laser, 1, 1, 1, 1.0f);
+
             Engines.Add(EngDef);
             ActiveSensorDef.Add(ActDef);
             PassiveSensorDef.Add(ThPasDef);
             PassiveSensorDef.Add(EMPasDef);
+
+            BeamFireControlDef.Add(BFCDef);
+            BeamWeaponDef.Add(BeamDef);
 
 
             /// <summary>
