@@ -572,6 +572,34 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public BindingList<ushort> ShipBeamCount { get; set; }
+
+        [DisplayName("Reactors"),
+        Category("Component Lists"),
+        Description("List of Reactors on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ReactorDefTN> ShipReactorDef { get; set; }
+
+        [DisplayName("Reactor Counts"),
+        Category("Component Counts"),
+        Description("Count of Reactors on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipReactorCount { get; set; }
+
+        [DisplayName("Total Power Requirement"),
+        Category("Detials"),
+        Description("Power required by beam weapon capacitors on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TotalPowerRequirement { get; set; }
+
+        [DisplayName("Total Power Generation"),
+        Category("Detials"),
+        Description("Power Generation of all reactors on this ship class.."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TotalPowerGeneration { get; set; }
         #endregion
 
         #region Constructor
@@ -678,6 +706,12 @@ namespace Pulsar4X.Entities
             ShipBFCCount = new BindingList<ushort>();
             ShipBeamDef = new BindingList<BeamDefTN>();
             ShipBeamCount = new BindingList<ushort>();
+
+            ShipReactorDef = new BindingList<ReactorDefTN>();
+            ShipReactorCount = new BindingList<ushort>();
+
+            TotalPowerGeneration = 0;
+            TotalPowerRequirement = 0;
         }
         #endregion
 
@@ -1411,7 +1445,43 @@ namespace Pulsar4X.Entities
                 }
             }
 
+            TotalPowerRequirement = TotalPowerRequirement + (int)(Beam.powerRequirement * inc);
             UpdateClass(Beam, inc);
+        }
+
+        public void AddReactor(ReactorDefTN Reactor, byte inc)
+        {
+            int ReactorIndex = ShipReactorDef.IndexOf(Reactor);
+            if (ReactorIndex != -1)
+            {
+                ShipReactorCount[ReactorIndex] = (ushort)((short)ShipReactorCount[ReactorIndex] + inc);
+            }
+            else if (ReactorIndex == -1 && inc >= 1)
+            {
+                ShipReactorDef.Add(Reactor);
+                ShipReactorCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (ReactorIndex != -1)
+                {
+                    if (ShipReactorCount[ReactorIndex] <= 0)
+                    {
+                        ShipReactorCount.RemoveAt(ReactorIndex);
+                        ShipReactorDef.RemoveAt(ReactorIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            TotalPowerGeneration = TotalPowerGeneration + (int)(Reactor.powerGen * inc);
+            UpdateClass(Reactor, inc);
         }
     }
 }

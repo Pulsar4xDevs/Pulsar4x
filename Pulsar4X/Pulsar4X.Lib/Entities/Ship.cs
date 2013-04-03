@@ -185,9 +185,14 @@ namespace Pulsar4X.Entities
         public BindingList<ushort> ComponentDefIndex { get; set; }
 
         /// <summary>
-        /// List of destroyed components for damage control.
+        /// List of destroyed component indexes for damage control.
         /// </summary>
-        public BindingList<ComponentTN> DestroyedComponents { get; set; }
+        public BindingList<ushort> DestroyedComponents { get; set; }
+
+        /// <summary>
+        /// Type of component represented by DestroyedComponents, which indexes the general component list, rather than the specific ones.
+        /// </summary>
+        public BindingList<ComponentTypeTN> DestroyedComponentsType { get; set; }
 
         /// <summary>
         /// Remaining hit to kill of the ship.
@@ -197,12 +202,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Component currently being repaired by damage control.
         /// </summary>
-        public ComponentTN DamageControlTarget { get; set; }
+        public short DamageControlTarget { get; set; }
 
         /// <summary>
-        /// List of components to be repaired by damage control in the order specified by player. 0 first, count last.
+        /// List of component indexes to be repaired by damage control in the order specified by player. 0 first, count last.
         /// </summary>
-        public BindingList<ComponentTN> DamageControlQue { get; set; }
+        public BindingList<ushort> DamageControlQue { get; set; }
 
         /// <summary>
         /// List of passive sensors that this craft will have.
@@ -251,6 +256,17 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// All beam weapon ships excepting gauss equipped vessels will require reactors.
+        /// </summary>
+        public BindingList<ReactorTN> ShipReactor { get; set; }
+
+        /// <summary>
+        /// Total power generation of all shipboard reactors.
+        /// </summary>
+        public int CurrentPowerGen { get; set; }
+
+
+        /// <summary>
         /// ShipTN creates a ship of classDefinition in Index ShipIndex for the taskgroup ship list.
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
@@ -286,7 +302,9 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// List of components that have been destroyed.
             /// </summary>
-            DestroyedComponents = new BindingList<ComponentTN>();
+            DestroyedComponents = new BindingList<ushort>();
+
+            DestroyedComponentsType = new BindingList<ComponentTypeTN>();
 
             /// <summary>
             /// How much damage can the ship take?
@@ -296,12 +314,12 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// When the destroyed components list is populated it can be selected from to put components here to be repaired.
             /// </summary>
-            DamageControlQue = new BindingList<ComponentTN>();
+            DamageControlQue = new BindingList<ushort>();
 
             /// <summary>
             /// Not yet set.
             /// </summary>
-            DamageControlTarget = null;
+            DamageControlTarget = -1;
 
 
             /// <summary>
@@ -520,6 +538,22 @@ namespace Pulsar4X.Entities
                     ShipComponents.Add(Beam);
                 }
             }
+
+            ShipReactor = new BindingList<ReactorTN>();
+            for(int loop = 0; loop < ClassDefinition.ShipReactorDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipReactorDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipReactorCount[loop]; loop2++)
+                {
+                    ReactorTN Reactor = new ReactorTN(ClassDefinition.ShipReactorDef[loop]);
+                    Reactor.componentIndex = ShipReactor.Count;
+                    ShipReactor.Add(Reactor);
+                    ShipComponents.Add(Reactor);
+                }
+            }
+            CurrentPowerGen = ClassDefinition.TotalPowerGeneration;
+
         }
 
         /// <summary>
@@ -864,7 +898,8 @@ namespace Pulsar4X.Entities
 
             /// <summary>
             /// Copy the component over to the destroyed components list and decrement the ships remaining HTK value.
-            DestroyedComponents.Add(ShipComponents[ID]);
+            DestroyedComponents.Add((ushort)ID);
+            DestroyedComponentsType.Add(Type);
             ShipHTK = ShipHTK - ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk;
 
             /// <summary>
@@ -925,6 +960,15 @@ namespace Pulsar4X.Entities
                     CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
                     if (CurrentSpeed > CurrentMaxSpeed)
                         SetSpeed(CurrentMaxSpeed);
+
+                    int ExpTest = DacRNG.Next(1, 100);
+
+                    if (ExpTest < ShipEngine[0].engineDef.expRisk)
+                    {
+                        /// <summary>
+                        /// *** Do secondary damage here. ***
+                        /// </summary>
+                    }
                 break;
 
                 case ComponentTypeTN.PassiveSensor:
@@ -1034,6 +1078,20 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.AdvParticle:
                     UnlinkWeapon(ShipBeam[ShipComponents[ID].componentIndex]);
                     ShipBeam[ShipComponents[ID].componentIndex].currentCapacitor = 0;
+                break;
+
+                case ComponentTypeTN.Reactor:
+
+                    CurrentPowerGen = CurrentPowerGen - ShipReactor[ShipComponents[ID].componentIndex].reactorDef.powerGen;
+
+                    ExpTest = DacRNG.Next(1, 100);
+
+                    if (ExpTest < ShipReactor[ShipComponents[ID].componentIndex].reactorDef.expRisk)
+                    {
+                        /// <summary>
+                        /// *** Do secondary damage here. ***
+                        /// </summary>
+                    }
                 break;
             }
             return DamageReturn;
@@ -1145,6 +1203,10 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.AdvLaser:
                 case ComponentTypeTN.AdvPlasma:
                 case ComponentTypeTN.AdvParticle:
+                break;
+
+                case ComponentTypeTN.Reactor:
+                    CurrentPowerGen = CurrentPowerGen + ShipReactor[ShipComponents[ComponentIndex].componentIndex].reactorDef.powerGen;
                 break;
             }
         }

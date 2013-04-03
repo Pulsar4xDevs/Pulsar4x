@@ -45,6 +45,8 @@ namespace Pulsar4X.Entities.Components
         AdvPlasma,
         AdvParticle,
 
+        Reactor,
+
         TypeCount
     }
 

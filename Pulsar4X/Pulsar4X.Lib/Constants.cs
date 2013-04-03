@@ -977,7 +977,16 @@ namespace Pulsar4X
         /// </summary>
         public static class BeamWeaponTN
         {
+            /// <summary>
+            /// Capacitor power per tech level
+            /// </summary>
             public static byte[] Capacitor = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 25 };
+
+            /// <summary>
+            /// Reactor Base Power Generation.
+            /// </summary>
+            public static float[] Power = { 2.0f, 3.0f, 4.5f, 6.0f, 8.0f, 10.0f, 12.0f, 16.0f, 20.0f, 24.0f, 32.0f, 40.0f };
+
             /// <summary>
             /// Point blank damage value for each calibre of railgun.
             /// </summary>
