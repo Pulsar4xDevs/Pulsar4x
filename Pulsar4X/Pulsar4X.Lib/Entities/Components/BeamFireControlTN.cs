@@ -9,6 +9,20 @@ using System.ComponentModel;
 
 namespace Pulsar4X.Entities.Components
 {
+    public enum PointDefenseState
+    {
+        None,
+        AreaDefense,
+        FinalDefensiveFire,
+        FinalDefensiveFireSelf,
+        AMM1v2,
+        AMM1v1,
+        AMM2v1,
+        AMM3v1,
+        AMM4v1,
+        AMM5v1,
+        TypeCount
+    }
     public class BeamFireControlDefTN : ComponentDefTN
     {
         /// <summary>
@@ -227,13 +241,185 @@ namespace Pulsar4X.Entities.Components
             set { LinkedWeapons = value; }
         }
 
+        /// <summary>
+        /// Target Assigned to this BFC
+        /// </summary>
+        private ShipTN Target;
+        public ShipTN target
+        {
+            get { return Target; }
+            set { Target = value; }
+        }
 
+        /// <summary>
+        /// Whether this FC is authorized to fire on its target.
+        /// </summary>
+        private bool OpenFire;
+        public bool openFire
+        {
+            get { return OpenFire; }
+            set { OpenFire = value; }
+        }
+
+        /// <summary>
+        /// Point defense state this BFC will fire to.
+        /// </summary>
+        private PointDefenseState PDState;
+        public PointDefenseState pDState
+        {
+            get { return PDState; }
+        }
+
+        /// <summary>
+        /// Constructor for BFC components.
+        /// </summary>
+        /// <param name="definition">Definition of this component</param>
         public BeamFireControlTN(BeamFireControlDefTN definition)
         {
             BeamFireControlDef = definition;
             isDestroyed = false;
 
             LinkedWeapons = new BindingList<BeamTN>();
+            
+            Target = null;
+            OpenFire = false;
+            PDState = PointDefenseState.None;
+        }
+
+        /// <summary>
+        /// Set the fire control to the desired point defense state.
+        /// </summary>
+        /// <param name="State">State the BFC is to be set to.</param>
+        public void SetPointDefenseMode(PointDefenseState State)
+        {
+            if (State <= PointDefenseState.FinalDefensiveFireSelf)
+                PDState = State;
+            else
+            {
+                /// <summary>
+                /// Bad PDState for BFCs.
+                /// </summary>
+            }
+        }
+
+        /// <summary>
+        /// The Fire control itself must determine if the target is in range of both itself and its weapons.
+        /// </summary>
+        /// <param name="Target">Ship to be targeted.</param>
+        /// <param name="DistanceToTarget">Distance in KM to target.</param>
+        /// <param name="RNG">RNG passed to this function from source further up the chain.</param>
+        /// <returns>Whether or not a weapon was able to fire.</returns>
+        public bool FireWeapons(ShipTN Target,float DistanceToTarget, Random RNG)
+        {
+            if (DistanceToTarget > BeamFireControlDef.range)
+            {
+                return false;
+            }
+            else
+            {
+                /// <summary>
+                /// Range * 2 / 10000.0;
+                /// </summary>
+
+                int RangeIncrement = (int)Math.Floor(DistanceToTarget / 5000.0f);
+                float FireAccuracy = BeamFireControlDef.rangeAccuracyTable[RangeIncrement];
+
+                /// <summary>
+                /// 100% accuracy at this speed.
+                /// </summary>
+                if (Target.CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[99])
+                {
+                    if (Target.CurrentSpeed >= BeamFireControlDef.trackingAccuracyTable[0])
+                    {
+                        FireAccuracy = FireAccuracy * 0.01f;
+                    }
+                    else
+                    {
+                        bool done = false;
+                        int Base = 50;
+                        int Cur = 50;
+                        /// <summary>
+                        /// Binary search through the tracking accuracy table.
+                        /// </summary>
+                        
+                        while (!done)
+                        {
+                            Cur = Cur / 2;
+                            if (Target.CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[Base])
+                            {
+                                if (Cur == 1)
+                                {
+                                    float t1 = Target.CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base];
+                                    float t2 = Target.CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base - 1];
+                                    if (t1 <= t2)
+                                    {
+                                        FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
+                                        done = true;
+                                    }
+                                    else
+                                    {
+                                        FireAccuracy = FireAccuracy * ((float)(Base - 1) / 100.0f);
+                                        done = true;
+                                    }
+                                }
+                                Base = Base - Cur;
+                            }
+                            else if (Target.CurrentSpeed < BeamFireControlDef.trackingAccuracyTable[Base])
+                            {
+                                if (Cur == 1)
+                                {
+                                    float t1 = BeamFireControlDef.trackingAccuracyTable[Base] - Target.CurrentSpeed;
+                                    float t2 = BeamFireControlDef.trackingAccuracyTable[Base + 1] - Target.CurrentSpeed;
+                                    if (t1 <= t2)
+                                    {
+                                        FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
+                                        done = true;
+                                    }
+                                    else
+                                    {
+                                        FireAccuracy = FireAccuracy * ((float)(Base + 1) / 100.0f);
+                                        done = true;
+                                    }
+                                }
+                                Base = Base + Cur;
+                            }
+                            else
+                            {
+                                FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
+                                done = true;
+                            }
+                        }
+                    }
+                }
+                
+                /// <summary>
+                /// Fire Accuracy is the likelyhood of a shot hitting from this FC at this point.
+                /// ECM vs ECCM needs to be done around here as well.
+                /// </summary>
+                bool weaponFired = false;
+
+                int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
+                ushort Columns = Target.ShipArmor.armorDef.cNum;
+                for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+                {
+                    if (LinkedWeapons[loop].beamDef.range > DistanceToTarget)
+                    {
+                        RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                        int Hit = RNG.Next(1, 100);
+
+                        if(toHit >= Hit)
+                        {
+                            ushort location = (ushort)RNG.Next(0,Columns);
+                            Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);
+                        }
+
+                        weaponFired = true;
+                    }
+                }
+
+                return weaponFired;
+            }       
         }
     }
 }

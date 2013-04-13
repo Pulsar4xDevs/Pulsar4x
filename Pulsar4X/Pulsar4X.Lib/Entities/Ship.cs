@@ -1270,6 +1270,68 @@ namespace Pulsar4X.Entities
             }
             BFC.linkedWeapons.Clear();
         }
+
+        /// <summary>
+        /// Rechargest energyweapons to currentPowerGeneration of the ship.
+        /// </summary>
+        public void RechargeBeamWeapons()
+        {
+            if (CurrentPowerGen > ShipClass.TotalPowerRequirement)
+            {
+                for (int loop = 0; loop < ShipBeam.Count; loop++)
+                {
+                    if (ShipBeam[loop].currentCapacitor + ShipBeam[loop].beamDef.weaponCapacitor > ShipBeam[loop].beamDef.powerRequirement)
+                    {
+                        ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
+                    }
+                    else
+                    {
+                        ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)ShipBeam[loop].beamDef.weaponCapacitor);
+                    }
+                }
+            }
+            else
+            {
+                int AvailablePower = CurrentPowerGen;
+
+                for (int loop = 0; loop < ShipBeam.Count; loop++)
+                {
+                    int WeaponPowerRequirement = ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
+
+                    if (AvailablePower > ShipBeam[loop].beamDef.weaponCapacitor)
+                    {
+                        if (ShipBeam[loop].currentCapacitor + ShipBeam[loop].beamDef.weaponCapacitor > ShipBeam[loop].beamDef.powerRequirement)
+                        {
+                            AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
+                            ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
+                        }
+                        else
+                        {
+                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)ShipBeam[loop].beamDef.weaponCapacitor);
+                            AvailablePower = AvailablePower - ShipBeam[loop].beamDef.weaponCapacitor;
+                        }
+                    }
+                    else
+                    {
+                        if (ShipBeam[loop].currentCapacitor + AvailablePower > ShipBeam[loop].beamDef.powerRequirement)
+                        {
+                            AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
+                            ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
+                        }
+                        else
+                        {
+                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)AvailablePower);
+                            AvailablePower = 0;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ShipFireWeapons()
+        {
+
+        }
     }
     /// <summary>
     /// End of ShipTN class

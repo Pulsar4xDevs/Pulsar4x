@@ -871,14 +871,14 @@ namespace Pulsar4X.Entities
         /// <param name="TimeSlice">How much time the taskgroup is alloted to perform its orders. unit is in seconds</param>
         public void FollowOrders(uint TimeSlice)
         {
-            if (NewOrders == true)
-            {
-                GetHeading();
-                GetSpeed();
+            //if (NewOrders == true)
+            //{
+            GetHeading();
+            GetSpeed();
 
-                GetTimeRequirement();
-                NewOrders = false;
-            }
+            GetTimeRequirement();
+                //NewOrders = false;
+            //}
             if (TimeRequirement < TimeSlice)
             {
                 /// <summary>

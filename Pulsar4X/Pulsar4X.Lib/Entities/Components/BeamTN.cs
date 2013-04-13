@@ -45,7 +45,7 @@ namespace Pulsar4X.Entities.Components
         /// Every beam weapon excepting gauss cannons will have a capacitor. this is the strength value, not the tech value
         /// </summary>
         private byte WeaponCapacitor;
-        public byte weaponcapacitor
+        public byte weaponCapacitor
         {
             get { return WeaponCapacitor; }
             set { WeaponCapacitor = value; }
@@ -109,6 +109,15 @@ namespace Pulsar4X.Entities.Components
         {
             get { return BaseAccuracy; }
             set { BaseAccuracy = value; }
+        }
+
+        /// <summary>
+        /// Type of damage this beam weapon does.
+        /// </summary>
+        private DamageTypeTN DamageType;
+        public DamageTypeTN damageType
+        {
+            get { return DamageType; }
         }
 
 
@@ -180,6 +189,8 @@ namespace Pulsar4X.Entities.Components
                     /// 
                     RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
+
+                    DamageType = DamageTypeTN.Beam;
                 break;
 
                 case ComponentTypeTN.AdvLaser :
@@ -194,6 +205,8 @@ namespace Pulsar4X.Entities.Components
 
                     RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
+
+                    DamageType = DamageTypeTN.Beam;
                 break;
 
                 /// <summary>
@@ -229,6 +242,8 @@ namespace Pulsar4X.Entities.Components
                     /// 
                     RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
+
+                    DamageType = DamageTypeTN.Plasma;
                 break;
 
                 case ComponentTypeTN.AdvPlasma :
@@ -239,6 +254,8 @@ namespace Pulsar4X.Entities.Components
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
                     RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
+
+                    DamageType = DamageTypeTN.Plasma;
                 break;
                 
                 /// <summary>
@@ -254,7 +271,9 @@ namespace Pulsar4X.Entities.Components
                     Damage.Add((ushort)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech]);
                     PowerRequirement = (ushort)(Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 3);
                     RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech];
-                    CalcDamageTable(RangeIncrement); 
+                    CalcDamageTable(RangeIncrement);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
 
                 /// <summary>
@@ -268,7 +287,9 @@ namespace Pulsar4X.Entities.Components
                     Damage.Add((ushort)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech]);
                     PowerRequirement = (ushort)(Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 3);
                     RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech];
-                    CalcDamageTable(RangeIncrement); 
+                    CalcDamageTable(RangeIncrement);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
 
                 /// <summary>
@@ -287,6 +308,8 @@ namespace Pulsar4X.Entities.Components
                         Damage.Add(1);
                     }
                     Damage.Add(0);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
 
                 /// <summary>
@@ -307,6 +330,8 @@ namespace Pulsar4X.Entities.Components
                         Damage.Add(1);
                     }
                     Damage.Add(0);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
 
                 /// <summary>
@@ -326,6 +351,8 @@ namespace Pulsar4X.Entities.Components
                         Damage.Add(Constants.BeamWeaponTN.ParticleDamage[WeaponSizeTech]);
                     }
                     Damage.Add(0);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
 
                 /// <summary>
@@ -344,6 +371,8 @@ namespace Pulsar4X.Entities.Components
                         Damage.Add(Constants.BeamWeaponTN.AdvancedParticleDamage[WeaponSizeTech]);
                     }
                     Damage.Add(0);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
 
                 /// <summary>
@@ -363,6 +392,8 @@ namespace Pulsar4X.Entities.Components
                         Damage.Add(1);
                     }
                     Damage.Add(0);
+
+                    DamageType = DamageTypeTN.Kinetic;
                 break;
             }
 
