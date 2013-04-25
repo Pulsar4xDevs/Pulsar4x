@@ -1328,9 +1328,43 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public void ShipFireWeapons()
+        /// <summary>
+        /// This function iterates through every beam fire control(and later mfcs will be added), and orders them to attempt to fire.
+        /// Sensor detection should be run before this every tick, or else we don't know if we can target a particular ship.
+        /// </summary>
+        /// <param name="CurrentTick">Tick the ship is ordered to fire.</param>
+        /// <param name="RNG">RNG passed from further up the food chain since I can't generate random results except by having a "global" rng.</param>
+        public void ShipFireWeapons(int CurrentTick,Random RNG)
         {
+            for (int loop = 0; loop < ShipBFC.Count; loop++)
+            {
+                if (ShipBFC[loop].openFire == true)
+                {
+                    /// <summary>
+                    /// Sanity Check. Make sure both are in the same system before checking distance.
+                    /// </summary>
+                    if (ShipsTaskGroup.Contact.CurrentSystem == ShipBFC[loop].target.ShipsTaskGroup.Contact.CurrentSystem)
+                    {
+                        /// <summary>
+                        /// This should all be precalculated by the sensor distance checker
+                        /// </summary>
+                        int targetID = ShipBFC[loop].target.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(ShipBFC[loop].target.ShipsTaskGroup.Contact);
 
+                        if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                        {
+                            /// <summary>
+                            /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
+                            /// </summary>
+                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick?", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                            return;
+                        }
+
+                        float distance = ShipsTaskGroup.Contact.DistanceTable[targetID];
+
+                        ShipBFC[loop].FireWeapons(distance, RNG);
+                    }
+                }
+            }
         }
     }
     /// <summary>

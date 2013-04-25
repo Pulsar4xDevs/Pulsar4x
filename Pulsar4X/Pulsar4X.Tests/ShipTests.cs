@@ -1247,5 +1247,103 @@ namespace Pulsar4X.Tests
     PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxFuelUsePerHour, PlayerFaction1.TaskGroups[0].Ships[0].CurrentMaxSpeed, PlayerFaction1.TaskGroups[0].Ships[0].CurrentSpeed,
     PlayerFaction1.TaskGroups[0].Ships[0].ShipEngine[2].isDestroyed);
         }
+
+
+
+        [Test]
+        public void SimulationTest()
+        {
+            DamageValuesTN.init();
+            Random RNG = new Random();
+
+            Faction P1 = new Faction(0);
+            Faction P2 = new Faction(1);
+
+            StarSystem Sol = new StarSystem();
+
+            P1.AddNewContactList(Sol);
+            P2.AddNewContactList(Sol);
+
+            P1.AddNewShipDesign("Tribal");
+            P2.AddNewShipDesign("Blucher");
+
+            P1.ShipDesigns[0].AddEngine(P1.ComponentList.Engines[0], 1);
+            P1.ShipDesigns[0].AddCrewQuarters(P1.ComponentList.CrewQuarters[0], 1);
+            P1.ShipDesigns[0].AddFuelStorage(P1.ComponentList.FuelStorage[0], 1);
+            P1.ShipDesigns[0].AddEngineeringSpaces(P1.ComponentList.EngineeringSpaces[0], 1);
+            P1.ShipDesigns[0].AddOtherComponent(P1.ComponentList.OtherComponents[0], 1);
+            P1.ShipDesigns[0].AddActiveSensor(P1.ComponentList.ActiveSensorDef[0], 1);
+            P1.ShipDesigns[0].AddBeamFireControl(P1.ComponentList.BeamFireControlDef[0], 1);
+            P1.ShipDesigns[0].AddBeamWeapon(P1.ComponentList.BeamWeaponDef[0], 1);
+            P1.ShipDesigns[0].AddReactor(P1.ComponentList.ReactorDef[0], 1);
+            P1.ShipDesigns[0].NewArmor("Duranium", 5, 5);
+
+            P2.ShipDesigns[0].AddEngine(P2.ComponentList.Engines[0], 1);
+            P2.ShipDesigns[0].AddCrewQuarters(P2.ComponentList.CrewQuarters[0], 1);
+            P2.ShipDesigns[0].AddFuelStorage(P2.ComponentList.FuelStorage[0], 1);
+            P2.ShipDesigns[0].AddEngineeringSpaces(P2.ComponentList.EngineeringSpaces[0], 1);
+            P2.ShipDesigns[0].AddOtherComponent(P2.ComponentList.OtherComponents[0], 1);
+            P2.ShipDesigns[0].AddActiveSensor(P2.ComponentList.ActiveSensorDef[0], 1);
+            P2.ShipDesigns[0].AddBeamFireControl(P2.ComponentList.BeamFireControlDef[0], 1);
+            P2.ShipDesigns[0].AddBeamWeapon(P2.ComponentList.BeamWeaponDef[0], 1);
+            P2.ShipDesigns[0].AddReactor(P2.ComponentList.ReactorDef[0], 1);
+            P2.ShipDesigns[0].NewArmor("Duranium", 5, 5);
+
+            Waypoint P1S = new Waypoint(Sol, 0.0, 0.0);
+            Waypoint P2S = new Waypoint(Sol, 0.1, 0.1);
+
+            Sol.Waypoints.Add(P1S);
+            Sol.Waypoints.Add(P2S);
+
+            P1.AddNewTaskGroup("P1 TG 01", Sol.Waypoints[0], Sol);
+            P1.TaskGroups[0].AddShip(P1.ShipDesigns[0], 0);
+            P1.TaskGroups[0].Ships[0].Refuel(200000.0f);
+            P1.TaskGroups[0].SetActiveSensor(0, 0, true);
+
+            P2.AddNewTaskGroup("P2 TG 01", Sol.Waypoints[1], Sol);
+            P2.TaskGroups[0].AddShip(P2.ShipDesigns[0], 0);
+            P2.TaskGroups[0].Ships[0].Refuel(200000.0f);
+            P2.TaskGroups[0].SetActiveSensor(0, 0, true);
+
+
+            bool done = false;
+            int tick = 0;
+
+            Orders Move1 = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, P2.TaskGroups[0]);
+            Orders Move2 = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, P1.TaskGroups[0]);
+
+            P1.TaskGroups[0].IssueOrder(Move1);
+            P2.TaskGroups[0].IssueOrder(Move2);
+
+
+            while (!done)
+            {
+                /// <summary>
+                /// Do sensor loop.
+                /// Follow orders.
+                /// Attempt to fire.
+                /// If one ship is destroyed exit loop.
+                /// </summary>
+
+                P1.SensorSweep(tick);
+                P2.SensorSweep(tick);
+
+                P1.TaskGroups[0].FollowOrders((uint)tick);
+                P2.TaskGroups[0].FollowOrders((uint)tick);
+
+
+
+                tick += 5;
+
+                Console.Write("{0} ", tick);
+
+                if (P1.TaskGroups[0].TaskGroupOrders.Count == 0)
+                    break;
+            }
+
+
+
+
+        }
     }
 }

@@ -436,7 +436,18 @@ namespace Pulsar4X.Entities
                                     ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.First();
                                     scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                     sig = scratch.CurrentThermalSignature;
-                                    detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                    /// <summary>
+                                    /// Check to make sure the taskgroup has a thermal sensor available, otherwise use the default.
+                                    /// </summary>
+                                    if (TaskGroups[loop].BestThermalCount != 0)
+                                    {
+                                        detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                    }
+                                    else
+                                    {
+                                        detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                    }
 
                                     /// <summary>
                                     /// Best case, everything is detected.
@@ -470,7 +481,14 @@ namespace Pulsar4X.Entities
                                                 if (scratch.ThermalDetection[FactionID] != YearTickValue)
                                                 {
                                                     sig = scratch.CurrentThermalSignature;
-                                                    detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                                    if (TaskGroups[loop].BestThermalCount != 0)
+                                                    {
+                                                        detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                                    }
+                                                    else
+                                                    {
+                                                        detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                                    }
 
                                                     if (dist <= (float)detection)
                                                     {
@@ -537,7 +555,18 @@ namespace Pulsar4X.Entities
                                     ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.First();
                                     scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                     sig = scratch.CurrentEMSignature;
-                                    detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+
+                                    /// <summary>
+                                    /// once again we must check here to make sure that the taskgroup does have a passive suite, or else use the default one.
+                                    /// </summary>
+                                    if (TaskGroups[loop].BestEMCount > 0)
+                                    {
+                                        detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                    }
+                                    else
+                                    {
+                                        detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                    }
 
                                     /// <summary>
                                     /// Best case, everything is detected.
@@ -592,7 +621,14 @@ namespace Pulsar4X.Entities
                                                         break;
                                                     }
 
-                                                    detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                                    if (TaskGroups[loop].BestEMCount > 0)
+                                                    {
+                                                        detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                                    }
+                                                    else
+                                                    {
+                                                        detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
+                                                    }
 
                                                     if (dist <= (float)detection)
                                                     {

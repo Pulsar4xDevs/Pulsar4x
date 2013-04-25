@@ -303,13 +303,29 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Simple assignment of a ship as a target to this bfc.
+        /// </summary>
+        /// <param name="ShipTarget">Ship to be targeted.</param>
+        public void assignTarget(ShipTN ShipTarget)
+        {
+            Target = ShipTarget;
+        }
+
+        /// <summary>
+        /// Simple return of the target of this BFC.
+        /// </summary>
+        public ShipTN getTarget()
+        {
+            return Target;
+        }
+
+        /// <summary>
         /// The Fire control itself must determine if the target is in range of both itself and its weapons.
         /// </summary>
-        /// <param name="Target">Ship to be targeted.</param>
         /// <param name="DistanceToTarget">Distance in KM to target.</param>
         /// <param name="RNG">RNG passed to this function from source further up the chain.</param>
         /// <returns>Whether or not a weapon was able to fire.</returns>
-        public bool FireWeapons(ShipTN Target,float DistanceToTarget, Random RNG)
+        public bool FireWeapons(float DistanceToTarget, Random RNG)
         {
             if (DistanceToTarget > BeamFireControlDef.range)
             {
