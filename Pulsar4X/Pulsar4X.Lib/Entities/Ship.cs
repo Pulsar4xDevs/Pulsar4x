@@ -267,6 +267,12 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// If this ship has been destroyed. this will need more sophisticated handling.
+        /// </summary>
+        public bool IsDestroyed { get; set; }
+
+
+        /// <summary>
         /// ShipTN creates a ship of classDefinition in Index ShipIndex for the taskgroup ship list.
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
@@ -553,6 +559,7 @@ namespace Pulsar4X.Entities
                 }
             }
             CurrentPowerGen = ClassDefinition.TotalPowerGeneration;
+            IsDestroyed = false;
 
         }
 
@@ -691,6 +698,7 @@ namespace Pulsar4X.Entities
             return CurrentSpeed;
         }
 
+        #region Weapons and Damage Lines 694 to 1374
         /// <summary>
         /// Damage goes through a 3 part process, 1st shields subtract damage, then armor blocks damage, then internals take the hits.
         /// if 20 rolls happen without an internal in the list being targeted then call OnDestroyed(); Mesons skip to the internal damage section.
@@ -699,7 +707,8 @@ namespace Pulsar4X.Entities
         /// <param name="Type">Type of damage, for armor penetration.</param>
         /// <param name="Value">How much damage is being done.</param>
         /// <param name="HitLocation">Where Armor damage is inflicted. Temporary argument for the time being. remove these when rngs are resolved.</param>
-        public void OnDamaged(DamageTypeTN Type, ushort Value, ushort HitLocation)
+        /// <returns>Whether or not the ship was destroyed as a result of this action.</returns>
+        public bool OnDamaged(DamageTypeTN Type, ushort Value, ushort HitLocation)
         {
             ushort Damage = Value;
             ushort internalDamage = 0;
@@ -756,10 +765,17 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
                 /// </summary>
-                if(ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
-                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
-                if(ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
-                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
+                if (Table.hitPoint - loop >= 0)
+                {
+                    if (ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
+                        internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
+                }
+
+                if (Table.hitPoint + loop < Table.damageTemplate.Count)
+                {
+                    if (ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
+                        internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
+                }
 
                 left--;
                 right++;
@@ -840,8 +856,11 @@ namespace Pulsar4X.Entities
 
             if (Attempts == 20)
             {
-                OnDestroyed();
+                IsDestroyed = true;
+                return true;
             }
+
+            return false;
         }
 
         /// <summary>
@@ -1212,19 +1231,10 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Handle the consequences of a ship destruction.
-        /// Class, Taskgroup, and the new wreck all need to be dealt with.
+        /// Handle the consequences of a ship destruction in game mechanics. C# loses its cookies if I try to actually delete anything here.
         /// </summary>
         public void OnDestroyed()
         {
-            ShipClass.ShipsInClass.Remove(this);
-            ShipsTaskGroup.Ships.Remove(this);
-
-            if (ShipsTaskGroup.Ships.Count == 0)
-            {
-                Faction.TaskGroups.Remove(ShipsTaskGroup);
-            }
-
             /// <summary>
             /// A new wreck needs to be created with the surviving components, if any, and some fraction of the cost of the ship.
             /// </summary>
@@ -1366,6 +1376,8 @@ namespace Pulsar4X.Entities
                 }
             }
         }
+
+        #endregion
     }
     /// <summary>
     /// End of ShipTN class

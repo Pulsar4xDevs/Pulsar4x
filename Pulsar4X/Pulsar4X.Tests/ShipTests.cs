@@ -1253,9 +1253,15 @@ namespace Pulsar4X.Tests
         [Test]
         public void SimulationTest()
         {
+            /// <summary>
+            /// initialize damage and rng here:
+            /// </summary>
             DamageValuesTN.init();
             Random RNG = new Random();
 
+            /// <summary>
+            /// create the game universe here:
+            /// </summary>
             Faction P1 = new Faction(0);
             Faction P2 = new Faction(1);
 
@@ -1264,10 +1270,14 @@ namespace Pulsar4X.Tests
             P1.AddNewContactList(Sol);
             P2.AddNewContactList(Sol);
 
+
+            /// <summary>
+            /// Create the ship designs for each side:
+            /// </summary>
             P1.AddNewShipDesign("Tribal");
             P2.AddNewShipDesign("Blucher");
 
-            P1.ShipDesigns[0].AddEngine(P1.ComponentList.Engines[0], 1);
+            P1.ShipDesigns[0].AddEngine(P1.ComponentList.Engines[0], 2);
             P1.ShipDesigns[0].AddCrewQuarters(P1.ComponentList.CrewQuarters[0], 1);
             P1.ShipDesigns[0].AddFuelStorage(P1.ComponentList.FuelStorage[0], 1);
             P1.ShipDesigns[0].AddEngineeringSpaces(P1.ComponentList.EngineeringSpaces[0], 1);
@@ -1278,7 +1288,7 @@ namespace Pulsar4X.Tests
             P1.ShipDesigns[0].AddReactor(P1.ComponentList.ReactorDef[0], 1);
             P1.ShipDesigns[0].NewArmor("Duranium", 5, 5);
 
-            P2.ShipDesigns[0].AddEngine(P2.ComponentList.Engines[0], 1);
+            P2.ShipDesigns[0].AddEngine(P2.ComponentList.Engines[0], 2);
             P2.ShipDesigns[0].AddCrewQuarters(P2.ComponentList.CrewQuarters[0], 1);
             P2.ShipDesigns[0].AddFuelStorage(P2.ComponentList.FuelStorage[0], 1);
             P2.ShipDesigns[0].AddEngineeringSpaces(P2.ComponentList.EngineeringSpaces[0], 1);
@@ -1307,20 +1317,43 @@ namespace Pulsar4X.Tests
 
 
             bool done = false;
-            int tick = 0;
+            int tick = 5;
 
+            /// <summary>
+            /// Set movement and firing orders here:
+            /// </summary>
             Orders Move1 = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, P2.TaskGroups[0]);
             Orders Move2 = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, P1.TaskGroups[0]);
 
             P1.TaskGroups[0].IssueOrder(Move1);
             P2.TaskGroups[0].IssueOrder(Move2);
 
+            int p1Contact = Sol.SystemContactList.IndexOf(P1.TaskGroups[0].Contact);
+            int p2Contact = Sol.SystemContactList.IndexOf(P2.TaskGroups[0].Contact);
 
+
+            P1.TaskGroups[0].Ships[0].LinkWeaponToBeamFC(P1.TaskGroups[0].Ships[0].ShipBFC[0], P1.TaskGroups[0].Ships[0].ShipBeam[0]);
+            P2.TaskGroups[0].Ships[0].LinkWeaponToBeamFC(P2.TaskGroups[0].Ships[0].ShipBFC[0], P2.TaskGroups[0].Ships[0].ShipBeam[0]);
+
+            P1.TaskGroups[0].Ships[0].ShipBFC[0].assignTarget(P2.TaskGroups[0].Ships[0]);
+            P2.TaskGroups[0].Ships[0].ShipBFC[0].assignTarget(P1.TaskGroups[0].Ships[0]);
+
+            P1.TaskGroups[0].Ships[0].ShipBFC[0].openFire = true;
+            P2.TaskGroups[0].Ships[0].ShipBFC[0].openFire = true;
+
+            /// <summary>
+            /// Run the simulation:
+            /// </summary>
             while (!done)
             {
+
+                Console.Write("Tick {0} ", tick);
+
                 /// <summary>
                 /// Do sensor loop.
                 /// Follow orders.
+                /// I need to be able to know what targets are available. In system? per taskgroup?
+                /// Dictionary in faction of system, and binding list of contacts?
                 /// Attempt to fire.
                 /// If one ship is destroyed exit loop.
                 /// </summary>
@@ -1328,20 +1361,111 @@ namespace Pulsar4X.Tests
                 P1.SensorSweep(tick);
                 P2.SensorSweep(tick);
 
-                P1.TaskGroups[0].FollowOrders((uint)tick);
-                P2.TaskGroups[0].FollowOrders((uint)tick);
+                if(P1.TaskGroups[0].TaskGroupOrders.Count != 0)
+                    P1.TaskGroups[0].FollowOrders((uint)tick);
+                if (P2.TaskGroups[0].TaskGroupOrders.Count != 0)
+                    P2.TaskGroups[0].FollowOrders((uint)tick);
 
+                /// <summary>
+                /// Player 1 detects player 2
+                /// </summary>
+                if (Sol.FactionDetectionLists[P1.FactionID].Active[p2Contact] == tick)
+                {
+                    Console.WriteLine("Attempting to fire here:");
+                    P1.TaskGroups[0].Ships[0].ShipFireWeapons(tick, RNG);
+                }
 
+                if (P2.TaskGroups[0].Ships[0].IsDestroyed == true)
+                    break;
+
+                /// <summary>
+                /// Player 2 detects player 1
+                /// </summary>
+                if (Sol.FactionDetectionLists[P2.FactionID].Active[p1Contact] == tick)
+                {
+                    Console.WriteLine("Attempting to fire here 2:");
+                    P2.TaskGroups[0].Ships[0].ShipFireWeapons(tick, RNG);
+                }
+
+                if (P1.TaskGroups[0].Ships[0].IsDestroyed == true)
+                    break;
+
+                P1.TaskGroups[0].Ships[0].RechargeBeamWeapons();
+                P2.TaskGroups[0].Ships[0].RechargeBeamWeapons();
 
                 tick += 5;
 
-                Console.Write("{0} ", tick);
+                if (P1.TaskGroups[0].Ships[0].ShipArmor.isDamaged == true)
+                {
+                    for (int loop = 0; loop < P1.TaskGroups[0].Ships[0].ShipArmor.armorColumns.Count; loop++)
+                        Console.Write("{0} ", P1.TaskGroups[0].Ships[0].ShipArmor.armorColumns[loop]);
 
-                if (P1.TaskGroups[0].TaskGroupOrders.Count == 0)
-                    break;
+                    Console.WriteLine("P1DC {0}", P1.TaskGroups[0].Ships[0].DestroyedComponents.Count);
+                }
+
+
+
+                if (P2.TaskGroups[0].Ships[0].ShipArmor.isDamaged == true)
+                {
+                    for (int loop = 0; loop < P2.TaskGroups[0].Ships[0].ShipArmor.armorColumns.Count; loop++)
+                        Console.Write("{0} ", P2.TaskGroups[0].Ships[0].ShipArmor.armorColumns[loop]);
+
+                    Console.WriteLine("P2DC {0}", P2.TaskGroups[0].Ships[0].DestroyedComponents.Count);
+                }
+            }
+
+            if (P1.TaskGroups[0].Ships[0].ShipArmor.isDamaged == true)
+            {
+                for (int loop = 0; loop < P1.TaskGroups[0].Ships[0].ShipArmor.armorColumns.Count; loop++)
+                    Console.Write("{0} ", P1.TaskGroups[0].Ships[0].ShipArmor.armorColumns[loop]);
+
+                Console.WriteLine("P1DC {0} | IsDestroyed:{1}", P1.TaskGroups[0].Ships[0].DestroyedComponents.Count, P1.TaskGroups[0].Ships[0].IsDestroyed);
+            }
+
+            if (P1.TaskGroups[0].Ships[0].IsDestroyed == true)
+            {
+                P1.TaskGroups[0].Ships[0].OnDestroyed();
+                P1.TaskGroups[0].Ships[0].ShipClass.ShipsInClass.Remove(P1.TaskGroups[0].Ships[0]);
+                P1.TaskGroups[0].Ships[0].ShipsTaskGroup.Ships.Remove(P1.TaskGroups[0].Ships[0]);
+
+                if (P1.TaskGroups[0].Ships.Count == 0)
+                {
+                    P1.TaskGroups[0].Contact.CurrentSystem.RemoveContact(P1.TaskGroups[0].Contact);
+                    P1.TaskGroups.Remove(P1.TaskGroups[0]);
+                    return;
+                }
             }
 
 
+
+            if (P2.TaskGroups[0].Ships[0].ShipArmor.isDamaged == true)
+            {
+                for (int loop = 0; loop < P2.TaskGroups[0].Ships[0].ShipArmor.armorColumns.Count; loop++)
+                    Console.Write("{0} ", P2.TaskGroups[0].Ships[0].ShipArmor.armorColumns[loop]);
+
+                Console.WriteLine("P2DC {0} | IsDestroyed:{1}", P2.TaskGroups[0].Ships[0].DestroyedComponents.Count, P2.TaskGroups[0].Ships[0].IsDestroyed);
+            }
+
+            if (P2.TaskGroups[0].Ships[0].IsDestroyed == true)
+            {
+                P2.TaskGroups[0].Ships[0].OnDestroyed();
+                P2.TaskGroups[0].Ships[0].ShipClass.ShipsInClass.Remove(P2.TaskGroups[0].Ships[0]);
+                P2.TaskGroups[0].Ships[0].ShipsTaskGroup.Ships.Remove(P2.TaskGroups[0].Ships[0]);
+
+                if (P2.TaskGroups[0].Ships.Count == 0)
+                {
+                    P2.TaskGroups[0].Contact.CurrentSystem.RemoveContact(P2.TaskGroups[0].Contact);
+                    P2.TaskGroups.Remove(P2.TaskGroups[0]);
+                    return;
+                }
+            }
+
+            /// <summary>
+            /// Issues thus far:
+            /// Contacts are done on a by taskgroup basis, this must be changed to by ship basis.
+            /// There is no list of purely enemy contacts, preferably sorted by distance available to any faction. make that.
+            /// Ship Destruction, destroying objects in the middle of using them is bad.
+            /// </summary>
 
 
         }

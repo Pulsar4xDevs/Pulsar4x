@@ -122,7 +122,7 @@ namespace Pulsar4X.Entities.Components
         private BindingList<float> TrackingAccuracyTable;
         public BindingList<float> trackingAccuracyTable
         {
-            get { return trackingAccuracyTable; }
+            get { return TrackingAccuracyTable; }
         }
 
 
@@ -205,7 +205,9 @@ namespace Pulsar4X.Entities.Components
 
             for (int loop = 0; loop < 100; loop++)
             {
-                float Accuracy = Tracking / (float)(((float)loop+1.0f)/100.0f);
+
+                float Factor = (float)((float)loop+1.0f) /100.0f;
+                float Accuracy = Tracking / Factor;
                 TrackingAccuracyTable.Add(Accuracy);
             }
 
@@ -327,7 +329,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Whether or not a weapon was able to fire.</returns>
         public bool FireWeapons(float DistanceToTarget, Random RNG)
         {
-            if (DistanceToTarget > BeamFireControlDef.range)
+            if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0)
             {
                 return false;
             }
@@ -339,9 +341,8 @@ namespace Pulsar4X.Entities.Components
 
                 int RangeIncrement = (int)Math.Floor(DistanceToTarget / 5000.0f);
                 float FireAccuracy = BeamFireControlDef.rangeAccuracyTable[RangeIncrement];
-
                 /// <summary>
-                /// 100% accuracy at this speed.
+                /// 100% accuracy due to tracking at this speed.
                 /// </summary>
                 if (Target.CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[99])
                 {
@@ -416,21 +417,30 @@ namespace Pulsar4X.Entities.Components
 
                 int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
                 ushort Columns = Target.ShipArmor.armorDef.cNum;
+
                 for (int loop = 0; loop < LinkedWeapons.Count; loop++)
                 {
-                    if (LinkedWeapons[loop].beamDef.range > DistanceToTarget)
+                    if (LinkedWeapons[loop].beamDef.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
                     {
                         RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
                         int Hit = RNG.Next(1, 100);
 
+                        LinkedWeapons[loop].Fire();
+                        weaponFired = true;
+
                         if(toHit >= Hit)
                         {
                             ushort location = (ushort)RNG.Next(0,Columns);
-                            Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);
-                        }
+                            bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);
 
-                        weaponFired = true;
+                            if (ShipDest == true)
+                            {
+                                Target = null;
+                                OpenFire = false;
+                                return weaponFired;
+                            }
+                        }
                     }
                 }
 

@@ -486,7 +486,7 @@ namespace Pulsar4X.Entities.Components
         {
             get { return CurrentCapacitor; }
             set { CurrentCapacitor = value; }
-        }
+        }   
 
         /// <summary>
         /// Constructor for beam weapons. FireController is null for the time being as no BFC is assigned by default, and CurrentCapacitor is set to filled and ready to fire.
@@ -501,6 +501,34 @@ namespace Pulsar4X.Entities.Components
             CurrentCapacitor = BeamDef.powerRequirement;
 
             isDestroyed = false;
+        }
+
+        /// <summary>
+        /// ReadyToFire determines if the beam weapon has the ability to fire. Gauss may always fire, everything else needs to have capacitor charge equal to their power requirement.
+        /// </summary>
+        /// <returns>Whether the weapon can fire or not(true or false)</returns>
+        public bool readyToFire()
+        {
+            if (BeamDef.componentType == ComponentTypeTN.Gauss)
+            {
+                return true;
+            }
+            else if (CurrentCapacitor == BeamDef.powerRequirement)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// When this beamweapon is fired the capacitor is discharged completely.
+        /// </summary>
+        public void Fire()
+        {
+            CurrentCapacitor = 0;
         }
     }
 }
