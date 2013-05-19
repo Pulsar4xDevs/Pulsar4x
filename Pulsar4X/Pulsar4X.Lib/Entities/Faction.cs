@@ -9,6 +9,129 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
+    public class FactionContact
+    {
+        /// <summary>
+        /// The detected ship.
+        /// </summary>
+        public ShipTN Ship{ get; set; }
+
+        /// <summary>
+        /// Detected via thermal.
+        /// </summary>
+        public bool thermal { get; set; }
+
+        /// <summary>
+        /// Tick thermal detect event happened on.
+        /// </summary>
+        public uint thermalTick { get; set; }
+
+
+        /// <summary>
+        /// Detected via EM.
+        /// </summary>
+        public bool EM { get; set; }
+
+        /// <summary>
+        /// Tick detected via EM.
+        /// </summary>
+        public uint EMTick { get; set; }
+
+        /// <summary>
+        /// Detected via Actives.
+        /// </summary>
+        public bool active { get; set; }
+
+        /// <summary>
+        /// Tick active detection event occurred on.
+        /// </summary>
+        public uint activeTick { get; set; }
+
+        /// <summary>
+        /// Initializer for detected ship event. FactionContact is the detector side of what is detected, while ShipTN itself stores the detectee side. 
+        /// multiple of these can exist, but only 1 per faction hopefully.
+        /// </summary>
+        /// <param name="DetectedShip">Ship detected.</param>
+        /// <param name="Thermal">Was the detection thermal based?</param>
+        /// <param name="em">Detection via EM?</param>
+        /// <param name="Active">Active detection?</param>
+        /// <param name="tick">What tick did this detection event occur on?</param>
+        public FactionContact(ShipTN DetectedShip, bool Thermal, bool em, bool Active, uint tick)
+        {
+            thermal = Thermal;
+            EM = em;
+            active = Active;
+
+            if (thermal == true)
+                thermalTick = tick;
+
+            if (EM == true)
+                EMTick = tick;
+
+            if (active == true)
+                activeTick = tick;
+        }
+
+        /// <summary>
+        /// Each tick every faction contact should be updated on the basis of collected sensor data.
+        /// </summary>
+        /// <param name="Thermal">Thermal detection?</param>
+        /// <param name="Em">Detected on EM?</param>
+        /// <param name="Active">Detected by actives?</param>
+        /// <param name="tick">Current tick.</param>
+        public void updateFactionContact(bool Thermal, bool Em, bool Active, uint tick)
+        {
+            if (thermal == false && Thermal == true)
+            {
+                /// <summary>
+                /// New thermal detection event, message logic should be here.
+                /// </summary>
+                thermalTick = tick;
+            }
+            else if (thermal == true && Thermal == false)
+            {
+                /// <summary>
+                /// Thermal contact lost.
+                /// </summary>
+            }
+
+            if (EM == false && Em == true)
+            {
+                /// <summary>
+                /// New EM detection event, message logic should be here.
+                /// </summary>
+                EMTick = tick;
+            }
+            if (EM == true && Em == false)
+            {
+                /// <summary>
+                /// EM contact lost.
+                /// </summary>
+            }
+
+            if (active == false && Active == true)
+            {
+                /// <summary>
+                /// New active detection event, message logic should be here.
+                /// </summary>
+                activeTick = tick;
+            }
+            if (active == true && Active == false)
+            {
+                /// <summary>
+                /// Active contact lost.
+                /// </summary>
+            }
+
+
+            thermal = Thermal;
+            EM = Em;
+            active = Active;
+        }
+
+
+    }
+
     public class FactionSystemDetection
     {
         /// <summary>
@@ -179,6 +302,11 @@ namespace Pulsar4X.Entities
         public Dictionary<StarSystem,FactionSystemDetection> SystemContacts { get; set; }
 
         /// <summary>
+        /// here is where only the specifically detected contacts are placed.
+        /// </summary>
+        public Dictionary<ShipTN,FactionContact> DetectedContacts { get; set; }
+
+        /// <summary>
         /// Just a list of the available installation types for this faction.
         /// </summary>
         public BindingList<Installation> InstallationTypes { get; set; }
@@ -202,6 +330,8 @@ namespace Pulsar4X.Entities
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
+
+            DetectedContacts = new Dictionary<ShipTN, FactionContact>();
 
             FactionID = ID;
 
@@ -703,6 +833,10 @@ namespace Pulsar4X.Entities
                                         {
                                             System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = YearTickValue;
                                         }
+                                        /// <summary>
+                                        /// FactionSystemDetection entry. I hope to deprecate this at some point.
+                                        /// Be sure to erase the factionDetectionSystem entry first, to track down everywhere this overbloated thing is.
+                                        /// </summary>
                                         System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                     }
                                     else if (noDetection == false && allDetection == false)
@@ -750,6 +884,36 @@ namespace Pulsar4X.Entities
                                 }
                             }
                             #endregion
+
+                            /// <summary>
+                            /// Detected contacts logic. If a ship has been newly detected this tick, create a contact entry for it.
+                            /// Otherwise update the existing one. Messages to the message log should be handled there(at the top of this very file.
+                            /// if a ship is no longer detected this tick then remove it from the detected contacts list.
+                            /// </summary>
+                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                            {
+                                ShipTN detectedShip = System.SystemContactList[loop2].TaskGroup.Ships[loop3];
+
+                                bool inDict = DetectedContacts.ContainsKey(detectedShip);
+                                bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
+                                bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
+                                bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
+
+                                if (inDict == true)
+                                {
+                                    DetectedContacts[detectedShip].updateFactionContact(th, em, ac, (uint)YearTickValue);
+
+                                    if (th == false && em == false && ac == false)
+                                    {
+                                        DetectedContacts.Remove(detectedShip);
+                                    }
+                                }
+                                else if(inDict == false && (th == true || em == true || ac == true))
+                                {
+                                    FactionContact newContact = new FactionContact(detectedShip, th, em, ac, (uint)YearTickValue);
+                                    DetectedContacts.Add(detectedShip, newContact);
+                                }
+                            }
                         }
                         /// <summary>
                         /// End if planet or Task Group
@@ -768,6 +932,11 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// End for Faction TaskGroups.
             /// </summary>
+            
+
         }
+        /// <summary>
+        /// End SensorSweep()
+        /// </summary>
     }
 }
