@@ -812,7 +812,7 @@ namespace Pulsar4X.Entities
 #endregion
 
 
-        #region Taskgroup orders issuing,following,performing
+        #region Taskgroup orders issuing,following,performing,clearing
         /// <summary>
         /// Places an order into the que of orders.
         /// </summary>
@@ -1525,6 +1525,16 @@ namespace Pulsar4X.Entities
             }
             return TimeSlice;
         }
+
+        /// <summary>
+        /// Clears the current orders for this TG.
+        /// </summary>
+        public void clearAllOrders()
+        {
+            TaskGroupOrders.Clear();
+            TimeRequirement = 0;
+            TotalOrderDistance = 0;
+        }
         #endregion
 
 
@@ -1887,6 +1897,71 @@ namespace Pulsar4X.Entities
 
         #endregion
 
+
+        #region Beam Fire Control targetting
+        /// <summary>
+        /// Clear all targeting info for this taskgroup
+        /// </summary>
+        public void clearAllTargets()
+        {
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipBFC.Count != 0)
+                {
+                    for (int loop2 = 0; loop2 < Ships[loop].ShipBFC.Count; loop2++)
+                    {
+                        Ships[loop].ShipBFC[loop2].clearTarget();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// This function returns the closest active contact to this taskgroup.
+        /// </summary>
+        /// <returns>ShipTN targeted, null if no ship meets criteria.</returns>
+        public ShipTN getNewTarget()
+        {
+            /// <summary>
+            /// Target Selection Logic:
+            /// pair.key = Ship
+            /// pair.value = FactionContact
+            /// pair.Value.active = bool for if this ship is detected on actives
+            /// How much should proximity matter? find closest?
+            /// </summary
+
+            ShipTN min = null;
+            float minDist = -1.0f;
+            foreach (KeyValuePair<ShipTN, FactionContact> pair in Faction.DetectedContacts)
+            {
+                /// <summary>
+                /// Only active targets are considered for this. Is this for BFC targeting, or general things to head for?
+                /// This should be commented out if I want to investigate rather than blow up.
+                /// </summary>
+                if (pair.Value.active == true) 
+                {
+                    int ID = pair.Key.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+
+                    /// <summary>
+                    /// No ship has been examined yet, so this one is the "closest".
+                    /// </summary>
+                    if (min == null || minDist == -1.0f) 
+                    {
+
+                        min = pair.Key;
+                        minDist = Contact.DistanceTable[ID];
+                    }
+                    else if (Contact.DistanceTable[ID] < minDist)
+                    {
+                        min = pair.Key;
+                        minDist = Contact.DistanceTable[ID];
+                    }
+                }
+            }
+
+            return min;
+        }
+        #endregion
 
     }
     /// <summary>

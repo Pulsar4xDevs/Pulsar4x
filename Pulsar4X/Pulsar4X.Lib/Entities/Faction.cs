@@ -889,6 +889,9 @@ namespace Pulsar4X.Entities
                             /// Detected contacts logic. If a ship has been newly detected this tick, create a contact entry for it.
                             /// Otherwise update the existing one. Messages to the message log should be handled there(at the top of this very file.
                             /// if a ship is no longer detected this tick then remove it from the detected contacts list.
+                            /// 
+                            /// This can actually be improved by turning detectedContact into a linked list, and putting updated contacts in front.
+                            /// this way unupdated contacts would be at the end, and I would not have to loop through all ships here.
                             /// </summary>
                             for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                             {

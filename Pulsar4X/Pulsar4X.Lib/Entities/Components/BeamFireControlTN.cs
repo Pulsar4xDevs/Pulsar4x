@@ -314,6 +314,14 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Simple deassignment of target to this bfc.
+        /// </summary>
+        public void clearTarget()
+        {
+            Target = null;
+        }
+
+        /// <summary>
         /// Simple return of the target of this BFC.
         /// </summary>
         public ShipTN getTarget()

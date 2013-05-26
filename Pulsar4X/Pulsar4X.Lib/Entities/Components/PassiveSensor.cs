@@ -175,7 +175,6 @@ namespace Pulsar4X.Entities.Components
             int shipDet;
             int shipSig = Signature;
 
-
             if (shipSig >= LookUpTableMax)
                 shipDet = CalcUnknownSignature(shipSig);
             else
