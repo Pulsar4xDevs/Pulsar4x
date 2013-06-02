@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -427,14 +428,14 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Loop through all DSTS. ***
             /// </summary>
-
+            
             /// <summary>
             /// Loop through all faction taskgroups.
             /// </summary>
             for (int loop = 0; loop < TaskGroups.Count; loop++)
             {
-                StarSystem System = TaskGroups[loop].Contact.CurrentSystem;
 
+                StarSystem System = TaskGroups[loop].Contact.CurrentSystem;
                 /// <summary>
                 /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
                 /// </summary>
@@ -524,7 +525,7 @@ namespace Pulsar4X.Entities
                             bool noDetection = false;
                             bool allDetection = false;
 
-                            #region Ship Thermal Detection Code.
+                            #region Ship Thermal Detection Code. 528 to 651
 
                             if (System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue)
                             {
@@ -582,7 +583,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Best case, everything is detected.
                                     /// </summary>
-                                    if (dist < (float)detection)
+                                    if (dist <= (float)detection)
                                     {
                                         allDetection = true;
 
@@ -597,7 +598,6 @@ namespace Pulsar4X.Entities
                                         /// <summary>
                                         /// Worst case. some are detected, some aren't.
                                         /// </summary>
-
 
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
@@ -629,8 +629,17 @@ namespace Pulsar4X.Entities
                                                         done = true;
                                                         break;
                                                     }
-                                                    node = node.Previous;
                                                 }
+                                                if (node == System.SystemContactList[loop2].TaskGroup.ThermalSortList.First)
+                                                {
+                                                    /// <summary>
+                                                    /// This should not happen.
+                                                    /// </summary>
+                                                    Console.WriteLine("Line 638 Faction.cs, partial detect looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
+                                                    done = true;
+                                                    break;
+                                                }
+                                                node = node.Previous;
                                             }
                                         }
                                     }
@@ -641,7 +650,7 @@ namespace Pulsar4X.Entities
                             }
                             #endregion
 
-                            #region Ship EM Detection Code.
+                            #region Ship EM Detection Code. 653 to 800
 
                             if (System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue)
                             {
@@ -701,7 +710,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Best case, everything is detected.
                                     /// </summary>
-                                    if (dist < (float)detection)
+                                    if (dist <= (float)detection)
                                     {
                                         allDetection = true;
 
@@ -769,8 +778,17 @@ namespace Pulsar4X.Entities
                                                         done = true;
                                                         break;
                                                     }
-                                                    node = node.Previous;
                                                 }
+                                                if (node == System.SystemContactList[loop2].TaskGroup.EMSortList.First)
+                                                {
+                                                    /// <summary>
+                                                    /// This should not happen.
+                                                    /// </summary>
+                                                    Console.WriteLine("Line 787, partial detect looped through every ship.");
+                                                    done = true;
+                                                    break;
+                                                }
+                                                node = node.Previous;
                                             }
                                         }
                                     }
@@ -781,7 +799,7 @@ namespace Pulsar4X.Entities
                             }
                             #endregion
 
-                            #region Ship Active Detection Code.
+                            #region Ship Active Detection Code. 802 to 913
 
                             if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue && TaskGroups[loop].ActiveSensorQue.Count > 0)
                             {
@@ -825,7 +843,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Best case, everything is detected.
                                     /// </summary>
-                                    if (dist < (float)detection)
+                                    if (dist <= (float)detection)
                                     {
                                         allDetection = true;
 
@@ -873,6 +891,15 @@ namespace Pulsar4X.Entities
                                                         done = true;
                                                         break;
                                                     }
+                                                }
+                                                if (node == System.SystemContactList[loop2].TaskGroup.ActiveSortList.First)
+                                                {
+                                                    /// <summary>
+                                                    /// This should not happen.
+                                                    /// </summary>
+                                                    Console.WriteLine("Line 900, partial detect looped through every ship.");
+                                                    done = true;
+                                                    break;
                                                 }
                                                 node = node.Previous;
                                             }
@@ -935,8 +962,6 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// End for Faction TaskGroups.
             /// </summary>
-            
-
         }
         /// <summary>
         /// End SensorSweep()

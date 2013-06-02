@@ -172,7 +172,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Range at which this sensor can detect this signature.</returns>
         public int GetPassiveDetectionRange(int Signature)
         {
-            int shipDet;
+            int shipDet=0;
             int shipSig = Signature;
 
             if (shipSig >= LookUpTableMax)

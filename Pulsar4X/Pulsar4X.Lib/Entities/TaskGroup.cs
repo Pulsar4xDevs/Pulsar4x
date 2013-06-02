@@ -714,6 +714,89 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// End SortShipBySignature
         /// </summary>
+
+        /// <summary>
+        /// RemoveShipFromTaskGroup handles removal of the ship from the various detection linked lists. It also traverses the linked lists
+        /// and decrements node values as appropriate to reflect the new state of the linked list ids.
+        /// </summary>
+        /// <param name="Ship">Ship to be removed.</param>
+        /// <returns>Were nodes removed from the various linkedLists?</returns>
+        public bool RemoveShipFromTaskGroup(ShipTN Ship)
+        {
+            ThermalSortList.Remove(Ship.ThermalList);
+            EMSortList.Remove(Ship.EMList);
+            ActiveSortList.Remove(Ship.ActiveList);
+
+            if (ThermalSortList.Count == 0 || EMSortList.Count == 0 || ActiveSortList.Count == 0)
+                return true;
+
+            LinkedListNode<int> node;
+
+            node = ThermalSortList.First;
+
+            if (node.Value > Ship.ThermalList.Value)
+                node.Value--;
+
+            bool done = false;
+            if (ThermalSortList.First == ThermalSortList.Last)
+                done = true;
+
+            while (done == false)
+            {
+                node = node.Next;
+
+                if (node.Value > Ship.ThermalList.Value)
+                    node.Value--;
+
+                if (node == ThermalSortList.Last)
+                    done = true;
+
+            }
+
+            node = EMSortList.First;
+
+            if (node.Value > Ship.EMList.Value)
+                node.Value--;
+
+            done = false;
+            if (EMSortList.First == EMSortList.Last)
+                done = true;
+
+            while (done == false)
+            {
+                node = node.Next;
+
+                if (node.Value > Ship.EMList.Value)
+                    node.Value--;
+
+                if (node == EMSortList.Last)
+                    done = true;
+
+            }
+
+            node = ActiveSortList.First;
+
+            if (node.Value > Ship.ActiveList.Value)
+                node.Value--;
+
+            done = false;
+            if (ActiveSortList.First == ActiveSortList.Last)
+                done = true;
+
+            while (done == false)
+            {
+                node = node.Next;
+
+                if (node.Value > Ship.ActiveList.Value)
+                    node.Value--;
+
+                if (node == ActiveSortList.Last)
+                    done = true;
+
+            }
+
+            return false;
+        }
 #endregion
 
 

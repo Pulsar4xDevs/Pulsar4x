@@ -976,7 +976,15 @@ namespace Pulsar4X.Entities
                     CurrentMaxEnginePower = CurrentMaxEnginePower - ShipEngine[0].engineDef.enginePower;
                     CurrentMaxThermalSignature = CurrentMaxThermalSignature - ShipEngine[0].engineDef.thermalSignature;
                     CurrentMaxFuelUsePerHour = CurrentMaxFuelUsePerHour - ShipEngine[0].engineDef.fuelUsePerHour;
-                    CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
+
+                    if (CurrentMaxEnginePower != 0)
+                        CurrentMaxSpeed = (int)((1000.0f / ((float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower));
+                    else
+                    {
+                        CurrentMaxSpeed = 1;
+                        CurrentMaxThermalSignature = 1; //it shouldn't be 0 either.
+                    }
+
                     if (CurrentSpeed > CurrentMaxSpeed)
                         SetSpeed(CurrentMaxSpeed);
 
@@ -1162,7 +1170,19 @@ namespace Pulsar4X.Entities
                     CurrentMaxEnginePower = CurrentMaxEnginePower + ShipEngine[0].engineDef.enginePower;
                     CurrentMaxThermalSignature = CurrentMaxThermalSignature + ShipEngine[0].engineDef.thermalSignature;
                     CurrentMaxFuelUsePerHour = CurrentMaxFuelUsePerHour + ShipEngine[0].engineDef.fuelUsePerHour;
-                    CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
+
+                    if (CurrentMaxEnginePower == 0)
+                    {
+                        /// <summary>
+                        /// This is a very bad error I think.
+                        /// hopefully it should never happen.
+                        /// </summary>
+                        CurrentMaxSpeed = 1;
+                        CurrentMaxThermalSignature = 1;
+                        Console.WriteLine("CurrentMaxEnginePower was 0 AFTER engine repair. oops. see Ship.cs(1178)");
+                    }
+                    else
+                        CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
                         SetSpeed(CurrentMaxSpeed);
                 break;
                 case ComponentTypeTN.PassiveSensor:
@@ -1232,9 +1252,17 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Handle the consequences of a ship destruction in game mechanics. C# loses its cookies if I try to actually delete anything here.
+        /// still many things need to be cleaned up when a ship is destroyed outright.
         /// </summary>
-        public void OnDestroyed()
+        /// <returns>Whether LinkedListNodes have been removed.</returns>
+        public bool OnDestroyed()
         {
+            /// <summary>
+            /// TG specific handling needs to be done here. first, the nodes have to be removed from the linked lists for each detection method.
+            /// Next the shipId's of the surviving ships have to be adjusted downwards to match the new ship count.
+            /// </summary>
+            return ShipsTaskGroup.RemoveShipFromTaskGroup(this);
+
             /// <summary>
             /// A new wreck needs to be created with the surviving components, if any, and some fraction of the cost of the ship.
             /// </summary>
@@ -1348,7 +1376,7 @@ namespace Pulsar4X.Entities
         {
             for (int loop = 0; loop < ShipBFC.Count; loop++)
             {
-                if (ShipBFC[loop].openFire == true)
+                if (ShipBFC[loop].openFire == true && ShipBFC[loop].isDestroyed == false)
                 {
                     /// <summary>
                     /// Sanity Check. Make sure both are in the same system before checking distance.
@@ -1365,7 +1393,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                             /// </summary>
-                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick?", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs line 1391.", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
                             return;
                         }
 
