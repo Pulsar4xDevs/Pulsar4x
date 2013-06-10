@@ -149,7 +149,19 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of where each component group falls on the ships hull distribution. size less than 1 components each have DAC of atleast 1.
         /// </summary>
+        [DisplayName("Damage Allocation Chart"), 
+        Category("Detials"),
+        Description("Where components are in relation to potential internal component strikes."),
+        Browsable(true),
+        ReadOnly(true)]
         public Dictionary<ComponentDefTN,int> DamageAllocationChart { get; set; }
+
+        [DisplayName("Electronic Damage Allocation Chart"),
+        Category("Detials"),
+        Description("Electronic only DAC for microwave hits."),
+        Browsable(true),
+        ReadOnly(true)]
+        public Dictionary<ComponentDefTN, int> ElectronicDamageAllocationChart { get; set; }
 
         /// <summary>
         /// What is the perceived protection value this ship class provides to civilians.
@@ -630,6 +642,7 @@ namespace Pulsar4X.Entities
             ListOfComponentDefs = new BindingList<ComponentDefTN>();
             ListOfComponentDefsCount = new BindingList<short>();
             DamageAllocationChart = new Dictionary<ComponentDefTN,int>();
+            ElectronicDamageAllocationChart = new Dictionary<ComponentDefTN, int>();
 
             ShipArmorDef = new ArmorDefTN("Conventional Armor");
             NewArmor("Conventional Armor", 2, 1);
@@ -731,9 +744,10 @@ namespace Pulsar4X.Entities
         /// General Class update function, many things will change as a result of adding components, this function handles them all.
         /// I think this function might be enough to handle subtracting components as well. Update: now subtracting.
         /// </summary>
-        /// <param name="CDTN">Basic abstract class definition of the added component.</param>
+        /// <param name="Component">Basic abstract class definition of the added component.</param>
         /// <param name="increment">The number of new components to be added.</param>
-        private void UpdateClass(ComponentDefTN Component, short increment )
+        /// <param name="isElectronic">Whether or not this component should go in the EDAC</param>
+        private void UpdateClass(ComponentDefTN Component, short increment, bool isElectronic=false )
         {
             int CIndex = ListOfComponentDefs.IndexOf(Component);
             if (CIndex != -1)
@@ -748,6 +762,11 @@ namespace Pulsar4X.Entities
                 ListOfComponentDefs.Add(Component);
                 ListOfComponentDefsCount.Add(increment);
                 DamageAllocationChart.Add(Component, -1);
+
+                if (isElectronic == true)
+                {
+                    ElectronicDamageAllocationChart.Add(Component, -1);
+                }
             }
             else
             {
@@ -758,6 +777,11 @@ namespace Pulsar4X.Entities
                         DamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
                         ListOfComponentDefsCount.RemoveAt(CIndex);
                         ListOfComponentDefs.RemoveAt(CIndex);
+
+                        if (isElectronic == true)
+                        {
+                            ElectronicDamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
+                        }
                     }
                 }
                 else
@@ -867,6 +891,7 @@ namespace Pulsar4X.Entities
             TroopLoadTime = (TotalTroopCapacity * Constants.ShipTN.BaseTroopLoadTime) / TractorMultiplier;
 
             int DAC = 0;
+            int EDAC = 0;
             for (int loop = 0; loop < ListOfComponentDefs.Count; loop++)
             {
                 if (ListOfComponentDefs[loop].size < 1.0)
@@ -875,6 +900,12 @@ namespace Pulsar4X.Entities
 
                     DamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + DAC;
                     DAC = DAC + localDAC;
+
+                    if (isElectronic == true)
+                    {
+                        ElectronicDamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + EDAC;
+                        EDAC = EDAC + localDAC;
+                    }
                 }
                 else
                 {
@@ -882,6 +913,12 @@ namespace Pulsar4X.Entities
 
                     DamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + DAC;
                     DAC = DAC + localDAC;
+
+                    if (isElectronic == true)
+                    {
+                        ElectronicDamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + EDAC;
+                        EDAC = EDAC + localDAC;
+                    }
                 }
             }
         }
@@ -1326,7 +1363,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            UpdateClass(Sensor, inc);
+            UpdateClass(Sensor, inc, true);
         }
 
         /// <summary>
@@ -1367,7 +1404,7 @@ namespace Pulsar4X.Entities
 
             MaxEMSignature = MaxEMSignature + (Sensor.gps * (int)inc);
 
-            UpdateClass(Sensor, inc);
+            UpdateClass(Sensor, inc, true);
         }
 
         /// <summary>
@@ -1406,7 +1443,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            UpdateClass(BFC, inc);
+            UpdateClass(BFC, inc, true);
         }
 
         /// <summary>

@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
-
+using System.ComponentModel;
 
 
 
@@ -712,74 +712,87 @@ namespace Pulsar4X.Entities
         {
             ushort Damage = Value;
             ushort internalDamage = 0;
-            /// <summary>
-            /// Handle Shield Damage.
-            /// </summary>
-            
 
-            /// <summary>
-            /// Armor Penetration.
-            /// </summary>
-            ushort Columns = ShipArmor.armorDef.cNum;
-            short left, right;
-
-            ushort ImpactLevel = ShipArmor.armorDef.depth;
-            if(ShipArmor.isDamaged == true)
-                ImpactLevel = ShipArmor.armorColumns[HitLocation];
-
-            DamageTableTN Table;
-            switch(Type)
+            if (Type != DamageTypeTN.Meson)
             {
-                case DamageTypeTN.Beam : Table = DamageValuesTN.EnergyTable[Damage-1];
-                break;
-                case DamageTypeTN.Kinetic : Table = DamageValuesTN.KineticTable[Damage-1];
-                break;
-                case DamageTypeTN.Missile : Table = DamageValuesTN.MissileTable[Damage-1];
-                break;
-                case DamageTypeTN.Plasma : Table = DamageValuesTN.PlasmaTable[Damage-1];
-                break;
-                default :
-                    Table = DamageValuesTN.MissileTable[Damage-1];
-                break;
-            }
-            left = (short)(HitLocation - 1);
-            right = (short)(HitLocation + 1);
-            internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
-            if (Type == DamageTypeTN.Plasma)
-            {
-                internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
-                right++;
-            }
-
-            for (int loop = 1; loop <= Table.halfSpread; loop++)
-            {
-                if (left < 0)
-                {
-                    left = (short)(Columns-1);
-                }
-                if (right >= Columns)
-                {
-                    right = 0;
-                }
 
                 /// <summary>
-                /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
+                /// Handle Shield Damage.
+                /// Microwaves do 3 damage to shields. Make them do 3xPowerReq?
                 /// </summary>
-                if (Table.hitPoint - loop >= 0)
+
+
+                /// <summary>
+                /// Armor Penetration.
+                /// </summary>
+                ushort Columns = ShipArmor.armorDef.cNum;
+                short left, right;
+
+                ushort ImpactLevel = ShipArmor.armorDef.depth;
+                if (ShipArmor.isDamaged == true)
+                    ImpactLevel = ShipArmor.armorColumns[HitLocation];
+
+                DamageTableTN Table;
+                switch (Type)
                 {
-                    if (ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
-                        internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
+                    case DamageTypeTN.Beam: Table = DamageValuesTN.EnergyTable[Damage - 1];
+                        break;
+                    case DamageTypeTN.Kinetic: Table = DamageValuesTN.KineticTable[Damage - 1];
+                        break;
+                    case DamageTypeTN.Missile: Table = DamageValuesTN.MissileTable[Damage - 1];
+                        break;
+                    case DamageTypeTN.Plasma: Table = DamageValuesTN.PlasmaTable[Damage - 1];
+                        break;
+                    default:
+                        Table = DamageValuesTN.MissileTable[Damage - 1];
+                        break;
+                }
+                left = (short)(HitLocation - 1);
+                right = (short)(HitLocation + 1);
+                internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
+                if (Type == DamageTypeTN.Plasma)
+                {
+                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
+                    right++;
                 }
 
-                if (Table.hitPoint + loop < Table.damageTemplate.Count)
+                for (int loop = 1; loop <= Table.halfSpread; loop++)
                 {
-                    if (ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
-                        internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
-                }
+                    if (left < 0)
+                    {
+                        left = (short)(Columns - 1);
+                    }
+                    if (right >= Columns)
+                    {
+                        right = 0;
+                    }
 
-                left--;
-                right++;
-            }    
+                    /// <summary>
+                    /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
+                    /// </summary>
+                    if (Table.hitPoint - loop >= 0)
+                    {
+                        if (ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
+                            internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
+                    }
+
+                    if (Table.hitPoint + loop < Table.damageTemplate.Count)
+                    {
+                        if (ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
+                            internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
+                    }
+
+                    left--;
+                    right++;
+                }
+            }
+            else
+            {
+                /// <summary>
+                /// This is a meson strike.
+                /// </summary>
+                internalDamage = 1;
+            }
             
 
             /// <summary>
@@ -787,77 +800,174 @@ namespace Pulsar4X.Entities
             /// is tested against the internal damage value, and if greater than the damage value the component has a chance of surviving. otherwise, the component is destroyed, damage
             /// is reduced, and the next component is chosen.
             /// DAC Should be redone as a binary tree at some later date.
+            /// 
+            /// The Electronic DAC should be used for microwave hits, ships can't be destroyed due to microwave strikes however.
             /// </summary>
             int Attempts = 0;
             Random DacRNG = new Random(HitLocation);
 
-            while (Attempts < 20 && internalDamage > 0)
+            if (Type != DamageTypeTN.Microwave)
             {
-                int DACHit = DacRNG.Next(1, ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[ShipClass.ListOfComponentDefs.Count - 1]]);
-
-                int localDAC = 1;
-                int previousDAC = 1;
-                int destroy = -1;
-                for (int loop = 0; loop < ShipClass.ListOfComponentDefs.Count; loop++)
+                while (Attempts < 20 && internalDamage > 0)
                 {
-                    localDAC = ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[loop]];
-                    if (DACHit <= localDAC)
+                    int DACHit = DacRNG.Next(1, ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[ShipClass.ListOfComponentDefs.Count - 1]]);
+
+                    int localDAC = 1;
+                    int previousDAC = 1;
+                    int destroy = -1;
+                    for (int loop = 0; loop < ShipClass.ListOfComponentDefs.Count; loop++)
                     {
-                        float size = ShipClass.ListOfComponentDefs[loop].size;
-                        if (size < 1.0)
-                            size = 1.0f;
-
-                        destroy = (int)Math.Floor(((float)(DACHit - previousDAC)/(float)size));
-
-                        /// <summary>
-                        /// By this point total should definitely be >= destroy. destroy is the HS of the group being hit.
-                        /// Should I try to find the exact component hit, or merely loop through all of them?
-                        /// internalDamage: Damage done to all internals
-                        /// destroy: component to destroy from shipClass.ListOfComponentDefs
-                        /// ComponentDefIndex[loop] where in ShipComponents this definition group is.
-                        /// </summary>
-
-                        int DamageDone = DestroyComponent(ShipClass.ListOfComponentDefs[loop].componentType, loop, internalDamage, destroy, DacRNG);
-
-                        /// <summary>
-                        /// No components are left to destroy, so short circuit the loops,destroy the ship, and create a wreck.
-                        /// </summary>
-                        if (DestroyedComponents.Count == ShipComponents.Count)
+                        localDAC = ShipClass.DamageAllocationChart[ShipClass.ListOfComponentDefs[loop]];
+                        if (DACHit <= localDAC)
                         {
-                            Attempts = 20;
-                            internalDamage = 0;
-                            break;
-                        }
+                            float size = ShipClass.ListOfComponentDefs[loop].size;
+                            if (size < 1.0)
+                                size = 1.0f;
 
+                            destroy = (int)Math.Floor(((float)(DACHit - previousDAC) / (float)size));
 
-                        if (DamageDone == -1)
-                        {
-                            Attempts++;
-                            if (Attempts == 20)
+                            /// <summary>
+                            /// By this point total should definitely be >= destroy. destroy is the HS of the group being hit.
+                            /// Should I try to find the exact component hit, or merely loop through all of them?
+                            /// internalDamage: Damage done to all internals
+                            /// destroy: component to destroy from shipClass.ListOfComponentDefs
+                            /// ComponentDefIndex[loop] where in ShipComponents this definition group is.
+                            /// </summary>
+
+                            int DamageDone = DestroyComponent(ShipClass.ListOfComponentDefs[loop].componentType, loop, internalDamage, destroy, DacRNG);
+
+                            /// <summary>
+                            /// No components are left to destroy, so short circuit the loops,destroy the ship, and create a wreck.
+                            /// </summary>
+                            if (DestroyedComponents.Count == ShipComponents.Count)
                             {
+                                Attempts = 20;
                                 internalDamage = 0;
+                                break;
                             }
-                            break;
+
+
+                            if (DamageDone == -1)
+                            {
+                                Attempts++;
+                                if (Attempts == 20)
+                                {
+                                    internalDamage = 0;
+                                }
+                                break;
+                            }
+                            else if (DamageDone == -2)
+                            {
+                                Attempts = 20;
+                                break;
+                            }
+                            else
+                            {
+                                internalDamage = (ushort)(internalDamage - (ushort)DamageDone);
+                                break;
+                            }
                         }
-                        else if (DamageDone == -2)
-                        {
-                            Attempts = 20;
-                            break;
-                        }
-                        else
-                        {
-                            internalDamage = (ushort)(internalDamage - (ushort)DamageDone);
-                            break;
-                        }
+                        previousDAC = localDAC + 1;
                     }
-                    previousDAC = localDAC + 1;
+                }
+
+                if (Attempts == 20)
+                {
+                    IsDestroyed = true;
+                    return true;
                 }
             }
-
-            if (Attempts == 20)
+            else
             {
-                IsDestroyed = true;
-                return true;
+                /// <summary>
+                /// Electronic damage can never destroy a craft, only wreck its sensors, so we'll cut short the attempts to damage components to only 5.
+                /// There is no list of only electronic components, and only destroyed electronic components so this will have to do for now.
+                /// Having those would improve performance slightly however.
+                /// </summary>
+                while (Attempts < 5 && internalDamage > 0)
+                {
+                    int DACHit = DacRNG.Next(1, ShipClass.ElectronicDamageAllocationChart[ShipClass.ElectronicDamageAllocationChart.Keys.Max()]);
+
+                    int localDAC = 1;
+                    int previousDAC = 1;
+                    int destroy = -1;
+
+                    foreach (KeyValuePair<ComponentDefTN, int> list in ShipClass.ElectronicDamageAllocationChart)
+                    {
+                        localDAC = ShipClass.ElectronicDamageAllocationChart[list.Key];
+
+                        if (DACHit <= localDAC)
+                        {
+                            float size = list.Key.size;
+                            if (size < 1.0)
+                                size = 1.0f;
+
+                            /// <summary>
+                            /// Electronic component to attempt to destroy:
+                            /// </summary>
+                            destroy = (int)Math.Floor(((float)(DACHit - previousDAC) / (float)size));
+
+                            /// <summary>
+                            /// Actually destroy the component.
+                            /// Store EDAC index values somewhere for speed?
+                            /// </summary>
+                            
+                            int ComponentIndex = ShipClass.ListOfComponentDefs.IndexOf(list.Key);
+
+                            float hardCheck = (float)DacRNG.Next(1, 100);
+                            float hardValue = -1.0f;
+
+                            switch (list.Key.componentType)
+                            {
+                                case ComponentTypeTN.ActiveSensor :
+                                    hardValue = ShipASensor[ComponentIndex].aSensorDef.hardening * 100.0f;
+                                break;
+                                case ComponentTypeTN.PassiveSensor :
+                                hardValue = ShipPSensor[ComponentIndex].pSensorDef.hardening * 100.0f;
+                                break;
+                                case ComponentTypeTN.BeamFireControl :
+                                hardValue = ShipBFC[ComponentIndex].beamFireControlDef.hardening * 100.0f;
+                                break;
+                            }
+
+                            int DamageDone = -1;
+
+                            if (hardValue == -1)
+                            {
+                                /// <summary>
+                                /// This is an error condition obviously.
+                                /// </summary>
+                                Console.WriteLine("Unidentified electronic component in onDamaged().");
+                            }
+                            else
+                            {
+                                if(hardCheck < hardValue)
+                                    DamageDone = DestroyComponent(list.Key.componentType, ComponentIndex, internalDamage, destroy, DacRNG);
+                            }
+
+                            
+
+                            if (DamageDone == -1)
+                            {
+                                Attempts++;
+                                if (Attempts == 5)
+                                {
+                                    internalDamage = 0;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                /// <summary>
+                                /// Electronic damage should always be only 1.
+                                /// </summary>
+                                internalDamage = 0;
+                                break;
+                            }
+                        }
+                        previousDAC = localDAC + 1;
+                    }
+                }
             }
 
             return false;
@@ -868,7 +978,7 @@ namespace Pulsar4X.Entities
         /// crew destruction and logging remain to be done.
         /// </summary>
         /// <param name="Type">Type of component destroyed</param>
-        /// <param name="componentIndex">Where in the shipClass.ListOfComponentDefs this component resides</param>
+        /// <param name="ComponentListDefIndex">Where in the shipClass.ListOfComponentDefs this component resides</param>
         /// <param name="Damage">How much damage is to be applied in the attempt to destroy the component</param>
         /// <param name="ComponentIndex">Which component specifically.</param>
         /// <param name="DacRNG">Current RNG kludge</param>
@@ -1179,7 +1289,7 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         CurrentMaxSpeed = 1;
                         CurrentMaxThermalSignature = 1;
-                        Console.WriteLine("CurrentMaxEnginePower was 0 AFTER engine repair. oops. see Ship.cs(1178)");
+                        Console.WriteLine("CurrentMaxEnginePower was 0 AFTER engine repair. oops. see Ship.cs RepairComponent()");
                     }
                     else
                         CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
@@ -1393,7 +1503,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                             /// </summary>
-                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs line 1391.", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
                             return;
                         }
 

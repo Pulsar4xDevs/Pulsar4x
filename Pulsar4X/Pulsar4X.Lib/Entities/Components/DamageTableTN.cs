@@ -15,6 +15,8 @@ namespace Pulsar4X.Entities.Components
         Kinetic,
         Plasma,
         Missile,
+        Meson,
+        Microwave,
         TypeCount
     }
     public class DamageTableTN : GameEntity

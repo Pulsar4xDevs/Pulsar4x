@@ -309,7 +309,7 @@ namespace Pulsar4X.Entities.Components
                     }
                     Damage.Add(0);
 
-                    DamageType = DamageTypeTN.Kinetic;
+                    DamageType = DamageTypeTN.Meson;
                 break;
 
                 /// <summary>
@@ -331,7 +331,7 @@ namespace Pulsar4X.Entities.Components
                     }
                     Damage.Add(0);
 
-                    DamageType = DamageTypeTN.Kinetic;
+                    DamageType = DamageTypeTN.Microwave;
                 break;
 
                 /// <summary>
