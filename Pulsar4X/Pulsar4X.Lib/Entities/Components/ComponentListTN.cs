@@ -78,6 +78,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public BindingList<ReactorDefTN> ReactorDef { get; set; }
 
+        public BindingList<ShieldDefTN> ShieldDef { get; set; }
+
 
 
         /// <summary>
@@ -101,6 +103,8 @@ namespace Pulsar4X.Entities.Components
             BeamFireControlDef = new BindingList<BeamFireControlDefTN>();
             BeamWeaponDef = new BindingList<BeamDefTN>();
             ReactorDef = new BindingList<ReactorDefTN>();
+
+            ShieldDef = new BindingList<ShieldDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -135,6 +139,7 @@ namespace Pulsar4X.Entities.Components
             BeamFireControlDefTN BFCDef = new BeamFireControlDefTN("Fire Control S01 10-1250", 10000.0f, 1250.0f, 1.0f, 1.0f, false, false, 1.0f, 1);
             BeamDefTN BeamDef = new BeamDefTN("10cm C1 Infrared Laser", ComponentTypeTN.Laser, 1, 1, 1, 1.0f);
             ReactorDefTN ReactDef = new ReactorDefTN("PWR S1 P2", 0, 1.0f, 1.0f);
+            ShieldDefTN AShieldDef = new ShieldDefTN("Alpha R300/240 Shields", 0, 0, 1.0f, 1.0f, ComponentTypeTN.Shield);
 
             Engines.Add(EngDef);
             ActiveSensorDef.Add(ActDef);
@@ -144,6 +149,8 @@ namespace Pulsar4X.Entities.Components
             BeamFireControlDef.Add(BFCDef);
             BeamWeaponDef.Add(BeamDef);
             ReactorDef.Add(ReactDef);
+
+            ShieldDef.Add(AShieldDef);
 
 
             /// <summary>

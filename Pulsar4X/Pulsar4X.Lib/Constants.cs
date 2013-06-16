@@ -1049,5 +1049,22 @@ namespace Pulsar4X
             /// </summary>
             public static byte[] GaussShots = { 1, 2, 3, 4, 5, 6, 8 };
         }
+
+        /// <summary>
+        /// Shield related constants placed here for now.
+        /// </summary>
+        public static class ShieldTN
+        {
+            /// <summary>
+            /// Cost of each shield component tech level. 4 + CostBase[Str] + CostBase[Regen] = cost.
+            /// </summary>
+            public static byte[] CostBase = { 0, 1, 2, 3, 4, 6, 8, 10, 14, 18, 22, 28 };
+
+            /// <summary>
+            /// Strength and regen values for normal shields.
+            /// for absorption shields Strength is 3x this, and radiate rate is 1/2x this.
+            /// </summary>
+            public static float[] ShieldBase = { 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f, 8.0f, 10.0f, 12.0f, 15.0f };
+        }
     }
 }

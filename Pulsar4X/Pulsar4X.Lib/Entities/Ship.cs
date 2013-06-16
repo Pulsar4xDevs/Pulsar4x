@@ -265,6 +265,37 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int CurrentPowerGen { get; set; }
 
+        #region Shield Info
+        /// <summary>
+        /// All shields on this ship.
+        /// </summary>
+        public BindingList<ShieldTN> ShipShield { get; set; }
+        
+        /// <summary>
+        /// Current shield strength value.
+        /// </summary>
+        public float CurrentShieldPool { get; set; }
+
+        /// <summary>
+        /// Current maximum shield strength value.
+        /// </summary>
+        public float CurrentShieldPoolMax { get; set; }
+
+        /// <summary>
+        /// Current shield regeneration per tick(5 seconds).
+        /// </summary>
+        public float CurrentShieldGen { get; set; }
+
+        /// <summary>
+        /// Current Shield fuel use per tick(5 seconds).
+        /// </summary>
+        public float CurrentShieldFuelUse { get; set; }
+
+        /// <summary>
+        /// Are the ships shields active?
+        /// </summary>
+        public bool ShieldIsActive { get; set; }
+        #endregion
 
         /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
@@ -559,6 +590,28 @@ namespace Pulsar4X.Entities
                 }
             }
             CurrentPowerGen = ClassDefinition.TotalPowerGeneration;
+
+            ShipShield = new BindingList<ShieldTN>();
+            index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipShieldDef);
+            if (index != -1)
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+
+            for (int loop = 0; loop < ClassDefinition.ShipShieldCount; loop++)
+            {
+                ShieldTN Shield = new ShieldTN(ClassDefinition.ShipShieldDef);
+                Shield.componentIndex = ShipShield.Count;
+                ShipShield.Add(Shield);
+                ShipComponents.Add(Shield);
+            }
+
+            CurrentShieldPool = 0.0f;
+            CurrentShieldPoolMax = ClassDefinition.TotalShieldPool;
+            CurrentShieldGen = ClassDefinition.TotalShieldGenPerTick;
+            CurrentShieldFuelUse = ClassDefinition.TotalShieldFuelCostPerTick;
+            ShieldIsActive = false;
+
+
+
             IsDestroyed = false;
 
         }
@@ -698,7 +751,7 @@ namespace Pulsar4X.Entities
             return CurrentSpeed;
         }
 
-        #region Weapons and Damage Lines 694 to 1374
+        #region Weapons and Damage Lines 754
         /// <summary>
         /// Damage goes through a 3 part process, 1st shields subtract damage, then armor blocks damage, then internals take the hits.
         /// if 20 rolls happen without an internal in the list being targeted then call OnDestroyed(); Mesons skip to the internal damage section.
@@ -720,6 +773,44 @@ namespace Pulsar4X.Entities
                 /// Handle Shield Damage.
                 /// Microwaves do 3 damage to shields. Make them do 3xPowerReq?
                 /// </summary>
+
+                if (Type == DamageTypeTN.Microwave)
+                {
+                    if (CurrentShieldPool >= 3.0f)
+                    {
+                        CurrentShieldPool = CurrentShieldPool - 3.0f;
+                        Damage = 0;
+                    }
+                    else if (CurrentShieldPool < 1.0f)
+                    {
+                        CurrentShieldPool = 0.0f;
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Microwaves only do 1 damage to internals, so take away the bonus damage to shields here.
+                        /// </summary>
+                        Damage = 1;
+                        CurrentShieldPool = 0.0f;
+                    }
+                }
+                else
+                {
+                    if (CurrentShieldPool >= Damage )
+                    {
+                        CurrentShieldPool = CurrentShieldPool - Damage;
+                        Damage = 0;
+                    }
+                    else if (CurrentShieldPool < 1.0f)
+                    {
+                        CurrentShieldPool = 0.0f;
+                    }
+                    else
+                    {
+                        Damage = (ushort)(Damage - (ushort)Math.Floor(CurrentShieldPool));
+                        CurrentShieldPool = 0.0f;
+                    }
+                }
 
 
                 /// <summary>
@@ -1230,6 +1321,29 @@ namespace Pulsar4X.Entities
                         /// </summary>
                     }
                 break;
+
+                /// <summary>
+                /// For shields I will preserve ShieldIsActive as is, but set the other values down on component destruction.
+                /// </summary.
+                case ComponentTypeTN.Shield:
+
+                   CurrentShieldPoolMax = CurrentShieldPoolMax - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool;
+                   CurrentShieldGen = CurrentShieldGen - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldGenPerTick;
+                   CurrentShieldFuelUse = CurrentShieldFuelUse - (ShipShield[ShipComponents[ID].componentIndex].shieldDef.fuelCostPerDay / 17280.0f);
+
+                   /// <summary>
+                   /// In the event of meson damage/mixed meson and non-meson damage:
+                   /// </summary>
+                   if (CurrentShieldPool != 0.0f && CurrentShieldPool > CurrentShieldPoolMax)
+                       CurrentShieldPool = CurrentShieldPoolMax;
+                break;
+
+                case ComponentTypeTN.AbsorptionShield:
+                    CurrentShieldPool = 0.0f;
+                    CurrentShieldPoolMax = 0.0f;
+                    CurrentShieldGen = 0.0f;
+                    CurrentShieldFuelUse = 0.0f;
+                break;
             }
             return DamageReturn;
         }
@@ -1356,6 +1470,21 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.Reactor:
                     CurrentPowerGen = CurrentPowerGen + ShipReactor[ShipComponents[ComponentIndex].componentIndex].reactorDef.powerGen;
+                break;
+
+                /// <summary>
+                /// For shields I will preserve ShieldIsActive as is, but set the other values down on component destruction.
+                /// </summary.
+                case ComponentTypeTN.Shield:
+                    CurrentShieldPoolMax = CurrentShieldPoolMax + ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool;
+                    CurrentShieldGen = CurrentShieldGen + ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldGenPerTick;
+                    CurrentShieldFuelUse = CurrentShieldFuelUse + (ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.fuelCostPerDay / 17280.0f);
+                break;
+
+                case ComponentTypeTN.AbsorptionShield:
+                    CurrentShieldPoolMax = ShipClass.TotalShieldPool;
+                    CurrentShieldGen = ShipClass.TotalShieldGenPerTick;
+                    CurrentShieldFuelUse = ShipClass.TotalShieldFuelCostPerTick;
                 break;
             }
         }
@@ -1516,6 +1645,38 @@ namespace Pulsar4X.Entities
         }
 
         #endregion
+
+        /// <summary>
+        /// Sets the shields to the specified value
+        /// </summary>
+        /// <param name="Active">Whether shields are active(true), or inactive(false)</param>
+        public void ShipSetShields(bool Active)
+        {
+            ShieldIsActive = Active;
+
+            if (ShieldIsActive == false)
+            {
+                CurrentShieldPool = 0.0f;
+            }
+        }
+
+        /// <summary>
+        /// Recharges the ships shields, if they are active.
+        /// </summary>
+        public void RechargeShields()
+        {
+            if (ShieldIsActive == true)
+            {
+                if(CurrentShieldPool + CurrentShieldGen >= CurrentShieldPoolMax)
+                {
+                    CurrentShieldPool = CurrentShieldPoolMax;
+                }
+                else
+                {
+                    CurrentShieldPool = CurrentShieldPool + CurrentShieldGen;
+                }
+            }
+        }
     }
     /// <summary>
     /// End of ShipTN class

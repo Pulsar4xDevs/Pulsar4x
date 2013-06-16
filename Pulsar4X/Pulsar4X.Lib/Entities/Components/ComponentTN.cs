@@ -48,6 +48,9 @@ namespace Pulsar4X.Entities.Components
 
         Reactor,
 
+        Shield,
+        AbsorptionShield,
+
         TypeCount
     }
 

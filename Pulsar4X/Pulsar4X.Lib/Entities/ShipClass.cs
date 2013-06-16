@@ -311,6 +311,7 @@ namespace Pulsar4X.Entities
         [Browsable(false)]
         public bool HasBridge { get; set; }
 
+        #region Engine 314
         /// <summary>
         /// each ship class can only have one type of engine, though several copies may be present.
         /// </summary>
@@ -358,7 +359,9 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int MaxSpeed { get; set; }
+        #endregion
 
+        #region Active and Passive Sensors 364
         /// <summary>
         /// List of passive sensor types, and how many of each that there are in this ship.
         /// Likewise the best possible sensors are stored.
@@ -430,8 +433,9 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int MaxEMSignature { get; set; }
+        #endregion
 
-
+        #region Cargo/Cryo/Troop loading and unloading 438
         /// <summary>
         /// List of Cargo hold definitions present on this ship class.
         /// </summary>
@@ -555,8 +559,9 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int TroopLoadTime { get; set; }
+        #endregion
 
-
+        #region Beam & FC Info 564
         [DisplayName("Beam Fire Controls"),
         Category("Component Lists"),
         Description("List of Beam Fire Controls on this ship class."),
@@ -608,10 +613,54 @@ namespace Pulsar4X.Entities
 
         [DisplayName("Total Power Generation"),
         Category("Detials"),
-        Description("Power Generation of all reactors on this ship class.."),
+        Description("Power Generation of all reactors on this ship class."),
         Browsable(true),
         ReadOnly(true)]
         public int TotalPowerGeneration { get; set; }
+        #endregion
+
+
+        #region Shield Info 623
+        /// <summary>
+        /// Only 1 shield is allowed per class.
+        /// </summary>
+        [DisplayName("Ship Shield"),
+        Category("Shield Stats"),
+        Description("The Shield type present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public ShieldDefTN ShipShieldDef { get; set; }
+
+        [DisplayName("Shield Count"),
+        Category("Component Counts"),
+        Description("Count of Shields on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public ushort ShipShieldCount { get; set; }
+
+        [DisplayName("Total Shield Pool"),
+        Category("Detials"),
+        Description("Shield Strength Total for every shield on this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public float TotalShieldPool { get; set; }
+
+        [DisplayName("Total Shield Regeneration per Tick"),
+        Category("Detials"),
+        Description("Total Shield Regeneration of every shield on this ship class per tick."),
+        Browsable(true),
+        ReadOnly(true)]
+        public float TotalShieldGenPerTick { get; set; }
+
+        [DisplayName("Total Fuel Cost Per Tick"),
+        Category("Detials"),
+        Description("Total fuel consumed every tick to keep the shields operating."),
+        Browsable(true),
+        ReadOnly(true)]
+        public float TotalShieldFuelCostPerTick { get; set; }
+        #endregion
+
+
         #endregion
 
         #region Constructor
@@ -725,6 +774,12 @@ namespace Pulsar4X.Entities
 
             TotalPowerGeneration = 0;
             TotalPowerRequirement = 0;
+
+            ShipShieldDef = null;
+            ShipShieldCount = 0;
+            TotalShieldPool = 0.0f;
+            TotalShieldFuelCostPerTick = 0.0f;
+            TotalShieldGenPerTick = 0.0f;
         }
         #endregion
 
@@ -1371,7 +1426,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Sensor">Active sensor definition</param>
         /// <param name="inc">Number of sensors to add.</param>
-        public void AddActiveSensor(ActiveSensorDefTN Sensor, byte inc)
+        public void AddActiveSensor(ActiveSensorDefTN Sensor, short inc)
         {
             int SensorIndex = ShipASensorDef.IndexOf(Sensor);
             if (SensorIndex != -1)
@@ -1412,7 +1467,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="BFC">Beam fire control</param>
         /// <param name="inc">Number to add or subtract</param>
-        public void AddBeamFireControl(BeamFireControlDefTN BFC, byte inc)
+        public void AddBeamFireControl(BeamFireControlDefTN BFC, short inc)
         {
             int BFCIndex = ShipBFCDef.IndexOf(BFC);
             if (BFCIndex != -1)
@@ -1451,7 +1506,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Beam">Beam weapon</param>
         /// <param name="inc">increment to add or subtract</param>
-        public void AddBeamWeapon(BeamDefTN Beam, byte inc)
+        public void AddBeamWeapon(BeamDefTN Beam, short inc)
         {
             int BeamIndex = ShipBeamDef.IndexOf(Beam);
             if (BeamIndex != -1)
@@ -1486,7 +1541,7 @@ namespace Pulsar4X.Entities
             UpdateClass(Beam, inc);
         }
 
-        public void AddReactor(ReactorDefTN Reactor, byte inc)
+        public void AddReactor(ReactorDefTN Reactor, short inc)
         {
             int ReactorIndex = ShipReactorDef.IndexOf(Reactor);
             if (ReactorIndex != -1)
@@ -1519,6 +1574,67 @@ namespace Pulsar4X.Entities
 
             TotalPowerGeneration = TotalPowerGeneration + (int)(Reactor.powerGen * inc);
             UpdateClass(Reactor, inc);
+        }
+
+        public void AddShield(ShieldDefTN Shield, short inc)
+        {
+            /// <summary>
+            /// Just blow away the previous definition.
+            /// </summary>
+            if (ShipShieldDef == Shield)
+            {
+                if (ShipShieldDef.componentType != ComponentTypeTN.AbsorptionShield)
+                {
+                    ShipShieldCount = (ushort)((short)ShipShieldCount + inc);
+
+                    if (ShipShieldCount != 0)
+                    {
+                        TotalShieldPool = TotalShieldPool + (ShipShieldDef.shieldPool * inc);
+                        TotalShieldGenPerTick = TotalShieldGenPerTick + (ShipShieldDef.shieldGenPerTick * inc);
+                        TotalShieldFuelCostPerTick = TotalShieldFuelCostPerTick + ((ShipShieldDef.fuelCostPerDay / 17280.0f) * inc);
+                    }
+                    else
+                    {
+                        TotalShieldPool = 0.0f;
+                        TotalShieldGenPerTick = 0.0f;
+                        TotalShieldFuelCostPerTick = 0.0f;
+                        ShipShieldDef = null;
+                    }
+                }
+                else
+                {
+                    if (ShipShieldCount == 1 && inc == -1)
+                    {
+                        ShipShieldCount = 0;
+                        TotalShieldPool = 0.0f;
+                        TotalShieldGenPerTick = 0.0f;
+                        TotalShieldFuelCostPerTick = 0.0f;
+                        ShipShieldDef = null;
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Multiple shields of this type are not allowed.
+                        /// </summary>
+                    }
+                }
+            }
+            else if (ShipShieldDef == null)
+            {
+                ShipShieldDef = Shield;
+                ShipShieldCount = (ushort)((short)ShipShieldCount + inc);
+                TotalShieldPool = TotalShieldPool + (ShipShieldDef.shieldPool * inc);
+                TotalShieldGenPerTick = TotalShieldGenPerTick + (ShipShieldDef.shieldGenPerTick * inc);
+                TotalShieldFuelCostPerTick = TotalShieldFuelCostPerTick + ((ShipShieldDef.fuelCostPerDay / 17280.0f) * inc);
+            }
+            else
+            {
+                /// <summary>
+                /// Multiple shield types are not allowed.
+                /// </summary>
+            }
+
+            UpdateClass(Shield, inc);
         }
     }
 }
