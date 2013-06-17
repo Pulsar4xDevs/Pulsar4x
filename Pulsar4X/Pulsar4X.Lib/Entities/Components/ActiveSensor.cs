@@ -205,6 +205,8 @@ namespace Pulsar4X.Entities.Components
             isSalvaged = false;
             isObsolete = false;
             isDivisible = false;
+
+            isElectronic = true;
         }
         ///<summary>
         ///End ActiveSensorDefTN()

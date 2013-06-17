@@ -212,9 +212,13 @@ namespace Pulsar4X.Entities.Components
             }
 
             isMilitary = true;
+
+            isElectronic = true;
+
             isSalvaged = false;
             isObsolete = false;
             isDivisible = false;
+
         }
     }
 

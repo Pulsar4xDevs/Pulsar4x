@@ -140,6 +140,16 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Is this an electronic component that belongs in the EDAC, and is vulnerable to microwave damage?
+        /// </summary>
+        private bool IsElectronic;
+        public bool isElectronic
+        {
+            get { return IsElectronic; }
+            set { IsElectronic = value; }
+        }
+
+        /// <summary>
         /// What type of component is this?
         /// </summary>
         private ComponentTypeTN ComponentType;

@@ -802,7 +802,7 @@ namespace Pulsar4X.Entities
         /// <param name="Component">Basic abstract class definition of the added component.</param>
         /// <param name="increment">The number of new components to be added.</param>
         /// <param name="isElectronic">Whether or not this component should go in the EDAC</param>
-        private void UpdateClass(ComponentDefTN Component, short increment, bool isElectronic=false )
+        private void UpdateClass(ComponentDefTN Component, short increment)
         {
             int CIndex = ListOfComponentDefs.IndexOf(Component);
             if (CIndex != -1)
@@ -818,7 +818,7 @@ namespace Pulsar4X.Entities
                 ListOfComponentDefsCount.Add(increment);
                 DamageAllocationChart.Add(Component, -1);
 
-                if (isElectronic == true)
+                if (Component.isElectronic == true)
                 {
                     ElectronicDamageAllocationChart.Add(Component, -1);
                 }
@@ -833,7 +833,7 @@ namespace Pulsar4X.Entities
                         ListOfComponentDefsCount.RemoveAt(CIndex);
                         ListOfComponentDefs.RemoveAt(CIndex);
 
-                        if (isElectronic == true)
+                        if (Component.isElectronic == true)
                         {
                             ElectronicDamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
                         }
@@ -945,6 +945,10 @@ namespace Pulsar4X.Entities
             CryoLoadTime = (SpareCryoBerths * Constants.ShipTN.BaseCryoLoadTimePerPerson) / TractorMultiplier;
             TroopLoadTime = (TotalTroopCapacity * Constants.ShipTN.BaseTroopLoadTime) / TractorMultiplier;
 
+
+            /// <summary>
+            /// This code recalculates the entire DAC and EDAC every time a component is added or subtracted from the design.
+            /// </summary>
             int DAC = 0;
             int EDAC = 0;
             for (int loop = 0; loop < ListOfComponentDefs.Count; loop++)
@@ -956,7 +960,7 @@ namespace Pulsar4X.Entities
                     DamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + DAC;
                     DAC = DAC + localDAC;
 
-                    if (isElectronic == true)
+                    if (ListOfComponentDefs[loop].isElectronic == true)
                     {
                         ElectronicDamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + EDAC;
                         EDAC = EDAC + localDAC;
@@ -969,7 +973,7 @@ namespace Pulsar4X.Entities
                     DamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + DAC;
                     DAC = DAC + localDAC;
 
-                    if (isElectronic == true)
+                    if (ListOfComponentDefs[loop].isElectronic == true)
                     {
                         ElectronicDamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + EDAC;
                         EDAC = EDAC + localDAC;
@@ -1418,7 +1422,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            UpdateClass(Sensor, inc, true);
+            UpdateClass(Sensor, inc);
         }
 
         /// <summary>
@@ -1459,7 +1463,7 @@ namespace Pulsar4X.Entities
 
             MaxEMSignature = MaxEMSignature + (Sensor.gps * (int)inc);
 
-            UpdateClass(Sensor, inc, true);
+            UpdateClass(Sensor, inc);
         }
 
         /// <summary>
@@ -1498,7 +1502,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            UpdateClass(BFC, inc, true);
+            UpdateClass(BFC, inc);
         }
 
         /// <summary>

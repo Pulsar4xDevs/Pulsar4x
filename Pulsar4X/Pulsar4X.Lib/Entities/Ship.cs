@@ -812,69 +812,86 @@ namespace Pulsar4X.Entities
                     }
                 }
 
-
                 /// <summary>
-                /// Armor Penetration.
+                /// Shields absorbed all damage.
                 /// </summary>
-                ushort Columns = ShipArmor.armorDef.cNum;
-                short left, right;
+                if (Damage == 0)
+                    return false;
 
-                ushort ImpactLevel = ShipArmor.armorDef.depth;
-                if (ShipArmor.isDamaged == true)
-                    ImpactLevel = ShipArmor.armorColumns[HitLocation];
-
-                DamageTableTN Table;
-                switch (Type)
+                if (Type != DamageTypeTN.Microwave)
                 {
-                    case DamageTypeTN.Beam: Table = DamageValuesTN.EnergyTable[Damage - 1];
-                        break;
-                    case DamageTypeTN.Kinetic: Table = DamageValuesTN.KineticTable[Damage - 1];
-                        break;
-                    case DamageTypeTN.Missile: Table = DamageValuesTN.MissileTable[Damage - 1];
-                        break;
-                    case DamageTypeTN.Plasma: Table = DamageValuesTN.PlasmaTable[Damage - 1];
-                        break;
-                    default:
-                        Table = DamageValuesTN.MissileTable[Damage - 1];
-                        break;
-                }
-                left = (short)(HitLocation - 1);
-                right = (short)(HitLocation + 1);
-                internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
-                if (Type == DamageTypeTN.Plasma)
-                {
-                    internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
-                    right++;
-                }
-
-                for (int loop = 1; loop <= Table.halfSpread; loop++)
-                {
-                    if (left < 0)
-                    {
-                        left = (short)(Columns - 1);
-                    }
-                    if (right >= Columns)
-                    {
-                        right = 0;
-                    }
 
                     /// <summary>
-                    /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
+                    /// Armor Penetration.
                     /// </summary>
-                    if (Table.hitPoint - loop >= 0)
+                    ushort Columns = ShipArmor.armorDef.cNum;
+                    short left, right;
+
+                    ushort ImpactLevel = ShipArmor.armorDef.depth;
+                    if (ShipArmor.isDamaged == true)
+                        ImpactLevel = ShipArmor.armorColumns[HitLocation];
+
+                    DamageTableTN Table;
+                    switch (Type)
                     {
-                        if (ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
-                            internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
+                        case DamageTypeTN.Beam: Table = DamageValuesTN.EnergyTable[Damage - 1];
+                            break;
+                        case DamageTypeTN.Kinetic: Table = DamageValuesTN.KineticTable[Damage - 1];
+                            break;
+                        case DamageTypeTN.Missile: Table = DamageValuesTN.MissileTable[Damage - 1];
+                            break;
+                        case DamageTypeTN.Plasma: Table = DamageValuesTN.PlasmaTable[Damage - 1];
+                            break;
+                        default:
+                            Table = DamageValuesTN.MissileTable[Damage - 1];
+                            break;
+                    }
+                    left = (short)(HitLocation - 1);
+                    right = (short)(HitLocation + 1);
+                    internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
+                    if (Type == DamageTypeTN.Plasma)
+                    {
+                        internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
+                        right++;
                     }
 
-                    if (Table.hitPoint + loop < Table.damageTemplate.Count)
+                    for (int loop = 1; loop <= Table.halfSpread; loop++)
                     {
-                        if (ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
-                            internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
+                        if (left < 0)
+                        {
+                            left = (short)(Columns - 1);
+                        }
+                        if (right >= Columns)
+                        {
+                            right = 0;
+                        }
+
+                        /// <summary>
+                        /// side impact damage doesn't always reduce armor, the principle hitpoint should be the site of the deepest armor penetration. Damage can be wasted in this manner.
+                        /// </summary>
+                        if (Table.hitPoint - loop >= 0)
+                        {
+                            if (ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
+                                internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
+                        }
+
+                        if (Table.hitPoint + loop < Table.damageTemplate.Count)
+                        {
+                            if (ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
+                                internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
+                        }
+
+                        left--;
+                        right++;
                     }
 
-                    left--;
-                    right++;
+                }
+                else
+                {
+                    /// <summary>
+                    /// This is a microwave strike.
+                    /// </summary>
+                    internalDamage = 1;
                 }
             }
             else
@@ -977,7 +994,8 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 while (Attempts < 5 && internalDamage > 0)
                 {
-                    int DACHit = DacRNG.Next(1, ShipClass.ElectronicDamageAllocationChart[ShipClass.ElectronicDamageAllocationChart.Keys.Max()]);
+                    ComponentDefTN last = ShipClass.ElectronicDamageAllocationChart.Keys.Last();
+                    int DACHit = DacRNG.Next(1, ShipClass.ElectronicDamageAllocationChart[last]);
 
                     int localDAC = 1;
                     int previousDAC = 1;
@@ -1002,8 +1020,10 @@ namespace Pulsar4X.Entities
                             /// Actually destroy the component.
                             /// Store EDAC index values somewhere for speed?
                             /// </summary>
-                            
-                            int ComponentIndex = ShipClass.ListOfComponentDefs.IndexOf(list.Key);
+
+                            int CI = ShipClass.ListOfComponentDefs.IndexOf(list.Key);
+
+                            int ComponentIndex = ShipComponents[ComponentDefIndex[CI] + destroy].componentIndex;
 
                             float hardCheck = (float)DacRNG.Next(1, 100);
                             float hardValue = -1.0f;
@@ -1014,10 +1034,10 @@ namespace Pulsar4X.Entities
                                     hardValue = ShipASensor[ComponentIndex].aSensorDef.hardening * 100.0f;
                                 break;
                                 case ComponentTypeTN.PassiveSensor :
-                                hardValue = ShipPSensor[ComponentIndex].pSensorDef.hardening * 100.0f;
+                                    hardValue = ShipPSensor[ComponentIndex].pSensorDef.hardening * 100.0f;
                                 break;
                                 case ComponentTypeTN.BeamFireControl :
-                                hardValue = ShipBFC[ComponentIndex].beamFireControlDef.hardening * 100.0f;
+                                    hardValue = ShipBFC[ComponentIndex].beamFireControlDef.hardening * 100.0f;
                                 break;
                             }
 
@@ -1032,8 +1052,11 @@ namespace Pulsar4X.Entities
                             }
                             else
                             {
-                                if(hardCheck < hardValue)
-                                    DamageDone = DestroyComponent(list.Key.componentType, ComponentIndex, internalDamage, destroy, DacRNG);
+
+                                if (hardCheck < hardValue)
+                                {
+                                    DamageDone = DestroyComponent(list.Key.componentType, CI, internalDamage, destroy, DacRNG);
+                                }
                             }
 
                             
@@ -1098,7 +1121,7 @@ namespace Pulsar4X.Entities
                 if (ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk <= Damage)
                 {
                     ShipComponents[ID].isDestroyed = true;
-                    DamageReturn = Damage - ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk;
+                    DamageReturn = ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk;
                 }
                 else
                 {
@@ -1107,11 +1130,16 @@ namespace Pulsar4X.Entities
                     if (htkTest == ShipClass.ListOfComponentDefs[ComponentListDefIndex].htk)
                     {
                         ShipComponents[ID].isDestroyed = true;
-                        DamageReturn = 0;
+                        DamageReturn = Damage;
                     }
                     else
                     {
-                        return 0;
+                        /// <summary>
+                        /// All damage was absorbed by the component without it being destroyed.
+                        /// </summary>
+                        
+                        DamageReturn = Damage;
+                        return DamageReturn;
                     }
                 }
             }
@@ -1551,41 +1579,48 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Rechargest energyweapons to currentPowerGeneration of the ship.
         /// </summary>
-        public void RechargeBeamWeapons()
+        /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
+        public void RechargeBeamWeapons(uint tick)
         {
-            if (CurrentPowerGen > ShipClass.TotalPowerRequirement)
+            ushort amt = (ushort)(Math.Floor((float)tick / 5.0f));
+
+            int PowerRecharge = CurrentPowerGen * amt;
+
+            if (PowerRecharge > ShipClass.TotalPowerRequirement)
             {
                 for (int loop = 0; loop < ShipBeam.Count; loop++)
                 {
-                    if (ShipBeam[loop].currentCapacitor + ShipBeam[loop].beamDef.weaponCapacitor > ShipBeam[loop].beamDef.powerRequirement)
+                    ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
+                    if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
                     {
                         ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
                     }
                     else
                     {
-                        ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)ShipBeam[loop].beamDef.weaponCapacitor);
+                        ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + beamCap);
                     }
                 }
             }
             else
             {
-                int AvailablePower = CurrentPowerGen;
+                int AvailablePower = PowerRecharge;
 
                 for (int loop = 0; loop < ShipBeam.Count; loop++)
                 {
                     int WeaponPowerRequirement = ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
+                    ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
 
-                    if (AvailablePower > ShipBeam[loop].beamDef.weaponCapacitor)
+                    if (AvailablePower > beamCap)
                     {
-                        if (ShipBeam[loop].currentCapacitor + ShipBeam[loop].beamDef.weaponCapacitor > ShipBeam[loop].beamDef.powerRequirement)
+                        if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
                         {
                             AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
                             ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
                         }
                         else
                         {
-                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)ShipBeam[loop].beamDef.weaponCapacitor);
-                            AvailablePower = AvailablePower - ShipBeam[loop].beamDef.weaponCapacitor;
+                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)beamCap);
+                            AvailablePower = AvailablePower - beamCap;
                         }
                     }
                     else
@@ -1650,7 +1685,7 @@ namespace Pulsar4X.Entities
         /// Sets the shields to the specified value
         /// </summary>
         /// <param name="Active">Whether shields are active(true), or inactive(false)</param>
-        public void ShipSetShields(bool Active)
+        public void SetShields(bool Active)
         {
             ShieldIsActive = Active;
 
@@ -1663,17 +1698,22 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Recharges the ships shields, if they are active.
         /// </summary>
-        public void RechargeShields()
+        /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
+        public void RechargeShields(uint tick)
         {
             if (ShieldIsActive == true)
             {
-                if(CurrentShieldPool + CurrentShieldGen >= CurrentShieldPoolMax)
+                float amt = (float)tick / 5.0f;
+
+                float ShieldRecharge = CurrentShieldGen * amt;
+
+                if (CurrentShieldPool + ShieldRecharge >= CurrentShieldPoolMax)
                 {
                     CurrentShieldPool = CurrentShieldPoolMax;
                 }
                 else
                 {
-                    CurrentShieldPool = CurrentShieldPool + CurrentShieldGen;
+                    CurrentShieldPool = CurrentShieldPool + ShieldRecharge;
                 }
             }
         }

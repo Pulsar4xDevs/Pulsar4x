@@ -1435,7 +1435,7 @@ namespace Pulsar4X.Tests
                                         P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                 }
                             }
-                            P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons();
+                            P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons(5);
                         }
                     }
                 }
@@ -1636,11 +1636,94 @@ namespace Pulsar4X.Tests
                     }
                 }
             }
-            /// <summary>
-            /// Issues thus far:
-            /// </summary>
+        }
+
+        [Test]
+        public void MesonMicrowaveShieldTest()
+        {
+            DamageValuesTN.init();
+
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+            System1.Stars[0].Planets.Add(pl2);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 2.0;
+            System1.Stars[0].Planets[1].YSystem = 2.0;
 
 
+            PlayerFaction1.AddNewShipDesign("Blucher");
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 5);
+            PlayerFaction1.ShipDesigns[0].AddActiveSensor(PlayerFaction1.ComponentList.ActiveSensorDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddShield(PlayerFaction1.ComponentList.ShieldDef[0], 10);
+
+            PlayerFaction1.ShipDesigns[0].NewArmor("Conventional", 2, 5);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].SetShields(true);
+
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool,PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].RechargeShields(300);
+
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
+
+            ushort Columns = PlayerFaction1.TaskGroups[0].Ships[0].ShipArmor.armorDef.cNum;
+            Random Gen = new Random();
+            ushort HitLocation = (ushort)Gen.Next(0, Columns);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
+
+            HitLocation = (ushort)Gen.Next(0, Columns);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
+
+            HitLocation = (ushort)Gen.Next(0, Columns);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
+
+            HitLocation = (ushort)Gen.Next(0, Columns);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+
+            Console.WriteLine("{0} {1} {2}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax,
+                                             PlayerFaction1.TaskGroups[0].Ships[0].DestroyedComponents.Count);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].RechargeShields(300);
+
+            Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
+
+            HitLocation = (ushort)Gen.Next(0, Columns);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Meson, 1, HitLocation);
+
+            Console.WriteLine("{0} {1} {2}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax,
+                                 PlayerFaction1.TaskGroups[0].Ships[0].DestroyedComponents.Count);
         }
     }
 }
