@@ -306,6 +306,7 @@ namespace Pulsar4X.Entities
             UpdatePassiveSensors(ship);
 
             AddShipToSort(ship);
+
         }
 
         /// <summary>
@@ -634,7 +635,7 @@ namespace Pulsar4X.Entities
 
             if (Ships[ShipIndex].CurrentEMSignature != oldEMSignature)
             {
-                SortShipBySignature(Ships[ShipIndex].EMList,EMSortList);
+                SortShipBySignature(Ships[ShipIndex].EMList,EMSortList,1);
             }
         }
         /// <summary>
@@ -642,74 +643,187 @@ namespace Pulsar4X.Entities
         /// </summary>
 
         /// <summary>
-        /// Sort ship by signature takes a ship's linkedList node and puts it in the appropriate place in SortList.
+        /// Sort ship by signature takes a ship's linkedList node and puts it in the appropriate place in SortList. this does not sort signatures, that must be done elsewhere.
         /// </summary>
         /// <param name="ShipSignatureNode">The node for the ship.</param>
         /// <param name="SortList">The overall taskgroup list.</param>
-        public void SortShipBySignature(LinkedListNode<int> ShipSignatureNode, LinkedList<int> SortList)
+        /// <param name="TEA">Whether this is a thermal,em, or active sorting.</param>
+        public void SortShipBySignature(LinkedListNode<int> ShipSignatureNode, LinkedList<int> SortList, int TEA)
         {
-            bool sorted = false;
 
             /// <summary>
-            /// First check if new sorting needs to be done.
+            /// Before the sortlist can be worked on, the values must be adjusted accordingly.
+            /// Node.Value is this ship's placement within the sortList, not its signature, this is an important distinction to be aware of.
             /// </summary>
-            if (ShipSignatureNode == SortList.First && SortList.First.Next != null)
-            {
-                if (ShipSignatureNode.Value < SortList.First.Next.Value)
-                    sorted = true;
-            }
-            else if (ShipSignatureNode == SortList.Last && SortList.Last.Previous != null)
-            {
-                if (ShipSignatureNode.Value > SortList.Last.Previous.Value)
-                    sorted = true;
-            }
+            
+            LinkedListNode<int> Prev = ShipSignatureNode.Previous;
+            LinkedListNode<int> Next = ShipSignatureNode.Next;
 
-            /// <summary>
-            /// The list needs to be resorted.
-            /// </summary>
-            if (sorted == false)
+            if (ShipSignatureNode == SortList.First)
+                Prev = ShipSignatureNode;
+            else
+                Prev = ShipSignatureNode.Previous;
+
+            if (ShipSignatureNode == SortList.Last)
+                Next = ShipSignatureNode;
+            else
+                Next = ShipSignatureNode.Next;
+
+            switch (TEA)
             {
-                if (ShipSignatureNode.Value <= SortList.First.Value && ShipSignatureNode != SortList.First)
-                {
-                    SortList.Remove(ShipSignatureNode);
-                    SortList.AddBefore(SortList.First, ShipSignatureNode);
-                }
-                else if (ShipSignatureNode.Value >= SortList.Last.Value && ShipSignatureNode != SortList.Last)
-                {
-                    SortList.Remove(ShipSignatureNode);
-                    SortList.AddAfter(SortList.Last, ShipSignatureNode);
-                }
-                else
-                {
-                    bool done = false;
-                    LinkedListNode<int> Temp = SortList.First;
-                    if (SortList.First == SortList.Last)
-                        done = true;
-
-                    
-
-                    while (done == false)
+                case 0 :
+                    if (Ships[ShipSignatureNode.Value].CurrentThermalSignature < Ships[Prev.Value].CurrentThermalSignature)
                     {
-                        Temp = Temp.Next;
-                        if (ShipSignatureNode.Value >= Temp.Value && ShipSignatureNode != Temp)
-                        {
-                            SortList.Remove(ShipSignatureNode);
-                            SortList.AddAfter(Temp, ShipSignatureNode);
-                            done = true;
-                        }
                         /// <summary>
-                        /// Hopefully this error condition won't come up.
+                        /// Thermal signature was lowered, and we need to adjust value downwards. Engine destruction most likely.
                         /// </summary>
-                        if (Temp == SortList.Last)
+
+                        while (Ships[ShipSignatureNode.Value].CurrentThermalSignature < Ships[Prev.Value].CurrentThermalSignature)
                         {
-                            done = true;
+                            if (Prev == SortList.First)
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddBefore(Prev, ShipSignatureNode);
+                                break;
+                            }
+                            else
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddBefore(Prev, ShipSignatureNode);
+                                Prev = ShipSignatureNode.Previous;
+                            }
                         }
                     }
-                }
-            }
-            /// <summary>
-            /// End if !sorted
-            /// </summary>
+                    else if (Ships[ShipSignatureNode.Value].CurrentThermalSignature > Ships[Next.Value].CurrentThermalSignature)
+                    {
+                        /// <summary>
+                        /// Thermal signature went up, engine repair is the only condition that would cause this that I can think of.
+                        /// </summary>
+                        while (Ships[ShipSignatureNode.Value].CurrentThermalSignature > Ships[Next.Value].CurrentThermalSignature)
+                        {
+                            if (Next == SortList.Last)
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddAfter(Next, ShipSignatureNode);
+                                break;
+                            }
+                            else
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddAfter(Next, ShipSignatureNode);
+                                Next = ShipSignatureNode.Next;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Thermal signature may have changed, but not enough to alter Value placement.
+                        /// </summary>
+                    }
+                break;
+                case 1 :
+                   if (Ships[ShipSignatureNode.Value].CurrentEMSignature < Ships[Prev.Value].CurrentEMSignature)
+                   {
+                       /// <summary>
+                       /// EM signature was lowered, and we need to adjust value downwards. Shield/sensor deactivation/destruction are probable causes.
+                       /// </summary>
+                       while (Ships[ShipSignatureNode.Value].CurrentEMSignature < Ships[Prev.Value].CurrentEMSignature)
+                       {
+                           if (Prev == SortList.First)
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddBefore(Prev, ShipSignatureNode);
+                               break;
+                           }
+                           else
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddBefore(Prev, ShipSignatureNode);
+                               Prev = ShipSignatureNode.Previous;
+                           }
+                       }
+                   }
+                   else if (Ships[ShipSignatureNode.Value].CurrentEMSignature > Ships[Next.Value].CurrentEMSignature)
+                   {
+                       /// <summary>
+                       /// EM signature went up, Shield/sensor activation or repair are probable causes of this.
+                       /// </summary>
+                       while (Ships[ShipSignatureNode.Value].CurrentEMSignature > Ships[Next.Value].CurrentEMSignature)
+                       {
+                           if (Next == SortList.Last)
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddAfter(Next, ShipSignatureNode);
+                               break;
+                           }
+                           else
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddAfter(Next, ShipSignatureNode);
+                               Next = ShipSignatureNode.Next;
+                           }
+                       }
+                   }
+                   else
+                   {
+                       /// <summary>
+                       /// EM signature may have changed, but not enough to alter Value placement.
+                       /// </summary>
+                   }
+                break;
+                case 2 :
+                   if (Ships[ShipSignatureNode.Value].TotalCrossSection < Ships[Prev.Value].TotalCrossSection)
+                   {
+                       /// <summary>
+                       /// TCS signature was lowered, a cloaking device got repaired.
+                       /// </summary>
+                       while (Ships[ShipSignatureNode.Value].TotalCrossSection < Ships[Prev.Value].TotalCrossSection)
+                       {
+                           if (Prev == SortList.First)
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddBefore(Prev, ShipSignatureNode);
+                               break;
+                           }
+                           else
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddBefore(Prev, ShipSignatureNode);
+                               Prev = ShipSignatureNode.Previous;
+                           }
+                       }
+                   }
+                   else if (Ships[ShipSignatureNode.Value].TotalCrossSection > Ships[Next.Value].TotalCrossSection)
+                   {
+                       /// <summary>
+                       /// TCS signature went up, cloaking device destruction is basically it.
+                       /// </summary>
+                       while (Ships[ShipSignatureNode.Value].TotalCrossSection > Ships[Next.Value].TotalCrossSection)
+                       {
+                           if (Next == SortList.Last)
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddAfter(Next, ShipSignatureNode);
+                               break;
+                           }
+                           else
+                           {
+                               SortList.Remove(ShipSignatureNode);
+                               SortList.AddAfter(Next, ShipSignatureNode);
+                               Next = ShipSignatureNode.Next;
+                           }
+                       }
+                   }
+                   else
+                   {
+                       /// <summary>
+                       /// TCS may have changed, but not enough to alter Value placement.
+                       /// </summary>
+                   }
+                break;
+
+            };
         }
         /// <summary>
         /// End SortShipBySignature

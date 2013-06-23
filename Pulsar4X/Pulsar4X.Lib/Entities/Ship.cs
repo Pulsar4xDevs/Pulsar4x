@@ -1214,8 +1214,19 @@ namespace Pulsar4X.Entities
                         CurrentMaxThermalSignature = 1; //it shouldn't be 0 either.
                     }
 
-                    if (CurrentSpeed > CurrentMaxSpeed)
-                        SetSpeed(CurrentMaxSpeed);
+                    int oldThermal = CurrentThermalSignature;
+
+                    if (ShipsTaskGroup.CurrentSpeed > CurrentMaxSpeed)
+                    {
+                        ShipsTaskGroup.CurrentSpeed = CurrentMaxSpeed;
+                        for (int loop = 0; loop < ShipsTaskGroup.Ships.Count; loop++)
+                        {
+                            ShipsTaskGroup.Ships[loop].SetSpeed(ShipsTaskGroup.CurrentSpeed);
+                        }
+                    }
+
+                    if (oldThermal != CurrentThermalSignature)
+                        ShipsTaskGroup.SortShipBySignature(ThermalList, ShipsTaskGroup.ThermalSortList, 0);
 
                     int ExpTest = DacRNG.Next(1, 100);
 
@@ -1364,6 +1375,12 @@ namespace Pulsar4X.Entities
                    /// </summary>
                    if (CurrentShieldPool != 0.0f && CurrentShieldPool > CurrentShieldPoolMax)
                        CurrentShieldPool = CurrentShieldPoolMax;
+
+                   if (ShieldIsActive == true)
+                   {
+                       CurrentEMSignature = CurrentEMSignature - (int)(ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool * 30.0f);
+                       ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                   }
                 break;
 
                 case ComponentTypeTN.AbsorptionShield:
@@ -1371,6 +1388,12 @@ namespace Pulsar4X.Entities
                     CurrentShieldPoolMax = 0.0f;
                     CurrentShieldGen = 0.0f;
                     CurrentShieldFuelUse = 0.0f;
+
+                    if (ShieldIsActive == true)
+                    {
+                        CurrentEMSignature = CurrentEMSignature - (int)(ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool * 30.0f);
+                        ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                    }
                 break;
             }
             return DamageReturn;
@@ -1435,7 +1458,28 @@ namespace Pulsar4X.Entities
                     }
                     else
                         CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
-                        SetSpeed(CurrentMaxSpeed);
+
+                    int speedMin=0;
+                    for (int loop = 0; loop < ShipsTaskGroup.Ships.Count; loop++)
+                    {
+                        if (ShipsTaskGroup.Ships[loop].CurrentMaxSpeed > speedMin)
+                            speedMin = CurrentMaxSpeed;
+                    }
+
+                    int oldThermal = CurrentThermalSignature;
+
+                    if (speedMin > ShipsTaskGroup.CurrentSpeed)
+                    {
+                        ShipsTaskGroup.CurrentSpeed = speedMin;
+                        for (int loop = 0; loop < ShipsTaskGroup.Ships.Count; loop++)
+                        {
+                            ShipsTaskGroup.Ships[loop].SetSpeed(ShipsTaskGroup.CurrentSpeed);
+                        }
+                    }
+
+                    if(oldThermal != CurrentThermalSignature)
+                        ShipsTaskGroup.SortShipBySignature(ThermalList, ShipsTaskGroup.ThermalSortList, 0);
+
                 break;
                 case ComponentTypeTN.PassiveSensor:
                     if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.thermalOrEM == PassiveSensorType.EM)
@@ -1507,12 +1551,24 @@ namespace Pulsar4X.Entities
                     CurrentShieldPoolMax = CurrentShieldPoolMax + ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool;
                     CurrentShieldGen = CurrentShieldGen + ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldGenPerTick;
                     CurrentShieldFuelUse = CurrentShieldFuelUse + (ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.fuelCostPerDay / 17280.0f);
+
+                    if (ShieldIsActive == true)
+                    {
+                        CurrentEMSignature = CurrentEMSignature + (int)(ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool * 30.0f);
+                        ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                    }
                 break;
 
                 case ComponentTypeTN.AbsorptionShield:
                     CurrentShieldPoolMax = ShipClass.TotalShieldPool;
                     CurrentShieldGen = ShipClass.TotalShieldGenPerTick;
                     CurrentShieldFuelUse = ShipClass.TotalShieldFuelCostPerTick;
+
+                    if (ShieldIsActive == true)
+                    {
+                        CurrentEMSignature = CurrentEMSignature + (int)(ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool * 30.0f);
+                        ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                    }
                 break;
             }
         }
@@ -1687,6 +1743,17 @@ namespace Pulsar4X.Entities
         /// <param name="Active">Whether shields are active(true), or inactive(false)</param>
         public void SetShields(bool Active)
         {
+            if(ShieldIsActive == true && Active == false)
+            {
+                CurrentEMSignature = CurrentEMSignature - (int)(CurrentShieldPoolMax * 30.0f);
+                ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+            }
+            else if(ShieldIsActive == false && Active == true)
+            {
+                CurrentEMSignature = CurrentEMSignature + (int)(CurrentShieldPoolMax * 30.0f);
+                ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+            }
+
             ShieldIsActive = Active;
 
             if (ShieldIsActive == false)

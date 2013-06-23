@@ -1638,6 +1638,7 @@ namespace Pulsar4X.Entities
                 /// </summary>
             }
 
+            MaxEMSignature = MaxEMSignature + (int)(Shield.shieldPool * 30.0f * (float)inc);
             UpdateClass(Shield, inc);
         }
     }

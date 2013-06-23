@@ -366,14 +366,41 @@ namespace Pulsar4X.Tests
             }
 
             LinkedListNode<int> AS = TaskGroup1.ActiveSortList.First;
+            LinkedListNode<int> ES = TaskGroup1.EMSortList.First;
             LinkedListNode<int> TS = TaskGroup1.ThermalSortList.First;
             for(int loop = 0; loop < 5; loop++)
             {
-                Console.WriteLine("AL:{0},TL:{1} || Ship{2} AL:{3},TL:{4} : {5} {6} {7} {8} {9} {10} {11}", AS.Value, TS.Value, loop,TaskGroup1.Ships[loop].ActiveList.Value, TaskGroup1.Ships[loop].ThermalList.Value, 
-                    TaskGroup1.Ships[loop].CurrentSpeed,TaskGroup1.Ships[loop].CurrentEnginePower,TaskGroup1.Ships[loop].CurrentThermalSignature, TaskGroup1.Ships[loop].ShipClass.MaxEnginePower,
+                Console.Write("AL:{0}, EL:{1}, TL:{2} || Ship{3} AL:{4}, EL:{5} TL:{6} |||", AS.Value, ES.Value, TS.Value, loop, TaskGroup1.Ships[loop].ActiveList.Value,
+                                                                                             TaskGroup1.Ships[loop].EMList.Value, TaskGroup1.Ships[loop].ThermalList.Value);
+                    
+
+                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}",TaskGroup1.Ships[loop].CurrentSpeed,TaskGroup1.Ships[loop].CurrentEnginePower,TaskGroup1.Ships[loop].CurrentThermalSignature, TaskGroup1.Ships[loop].ShipClass.MaxEnginePower,
                     TaskGroup1.Ships[loop].ShipClass.MaxThermalSignature,TaskGroup1.Ships[loop].CurrentFuelUsePerHour,TaskGroup1.Ships[loop].ShipClass.MaxFuelUsePerHour);
 
                 AS = AS.Next;
+                ES = ES.Next;
+                TS = TS.Next;
+            }
+
+            TaskGroup1.Ships[4].CurrentThermalSignature = 500;
+            TaskGroup1.SortShipBySignature(TaskGroup1.Ships[4].ThermalList, TaskGroup1.ThermalSortList,0);
+
+            Console.WriteLine("------------------------");
+
+            AS = TaskGroup1.ActiveSortList.First;
+            ES = TaskGroup1.EMSortList.First;
+            TS = TaskGroup1.ThermalSortList.First;
+            for (int loop = 0; loop < 5; loop++)
+            {
+                Console.Write("AL:{0}, EL:{1}, TL:{2} || Ship{3} AL:{4}, EL:{5} TL:{6} |||", AS.Value, ES.Value, TS.Value, loop, TaskGroup1.Ships[loop].ActiveList.Value,
+                                                                                             TaskGroup1.Ships[loop].EMList.Value, TaskGroup1.Ships[loop].ThermalList.Value);
+
+
+                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6}", TaskGroup1.Ships[loop].CurrentSpeed, TaskGroup1.Ships[loop].CurrentEnginePower, TaskGroup1.Ships[loop].CurrentThermalSignature, TaskGroup1.Ships[loop].ShipClass.MaxEnginePower,
+                    TaskGroup1.Ships[loop].ShipClass.MaxThermalSignature, TaskGroup1.Ships[loop].CurrentFuelUsePerHour, TaskGroup1.Ships[loop].ShipClass.MaxFuelUsePerHour);
+
+                AS = AS.Next;
+                ES = ES.Next;
                 TS = TS.Next;
             }
         }
@@ -489,6 +516,8 @@ namespace Pulsar4X.Tests
 
             TaskGroup1.SetActiveSensor(2, 0, false);
             TaskGroup1.SetActiveSensor(2, 1, false);
+
+            Console.WriteLine("--------------------------------------------");
 
             EM = TaskGroup1.EMSortList.First;
             for (int loop = 0; loop < 4; loop++)
