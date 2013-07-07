@@ -7,6 +7,7 @@ using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 
+
 namespace Pulsar4X.Tests
 {
     [TestFixture]
@@ -1314,18 +1315,16 @@ namespace Pulsar4X.Tests
                     int randx = RNG.Next(0, 100000);
                     int randy = RNG.Next(0, 100000);
 
-                    float wx = ((float)randx / 100000.0f);
-                    float wy = ((float)randy / 100000.0f);
+                    float wx = ((float)randx / 50000.0f) - 1.0f;
+                    float wy = ((float)randy / 50000.0f) - 1.0f;
 
                     Waypoint Start = new Waypoint(Sol, wx, wy);
-
-                    Sol.Waypoints.Add(Start);
 
                     string ID1 = loop.ToString();
 
                     string TGName = "P" + ID1 + "TG 01";
 
-                    P1.AddNewTaskGroup(TGName, Sol.Waypoints[loop+loop2], Sol);
+                    P1.AddNewTaskGroup(TGName, Start, Sol);
 
                     for (int loop3 = 0; loop3 < ShipCount; loop3++)
                     {
@@ -1353,6 +1352,7 @@ namespace Pulsar4X.Tests
             {
                 for (int loop2 = 0; loop2 < TGCount; loop2++)
                 {
+                    P[loop].TaskGroups[loop2].IsOrbiting = false;
                     P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
 
                     /// <summary>
@@ -1380,6 +1380,7 @@ namespace Pulsar4X.Tests
                 {
                     for (int loop3 = 0; loop3 < P[loop].TaskGroups[loop2].Ships.Count; loop3++)
                     {
+
                         if (P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].target != null)
                         {
                             if (P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].target.IsDestroyed == true)
@@ -1395,10 +1396,23 @@ namespace Pulsar4X.Tests
                                 P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].assignTarget(newTarget);
                                 P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].openFire = true;
 
-                                Orders MoveToTarget = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, newTarget.ShipsTaskGroup);
 
-                                P[loop].TaskGroups[loop2].clearAllOrders();
-                                P[loop].TaskGroups[loop2].IssueOrder(MoveToTarget);
+                                bool inOrderList = false;
+                                for (int loop4 = 0; loop4 < P[loop].TaskGroups[loop2].TaskGroupOrders.Count; loop4++)
+                                {
+                                    if (P[loop].TaskGroups[loop2].TaskGroupOrders[loop4].target == newTarget.ShipsTaskGroup)
+                                    {
+                                        inOrderList = true;
+                                        break;
+                                    }
+                                }
+
+                                if (inOrderList == false)
+                                {
+                                    Orders MoveToTarget = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, newTarget.ShipsTaskGroup);
+                                    P[loop].TaskGroups[loop2].clearAllOrders();
+                                    P[loop].TaskGroups[loop2].IssueOrder(MoveToTarget);
+                                }
                             }
                         }
                     }
@@ -1434,7 +1448,7 @@ namespace Pulsar4X.Tests
                                 {
                                     target = null;
                                     P[loop].TaskGroups[loop2].clearAllOrders();
-                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[0].Contact.YSystem != 0.0)
+                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
                                         P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                 }
                             }
@@ -1453,14 +1467,14 @@ namespace Pulsar4X.Tests
                                     else
                                     {
                                         P[loop].TaskGroups[loop2].clearAllOrders();
-                                        if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[0].Contact.YSystem != 0.0)
+                                        if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
                                             P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                     }
                                 }
                                 else
                                 {
                                     P[loop].TaskGroups[loop2].clearAllOrders();
-                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[0].Contact.YSystem != 0.0)
+                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
                                         P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                 }
                             }
@@ -1532,8 +1546,8 @@ namespace Pulsar4X.Tests
             /// Order every ship to proceed to the center.
             /// </summary>
             Waypoint Center = new Waypoint(Sol, 0.0, 0.0);
-            Sol.Waypoints.Add(Center);
-            Orders MoveToCenter = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, Sol.Waypoints[factionCount]);
+
+            Orders MoveToCenter = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, Center);
 
             initShips(P, MoveToCenter, factionCount, TGCount, ShipCount);
 
@@ -1541,6 +1555,7 @@ namespace Pulsar4X.Tests
 
             bool done = false;
             int tick = 5;
+            int lastTick = 0;
             int ShipsDestroyed = 0;
             int TGDestroyed = 0;
 
@@ -1550,7 +1565,6 @@ namespace Pulsar4X.Tests
             while (!done)
             {
                 Console.WriteLine("Tick {0} ShipsDestroyed {1} TGDestroyed {2} ", tick, ShipsDestroyed, TGDestroyed);
-
                 /// <summary>
                 /// Do sensor loop.
                 /// Follow orders.
@@ -1588,8 +1602,8 @@ namespace Pulsar4X.Tests
                       /// <summary>
                       /// Adding new taskgroups means adding a loop here to run through them all.
                       /// </summary>
-                      if (P[loop].TaskGroups[0].TaskGroupOrders.Count != 0)
-                         P[loop].TaskGroups[0].FollowOrders((uint)tick);
+                      if (P[loop].TaskGroups[loop2].TaskGroupOrders.Count != 0)
+                         P[loop].TaskGroups[loop2].FollowOrders((uint)(tick-lastTick));
                    }
                 }
 
@@ -1597,13 +1611,14 @@ namespace Pulsar4X.Tests
                 /// attempt to fire weapons at target here.
                 /// Initiative will have to be implemented here for "fairness". right now lower P numbers have the advantage.
                 /// </summary>
-                done = FireWeapons(P, factionCount, MoveToCenter, tick, RNG, done);
+                //done = FireWeapons(P, factionCount, MoveToCenter, tick, RNG, done);
 
                 
 
                 /// <summary>
                 /// Advance the game tick:
                 /// </summary>
+                lastTick = tick;
                 tick += 5;
 
                 /// <summary>

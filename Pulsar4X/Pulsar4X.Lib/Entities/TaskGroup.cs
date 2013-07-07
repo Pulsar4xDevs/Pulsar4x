@@ -165,6 +165,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int CurrentCryoStorage { get; set; }
 
+        public int MapMarkerId { get; set; }
+
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
@@ -937,10 +939,15 @@ namespace Pulsar4X.Entities
                 IsOrbiting = false;
             }
 
-            double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
-            double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
+            if (TaskGroupOrders.Count > 0)
+            {
+                double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
+                double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
 
-            CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
+                CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
+            }
+            else
+                CurrentHeading = 0.0;
         }
 
         /// <summary>
@@ -948,20 +955,28 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetSpeed()
         {
-            double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
-            double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
-
-            double sign = 1.0;
-            if (dX > 0.0)
+            if (TaskGroupOrders.Count > 0)
             {
-                sign = -1.0;
-            }
+                double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
+                double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
 
-            /// <summary>
-            /// minor matrix multiplication here.
-            /// </summary>
-            CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign;
-            CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign;
+                double sign = 1.0;
+                if (dX > 0.0)
+                {
+                    sign = -1.0;
+                }
+
+                /// <summary>
+                /// minor matrix multiplication here.
+                /// </summary>
+                CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign;
+                CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign;
+            }
+            else
+            {
+                CurrentSpeedX = 0.0;
+                CurrentSpeedY = 0.0;
+            }
         }
 
         /// <summary>
@@ -969,11 +984,18 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetTimeRequirement()
         {
-            double dX = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
-            double dY = Math.Abs((TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
-            double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
+            if (TaskGroupOrders.Count > 0)
+            {
+                double dX = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
+                double dY = Math.Abs((TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
+                double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
-            TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed));
+                TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed));
+            }
+            else
+            {
+                TimeRequirement = 0;
+            }
         }
 
         /// <summary>
@@ -1724,10 +1746,19 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Clears the current orders for this TG.
+        /// Clears the current orders for this TG. Make sure to check to see if we are at a planet, if so we are orbiting.
         /// </summary>
         public void clearAllOrders()
         {
+            if (TaskGroupOrders.Count > 0)
+            {
+                if ((TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                    && (Contact.XSystem == TaskGroupOrders[0].target.XSystem && Contact.YSystem == TaskGroupOrders[0].target.YSystem))
+                {
+                    IsOrbiting = true;
+                    OrbitingBody = TaskGroupOrders[0].target;
+                }   
+            }
             TaskGroupOrders.Clear();
             TimeRequirement = 0;
             TotalOrderDistance = 0;

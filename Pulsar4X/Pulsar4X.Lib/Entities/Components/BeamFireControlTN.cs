@@ -201,6 +201,8 @@ namespace Pulsar4X.Entities.Components
                 RangeAccuracyTable.Add(Accuracy);
             }
 
+            RangeAccuracyTable.Add(0.0f);
+
             TrackingAccuracyTable = new BindingList<float>();
 
             for (int loop = 0; loop < 100; loop++)

@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
+using System.Drawing;
 
 namespace Pulsar4X.Entities
 {
@@ -313,6 +314,8 @@ namespace Pulsar4X.Entities
         public BindingList<Installation> InstallationTypes { get; set; }
 
         public BindingList<MessageEntry> MessageLog { get; set; }
+
+        public Color FactionColor { get; set; }
 
         public Faction(int ID)
         {
@@ -924,24 +927,31 @@ namespace Pulsar4X.Entities
                             {
                                 ShipTN detectedShip = System.SystemContactList[loop2].TaskGroup.Ships[loop3];
 
-                                bool inDict = DetectedContacts.ContainsKey(detectedShip);
-                                bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
-                                bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
-                                bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
-
-                                if (inDict == true)
+                                /// <summary>
+                                /// Sanity check to keep allied ships out of the DetectedContacts list.
+                                /// </summary>
+                                if (detectedShip.Faction != this)
                                 {
-                                    DetectedContacts[detectedShip].updateFactionContact(th, em, ac, (uint)YearTickValue);
 
-                                    if (th == false && em == false && ac == false)
+                                    bool inDict = DetectedContacts.ContainsKey(detectedShip);
+                                    bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
+                                    bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
+                                    bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
+
+                                    if (inDict == true)
                                     {
-                                        DetectedContacts.Remove(detectedShip);
+                                        DetectedContacts[detectedShip].updateFactionContact(th, em, ac, (uint)YearTickValue);
+
+                                        if (th == false && em == false && ac == false)
+                                        {
+                                            DetectedContacts.Remove(detectedShip);
+                                        }
                                     }
-                                }
-                                else if(inDict == false && (th == true || em == true || ac == true))
-                                {
-                                    FactionContact newContact = new FactionContact(detectedShip, th, em, ac, (uint)YearTickValue);
-                                    DetectedContacts.Add(detectedShip, newContact);
+                                    else if (inDict == false && (th == true || em == true || ac == true))
+                                    {
+                                        FactionContact newContact = new FactionContact(detectedShip, th, em, ac, (uint)YearTickValue);
+                                        DetectedContacts.Add(detectedShip, newContact);
+                                    }
                                 }
                             }
                         }
