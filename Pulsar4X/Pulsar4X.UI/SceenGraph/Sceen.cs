@@ -419,7 +419,8 @@ namespace Pulsar4X.UI.SceenGraph
                                                                         Color.Tan,
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
             // create name lable:
-            string name = "WP" + (m_lMapMarkers.Count + 1).ToString();
+            int m_Count = m_lMapMarkers.Count + 1;
+            string name = "WP" + m_Count.ToString();
             GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, a_v3Pos,
                 UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT, name);
 
@@ -430,6 +431,38 @@ namespace Pulsar4X.UI.SceenGraph
             m_lMapMarkers.Add(oMapMarker);
 
             Refresh();
+        }
+
+        /// <summary>
+        /// This Add map marker will let me place taskgroup markers, rather than the generic Waypoint marker above.
+        /// </summary>
+        /// <param name="a_v3Pos">Position of marker</param>
+        /// <param name="a_oDefaultEffect">I have no clue what this is. cargo culting it.</param>
+        /// <param name="MMColor">Color of marker</param>
+        /// <param name="name">Name of marker</param>
+        /// <returns>index of marker</returns>
+        public int AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect, Color MMColor, string name)
+        {
+            MapMarker oMapMarker = new MapMarker();
+
+            GLUtilities.GLQuad oMarkerQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                        a_v3Pos,
+                                                                        new Vector2(0.0001f, 0.0001f),
+                                                                        MMColor,
+                                                                        UIConstants.Textures.DEFAULT_PLANET_ICON);
+            // create name lable:
+            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, a_v3Pos,
+                UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, name);
+
+            oMapMarker.AddPrimitive(oMarkerQuad);
+            oMapMarker.PrimaryPrimitive = oMarkerQuad;
+            oMapMarker.Lable = oNameLable;
+
+            m_lMapMarkers.Add(oMapMarker);
+
+            Refresh();
+
+            return m_lMapMarkers.Count;
         }
 
         /// <summary>

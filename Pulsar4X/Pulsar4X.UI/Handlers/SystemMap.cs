@@ -88,6 +88,15 @@ namespace Pulsar4X.UI.Handlers
             m_oViewPortPanel = new Panels.SysMap_ViewPort();
             m_oControlsPanel = new Panels.SysMap_Controls();
 
+            /// <summary>
+            /// Add time button handlers to ViewPortPanel.
+            /// </summary>
+            m_oViewPortPanel.AdvanceTime5Seconds.Click += new EventHandler(AdvanceTime5Seconds_Click);
+            m_oViewPortPanel.AdvanceTime10Seconds.Click += new EventHandler(AdvanceTime10Seconds_Click);
+            m_oViewPortPanel.AdvanceTime100Seconds.Click += new EventHandler(AdvanceTime100Seconds_Click);
+            m_oViewPortPanel.AdvanceTime1000Seconds.Click += new EventHandler(AdvanceTime1000Seconds_Click);
+            m_oViewPortPanel.StartSim.Click += new EventHandler(StartSim_Click);
+
             // setup GL Canvas and insert it into the ViewPort:
             m_oGLCanvas = new GLCanvas();
             m_oGLCanvas.Dock = DockStyle.Fill;
@@ -179,6 +188,195 @@ namespace Pulsar4X.UI.Handlers
         void CreateMapMarkerButton_Click(object sender, EventArgs e)
         {
             m_bCreateMapMarkerOnNextClick = true;
+        }
+
+        void AdvanceTime5Seconds_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 5);
+
+                /// <summary>
+                /// Kludge to draw the ships.
+                /// </summary>
+                m_oCurrentSceen.MapMarkers.Clear();
+                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
+                {
+                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
+                    {
+                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
+                        ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
+                        string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
+
+
+
+                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name + "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString()
+                            + ">>" + info;
+                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
+                    }
+                }
+                m_oCurrentSceen.Refresh();
+            }
+        }
+
+        void AdvanceTime10Seconds_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 10 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 10);
+
+                /// <summary>
+                /// Kludge to draw the ships.
+                /// </summary>
+                m_oCurrentSceen.MapMarkers.Clear();
+                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
+                {
+                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
+                    {
+                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
+                        ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
+                        string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
+
+
+
+                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name + "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString()
+                            + ">>" + info;
+                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
+                    }
+                }
+                m_oCurrentSceen.Refresh();
+            }
+        }
+
+        void AdvanceTime100Seconds_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 100 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 100);
+
+                /// <summary>
+                /// Kludge to draw the ships.
+                /// </summary>
+                m_oCurrentSceen.MapMarkers.Clear();
+                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
+                {
+                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
+                    {
+                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
+                        ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
+                        string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
+
+
+
+                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name + "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString()
+                            + ">>" + info;
+                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
+                    }
+                }
+                m_oCurrentSceen.Refresh();
+            }
+        }
+
+        void AdvanceTime1000Seconds_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 1000 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 1000);
+
+                /// <summary>
+                /// Kludge to draw the ships.
+                /// </summary>
+                m_oCurrentSceen.MapMarkers.Clear();
+                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
+                {
+                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
+                    {
+                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
+                        ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
+                        string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
+
+
+
+                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name + "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString()
+                            + ">>" + info;
+                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
+                    }
+                }
+                m_oCurrentSceen.Refresh();
+            }
+        }
+
+        void StartSim_Click(object sender, EventArgs e)
+        {
+            if (GameState.SE.SimCreated == false)
+            {
+                /// <summary>
+                /// Start the simulation.
+                /// </summary>
+                GameState.SE.InitSim(m_oCurrnetSystem, GameState.Instance.Factions, GameState.RNG);
+
+                for (int loop = 0; loop < GameState.SE.factionCount; loop++)
+                {
+                    switch (loop)
+                    {
+                        case 0: GameState.Instance.Factions[loop].FactionColor = Color.Blue;
+                            break;
+                        case 1: GameState.Instance.Factions[loop].FactionColor = Color.Red;
+                            break;
+                        case 2: GameState.Instance.Factions[loop].FactionColor = Color.Green;
+                            break;
+                        case 3: GameState.Instance.Factions[loop].FactionColor = Color.Yellow;
+                            break;
+                        case 4: GameState.Instance.Factions[loop].FactionColor = Color.Brown;
+                            break;
+                        case 5: GameState.Instance.Factions[loop].FactionColor = Color.Purple;
+                            break;
+                        case 6: GameState.Instance.Factions[loop].FactionColor = Color.Orange;
+                            break;
+                        case 7: GameState.Instance.Factions[loop].FactionColor = Color.Pink;
+                            break;
+                        case 8: GameState.Instance.Factions[loop].FactionColor = Color.Gray;
+                            break;
+                        case 9: GameState.Instance.Factions[loop].FactionColor = Color.Black;
+                            break;
+                        case 10: GameState.Instance.Factions[loop].FactionColor = Color.White;
+                            break;
+                        case 11: GameState.Instance.Factions[loop].FactionColor = Color.Cyan;
+                            break;
+                        case 12: GameState.Instance.Factions[loop].FactionColor = Color.Aqua;
+                            break;
+                        case 13: GameState.Instance.Factions[loop].FactionColor = Color.Crimson;
+                            break;
+                        case 14: GameState.Instance.Factions[loop].FactionColor = Color.Khaki;
+                            break;
+                        case 15: GameState.Instance.Factions[loop].FactionColor = Color.Olive;
+                            break;
+                    }
+
+                    for (int loop2 = 0; loop2 < GameState.SE.TGCount; loop2++)
+                    {
+                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
+                        ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
+
+                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name + "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString();
+                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
+                    }
+                }
+
+                GameState.SE.SimCreated = true;
+            }
         }
 
         /// <summary>   Executes the mouse move action. i.e. Panning </summary>

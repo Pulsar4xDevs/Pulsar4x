@@ -13,6 +13,32 @@ namespace Pulsar4X.UI.Panels
 {
     public partial class SysMap_ViewPort : DockContent
     {
+
+        #region Properties
+        public Button AdvanceTime5Seconds
+        {
+            get { return m_oAdvanceTime5Seconds; }
+        }
+
+        public Button AdvanceTime10Seconds
+        {
+            get { return m_oAdvanceTime10Seconds; }
+        }
+        public Button AdvanceTime100Seconds
+        {
+            get { return m_oAdvanceTime100Seconds; }
+        }
+
+        public Button AdvanceTime1000Seconds
+        {
+            get { return m_oAdvanceTime1000Seconds; }
+        }
+        public Button StartSim
+        {
+            get { return m_oStartSim; }
+        }
+        #endregion
+
         public SysMap_ViewPort()
         {
             InitializeComponent();

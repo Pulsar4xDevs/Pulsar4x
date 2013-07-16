@@ -26,6 +26,32 @@ namespace Pulsar4X
             }
         }
 
+        private static Random _RNG;
+        public static Random RNG
+        {
+            get
+            {
+                if (_RNG == null)
+                {
+                    _RNG = new Random();
+                }
+                return _RNG;
+            }
+        }
+
+        private static SimEntity _SE;
+        public static SimEntity SE
+        {
+            get
+            {
+                if (_SE == null)
+                {
+                    _SE = new SimEntity();
+                }
+                return _SE;
+            }
+        }
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -34,6 +60,16 @@ namespace Pulsar4X
             if (instance == null)
             {
                 instance = new GameState();
+            }
+
+            if (_RNG == null)
+            {
+                _RNG = new Random();
+            }
+
+            if(_SE == null)
+            {
+                _SE = new SimEntity();
             }
         }
 
