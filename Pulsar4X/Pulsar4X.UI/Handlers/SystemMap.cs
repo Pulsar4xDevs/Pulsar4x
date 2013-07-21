@@ -218,6 +218,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
                     }
                 }
+                GameState.Instance.GameDateTime.AddSeconds(5.0);
                 m_oCurrentSceen.Refresh();
             }
         }
@@ -250,6 +251,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
                     }
                 }
+                GameState.Instance.GameDateTime.AddSeconds(10.0);
                 m_oCurrentSceen.Refresh();
             }
         }
@@ -282,6 +284,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
                     }
                 }
+                GameState.Instance.GameDateTime.AddSeconds(100.0);
                 m_oCurrentSceen.Refresh();
             }
         }
@@ -314,6 +317,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
                     }
                 }
+                GameState.Instance.GameDateTime.AddSeconds(1000.0);
                 m_oCurrentSceen.Refresh();
             }
         }

@@ -51,6 +51,13 @@ namespace Pulsar4X.Entities.Components
         Shield,
         AbsorptionShield,
 
+        /// <summary>
+        /// New components, no repair/damage
+        /// </summary>
+        MissileLauncher,
+        Magazine,
+        MissileFireControl,
+
         TypeCount
     }
 

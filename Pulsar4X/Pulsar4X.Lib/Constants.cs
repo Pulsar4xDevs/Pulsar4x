@@ -1066,5 +1066,23 @@ namespace Pulsar4X
             /// </summary>
             public static float[] ShieldBase = { 1.0f, 1.5f, 2.0f, 2.5f, 3.0f, 4.0f, 5.0f, 6.0f, 8.0f, 10.0f, 12.0f, 15.0f };
         }
+
+        public static class MagazineTN
+        {
+            /// <summary>
+            /// Internal armor factor for magazines.
+            /// </summary>
+            public static int[] MagArmor = { 2, 5, 6, 8, 10, 12, 15, 18, 21, 25, 30, 36, 45 };
+
+            /// <summary>
+            /// Chance of not having catastrophic destruction occur on mag destruction.
+            /// </summary>
+            public static float[] Ejection      = { 0.7f, 0.8f, 0.85f, 0.9f, 0.93f, 0.95f, 0.97f, 0.98f, 0.99f };
+
+            /// <summary>
+            /// Internal space not devoted to the feed mechanism.
+            /// </summary>
+            public static float[] FeedMechanism = { 0.75f, 0.8f, 0.85f, 0.9f, 0.92f, 0.94f, 0.96f, 0.98f, 0.99f };
+        }
     }
 }
