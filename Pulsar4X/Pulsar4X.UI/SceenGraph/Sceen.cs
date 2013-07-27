@@ -48,6 +48,16 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
+        private BindingList<MapMarker> m_lTempShipMarkers = new BindingList<MapMarker>();
+
+        public BindingList<MapMarker> ShipMarkers
+        {
+            get
+            {
+                return m_lTempShipMarkers;
+            }
+        }
+
         /// <summary> 
         /// The zoom scaler, make this smaller to zoom out, larger to zoom in.
         /// </summary>
@@ -343,6 +353,11 @@ namespace Pulsar4X.UI.SceenGraph
                 oElement.Render();
             }
 
+            foreach (SceenElement oElement in m_lTempShipMarkers)
+            {
+                oElement.Render();
+            }
+
             if (MeasureMode == true)
             {
                 m_oMeasurementElement.Render();
@@ -360,6 +375,11 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             foreach (SceenElement oElement in m_lMapMarkers)
+            {
+                oElement.Refresh(m_fZoomScaler);
+            }
+
+            foreach (SceenElement oElement in m_lTempShipMarkers)
             {
                 oElement.Refresh(m_fZoomScaler);
             }
@@ -458,11 +478,11 @@ namespace Pulsar4X.UI.SceenGraph
             oMapMarker.PrimaryPrimitive = oMarkerQuad;
             oMapMarker.Lable = oNameLable;
 
-            m_lMapMarkers.Add(oMapMarker);
+            m_lTempShipMarkers.Add(oMapMarker);
 
             Refresh();
 
-            return m_lMapMarkers.Count;
+            return m_lTempShipMarkers.Count;
         }
 
         /// <summary>

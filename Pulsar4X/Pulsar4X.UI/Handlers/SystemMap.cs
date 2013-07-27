@@ -202,7 +202,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Kludge to draw the ships.
                 /// </summary>
-                m_oCurrentSceen.MapMarkers.Clear();
+                m_oCurrentSceen.ShipMarkers.Clear();
                 for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
                 {
                     for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
@@ -235,7 +235,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Kludge to draw the ships.
                 /// </summary>
-                m_oCurrentSceen.MapMarkers.Clear();
+                m_oCurrentSceen.ShipMarkers.Clear();
                 for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
                 {
                     for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
@@ -268,7 +268,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Kludge to draw the ships.
                 /// </summary>
-                m_oCurrentSceen.MapMarkers.Clear();
+                m_oCurrentSceen.ShipMarkers.Clear();
                 for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
                 {
                     for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
@@ -301,7 +301,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Kludge to draw the ships.
                 /// </summary>
-                m_oCurrentSceen.MapMarkers.Clear();
+                m_oCurrentSceen.ShipMarkers.Clear();
                 for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
                 {
                     for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
