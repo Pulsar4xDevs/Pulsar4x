@@ -105,7 +105,10 @@ namespace Pulsar4X.Entities.Components
         {
             Id = Guid.NewGuid();
 
-            componentType = ComponentTypeTN.ActiveSensor;
+            if (MFC == false)
+                componentType = ComponentTypeTN.ActiveSensor;
+            else if (MFC == true)
+                componentType = ComponentTypeTN.MissileFireControl;
 
             /// <summary>
             /// basic sensor statistics.
@@ -288,5 +291,120 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     ///End ActiveSensorTN
     /// </summary>
+    
+
+    public class MissileFireControlTN : ComponentTN
+    {
+        /// <summary>
+        /// Missile Fire Controls are basically active sensors, this definition has the MFC range data for this sensor.
+        /// </summary>
+        private ActiveSensorDefTN MFCSensorDef;
+        public ActiveSensorDefTN mFCSensorDef
+        {
+            get { return MFCSensorDef; }
+        }
+
+        /// <summary>
+        /// ECCMs Linked to this BFC. Update DestroyComponents when eccm is added.
+        /// </summary>
+
+        /// <summary>
+        /// Weapons linked to this BFC.
+        /// </summary>
+        private BindingList<MissileLauncherTN> LinkedWeapons;
+        public BindingList<MissileLauncherTN> linkedWeapons
+        {
+            get { return LinkedWeapons; }
+        }
+
+        /// <summary>
+        /// Target Assigned to this MFC
+        /// </summary>
+        private ShipTN Target;
+        public ShipTN target
+        {
+            get { return Target; }
+        }
+
+        /// <summary>
+        /// Whether this FC is authorized to fire on its target.
+        /// </summary>
+        private bool OpenFire;
+        public bool openFire
+        {
+            get { return OpenFire; }
+            set { OpenFire = value; }
+        }
+
+        /// <summary>
+        /// Point defense state this BFC will fire to.
+        /// </summary>
+        private PointDefenseState PDState;
+        public PointDefenseState pDState
+        {
+            get { return PDState; }
+        }
+
+
+        /// <summary>
+        /// Ordnance in fly but still connected to this MFC.
+        /// </summary>
+
+
+        /// <summary>
+        /// Constructor for Missile Fire Controls
+        /// </summary>
+        /// <param name="MFCDef">MFC definition.</param>
+        MissileFireControlTN(ActiveSensorDefTN MFCDef)
+        {
+            MFCSensorDef = MFCDef;
+            isDestroyed = false;
+
+            LinkedWeapons = new BindingList<MissileLauncherTN>();
+
+            OpenFire = false;
+            Target = null;
+            PDState = PointDefenseState.None;
+        }
+
+        /// <summary>
+        /// Set the fire control to the desired point defense state.
+        /// </summary>
+        /// <param name="State">State the MFC is to be set to.</param>
+        public void SetPointDefenseMode(PointDefenseState State)
+        {
+            PDState = State;
+        }
+
+        /// <summary>
+        /// Simple assignment of a ship as a target to this mfc.
+        /// </summary>
+        /// <param name="ShipTarget">Ship to be targeted.</param>
+        public void assignTarget(ShipTN ShipTarget)
+        {
+            Target = ShipTarget;
+        }
+
+        /// <summary>
+        /// Simple deassignment of target to this bfc.
+        /// </summary>
+        public void clearTarget()
+        {
+            Target = null;
+        }
+
+        /// <summary>
+        /// Simple return of the target of this BFC.
+        /// </summary>
+        public ShipTN getTarget()
+        {
+            return Target;
+        }
+
+        public bool FireWeapons()
+        {
+            return false;
+        }
+    }
 
 }
