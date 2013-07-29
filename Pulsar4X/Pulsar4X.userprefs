@@ -1,6 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.Tests/Helpers/EventQueueTester.cs">
+    <Files>
+      <File FileName="Pulsar4X.Lib/Helpers/EventQueue.cs" Line="51" Column="15" />
+      <File FileName="Pulsar4X.Tests/Helpers/EventQueueTester.cs" Line="10" Column="4" />
+      <File FileName="Pulsar4X.Tests/StargenTests.cs" Line="7" Column="24" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
