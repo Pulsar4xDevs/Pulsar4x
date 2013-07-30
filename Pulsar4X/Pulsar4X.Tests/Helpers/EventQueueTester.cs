@@ -5,7 +5,8 @@ using NUnit.Framework;
 namespace Pulsar4X {
 	[TestFixture]
 	public class EventQueueTester {
-		int numberTestCases = 100000;
+		int numberTestCases = 32000000;
+		int testCasesToInsert = 100000;
 		EventQueue queue;
 		List<DateTime> eventListUnordered;
 		List<DateTime> eventListOrdered;
@@ -15,21 +16,25 @@ namespace Pulsar4X {
 			queue = new EventQueue();
 			eventListUnordered = new List<DateTime>();
 			randomGen = new Random();
-			for (int i = 0; i < numberTestCases; i++) {
+			for (int i = 0; i < numberTestCases + testCasesToInsert; i++) {
 				int numberTicks = randomGen.Next();
 				eventListUnordered.Add(new DateTime(numberTicks));
 			}
 			eventListOrdered = new List<DateTime>(eventListUnordered);
 			eventListOrdered.Sort();
+			for (int i = 0; i < numberTestCases; i++) {
+				queue.insertEvent(eventListUnordered[i]);
+			}
+
 		}
 
 		[Test]
 		public void eventQueueTest() {
-
-			foreach (DateTime dtime in eventListUnordered) {
-				queue.insertEvent(dtime);
+			for (int i = numberTestCases; i < testCasesToInsert+numberTestCases; i++) {
+				queue.insertEvent(eventListUnordered[i]);
 			}
-			foreach (DateTime dtime in eventListOrdered) {
+			for (int i = 0; i < testCasesToInsert; i++) {
+				DateTime dtime = eventListOrdered[i];
 				if (queue.getNextEventTime() != dtime) {
 					Console.WriteLine("ERROR! Test cases left: " + eventListUnordered.Count);
 				}
