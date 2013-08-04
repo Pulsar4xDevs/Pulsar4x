@@ -1,6 +1,35 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Pulsar4X.UI/Helpers/BindingHelper.cs">
+    <Files>
+      <File FileName="Pulsar4X.UI/Helpers/BindingHelper.cs" Line="50" Column="1" />
+      <File FileName="Pulsar4X.UI/ViewModels/EconomicsViewModel.cs" Line="42" Column="42" />
+      <File FileName="Pulsar4X.UI/Helpers/BindingHelper.cs" Line="50" Column="35" />
+      <File FileName="Pulsar4X.UI/ViewModels/EconomicsViewModel.cs" Line="42" Column="42" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="Pulsar4X.Lib" expanded="True" />
+          <Node name="Pulsar4X.UI" expanded="True">
+            <Node name="Helpers" expanded="True">
+              <Node name="BindingHelper.cs" selected="True" />
+            </Node>
+            <Node name="ViewModels" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+      <Pad Id="MonoDevelop.Debugger.WatchPad">
+        <State />
+      </Pad>
+      <Pad Id="MonoDevelop.NUnit.TestPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore />
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
