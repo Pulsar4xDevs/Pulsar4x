@@ -424,6 +424,7 @@ namespace Pulsar4X.Entities.Components
             isObsolete = false;
             isDivisible = false;
             isSalvaged = false;
+            isElectronic = false;
         }
 
         /// <summary>

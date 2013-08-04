@@ -214,6 +214,87 @@ namespace Pulsar4X.Entities.Components
         ///<summary>
         ///End ActiveSensorDefTN()
         ///</summary>
+        
+        /// <summary>
+        /// Missile active sensor definition
+        /// </summary>
+        /// <param name="ActiveStr">Active strength value in total.</param>
+        /// <param name="EMS">EM sensitivity same as regular active sensors.</param>
+        /// <param name="Resolution">Active sensor resolution.</param>
+        public ActiveSensorDefTN(float ActiveStr, byte EMS, int Resolution)
+        {
+            Id = Guid.NewGuid();
+            componentType = ComponentTypeTN.TypeCount;
+            EMRecv = EMS;
+
+            Name = "MissileActive";
+
+            GPS = (int)(ActiveStrength * Resolution);
+
+            MaxRange = (int)((float)ActiveStr * EMS * (float)Math.Sqrt((double)Resolution) * 10000.0f);
+
+            LookUpST = new BindingList<int>();
+            LookUpMT = new BindingList<int>();
+
+            ///<summary>
+            ///Initialize the ship lookup Table.
+            ///</summary>
+            for (int loop = 0; loop < Constants.ShipTN.ResolutionMax; loop++)
+            {
+                ///<summary>
+                ///Sensor Resolution can't resolve this target at its MaxRange due to the target's smaller size
+                ///</summary>
+                if ((loop + 1) < Resolution)
+                {
+                    int NewRange = (int)((float)MaxRange * (float)Math.Pow(((double)(loop + 1) / (float)Resolution), 2.0f));
+                    LookUpST.Add(NewRange);
+                }
+                else if ((loop + 1) >= Resolution)
+                {
+                    LookUpST.Add(MaxRange);
+                }
+            }
+
+            ///<summary>
+            ///Initialize the missile lookup Table.
+            ///Missile size is in MSP, and no missile may be a fractional MSP in size. Each MSP is 0.05 HS in size.
+            ///</summary>
+            for (int loop = 0; loop < 15; loop++)
+            {
+                ///<summary>
+                ///Missile size never drops below 0.33, and missiles above 1 HS are atleast 1 HS. if I have to deal with 2HS missiles I can go to LookUpST
+                ///</summary>
+                if (loop == 0)
+                {
+                    int NewRange = (int)((float)MaxRange * (float)Math.Pow((0.33 / (float)Resolution), 2.0f));
+                    LookUpMT.Add(NewRange);
+                }
+                else if (loop != 14)
+                {
+                    float msp = ((float)loop + 6.0f) * 0.05f;
+                    int NewRange = (int)((float)MaxRange * Math.Pow((msp / (float)Resolution), 2.0f));
+                    LookUpMT.Add(NewRange);
+                }
+                else if (loop == 14)
+                {
+                    lookUpMT.Add(LookUpST[0]);//size 1 is size 1
+                }
+            }
+
+
+            ActiveStrength = 0;
+            Hardening = 0;
+            IsMFC = false;
+            crew = 0;
+            cost = 0;
+            htk = 0;
+            size = 0;
+            isMilitary = false;
+            isObsolete = false;
+            isSalvaged = false;
+            isDivisible = false;
+            isElectronic = false;
+        }
 
         /// <summary>
         /// GetActiveDetectionRange returns the range of either the ship or missile

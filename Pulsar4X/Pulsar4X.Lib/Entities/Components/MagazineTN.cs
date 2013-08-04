@@ -132,6 +132,7 @@ namespace Pulsar4X.Entities.Components
             isObsolete = false;
             isSalvaged = false;
             isElectronic = false;
+            isDivisible = false;
         }
     }
 

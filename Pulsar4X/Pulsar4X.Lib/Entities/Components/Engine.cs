@@ -23,8 +23,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// The raw EP per HS of this engine.
         /// </summary>
-        private byte EngineBase;
-        public byte engineBase
+        private float EngineBase;
+        public float engineBase
         {
             get { return EngineBase; }
         }
@@ -112,7 +112,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ThmRedTech">The tech level of the thermal reduction modifier. 1 to 13</param>
         /// <param name="EngSize">Size of the engine determines size,power,and fuel consumption. Military drives are less than 25 HS.</param>
         /// <param name="HyperMod">If  this engine is hyper capable, and how much this modifies the size of the engine.</param>
-        public EngineDefTN(string EngName, byte EngBase, float EngPowMod, float FuelCon, float ThmRed, byte ThmRedTech, float EngSize, float HyperMod)
+        public EngineDefTN(string EngName, float EngBase, float EngPowMod, float FuelCon, float ThmRed, byte ThmRedTech, float EngSize, float HyperMod)
         {
             Id = Guid.NewGuid();
 
@@ -122,7 +122,13 @@ namespace Pulsar4X.Entities.Components
             /// EngineDef stores all of these variables, so move them over.
             /// </summary>
             Name = EngName;
+
+            /// <summary>
+            /// acceptable engine base numbers from conventional to photonic:
+            /// float engineBase[13] = { 0.2,5,8,12,16,20,25,32,40,50,60,80,100 };
+            /// </summary>
             EngineBase = EngBase;
+
             PowerMod = EngPowMod;
             FuelConsumptionMod = FuelCon;
             ThermalReduction = ThmRed;

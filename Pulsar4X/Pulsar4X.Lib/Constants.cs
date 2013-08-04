@@ -1084,5 +1084,18 @@ namespace Pulsar4X
             /// </summary>
             public static float[] FeedMechanism = { 0.75f, 0.8f, 0.85f, 0.9f, 0.92f, 0.94f, 0.96f, 0.98f, 0.99f };
         }
+
+
+        public static class OrdnanceTN
+        {
+            public static int[] warheadTech   = { 2,3,4,5,6,8,10,12,16,20,24,30 };
+            public static int[] agilityTech   = { 20, 32, 48, 64, 80, 100, 128, 160, 200, 240, 320, 400 };
+            public static float[] passiveTech = { 0.25f, 0.3f, 0.4f, 0.55f, 0.7f, 0.9f, 1.2f, 1.6f, 2.0f, 2.5f, 3.0f, 3.75f };
+            public static float[] activeTech  = { 0.5f, 0.6f, 0.8f, 1.05f, 1.4f, 1.6f, 2.4f, 3.0f, 4.0f, 5.0f, 6.75f, 9.0f };
+            public static float[] geoTech     = { 0.01f, 0.02f, 0.03f, 0.05f };
+            public static float[] reactorTech = { 0.1f, 0.15f, 0.225f, 0.3f, 0.4f, 0.5f, 0.6f, 0.8f, 1.0f, 1.2f, 1.6f, 2.0f };
+            public static int[] radTech = { 2, 3, 4, 5 };
+            public static int[] laserTech = { 2, 4, 6, 10 };
+        }
     }
 }

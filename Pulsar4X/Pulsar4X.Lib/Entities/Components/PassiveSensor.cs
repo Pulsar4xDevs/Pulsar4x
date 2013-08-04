@@ -151,6 +151,52 @@ namespace Pulsar4X.Entities.Components
             isElectronic = true;
         }
 
+        /// <summary>
+        /// Missile passive sensor constructor. This is actually not a component.
+        /// </summary>
+        /// <param name="PassiveStrength">Missile Passive Strength</param>
+        /// <param name="TorE">Thermal or EM?</param>
+        public PassiveSensorDefTN(float PassiveStrength, PassiveSensorType TOrE)
+        {
+            Id = Guid.NewGuid();
+            componentType = ComponentTypeTN.TypeCount;
+
+            Name = "MissilePassive";
+            Sensitivity = 0;
+            Hardening = 0;
+
+            ThermalOrEM = TOrE;
+
+            LookUpTableMax = 10000;
+
+            /// <summary>
+            /// Rating is the best way to compare sensors against each other.
+            /// while Range tells me at what distance a signature of 1000 will be detected in KM.
+            /// </summary>
+            Rating = PassiveStrength;
+            Range = (int)(Rating * 1000000.0f);
+
+            /// <summary>
+            /// Populate the lookup table.
+            /// </summary>
+            LookUpTable = new BindingList<int>();
+            for (ushort loop = 0; loop < LookUpTableMax; loop++)
+            {
+                int DetectionRange = CalcUnknownSignature(loop);
+                LookUpTable.Add(DetectionRange);
+            }
+
+            crew = 0;
+            cost = 0;
+            htk = 0;
+            size = 0;
+            isMilitary = false;
+            isObsolete = false;
+            isSalvaged = false;
+            isDivisible = false;
+            isElectronic = false;
+        }
+
 
         /// <summary>
         /// CalcUnknownSignature is useful in those situations where the desired signature is outside of the precalculated lookup table.

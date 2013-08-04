@@ -98,6 +98,7 @@ namespace Pulsar4X.Entities.Components
             isDivisible = false;
             isObsolete = false;
             isSalvaged = false;
+            isDivisible = false;
         }
     }
 

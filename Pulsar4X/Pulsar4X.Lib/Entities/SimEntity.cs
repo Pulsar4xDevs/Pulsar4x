@@ -33,7 +33,12 @@ namespace Pulsar4X.Entities
         {
             for (int loop = 0; loop < factionCount; loop++)
             {
-                Faction P1 = new Faction(loop);
+                Faction P1;
+                if (loop == 0)
+                    P1 = P[0];
+                else
+                    P1 = new Faction(loop);
+
                 P1.AddNewContactList(Sol);
                 P1.AddNewShipDesign("Blucher");
 
