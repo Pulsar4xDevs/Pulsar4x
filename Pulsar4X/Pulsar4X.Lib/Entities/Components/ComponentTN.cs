@@ -9,6 +9,7 @@ namespace Pulsar4X.Entities.Components
     /// List of Components:
     /// Be especially sure to update DestroyComponent and RepairComponent in Ship.cs when updating this list.
     /// in Ship.cs OnDamaged() new electronic components need to be handled as well for microwave damage.
+    /// when adding components in general do the declarations, at them to shipclass, add them to ship, work out their mechanics and place those appropriately.
     /// </summary>
     public enum ComponentTypeTN
     {

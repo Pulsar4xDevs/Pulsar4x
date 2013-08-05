@@ -430,7 +430,15 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Ordnance in fly but still connected to this MFC.
         /// </summary>
+        private OrdnanceTN MissilesInFlight;
+        public OrdnanceTN missilesInFlight
+        {
+            get { return MissilesInFlight; }
+        }
 
+        /// <summary>
+        /// ECCM needs to be handled eventually
+        /// </summary>
 
         /// <summary>
         /// Constructor for Missile Fire Controls
@@ -464,6 +472,43 @@ namespace Pulsar4X.Entities.Components
         public void assignTarget(ShipTN ShipTarget)
         {
             Target = ShipTarget;
+        }
+
+        /// <summary>
+        /// Simple launch tube assignment.
+        /// </summary>
+        /// <param name="tube">launch tube to be assigned.</param>
+        public void assignLaunchTube(MissileLauncherTN tube)
+        {
+            LinkedWeapons.Add(tube);
+
+            if (tube.mFC != this)
+                tube.AssignMFC(this);
+        }
+
+        /// <summary>
+        /// Launch tube removal
+        /// </summary>
+        /// <param name="tube">tube to be removed.</param>
+        public void removeLaunchTube(MissileLauncherTN tube)
+        {
+            LinkedWeapons.Remove(tube);
+
+            if(tube.mFC == this)
+               tube.ClearMFC();
+            
+        }
+
+        /// <summary>
+        /// Clears all assigned launch tubes.
+        /// </summary>
+        public void ClearAllWeapons()
+        {
+            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            {
+                LinkedWeapons[loop].ClearMFC();
+            }
+            LinkedWeapons.Clear();
         }
 
         /// <summary>

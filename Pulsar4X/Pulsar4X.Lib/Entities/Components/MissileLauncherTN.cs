@@ -187,9 +187,22 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Missile Fire Controller and loaded missile are needed here.
+        /// Missile Fire Controller
         /// </summary>
-        
+        private MissileFireControlTN MFC;
+        public MissileFireControlTN mFC
+        {
+            get { return MFC; }
+        }
+
+        /// <summary>
+        /// Missile Loaded in the tube.
+        /// </summary>
+        private OrdnanceDefTN LoadedOrdnance;
+        public OrdnanceDefTN loadedOrdnance
+        {
+            get { return LoadedOrdnance; }
+        }
 
 
 
@@ -202,8 +215,26 @@ namespace Pulsar4X.Entities.Components
             MissileLauncherDef = definition;
 
             LoadTime = 0;
+            LoadedOrdnance = null;
+            MFC = null;
 
             isDestroyed = false;
+        }
+
+        public void AssignMFC(MissileFireControlTN mFCtrl)
+        {
+            MFC = mFCtrl;
+
+            if (MFC.linkedWeapons.Contains(this) == false)
+                MFC.assignLaunchTube(this);
+        }
+
+        public void ClearMFC()
+        {
+            MFC = null;
+
+            if (MFC.linkedWeapons.Contains(this) == true)
+               MFC.removeLaunchTube(this);
         }
 
         /// <summary>
@@ -226,24 +257,26 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Clear the launch tube of the loaded missile.
             /// </summary>
-            
-
-
-
-            /// <summary>
-            /// Set the time to load the next missile.
-            /// </summary>
-            if (MissileLauncherDef.isBoxLauncher == true && MissileLauncherDef.isPDCSilo == false)
+            if (LoadTime == 0)
             {
+                LoadedOrdnance = null;
+
+
                 /// <summary>
-                /// MFReloadtime won't come into play unless the ship visits a planet.
-                /// likewise hangar reload time won't come into play unless the ship lands in a hangar.
+                /// Set the time to load the next missile.
                 /// </summary>
-                LoadTime = MissileLauncherDef.hangarReload;
-            }
-            else
-            {
-                LoadTime = MissileLauncherDef.rateOfFire;
+                if (MissileLauncherDef.isBoxLauncher == true && MissileLauncherDef.isPDCSilo == false)
+                {
+                    /// <summary>
+                    /// MFReloadtime won't come into play unless the ship visits a planet.
+                    /// likewise hangar reload time won't come into play unless the ship lands in a hangar.
+                    /// </summary>
+                    LoadTime = MissileLauncherDef.hangarReload;
+                }
+                else
+                {
+                    LoadTime = MissileLauncherDef.rateOfFire;
+                }
             }
         }
     }

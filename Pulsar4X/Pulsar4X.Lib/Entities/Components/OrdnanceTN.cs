@@ -588,7 +588,7 @@ namespace Pulsar4X.Entities.Components
         }
     }
 
-    public class OrdnanceTN //: StarSystemEntity
+    public class OrdnanceTN
     {
         /// <summary>
         /// Definition for this missile.
@@ -608,8 +608,28 @@ namespace Pulsar4X.Entities.Components
             get { return Separated; }
         }
 
-        public OrdnanceTN(OrdnanceDefTN definition)
+        /// <summary>
+        /// Which group(these handle system map movement) is this ordnance associated with.
+        /// </summary>
+        private OrdnanceGroupTN MissileGroup;
+        public OrdnanceGroupTN missileGroup
         {
+            get { return MissileGroup; }
+        }
+
+        /// <summary>
+        /// Missile Fire Control this missile is guided by.
+        /// </summary>
+        private MissileFireControlTN MFC;
+        public MissileFireControlTN mFC
+        {
+            get { return MFC; }
+        }
+
+        public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition)
+        {
+            MFC = mfCtrl;
+
             MissileDef = definition;
 
             Separated = false;
@@ -618,5 +638,31 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Need functions to check various things such as whether a missile is destroyed by incoming fire, if it hits, damage used, and so on.
         /// </summary>
+    }
+
+    public class OrdnanceGroupTN : StarSystemEntity
+    {
+        /// <summary>
+        /// Missiles in this "group" of missiles.
+        /// </summary>
+        private BindingList<OrdnanceTN> Missiles;
+        public BindingList<OrdnanceTN> missiles
+        {
+            get { return Missiles; }
+        }
+
+        /// <summary>
+        /// Useless mass override for StarSystem Entity.
+        /// </summary>
+        public override double Mass
+        {
+            get { return 0.0; }
+            set { value = 0.0; }
+        }
+
+        public OrdnanceGroupTN()
+        {
+            Missiles = new BindingList<OrdnanceTN>();
+        }
     }
 }
