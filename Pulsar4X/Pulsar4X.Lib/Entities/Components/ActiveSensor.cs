@@ -444,7 +444,7 @@ namespace Pulsar4X.Entities.Components
         /// Constructor for Missile Fire Controls
         /// </summary>
         /// <param name="MFCDef">MFC definition.</param>
-        MissileFireControlTN(ActiveSensorDefTN MFCDef)
+        public MissileFireControlTN(ActiveSensorDefTN MFCDef)
         {
             MFCSensorDef = MFCDef;
             isDestroyed = false;

@@ -660,6 +660,60 @@ namespace Pulsar4X.Entities
         public float TotalShieldFuelCostPerTick { get; set; }
         #endregion
 
+        #region Missile Components 663
+        /// <summary>
+        /// Ships need magazines(though launchers have some innate magazine capacity), launch tubes, and missile fire controls to fire missiles at targets.
+        /// </summary>
+        [DisplayName("Ship Missile Launchers"),
+        Category("Component Lists"),
+        Description("List of missile launchers present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<MissileLauncherDefTN> ShipMLaunchDef { get; set; }
+
+        [DisplayName("Ship Missile Launcher Count"),
+        Category("Component Counts"),
+        Description("Count of missile launchers present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipMLaunchCount { get; set; }
+
+        [DisplayName("Ship Magazines"),
+        Category("Component Lists"),
+        Description("List of Magazines present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<MagazineDefTN> ShipMagazineDef { get; set; }
+
+        [DisplayName("Ship Magazine Count"),
+        Category("Component Counts"),
+        Description("Count of Magazines present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipMagazineCount { get; set; }
+
+        [DisplayName("Ship Missile Fire Controls"),
+        Category("Component Lists"),
+        Description("List of MFCs present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ActiveSensorDefTN> ShipMFCDef { get; set; }
+
+        [DisplayName("Ship MFC Count"),
+        Category("Component Counts"),
+        Description("Count of MFCs present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipMFCCount { get; set; }
+
+        [DisplayName("Total Magazine space"),
+        Category("Detials"),
+        Description("Total ordnance carrying capacity of this vessel, this is launch tubes + magazine space."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int TotalMagazineCapacity { get; set; }
+        #endregion
+
 
         #endregion
 
@@ -780,6 +834,14 @@ namespace Pulsar4X.Entities
             TotalShieldPool = 0.0f;
             TotalShieldFuelCostPerTick = 0.0f;
             TotalShieldGenPerTick = 0.0f;
+
+            ShipMLaunchDef = new BindingList<MissileLauncherDefTN>();
+            ShipMLaunchCount = new BindingList<ushort>();
+            ShipMagazineDef = new BindingList<MagazineDefTN>();
+            ShipMagazineCount = new BindingList<ushort>();
+            ShipMFCDef = new BindingList<ActiveSensorDefTN>();
+            ShipMFCCount = new BindingList<ushort>();
+            TotalMagazineCapacity = 0;
         }
         #endregion
 
@@ -1545,6 +1607,11 @@ namespace Pulsar4X.Entities
             UpdateClass(Beam, inc);
         }
 
+        /// <summary>
+        /// AddReactor puts a powerplant design into this shipclass.
+        /// </summary>
+        /// <param name="Reactor">Reactor definition</param>
+        /// <param name="inc"># of reactors to put in or remove.</param>
         public void AddReactor(ReactorDefTN Reactor, short inc)
         {
             int ReactorIndex = ShipReactorDef.IndexOf(Reactor);
@@ -1580,6 +1647,11 @@ namespace Pulsar4X.Entities
             UpdateClass(Reactor, inc);
         }
 
+        /// <summary>
+        /// AddShield puts the specified shield onto this shipclass design.
+        /// </summary>
+        /// <param name="Shield">Shield definition</param>
+        /// <param name="inc">Amount to add or remove</param>
         public void AddShield(ShieldDefTN Shield, short inc)
         {
             /// <summary>
@@ -1640,6 +1712,125 @@ namespace Pulsar4X.Entities
 
             MaxEMSignature = MaxEMSignature + (int)(Shield.shieldPool * 30.0f * (float)inc);
             UpdateClass(Shield, inc);
+        }
+
+        /// <summary>
+        /// Add a missile launcher to this ship class
+        /// </summary>
+        /// <param name="Tube">Launch tube(Can also be a pdc silo no problem.)</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddLauncher(MissileLauncherDefTN Tube, short inc)
+        {
+            int TubeIndex = ShipMLaunchDef.IndexOf(Tube);
+            if (TubeIndex != -1)
+            {
+                ShipMLaunchCount[TubeIndex] = (ushort)((short)ShipMLaunchCount[TubeIndex] + inc);
+            }
+            else if (TubeIndex == -1 && inc >= 1)
+            {
+                ShipMLaunchDef.Add(Tube);
+                ShipMLaunchCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (TubeIndex != -1)
+                {
+                    if (ShipMLaunchCount[TubeIndex] <= 0)
+                    {
+                        ShipMLaunchCount.RemoveAt(TubeIndex);
+                        ShipMLaunchDef.RemoveAt(TubeIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            TotalMagazineCapacity = TotalMagazineCapacity + ((int)Tube.launchMaxSize * inc);
+            UpdateClass(Tube, inc);
+        }
+
+        /// <summary>
+        /// Add a magazine to this ship class
+        /// </summary>
+        /// <param name="Mag">Magazine to add</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddMagazine(MagazineDefTN Mag, short inc)
+        {
+            int MagIndex = ShipMagazineDef.IndexOf(Mag);
+            if (MagIndex != -1)
+            {
+                ShipMagazineCount[MagIndex] = (ushort)((short)ShipMagazineCount[MagIndex] + inc);
+            }
+            else if (MagIndex == -1 && inc >= 1)
+            {
+                ShipMagazineDef.Add(Mag);
+                ShipMagazineCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (MagIndex != -1)
+                {
+                    if (ShipMagazineCount[MagIndex] <= 0)
+                    {
+                        ShipMagazineCount.RemoveAt(MagIndex);
+                        ShipMagazineDef.RemoveAt(MagIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            TotalMagazineCapacity = TotalMagazineCapacity + ((int)Mag.capacity * inc);
+            UpdateClass(Mag, inc);
+        }
+
+        /// <summary>
+        /// Add a Missile Fire Control to this ship class
+        /// </summary>
+        /// <param name="MFC">MFC to add</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddMFC(ActiveSensorDefTN MFC, short inc)
+        {
+            int MFCIndex = ShipMFCDef.IndexOf(MFC);
+            if (MFCIndex != -1)
+            {
+                ShipMFCCount[MFCIndex] = (ushort)((short)ShipMFCCount[MFCIndex] + inc);
+            }
+            else if (MFCIndex == -1 && inc >= 1)
+            {
+                ShipMFCDef.Add(MFC);
+                ShipMFCCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (MFCIndex != -1)
+                {
+                    if (ShipMFCCount[MFCIndex] <= 0)
+                    {
+                        ShipMFCCount.RemoveAt(MFCIndex);
+                        ShipMFCDef.RemoveAt(MFCIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            UpdateClass(MFC, inc);
         }
     }
 }

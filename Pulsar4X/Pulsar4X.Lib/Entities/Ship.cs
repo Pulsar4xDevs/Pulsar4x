@@ -296,6 +296,44 @@ namespace Pulsar4X.Entities
         public bool ShieldIsActive { get; set; }
         #endregion
 
+        #region Missile Info
+        /// <summary>
+        /// Missile Launchers on this ship.
+        /// </summary>
+        public BindingList<MissileLauncherTN> ShipMLaunchers { get; set; }
+
+        /// <summary>
+        /// Magazines on this ship.
+        /// </summary>
+        public BindingList<MagazineTN> ShipMagazines { get; set; }
+
+        /// <summary>
+        /// Missile fire controls on this ship.
+        /// </summary>
+        public BindingList<MissileFireControlTN> ShipMFC { get; set; }
+
+        /// <summary>
+        /// Missile types this ship is carrying.
+        /// </summary>
+        public BindingList<OrdnanceDefTN> ShipOrdnance { get; set; }
+        
+        /// <summary>
+        /// Count of each missile type.
+        /// </summary>
+        public BindingList<ushort> ShipOrdnanceCount { get; set; }
+
+        /// <summary>
+        /// Ordnance currently on this ship.
+        /// </summary>
+        public int CurrentMagazineCapacity { get; set; }
+
+        /// <summary>
+        /// Current Max ordnance carrying capacity of this Ship.
+        /// </summary>
+        public int CurrentMagazineCapacityMax { get; set; }
+        #endregion
+
+
         /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
         /// </summary>
@@ -608,6 +646,52 @@ namespace Pulsar4X.Entities
             CurrentShieldGen = ClassDefinition.TotalShieldGenPerTick;
             CurrentShieldFuelUse = ClassDefinition.TotalShieldFuelCostPerTick;
             ShieldIsActive = false;
+
+
+            ShipMLaunchers = new BindingList<MissileLauncherTN>();
+            for(int loop = 0; loop < ClassDefinition.ShipMLaunchDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipMLaunchDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipMLaunchCount[loop]; loop2++)
+                {
+                    MissileLauncherTN Tube = new MissileLauncherTN(ClassDefinition.ShipMLaunchDef[loop]);
+                    Tube.componentIndex = ShipMLaunchers.Count;
+                    ShipMLaunchers.Add(Tube);
+                    ShipComponents.Add(Tube);
+                }
+            }
+
+            ShipMagazines = new BindingList<MagazineTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipMagazineDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipMagazineDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipMagazineCount[loop]; loop2++)
+                {
+                    MagazineTN Mag = new MagazineTN(ClassDefinition.ShipMagazineDef[loop]);
+                    Mag.componentIndex = ShipMagazines.Count;
+                    ShipMagazines.Add(Mag);
+                    ShipComponents.Add(Mag);
+                }
+            }
+
+            ShipMFC = new BindingList<MissileFireControlTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipMFCDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipMFCDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipMFCCount[loop]; loop2++)
+                {
+                    MissileFireControlTN MFC = new MissileFireControlTN(ClassDefinition.ShipMFCDef[loop]);
+                    MFC.componentIndex = ShipMFC.Count;
+                    ShipMFC.Add(MFC);
+                    ShipComponents.Add(MFC);
+                }
+            }
+
+            CurrentMagazineCapacity = 0;
+            CurrentMagazineCapacityMax = ClassDefinition.TotalMagazineCapacity;
 
 
 
