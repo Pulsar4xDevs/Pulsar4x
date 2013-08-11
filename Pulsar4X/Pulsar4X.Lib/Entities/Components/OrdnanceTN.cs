@@ -624,6 +624,7 @@ namespace Pulsar4X.Entities.Components
         public MissileFireControlTN mFC
         {
             get { return MFC; }
+            set { MFC = value; }
         }
 
         public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition)

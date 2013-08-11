@@ -430,8 +430,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Ordnance in fly but still connected to this MFC.
         /// </summary>
-        private OrdnanceTN MissilesInFlight;
-        public OrdnanceTN missilesInFlight
+        private BindingList<OrdnanceTN> MissilesInFlight;
+        public BindingList<OrdnanceTN> missilesInFlight
         {
             get { return MissilesInFlight; }
         }
@@ -450,6 +450,8 @@ namespace Pulsar4X.Entities.Components
             isDestroyed = false;
 
             LinkedWeapons = new BindingList<MissileLauncherTN>();
+
+            MissilesInFlight = new BindingList<OrdnanceTN>();
 
             OpenFire = false;
             Target = null;
@@ -512,6 +514,17 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// If an MFC is destroyed set all missiles to have no MFC.
+        /// </summary>
+        public void ClearAllMissiles()
+        {
+            for (int loop = 0; loop < MissilesInFlight.Count; loop++)
+            {
+                MissilesInFlight[loop].mFC = null;
+            }
+        }
+
+        /// <summary>
         /// Simple deassignment of target to this bfc.
         /// </summary>
         public void clearTarget()
@@ -529,6 +542,7 @@ namespace Pulsar4X.Entities.Components
 
         public bool FireWeapons()
         {
+            // stub for now
             return false;
         }
     }

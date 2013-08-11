@@ -343,7 +343,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Whether or not a weapon was able to fire.</returns>
         public bool FireWeapons(float DistanceToTarget, Random RNG)
         {
-            if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0)
+            if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0 || isDestroyed == true)
             {
                 return false;
             }
@@ -440,10 +440,10 @@ namespace Pulsar4X.Entities.Components
 
                         int Hit = RNG.Next(1, 100);
 
-                        LinkedWeapons[loop].Fire();
-                        weaponFired = true;
 
-                        if(toHit >= Hit)
+                        weaponFired = LinkedWeapons[loop].Fire();
+
+                        if(toHit >= Hit && weaponFired == true)
                         {
                             ushort location = (ushort)RNG.Next(0,Columns);
                             bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);

@@ -1478,6 +1478,34 @@ namespace Pulsar4X.Entities
                         ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                     }
                 break;
+
+                case ComponentTypeTN.MissileLauncher:
+                    ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance = null;
+                    ShipMLaunchers[ShipComponents[ID].componentIndex].ClearMFC();
+                break;
+
+                case ComponentTypeTN.Magazine:
+
+                    /// <summary>
+                    /// Store ordnance on a per magazine basis for this:
+                    /// </summary>
+                    
+                    CurrentMagazineCapacityMax = CurrentMagazineCapacityMax - ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity;
+
+                    ExpTest = DacRNG.Next(1, 100);
+
+                    if (ExpTest < ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.expRisk)
+                    {
+                        /// <summary>
+                        /// *** Do secondary damage here. ***
+                        /// </summary>
+                    }       
+                break;
+
+                case ComponentTypeTN.MissileFireControl:
+                    ShipMFC[ShipComponents[ID].componentIndex].ClearAllWeapons();
+                    ShipMFC[ShipComponents[ID].componentIndex].ClearAllMissiles();
+                break;
             }
             return DamageReturn;
         }
@@ -1652,6 +1680,16 @@ namespace Pulsar4X.Entities
                         CurrentEMSignature = CurrentEMSignature + (int)(ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool * 30.0f);
                         ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                     }
+                break;
+
+                case ComponentTypeTN.MissileLauncher:
+                break;
+
+                case ComponentTypeTN.Magazine:
+                    CurrentMagazineCapacityMax = CurrentMagazineCapacityMax + ShipMagazines[ShipComponents[ComponentIndex].componentIndex].magazineDef.capacity;
+                break;
+
+                case ComponentTypeTN.MissileFireControl:
                 break;
             }
         }

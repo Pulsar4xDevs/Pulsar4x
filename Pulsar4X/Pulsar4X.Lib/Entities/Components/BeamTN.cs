@@ -510,11 +510,11 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Whether the weapon can fire or not(true or false)</returns>
         public bool readyToFire()
         {
-            if (BeamDef.componentType == ComponentTypeTN.Gauss)
+            if (BeamDef.componentType == ComponentTypeTN.Gauss && isDestroyed == false)
             {
                 return true;
             }
-            else if (CurrentCapacitor == BeamDef.powerRequirement)
+            else if (CurrentCapacitor == BeamDef.powerRequirement && isDestroyed == false)
             {
                 return true;
             }
@@ -527,9 +527,10 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// When this beamweapon is fired the capacitor is discharged completely.
         /// </summary>
-        public void Fire()
+        public bool Fire()
         {
             CurrentCapacitor = 0;
+            return isDestroyed;
         }
     }
 }

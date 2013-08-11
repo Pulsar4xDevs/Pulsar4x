@@ -202,6 +202,7 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceDefTN loadedOrdnance
         {
             get { return LoadedOrdnance; }
+            set { LoadedOrdnance = value; }
         }
 
 
