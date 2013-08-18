@@ -152,6 +152,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Dictionary<Guid, int> ComponentStockpileLookup { get; set; }
 
+        /// <summary>
+        /// Missiles at this colony
+        /// </summary>
+        public Dictionary<OrdnanceDefTN, int> MissileStockpile { get; set; }
+
         #endregion
 
         public Population(Planet a_oPlanet, Faction a_oFaction)
@@ -192,6 +197,7 @@ namespace Pulsar4X.Entities
             ComponentStockpile = new BindingList<ComponentDefTN>();
             ComponentStockpileCount = new BindingList<float>();
             ComponentStockpileLookup = new Dictionary<Guid, int>();
+            MissileStockpile = new Dictionary<OrdnanceDefTN, int>();
             
         }
 
@@ -279,6 +285,52 @@ namespace Pulsar4X.Entities
             }
 
             return decrement;
+        }
+
+        /// <summary>
+        /// Loads or unloads missiles from a population.
+        /// </summary>
+        /// <param name="Missile">Ordnance type to be loaded or unloaded.</param>
+        /// <param name="inc">Amount to load or unload.</param>
+        /// <returns>Missiles placed into stockpile or taken out of it.</returns>
+        public int LoadMissileToStockpile(OrdnanceDefTN Missile, int inc)
+        {
+            if (inc > 0)
+            {
+                if (MissileStockpile.ContainsKey(Missile))
+                {
+                    MissileStockpile[Missile] = MissileStockpile[Missile] + inc;
+                }
+                else
+                {
+                    MissileStockpile.Add(Missile, inc);
+                }
+                return inc;
+            }
+            else
+            {
+                if (MissileStockpile.ContainsKey(Missile) == false)
+                {
+                    return 0;
+                }
+                else
+                {
+                    /// <summary>
+                    /// Inc is negative here.
+                    /// </summary>
+                    int retVal = MissileStockpile[Missile];
+                    MissileStockpile[Missile] = MissileStockpile[Missile] + inc;
+
+                    if (MissileStockpile[Missile] <= 0)
+                    {
+                        MissileStockpile.Remove(Missile);
+
+                        return retVal;
+                    }
+
+                    return inc;
+                }
+            }
         }
     }
 }

@@ -383,6 +383,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Series of this missile.
+        /// </summary>
+        private OrdnanceSeries OrdSeries;
+        public OrdnanceSeries ordSeries
+        {
+            get { return OrdSeries; }
+        }
+
+        /// <summary>
         /// Ordnance Constructor.
         /// </summary>
         /// <param name="title">Name</param>
@@ -435,6 +444,8 @@ namespace Pulsar4X.Entities.Components
             size = 0;
             cost = 0;
 
+
+            OrdSeries = Series;
 
             /// <summary>
             /// Warhead handling section.
@@ -634,6 +645,8 @@ namespace Pulsar4X.Entities.Components
             MissileDef = definition;
 
             Separated = false;
+
+            MissileGroup = new OrdnanceGroupTN();
         }
 
         /// <summary>

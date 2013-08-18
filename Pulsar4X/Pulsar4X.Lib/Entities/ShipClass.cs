@@ -712,6 +712,20 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int TotalMagazineCapacity { get; set; }
+
+        [DisplayName("Ship Class Ordnance"),
+        Category("Detials"),
+        Description("Preferred Ordnance loadout for this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public Dictionary<OrdnanceDefTN, int> ShipClassOrdnance { get; set; }
+
+        [DisplayName("Preferred Ordnance size"),
+        Category("Detials"),
+        Description("Preferred Ordnance loadout size for this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int PreferredOrdnanceSize { get; set; }
         #endregion
 
 
@@ -842,6 +856,8 @@ namespace Pulsar4X.Entities
             ShipMFCDef = new BindingList<ActiveSensorDefTN>();
             ShipMFCCount = new BindingList<ushort>();
             TotalMagazineCapacity = 0;
+            ShipClassOrdnance = new Dictionary<OrdnanceDefTN, int>();
+            PreferredOrdnanceSize = 0;
         }
         #endregion
 
@@ -1039,6 +1055,31 @@ namespace Pulsar4X.Entities
                     {
                         ElectronicDamageAllocationChart[ListOfComponentDefs[loop]] = localDAC + EDAC;
                         EDAC = EDAC + localDAC;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Ordnance Section
+            /// </summary>
+            if (TotalMagazineCapacity < PreferredOrdnanceSize)
+            {
+                int overrun = PreferredOrdnanceSize - TotalMagazineCapacity;
+                foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipClassOrdnance)
+                {
+                    int SCOSize = ((int)pair.Key.size * pair.Value);
+                    if (SCOSize <= overrun)
+                    {
+                        ShipClassOrdnance.Remove(pair.Key);
+                        overrun = overrun - SCOSize;
+                        PreferredOrdnanceSize = PreferredOrdnanceSize - SCOSize;
+                    }
+                    else
+                    {
+                        int reduction = (int)Math.Ceiling((float)(overrun) / pair.Key.size);
+                        ShipClassOrdnance[pair.Key] = ShipClassOrdnance[pair.Key] - reduction;
+                        PreferredOrdnanceSize = PreferredOrdnanceSize - reduction;
+                        break;
                     }
                 }
             }
@@ -1831,6 +1872,65 @@ namespace Pulsar4X.Entities
             }
 
             UpdateClass(MFC, inc);
+        }
+
+
+        /// <summary>
+        /// Set preferred ordnance adds or subtracts missiles from the preferred ordnance list of this class.
+        /// </summary>
+        /// <param name="missile">Missile to be added or subtracted.</param>
+        /// <param name="inc">Amount to add/remove.</param>
+        public void SetPreferredOrdnance(OrdnanceDefTN missile, int inc)
+        {
+            int loadAmt = (int)missile.size * inc;
+
+            if (inc > 0)
+            {
+                if (PreferredOrdnanceSize + loadAmt <= TotalMagazineCapacity)
+                {
+                    loadAmt = inc;
+                }
+                else
+                {
+                    if (PreferredOrdnanceSize == TotalMagazineCapacity)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        int capRemaining = TotalMagazineCapacity - PreferredOrdnanceSize;
+                        loadAmt = (int)Math.Floor(((float)capRemaining / missile.size));
+                    }
+                }
+
+                if (ShipClassOrdnance.ContainsKey(missile))
+                {
+                    ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + loadAmt;
+                }
+                else
+                {
+                    ShipClassOrdnance.Add(missile, loadAmt);
+                }
+            }
+            else
+            {
+                if (ShipClassOrdnance.ContainsKey(missile) == false)
+                {
+                    return;
+                }
+                else
+                {
+                    /// <summary>
+                    /// Have to remember that inc is negative here.
+                    /// </summary>
+                    ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + inc;
+
+                    if (ShipClassOrdnance[missile] <= 0)
+                    {
+                        ShipClassOrdnance.Remove(missile);
+                    }
+                }
+            }
         }
     }
 }
