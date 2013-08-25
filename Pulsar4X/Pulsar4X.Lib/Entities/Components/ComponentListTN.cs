@@ -160,7 +160,7 @@ namespace Pulsar4X.Entities.Components
             ReactorDefTN ReactDef = new ReactorDefTN("PWR S1 P2", 0, 1.0f, 1.0f);
             ShieldDefTN AShieldDef = new ShieldDefTN("Alpha R300/240 Shields", 0, 0, 1.0f, 1.0f, ComponentTypeTN.Shield);
             MissileLauncherDefTN TubeDef = new MissileLauncherDefTN("Size 1 Launcher", 1.0f, 1, false, 1.0f);
-            MagazineDefTN MagDef = new MagazineDefTN("Mag S10", 10.0f, 1, 1, 1, 1);
+            MagazineDefTN MagDef = new MagazineDefTN("Mag S1", 1.0f, 1, 0, 0, 1);
             ActiveSensorDefTN MFCDef = new ActiveSensorDefTN("Wasp I FC", 1.0f, 10, 5, 100, true, 1.0f, 1);
 
             Engines.Add(EngDef);

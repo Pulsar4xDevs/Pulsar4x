@@ -1740,6 +1740,32 @@ namespace Pulsar4X.Entities
                     break;
                     #endregion
 
+                    #region Load Ordnance From Colony
+                    case (int)Constants.ShipTN.OrderType.LoadOrdnanceFromColony:
+                       TaskGroupOrders[0].orderTimeRequirement = 0;
+                       for (int loop = 0; loop < Ships.Count; loop++)
+                       {
+                           if (Ships[loop].ShipMagazines.Count != 0)
+                           {
+                               Ships[loop].LoadOrdnance(TaskGroupOrders[0].pop);
+                           }
+                       }
+                    break;
+                    #endregion
+
+                    #region Unload Ordnance To Colony
+                    case (int) Constants.ShipTN.OrderType.UnloadOrdnanceToColony:
+                       TaskGroupOrders[0].orderTimeRequirement = 0;
+                       for (int loop = 0; loop < Ships.Count; loop++)
+                       {
+                           if (Ships[loop].ShipMagazines.Count != 0)
+                           {
+                               Ships[loop].UnloadOrdnance(TaskGroupOrders[0].pop);
+                           }
+                       }
+                    break;
+                    #endregion
+
                 }
             }
             return TimeSlice;

@@ -887,7 +887,8 @@ namespace Pulsar4X
                 /// <summary>
                 /// Any ship with a magazine:
                 /// </summary>
-                UnloadOrdnanceToPlanet,
+                LoadOrdnanceFromColony,
+                UnloadOrdnanceToColony,
 
                 /// <summary>
                 /// Any taskgroup, but the target must be a TG with the appropriate ship to fulfill this order.

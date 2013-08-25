@@ -426,8 +426,8 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceDefTN(string title, OrdnanceSeries Series, 
                              float whMSP, int whTech, float fuelMSP, float AgilityMSP, int agilTech, 
                              float activeMSP, int activeTech, float thermalMSP, int thermalTech, float emMSP, int emTech, float geoMSP, int geoTech, int aRes, int reactorTech,
-                             int armor, bool ECM, int ecmTech, bool enhanced, int radTech, bool laser, int laserTech, OrdnanceDefTN SubMunition, int SubMunitionCount,int SeparationDist,
-                             MissileEngineDefTN Engine, int missileEngineCount)
+                             int armor, bool ECM, int ecmTech, bool enhanced, int radTech, bool laser, int laserTech,MissileEngineDefTN Engine, int missileEngineCount,
+                             OrdnanceDefTN SubMunition=null, int SubMunitionCount=0,int SeparationDist=-1)
         {
             /// <summary>
             /// Ignore these:
@@ -491,8 +491,10 @@ namespace Pulsar4X.Entities.Components
                 TotalThermalSignature = TotalEnginePower;
                 TotalFuelConsumption = (OrdnanceEngine.fuelConsumption * (float)EngineCount);
 
-
-                size = size + (OrdnanceEngine.size * (float)EngineCount);
+                /// <summary>
+                /// Engine sizes are divided by 20 to make their formula work.
+                /// </summary>
+                size = size + (OrdnanceEngine.size * (float)EngineCount * 20.0f);
             }
 
             /// <summary>
@@ -500,6 +502,7 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             Agility = (int)Math.Floor(AgilityMSP * (float)Constants.OrdnanceTN.agilityTech[agilTech]);
             size = size + AgilityMSP;
+
 
             
             /// <summary>
@@ -546,9 +549,19 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Do secondary missiles here.
             /// </summary>
-            SubRelease = SubMunition;
-            SubReleaseCount = SubMunitionCount;
-            SubReleaseDistance = SeparationDist;
+            /// 
+            if (SubMunition != null)
+            {
+                SubRelease = SubMunition;
+                SubReleaseCount = SubMunitionCount;
+                SubReleaseDistance = SeparationDist;
+            }
+            else
+            {
+                SubRelease = null;
+                SubReleaseCount = -1;
+                SubReleaseDistance = -1;
+            }
 
             /// <summary>
             /// now that the size of the missile is known, we can see what its detection characteristics should be.
@@ -578,7 +591,11 @@ namespace Pulsar4X.Entities.Components
             cost = cost + (decimal)(GeoStr * 25.0f);
             cost = cost + (decimal)((float)Armor / 4.0f);
             cost = cost + (decimal)((float)ECMValue / 2.0f);
-            cost = cost + (SubMunition.cost * SubMunitionCount);
+
+            if (SubMunition != null)
+            {
+                cost = cost + (SubMunition.cost * SubMunitionCount);
+            }
 
             isObsolete = false;
 
@@ -626,6 +643,7 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceGroupTN missileGroup
         {
             get { return MissileGroup; }
+            set { MissileGroup = value; }
         }
 
         /// <summary>
@@ -645,8 +663,6 @@ namespace Pulsar4X.Entities.Components
             MissileDef = definition;
 
             Separated = false;
-
-            MissileGroup = new OrdnanceGroupTN();
         }
 
         /// <summary>
@@ -674,9 +690,30 @@ namespace Pulsar4X.Entities.Components
             set { value = 0.0; }
         }
 
-        public OrdnanceGroupTN()
+        /// <summary>
+        /// Speed this missile group is traveling at.
+        /// </summary>
+        private float Speed;
+        public float speed
+        {
+            get { return Speed; }
+        }
+
+        /// <summary>
+        /// target of this missile gorup.
+        /// </summary>
+        private StarSystemEntity Target;
+        public StarSystemEntity target
+        {
+            get { return Target; }
+        }
+
+        public OrdnanceGroupTN(TaskGroupTN LaunchedFrom)
         {
             Missiles = new BindingList<OrdnanceTN>();
+
+            Speed = 0;
+            Target = null;
         }
     }
 }

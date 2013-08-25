@@ -1906,10 +1906,12 @@ namespace Pulsar4X.Entities
                 if (ShipClassOrdnance.ContainsKey(missile))
                 {
                     ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + loadAmt;
+                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadAmt;
                 }
                 else
                 {
                     ShipClassOrdnance.Add(missile, loadAmt);
+                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadAmt;
                 }
             }
             else
@@ -1924,10 +1926,19 @@ namespace Pulsar4X.Entities
                     /// Have to remember that inc is negative here.
                     /// </summary>
                     ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + inc;
+                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadAmt;
 
-                    if (ShipClassOrdnance[missile] <= 0)
+                    if (ShipClassOrdnance[missile] == 0)
                     {
                         ShipClassOrdnance.Remove(missile);
+                    }
+                    else if (ShipClassOrdnance[missile] < 0)
+                    {
+                        /// <summary>
+                        /// This can be bad.
+                        /// </summary>
+                        Console.WriteLine("ShipClassOrdnance underflow.");
+                        return;
                     }
                 }
             }

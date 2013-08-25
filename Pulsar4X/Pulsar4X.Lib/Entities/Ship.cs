@@ -1923,89 +1923,136 @@ namespace Pulsar4X.Entities
                 {
                     OrdnanceSeries Series = SCPair.Key.ordSeries;
 
-                    foreach (KeyValuePair<OrdnanceDefTN, int> SOPair in ShipOrdnance)
+                    if (ContainsMissileOfSeries(Series) == 0)
                     {
-                        if (SOPair.Key.ordSeries == Series)
+                        LoadMissileFromPopulation(Series, pop, SCPair.Value, 0);
+                    }
+                    else
+                    {
+                        foreach (KeyValuePair<OrdnanceDefTN, int> SOPair in ShipOrdnance)
                         {
-                            if (SOPair.Value == SCPair.Value)
+                            if (SOPair.Key.ordSeries == Series)
                             {
-                                /// <summary>
-                                /// This missile is loaded properly.
-                                /// </summary>
-                                break;
-                            }
-                            else
-                            {
-                                /// <summary>
-                                /// need to load from the population.
-                                /// </summary>
-
-                                for (int loop = (Series.missilesInSeries.Count-1); loop >= 0; loop--)
+                                if (SOPair.Value == SCPair.Value)
                                 {
-                                    if(pop.MissileStockpile.ContainsKey(Series.missilesInSeries[loop]))
-                                    {
-                                        int SpaceAvailable = CurrentMagazineCapacityMax - CurrentMagazineCapacity;
-                                        int MissileReq = SCPair.Value - SOPair.Value;
-
-                                        if(MissileReq <= SpaceAvailable)
-                                        {
-                                            /// <summary>
-                                            /// Unload missiles from Stockpile. MissilesAvailable will be less than or equal to MissileReq.
-                                            /// </summary>
-                                            int MissilesAvailable = pop.LoadMissileToStockpile(Series.missilesInSeries[loop],(MissileReq * -1));
-
-                                            /// <summary>
-                                            /// Now load them to the appropriate magazine and shipOrdnance.
-                                            /// </summary>
-
-                                            for (int loop2 = 0; loop2 < ShipMagazines.Count; loop2++)
-                                            {
-                                                if ((ShipMagazines[loop2].curCapacity < ShipMagazines[loop2].magazineDef.capacity) && ShipMagazines[loop2].isDestroyed == false)
-                                                {
-                                                    int SpaceInMag = ShipMagazines[loop2].magazineDef.capacity - ShipMagazines[loop2].curCapacity;
-
-                                                    int missileSpaceReq = (int)Math.Floor(Series.missilesInSeries[loop].size / SpaceInMag);
-
-                                                    int load = 0;
-                                                    if (missileSpaceReq >= MissilesAvailable)
-                                                    {
-                                                        load = MissilesAvailable;
-                                                    }
-                                                    else
-                                                    {
-                                                        load = missileSpaceReq;
-                                                    }
-
-                                                    int loadedToMagazine = ShipMagazines[loop2].LoadMagazine(Series.missilesInSeries[loop], load);
-
-                                                    if (ShipOrdnance.ContainsKey(Series.missilesInSeries[loop]) == true)
-                                                    {
-                                                        ShipOrdnance[Series.missilesInSeries[loop]] = ShipOrdnance[Series.missilesInSeries[loop]] + loadedToMagazine;
-                                                    }
-                                                    else
-                                                    {
-                                                        ShipOrdnance.Add(Series.missilesInSeries[loop], loadedToMagazine);
-                                                    }
-                                                    CurrentMagazineCapacity = CurrentMagazineCapacity + loadedToMagazine;
-
-                                                    MissilesAvailable = MissilesAvailable - loadedToMagazine;
-                                                }
-                                            }
-
-                                            if (MissilesAvailable > 0)
-                                            {
-                                                /// <summary>
-                                                /// Magazines are all filled and cannot accomodate remaining missiles. put the extras back in the stockpile.
-                                                /// </summary>
-                                                pop.LoadMissileToStockpile(Series.missilesInSeries[loop], MissilesAvailable);
-                                                return;
-                                            }
-                                        }
-                                    }
+                                    /// <summary>
+                                    /// This missile is loaded properly.
+                                    /// </summary>
+                                    break;
                                 }
-                            } //end else
-                        } // end if SOPair.Key.ordSeries
-                    } // end foreach
+                                else
+                                {
+                                    /// <summary>
+                                    /// need to load from the population.
+                                    /// </summary>
+                                    LoadMissileFromPopulation(Series, pop, SCPair.Value, SOPair.Value);
+
+                                } //end else
+                            } // end if SOPair.Key.ordSeries
+                        } // end foreach
+                    }
+
+                    
+                }
+            }
+        }
+
+        /// <summary>
+        /// Does this ship have a missile of Series X?
+        /// </summary>
+        /// <param name="Series">Series to test against.</param>
+        /// <returns>Number of missiles of that series.</returns>
+        public int ContainsMissileOfSeries(OrdnanceSeries Series)
+        {
+            if (ShipOrdnance.Count == 0)
+            {
+                return 0;
+            }
+            else
+            {
+                foreach (KeyValuePair<OrdnanceDefTN, int> SOPair in ShipOrdnance)
+                {
+                    if (SOPair.Key.ordSeries == Series)
+                    {
+                        return SOPair.Value;
+                    }
+                }
+
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Loads a missile from the specified series on Population pop into the ship.
+        /// </summary>
+        /// <param name="Series">Series of missile to search through</param>
+        /// <param name="pop">Population stockpile.</param>
+        /// <param name="SCValue">ShipClass Preferred Ordnance #</param>
+        /// <param name="SOValue">Current Ship Ordnance #</param>
+        public void LoadMissileFromPopulation(OrdnanceSeries Series, Population pop, int SCValue, int SOValue)
+        {
+            for (int loop = (Series.missilesInSeries.Count - 1); loop >= 0; loop--)
+            {
+                if (pop.MissileStockpile.ContainsKey(Series.missilesInSeries[loop]))
+                {
+                    int SpaceAvailable = CurrentMagazineCapacityMax - CurrentMagazineCapacity;
+                    int MissileReq = (int)((float)(SCValue - SOValue) * Series.missilesInSeries[loop].size);
+
+
+                    if (MissileReq <= SpaceAvailable)
+                    {
+                        /// <summary>
+                        /// Unload missiles from Stockpile. MissilesAvailable will be less than or equal to MissileReq.
+                        /// </summary>
+                        int MissilesAvailable = pop.LoadMissileToStockpile(Series.missilesInSeries[loop], (MissileReq * -1));
+
+                        /// <summary>
+                        /// Now load them to the appropriate magazine and shipOrdnance.
+                        /// </summary>
+
+                        for (int loop2 = 0; loop2 < ShipMagazines.Count; loop2++)
+                        {
+                            if ((ShipMagazines[loop2].curCapacity < ShipMagazines[loop2].magazineDef.capacity) && ShipMagazines[loop2].isDestroyed == false)
+                            {
+                                int SpaceInMag = ShipMagazines[loop2].magazineDef.capacity - ShipMagazines[loop2].curCapacity;
+
+                                int missileSpaceReq = (int)Math.Floor(SpaceInMag / Series.missilesInSeries[loop].size);
+
+                                int load = 0;
+                                if (missileSpaceReq >= MissilesAvailable)
+                                {
+                                    load = MissilesAvailable;
+                                }
+                                else
+                                {
+                                    load = missileSpaceReq;
+                                }
+
+                                int loadedToMagazine = ShipMagazines[loop2].LoadMagazine(Series.missilesInSeries[loop], load);
+
+                                if (ShipOrdnance.ContainsKey(Series.missilesInSeries[loop]) == true)
+                                {
+                                    ShipOrdnance[Series.missilesInSeries[loop]] = ShipOrdnance[Series.missilesInSeries[loop]] + loadedToMagazine;
+                                }
+                                else
+                                {
+                                    ShipOrdnance.Add(Series.missilesInSeries[loop], loadedToMagazine);
+                                }
+                                CurrentMagazineCapacity = CurrentMagazineCapacity + loadedToMagazine;
+
+                                MissilesAvailable = MissilesAvailable - loadedToMagazine;
+                            }
+                        }
+
+                        if (MissilesAvailable > 0)
+                        {
+                            /// <summary>
+                            /// Magazines are all filled and cannot accomodate remaining missiles. put the extras back in the stockpile.
+                            /// </summary>
+                            pop.LoadMissileToStockpile(Series.missilesInSeries[loop], MissilesAvailable);
+                            return;
+                        }
+                    }
                 }
             }
         }
@@ -2019,8 +2066,9 @@ namespace Pulsar4X.Entities
             foreach (KeyValuePair<OrdnanceDefTN, int> SOPair in ShipOrdnance)
             {
                 pop.LoadMissileToStockpile(SOPair.Key, SOPair.Value);
-                ShipOrdnance.Remove(SOPair.Key);
             }
+
+            ShipOrdnance.Clear();
 
             for (int loop = 0; loop < ShipMagazines.Count; loop++)
             {

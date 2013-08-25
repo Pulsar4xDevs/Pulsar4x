@@ -95,7 +95,7 @@ namespace Pulsar4X.Entities.Components
             EjectionTech = EjectTech;
             ArmorTech = ArmorHSTech;
 
-            float ArmorFactor = 1.0f;
+            float ArmorFactor = 0.0f;
 
             /// <summary>
             /// have some rounding to do here:
@@ -122,7 +122,6 @@ namespace Pulsar4X.Entities.Components
             float modifiedSize = size - ArmorFactor;
             if (modifiedSize < 0.0f)
                 modifiedSize = 0.0f;
-
 
             Capacity = (int)(modifiedSize * 20.0f * Constants.MagazineTN.FeedMechanism[FeedEfficiencyTech]);
 

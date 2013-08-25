@@ -1769,5 +1769,94 @@ namespace Pulsar4X.Tests
             Console.WriteLine("{0} {1} {2}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax,
                                  PlayerFaction1.TaskGroups[0].Ships[0].DestroyedComponents.Count);
         }
+
+
+        [Test]
+        public void CollierOrdersTest()
+        {
+            Faction PlayerFaction1 = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+            System1.Stars[0].Planets.Add(pl2);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 2.0;
+            System1.Stars[0].Planets[1].YSystem = 2.0;
+
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+
+            MissileEngineDefTN TestMissileEngine = new MissileEngineDefTN("Testbed",5.0f,1.0f,1.0f,1.0f);
+            OrdnanceSeries Series = new OrdnanceSeries();
+            OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0, false, 0, false, 0, false, 0, TestMissileEngine,1);
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddMagazine(PlayerFaction1.ComponentList.MagazineDef[0], 1);
+
+            PlayerFaction1.ShipDesigns[0].SetPreferredOrdnance(TestMissile, 3);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
+
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction1);
+
+            System1.Stars[0].Planets[0].Populations[0].LoadMissileToStockpile(TestMissile, 4);
+
+
+            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadOrdnanceFromColony, -1, -1, 0, System1.Stars[0].Planets[0].Populations[0]);
+            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadOrdnanceToColony, -1, -1, 0, System1.Stars[0].Planets[1].Populations[0]);
+
+            PlayerFaction1.TaskGroups[0].IssueOrder(Load);
+            PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
+
+            bool CK = System1.Stars[0].Planets[1].Populations[0].MissileStockpile.ContainsKey(TestMissile);
+            Console.WriteLine("Missiles on P1 and P2:{0} {1}", System1.Stars[0].Planets[0].Populations[0].MissileStockpile[TestMissile],
+                CK);
+
+
+            while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
+            {
+                Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
+    PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
+
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+
+                Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
+            }
+
+            bool CK1 = System1.Stars[0].Planets[0].Populations[0].MissileStockpile.ContainsKey(TestMissile);
+            bool CK2 = System1.Stars[0].Planets[1].Populations[0].MissileStockpile.ContainsKey(TestMissile);
+            Console.WriteLine("Missiles on P1 and P2:{0} {1}", CK1,
+                            CK2);
+
+            if (CK1 == true)
+            {
+                Console.WriteLine("P1 Missiles {0}", System1.Stars[0].Planets[0].Populations[0].MissileStockpile[TestMissile]);
+            }
+
+            if (CK2 == true)
+            {
+                Console.WriteLine("P2 Missiles {0}", System1.Stars[0].Planets[1].Populations[0].MissileStockpile[TestMissile]);
+            }
+
+            CK = PlayerFaction1.TaskGroups[0].Ships[0].ShipOrdnance.ContainsKey(TestMissile);
+            Console.WriteLine("Missile count on Ships[0] after unload :{0}", CK);
+        }
     }
 }
