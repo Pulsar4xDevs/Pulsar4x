@@ -392,6 +392,24 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Speed in KM/s of this missile.
+        /// </summary>
+        private float MaxSpeed;
+        public float maxSpeed
+        {
+            get { return MaxSpeed; }
+        }
+
+        /// <summary>
+        /// Manueverability rating of this missile.
+        /// </summary>
+        private float Manuever;
+        public float manuever
+        {
+            get { return Manuever; }
+        }
+
+        /// <summary>
         /// Ordnance Constructor.
         /// </summary>
         /// <param name="title">Name</param>
@@ -599,6 +617,9 @@ namespace Pulsar4X.Entities.Components
 
             isObsolete = false;
 
+            MaxSpeed = (float)TotalEnginePower * (1000.0f / (size * 0.05f));
+            Manuever = 10.0f + (Agility / size);
+
             Series.AddMissileToSeries(this);
         }
 
@@ -609,9 +630,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns></returns>
         public int ToHit(float targetSpeed)
         {
-            float manuever = 10.0f + (Agility / size);
-            float speed = (float)TotalEnginePower * ( 1000.0f / ( size * 0.05f ) );
-            int chance = (int)Math.Floor((speed / targetSpeed) * manuever);
+            int chance = (int)Math.Floor((MaxSpeed / targetSpeed) * Manuever);
             return chance;
         }
     }
@@ -708,12 +727,41 @@ namespace Pulsar4X.Entities.Components
             get { return Target; }
         }
 
-        public OrdnanceGroupTN(TaskGroupTN LaunchedFrom)
+        /// <summary>
+        /// Taskgroup this missilegroup launched from, and will be connected to for house keeping purposes for atleast the current tick
+        /// </summary>
+        private TaskGroupTN Attached;
+        public TaskGroupTN attached
         {
-            Missiles = new BindingList<OrdnanceTN>();
+            get { return Attached; }
+        }
+        
+        /// <summary>
+        /// Constructor for missile groups.
+        /// </summary>
+        /// <param name="LaunchedFrom">TG this launched from. additional missiles may be added this tick but afterwards no more.</param>
+        /// <param name="Missile">Initial missile that prompted the creation of this ordnance group.</param>
+        /// <param name="MissileTarget">The target this group is aimed at.</param>
+        public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile, StarSystemEntity MissileTarget)
+        {
+            Attached = LaunchedFrom;
 
-            Speed = 0;
-            Target = null;
+            Missiles = new BindingList<OrdnanceTN>();
+            Missiles.Add(Missile);
+
+            SSEntity = StarSystemEntityType.Missile;
+
+            Speed = Missile.missileDef.maxSpeed;
+            Target = MissileTarget;
+        }
+
+        public void AddMissile(OrdnanceTN Missile)
+        {
+            Missiles.Add(Missile);
+
+            /// <summary>
+            /// When missile detection stats are revisited, they'll have to be updated here and in the constructor.
+            /// </summary>
         }
     }
 }

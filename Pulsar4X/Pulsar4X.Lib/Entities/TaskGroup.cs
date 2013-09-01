@@ -165,7 +165,17 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int CurrentCryoStorage { get; set; }
 
+        /// <summary>
+        /// Missile groups spawned by this TG that have yet to launch out yet. look here to add missiles first before creating new ones.
+        /// </summary>
+        public BindingList<OrdnanceGroupTN> AttachedMissileGroups { get; set; }
+        
+        /// <summary>
+        /// UI map marker identifier.
+        /// </summary>
         public int MapMarkerId { get; set; }
+
+
 
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
@@ -260,6 +270,8 @@ namespace Pulsar4X.Entities
 
             TotalCryoCapacity = 0;
             CurrentCryoStorage = 0;
+
+            AttachedMissileGroups = new BindingList<OrdnanceGroupTN>();
 
         }
 
@@ -431,7 +443,7 @@ namespace Pulsar4X.Entities
             AddNodeToSort(EMSortList, Ship.EMList,1);
             AddNodeToSort(ActiveSortList, Ship.ActiveList,2);
         }
-#endregion
+        #endregion
 
 
         #region Taskgroup Sensor activation and emissions sorting
@@ -913,7 +925,7 @@ namespace Pulsar4X.Entities
 
             return false;
         }
-#endregion
+        #endregion
 
 
         #region Taskgroup movement and position as well as time requirement,heading and speed.
@@ -2152,7 +2164,7 @@ namespace Pulsar4X.Entities
         #endregion
 
 
-        #region Beam Fire Control targetting
+        #region Fire Control targetting
         /// <summary>
         /// Clear all targeting info for this taskgroup
         /// </summary>

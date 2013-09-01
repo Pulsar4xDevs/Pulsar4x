@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 
+/// <summary>
+/// I am concerned that the distances here are going to get too massive without some bounds checking, that will have to be added in at some point.
+/// </summary>
+
 namespace Pulsar4X.Entities
 {
     public class SystemContact : StarSystemEntity

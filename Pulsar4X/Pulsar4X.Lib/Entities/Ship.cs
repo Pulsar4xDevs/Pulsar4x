@@ -831,7 +831,7 @@ namespace Pulsar4X.Entities
             return CurrentSpeed;
         }
 
-        #region Weapons and Damage Lines 754
+        #region Weapons and Damage Lines
         /// <summary>
         /// Damage goes through a 3 part process, 1st shields subtract damage, then armor blocks damage, then internals take the hits.
         /// if 20 rolls happen without an internal in the list being targeted then call OnDestroyed(); Mesons skip to the internal damage section.
@@ -1729,6 +1729,28 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Links specified Tube to MFC.
+        /// </summary>
+        /// <param name="MFC">missile fire control</param>
+        /// <param name="Tube">Launch tube</param>
+        public void LinkTubeToMFC(MissileFireControlTN MFC, MissileLauncherTN Tube)
+        {
+            MFC.assignLaunchTube(Tube);
+        }
+
+        /// <summary>
+        /// unlinks this tube from any MFC.
+        /// </summary>
+        /// <param name="Tube">Launch tube to be disconnected.</param>
+        public void UnlinkTube(MissileLauncherTN Tube)
+        {
+            if (Tube.mFC != null)
+            {
+                Tube.ClearMFC();
+            }
+        }
+
+        /// <summary>
         /// Unlinks the specified beam weapon from its fire controller.
         /// </summary>
         /// <param name="Weapon">beam weapon to be cleared.</param>
@@ -1739,6 +1761,19 @@ namespace Pulsar4X.Entities
                 Weapon.fireController.linkedWeapons.Remove(Weapon);
                 Weapon.fireController = null;
             }
+        }
+
+        /// <summary>
+        /// Removes all weapon links to ths specified MFC
+        /// </summary>
+        /// <param name="MFC"></param>
+        public void UnlinkAllTubes(MissileFireControlTN MFC)
+        {
+            for (int loop = 0; loop < MFC.linkedWeapons.Count; loop++)
+            {
+                MFC.linkedWeapons[loop].ClearMFC();
+            }
+            MFC.linkedWeapons.Clear();
         }
 
         /// <summary>
@@ -1755,7 +1790,22 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Rechargest energyweapons to currentPowerGeneration of the ship.
+        /// Reloads missile tubes, function is based on time alone for the most part.
+        /// </summary>
+        /// <param name="tick">time increment that the sim is advanced by. 1 day = 86400 seconds, smallest practical value is 5.</param>
+        public void ReloadLaunchTubes(uint tick)
+        {
+            for (int loop = 0; loop < ShipMLaunchers.Count; loop++)
+            {
+                ShipMLaunchers[loop].loadTime = ShipMLaunchers[loop].loadTime - (int)tick;
+
+                if (ShipMLaunchers[loop].loadTime < 0)
+                    ShipMLaunchers[loop].loadTime = 0;
+            }
+        }
+
+        /// <summary>
+        /// Recharges energyweapons to currentPowerGeneration of the ship.
         /// </summary>
         /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
         public void RechargeBeamWeapons(uint tick)
@@ -1855,6 +1905,33 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
+
+            /// <summary>
+            /// Missile Fire Control Section
+            for (int loop = 0; loop < ShipMFC.Count; loop++)
+            {
+                if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false)
+                {
+                    /// <summary>
+                    /// Sanity Check. Make sure both are in the same system before checking distance. This, and an AU checker are probably going to have to go into another function.
+                    /// </summary>
+                    if (ShipsTaskGroup.Contact.CurrentSystem == ShipBFC[loop].target.ShipsTaskGroup.Contact.CurrentSystem)
+                    {
+                        int targetID = ShipMFC[loop].target.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(ShipMFC[loop].target.ShipsTaskGroup.Contact);
+
+                        if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                        {
+                            /// <summary>
+                            /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
+                            /// </summary>
+                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                            return;
+                        }
+
+                        ShipMFC[loop].FireWeapons(ShipsTaskGroup);
+                    }
+                }
+            }
         }
 
         #endregion
@@ -1907,6 +1984,7 @@ namespace Pulsar4X.Entities
             }
         }
 
+        #region Ordnance loading and unloading
         /// <summary>
         /// Loads ordnance to this ship from a population.
         /// </summary>
@@ -2075,6 +2153,8 @@ namespace Pulsar4X.Entities
                 ShipMagazines[loop].ClearMagazine();
             }
         }
+
+        #endregion
     }
     /// <summary>
     /// End of ShipTN class

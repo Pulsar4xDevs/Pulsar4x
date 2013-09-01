@@ -317,6 +317,11 @@ namespace Pulsar4X.Entities
 
         public Color FactionColor { get; set; }
 
+        /// <summary>
+        /// Missile groups in flight.
+        /// </summary>
+        public BindingList<OrdnanceGroupTN> MissileGroups { get; set; }
+
         public Faction(int ID)
         {
             Name = "Human Federation";
@@ -347,6 +352,8 @@ namespace Pulsar4X.Entities
             }
 
             MessageLog = new BindingList<MessageEntry>();
+
+            MissileGroups = new BindingList<OrdnanceGroupTN>();
         }
 
         public Faction(string a_oName, Species a_oSpecies, int ID)

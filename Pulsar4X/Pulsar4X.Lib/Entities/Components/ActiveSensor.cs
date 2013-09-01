@@ -482,7 +482,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="tube">launch tube to be assigned.</param>
         public void assignLaunchTube(MissileLauncherTN tube)
         {
-            LinkedWeapons.Add(tube);
+            if (LinkedWeapons.Contains(tube) == false)
+                LinkedWeapons.Add(tube);
 
             if (tube.mFC != this)
                 tube.AssignMFC(this);
@@ -494,7 +495,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="tube">tube to be removed.</param>
         public void removeLaunchTube(MissileLauncherTN tube)
         {
-            LinkedWeapons.Remove(tube);
+            if (LinkedWeapons.Contains(tube) == false)
+                LinkedWeapons.Remove(tube);
 
             if(tube.mFC == this)
                tube.ClearMFC();
@@ -540,10 +542,43 @@ namespace Pulsar4X.Entities.Components
             return Target;
         }
 
-        public bool FireWeapons()
+        /// <summary>
+        /// Fire Weapons spawns new missiles groups or adds missiles to existing ones.
+        /// </summary>
+        /// <param name="TG">Taskgroup this MFC is in.</param>
+        /// <returns>to be decided upon.</returns>
+        public bool FireWeapons(TaskGroupTN TG)
         {
-            // stub for now
-            return false;
+            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            {
+                if (LinkedWeapons[loop].isDestroyed == false && LinkedWeapons[loop].loadTime == 0)
+                {
+                    bool used = false;
+                    for (int loop2 = 0; loop2 < TG.AttachedMissileGroups.Count; loop2++)
+                    {
+                        if (TG.AttachedMissileGroups[loop2].speed == LinkedWeapons[loop].loadedOrdnance.maxSpeed)
+                        {
+                            OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
+                            TG.AttachedMissileGroups[loop].AddMissile(newMissile);
+
+                            LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
+                            used = true;
+                            break;
+                        }
+                    }
+
+                    if (used == false)
+                    {
+                        OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
+                        OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile, Target.ShipsTaskGroup);
+                        TG.AttachedMissileGroups.Add(newMissileGroup);
+                        TG.Faction.MissileGroups.Add(newMissileGroup);
+
+                        LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
+                    }
+                }
+            }
+            return true;
         }
     }
 

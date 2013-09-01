@@ -184,6 +184,7 @@ namespace Pulsar4X.Entities.Components
         public int loadTime
         {
             get { return LoadTime; }
+            set { LoadTime = value; }
         }
 
         /// <summary>
