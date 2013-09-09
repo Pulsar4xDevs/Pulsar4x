@@ -401,8 +401,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Target Assigned to this MFC
         /// </summary>
-        private ShipTN Target;
-        public ShipTN target
+        private OrdnanceTargetTN Target;
+        public OrdnanceTargetTN target
         {
             get { return Target; }
         }
@@ -473,7 +473,34 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ShipTarget">Ship to be targeted.</param>
         public void assignTarget(ShipTN ShipTarget)
         {
-            Target = ShipTarget;
+            Target = new OrdnanceTargetTN(ShipTarget);
+        }
+
+        /// <summary>
+        /// Target assignment of planets.
+        /// </summary>
+        /// <param name="PlanetTarget">planet</param>
+        public void assignTarget(Planet PlanetTarget)
+        {
+            Target = new OrdnanceTargetTN(PlanetTarget);
+        }
+
+        /// <summary>
+        /// Target assignment of populations
+        /// </summary>
+        /// <param name="PopTarget">Population</param>
+        public void assignTarget(Population PopTarget)
+        {
+            Target = new OrdnanceTargetTN(PopTarget);
+        }
+
+        /// <summary>
+        /// Target assignment of waypoints.
+        /// </summary>
+        /// <param name="WPTarget">Waypoint</param>
+        public void assignTarget(Waypoint WPTarget)
+        {
+            Target = new OrdnanceTargetTN(WPTarget);
         }
 
         /// <summary>
@@ -535,9 +562,9 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Simple return of the target of this BFC.
+        /// Simple return of the target of this MFC.
         /// </summary>
-        public ShipTN getTarget()
+        public OrdnanceTargetTN getTarget()
         {
             return Target;
         }
@@ -556,7 +583,7 @@ namespace Pulsar4X.Entities.Components
                     bool used = false;
                     for (int loop2 = 0; loop2 < TG.AttachedMissileGroups.Count; loop2++)
                     {
-                        if (TG.AttachedMissileGroups[loop2].speed == LinkedWeapons[loop].loadedOrdnance.maxSpeed)
+                        if (TG.AttachedMissileGroups[loop2].missiles[0].missileDef.maxSpeed == LinkedWeapons[loop].loadedOrdnance.maxSpeed)
                         {
                             OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
                             TG.AttachedMissileGroups[loop].AddMissile(newMissile);
@@ -570,7 +597,7 @@ namespace Pulsar4X.Entities.Components
                     if (used == false)
                     {
                         OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
-                        OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile, Target.ShipsTaskGroup);
+                        OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                         TG.AttachedMissileGroups.Add(newMissileGroup);
                         TG.Faction.MissileGroups.Add(newMissileGroup);
 

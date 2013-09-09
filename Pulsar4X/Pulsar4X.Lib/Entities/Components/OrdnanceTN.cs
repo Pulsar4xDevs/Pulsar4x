@@ -635,6 +635,96 @@ namespace Pulsar4X.Entities.Components
         }
     }
 
+    public class OrdnanceTargetTN
+    {
+        /// <summary>
+        /// Missiles can be fired at many potential targets, hence falling back to the SSE
+        /// </summary>
+        private StarSystemEntityType TargetType;
+        public StarSystemEntityType targetType
+        {
+            get { return TargetType; }
+            set { TargetType = value; }
+        }
+
+        /// <summary>
+        /// Ship killer ordnance usually.
+        /// </summary>
+        private ShipTN Ship;
+        public ShipTN ship
+        {
+            get { return Ship; }
+        }
+
+        /// <summary>
+        /// Survey typically.
+        /// </summary>
+        private Planet Body;
+        public Planet body
+        {
+            get { return body; }
+        }
+
+        /// <summary>
+        /// Planetary bombardment typically.
+        /// </summary>
+        private Population Pop;
+        public Population pop
+        {
+            get { return Pop; }
+        }
+
+        /// <summary>
+        /// Waypoint target, Drones, sensor missiles, and mines will make use of this for now.
+        /// specialized minelaying code may be put in later.
+        /// </summary>
+        private Waypoint WP;
+        public Waypoint wp
+        {
+            get { return WP; }
+        }
+
+        /// <summary>
+        /// Constructor for ship targets.
+        /// </summary>
+        /// <param name="ShipTarget">Ship that will be the target</param>
+        public OrdnanceTargetTN(ShipTN ShipTarget)
+        {
+            TargetType = ShipTarget.ShipsTaskGroup.SSEntity;
+            Ship = ShipTarget;
+        }
+
+        /// <summary>
+        /// Constructor for planetary targets.
+        /// </summary>
+        /// <param name="BodyTarget">Body which is the target</param>
+        public OrdnanceTargetTN(Planet BodyTarget)
+        {
+            TargetType = BodyTarget.SSEntity;
+            Body = BodyTarget;
+        }
+
+        /// <summary>
+        /// Constructor for population targets.
+        /// </summary>
+        /// <param name="PopTarget">Population that is targeted.</param>
+        public OrdnanceTargetTN(Population PopTarget)
+        {
+            TargetType = StarSystemEntityType.Population;
+            Pop = PopTarget;
+        }
+
+        /// <summary>
+        /// Constructor for Waypoint targets.
+        /// </summary>
+        /// <param name="WPTarget">waypoint to be targeted.</param>
+        public OrdnanceTargetTN(Waypoint WPTarget)
+        {
+            TargetType = WPTarget.SSEntity;
+            WP = WPTarget;
+        }
+    }
+
     public class OrdnanceTN
     {
         /// <summary>
@@ -675,11 +765,51 @@ namespace Pulsar4X.Entities.Components
             set { MFC = value; }
         }
 
+        /// <summary>
+        /// Target this missile is headed for.
+        /// </summary>
+        private OrdnanceTargetTN Target;
+        public OrdnanceTargetTN target
+        {
+            get { return Target; }
+        }
+
+        /// <summary>
+        /// which ordnance group is handling the movement for this missile(and others)
+        /// </summary>
+        private OrdnanceGroupTN OrdGroup;
+        public OrdnanceGroupTN ordGroup
+        {
+            get { return OrdGroup; }
+            set { OrdGroup = value; }
+        }
+
+        /// <summary>
+        /// Fuel the missile has to use.
+        /// </summary>
+        private float Fuel;
+        public float fuel
+        {
+            get { return Fuel; }
+        }
+
+        /// <summary>
+        /// Constructor for missiles.
+        /// </summary>
+        /// <param name="mfCtrl">MFC directing this missile.</param>
+        /// <param name="definition">definition of the missile.</param>
         public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition)
         {
             MFC = mfCtrl;
 
+            Target = MFC.target;
+
             MissileDef = definition;
+
+            /// <summary>
+            /// Litres of fuel available to this missile.
+            /// </summary>
+            Fuel = definition.fuel * 2500.0f;
 
             Separated = false;
         }
@@ -710,30 +840,75 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Speed this missile group is traveling at.
-        /// </summary>
-        private float Speed;
-        public float speed
-        {
-            get { return Speed; }
-        }
-
-        /// <summary>
-        /// target of this missile gorup.
-        /// </summary>
-        private StarSystemEntity Target;
-        public StarSystemEntity target
-        {
-            get { return Target; }
-        }
-
-        /// <summary>
         /// Taskgroup this missilegroup launched from, and will be connected to for house keeping purposes for atleast the current tick
         /// </summary>
         private TaskGroupTN Attached;
         public TaskGroupTN attached
         {
             get { return Attached; }
+        }
+
+        /// <summary>
+        /// The contact for this missile.
+        /// </summary>
+        private SystemContact Contact;
+        public SystemContact contact
+        {
+            get { return Contact; }
+        }
+
+        /// <summary>
+        /// Heading this missilegroup is travelling on.
+        /// </summary>
+        private float CurrentHeading;
+        public float currentHeading
+        {
+            get { return CurrentHeading; }
+        }
+
+        /// <summary>
+        /// Distance X component.
+        /// </summary>
+        private float dX;
+        public float dx
+        {
+            get { return dX; }
+        }
+
+        /// <summary>
+        /// Distance Y component.
+        /// </summary>
+        private float dY;
+        public float dy
+        {
+            get { return dY; }
+        }
+
+        /// <summary>
+        /// Speed X component.
+        /// </summary>
+        private float CurrentSpeedX;
+        public float currentSpeedX
+        {
+            get { return CurrentSpeedX; }
+        }
+
+        /// <summary>
+        /// Speed Y component.
+        /// </summary>
+        private float CurrentSpeedY;
+        public float currentSpeedY
+        {
+            get { return CurrentSpeedY; }
+        }
+
+        /// <summary>
+        /// Time to impact.
+        /// </summary>
+        private uint TimeReq;
+        public uint timeReq
+        {
+            get { return TimeReq; }
         }
         
         /// <summary>
@@ -742,19 +917,24 @@ namespace Pulsar4X.Entities.Components
         /// <param name="LaunchedFrom">TG this launched from. additional missiles may be added this tick but afterwards no more.</param>
         /// <param name="Missile">Initial missile that prompted the creation of this ordnance group.</param>
         /// <param name="MissileTarget">The target this group is aimed at.</param>
-        public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile, StarSystemEntity MissileTarget)
+        public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile)
         {
             Attached = LaunchedFrom;
+            Contact.XSystem = Attached.Contact.XSystem;
+            Contact.YSystem = Attached.Contact.YSystem;
+
 
             Missiles = new BindingList<OrdnanceTN>();
             Missiles.Add(Missile);
+            Missile.ordGroup = this;
 
             SSEntity = StarSystemEntityType.Missile;
-
-            Speed = Missile.missileDef.maxSpeed;
-            Target = MissileTarget;
         }
 
+        /// <summary>
+        /// Adds a missile to the ordnance group.
+        /// </summary>
+        /// <param name="Missile">Missile to add, think of this as the ShipTN to OrdnanceGroupTN's TaskGroupTN</param>
         public void AddMissile(OrdnanceTN Missile)
         {
             Missiles.Add(Missile);
@@ -762,6 +942,75 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// When missile detection stats are revisited, they'll have to be updated here and in the constructor.
             /// </summary>
+        }
+
+        /// <summary>
+        /// Direction this missile is headed.
+        /// </summary>
+        public void GetHeading()
+        {
+            /// <summary>
+            /// Add others here for planets, populations, other missile groups
+            switch (Missiles[0].target.targetType)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    dX = (float)(Contact.XSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem);
+                    dY = (float)(Contact.YSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem);
+                break;
+            }
+
+
+            CurrentHeading = (float)(Math.Atan((dY / dX)) / Constants.Units.RADIAN);
+        }
+
+        /// <summary>
+        /// directional speed of this missilegroup.
+        /// </summary>
+        public void GetSpeed()
+        {
+            float sign = 1.0f;
+            if (dX > 0.0f)
+            {
+                sign = -1.0f;
+            }
+
+            /// <summary>
+            /// minor matrix multiplication here.
+            /// </summary>
+            CurrentSpeedX = (float)(Missiles[0].missileDef.maxSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign);
+            CurrentSpeedY = (float)(Missiles[0].missileDef.maxSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign);
+        }
+
+        /// <summary>
+        /// How long will this order take given the missileGroup's current speed?
+        /// </summary>
+        public void GetTimeRequirement()
+        {
+            float dZ = (float)Math.Sqrt(((dX * dX) + (dY * dY)));
+            TimeReq = (uint)Math.Ceiling((dZ / Missiles[0].missileDef.maxSpeed));
+        }
+
+        /// <summary>
+        /// I need to move everyone to their target in this function. Any event that would cause a missile to self destruct can be handled elsewhere.
+        /// </summary>
+        public void ProcessOrder(uint tick)
+        {
+            GetHeading();
+            GetSpeed();
+            GetTimeRequirement();
+
+            if (TimeReq < tick)
+            {
+                /// <summary>
+                /// Use fuel and either impact missile or bring missile to halt.
+                /// </summary>
+            }
+            else
+            {
+                /// <summary>
+                /// Move missile closer to its target.
+                /// </summary>
+            }
         }
     }
 }

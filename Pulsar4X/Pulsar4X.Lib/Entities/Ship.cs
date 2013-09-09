@@ -690,8 +690,6 @@ namespace Pulsar4X.Entities
             CurrentMagazineCapacity = 0;
             CurrentMagazineCapacityMax = ClassDefinition.TotalMagazineCapacity;
 
-
-
             IsDestroyed = false;
 
         }
@@ -1706,6 +1704,7 @@ namespace Pulsar4X.Entities
             /// TG specific handling needs to be done here. first, the nodes have to be removed from the linked lists for each detection method.
             /// Next the shipId's of the surviving ships have to be adjusted downwards to match the new ship count.
             /// </summary>
+
             return ShipsTaskGroup.RemoveShipFromTaskGroup(this);
 
             /// <summary>
@@ -1912,23 +1911,27 @@ namespace Pulsar4X.Entities
             {
                 if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false)
                 {
-                    /// <summary>
-                    /// Sanity Check. Make sure both are in the same system before checking distance. This, and an AU checker are probably going to have to go into another function.
-                    /// </summary>
-                    if (ShipsTaskGroup.Contact.CurrentSystem == ShipBFC[loop].target.ShipsTaskGroup.Contact.CurrentSystem)
+                    if (ShipMFC[loop].target.targetType == StarSystemEntityType.TaskGroup)
                     {
-                        int targetID = ShipMFC[loop].target.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(ShipMFC[loop].target.ShipsTaskGroup.Contact);
-
-                        if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                        /// <summary>
+                        /// Sanity Check. Make sure both are in the same system before checking distance. This, and an AU checker are probably going to have to go into another function.
+                        /// </summary>
+                        if (ShipsTaskGroup.Contact.CurrentSystem == ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.CurrentSystem)
                         {
-                            /// <summary>
-                            /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
-                            /// </summary>
-                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                            return;
-                        }
 
-                        ShipMFC[loop].FireWeapons(ShipsTaskGroup);
+                            int targetID = ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(ShipMFC[loop].target.ship.ShipsTaskGroup.Contact);
+
+                            if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                            {
+                                /// <summary>
+                                /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
+                                /// </summary>
+                                Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                                return;
+                            }
+
+                            ShipMFC[loop].FireWeapons(ShipsTaskGroup);
+                        }
                     }
                 }
             }
