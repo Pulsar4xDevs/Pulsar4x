@@ -618,6 +618,13 @@ namespace Pulsar4X.Entities.Components
             isObsolete = false;
 
             MaxSpeed = (float)TotalEnginePower * (1000.0f / (size * 0.05f));
+            
+            /// <summary>
+            /// Bombs dropped directly on target, or otherwise things I really don't want to move, but don't want to screw up TimeReq for.
+            /// </summary>
+            if (MaxSpeed == 0)
+                MaxSpeed = 1; 
+
             Manuever = 10.0f + (Agility / size);
 
             Series.AddMissileToSeries(this);
@@ -791,6 +798,7 @@ namespace Pulsar4X.Entities.Components
         public float fuel
         {
             get { return Fuel; }
+            set { Fuel = value; }
         }
 
         /// <summary>
@@ -993,23 +1001,105 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// I need to move everyone to their target in this function. Any event that would cause a missile to self destruct can be handled elsewhere.
         /// </summary>
-        public void ProcessOrder(uint tick)
+        public void ProcessOrder(uint TimeSlice, Random RNG)
         {
             GetHeading();
             GetSpeed();
             GetTimeRequirement();
 
-            if (TimeReq < tick)
+            if (TimeReq < TimeSlice)
             {
                 /// <summary>
                 /// Use fuel and either impact missile or bring missile to halt.
                 /// </summary>
+                Contact.LastXSystem = Contact.XSystem;
+                Contact.LastYSystem = Contact.YSystem;
+
+                switch(Missiles[0].target.targetType)
+                {
+                    case StarSystemEntityType.TaskGroup:
+                        Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
+                        Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
+                        Contact.SystemKmX = (float)(Contact.XSystem / Constants.Units.KM_PER_AU);
+                        Contact.SystemKmX = (float)(Contact.YSystem / Constants.Units.KM_PER_AU);
+
+                        for (int loop = 0; loop < Missiles.Count; loop++)
+                        {
+                            float hourPer = TimeSlice / 3600.0f;
+                            Missiles[loop].fuel = Missiles[loop].fuel - (Missiles[loop].missileDef.totalFuelConsumption * hourPer);
+
+                            if (Missiles[loop].fuel <= 0.0f)
+                            {
+                                Missiles.RemoveAt(loop);
+                                loop--;
+                            }
+                        }
+
+                        /// <summary>
+                        /// Impact time.
+                        /// </summary>
+                        for (int loop = 0; loop < Missiles.Count; loop++)
+                        {
+                            ushort ToHit = 0;
+                            if (Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 1 || Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 0)
+                                ToHit = 100;
+                            else
+                               ToHit = (ushort)((Missiles[loop].missileDef.maxSpeed / (float)Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed) * Missiles[loop].missileDef.manuever);
+
+                            ushort HitChance = (ushort)RNG.Next(1, 100);
+
+                            if (ToHit > HitChance)
+                            {
+
+                                ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
+
+                                ushort location = (ushort)RNG.Next(0, Columns);
+
+                                ///<summary>
+                                ///Missile damage type always? laser damage type if implemented will need to change this.
+                                ///</summary>
+                                bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location);
+
+                                /// <summary>
+                                /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.
+                                /// </summary>
+                            }
+                        }
+                    break;
+                }
+                
             }
-            else
+            else if(Missiles[0].missileDef.ordnanceEngine != null)
             {
                 /// <summary>
-                /// Move missile closer to its target.
+                /// Move missile closer to its target. provided of course that it has an engine.
                 /// </summary>
+                Contact.LastXSystem = Contact.XSystem;
+                Contact.LastYSystem = Contact.YSystem;
+
+                Contact.SystemKmX = Contact.SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
+                Contact.SystemKmY = Contact.SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
+
+                Contact.XSystem = Contact.SystemKmX / Constants.Units.KM_PER_AU;
+                Contact.YSystem = Contact.SystemKmY / Constants.Units.KM_PER_AU;
+
+                //UseFuel(TimeSlice);
+                for (int loop = 0; loop < Missiles.Count; loop++)
+                {
+                    float hourPer = TimeSlice / 3600.0f;
+
+                    Missiles[loop].fuel = Missiles[loop].fuel - (Missiles[loop].missileDef.totalFuelConsumption * hourPer);
+
+                    if (Missiles[loop].fuel <= 0.0f)
+                    {
+                        Missiles.RemoveAt(loop);
+                        loop--;
+                    }
+                }
+
+                TimeReq = TimeReq - TimeSlice;
+
+                TimeSlice = 0;
             }
         }
     }
