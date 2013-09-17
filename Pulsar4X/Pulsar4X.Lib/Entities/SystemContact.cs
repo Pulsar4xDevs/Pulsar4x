@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using Pulsar4X.Entities.Components;
 
 /// <summary>
 /// I am concerned that the distances here are going to get too massive without some bounds checking, that will have to be added in at some point.
@@ -62,6 +63,11 @@ namespace Pulsar4X.Entities
         public TaskGroupTN TaskGroup { get; set; }
 
         /// <summary>
+        /// If the contact is a missile, it goes here.
+        /// </summary>
+        public OrdnanceGroupTN MissileGroup { get; set; }
+
+        /// <summary>
         /// Distance between this contact and the other contacts in the system.
         /// </summary>
         public BindingList<float> DistanceTable { get; set; }
@@ -111,8 +117,32 @@ namespace Pulsar4X.Entities
             SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
             SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
 
+
             TaskGroup = TG;
             SSEntity = StarSystemEntityType.TaskGroup;
+            DistanceTable = new BindingList<float>();
+            DistanceUpdate = new BindingList<int>();
+        }
+
+        /// <summary>
+        /// Creates a new system contact.
+        /// </summary>
+        /// <param name="Fact">Faction of contact.</param>
+        /// <param name="MG">Type of contact.</param>
+        public SystemContact(Faction Fact, OrdnanceGroupTN MG)
+        {
+            faction = Fact;
+            XSystem = MG.XSystem;
+            YSystem = MG.YSystem;
+            LastXSystem = XSystem;
+            LastYSystem = YSystem;
+
+            SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
+            SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
+
+
+            MissileGroup = MG;
+            SSEntity = StarSystemEntityType.Missile;
             DistanceTable = new BindingList<float>();
             DistanceUpdate = new BindingList<int>();
         }

@@ -1858,5 +1858,154 @@ namespace Pulsar4X.Tests
             CK = PlayerFaction1.TaskGroups[0].Ships[0].ShipOrdnance.ContainsKey(TestMissile);
             Console.WriteLine("Missile count on Ships[0] after unload :{0}", CK);
         }
+
+
+        [Test]
+        public void OrdnanceTest()
+        {
+            /// <summary>
+            /// Need to hook missiles into the distance table calculations, as well as sensor model.
+            /// </summary>
+
+
+            /// <summary>
+            ///The Damage table MUST be initialized.
+            /// </summary>
+            DamageValuesTN.init();
+
+            /// <summary>
+            /// Factions ARE necessary.
+            /// </summary>
+            Faction PlayerFaction1 = new Faction(0);
+            Faction PlayerFaction2 = new Faction(1);
+
+            /// <summary>
+            /// No StarSystem no contacts!
+            /// </summary>
+            StarSystem System1 = new StarSystem("Sol");
+            PlayerFaction1.AddNewContactList(System1);
+            PlayerFaction2.AddNewContactList(System1);
+
+            /// <summary>
+            /// No global RNG, no Damage or tohit.
+            /// </summary>
+            Random RNG = new Random();
+
+            /// <summary>
+            /// Planets and populations are needed for house keeping.
+            /// </summary>
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            Planet pl2 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1); 
+            System1.Stars[0].Planets.Add(pl2);
+
+            Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
+            Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction2);
+
+            System1.Stars[0].Planets[0].XSystem = 1.0;
+            System1.Stars[0].Planets[0].YSystem = 1.0;
+
+            System1.Stars[0].Planets[1].XSystem = 1.05;
+            System1.Stars[0].Planets[1].YSystem = 1.05;
+
+
+            PlayerFaction1.AddNewShipDesign("Blucher");
+            PlayerFaction2.AddNewShipDesign("Tribal");
+
+            MissileEngineDefTN TestMissileEngine = new MissileEngineDefTN("Testbed", 5.0f, 4.0f, 1.0f, 1.0f);
+
+            OrdnanceSeries Series = new OrdnanceSeries();
+            OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0, false, 0, false, 0, false, 0, TestMissileEngine, 1);
+
+            ActiveSensorDefTN Spotter = new ActiveSensorDefTN("Spotter", 5.0f, 10, 5, 18, false, 1.0f, 0);
+
+            PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddMagazine(PlayerFaction1.ComponentList.MagazineDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddLauncher(PlayerFaction1.ComponentList.MLauncherDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddMFC(PlayerFaction1.ComponentList.MissileFireControlDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddActiveSensor(Spotter, 1);
+
+            PlayerFaction2.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
+            PlayerFaction2.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
+            PlayerFaction2.ShipDesigns[0].AddFuelStorage(PlayerFaction1.ComponentList.FuelStorage[0], 2);
+            PlayerFaction2.ShipDesigns[0].AddEngineeringSpaces(PlayerFaction1.ComponentList.EngineeringSpaces[0], 2);
+            PlayerFaction2.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
+            PlayerFaction2.ShipDesigns[0].NewArmor("Duranium", 5, 4);
+
+            PlayerFaction1.ShipDesigns[0].SetPreferredOrdnance(TestMissile, 3);
+
+            PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
+            PlayerFaction2.AddNewTaskGroup("P2 TG 01", System1.Stars[0].Planets[1], System1);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], 0);
+            PlayerFaction2.TaskGroups[0].AddShip(PlayerFaction2.ShipDesigns[0], 0);
+
+
+            PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
+            PlayerFaction2.TaskGroups[0].Ships[0].Refuel(200000.0f);
+
+            System1.Stars[0].Planets[0].Populations[0].LoadMissileToStockpile(TestMissile, 4);
+
+            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadOrdnanceFromColony, -1, -1, 0, System1.Stars[0].Planets[0].Populations[0]);
+
+            PlayerFaction1.TaskGroups[0].IssueOrder(Load);
+
+            while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
+            {
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+            }
+
+            /// <summary>
+            /// Magazine loading isn't handled anywhere.
+            /// </summary>
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipMLaunchers[0].loadedOrdnance = TestMissile;
+
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipMLaunchers[0].AssignMFC(PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0]);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0].assignTarget(PlayerFaction2.TaskGroups[0].Ships[0]);
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0].openFire = true;
+            PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
+
+            PlayerFaction1.SensorSweep(5);
+
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipFireWeapons(5, RNG);
+
+            PlayerFaction1.MissileGroups[0].attached = null;
+
+            uint tick = 10;
+
+            bool done = false;
+            while (!done)
+            {
+                Console.WriteLine("{0}", tick);
+                PlayerFaction1.SensorSweep((int)tick);
+                PlayerFaction1.MissileGroups[0].ProcessOrder(tick, RNG);
+
+                Console.WriteLine("{0} {1} {2} {3} {4} {5}", PlayerFaction1.MissileGroups[0].currentHeading, PlayerFaction1.MissileGroups[0].currentSpeedX,
+                    PlayerFaction1.MissileGroups[0].currentSpeedY, PlayerFaction1.MissileGroups[0].timeReq, PlayerFaction1.MissileGroups[0].dx, PlayerFaction1.MissileGroups[0].dy);
+
+                tick = tick + 5;
+
+                if (PlayerFaction1.MissileGroups[0].missiles.Count == 0)
+                {
+                    PlayerFaction1.MissileGroups.Clear();
+                    done = true;
+                }
+            }
+
+
+            Console.WriteLine("Armor:");
+            for (int loop = 0; loop < PlayerFaction2.TaskGroups[0].Ships[0].ShipArmor.armorColumns.Count; loop++)
+            {
+                Console.WriteLine("{0} ", PlayerFaction2.TaskGroups[0].Ships[0].ShipArmor.armorColumns[loop]);
+            }
+
+        }
     }
 }

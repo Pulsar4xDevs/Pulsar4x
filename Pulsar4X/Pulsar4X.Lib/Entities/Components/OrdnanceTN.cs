@@ -38,8 +38,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Engine power determined by size, and base. Speed and thermal signature are derived from this.
         /// </summary>
-        private ushort EnginePower;
-        public ushort enginePower
+        private float EnginePower;
+        public float enginePower
         {
             get { return EnginePower; }
         }
@@ -85,8 +85,10 @@ namespace Pulsar4X.Entities.Components
             size = msp / 20.0f;
 
 
-            EnginePower = (ushort)((EngBase * size) * PowerMod);
-            ThermalSignature = EnginePower;
+            EnginePower = ((EngBase * size) * PowerMod);
+            ThermalSignature = (ushort)EnginePower;
+            if (ThermalSignature == 0)
+                ThermalSignature = 1;
 
             //Int ((Engine Size in MSP / 5) ^ (-0.683))
 
@@ -169,8 +171,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Total engine power of every engine on the missile.
         /// </summary>
-        private int TotalEnginePower;
-        public int totalEnginePower
+        private float TotalEnginePower;
+        public float totalEnginePower
         {
             get { return TotalEnginePower; }
         }
@@ -505,8 +507,8 @@ namespace Pulsar4X.Entities.Components
 
             if (OrdnanceEngine != null)
             {
-                TotalEnginePower = (int)(OrdnanceEngine.enginePower * EngineCount);
-                TotalThermalSignature = TotalEnginePower;
+                TotalEnginePower = (OrdnanceEngine.enginePower * (float)EngineCount);
+                TotalThermalSignature = (OrdnanceEngine.thermalSignature * EngineCount);
                 TotalFuelConsumption = (OrdnanceEngine.fuelConsumption * (float)EngineCount);
 
                 /// <summary>
@@ -779,6 +781,7 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceTargetTN target
         {
             get { return Target; }
+            set { Target = value; }
         }
 
         /// <summary>
@@ -854,6 +857,7 @@ namespace Pulsar4X.Entities.Components
         public TaskGroupTN attached
         {
             get { return Attached; }
+            set { Attached = value; }
         }
 
         /// <summary>
@@ -927,16 +931,20 @@ namespace Pulsar4X.Entities.Components
         /// <param name="MissileTarget">The target this group is aimed at.</param>
         public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile)
         {
-            Attached = LaunchedFrom;
-            Contact.XSystem = Attached.Contact.XSystem;
-            Contact.YSystem = Attached.Contact.YSystem;
+            XSystem = LaunchedFrom.XSystem;
+            YSystem = LaunchedFrom.YSystem;
+            Contact = new SystemContact(LaunchedFrom.Faction, this);
 
+            Attached = LaunchedFrom;
 
             Missiles = new BindingList<OrdnanceTN>();
             Missiles.Add(Missile);
             Missile.ordGroup = this;
 
             SSEntity = StarSystemEntityType.Missile;
+
+            Contact.CurrentSystem = LaunchedFrom.Contact.CurrentSystem;
+            LaunchedFrom.Contact.CurrentSystem.AddContact(Contact);
         }
 
         /// <summary>
@@ -959,6 +967,7 @@ namespace Pulsar4X.Entities.Components
         {
             /// <summary>
             /// Add others here for planets, populations, other missile groups
+            /// </summary>
             switch (Missiles[0].target.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
@@ -994,7 +1003,9 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void GetTimeRequirement()
         {
-            float dZ = (float)Math.Sqrt(((dX * dX) + (dY * dY)));
+            double dXKM = dX * Constants.Units.KM_PER_AU;
+            double dYKM = dY * Constants.Units.KM_PER_AU;
+            float dZ = (float)Math.Sqrt(((dXKM * dXKM) + (dYKM * dYKM)));
             TimeReq = (uint)Math.Ceiling((dZ / Missiles[0].missileDef.maxSpeed));
         }
 
@@ -1041,6 +1052,7 @@ namespace Pulsar4X.Entities.Components
                         for (int loop = 0; loop < Missiles.Count; loop++)
                         {
                             ushort ToHit = 0;
+
                             if (Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 1 || Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 0)
                                 ToHit = 100;
                             else
@@ -1065,6 +1077,8 @@ namespace Pulsar4X.Entities.Components
                                 /// </summary>
                             }
                         }
+
+                        Missiles.Clear();
                     break;
                 }
                 

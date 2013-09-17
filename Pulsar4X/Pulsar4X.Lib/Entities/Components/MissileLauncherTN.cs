@@ -261,9 +261,6 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             if (LoadTime == 0)
             {
-                LoadedOrdnance = null;
-
-
                 /// <summary>
                 /// Set the time to load the next missile.
                 /// </summary>

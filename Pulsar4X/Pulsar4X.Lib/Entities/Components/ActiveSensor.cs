@@ -576,8 +576,11 @@ namespace Pulsar4X.Entities.Components
         /// <returns>to be decided upon.</returns>
         public bool FireWeapons(TaskGroupTN TG)
         {
+
+
             for (int loop = 0; loop < LinkedWeapons.Count; loop++)
             {
+
                 if (LinkedWeapons[loop].isDestroyed == false && LinkedWeapons[loop].loadTime == 0)
                 {
                     bool used = false;
@@ -597,6 +600,7 @@ namespace Pulsar4X.Entities.Components
                     if (used == false)
                     {
                         OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
+                        newMissile.target = Target;
                         OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                         TG.AttachedMissileGroups.Add(newMissileGroup);
                         TG.Faction.MissileGroups.Add(newMissileGroup);
