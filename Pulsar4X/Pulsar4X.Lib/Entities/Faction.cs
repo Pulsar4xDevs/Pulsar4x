@@ -335,7 +335,6 @@ namespace Pulsar4X.Entities
             ComponentList = new ComponentDefListTN();
             ShipDesigns = new BindingList<ShipClassTN>();
             TaskGroups = new BindingList<TaskGroupTN>();
-
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
@@ -525,7 +524,7 @@ namespace Pulsar4X.Entities
                                 System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                             }
                         }
-                        else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup )
+                        else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup && System.SystemContactList[loop2].TaskGroup.Ships.Count != 0)
                         {
 
                             /// <summary>

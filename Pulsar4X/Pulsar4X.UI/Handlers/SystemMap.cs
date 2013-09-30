@@ -331,7 +331,7 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
                 GameState.SE.InitSim(m_oCurrnetSystem, GameState.Instance.Factions, GameState.RNG);
 
-                for (int loop = 0; loop < GameState.SE.factionCount; loop++)
+                for (int loop = GameState.SE.factionStart; loop < GameState.SE.factionCount; loop++)
                 {
                     switch (loop)
                     {
@@ -369,7 +369,7 @@ namespace Pulsar4X.UI.Handlers
                             break;
                     }
 
-                    for (int loop2 = 0; loop2 < GameState.SE.TGCount; loop2++)
+                    for (int loop2 = GameState.SE.TGStart; loop2 <= GameState.SE.TGCount; loop2++)
                     {
                         Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
                         ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();

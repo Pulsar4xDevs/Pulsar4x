@@ -10,7 +10,9 @@ namespace Pulsar4X.Entities
 {
     public class SimEntity
     {
+        public int factionStart { get; set; }
         public int factionCount { get; set; }
+        public int TGStart { get; set; }
         public int TGCount { get; set; }
         public int ShipCount { get; set; }
         public int CurrentTick { get; set; }
@@ -31,13 +33,17 @@ namespace Pulsar4X.Entities
         /// <param name="RNG">"global" rng since it has to be done that way.</param>
         private void createFactions(BindingList<Faction> P, StarSystem Sol, int factionCount, int TGCount, int ShipCount, Random RNG)
         {
-            for (int loop = 0; loop < factionCount; loop++)
+            for (int loop = factionStart; loop < factionCount; loop++)
             {
                 Faction P1;
                 if (loop == 0)
                     P1 = P[0];
                 else
+                {
                     P1 = new Faction(loop);
+                    Waypoint Start = new Waypoint(Sol, 0.0, 0.0);
+                    P1.AddNewTaskGroup("Shipyard TG", Start, Sol);
+                }
 
                 P1.AddNewContactList(Sol);
                 P1.AddNewShipDesign("Blucher");
@@ -54,7 +60,7 @@ namespace Pulsar4X.Entities
                 P1.ShipDesigns[0].NewArmor("Duranium", 5, 4);
 
 
-                for (int loop2 = 0; loop2 < TGCount; loop2++)
+                for (int loop2 = 1; loop2 <= TGCount; loop2++)
                 {
                     int randx = RNG.Next(0, 100000);
                     int randy = RNG.Next(0, 100000);
@@ -94,7 +100,7 @@ namespace Pulsar4X.Entities
         {
             for (int loop = 0; loop < factionCount; loop++)
             {
-                for (int loop2 = 0; loop2 < TGCount; loop2++)
+                for (int loop2 = TGStart; loop2 <= TGCount; loop2++)
                 {
                     P[loop].TaskGroups[loop2].IsOrbiting = false;
                     P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
@@ -269,7 +275,9 @@ namespace Pulsar4X.Entities
 
         public void InitSim(StarSystem Sol, BindingList<Faction> P, Random RNG)
         {
+            factionStart = 0;
             factionCount = 16;
+            TGStart = 1;
             TGCount = 10;
             ShipCount = 8;
 
@@ -313,7 +321,7 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// 1st do the sensor sweep:
                 /// </summary>
-                for (int loop = 0; loop < factionCount; loop++)
+                for (int loop = factionStart; loop < factionCount; loop++)
                 {
                     P[loop].SensorSweep(CurrentTick);
                 }
@@ -351,7 +359,7 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// Ending print report and preliminary ship/tg destruction handler.
                 /// </summary>
-                for (int loop = 0; loop < factionCount; loop++)
+                for (int loop = factionStart; loop < factionCount; loop++)
                 {
                     for (int loop2 = 0; loop2 < P[loop].TaskGroups.Count; loop2++)
                     {

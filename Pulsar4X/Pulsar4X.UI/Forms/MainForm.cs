@@ -58,6 +58,8 @@ namespace Pulsar4X.UI.Forms
             shipsToolStripMenuItem.Click += new EventHandler(shipsToolStripMenuItem_Click);
             classDesignToolStripMenuItem.Click += new EventHandler(classDesignToolStripMenuItem_Click);
 
+            taskGroupsToolStripMenuItem.Click += new EventHandler(taskGroupsToolStripMenuItem_Click);
+
             sMOnToolStripMenuItem.Click += new EventHandler(sMOnToolStripMenuItem_Click);
             sMOffToolStripMenuItem.Click += new EventHandler(sMOffToolStripMenuItem_Click);
 
@@ -125,6 +127,11 @@ namespace Pulsar4X.UI.Forms
         void systemInformationToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Helpers.UIController.Instance.SystemGenAndDisplay.ShowAllPanels(m_oDockPanel);
+        }
+
+        private void taskGroupsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.TaskGroup.ShowAllPanels(m_oDockPanel);
         }
 
         #endregion

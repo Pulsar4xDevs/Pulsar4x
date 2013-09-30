@@ -95,6 +95,16 @@ namespace Pulsar4X.UI.Helpers
             }
         }
 
+        Handlers.TaskGroup m_oTaskGroup;
+
+        /// <summary>
+        /// Handler for all taskgroup screens.
+        /// </summary>
+        public Handlers.TaskGroup TaskGroup
+        {
+            get { return m_oTaskGroup; }
+        }
+
         public bool SuspendAutoPanelDisplay { get; set; }
 
         /// <summary>
@@ -126,6 +136,7 @@ namespace Pulsar4X.UI.Helpers
             m_oEconomics = new Handlers.Economics();
             m_oShips = new Handlers.Ships();
             m_oClassDesign = new Handlers.ClassDesign();
+            m_oTaskGroup = new Handlers.TaskGroup();
         }
 
         #region PublicMethods
@@ -162,7 +173,7 @@ namespace Pulsar4X.UI.Helpers
             }
 
             if (a_oDockPanel == null || m_oSystemGenAndDisplay == null || m_oSystemMap == null
-                || m_oEconomics == null || m_oShips == null || m_oClassDesign == null)
+                || m_oEconomics == null || m_oShips == null || m_oClassDesign == null || m_oTaskGroup == null)
             {
                 return; // do nothing if we dont have the full UI!!
             }

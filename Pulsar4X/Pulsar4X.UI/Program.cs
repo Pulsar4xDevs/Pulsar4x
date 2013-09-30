@@ -30,9 +30,14 @@ namespace Pulsar4X.UI
             GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Bar"));
             // gen Faction and a pop:
             Entities.Faction oNewFaction = new Entities.Faction(0);
+
+            /// <summary>
+            /// This following section should probably be moved to the Faction constructor at some point.
+            /// </summary>
             oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
             oNewFaction.Populations.First().CivilianPopulation = 100.0f;
             GameState.Instance.Factions.Add(oNewFaction);
+            oNewFaction.AddNewTaskGroup("Shipyard TG", oNewFaction.Populations[0].Planet, otest);
 
             Application.EnableVisualStyles();
 
