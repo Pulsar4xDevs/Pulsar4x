@@ -66,6 +66,24 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Current faction
+        /// </summary>
+        private Pulsar4X.Entities.Faction m_oCurrnetFaction;
+        public Pulsar4X.Entities.Faction CurrentFaction
+        {
+            get { return m_oCurrnetFaction; }
+            set
+            {
+                if (value != m_oCurrnetFaction)
+                {
+                    m_oCurrnetFaction = value;
+                    RefreshTGPanel();
+                }
+            }
+
+        }
+
+        /// <summary>
         /// The view model this handler uses.
         /// </summary>
         public ViewModels.TaskGroupViewModel VM { get; set; }
@@ -84,14 +102,27 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             VM = new ViewModels.TaskGroupViewModel();
 
+
+            /// <summary>
+            /// Set up the faction bindings. FactionSelectionComboBox is in the TaskGroup_Panel.designer.cs file.
+            /// </summary>
+            m_oTaskGroupPanel.FactionSelectionComboBox.Bind(c => c.DataSource, VM, d => d.Factions);
+            m_oTaskGroupPanel.FactionSelectionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
+            m_oTaskGroupPanel.FactionSelectionComboBox.DisplayMember = "Name";
+            VM.FactionChanged += (s, args) => CurrentFaction = VM.CurrentFaction;
+            CurrentFaction = VM.CurrentFaction;
+            m_oTaskGroupPanel.FactionSelectionComboBox.SelectedIndexChanged += (s, args) => m_oTaskGroupPanel.FactionSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
+            m_oTaskGroupPanel.FactionSelectionComboBox.SelectedIndexChanged += new EventHandler(FactionSelectComboBox_SelectedIndexChanged);
+
+
+            /// <summary>
+            /// Bind the TaskGroup to the appropriate combo box.
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.Bind(c => c.DataSource, VM, d => d.TaskGroups);
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentTaskGroup, DataSourceUpdateMode.OnPropertyChanged);
-
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.DisplayMember = "Name";
             VM.TaskGroupChanged += (s, args) => CurrentTaskGroup = VM.CurrentTaskGroup;
             CurrentTaskGroup = VM.CurrentTaskGroup;
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.SelectedIndexChanged += (s, args) => m_oTaskGroupPanel.TaskGroupSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
-
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.SelectedIndexChanged += new EventHandler(TaskGroupSelectComboBox_SelectedIndexChanged);
 
             /// <summary>
@@ -101,6 +132,16 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.TaskGroupDataGrid.RowHeadersVisible = false;
             m_oTaskGroupPanel.TaskGroupDataGrid.AutoGenerateColumns = false;
             SetupShipDataGrid();
+            RefreshShipCells();
+        }
+
+        /// <summary>
+        /// Handle Faction Changes here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FactionSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
             RefreshShipCells();
         }
 
@@ -171,6 +212,7 @@ namespace Pulsar4X.UI.Handlers
         {
             try
             {
+                m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.CurrentSystem.Name;
                 m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Clear();
                 /// <summary>
                 /// Add Rows:
@@ -269,7 +311,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// Not sure if I need this.
+        /// Refresh the TG page.
         /// </summary>
         private void RefreshTGPanel()
         {

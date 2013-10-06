@@ -72,6 +72,10 @@ namespace Pulsar4X.UI.ViewModels
 
         private void OnFactionChanged()
         {
+            TaskGroups = GameState.Instance.Factions[_CurrentFaction.FactionID].TaskGroups;
+            _CurrentTaskGroup = TaskGroups[0];
+
+
             if (FactionChanged != null)
             {
                 FactionChanged(this, new EventArgs());
