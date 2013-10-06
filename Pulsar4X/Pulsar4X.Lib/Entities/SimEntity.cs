@@ -79,6 +79,7 @@ namespace Pulsar4X.Entities
                     for (int loop3 = 0; loop3 < ShipCount; loop3++)
                     {
                         P1.TaskGroups[loop2].AddShip(P1.ShipDesigns[0], 0);
+                        P1.TaskGroups[loop2].Ships[loop3].Name = "P" + loop.ToString() + " TG" + loop2.ToString() + " Ship" + loop3.ToString();
                         P1.TaskGroups[loop2].Ships[loop3].Refuel(200000.0f);
                         P1.TaskGroups[loop2].SetActiveSensor(loop3, 0, true);
                     }

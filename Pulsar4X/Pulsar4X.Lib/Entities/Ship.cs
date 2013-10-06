@@ -56,22 +56,37 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// How many crew are on the ship. Crew aren't necessarily in their quarters when those are destroyed, though the crew requirement for quarters will be at risk.
         /// </summary>
-        public int CurrentCrew;
+        public int CurrentCrew { get; set; }
 
         /// <summary>
         /// How many additional berths this vessel has. negative numbers indicate overloaded crew quarters and chance of environmental failures.
         /// </summary>
-        public int SpareBerths;
+        public int SpareBerths { get; set; }
 
         /// <summary>
         /// How many crew/POWs are in cryo stasis.
         /// </summary>
-        public int CurrentCryoStorage;
+        public int CurrentCryoStorage { get; set; }
 
         /// <summary>
         /// How long has the ship been out on patrol. 1.0 = Max deployment time.
         /// </summary>
-        public float CurrentDeployment;
+        public float CurrentDeployment { get; set; }
+
+        /// <summary>
+        /// What is the ship's morale, this is Current Deployment / Max Deployment but in steps from 100% to 25%.
+        /// </summary>
+        public float Morale { get; set; }
+
+        /// <summary>
+        /// Modifier to tohit, certain things increase.
+        /// </summary>
+        public float ShipGrade { get; set; }
+
+        /// <summary>
+        /// Response time to orders. semi random, up to 5 Minutes I believe.
+        /// </summary>
+        public float TFTraining { get; set; }
 
         /// <summary>
         /// Fuel Tanks, Small Fuel Tanks, Tiny Fuel Tanks, Large Fuel Tanks, Very Large Fuel Tanks, Ultra Large Fuel Tanks.
@@ -107,6 +122,12 @@ namespace Pulsar4X.Entities
         /// How much Maintenance supply can be carried by this ship?
         /// </summary>
         public int CurrentMSPCapacity { get; set; }
+
+        /// <summary>
+        /// How long has this ship been away from a maintenance facility.
+        /// </summary>
+        public float MaintenanceClock { get; set; }
+
         /// <summary>
         /// Bridge, Flag Bridge, Damage Control, Improved Damage Control, Advanced Damage Control, Maintenance bay, Recreational Facility, Orbital Habitat.
         /// </summary>
@@ -410,6 +431,9 @@ namespace Pulsar4X.Entities
             SpareBerths = ShipClass.TotalCrewQuarters;
             CurrentCryoStorage = 0;
             CurrentDeployment = 0.0f;
+            Morale = 100.0f;
+            ShipGrade = 0.0f;
+            TFTraining = 0.0f;
 
             /// <summary>
             ///Fuel Tanks don't have to be present, but will be in most designs.
@@ -428,6 +452,7 @@ namespace Pulsar4X.Entities
             CurrentDamageControlRating = ClassDefinition.MaxDamageControlRating;
             CurrentMSP = ShipClass.TotalMSPCapacity;
             CurrentMSPCapacity = ShipClass.TotalMSPCapacity;
+            MaintenanceClock = 0.0f;
 
             /// <summary>
             /// All remaining components that are of a more specialized nature. These do not have to be present, except bridges on ships bigger than 1K tons.

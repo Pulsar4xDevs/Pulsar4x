@@ -50,6 +50,7 @@ namespace Pulsar4X.UI.Panels
         private void InitializeComponent()
         {
             this.m_oTaskGroupName = new System.Windows.Forms.ComboBox();
+            this.m_oShipsBox = new System.Windows.Forms.GroupBox();
             this.SuspendLayout();
             // 
             // m_oTaskGroupName
@@ -60,12 +61,26 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupName.Size = new System.Drawing.Size(171, 21);
             this.m_oTaskGroupName.TabIndex = 1;
             // 
+            // m_oShipsBox
+            // 
+            this.m_oShipsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oShipsBox.Location = new System.Drawing.Point(252, 12);
+            this.m_oShipsBox.Name = "m_oShipsBox";
+            this.m_oShipsBox.Size = new System.Drawing.Size(921, 299);
+            this.m_oShipsBox.TabIndex = 2;
+            this.m_oShipsBox.TabStop = false;
+            this.m_oShipsBox.Text = "Ships in TaskGroup - Double-Click to open Ship window";
+            // 
             // TaskGroup_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(941, 683);
+            this.ClientSize = new System.Drawing.Size(1185, 652);
+            this.Controls.Add(this.m_oShipsBox);
             this.Controls.Add(this.m_oTaskGroupName);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "TaskGroup_Panel";
             this.Text = "Task Groups";
             this.ResumeLayout(false);
@@ -75,5 +90,6 @@ namespace Pulsar4X.UI.Panels
         #endregion
 
         private System.Windows.Forms.ComboBox m_oTaskGroupName;
+        private GroupBox m_oShipsBox;
     }
 }
