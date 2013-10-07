@@ -40,7 +40,9 @@ namespace Pulsar4X.Entities
                     P1 = P[0];
                 else
                 {
-                    P1 = new Faction(loop);
+                    String Race = "Human Federation" + loop.ToString();
+                    Species NewSpecies = new Species();
+                    P1 = new Faction(Race, NewSpecies, loop);
                     Waypoint Start = new Waypoint(Sol, 0.0, 0.0);
                     P1.AddNewTaskGroup("Shipyard TG", Start, Sol);
                 }

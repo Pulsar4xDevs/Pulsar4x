@@ -297,7 +297,6 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<TaskGroupTN> TaskGroups { get; set; }
 
-
         /// <summary>
         /// I'll just store every contact in every system potentially here right now.
         /// </summary>
@@ -318,7 +317,7 @@ namespace Pulsar4X.Entities
         public Color FactionColor { get; set; }
 
         /// <summary>
-        /// Missile groups in flight.
+        /// Going to get rid of this, don't get attached to it.
         /// </summary>
         public BindingList<OrdnanceGroupTN> MissileGroups { get; set; }
 
@@ -338,7 +337,6 @@ namespace Pulsar4X.Entities
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
-
             DetectedContacts = new Dictionary<ShipTN, FactionContact>();
 
             FactionID = ID;
@@ -368,10 +366,10 @@ namespace Pulsar4X.Entities
             ComponentList = new ComponentDefListTN();
             ShipDesigns = new BindingList<ShipClassTN>();
             TaskGroups = new BindingList<TaskGroupTN>();
-
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
+            DetectedContacts = new Dictionary<ShipTN, FactionContact>();
 
             FactionID = ID;
 
@@ -383,6 +381,8 @@ namespace Pulsar4X.Entities
             }
 
             MessageLog = new BindingList<MessageEntry>();
+
+            MissileGroups = new BindingList<OrdnanceGroupTN>();
         }
 
         /// <summary>
