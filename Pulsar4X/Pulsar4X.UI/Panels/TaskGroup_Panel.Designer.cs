@@ -106,6 +106,16 @@ namespace Pulsar4X.UI.Panels
             this.m_oDefaultCondEscortOrdersGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oOOBGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oTaskGroupOrdersBox = new System.Windows.Forms.GroupBox();
+            this.m_oRepeatOrdersTextBox = new System.Windows.Forms.TextBox();
+            this.m_oRepeatOrderButton = new System.Windows.Forms.Button();
+            this.m_oCycleMovesCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oOrderDelayTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.m_oAutoRouteCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oLoadAmtTextBox = new System.Windows.Forms.TextBox();
+            this.m_oOrbitalDistanceTextBox = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.m_oOrbitalDistanceLabel = new System.Windows.Forms.Label();
             this.m_oRemoveAllButton = new System.Windows.Forms.Button();
             this.m_oRemoveButton = new System.Windows.Forms.Button();
             this.m_oAddMoveButton = new System.Windows.Forms.Button();
@@ -136,16 +146,32 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpecialOrdersTabPage = new System.Windows.Forms.TabPage();
             this.m_oHistoryTabPage = new System.Windows.Forms.TabPage();
             this.m_oNavalOrgTabPage = new System.Windows.Forms.TabPage();
-            this.m_oOrbitalDistanceLabel = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.m_oOrbitalDistanceTextBox = new System.Windows.Forms.TextBox();
-            this.m_oLoadAmtTextBox = new System.Windows.Forms.TextBox();
-            this.m_oAutoRouteCheckBox = new System.Windows.Forms.CheckBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.m_oOrderDelayTextBox = new System.Windows.Forms.TextBox();
-            this.m_oCycleMovesCheckBox = new System.Windows.Forms.CheckBox();
-            this.m_oRepeatOrderButton = new System.Windows.Forms.Button();
-            this.m_oRepeatOrdersTextBox = new System.Windows.Forms.TextBox();
+            this.m_oButtonBox = new System.Windows.Forms.GroupBox();
+            this.m_oDeployEscortsButton = new System.Windows.Forms.Button();
+            this.m_oRecallEscortsButton = new System.Windows.Forms.Button();
+            this.m_oEqualizeFuelButton = new System.Windows.Forms.Button();
+            this.m_oEqualizeMaintButton = new System.Windows.Forms.Button();
+            this.m_oNoConditionsButton = new System.Windows.Forms.Button();
+            this.m_oRecoverParaButton = new System.Windows.Forms.Button();
+            this.m_oLaunchParaButton = new System.Windows.Forms.Button();
+            this.m_oDeleteTGButton = new System.Windows.Forms.Button();
+            this.m_oOOBButton = new System.Windows.Forms.Button();
+            this.m_oRenameTGButton = new System.Windows.Forms.Button();
+            this.m_oAddColonyButton = new System.Windows.Forms.Button();
+            this.m_oSystemMapButton = new System.Windows.Forms.Button();
+            this.m_oNewTGButton = new System.Windows.Forms.Button();
+            this.m_oCloseButton = new System.Windows.Forms.Button();
+            this.m_oNoDefaultButton = new System.Windows.Forms.Button();
+            this.m_oShieldsOffButton = new System.Windows.Forms.Button();
+            this.m_oShieldsOnButton = new System.Windows.Forms.Button();
+            this.m_oHyperOffButton = new System.Windows.Forms.Button();
+            this.m_oHyperOnButton = new System.Windows.Forms.Button();
+            this.m_oReloadParaButton = new System.Windows.Forms.Button();
+            this.m_oMissileLaunchButton = new System.Windows.Forms.Button();
+            this.m_oSaveEscortsButton = new System.Windows.Forms.Button();
+            this.m_oEscortButton = new System.Windows.Forms.Button();
+            this.m_oDetachButton = new System.Windows.Forms.Button();
+            this.m_oAssembleButton = new System.Windows.Forms.Button();
             this.m_oGeneralTGDetailsBox.SuspendLayout();
             this.m_oSpeedBox.SuspendLayout();
             this.m_oCenterShowGF.SuspendLayout();
@@ -158,6 +184,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.SuspendLayout();
             this.m_oCopyOrdersGroupBox.SuspendLayout();
             this.m_oSystemDisplayOptionsBox.SuspendLayout();
+            this.m_oButtonBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupName
@@ -658,6 +685,106 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.TabIndex = 33;
             this.m_oTaskGroupOrdersBox.TabStop = false;
             // 
+            // m_oRepeatOrdersTextBox
+            // 
+            this.m_oRepeatOrdersTextBox.Location = new System.Drawing.Point(769, 399);
+            this.m_oRepeatOrdersTextBox.Name = "m_oRepeatOrdersTextBox";
+            this.m_oRepeatOrdersTextBox.Size = new System.Drawing.Size(27, 20);
+            this.m_oRepeatOrdersTextBox.TabIndex = 44;
+            this.m_oRepeatOrdersTextBox.Text = "0";
+            this.m_oRepeatOrdersTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oRepeatOrderButton
+            // 
+            this.m_oRepeatOrderButton.Location = new System.Drawing.Point(694, 397);
+            this.m_oRepeatOrderButton.Name = "m_oRepeatOrderButton";
+            this.m_oRepeatOrderButton.Size = new System.Drawing.Size(61, 26);
+            this.m_oRepeatOrderButton.TabIndex = 43;
+            this.m_oRepeatOrderButton.Text = "Repeat";
+            this.m_oRepeatOrderButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCycleMovesCheckBox
+            // 
+            this.m_oCycleMovesCheckBox.AutoSize = true;
+            this.m_oCycleMovesCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCycleMovesCheckBox.Location = new System.Drawing.Point(694, 367);
+            this.m_oCycleMovesCheckBox.MaximumSize = new System.Drawing.Size(102, 17);
+            this.m_oCycleMovesCheckBox.MinimumSize = new System.Drawing.Size(102, 17);
+            this.m_oCycleMovesCheckBox.Name = "m_oCycleMovesCheckBox";
+            this.m_oCycleMovesCheckBox.Size = new System.Drawing.Size(102, 17);
+            this.m_oCycleMovesCheckBox.TabIndex = 21;
+            this.m_oCycleMovesCheckBox.Text = "Cycle Moves";
+            this.m_oCycleMovesCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrderDelayTextBox
+            // 
+            this.m_oOrderDelayTextBox.Location = new System.Drawing.Point(601, 400);
+            this.m_oOrderDelayTextBox.Name = "m_oOrderDelayTextBox";
+            this.m_oOrderDelayTextBox.Size = new System.Drawing.Size(77, 20);
+            this.m_oOrderDelayTextBox.TabIndex = 42;
+            this.m_oOrderDelayTextBox.Text = "0";
+            this.m_oOrderDelayTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(532, 403);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(63, 13);
+            this.label1.TabIndex = 41;
+            this.label1.Text = "Order Delay";
+            // 
+            // m_oAutoRouteCheckBox
+            // 
+            this.m_oAutoRouteCheckBox.AutoSize = true;
+            this.m_oAutoRouteCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(526, 367);
+            this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(152, 17);
+            this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(152, 17);
+            this.m_oAutoRouteCheckBox.Name = "m_oAutoRouteCheckBox";
+            this.m_oAutoRouteCheckBox.Size = new System.Drawing.Size(152, 17);
+            this.m_oAutoRouteCheckBox.TabIndex = 21;
+            this.m_oAutoRouteCheckBox.Text = "No auto-route jump check";
+            this.m_oAutoRouteCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oLoadAmtTextBox
+            // 
+            this.m_oLoadAmtTextBox.Enabled = false;
+            this.m_oLoadAmtTextBox.Location = new System.Drawing.Point(441, 403);
+            this.m_oLoadAmtTextBox.Name = "m_oLoadAmtTextBox";
+            this.m_oLoadAmtTextBox.Size = new System.Drawing.Size(56, 20);
+            this.m_oLoadAmtTextBox.TabIndex = 40;
+            this.m_oLoadAmtTextBox.Text = "0";
+            this.m_oLoadAmtTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oOrbitalDistanceTextBox
+            // 
+            this.m_oOrbitalDistanceTextBox.Location = new System.Drawing.Point(441, 374);
+            this.m_oOrbitalDistanceTextBox.Name = "m_oOrbitalDistanceTextBox";
+            this.m_oOrbitalDistanceTextBox.Size = new System.Drawing.Size(56, 20);
+            this.m_oOrbitalDistanceTextBox.TabIndex = 35;
+            this.m_oOrbitalDistanceTextBox.Text = "0";
+            this.m_oOrbitalDistanceTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Enabled = false;
+            this.label2.Location = new System.Drawing.Point(277, 406);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(129, 13);
+            this.label2.TabIndex = 39;
+            this.label2.Text = "Maximum Amount to Load";
+            // 
+            // m_oOrbitalDistanceLabel
+            // 
+            this.m_oOrbitalDistanceLabel.AutoSize = true;
+            this.m_oOrbitalDistanceLabel.Location = new System.Drawing.Point(277, 377);
+            this.m_oOrbitalDistanceLabel.Name = "m_oOrbitalDistanceLabel";
+            this.m_oOrbitalDistanceLabel.Size = new System.Drawing.Size(114, 13);
+            this.m_oOrbitalDistanceLabel.TabIndex = 38;
+            this.m_oOrbitalDistanceLabel.Text = "Orbital Distance (k km)";
+            // 
             // m_oRemoveAllButton
             // 
             this.m_oRemoveAllButton.Location = new System.Drawing.Point(173, 406);
@@ -1021,111 +1148,315 @@ namespace Pulsar4X.UI.Panels
             this.m_oNavalOrgTabPage.Text = "Naval Organization";
             this.m_oNavalOrgTabPage.UseVisualStyleBackColor = true;
             // 
-            // m_oOrbitalDistanceLabel
+            // m_oButtonBox
             // 
-            this.m_oOrbitalDistanceLabel.AutoSize = true;
-            this.m_oOrbitalDistanceLabel.Location = new System.Drawing.Point(277, 377);
-            this.m_oOrbitalDistanceLabel.Name = "m_oOrbitalDistanceLabel";
-            this.m_oOrbitalDistanceLabel.Size = new System.Drawing.Size(114, 13);
-            this.m_oOrbitalDistanceLabel.TabIndex = 38;
-            this.m_oOrbitalDistanceLabel.Text = "Orbital Distance (k km)";
+            this.m_oButtonBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oButtonBox.Controls.Add(this.m_oAssembleButton);
+            this.m_oButtonBox.Controls.Add(this.m_oDetachButton);
+            this.m_oButtonBox.Controls.Add(this.m_oEscortButton);
+            this.m_oButtonBox.Controls.Add(this.m_oSaveEscortsButton);
+            this.m_oButtonBox.Controls.Add(this.m_oMissileLaunchButton);
+            this.m_oButtonBox.Controls.Add(this.m_oReloadParaButton);
+            this.m_oButtonBox.Controls.Add(this.m_oHyperOnButton);
+            this.m_oButtonBox.Controls.Add(this.m_oHyperOffButton);
+            this.m_oButtonBox.Controls.Add(this.m_oShieldsOnButton);
+            this.m_oButtonBox.Controls.Add(this.m_oShieldsOffButton);
+            this.m_oButtonBox.Controls.Add(this.m_oNoDefaultButton);
+            this.m_oButtonBox.Controls.Add(this.m_oCloseButton);
+            this.m_oButtonBox.Controls.Add(this.m_oDeployEscortsButton);
+            this.m_oButtonBox.Controls.Add(this.m_oRecallEscortsButton);
+            this.m_oButtonBox.Controls.Add(this.m_oEqualizeFuelButton);
+            this.m_oButtonBox.Controls.Add(this.m_oEqualizeMaintButton);
+            this.m_oButtonBox.Controls.Add(this.m_oNoConditionsButton);
+            this.m_oButtonBox.Controls.Add(this.m_oRecoverParaButton);
+            this.m_oButtonBox.Controls.Add(this.m_oLaunchParaButton);
+            this.m_oButtonBox.Controls.Add(this.m_oDeleteTGButton);
+            this.m_oButtonBox.Controls.Add(this.m_oOOBButton);
+            this.m_oButtonBox.Controls.Add(this.m_oRenameTGButton);
+            this.m_oButtonBox.Controls.Add(this.m_oAddColonyButton);
+            this.m_oButtonBox.Controls.Add(this.m_oSystemMapButton);
+            this.m_oButtonBox.Controls.Add(this.m_oNewTGButton);
+            this.m_oButtonBox.Location = new System.Drawing.Point(12, 888);
+            this.m_oButtonBox.MaximumSize = new System.Drawing.Size(1170, 90);
+            this.m_oButtonBox.MinimumSize = new System.Drawing.Size(1170, 90);
+            this.m_oButtonBox.Name = "m_oButtonBox";
+            this.m_oButtonBox.Size = new System.Drawing.Size(1170, 90);
+            this.m_oButtonBox.TabIndex = 33;
+            this.m_oButtonBox.TabStop = false;
             // 
-            // label2
+            // m_oDeployEscortsButton
             // 
-            this.label2.AutoSize = true;
-            this.label2.Enabled = false;
-            this.label2.Location = new System.Drawing.Point(277, 406);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(129, 13);
-            this.label2.TabIndex = 39;
-            this.label2.Text = "Maximum Amount to Load";
+            this.m_oDeployEscortsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oDeployEscortsButton.Location = new System.Drawing.Point(808, 16);
+            this.m_oDeployEscortsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oDeployEscortsButton.Name = "m_oDeployEscortsButton";
+            this.m_oDeployEscortsButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oDeployEscortsButton.TabIndex = 66;
+            this.m_oDeployEscortsButton.Text = "Deploy Escorts";
+            this.m_oDeployEscortsButton.UseVisualStyleBackColor = true;
             // 
-            // m_oOrbitalDistanceTextBox
+            // m_oRecallEscortsButton
             // 
-            this.m_oOrbitalDistanceTextBox.Location = new System.Drawing.Point(441, 374);
-            this.m_oOrbitalDistanceTextBox.Name = "m_oOrbitalDistanceTextBox";
-            this.m_oOrbitalDistanceTextBox.Size = new System.Drawing.Size(56, 20);
-            this.m_oOrbitalDistanceTextBox.TabIndex = 35;
-            this.m_oOrbitalDistanceTextBox.Text = "0";
-            this.m_oOrbitalDistanceTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.m_oRecallEscortsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oRecallEscortsButton.Location = new System.Drawing.Point(718, 16);
+            this.m_oRecallEscortsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oRecallEscortsButton.Name = "m_oRecallEscortsButton";
+            this.m_oRecallEscortsButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oRecallEscortsButton.TabIndex = 65;
+            this.m_oRecallEscortsButton.Text = "Recall Escorts";
+            this.m_oRecallEscortsButton.UseVisualStyleBackColor = true;
             // 
-            // m_oLoadAmtTextBox
+            // m_oEqualizeFuelButton
             // 
-            this.m_oLoadAmtTextBox.Enabled = false;
-            this.m_oLoadAmtTextBox.Location = new System.Drawing.Point(441, 403);
-            this.m_oLoadAmtTextBox.Name = "m_oLoadAmtTextBox";
-            this.m_oLoadAmtTextBox.Size = new System.Drawing.Size(56, 20);
-            this.m_oLoadAmtTextBox.TabIndex = 40;
-            this.m_oLoadAmtTextBox.Text = "0";
-            this.m_oLoadAmtTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.m_oEqualizeFuelButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oEqualizeFuelButton.Location = new System.Drawing.Point(538, 16);
+            this.m_oEqualizeFuelButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oEqualizeFuelButton.Name = "m_oEqualizeFuelButton";
+            this.m_oEqualizeFuelButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oEqualizeFuelButton.TabIndex = 63;
+            this.m_oEqualizeFuelButton.Text = "Equalize Fuel";
+            this.m_oEqualizeFuelButton.UseVisualStyleBackColor = true;
             // 
-            // m_oAutoRouteCheckBox
+            // m_oEqualizeMaintButton
             // 
-            this.m_oAutoRouteCheckBox.AutoSize = true;
-            this.m_oAutoRouteCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(526, 367);
-            this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(152, 17);
-            this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(152, 17);
-            this.m_oAutoRouteCheckBox.Name = "m_oAutoRouteCheckBox";
-            this.m_oAutoRouteCheckBox.Size = new System.Drawing.Size(152, 17);
-            this.m_oAutoRouteCheckBox.TabIndex = 21;
-            this.m_oAutoRouteCheckBox.Text = "No auto-route jump check";
-            this.m_oAutoRouteCheckBox.UseVisualStyleBackColor = true;
+            this.m_oEqualizeMaintButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oEqualizeMaintButton.Location = new System.Drawing.Point(448, 16);
+            this.m_oEqualizeMaintButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oEqualizeMaintButton.Name = "m_oEqualizeMaintButton";
+            this.m_oEqualizeMaintButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oEqualizeMaintButton.TabIndex = 62;
+            this.m_oEqualizeMaintButton.Text = "Equalize Maint";
+            this.m_oEqualizeMaintButton.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // m_oNoConditionsButton
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(532, 403);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(63, 13);
-            this.label1.TabIndex = 41;
-            this.label1.Text = "Order Delay";
+            this.m_oNoConditionsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oNoConditionsButton.Location = new System.Drawing.Point(988, 53);
+            this.m_oNoConditionsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oNoConditionsButton.Name = "m_oNoConditionsButton";
+            this.m_oNoConditionsButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oNoConditionsButton.TabIndex = 59;
+            this.m_oNoConditionsButton.Text = "No Conditions";
+            this.m_oNoConditionsButton.UseVisualStyleBackColor = true;
             // 
-            // m_oOrderDelayTextBox
+            // m_oRecoverParaButton
             // 
-            this.m_oOrderDelayTextBox.Location = new System.Drawing.Point(601, 400);
-            this.m_oOrderDelayTextBox.Name = "m_oOrderDelayTextBox";
-            this.m_oOrderDelayTextBox.Size = new System.Drawing.Size(77, 20);
-            this.m_oOrderDelayTextBox.TabIndex = 42;
-            this.m_oOrderDelayTextBox.Text = "0";
-            this.m_oOrderDelayTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.m_oRecoverParaButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oRecoverParaButton.Location = new System.Drawing.Point(358, 53);
+            this.m_oRecoverParaButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oRecoverParaButton.Name = "m_oRecoverParaButton";
+            this.m_oRecoverParaButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oRecoverParaButton.TabIndex = 52;
+            this.m_oRecoverParaButton.Text = "Recover Para";
+            this.m_oRecoverParaButton.UseVisualStyleBackColor = true;
             // 
-            // m_oCycleMovesCheckBox
+            // m_oLaunchParaButton
             // 
-            this.m_oCycleMovesCheckBox.AutoSize = true;
-            this.m_oCycleMovesCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCycleMovesCheckBox.Location = new System.Drawing.Point(694, 367);
-            this.m_oCycleMovesCheckBox.MaximumSize = new System.Drawing.Size(102, 17);
-            this.m_oCycleMovesCheckBox.MinimumSize = new System.Drawing.Size(102, 17);
-            this.m_oCycleMovesCheckBox.Name = "m_oCycleMovesCheckBox";
-            this.m_oCycleMovesCheckBox.Size = new System.Drawing.Size(102, 17);
-            this.m_oCycleMovesCheckBox.TabIndex = 21;
-            this.m_oCycleMovesCheckBox.Text = "Cycle Moves";
-            this.m_oCycleMovesCheckBox.UseVisualStyleBackColor = true;
+            this.m_oLaunchParaButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oLaunchParaButton.Location = new System.Drawing.Point(268, 53);
+            this.m_oLaunchParaButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oLaunchParaButton.Name = "m_oLaunchParaButton";
+            this.m_oLaunchParaButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oLaunchParaButton.TabIndex = 51;
+            this.m_oLaunchParaButton.Text = "Launch Para";
+            this.m_oLaunchParaButton.UseVisualStyleBackColor = true;
             // 
-            // m_oRepeatOrderButton
+            // m_oDeleteTGButton
             // 
-            this.m_oRepeatOrderButton.Location = new System.Drawing.Point(694, 397);
-            this.m_oRepeatOrderButton.Name = "m_oRepeatOrderButton";
-            this.m_oRepeatOrderButton.Size = new System.Drawing.Size(61, 26);
-            this.m_oRepeatOrderButton.TabIndex = 43;
-            this.m_oRepeatOrderButton.Text = "Repeat";
-            this.m_oRepeatOrderButton.UseVisualStyleBackColor = true;
+            this.m_oDeleteTGButton.Location = new System.Drawing.Point(183, 53);
+            this.m_oDeleteTGButton.Name = "m_oDeleteTGButton";
+            this.m_oDeleteTGButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oDeleteTGButton.TabIndex = 50;
+            this.m_oDeleteTGButton.Text = "Delete TG";
+            this.m_oDeleteTGButton.UseVisualStyleBackColor = true;
             // 
-            // m_oRepeatOrdersTextBox
+            // m_oOOBButton
             // 
-            this.m_oRepeatOrdersTextBox.Location = new System.Drawing.Point(769, 399);
-            this.m_oRepeatOrdersTextBox.Name = "m_oRepeatOrdersTextBox";
-            this.m_oRepeatOrdersTextBox.Size = new System.Drawing.Size(27, 20);
-            this.m_oRepeatOrdersTextBox.TabIndex = 44;
-            this.m_oRepeatOrdersTextBox.Text = "0";
-            this.m_oRepeatOrdersTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.m_oOOBButton.Location = new System.Drawing.Point(183, 16);
+            this.m_oOOBButton.Name = "m_oOOBButton";
+            this.m_oOOBButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oOOBButton.TabIndex = 49;
+            this.m_oOOBButton.Text = "OOB";
+            this.m_oOOBButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oRenameTGButton
+            // 
+            this.m_oRenameTGButton.Location = new System.Drawing.Point(95, 53);
+            this.m_oRenameTGButton.Name = "m_oRenameTGButton";
+            this.m_oRenameTGButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oRenameTGButton.TabIndex = 48;
+            this.m_oRenameTGButton.Text = "Rename TG";
+            this.m_oRenameTGButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAddColonyButton
+            // 
+            this.m_oAddColonyButton.Enabled = false;
+            this.m_oAddColonyButton.Location = new System.Drawing.Point(95, 16);
+            this.m_oAddColonyButton.Name = "m_oAddColonyButton";
+            this.m_oAddColonyButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oAddColonyButton.TabIndex = 47;
+            this.m_oAddColonyButton.Text = "Add Colony";
+            this.m_oAddColonyButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSystemMapButton
+            // 
+            this.m_oSystemMapButton.Location = new System.Drawing.Point(6, 16);
+            this.m_oSystemMapButton.Name = "m_oSystemMapButton";
+            this.m_oSystemMapButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oSystemMapButton.TabIndex = 46;
+            this.m_oSystemMapButton.Text = "System Map";
+            this.m_oSystemMapButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oNewTGButton
+            // 
+            this.m_oNewTGButton.Location = new System.Drawing.Point(6, 53);
+            this.m_oNewTGButton.Name = "m_oNewTGButton";
+            this.m_oNewTGButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oNewTGButton.TabIndex = 45;
+            this.m_oNewTGButton.Text = "New TG";
+            this.m_oNewTGButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCloseButton
+            // 
+            this.m_oCloseButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oCloseButton.Location = new System.Drawing.Point(1078, 53);
+            this.m_oCloseButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oCloseButton.Name = "m_oCloseButton";
+            this.m_oCloseButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oCloseButton.TabIndex = 67;
+            this.m_oCloseButton.Text = "Close";
+            this.m_oCloseButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oNoDefaultButton
+            // 
+            this.m_oNoDefaultButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oNoDefaultButton.Location = new System.Drawing.Point(898, 53);
+            this.m_oNoDefaultButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oNoDefaultButton.Name = "m_oNoDefaultButton";
+            this.m_oNoDefaultButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oNoDefaultButton.TabIndex = 68;
+            this.m_oNoDefaultButton.Text = "No Default";
+            this.m_oNoDefaultButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oShieldsOffButton
+            // 
+            this.m_oShieldsOffButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oShieldsOffButton.Location = new System.Drawing.Point(808, 53);
+            this.m_oShieldsOffButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oShieldsOffButton.Name = "m_oShieldsOffButton";
+            this.m_oShieldsOffButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oShieldsOffButton.TabIndex = 69;
+            this.m_oShieldsOffButton.Text = "Shields Off";
+            this.m_oShieldsOffButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oShieldsOnButton
+            // 
+            this.m_oShieldsOnButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oShieldsOnButton.Location = new System.Drawing.Point(718, 53);
+            this.m_oShieldsOnButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oShieldsOnButton.Name = "m_oShieldsOnButton";
+            this.m_oShieldsOnButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oShieldsOnButton.TabIndex = 70;
+            this.m_oShieldsOnButton.Text = "Shields On";
+            this.m_oShieldsOnButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oHyperOffButton
+            // 
+            this.m_oHyperOffButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oHyperOffButton.Location = new System.Drawing.Point(628, 53);
+            this.m_oHyperOffButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oHyperOffButton.Name = "m_oHyperOffButton";
+            this.m_oHyperOffButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oHyperOffButton.TabIndex = 71;
+            this.m_oHyperOffButton.Text = "Hyper Off";
+            this.m_oHyperOffButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oHyperOnButton
+            // 
+            this.m_oHyperOnButton.Enabled = false;
+            this.m_oHyperOnButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oHyperOnButton.Location = new System.Drawing.Point(538, 53);
+            this.m_oHyperOnButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oHyperOnButton.Name = "m_oHyperOnButton";
+            this.m_oHyperOnButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oHyperOnButton.TabIndex = 72;
+            this.m_oHyperOnButton.Text = "Hyper On";
+            this.m_oHyperOnButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReloadParaButton
+            // 
+            this.m_oReloadParaButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oReloadParaButton.Location = new System.Drawing.Point(448, 53);
+            this.m_oReloadParaButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oReloadParaButton.Name = "m_oReloadParaButton";
+            this.m_oReloadParaButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oReloadParaButton.TabIndex = 73;
+            this.m_oReloadParaButton.Text = "Reload Para";
+            this.m_oReloadParaButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oMissileLaunchButton
+            // 
+            this.m_oMissileLaunchButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oMissileLaunchButton.Location = new System.Drawing.Point(358, 16);
+            this.m_oMissileLaunchButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oMissileLaunchButton.Name = "m_oMissileLaunchButton";
+            this.m_oMissileLaunchButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oMissileLaunchButton.TabIndex = 74;
+            this.m_oMissileLaunchButton.Text = "Msl Launch";
+            this.m_oMissileLaunchButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSaveEscortsButton
+            // 
+            this.m_oSaveEscortsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oSaveEscortsButton.Location = new System.Drawing.Point(628, 16);
+            this.m_oSaveEscortsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oSaveEscortsButton.Name = "m_oSaveEscortsButton";
+            this.m_oSaveEscortsButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oSaveEscortsButton.TabIndex = 75;
+            this.m_oSaveEscortsButton.Text = "Save Escorts";
+            this.m_oSaveEscortsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oEscortButton
+            // 
+            this.m_oEscortButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oEscortButton.Location = new System.Drawing.Point(898, 16);
+            this.m_oEscortButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oEscortButton.Name = "m_oEscortButton";
+            this.m_oEscortButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oEscortButton.TabIndex = 76;
+            this.m_oEscortButton.Text = "Escort";
+            this.m_oEscortButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oDetachButton
+            // 
+            this.m_oDetachButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oDetachButton.Location = new System.Drawing.Point(988, 16);
+            this.m_oDetachButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oDetachButton.Name = "m_oDetachButton";
+            this.m_oDetachButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oDetachButton.TabIndex = 77;
+            this.m_oDetachButton.Text = "Detach";
+            this.m_oDetachButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAssembleButton
+            // 
+            this.m_oAssembleButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oAssembleButton.Location = new System.Drawing.Point(1078, 16);
+            this.m_oAssembleButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oAssembleButton.Name = "m_oAssembleButton";
+            this.m_oAssembleButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oAssembleButton.TabIndex = 78;
+            this.m_oAssembleButton.Text = "Assemble";
+            this.m_oAssembleButton.UseVisualStyleBackColor = true;
             // 
             // TaskGroup_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1209, 935);
+            this.ClientSize = new System.Drawing.Size(1193, 986);
+            this.Controls.Add(this.m_oButtonBox);
             this.Controls.Add(this.m_oTaskGroupTabControl);
             this.Controls.Add(this.m_oOrderTimeDistBox);
             this.Controls.Add(this.m_oOfficerBox);
@@ -1160,6 +1491,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCopyOrdersGroupBox.PerformLayout();
             this.m_oSystemDisplayOptionsBox.ResumeLayout(false);
             this.m_oSystemDisplayOptionsBox.PerformLayout();
+            this.m_oButtonBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1247,5 +1579,31 @@ namespace Pulsar4X.UI.Panels
         private TextBox m_oOrderDelayTextBox;
         private Label label1;
         private CheckBox m_oAutoRouteCheckBox;
+        private GroupBox m_oButtonBox;
+        private Button m_oDeployEscortsButton;
+        private Button m_oRecallEscortsButton;
+        private Button m_oEqualizeFuelButton;
+        private Button m_oEqualizeMaintButton;
+        private Button m_oNoConditionsButton;
+        private Button m_oRecoverParaButton;
+        private Button m_oLaunchParaButton;
+        private Button m_oDeleteTGButton;
+        private Button m_oOOBButton;
+        private Button m_oRenameTGButton;
+        private Button m_oAddColonyButton;
+        private Button m_oSystemMapButton;
+        private Button m_oNewTGButton;
+        private Button m_oAssembleButton;
+        private Button m_oDetachButton;
+        private Button m_oEscortButton;
+        private Button m_oSaveEscortsButton;
+        private Button m_oMissileLaunchButton;
+        private Button m_oReloadParaButton;
+        private Button m_oHyperOnButton;
+        private Button m_oHyperOffButton;
+        private Button m_oShieldsOnButton;
+        private Button m_oShieldsOffButton;
+        private Button m_oNoDefaultButton;
+        private Button m_oCloseButton;
     }
 }
