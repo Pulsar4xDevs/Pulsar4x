@@ -10,7 +10,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Starsystem this waypoint resides in.
         /// </summary>
-        StarSystem System;
+        public StarSystem System;
+
+        /// <summary>
+        /// Which player set this waypoint?
+        /// </summary>
+        public int FactionId;
 
         /// <summary>
         /// Mass is totally unnecessary here.
@@ -21,8 +26,10 @@ namespace Pulsar4X.Entities
             set { value = 0.0; } 
         }
 
-        public Waypoint(StarSystem Sys,double X, double Y)
+        public Waypoint(String Title,StarSystem Sys,double X, double Y, int FactionID)
         {
+            Name = Title;
+            FactionId = FactionID;
             System = Sys;
             XSystem = X;
             YSystem = Y;

@@ -15,7 +15,7 @@ namespace Pulsar4X.Entities
         public BindingList<Star> Stars { get; set; }
 
         /// <summary>
-        /// Each starsystem has its own list of waypoints.
+        /// Each starsystem has its own list of waypoints. These probably need to be faction specific?
         /// </summary>
         public BindingList<Waypoint> Waypoints { get; set; }
 
@@ -63,9 +63,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="XSystemAU">System Position X in AU</param>
         /// <param name="YSystemAU">System Position Y in AU</param>
-        public void AddWaypoint(double XSystemAU, double YSystemAU)
+        public void AddWaypoint(String Title, double XSystemAU, double YSystemAU, int FactionID)
         {
-            Waypoint NewWP = new Waypoint(this,XSystemAU, YSystemAU);
+            Waypoint NewWP = new Waypoint(Title,this,XSystemAU, YSystemAU, FactionID);
             Waypoints.Add(NewWP);
             //logger.Info("Waypoint added.");
             //logger.Info(XSystemAU.ToString());

@@ -15,6 +15,8 @@ using Pulsar4X.UI.SceenGraph;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Pulsar4X.UI.Handlers
 {
@@ -36,6 +38,15 @@ namespace Pulsar4X.UI.Handlers
             Training,
             Count
 
+        }
+
+        public enum SystemLocationListType
+        {
+            Planets,
+            Contacts,
+            TaskGroups,
+            Waypoints,
+            Count
         }
 
         /// <summary>
@@ -77,6 +88,7 @@ namespace Pulsar4X.UI.Handlers
                 if (value != m_oCurrnetFaction)
                 {
                     m_oCurrnetFaction = value;
+                    m_oCurrnetTaskGroup = m_oCurrnetFaction.TaskGroups[0];
                     RefreshTGPanel();
                 }
             }
@@ -87,6 +99,17 @@ namespace Pulsar4X.UI.Handlers
         /// The view model this handler uses.
         /// </summary>
         public ViewModels.TaskGroupViewModel VM { get; set; }
+
+        /// <summary>
+        /// Index of interesting locations for the SystemLocationList
+        /// </summary>
+        private BindingList<int> SystemLocationListIndices { get; set; }
+
+        /// <summary>
+        /// What those indices really mean
+        /// </summary>
+        private BindingList<SystemLocationListType> SystemLocationListTypes { get; set; }
+
 
 
         /// <summary>
@@ -99,9 +122,12 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// setup viewmodel:
             /// Bind TG Selection Combo Box.
+            /// Bind faction Selection as well.
             /// </summary>
             VM = new ViewModels.TaskGroupViewModel();
 
+            SystemLocationListIndices = new BindingList<int>();
+            SystemLocationListTypes = new BindingList<SystemLocationListType>();
 
             /// <summary>
             /// Set up the faction bindings. FactionSelectionComboBox is in the TaskGroup_Panel.designer.cs file.
@@ -117,6 +143,7 @@ namespace Pulsar4X.UI.Handlers
 
             /// <summary>
             /// Bind the TaskGroup to the appropriate combo box.
+            /// </summary>
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.Bind(c => c.DataSource, VM, d => d.TaskGroups);
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentTaskGroup, DataSourceUpdateMode.OnPropertyChanged);
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.DisplayMember = "Name";
@@ -132,7 +159,18 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.TaskGroupDataGrid.RowHeadersVisible = false;
             m_oTaskGroupPanel.TaskGroupDataGrid.AutoGenerateColumns = false;
             SetupShipDataGrid();
-            RefreshShipCells();
+
+            m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndexChanged += new EventHandler(SystemLocationListBox_SelectedIndexChanged);
+            m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayContactsCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayTaskGroupsCheckBox_CheckChanged);
+            m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayWaypointsCheckBox_CheckChanged);
+            m_oTaskGroupPanel.SetSpeedButton.Click += new EventHandler(SetSpeedButton_Clicked);
+            m_oTaskGroupPanel.MaxSpeedButton.Click += new EventHandler(MaxSpeedButton_Clicked);
+            m_oTaskGroupPanel.AddMoveButton.Click += new EventHandler(AddMoveButton_Clicked);
+            m_oTaskGroupPanel.RemoveButton.Click += new EventHandler(RemoveButton_Clicked);
+            m_oTaskGroupPanel.RemoveAllButton.Click += new EventHandler(RemoveAllButton_Clicked);
+
+            RefreshTGPanel();
         }
 
         /// <summary>
@@ -142,7 +180,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void FactionSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RefreshShipCells();
+            RefreshTGPanel();
         }
 
         /// <summary>
@@ -152,7 +190,271 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void TaskGroupSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RefreshShipCells();
+            RefreshTGPanel();
+        }
+
+        /// <summary>
+        /// If the contacts checkbox is changed:
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DisplayContactsCheckBox_CheckChanged(object sender, EventArgs e)
+        {
+            BuildSystemLocationList();
+            ClearActionList();
+        }
+
+        /// <summary>
+        /// If Taskgroups checkbox is changed:
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DisplayTaskGroupsCheckBox_CheckChanged(object sender, EventArgs e)
+        {
+            BuildSystemLocationList();
+            ClearActionList();
+        }
+
+        /// <summary>
+        /// If Waypoints checkbox is changed:
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DisplayWaypointsCheckBox_CheckChanged(object sender, EventArgs e)
+        {
+            BuildSystemLocationList();
+            ClearActionList();
+        }
+
+        /// <summary>
+        /// If a location is chosen build the action list.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SystemLocationListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BuildActionList();
+        }
+
+        /// <summary>
+        /// Sets the speed of the taskgroup to its user entered value.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SetSpeedButton_Clicked(object sender, EventArgs e)
+        {
+            string newSpeed = m_oTaskGroupPanel.SetSpeedTextBox.Text;
+            int value;
+            bool CheckString = int.TryParse(newSpeed, out value);
+
+            if(CheckString == true)
+                CurrentTaskGroup.SetSpeed(value);
+        }
+
+        /// <summary>
+        /// Sets the speed of the taskgroup to its maximum.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MaxSpeedButton_Clicked(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.SetSpeed(CurrentTaskGroup.MaxSpeed);
+            m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
+        }
+
+        /// <summary>
+        /// Adds the selected order to the task group's list of orders. This function is going to get giant.
+        /// Not handled: Order filtering, delays, secondary and tertiary orders.
+        /// As for adding new things here, look at the logic for how they were added to the SystemLocationListBox to derive how to get to them for this code.
+        /// Don't forget filtering of destinations by survey status.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddMoveButton_Clicked(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Planets, Contacts, TG, WP
+            /// </summary>
+            int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
+
+
+            int newIndex;
+            int Counter;
+            Orders NewOrder;
+
+            if (PlaceIndex != -1)
+            {
+                int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
+
+                if (ActionIndex != -1)
+                {
+                    /// <summary>
+                    /// Now figure out what the hell order this would be.
+                    /// </summary>
+
+                    for (int loop = 0; loop < SystemLocationListIndices.Count; loop++)
+                    {
+                        if (PlaceIndex < SystemLocationListIndices[loop])
+                        {
+                            if (loop == 0)
+                            {
+                                newIndex = PlaceIndex;
+                            }
+                            else
+                            {
+                                newIndex = PlaceIndex - SystemLocationListIndices[loop-1];
+                            }
+
+                            /// <summary>
+                            /// Which type is this? 
+                            /// </summary>
+                            switch (SystemLocationListTypes[loop-1])
+                            {
+                                #region Planets
+                                case SystemLocationListType.Planets :
+                                    /// <summary>
+                                    /// This is currently the planets section.
+                                    /// </summary>
+                                    Counter = 0;
+                                    for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.Stars.Count; loop2++)
+                                    {
+                                        Counter = Counter + CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets.Count;
+
+                                        if (newIndex < Counter)
+                                        {
+                                            int PlanetIndex = newIndex - (Counter - CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets.Count);
+
+                                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets[PlanetIndex]);
+                                            CurrentTaskGroup.IssueOrder(NewOrder);
+                                            break;
+                                        }
+                                    }
+
+
+                                break;
+                                #endregion
+
+                                #region Contacts
+                                case SystemLocationListType.Contacts:
+                                /// <summary>
+                                /// This is Contacts
+                                /// </summary>
+                                Counter = 0;
+                                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+                                {
+                                    if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentTaskGroup.Contact.CurrentSystem)
+                                    {
+                                        if (Counter == newIndex)
+                                        {
+                                            Counter = 0;
+                                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, pair.Key.ShipsTaskGroup);
+                                            CurrentTaskGroup.IssueOrder(NewOrder);
+                                            break;
+                                        }
+
+                                        Counter++;
+                                    }
+                                }
+
+                                if (Counter != 0)
+                                {
+                                    logger.Error("Contact selected for AddMoveButton_Clicked was not in the contact list somehow. Taskgroup.cs under handlers.");
+                                }
+                                
+                                break;
+                                #endregion
+
+                                #region TaskGroups
+                                case SystemLocationListType.TaskGroups:
+                                /// <summary>
+                                /// This is Taskgroups.
+                                /// </summary>
+                                Counter = 0;
+                                TaskGroupTN TargetOfOrder = null;
+
+                                for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.SystemContactList.Count; loop2++)
+                                {
+                                    if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
+                                    {
+                                        if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup != CurrentTaskGroup &&
+                                            CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup.Faction == CurrentFaction)
+                                        {
+                                            if (Counter == newIndex)
+                                            {
+                                                TargetOfOrder = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup;
+                                                break;
+                                            }
+
+                                            Counter++;
+                                        }
+                                    }
+                                }
+
+                                if (TargetOfOrder != null)
+                                {
+                                    NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, TargetOfOrder);
+                                    CurrentTaskGroup.IssueOrder(NewOrder);
+                                }
+                                else
+                                {
+                                    /// <summary>
+                                    /// Error condition here. How would this even happen? and yet I know that it will.
+                                    /// </summary>
+                                    logger.Error("Unknown taskgroup selected as order target in AddMoveButton_Clicked in TaskGroup.cs under Handlers.");
+                                }
+                                break;
+                                #endregion
+
+                                #region Waypoints
+                                case SystemLocationListType.Waypoints:
+                                /// <summary>
+                                /// This is waypoints.
+                                /// </summary>
+
+                                if (CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count <= newIndex)
+                                {
+                                    logger.Error("Index out of range Selection for waypoint order target int AddMoveButton_Clicked in TaskGroup.cs under Handlers.");
+                                }
+
+
+                                NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, CurrentTaskGroup.Contact.CurrentSystem.Waypoints[newIndex]);
+                                CurrentTaskGroup.IssueOrder(NewOrder);
+                                break;
+                                #endregion
+
+                                #region Count
+                                case SystemLocationListType.Count :
+                                /// <summary>
+                                /// Do nothing, this is here to mark the end of the list.
+                                /// </summary>
+                                break;
+                                #endregion
+                            }
+
+                            break;
+                        }
+                    }
+                }
+            }
+
+            BuildPlottedMoveList();
+        }
+
+        private void RemoveButton_Clicked(object sender, EventArgs e)
+        {
+            if (CurrentTaskGroup.TaskGroupOrders.Count != 0)
+            {
+                CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
+                ClearActionList();
+                BuildPlottedMoveList();
+            }
+        }
+
+        private void RemoveAllButton_Clicked(object sender, EventArgs e)
+        {
+            CurrentTaskGroup.TaskGroupOrders.Clear();
+            ClearActionList();
+            m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
         }
 
         /// <summary>
@@ -210,30 +512,32 @@ namespace Pulsar4X.UI.Handlers
 
         private void RefreshShipCells()
         {
-            try
+            m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Clear();
+            if (CurrentTaskGroup != null)
             {
-                m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.CurrentSystem.Name;
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Clear();
-                /// <summary>
-                /// Add Rows:
-                /// </summary>
-                for (int loop = 0; loop < m_oCurrnetTaskGroup.Ships.Count; loop++)
+                try
                 {
-                    using (DataGridViewRow row = new DataGridViewRow())
+                    /// <summary>
+                    /// Add Rows:
+                    /// </summary>
+                    for (int loop = 0; loop < m_oCurrnetTaskGroup.Ships.Count; loop++)
                     {
-                        /// <summary>
-                        /// setup row height. note that by default they are 22 pixels in height!
-                        /// </summary>
-                        row.Height = 18;
-                        m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Add(row);
+                        using (DataGridViewRow row = new DataGridViewRow())
+                        {
+                            /// <summary>
+                            /// setup row height. note that by default they are 22 pixels in height!
+                            /// </summary>
+                            row.Height = 18;
+                            m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Add(row);
 
-                        PopulateRow(loop);
+                            PopulateRow(loop);
+                        }
                     }
                 }
-            }
-            catch
-            {
-                logger.Error("Something whent wrong Creating Columns for Taskgroup summary screen...");
+                catch
+                {
+                    logger.Error("Something whent wrong Creating Rows for Taskgroup summary screen...");
+                }
             }
         }
 
@@ -311,11 +615,150 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Build the Total System Location List here.
+        /// </summary>
+        private void BuildSystemLocationList()
+        {
+            m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
+            SystemLocationListIndices.Clear();
+            SystemLocationListTypes.Clear();
+
+            AddPlanetsToList();
+
+            if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
+                AddContactsToList();
+
+            if (m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.Checked == true)
+                AddTaskGroupsToList();
+
+            if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
+                AddWaypointsToList();
+
+            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
+            SystemLocationListTypes.Add(SystemLocationListType.Count);
+        }
+
+        /// <summary>
+        /// Builds available orders here. Right now, moveTo is the only one worthwhile. also want to replace this with a proper string at some point.
+        /// </summary>
+        private void BuildActionList()
+        {
+            ClearActionList();
+            m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.MoveTo);
+        }
+
+        /// <summary>
+        /// Clears the action list.
+        /// </summary>
+        private void ClearActionList()
+        {
+            m_oTaskGroupPanel.AvailableActionsListBox.Items.Clear();
+            m_oTaskGroupPanel.PlottedMovesListBox.ClearSelected();
+        }
+
+        /// <summary>
+        /// Build the list of TG orders here.
+        /// </summary>
+        private void BuildPlottedMoveList()
+        {
+            m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
+
+            for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
+            {
+                m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(CurrentTaskGroup.TaskGroupOrders[loop].Name);
+            }
+        }
+
+        /// <summary>
+        /// Add every planet in the system that this TG is in to the list.
+        /// Eventually jump orders will modify this. to be the system at the end of the order stack.
+        /// </summary>
+        private void AddPlanetsToList()
+        {
+            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
+            SystemLocationListTypes.Add(SystemLocationListType.Planets);
+
+
+            for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Stars.Count; loop++)
+            {
+                for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets.Count; loop2++)
+                {
+                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets[loop2]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds any detected ships to the system location box.
+        /// </summary>
+        private void AddContactsToList()
+        {
+            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
+            SystemLocationListTypes.Add(SystemLocationListType.Contacts);
+
+
+            foreach( KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+            {
+                if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentTaskGroup.Contact.CurrentSystem)
+                {
+                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(pair.Key);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds friendly taskgroups to the system location box
+        /// </summary>
+        private void AddTaskGroupsToList()
+        {
+            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
+            SystemLocationListTypes.Add(SystemLocationListType.TaskGroups);
+
+
+            for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.SystemContactList.Count; loop++)
+            {
+                if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
+                {
+                    if (CurrentTaskGroup != CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup &&
+                        CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup.Faction == CurrentFaction)
+                    {
+                        m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds user generated waypoints to the location list.
+        /// </summary>
+        private void AddWaypointsToList()
+        {
+            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
+            SystemLocationListTypes.Add(SystemLocationListType.Waypoints);
+
+
+            for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count; loop++)
+            {
+                if( CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop].FactionId == CurrentTaskGroup.Faction.FactionID)
+                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop]);
+            }
+        }
+
+        /// <summary>
         /// Refresh the TG page.
         /// </summary>
         private void RefreshTGPanel()
         {
+            m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.CurrentSystem.Name;
+            m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
+            m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
+
             RefreshShipCells();
+
+            BuildSystemLocationList();
+            ClearActionList();
+
+            BuildPlottedMoveList();
         }
         #endregion
     }

@@ -22,26 +22,127 @@ namespace Pulsar4X.UI.Panels
         /// </summary>
         public ComboBox TaskGroupSelectionComboBox
         {
-            get
-            {
-                return m_oTaskGroupName;
-            }
+            get { return m_oTaskGroupName; }
         }
 
+        /// <summary>
+        /// Similarly this is the faction selection combo box.
+        /// </summary>
         public ComboBox FactionSelectionComboBox
         {
-            get
-            {
-                return m_oFactionName;
-            }
+            get { return m_oFactionName; }
         }
 
+        /// <summary>
+        /// This textbox is where the TG location should be printed.
+        /// </summary>
         public TextBox TaskGroupLocationTextBox
         {
-            get
-            {
-                return m_oTGLocation;
-            }
+            get { return m_oTGLocation; }
+        }
+
+        /// <summary>
+        /// Textbox for speed setting
+        /// </summary>
+        public TextBox SetSpeedTextBox
+        {
+            get { return m_oCurSpeedBox; }
+        }
+
+        /// <summary>
+        /// Textbox for max speed.
+        /// </summary>
+        public TextBox MaxSpeedTextBox
+        {
+            get { return m_oMaxSpeedBox; }
+        }
+
+        /// <summary>
+        /// Here is where the list of potential taskgroup locations should be printed.
+        /// </summary>
+        public ListBox SystemLocationsListBox
+        {
+            get { return m_oSystemLocationsListBox; }
+        }
+
+        /// <summary>
+        /// Allowed actions go here.
+        /// </summary>
+        public ListBox AvailableActionsListBox
+        {
+            get { return m_oActionsAvailableListBox; }
+        }
+
+        /// <summary>
+        /// Current orders are placed here.
+        /// </summary>
+        public ListBox PlottedMovesListBox
+        {
+            get { return m_oPlottedMoveListBox; }
+        }
+
+        /// <summary>
+        /// Should detected contacts be displayed?
+        /// </summary>
+        public CheckBox DisplayContactsCheckBox
+        {
+            get { return m_oContactsCheckBox; }
+        }
+
+        /// <summary>
+        /// display taskgroups checkbox.
+        /// </summary>
+        public CheckBox DisplayTaskGroupsCheckBox
+        {
+            get { return m_oTaskGroupsCheckBox; }
+        }
+
+        /// <summary>
+        /// Display waypoints checkbox.
+        /// </summary>
+        public CheckBox DisplayWaypointsCheckBox
+        {
+            get { return m_oWaypointCheckBox; }
+        }
+
+        /// <summary>
+        /// Sets speed to user entered value if valid.
+        /// </summary>
+        public Button SetSpeedButton
+        {
+            get { return m_oSetSpeedButton; }
+        }
+
+        /// <summary>
+        /// Sets speed to maximum possible
+        /// </summary>
+        public Button MaxSpeedButton
+        {
+            get { return m_oMaxSpeedButton; }
+        }
+
+        /// <summary>
+        /// Adds a taskgroup order to the current task group's orders list
+        /// </summary>
+        public Button AddMoveButton
+        {
+            get { return m_oAddMoveButton; }
+        }
+
+        /// <summary>
+        /// Removes the last order issued to the current task group.
+        /// </summary>
+        public Button RemoveButton 
+        { 
+            get { return m_oRemoveButton; } 
+        }
+
+        /// <summary>
+        /// Clears all taskgroup orders.
+        /// </summary>
+        public Button RemoveAllButton
+        {
+            get { return m_oRemoveAllButton; }
         }
 
         /// <summary>
@@ -78,8 +179,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpeedBox = new System.Windows.Forms.GroupBox();
             this.m_oMaxSpeedButton = new System.Windows.Forms.Button();
             this.m_oSetSpeedButton = new System.Windows.Forms.Button();
-            this.MaxSpeedBox = new System.Windows.Forms.TextBox();
-            this.CurSpeedBox = new System.Windows.Forms.TextBox();
+            this.m_oMaxSpeedBox = new System.Windows.Forms.TextBox();
+            this.m_oCurSpeedBox = new System.Windows.Forms.TextBox();
             this.m_oCenterShowGF = new System.Windows.Forms.GroupBox();
             this.m_oShowGroundForces = new System.Windows.Forms.CheckBox();
             this.m_oCenterMapCheckBox = new System.Windows.Forms.CheckBox();
@@ -147,6 +248,18 @@ namespace Pulsar4X.UI.Panels
             this.m_oHistoryTabPage = new System.Windows.Forms.TabPage();
             this.m_oNavalOrgTabPage = new System.Windows.Forms.TabPage();
             this.m_oButtonBox = new System.Windows.Forms.GroupBox();
+            this.m_oAssembleButton = new System.Windows.Forms.Button();
+            this.m_oDetachButton = new System.Windows.Forms.Button();
+            this.m_oEscortButton = new System.Windows.Forms.Button();
+            this.m_oSaveEscortsButton = new System.Windows.Forms.Button();
+            this.m_oMissileLaunchButton = new System.Windows.Forms.Button();
+            this.m_oReloadParaButton = new System.Windows.Forms.Button();
+            this.m_oHyperOnButton = new System.Windows.Forms.Button();
+            this.m_oHyperOffButton = new System.Windows.Forms.Button();
+            this.m_oShieldsOnButton = new System.Windows.Forms.Button();
+            this.m_oShieldsOffButton = new System.Windows.Forms.Button();
+            this.m_oNoDefaultButton = new System.Windows.Forms.Button();
+            this.m_oCloseButton = new System.Windows.Forms.Button();
             this.m_oDeployEscortsButton = new System.Windows.Forms.Button();
             this.m_oRecallEscortsButton = new System.Windows.Forms.Button();
             this.m_oEqualizeFuelButton = new System.Windows.Forms.Button();
@@ -160,18 +273,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oAddColonyButton = new System.Windows.Forms.Button();
             this.m_oSystemMapButton = new System.Windows.Forms.Button();
             this.m_oNewTGButton = new System.Windows.Forms.Button();
-            this.m_oCloseButton = new System.Windows.Forms.Button();
-            this.m_oNoDefaultButton = new System.Windows.Forms.Button();
-            this.m_oShieldsOffButton = new System.Windows.Forms.Button();
-            this.m_oShieldsOnButton = new System.Windows.Forms.Button();
-            this.m_oHyperOffButton = new System.Windows.Forms.Button();
-            this.m_oHyperOnButton = new System.Windows.Forms.Button();
-            this.m_oReloadParaButton = new System.Windows.Forms.Button();
-            this.m_oMissileLaunchButton = new System.Windows.Forms.Button();
-            this.m_oSaveEscortsButton = new System.Windows.Forms.Button();
-            this.m_oEscortButton = new System.Windows.Forms.Button();
-            this.m_oDetachButton = new System.Windows.Forms.Button();
-            this.m_oAssembleButton = new System.Windows.Forms.Button();
             this.m_oGeneralTGDetailsBox.SuspendLayout();
             this.m_oSpeedBox.SuspendLayout();
             this.m_oCenterShowGF.SuspendLayout();
@@ -300,8 +401,8 @@ namespace Pulsar4X.UI.Panels
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedButton);
             this.m_oSpeedBox.Controls.Add(this.m_oSetSpeedButton);
-            this.m_oSpeedBox.Controls.Add(this.MaxSpeedBox);
-            this.m_oSpeedBox.Controls.Add(this.CurSpeedBox);
+            this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedBox);
+            this.m_oSpeedBox.Controls.Add(this.m_oCurSpeedBox);
             this.m_oSpeedBox.Location = new System.Drawing.Point(258, 15);
             this.m_oSpeedBox.MaximumSize = new System.Drawing.Size(116, 78);
             this.m_oSpeedBox.MinimumSize = new System.Drawing.Size(116, 78);
@@ -329,20 +430,20 @@ namespace Pulsar4X.UI.Panels
             this.m_oSetSpeedButton.Text = "Set";
             this.m_oSetSpeedButton.UseVisualStyleBackColor = true;
             // 
-            // MaxSpeedBox
+            // m_oMaxSpeedBox
             // 
-            this.MaxSpeedBox.Enabled = false;
-            this.MaxSpeedBox.Location = new System.Drawing.Point(6, 50);
-            this.MaxSpeedBox.Name = "MaxSpeedBox";
-            this.MaxSpeedBox.Size = new System.Drawing.Size(43, 20);
-            this.MaxSpeedBox.TabIndex = 30;
+            this.m_oMaxSpeedBox.Enabled = false;
+            this.m_oMaxSpeedBox.Location = new System.Drawing.Point(6, 50);
+            this.m_oMaxSpeedBox.Name = "m_oMaxSpeedBox";
+            this.m_oMaxSpeedBox.Size = new System.Drawing.Size(43, 20);
+            this.m_oMaxSpeedBox.TabIndex = 30;
             // 
-            // CurSpeedBox
+            // m_oCurSpeedBox
             // 
-            this.CurSpeedBox.Location = new System.Drawing.Point(6, 23);
-            this.CurSpeedBox.Name = "CurSpeedBox";
-            this.CurSpeedBox.Size = new System.Drawing.Size(43, 20);
-            this.CurSpeedBox.TabIndex = 29;
+            this.m_oCurSpeedBox.Location = new System.Drawing.Point(6, 23);
+            this.m_oCurSpeedBox.Name = "m_oCurSpeedBox";
+            this.m_oCurSpeedBox.Size = new System.Drawing.Size(43, 20);
+            this.m_oCurSpeedBox.TabIndex = 29;
             // 
             // m_oCenterShowGF
             // 
@@ -738,11 +839,11 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oAutoRouteCheckBox.AutoSize = true;
             this.m_oAutoRouteCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(526, 367);
-            this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(152, 17);
-            this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(152, 17);
+            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(523, 367);
+            this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(155, 17);
+            this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(155, 17);
             this.m_oAutoRouteCheckBox.Name = "m_oAutoRouteCheckBox";
-            this.m_oAutoRouteCheckBox.Size = new System.Drawing.Size(152, 17);
+            this.m_oAutoRouteCheckBox.Size = new System.Drawing.Size(155, 17);
             this.m_oAutoRouteCheckBox.TabIndex = 21;
             this.m_oAutoRouteCheckBox.Text = "No auto-route jump check";
             this.m_oAutoRouteCheckBox.UseVisualStyleBackColor = true;
@@ -981,6 +1082,8 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oOrderFilteringCheckBox.AutoSize = true;
             this.m_oOrderFilteringCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oOrderFilteringCheckBox.Checked = true;
+            this.m_oOrderFilteringCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.m_oOrderFilteringCheckBox.Location = new System.Drawing.Point(456, 19);
             this.m_oOrderFilteringCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
             this.m_oOrderFilteringCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
@@ -1186,6 +1289,139 @@ namespace Pulsar4X.UI.Panels
             this.m_oButtonBox.TabIndex = 33;
             this.m_oButtonBox.TabStop = false;
             // 
+            // m_oAssembleButton
+            // 
+            this.m_oAssembleButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oAssembleButton.Location = new System.Drawing.Point(1078, 16);
+            this.m_oAssembleButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oAssembleButton.Name = "m_oAssembleButton";
+            this.m_oAssembleButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oAssembleButton.TabIndex = 78;
+            this.m_oAssembleButton.Text = "Assemble";
+            this.m_oAssembleButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oDetachButton
+            // 
+            this.m_oDetachButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oDetachButton.Location = new System.Drawing.Point(988, 16);
+            this.m_oDetachButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oDetachButton.Name = "m_oDetachButton";
+            this.m_oDetachButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oDetachButton.TabIndex = 77;
+            this.m_oDetachButton.Text = "Detach";
+            this.m_oDetachButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oEscortButton
+            // 
+            this.m_oEscortButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oEscortButton.Location = new System.Drawing.Point(898, 16);
+            this.m_oEscortButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oEscortButton.Name = "m_oEscortButton";
+            this.m_oEscortButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oEscortButton.TabIndex = 76;
+            this.m_oEscortButton.Text = "Escort";
+            this.m_oEscortButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSaveEscortsButton
+            // 
+            this.m_oSaveEscortsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oSaveEscortsButton.Location = new System.Drawing.Point(628, 16);
+            this.m_oSaveEscortsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oSaveEscortsButton.Name = "m_oSaveEscortsButton";
+            this.m_oSaveEscortsButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oSaveEscortsButton.TabIndex = 75;
+            this.m_oSaveEscortsButton.Text = "Save Escorts";
+            this.m_oSaveEscortsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oMissileLaunchButton
+            // 
+            this.m_oMissileLaunchButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oMissileLaunchButton.Location = new System.Drawing.Point(358, 16);
+            this.m_oMissileLaunchButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oMissileLaunchButton.Name = "m_oMissileLaunchButton";
+            this.m_oMissileLaunchButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oMissileLaunchButton.TabIndex = 74;
+            this.m_oMissileLaunchButton.Text = "Msl Launch";
+            this.m_oMissileLaunchButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReloadParaButton
+            // 
+            this.m_oReloadParaButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oReloadParaButton.Location = new System.Drawing.Point(448, 53);
+            this.m_oReloadParaButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oReloadParaButton.Name = "m_oReloadParaButton";
+            this.m_oReloadParaButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oReloadParaButton.TabIndex = 73;
+            this.m_oReloadParaButton.Text = "Reload Para";
+            this.m_oReloadParaButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oHyperOnButton
+            // 
+            this.m_oHyperOnButton.Enabled = false;
+            this.m_oHyperOnButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oHyperOnButton.Location = new System.Drawing.Point(538, 53);
+            this.m_oHyperOnButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oHyperOnButton.Name = "m_oHyperOnButton";
+            this.m_oHyperOnButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oHyperOnButton.TabIndex = 72;
+            this.m_oHyperOnButton.Text = "Hyper On";
+            this.m_oHyperOnButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oHyperOffButton
+            // 
+            this.m_oHyperOffButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oHyperOffButton.Location = new System.Drawing.Point(628, 53);
+            this.m_oHyperOffButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oHyperOffButton.Name = "m_oHyperOffButton";
+            this.m_oHyperOffButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oHyperOffButton.TabIndex = 71;
+            this.m_oHyperOffButton.Text = "Hyper Off";
+            this.m_oHyperOffButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oShieldsOnButton
+            // 
+            this.m_oShieldsOnButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oShieldsOnButton.Location = new System.Drawing.Point(718, 53);
+            this.m_oShieldsOnButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oShieldsOnButton.Name = "m_oShieldsOnButton";
+            this.m_oShieldsOnButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oShieldsOnButton.TabIndex = 70;
+            this.m_oShieldsOnButton.Text = "Shields On";
+            this.m_oShieldsOnButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oShieldsOffButton
+            // 
+            this.m_oShieldsOffButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oShieldsOffButton.Location = new System.Drawing.Point(808, 53);
+            this.m_oShieldsOffButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oShieldsOffButton.Name = "m_oShieldsOffButton";
+            this.m_oShieldsOffButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oShieldsOffButton.TabIndex = 69;
+            this.m_oShieldsOffButton.Text = "Shields Off";
+            this.m_oShieldsOffButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oNoDefaultButton
+            // 
+            this.m_oNoDefaultButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oNoDefaultButton.Location = new System.Drawing.Point(898, 53);
+            this.m_oNoDefaultButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oNoDefaultButton.Name = "m_oNoDefaultButton";
+            this.m_oNoDefaultButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oNoDefaultButton.TabIndex = 68;
+            this.m_oNoDefaultButton.Text = "No Default";
+            this.m_oNoDefaultButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCloseButton
+            // 
+            this.m_oCloseButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oCloseButton.Location = new System.Drawing.Point(1078, 53);
+            this.m_oCloseButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
+            this.m_oCloseButton.Name = "m_oCloseButton";
+            this.m_oCloseButton.Size = new System.Drawing.Size(88, 31);
+            this.m_oCloseButton.TabIndex = 67;
+            this.m_oCloseButton.Text = "Close";
+            this.m_oCloseButton.UseVisualStyleBackColor = true;
+            // 
             // m_oDeployEscortsButton
             // 
             this.m_oDeployEscortsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1318,139 +1554,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oNewTGButton.Text = "New TG";
             this.m_oNewTGButton.UseVisualStyleBackColor = true;
             // 
-            // m_oCloseButton
-            // 
-            this.m_oCloseButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oCloseButton.Location = new System.Drawing.Point(1078, 53);
-            this.m_oCloseButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oCloseButton.Name = "m_oCloseButton";
-            this.m_oCloseButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oCloseButton.TabIndex = 67;
-            this.m_oCloseButton.Text = "Close";
-            this.m_oCloseButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oNoDefaultButton
-            // 
-            this.m_oNoDefaultButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oNoDefaultButton.Location = new System.Drawing.Point(898, 53);
-            this.m_oNoDefaultButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oNoDefaultButton.Name = "m_oNoDefaultButton";
-            this.m_oNoDefaultButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oNoDefaultButton.TabIndex = 68;
-            this.m_oNoDefaultButton.Text = "No Default";
-            this.m_oNoDefaultButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oShieldsOffButton
-            // 
-            this.m_oShieldsOffButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oShieldsOffButton.Location = new System.Drawing.Point(808, 53);
-            this.m_oShieldsOffButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oShieldsOffButton.Name = "m_oShieldsOffButton";
-            this.m_oShieldsOffButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oShieldsOffButton.TabIndex = 69;
-            this.m_oShieldsOffButton.Text = "Shields Off";
-            this.m_oShieldsOffButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oShieldsOnButton
-            // 
-            this.m_oShieldsOnButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oShieldsOnButton.Location = new System.Drawing.Point(718, 53);
-            this.m_oShieldsOnButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oShieldsOnButton.Name = "m_oShieldsOnButton";
-            this.m_oShieldsOnButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oShieldsOnButton.TabIndex = 70;
-            this.m_oShieldsOnButton.Text = "Shields On";
-            this.m_oShieldsOnButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oHyperOffButton
-            // 
-            this.m_oHyperOffButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oHyperOffButton.Location = new System.Drawing.Point(628, 53);
-            this.m_oHyperOffButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oHyperOffButton.Name = "m_oHyperOffButton";
-            this.m_oHyperOffButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oHyperOffButton.TabIndex = 71;
-            this.m_oHyperOffButton.Text = "Hyper Off";
-            this.m_oHyperOffButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oHyperOnButton
-            // 
-            this.m_oHyperOnButton.Enabled = false;
-            this.m_oHyperOnButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oHyperOnButton.Location = new System.Drawing.Point(538, 53);
-            this.m_oHyperOnButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oHyperOnButton.Name = "m_oHyperOnButton";
-            this.m_oHyperOnButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oHyperOnButton.TabIndex = 72;
-            this.m_oHyperOnButton.Text = "Hyper On";
-            this.m_oHyperOnButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oReloadParaButton
-            // 
-            this.m_oReloadParaButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oReloadParaButton.Location = new System.Drawing.Point(448, 53);
-            this.m_oReloadParaButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oReloadParaButton.Name = "m_oReloadParaButton";
-            this.m_oReloadParaButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oReloadParaButton.TabIndex = 73;
-            this.m_oReloadParaButton.Text = "Reload Para";
-            this.m_oReloadParaButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oMissileLaunchButton
-            // 
-            this.m_oMissileLaunchButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oMissileLaunchButton.Location = new System.Drawing.Point(358, 16);
-            this.m_oMissileLaunchButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oMissileLaunchButton.Name = "m_oMissileLaunchButton";
-            this.m_oMissileLaunchButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oMissileLaunchButton.TabIndex = 74;
-            this.m_oMissileLaunchButton.Text = "Msl Launch";
-            this.m_oMissileLaunchButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSaveEscortsButton
-            // 
-            this.m_oSaveEscortsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oSaveEscortsButton.Location = new System.Drawing.Point(628, 16);
-            this.m_oSaveEscortsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oSaveEscortsButton.Name = "m_oSaveEscortsButton";
-            this.m_oSaveEscortsButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oSaveEscortsButton.TabIndex = 75;
-            this.m_oSaveEscortsButton.Text = "Save Escorts";
-            this.m_oSaveEscortsButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oEscortButton
-            // 
-            this.m_oEscortButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oEscortButton.Location = new System.Drawing.Point(898, 16);
-            this.m_oEscortButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oEscortButton.Name = "m_oEscortButton";
-            this.m_oEscortButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oEscortButton.TabIndex = 76;
-            this.m_oEscortButton.Text = "Escort";
-            this.m_oEscortButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oDetachButton
-            // 
-            this.m_oDetachButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oDetachButton.Location = new System.Drawing.Point(988, 16);
-            this.m_oDetachButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oDetachButton.Name = "m_oDetachButton";
-            this.m_oDetachButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oDetachButton.TabIndex = 77;
-            this.m_oDetachButton.Text = "Detach";
-            this.m_oDetachButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oAssembleButton
-            // 
-            this.m_oAssembleButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.m_oAssembleButton.Location = new System.Drawing.Point(1078, 16);
-            this.m_oAssembleButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
-            this.m_oAssembleButton.Name = "m_oAssembleButton";
-            this.m_oAssembleButton.Size = new System.Drawing.Size(88, 31);
-            this.m_oAssembleButton.TabIndex = 78;
-            this.m_oAssembleButton.Text = "Assemble";
-            this.m_oAssembleButton.UseVisualStyleBackColor = true;
-            // 
             // TaskGroup_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1509,8 +1612,8 @@ namespace Pulsar4X.UI.Panels
         private ComboBox m_oTaskForceName;
         private Label m_oTFLabel;
         private GroupBox m_oSpeedBox;
-        private TextBox MaxSpeedBox;
-        private TextBox CurSpeedBox;
+        private TextBox m_oMaxSpeedBox;
+        private TextBox m_oCurSpeedBox;
         private Button m_oMaxSpeedButton;
         private Button m_oSetSpeedButton;
         private GroupBox m_oCenterShowGF;

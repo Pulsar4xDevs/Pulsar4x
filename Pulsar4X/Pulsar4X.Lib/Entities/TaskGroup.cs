@@ -208,8 +208,8 @@ namespace Pulsar4X.Entities
 
 
 
-            CurrentSpeed = 0;
-            MaxSpeed = 0;
+            CurrentSpeed = 1;
+            MaxSpeed = 1;
 
             CurrentSpeedX = 0.0;
             CurrentSpeedY = 0.0;
@@ -321,6 +321,29 @@ namespace Pulsar4X.Entities
 
             AddShipToSort(ship);
 
+        }
+
+        /// <summary>
+        /// Sets taskgroup speed.
+        /// </summary>
+        /// <param name="Speed">New speed</param>
+        public void SetSpeed(int Speed)
+        {
+            if (Speed > MaxSpeed)
+            {
+                CurrentSpeed = MaxSpeed;
+            }
+            else if (Speed < 0)
+            {
+                CurrentSpeed = 0;
+            }
+            else
+            {
+                CurrentSpeed = Speed;
+            }
+
+            for (int loop = 0; loop < Ships.Count; loop++)
+                Ships[loop].SetSpeed(CurrentSpeed);
         }
 
         /// <summary>

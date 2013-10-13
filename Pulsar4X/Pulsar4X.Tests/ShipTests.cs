@@ -550,7 +550,7 @@ namespace Pulsar4X.Tests
             Planet planet = new Planet();
 
 
-            Waypoint WP1 = new Waypoint(System,0.1,0.1);
+            Waypoint WP1 = new Waypoint("WP TG Orders",System,0.1,0.1,0);
 
             planet.XSystem = 0.0;
             planet.YSystem = 0.0;
@@ -594,8 +594,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
             StarSystem System2 = new StarSystem("Alpha Centauri");
 
-            Waypoint Start1 = new Waypoint(System1,1.0, 1.0);
-            Waypoint Start2 = new Waypoint(System1,1.0005, 1.0005);
+            Waypoint Start1 = new Waypoint("WP FST1",System1,1.0, 1.0,0);
+            Waypoint Start2 = new Waypoint("WP FST2",System1,1.0005, 1.0005,0);
 
 
 
@@ -1318,7 +1318,7 @@ namespace Pulsar4X.Tests
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    Waypoint Start = new Waypoint(Sol, wx, wy);
+                    Waypoint Start = new Waypoint("WP Random",Sol, wx, wy,loop);
 
                     string ID1 = loop.ToString();
 
@@ -1545,7 +1545,7 @@ namespace Pulsar4X.Tests
             /// <summary>
             /// Order every ship to proceed to the center.
             /// </summary>
-            Waypoint Center = new Waypoint(Sol, 0.0, 0.0);
+            Waypoint Center = new Waypoint("WP Center",Sol, 0.0, 0.0,0);
 
             Orders MoveToCenter = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, Center);
 

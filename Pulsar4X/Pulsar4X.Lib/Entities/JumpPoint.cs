@@ -59,6 +59,8 @@ namespace Pulsar4X.Entities
             ZSystem = 0.0;
 
             SSEntity = StarSystemEntityType.JumpPoint;
+
+            Name = System.Name + " #" + System.JumpPoints.Count.ToString();
         }
 
         /// <summary>

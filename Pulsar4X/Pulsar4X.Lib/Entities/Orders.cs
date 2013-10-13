@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 namespace Pulsar4X.Entities
 {
-    public class Orders
+    public class Orders : GameEntity
     {
         /// <summary>
         /// What order type is this
@@ -126,6 +126,8 @@ namespace Pulsar4X.Entities
             OrderDelay = Delay;
 
             OrderTimeRequirement = -1;
+
+            Name = TypeOrder.ToString() + " " + TaskGroupOrder.Name.ToString();
         }
 
         /// <summary>
@@ -146,6 +148,8 @@ namespace Pulsar4X.Entities
             OrderDelay = Delay;
 
             OrderTimeRequirement = -1;
+
+            Name = TypeOrder.ToString() + " " + PlanetOrder.Name.ToString();
         }
 
         /// <summary>
@@ -167,6 +171,8 @@ namespace Pulsar4X.Entities
 
 
             OrderTimeRequirement = -1;
+
+            Name = TypeOrder.ToString() + " " + PopOrder.Name.ToString();
         }
 
         /// <summary>
@@ -188,6 +194,8 @@ namespace Pulsar4X.Entities
 
 
             OrderTimeRequirement = -1;
+
+            Name = TypeOrder.ToString() + " " + JPOrder.Name.ToString();
         }
 
         /// <summary>
@@ -209,6 +217,8 @@ namespace Pulsar4X.Entities
 
 
             OrderTimeRequirement = -1;
+
+            Name = TypeOrder.ToString() + " " + WPOrder.Name.ToString();
         }
     }
 

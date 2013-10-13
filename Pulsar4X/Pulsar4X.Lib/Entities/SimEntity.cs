@@ -36,14 +36,16 @@ namespace Pulsar4X.Entities
             for (int loop = factionStart; loop < factionCount; loop++)
             {
                 Faction P1;
-                if (loop == 0)
+                if (loop == factionStart)
+                {
                     P1 = P[0];
+                }
                 else
                 {
                     String Race = "Human Federation" + loop.ToString();
                     Species NewSpecies = new Species();
                     P1 = new Faction(Race, NewSpecies, loop);
-                    Waypoint Start = new Waypoint(Sol, 0.0, 0.0);
+                    Waypoint Start = new Waypoint("WP Start",Sol, 0.0, 0.0,P1.FactionID);
                     P1.AddNewTaskGroup("Shipyard TG", Start, Sol);
                 }
 
@@ -70,7 +72,7 @@ namespace Pulsar4X.Entities
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    Waypoint Start = new Waypoint(Sol, wx, wy);
+                    Waypoint Start = new Waypoint("WP Random",Sol, wx, wy, P1.FactionID);
 
                     string ID1 = loop.ToString();
 
@@ -87,7 +89,9 @@ namespace Pulsar4X.Entities
                     }
 
                 }
-                P.Add(P1);
+
+                if(loop != factionStart)
+                    P.Add(P1);
             }
         }
 
@@ -291,9 +295,9 @@ namespace Pulsar4X.Entities
 
 
             /// <summary>
-            /// Order every ship to proceed to the center.
+            /// Order every ship to proceed to the center. this waypoint has an owning ID of 0, but everyone shares it. in any event I don't want it displayed.
             /// </summary>
-            Waypoint Center = new Waypoint(Sol, 0.0, 0.0);
+            Waypoint Center = new Waypoint("WP Center",Sol, 0.0, 0.0, 0);
             MoveToCenter = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, Center);
 
             initShips(P);

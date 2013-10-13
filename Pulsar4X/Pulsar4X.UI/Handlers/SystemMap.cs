@@ -16,6 +16,10 @@ using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
+/// <summary>
+/// To Do: when multi faction system mapping is done, be sure to update waypoint creation further down.
+/// </summary>
+
 namespace Pulsar4X.UI.Handlers
 {
     public class SystemMap
@@ -160,7 +164,7 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Create waypoint on the back end to correspond to the front end display.
                     /// </summary>
-                    m_oCurrnetSystem.AddWaypoint(v3CurPosWorldCorrds.X, v3CurPosWorldCorrds.Y);
+                    m_oCurrnetSystem.AddWaypoint(m_oCurrentSceen.MapMarkers.Last().Lable.Text,v3CurPosWorldCorrds.X, v3CurPosWorldCorrds.Y,0);
 
                     m_bCreateMapMarkerOnNextClick = false;
 
