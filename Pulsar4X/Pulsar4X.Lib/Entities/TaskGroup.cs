@@ -951,7 +951,7 @@ namespace Pulsar4X.Entities
         #endregion
 
 
-        #region Taskgroup movement and position as well as time requirement,heading and speed.
+        #region Taskgroup movement and position as well as time requirement,heading and speed. Does not handle large distances, rewrite.
         /// <summary>
         /// GetPositionFromOrbit returns systemKm from SystemAU. If a ship is orbiting a body it will move with that body.
         /// </summary>

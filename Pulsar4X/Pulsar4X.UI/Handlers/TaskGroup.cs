@@ -164,11 +164,15 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayContactsCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayTaskGroupsCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayWaypointsCheckBox_CheckChanged);
+
             m_oTaskGroupPanel.SetSpeedButton.Click += new EventHandler(SetSpeedButton_Clicked);
             m_oTaskGroupPanel.MaxSpeedButton.Click += new EventHandler(MaxSpeedButton_Clicked);
             m_oTaskGroupPanel.AddMoveButton.Click += new EventHandler(AddMoveButton_Clicked);
             m_oTaskGroupPanel.RemoveButton.Click += new EventHandler(RemoveButton_Clicked);
             m_oTaskGroupPanel.RemoveAllButton.Click += new EventHandler(RemoveAllButton_Clicked);
+
+            m_oTaskGroupPanel.CurrentTDRadioButton.CheckedChanged += new EventHandler(CurrentTDRadioButton_CheckChanged);
+            m_oTaskGroupPanel.AllOrdersTDRadioButton.CheckedChanged += new EventHandler(AllOrdersTDRadioButton_CheckChanged);
 
             RefreshTGPanel();
         }
@@ -227,6 +231,26 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// The TimeDistance radio buttons are controlled here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CurrentTDRadioButton_CheckChanged(object sender, EventArgs e)
+        {
+            CalculateTimeDistance();
+        }
+
+        /// <summary>
+        /// And here as well for all orders.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AllOrdersTDRadioButton_CheckChanged(object sender, EventArgs e)
+        {
+            CalculateTimeDistance();
+        }
+
+        /// <summary>
         /// If a location is chosen build the action list.
         /// </summary>
         /// <param name="sender"></param>
@@ -249,6 +273,8 @@ namespace Pulsar4X.UI.Handlers
 
             if(CheckString == true)
                 CurrentTaskGroup.SetSpeed(value);
+
+            CalculateTimeDistance();
         }
 
         /// <summary>
@@ -260,6 +286,8 @@ namespace Pulsar4X.UI.Handlers
         {
             CurrentTaskGroup.SetSpeed(CurrentTaskGroup.MaxSpeed);
             m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
+
+            CalculateTimeDistance();
         }
 
         /// <summary>
@@ -438,6 +466,7 @@ namespace Pulsar4X.UI.Handlers
             }
 
             BuildPlottedMoveList();
+            CalculateTimeDistance();
         }
 
         private void RemoveButton_Clicked(object sender, EventArgs e)
@@ -447,6 +476,7 @@ namespace Pulsar4X.UI.Handlers
                 CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
                 ClearActionList();
                 BuildPlottedMoveList();
+                CalculateTimeDistance();
             }
         }
 
@@ -455,6 +485,7 @@ namespace Pulsar4X.UI.Handlers
             CurrentTaskGroup.TaskGroupOrders.Clear();
             ClearActionList();
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
+            CalculateTimeDistance();
         }
 
         /// <summary>
@@ -745,6 +776,154 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Time and distance or orders should be calculated here based on the radio button selection choices.
+        /// </summary>
+        private void CalculateTimeDistance()
+        {
+            m_oTaskGroupPanel.TimeDistanceTextBox.Clear();
+
+            if (CurrentTaskGroup.TaskGroupOrders.Count != 0)
+            {
+
+                String DistanceString = "N/A";
+                String TimeString = "N/A";
+                double dX = 0.0;
+                double dY = 0.0;
+                double dZ = 0.0;
+
+                if (m_oTaskGroupPanel.CurrentTDRadioButton.Checked == true)
+                {
+                    dX = CurrentTaskGroup.TaskGroupOrders[0].target.XSystem - CurrentTaskGroup.Contact.XSystem;
+                    dY = CurrentTaskGroup.TaskGroupOrders[0].target.YSystem - CurrentTaskGroup.Contact.YSystem;
+
+                    dZ = Math.Sqrt((dX * dX) + (dY * dY));
+
+                }
+                else if (m_oTaskGroupPanel.AllOrdersTDRadioButton.Checked == true)
+                {
+                    double tX = CurrentTaskGroup.Contact.XSystem;
+                    double tY = CurrentTaskGroup.Contact.YSystem;
+
+                    for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
+                    {
+                        dX = CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem - tX;
+                        dY = CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem - tY;
+
+                        dZ = dZ + Math.Sqrt((dX * dX) + (dY * dY));
+
+                        if (CurrentTaskGroup.TaskGroupOrders[loop].typeOf != Constants.ShipTN.OrderType.StandardTransit &&
+                            CurrentTaskGroup.TaskGroupOrders[loop].typeOf != Constants.ShipTN.OrderType.SquadronTransit &&
+                            CurrentTaskGroup.TaskGroupOrders[loop].typeOf != Constants.ShipTN.OrderType.TransitAndDivide)
+                        {
+                            tX = CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem;
+                            tY = CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem;
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// As the TG will be in a new system, set the jump point far end locations here.
+                            /// </summary>
+
+                            try
+                            {
+                                tX = CurrentTaskGroup.TaskGroupOrders[loop].jumpPoint.Connect.XSystem;
+                                tY = CurrentTaskGroup.TaskGroupOrders[loop].jumpPoint.Connect.YSystem;
+                            }
+                            catch
+                            {
+                                logger.Error("No Jumppoint associated with jump point transit order in CalcTimeDistance in taskgroup.cs under handlers.");
+                            }
+                        }
+                    }
+                }
+                    
+                if (dZ > 14.0)
+                {
+                    double maxDist = 2147483648.0 / Constants.Units.KM_PER_AU; //14.35504154
+
+                    double Count = dZ / maxDist;
+
+                    double newDistance = Math.Floor(2.147483648 * Count * 100.0);
+                    newDistance = newDistance / 100.0;
+
+                    DistanceString = "Distance: " + newDistance.ToString() + "B km";
+
+                    double maxTime = 2.147483648;
+
+                    double timeReq = newDistance / (double)CurrentTaskGroup.CurrentSpeed;
+
+                    TimeString = "ETA: N/A";
+
+                    if (timeReq < maxTime)
+                    {
+                        double TimeSeconds = Math.Floor(timeReq * 1000000000.0);
+                        double TimeMinutes = Math.Floor(TimeSeconds / 60.0);
+                        TimeSeconds = TimeSeconds - (TimeMinutes * 60.0);
+
+                        double TimeHours = Math.Floor(TimeMinutes / 60.0);
+                        TimeMinutes = TimeMinutes - (TimeHours * 60.0);
+
+                        TimeString = "ETA: " + TimeHours.ToString() + ":" + TimeMinutes.ToString() + ":" + TimeSeconds.ToString();
+                    }
+
+                }
+                else
+                {
+                    /// <summary>
+                    /// This is the easy case, no worries about overflows here. I hope.
+                    /// </summary>
+                        
+                    double Distance = Math.Floor(dZ * Constants.Units.KM_PER_AU);
+
+                    double TimeSeconds = Math.Floor(Distance / CurrentTaskGroup.CurrentSpeed);
+
+                    double TimeMinutes = Math.Floor(TimeSeconds / 60.0);
+                    TimeSeconds = TimeSeconds - (TimeMinutes * 60.0);
+
+
+                    double TimeHours = Math.Floor(TimeMinutes / 60.0);
+                    TimeMinutes = TimeMinutes - (TimeHours * 60.0);
+
+                    DistanceString = "Distance: ";
+                    TimeString = "ETA: " + TimeHours.ToString() + ":" + TimeMinutes.ToString() + ":" + TimeSeconds.ToString();
+
+                    if(Distance > 1000000000.0)
+                    {
+                        Distance = Math.Floor(Distance / 10000000.0);
+                        Distance = Distance / 100.0;
+
+                        DistanceString = "Distance: " + Distance.ToString() + "B km";
+                    }
+                    else if(Distance > 1000000.0)
+                    {
+                        Distance = Math.Floor(Distance / 10000.0);
+                        Distance = Distance / 100.0;
+
+                        DistanceString = "Distance: " + Distance.ToString() + "M km";
+                    }
+                    else if (Distance > 1000.0)
+                    {
+                        Distance = Math.Floor(Distance / 10.0);
+                        Distance = Distance / 100.0;
+
+                        DistanceString = "Distance: " + Distance.ToString() + "K km";
+                    }
+                    else
+                    {
+                        Distance = Math.Floor(Distance);
+
+                        DistanceString = "Distance: " + Distance.ToString() + "km";
+                    }
+                }
+                m_oTaskGroupPanel.TimeDistanceTextBox.Text = DistanceString + " " + TimeString;
+            }
+            else
+            {
+                m_oTaskGroupPanel.TimeDistanceTextBox.Text = "No Orders";
+            }
+        }
+
+        /// <summary>
         /// Refresh the TG page.
         /// </summary>
         private void RefreshTGPanel()
@@ -759,6 +938,8 @@ namespace Pulsar4X.UI.Handlers
             ClearActionList();
 
             BuildPlottedMoveList();
+
+            CalculateTimeDistance();
         }
         #endregion
     }

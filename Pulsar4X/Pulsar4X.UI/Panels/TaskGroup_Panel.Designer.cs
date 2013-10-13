@@ -58,6 +58,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// ETA and distance to destination box.
+        /// </summary>
+        public TextBox TimeDistanceTextBox
+        {
+            get { return m_oTimeDistTextBox; }
+        }
+
+        /// <summary>
         /// Here is where the list of potential taskgroup locations should be printed.
         /// </summary>
         public ListBox SystemLocationsListBox
@@ -143,6 +151,22 @@ namespace Pulsar4X.UI.Panels
         public Button RemoveAllButton
         {
             get { return m_oRemoveAllButton; }
+        }
+
+        /// <summary>
+        /// Time and distance for only the current order.
+        /// </summary>
+        public RadioButton CurrentTDRadioButton
+        {
+            get { return m_oCurrentTDRadioButton; }
+        }
+
+        /// <summary>
+        /// Time and distance for all orders.
+        /// </summary>
+        public RadioButton AllOrdersTDRadioButton
+        {
+            get { return m_oAllOrdersRadioButton; }
         }
 
         /// <summary>
