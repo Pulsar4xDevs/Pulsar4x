@@ -298,6 +298,11 @@ namespace Pulsar4X.Entities
         public BindingList<TaskGroupTN> TaskGroups { get; set; }
 
         /// <summary>
+        /// A list of every ship this faction has is stored here.
+        /// </summary>
+        public BindingList<ShipTN> Ships { get; set; }
+
+        /// <summary>
         /// I'll just store every contact in every system potentially here right now.
         /// </summary>
         public Dictionary<StarSystem,FactionSystemDetection> SystemContacts { get; set; }
@@ -334,6 +339,7 @@ namespace Pulsar4X.Entities
             ComponentList = new ComponentDefListTN();
             ShipDesigns = new BindingList<ShipClassTN>();
             TaskGroups = new BindingList<TaskGroupTN>();
+            Ships = new BindingList<ShipTN>();
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
@@ -366,6 +372,7 @@ namespace Pulsar4X.Entities
             ComponentList = new ComponentDefListTN();
             ShipDesigns = new BindingList<ShipClassTN>();
             TaskGroups = new BindingList<TaskGroupTN>();
+            Ships = new BindingList<ShipTN>();
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();

@@ -235,11 +235,11 @@ namespace Pulsar4X.UI.Panels
             this.m_oRepeatOrderButton = new System.Windows.Forms.Button();
             this.m_oCycleMovesCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oOrderDelayTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.m_oOrderDelayLabel = new System.Windows.Forms.Label();
             this.m_oAutoRouteCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oLoadAmtTextBox = new System.Windows.Forms.TextBox();
             this.m_oOrbitalDistanceTextBox = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.m_oLoadLimitLabel = new System.Windows.Forms.Label();
             this.m_oOrbitalDistanceLabel = new System.Windows.Forms.Label();
             this.m_oRemoveAllButton = new System.Windows.Forms.Button();
             this.m_oRemoveButton = new System.Windows.Forms.Button();
@@ -787,11 +787,11 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrderButton);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oCycleMovesCheckBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrderDelayTextBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.label1);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrderDelayLabel);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oAutoRouteCheckBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oLoadAmtTextBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrbitalDistanceTextBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.label2);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oLoadLimitLabel);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrbitalDistanceLabel);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRemoveAllButton);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRemoveButton);
@@ -850,14 +850,14 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrderDelayTextBox.Text = "0";
             this.m_oOrderDelayTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label1
+            // m_oOrderDelayLabel
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(532, 403);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(63, 13);
-            this.label1.TabIndex = 41;
-            this.label1.Text = "Order Delay";
+            this.m_oOrderDelayLabel.AutoSize = true;
+            this.m_oOrderDelayLabel.Location = new System.Drawing.Point(532, 403);
+            this.m_oOrderDelayLabel.Name = "m_oOrderDelayLabel";
+            this.m_oOrderDelayLabel.Size = new System.Drawing.Size(63, 13);
+            this.m_oOrderDelayLabel.TabIndex = 41;
+            this.m_oOrderDelayLabel.Text = "Order Delay";
             // 
             // m_oAutoRouteCheckBox
             // 
@@ -891,15 +891,15 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrbitalDistanceTextBox.Text = "0";
             this.m_oOrbitalDistanceTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label2
+            // m_oLoadLimitLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Enabled = false;
-            this.label2.Location = new System.Drawing.Point(277, 406);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(129, 13);
-            this.label2.TabIndex = 39;
-            this.label2.Text = "Maximum Amount to Load";
+            this.m_oLoadLimitLabel.AutoSize = true;
+            this.m_oLoadLimitLabel.Enabled = false;
+            this.m_oLoadLimitLabel.Location = new System.Drawing.Point(277, 406);
+            this.m_oLoadLimitLabel.Name = "m_oLoadLimitLabel";
+            this.m_oLoadLimitLabel.Size = new System.Drawing.Size(129, 13);
+            this.m_oLoadLimitLabel.TabIndex = 39;
+            this.m_oLoadLimitLabel.Text = "Maximum Amount to Load";
             // 
             // m_oOrbitalDistanceLabel
             // 
@@ -1698,13 +1698,13 @@ namespace Pulsar4X.UI.Panels
         private Button m_oAddMoveButton;
         private TextBox m_oLoadAmtTextBox;
         private TextBox m_oOrbitalDistanceTextBox;
-        private Label label2;
+        private Label m_oLoadLimitLabel;
         private Label m_oOrbitalDistanceLabel;
         private TextBox m_oRepeatOrdersTextBox;
         private Button m_oRepeatOrderButton;
         private CheckBox m_oCycleMovesCheckBox;
         private TextBox m_oOrderDelayTextBox;
-        private Label label1;
+        private Label m_oOrderDelayLabel;
         private CheckBox m_oAutoRouteCheckBox;
         private GroupBox m_oButtonBox;
         private Button m_oDeployEscortsButton;

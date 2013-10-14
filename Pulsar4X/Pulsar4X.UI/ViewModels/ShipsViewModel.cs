@@ -49,7 +49,8 @@ namespace Pulsar4X.UI.ViewModels
                     return;
                 }
 
-                //Ships = _currentFaction.;
+                Ships = _currentFaction.Ships;
+                OnFactionChanged();
             }
         }
 
@@ -66,7 +67,15 @@ namespace Pulsar4X.UI.ViewModels
                 return;
             }
 
-            
+            CurrentFaction = Factions[0];   
+        }
+
+        private void OnFactionChanged()
+        {
+            if (FactionChanged != null)
+            {
+                FactionChanged(this, new EventArgs());
+            }
         }
 
         private void OnPropertyChanged(Expression<Func<object>> property)
@@ -80,6 +89,7 @@ namespace Pulsar4X.UI.ViewModels
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public event EventHandler FactionChanged;
         public event EventHandler PopulationChanged;
     }
 }

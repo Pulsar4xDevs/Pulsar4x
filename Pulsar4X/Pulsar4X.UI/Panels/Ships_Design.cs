@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 
+//I want Armor Status, Damage Control, Combat settings
+
 namespace Pulsar4X.UI.Panels
 {
     public partial class Ships_Design : DockContent
@@ -53,9 +55,9 @@ namespace Pulsar4X.UI.Panels
 
             this.AutoHidePortion = 0.2f;
             this.HideOnClose = true;
-            this.Text = "Populations";
-            this.TabText = "Populations";
-            this.ToolTipText = "List of Populated Systems";
+            this.Text = "Individual Unit Details";
+            this.TabText = "Individual Unit Details";
+            this.ToolTipText = "Individual ship information display.";
 
             m_oDesignRichTextBox.Multiline = true;
             m_oDesignRichTextBox.ScrollBars = RichTextBoxScrollBars.Both;

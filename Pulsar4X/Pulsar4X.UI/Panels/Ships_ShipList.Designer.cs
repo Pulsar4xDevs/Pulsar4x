@@ -54,7 +54,7 @@
             this.m_oFactionGroupBox.Size = new System.Drawing.Size(184, 57);
             this.m_oFactionGroupBox.TabIndex = 0;
             this.m_oFactionGroupBox.TabStop = false;
-            this.m_oFactionGroupBox.Text = "Faction";
+            this.m_oFactionGroupBox.Text = "Empire";
             // 
             // m_oFactionComboBox
             // 
@@ -164,9 +164,9 @@
             // 
             // m_oShipsGroupBox
             // 
-            this.m_oShipsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oShipsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oShipsGroupBox.Controls.Add(this.m_oShipsListBox);
             this.m_oShipsGroupBox.Location = new System.Drawing.Point(12, 178);
             this.m_oShipsGroupBox.MinimumSize = new System.Drawing.Size(184, 377);

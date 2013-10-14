@@ -933,7 +933,7 @@ namespace Pulsar4X.Entities.Components
         {
             XSystem = LaunchedFrom.XSystem;
             YSystem = LaunchedFrom.YSystem;
-            Contact = new SystemContact(LaunchedFrom.Faction, this);
+            Contact = new SystemContact(LaunchedFrom.TaskGroupFaction, this);
 
             Attached = LaunchedFrom;
 

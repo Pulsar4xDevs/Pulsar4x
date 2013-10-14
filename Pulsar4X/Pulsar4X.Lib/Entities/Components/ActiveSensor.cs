@@ -603,7 +603,7 @@ namespace Pulsar4X.Entities.Components
                         newMissile.target = Target;
                         OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                         TG.AttachedMissileGroups.Add(newMissileGroup);
-                        TG.Faction.MissileGroups.Add(newMissileGroup);
+                        TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
                         LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
                     }
                 }

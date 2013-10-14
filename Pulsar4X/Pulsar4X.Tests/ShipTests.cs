@@ -17,7 +17,17 @@ namespace Pulsar4X.Tests
         public void testArmor()
         {
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0,0);
+            Faction newFaction = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+
+            TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
+            ShipTN ts = new ShipTN(ts2,0,0, newTG, newFaction);
 
             ts2.ShipArmorDef = new ArmorDefTN("Duranium Armour");
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
@@ -111,8 +121,20 @@ namespace Pulsar4X.Tests
         [Test]
         public void testEngine()
         {
+
+            Faction newFaction = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+
+            TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
+
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0,0);
+            ShipTN ts = new ShipTN(ts2,0,0,newTG,newFaction);
 
             ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive",32,2.65f,0.6f,0.75f,2,37,-1.0f);
             ts2.ShipEngineCount = 1;
@@ -138,8 +160,20 @@ namespace Pulsar4X.Tests
         [Test]
         public void testPSensor()
         {
+
+            Faction newFaction = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+
+            TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
+
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0,0);
+            ShipTN ts = new ShipTN(ts2,0,0,newTG,newFaction);
 
             PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, PassiveSensorType.Thermal, 1.0f, 1);
 
@@ -172,8 +206,20 @@ namespace Pulsar4X.Tests
         [Test]
         public void testASensor()
         {
+
+            Faction newFaction = new Faction(0);
+
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+
+            TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
+
             ShipClassTN ts2 = new ShipClassTN("Test");
-            ShipTN ts = new ShipTN(ts2,0,0);
+            ShipTN ts = new ShipTN(ts2,0,0,newTG,newFaction);
 
             ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36, 24, 185, false, 1.0f, 1);
 
@@ -273,8 +319,19 @@ namespace Pulsar4X.Tests
 
             TestClass.AddCrewQuarters(CrewQ, 2);
 
+            Faction newFaction = new Faction(0);
 
-            ShipTN testShip = new ShipTN(TestClass,0,0);
+            StarSystem System1 = new StarSystem("Sol");
+
+            Star S1 = new Star();
+            Planet pl1 = new Planet();
+            System1.Stars.Add(S1);
+            System1.Stars[0].Planets.Add(pl1);
+
+            TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
+
+
+            ShipTN testShip = new ShipTN(TestClass,0,0,newTG,newFaction);
 
             testShip.CrewQuarters[0].isDestroyed = true;
 

@@ -29,7 +29,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Faction this taskgroup will be a member of.
         /// </summary>
-        public Faction Faction { get; set; }
+        public Faction TaskGroupFaction { get; set; }
 
         /// <summary>
         /// This TaskGroup's System Contact, which stores location about where the contact is.
@@ -187,14 +187,14 @@ namespace Pulsar4X.Entities
         {
             Name = Title;
 
-            Faction = FID;
+            TaskGroupFaction = FID;
 
             IsOrbiting = true;
             OrbitingBody = StartingBody;
 
             SSEntity = StarSystemEntityType.TaskGroup;
 
-            Contact = new SystemContact(Faction,this);
+            Contact = new SystemContact(TaskGroupFaction,this);
 
             Contact.XSystem = OrbitingBody.XSystem;
             Contact.YSystem = OrbitingBody.YSystem;
@@ -283,17 +283,13 @@ namespace Pulsar4X.Entities
         /// <param name="shipDef">definition of the ship to be added.</param>
         public void AddShip(ShipClassTN shipDef, int CurrentTimeSlice)
         {
-            ShipTN ship = new ShipTN(shipDef,Ships.Count, CurrentTimeSlice);
+            ShipTN ship = new ShipTN(shipDef,Ships.Count, CurrentTimeSlice, this, TaskGroupFaction);
             Ships.Add(ship);
 
             /// <summary>
-            /// Refuel and ReCrew this ship
+            /// Refuel and ReCrew this ship here?
             /// </summary>
 
-            /// <summary>
-            /// inform the ship of the taskgroup it belongs to.
-            /// </summary>
-            ship.ShipsTaskGroup = this;
 
             if (Ships.Count == 1)
             {
@@ -1837,8 +1833,8 @@ namespace Pulsar4X.Entities
         public void LoadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
             int RemainingTaskGroupTonnage = TotalCargoTonnage - CurrentCargoTonnage;
-            int TotalMass = Faction.InstallationTypes[(int)InstType].Mass * Limit;
-            int AvailableMass = (int)(Pop.Installations[(int)InstType].Number * (float)Faction.InstallationTypes[(int)InstType].Mass);
+            int TotalMass = TaskGroupFaction.InstallationTypes[(int)InstType].Mass * Limit;
+            int AvailableMass = (int)(Pop.Installations[(int)InstType].Number * (float)TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
 
             int MassToLoad = 0;
 
@@ -1866,7 +1862,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Decrement the installation count on the planet.
             /// </summary>
-            Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number - (float)(MassToLoad / Faction.InstallationTypes[(int)InstType].Mass);
+            Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number - (float)(MassToLoad / TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
 
             /// <summary>
             /// Now start loading mass onto each ship.
@@ -1908,7 +1904,7 @@ namespace Pulsar4X.Entities
         /// <param name="Limit">Number of installations to unload.</param>
         public void UnloadCargo(Population Pop, Installation.InstallationType InstType, int Limit)
         {
-            int TotalMass = Faction.InstallationTypes[(int)InstType].Mass * Limit;
+            int TotalMass = TaskGroupFaction.InstallationTypes[(int)InstType].Mass * Limit;
             for (int loop = 0; loop < Ships.Count; loop++)
             {
                 if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && Ships[loop].CurrentCargoTonnage != 0 && Ships[loop].CargoList.ContainsKey(InstType) == true)
@@ -1934,7 +1930,7 @@ namespace Pulsar4X.Entities
                     CLE.tons = CLE.tons - ShipMassToUnload;
                     CurrentCargoTonnage = CurrentCargoTonnage - ShipMassToUnload;
 
-                    Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(ShipMassToUnload / Faction.InstallationTypes[(int)InstType].Mass);
+                    Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(ShipMassToUnload / TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
                 }
             }
             
@@ -2221,7 +2217,7 @@ namespace Pulsar4X.Entities
 
             ShipTN min = null;
             float minDist = -1.0f;
-            foreach (KeyValuePair<ShipTN, FactionContact> pair in Faction.DetectedContacts)
+            foreach (KeyValuePair<ShipTN, FactionContact> pair in TaskGroupFaction.DetectedContacts)
             {
                 /// <summary>
                 /// Only active targets are considered for this. Is this for BFC targeting, or general things to head for?

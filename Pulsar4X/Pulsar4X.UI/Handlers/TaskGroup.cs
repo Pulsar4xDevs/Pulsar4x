@@ -405,7 +405,7 @@ namespace Pulsar4X.UI.Handlers
                                     if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
                                     {
                                         if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup != CurrentTaskGroup &&
-                                            CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup.Faction == CurrentFaction)
+                                            CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup.TaskGroupFaction == CurrentFaction)
                                         {
                                             if (Counter == newIndex)
                                             {
@@ -751,7 +751,7 @@ namespace Pulsar4X.UI.Handlers
                 if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
                 {
                     if (CurrentTaskGroup != CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup &&
-                        CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup.Faction == CurrentFaction)
+                        CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup.TaskGroupFaction == CurrentFaction)
                     {
                         m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup);
                     }
@@ -770,7 +770,7 @@ namespace Pulsar4X.UI.Handlers
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count; loop++)
             {
-                if( CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop].FactionId == CurrentTaskGroup.Faction.FactionID)
+                if( CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop].FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
                     m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop]);
             }
         }

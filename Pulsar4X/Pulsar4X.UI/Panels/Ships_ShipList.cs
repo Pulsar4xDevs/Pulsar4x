@@ -28,7 +28,7 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// Used to select the current faction.
         /// </summary>
-        public ComboBox FactionComboBox
+        public ComboBox FactionSelectionComboBox
         {
             get
             {

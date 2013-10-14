@@ -25,6 +25,11 @@ namespace Pulsar4X.Entities
         public TaskGroupTN ShipsTaskGroup { get; set; }
 
         /// <summary>
+        /// Faction this Ship belongs to.
+        /// </summary>
+        public Faction ShipsFaction { get; set; }
+
+        /// <summary>
         /// Unused at the moment.
         /// </summary>
         public string ClassNotes { get; set; }
@@ -361,7 +366,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
-        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice)
+        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact)
         {
             int index;
 
@@ -374,6 +379,21 @@ namespace Pulsar4X.Entities
             /// Inform the class that it has a new member.
             /// </summary>
             ClassDefinition.ShipsInClass.Add(this);
+
+            /// <summary>
+            /// Tell the Ship which TG it is a part of.
+            /// </summary>
+            ShipsTaskGroup = ShipTG;
+
+            /// <summary>
+            /// Likewise for Faction.
+            /// </summary>
+            ShipsFaction = ShipFact;
+
+            /// <summary>
+            /// Add this ship to the overall faction ship list.
+            /// </summary>
+            ShipsFaction.Ships.Add(this);
 
             /// <summary>
             /// Make sure to initialize this important variable that everything uses.
@@ -716,7 +736,6 @@ namespace Pulsar4X.Entities
             CurrentMagazineCapacityMax = ClassDefinition.TotalMagazineCapacity;
 
             IsDestroyed = false;
-
         }
 
         /// <summary>

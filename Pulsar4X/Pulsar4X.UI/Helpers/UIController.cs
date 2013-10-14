@@ -195,7 +195,7 @@ namespace Pulsar4X.UI.Helpers
             {
                 m_oEconomics.ActivatePopulationsPanel();
             }
-            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Ships_Design))
+            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Ships_Design) || a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Individual_Unit_Details_Panel))
             {
                 m_oShips.ActivateShipListPanel();
             }
