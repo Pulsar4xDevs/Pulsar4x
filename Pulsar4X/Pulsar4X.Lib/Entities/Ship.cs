@@ -1560,6 +1560,8 @@ namespace Pulsar4X.Entities
             /// </summary>
 
             ShipComponents[ComponentIndex].isDestroyed = false;
+            DestroyedComponents.Remove((ushort)ComponentIndex);
+
             switch(Type)
             {
                 case ComponentTypeTN.Crew :

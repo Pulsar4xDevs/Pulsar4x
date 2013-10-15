@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Drawing;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
@@ -11,6 +12,7 @@ using Pulsar4X.Stargen;
 using Newtonsoft.Json;
 using log4net.Config;
 using log4net;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.UI.Handlers
 {
@@ -215,6 +217,9 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// BuildArmor displays the armor status of the current ship, how big it is and what damage it has sustained.
+        /// </summary>
         private void BuildArmor()
         {
             m_oDetailsPanel.ArmorDisplayDataGrid.Rows.Clear();
@@ -232,6 +237,113 @@ namespace Pulsar4X.UI.Handlers
             }
 
             m_oDetailsPanel.ArmorDisplayDataGrid.ClearSelection();
+
+
+            if (CurrentShip.ShipArmor.isDamaged == true)
+            {
+                foreach( KeyValuePair<ushort, ushort>  pair in CurrentShip.ShipArmor.armorDamage)
+                {
+                    for (int loop = 0; loop < pair.Value; loop++)
+                    {
+                        m_oDetailsPanel.ArmorDisplayDataGrid.Rows[loop].Cells[pair.Key].Style.BackColor = Color.Red;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Print the damage allocation chart to the appropriate place under the damage control tab.
+        /// </summary>
+        private void BuildDACInfo()
+        {
+            m_oDetailsPanel.DACListBox.Items.Clear();
+
+            int DAC = 1;
+            String Entry = "N/A";
+            for (int loop = 0; loop < CurrentShip.ShipClass.ListOfComponentDefs.Count; loop++)
+            {
+                String DACString = DAC.ToString();
+                if (DAC < 10)
+                {
+                    DACString = "00" + DAC.ToString();
+                }
+                else if(DAC < 100)
+                {
+                    DACString = "0" + DAC.ToString();
+                }
+
+                String DAC2 = CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
+                if (CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] < 10)
+                {
+                    DAC2 = "00" + CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
+                }
+                else if (CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] < 100)
+                {
+                    DAC2 = "0" + CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
+                }
+
+
+
+                Entry = DACString + "-" + DAC2 + " " + CurrentShip.ShipClass.ListOfComponentDefs[loop].Name + 
+                    "(" + CurrentShip.ShipClass.ListOfComponentDefsCount[loop].ToString() + "/" + 
+                    CurrentShip.ShipClass.ListOfComponentDefs[loop].htk.ToString() + ")";
+
+                m_oDetailsPanel.DACListBox.Items.Add(Entry);
+
+                DAC = CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] + 1;
+
+                
+            }
+
+            m_oDetailsPanel.DACListBox.Items.Add("");
+            m_oDetailsPanel.DACListBox.Items.Add("Electronic Only DAC");
+
+            DAC = 1;
+
+            foreach (KeyValuePair<ComponentDefTN, int> pair in CurrentShip.ShipClass.ElectronicDamageAllocationChart)
+            {
+                String DACString = DAC.ToString();
+                if (DAC < 10)
+                {
+                    DACString = "00" + DAC.ToString();
+                }
+                else if (DAC < 100)
+                {
+                    DACString = "0" + DAC.ToString();
+                }
+
+                String DAC2 = pair.Value.ToString();
+                if (pair.Value < 10)
+                {
+                    DAC2 = "00" + pair.Value.ToString();
+                }
+                else if (pair.Value < 100)
+                {
+                    DAC2 = "0" + pair.Value.ToString();
+                }
+
+                int index = CurrentShip.ShipClass.ListOfComponentDefs.IndexOf(pair.Key);
+
+                Entry = DACString + "-" + DAC2 + " " + pair.Key.Name + "(" + CurrentShip.ShipClass.ListOfComponentDefsCount[index].ToString() + "/" +
+                    pair.Key.htk.ToString() + ")";
+
+                m_oDetailsPanel.DACListBox.Items.Add(Entry);
+
+                DAC = CurrentShip.ShipClass.ElectronicDamageAllocationChart[pair.Key] + 1;
+            }
+        }
+
+        /// <summary>
+        /// print the names of all the destroyed components.
+        /// </summary>
+        private void BuildDamagedSystemsList()
+        {
+            m_oDetailsPanel.DamagedSystemsListBox.Items.Clear();
+
+            for (int loop = 0; loop < CurrentShip.DestroyedComponents.Count; loop++)
+            {
+                m_oDetailsPanel.DamagedSystemsListBox.Items.Add(CurrentShip.ShipComponents[CurrentShip.DestroyedComponents[loop]].Name);
+            }
         }
 
 
@@ -254,7 +366,16 @@ namespace Pulsar4X.UI.Handlers
         {
             if (CurrentShip != null)
             {
+                /// <summary>
+                /// Armor tab:
+                /// </summary>
                 BuildArmor();
+
+                /// <summary>
+                /// Damage Control Tab:
+                /// </summary>
+                BuildDACInfo();
+                BuildDamagedSystemsList();
             }
         }
         #endregion
