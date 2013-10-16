@@ -64,7 +64,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Range is the sensor's rating * 1M.
+        /// Range is the sensor's rating * 100 * 10,000, for 1M * rating, the 10,000 is handled elsewhere however.
         /// </summary>
         private int Range;
         public int range
@@ -113,7 +113,7 @@ namespace Pulsar4X.Entities.Components
             /// while Range tells me at what distance a signature of 1000 will be detected in KM.
             /// </summary>
             Rating = size * (float)Sensitivity;
-            Range = (int)(Rating * 1000000.0f);
+            Range = (int)(Rating * 100.0f);
 
             /// <summary>
             /// Populate the lookup table.
@@ -174,7 +174,7 @@ namespace Pulsar4X.Entities.Components
             /// while Range tells me at what distance a signature of 1000 will be detected in KM.
             /// </summary>
             Rating = PassiveStrength;
-            Range = (int)(Rating * 1000000.0f);
+            Range = (int)(Rating*100.0f);
 
             /// <summary>
             /// Populate the lookup table.

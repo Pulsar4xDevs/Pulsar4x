@@ -199,8 +199,6 @@ namespace Pulsar4X.Entities
             Contact.XSystem = OrbitingBody.XSystem;
             Contact.YSystem = OrbitingBody.YSystem;
             Contact.ZSystem = OrbitingBody.ZSystem;
-            Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
-            Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
             Contact.CurrentSystem = StartingSystem;
             StartingSystem.AddContact(Contact);
             
@@ -955,8 +953,6 @@ namespace Pulsar4X.Entities
         {
             Contact.XSystem = OrbitingBody.XSystem;
             Contact.YSystem = OrbitingBody.YSystem;
-            Contact.SystemKmX = (long)(OrbitingBody.XSystem * Constants.Units.KM_PER_AU);
-            Contact.SystemKmY = (long)(OrbitingBody.YSystem * Constants.Units.KM_PER_AU);
         }
 
         /// <summary>
@@ -972,8 +968,8 @@ namespace Pulsar4X.Entities
 
             if (TaskGroupOrders.Count > 0)
             {
-                double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
-                double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
+                double dX = Contact.XSystem - TaskGroupOrders[0].target.XSystem;
+                double dY = Contact.YSystem - TaskGroupOrders[0].target.YSystem;
 
                 CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
             }
@@ -988,8 +984,8 @@ namespace Pulsar4X.Entities
         {
             if (TaskGroupOrders.Count > 0)
             {
-                double dX = Contact.SystemKmX - (TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU);
-                double dY = Contact.SystemKmY - (TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU);
+                double dX = Contact.XSystem - TaskGroupOrders[0].target.XSystem;
+                double dY = Contact.XSystem - TaskGroupOrders[0].target.YSystem;
 
                 double sign = 1.0;
                 if (dX > 0.0)
@@ -1017,11 +1013,41 @@ namespace Pulsar4X.Entities
         {
             if (TaskGroupOrders.Count > 0)
             {
-                double dX = Math.Abs((TaskGroupOrders[0].target.XSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmX);
-                double dY = Math.Abs((TaskGroupOrders[0].target.YSystem * Constants.Units.KM_PER_AU) - Contact.SystemKmY);
+                double dX = Math.Abs(TaskGroupOrders[0].target.XSystem - Contact.XSystem);
+                double dY = Math.Abs(TaskGroupOrders[0].target.YSystem - Contact.YSystem);
                 double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
-                TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed));
+                /// <summary>
+                /// In this case there exists a possibility that TimeReq will overflow.
+                /// </summary>
+                if (dZ >= Constants.Units.MAX_KM_IN_AU)
+                {
+                    double Count = dZ / Constants.Units.MAX_KM_IN_AU;
+
+                    /// <summary>
+                    /// TimeRequirement is safe to calculate.
+                    /// </summary>
+                    if (Count < (double)CurrentSpeed)
+                    {
+                        TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed / Constants.Units.KM_PER_AU));
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// even though TimeReq is a uint I'll treat it as a "signed" int except in this case.
+                        /// </summary>
+                        TimeRequirement = 2147483649;
+                    }
+                }
+                else
+                {
+
+                    /// <summary>
+                    /// This line hosed me with parenthesis requirements, should do things more explicitly.
+                    /// </summary>
+                    TimeRequirement = (uint)Math.Ceiling((dZ / ((double)CurrentSpeed / Constants.Units.KM_PER_AU)));
+                }
+
             }
             else
             {
@@ -1129,6 +1155,7 @@ namespace Pulsar4X.Entities
             GetTimeRequirement();
                 //NewOrders = false;
             //}
+
             if (TimeRequirement < TimeSlice)
             {
                 /// <summary>
@@ -1196,13 +1223,10 @@ namespace Pulsar4X.Entities
                 Contact.LastXSystem = Contact.XSystem;
                 Contact.LastYSystem = Contact.YSystem;
 
-                Contact.SystemKmX = Contact.SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
-                Contact.SystemKmY = Contact.SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
+                Contact.XSystem = Contact.XSystem + (((double)TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
+                Contact.YSystem = Contact.YSystem + (((double)TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);
 
-                Contact.XSystem = Contact.SystemKmX / Constants.Units.KM_PER_AU;
-                Contact.YSystem = Contact.SystemKmY / Constants.Units.KM_PER_AU;
-
-                TotalOrderDistance = TotalOrderDistance - (double)(CurrentSpeed * TimeSlice);
+                TotalOrderDistance = TotalOrderDistance - (double)((CurrentSpeed * TimeSlice) / Constants.Units.KM_PER_AU);
 
                 UseFuel(TimeSlice);
 

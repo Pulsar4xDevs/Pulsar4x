@@ -39,9 +39,12 @@ namespace Pulsar4X.UI.Handlers
         {
             get { return _CurrnetShip; }
             set 
-            { 
-                _CurrnetShip = value;
-                RefreshShipInfo();
+            {
+                if (value != _CurrnetShip)
+                {
+                    _CurrnetShip = value;
+                    RefreshShipInfo();
+                }
             }
         }
 
@@ -68,6 +71,29 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Currently selected FC.
+        /// </summary>
+        private Pulsar4X.Entities.Components.ComponentTN _CurrnetFC;
+        public Pulsar4X.Entities.Components.ComponentTN CurrentFC
+        {
+            get { return _CurrnetFC; }
+            set
+            {
+                if (value != _CurrnetFC)
+                {
+                    _CurrnetFC = value;
+
+                    RefreshFCInfo();
+                }
+            }
+        }
+
+        /// <summary>
+        /// I need to know what type of BFC I have.
+        /// </summary>
+        public bool isBFC { get; set; }
+        
+        /// <summary>
         /// View Model used by Ships
         /// </summary>
         public ViewModels.ShipsViewModel VM { get; set; }
@@ -77,6 +103,8 @@ namespace Pulsar4X.UI.Handlers
 
         public Ships()
         {
+            isBFC = false;
+
             m_oDetailsPanel = new Panels.Individual_Unit_Details_Panel();
             m_oDesignPanel = new Panels.Ships_Design();
             m_oShipListPanel = new Panels.Ships_ShipList();
@@ -93,6 +121,8 @@ namespace Pulsar4X.UI.Handlers
             CurrentFaction = VM.CurrentFaction;
             m_oShipListPanel.FactionSelectionComboBox.SelectedIndexChanged += (s, args) => m_oShipListPanel.FactionSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
             m_oShipListPanel.FactionSelectionComboBox.SelectedIndexChanged += new EventHandler(FactionSelectComboBox_SelectedIndexChanged);
+
+            m_oDetailsPanel.SFCComboBox.SelectedIndexChanged += new EventHandler(SFCComboBox_SelectedIndexChanged);
 
             m_oShipListPanel.ShipsListBox.SelectedIndexChanged += new EventHandler(ShipListBox_SelectedIndexChanged);
         }
@@ -175,9 +205,46 @@ namespace Pulsar4X.UI.Handlers
             RefreshShipPanels();
         }
 
+        /// <summary>
+        /// Ship selection.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ShipListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            //RefreshShipInfo();
             CurrentShip = CurrentFaction.Ships[m_oShipListPanel.ShipsListBox.SelectedIndex];
+
+            /// <summary>
+            /// This is a kludge, plain and simple, I was not able to successfully bind the SFCComboBox, so I am doing this.
+            /// </summary>
+            m_oDetailsPanel.SFCComboBox.Items.Clear();
+            for (int loop = 0; loop < CurrentShip.ShipFireControls.Count; loop++)
+            {
+                m_oDetailsPanel.SFCComboBox.Items.Add(CurrentShip.ShipFireControls[loop].Name);
+            }
+        }
+
+        /// <summary>
+        /// Handle Fire control selection and its various kludges.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SFCComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_oDetailsPanel.SFCComboBox.SelectedIndex < CurrentShip.ShipBFC.Count)
+            {
+                CurrentFC = CurrentShip.ShipBFC[m_oDetailsPanel.SFCComboBox.SelectedIndex];
+                isBFC = true;
+            }
+            else
+            {
+                int newIndex = m_oDetailsPanel.SFCComboBox.SelectedIndex - CurrentShip.ShipBFC.Count;
+                CurrentFC = CurrentShip.ShipMFC[newIndex];
+                isBFC = false;
+            }
+
+            RefreshFCInfo();
         }
 
         /// <summary>
@@ -346,6 +413,86 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// Print the names of every weapon on this ship.
+        /// </summary>
+        private void BuildWeaponList()
+        {
+            m_oDetailsPanel.WeaponListBox.Items.Clear();
+
+            if (isBFC == true)
+            {
+                for (int loop = 0; loop < CurrentShip.ShipBeam.Count; loop++)
+                {
+                    m_oDetailsPanel.WeaponListBox.Items.Add(CurrentShip.ShipBeam[loop].Name);
+                }
+            }
+            else
+            {
+                for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
+                {
+                    m_oDetailsPanel.WeaponListBox.Items.Add(CurrentShip.ShipMLaunchers[loop].Name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Build the pd modes.
+        /// </summary>
+        private void BuildPDComboBox()
+        {
+            m_oDetailsPanel.PDComboBox.Items.Clear();
+
+            m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.None);
+
+            if (isBFC == true)
+            {
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AreaDefense);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.FinalDefensiveFire);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.FinalDefensiveFireSelf);
+            }
+            else
+            {
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM1v2);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM1v1);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM2v1);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM3v1);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM4v1);
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM5v1);
+            }
+        }
+
+
+        /// <summary>
+        /// Add all available system contacts to the contact list.
+        /// </summary>
+        private void BuildContactsList()
+        {
+            m_oDetailsPanel.ContactListBox.Items.Clear();
+
+            /// <summary>
+            /// Planetary enemy populations should always be displayed.
+            /// </summary>
+
+            if (isBFC == true)
+            {
+                /// <summary>
+                /// BFC range is so short that we'll just print all contacts and let the user sort em out.
+                /// </summary>
+                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+                {
+                    if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
+                    {
+                        m_oDetailsPanel.ContactListBox.Items.Add(pair.Key);
+                    }
+                }
+            }
+            else
+            {
+
+            }
+        }
+
 
         /// <summary>
         /// Updates the display for all relevant ship panels.
@@ -360,8 +507,12 @@ namespace Pulsar4X.UI.Handlers
             }
 
             RefreshShipInfo();
+            RefreshFCInfo();
         }
 
+        /// <summary>
+        /// Build info about the ship.
+        /// </summary>
         private void RefreshShipInfo()
         {
             if (CurrentShip != null)
@@ -376,6 +527,22 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
                 BuildDACInfo();
                 BuildDamagedSystemsList();
+            }
+        }
+
+        /// <summary>
+        /// Build info about the fire control.
+        /// </summary>
+        private void RefreshFCInfo()
+        {
+            if (CurrentFC != null)
+            {
+                /// <summary>
+                /// Combat Settings Tab:
+                /// </summary>
+                
+                BuildWeaponList();
+                BuildPDComboBox();
             }
         }
         #endregion

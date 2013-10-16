@@ -41,6 +41,11 @@ namespace Pulsar4X
             public const double KM_PER_AU = CM_PER_AU / CM_PER_KM;
 
             /// <summary>
+            /// 32 bit limitation number for distances in KM. //14.35504154
+            /// </summary>
+            public const double MAX_KM_IN_AU = 2147483648.0 / KM_PER_AU;
+
+            /// <summary>
             /// Plus or Minus 65Km
             /// </summary>
             public const double SOLAR_RADIUS_IN_KM = 696342.0;

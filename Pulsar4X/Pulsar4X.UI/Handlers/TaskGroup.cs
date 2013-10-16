@@ -836,12 +836,10 @@ namespace Pulsar4X.UI.Handlers
                         }
                     }
                 }
-                    
-                if (dZ > 14.0)
-                {
-                    double maxDist = 2147483648.0 / Constants.Units.KM_PER_AU; //14.35504154
 
-                    double Count = dZ / maxDist;
+                if (dZ >= Constants.Units.MAX_KM_IN_AU)
+                {
+                    double Count = dZ / Constants.Units.MAX_KM_IN_AU;
 
                     double newDistance = Math.Floor(2.147483648 * Count * 100.0);
                     newDistance = newDistance / 100.0;

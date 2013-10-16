@@ -24,16 +24,6 @@ namespace Pulsar4X.Entities
         public StarSystem CurrentSystem { get; set; }
 
         /// <summary>
-        /// While SSEntity contains XSystem, X position in AU, this is X position in KM 
-        /// </summary>
-        public float SystemKmX { get; set; }
-
-        /// <summary>
-        /// Corresponding Y position in system.
-        /// </summary>
-        public float SystemKmY { get; set; }
-
-        /// <summary>
         /// where the contact was on the last tick.
         /// </summary>
         public double LastXSystem { get; set; }
@@ -68,7 +58,7 @@ namespace Pulsar4X.Entities
         public OrdnanceGroupTN MissileGroup { get; set; }
 
         /// <summary>
-        /// Distance between this contact and the other contacts in the system.
+        /// Distance between this contact and the other contacts in the system in AU.
         /// </summary>
         public BindingList<float> DistanceTable { get; set; }
 
@@ -91,9 +81,6 @@ namespace Pulsar4X.Entities
             LastXSystem = XSystem;
             LastYSystem = YSystem;
 
-            SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
-            SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
-
             Pop = pop;
             SSEntity = StarSystemEntityType.Population;
 
@@ -114,10 +101,6 @@ namespace Pulsar4X.Entities
             LastXSystem = XSystem;
             LastYSystem = YSystem;
 
-            SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
-            SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
-
-
             TaskGroup = TG;
             SSEntity = StarSystemEntityType.TaskGroup;
             DistanceTable = new BindingList<float>();
@@ -137,10 +120,6 @@ namespace Pulsar4X.Entities
             LastXSystem = XSystem;
             LastYSystem = YSystem;
 
-            SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
-            SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
-
-
             MissileGroup = MG;
             SSEntity = StarSystemEntityType.Missile;
             DistanceTable = new BindingList<float>();
@@ -158,9 +137,6 @@ namespace Pulsar4X.Entities
             LastYSystem = YSystem;
             XSystem = X;
             YSystem = Y;
-
-            SystemKmX = (float)(XSystem * Constants.Units.KM_PER_AU);
-            SystemKmY = (float)(YSystem * Constants.Units.KM_PER_AU);
         }
 
         /// <summary>

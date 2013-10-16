@@ -26,6 +26,55 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// List of Weapons will go here.
+        /// </summary>
+        public ListBox WeaponListBox
+        {
+            get { return m_oWeaponListBox; }
+        }
+
+        /// <summary>
+        /// List of contacts here.
+        /// </summary>
+        public ListBox ContactListBox
+        {
+            get { return m_oContactsListBox; }
+        }
+
+
+        /// <summary>
+        /// Selected Fire Control Combo box
+        /// </summary>
+        public ComboBox SFCComboBox
+        {
+            get { return m_oSFCComboBox; }
+        }
+
+        /// <summary>
+        /// Selected PD mode box.
+        /// </summary>
+        public ComboBox PDComboBox
+        {
+            get { return m_oPDModeComboBox; }
+        }
+
+        /// <summary>
+        /// Set FC to open fire mode.
+        /// </summary>
+        public Button OpenFireButton
+        {
+            get { return m_oOpenFireButton; }
+        }
+
+        /// <summary>
+        /// Set FC to cease fire mode.
+        /// </summary>
+        public Button CeaseFireButton
+        {
+            get { return m_oCeaseFireButton; }
+        }
+
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -75,17 +124,41 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipDesignTab = new System.Windows.Forms.TabPage();
             this.m_oClassDesignTab = new System.Windows.Forms.TabPage();
             this.m_oCombatSettingsTab = new System.Windows.Forms.TabPage();
+            this.m_oActiveSensorGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSelectedActiveComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oInactiveButton = new System.Windows.Forms.Button();
+            this.m_oActiveButton = new System.Windows.Forms.Button();
+            this.m_oShieldGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oLowerShieldsButton = new System.Windows.Forms.Button();
+            this.m_oRaiseShieldsButton = new System.Windows.Forms.Button();
+            this.m_oFireControlsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCeaseFireButton = new System.Windows.Forms.Button();
+            this.m_oOpenFireButton = new System.Windows.Forms.Button();
+            this.m_oAutoFireGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSyncFireCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oAutoFireCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oECCMAssignGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oAssignECCMButton = new System.Windows.Forms.Button();
+            this.m_oECCMComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oPointDefenseModeGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oPDRangeLabel2 = new System.Windows.Forms.Label();
+            this.m_oSelectRangeLabel = new System.Windows.Forms.Label();
+            this.m_oPDRangeTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSetModeButton = new System.Windows.Forms.Button();
+            this.m_oPDModeComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSelectedFireControlGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSFCComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oAssignTargetsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oClearTargetButton = new System.Windows.Forms.Button();
+            this.m_oAssignTargetButton = new System.Windows.Forms.Button();
+            this.m_oContactsListBox = new System.Windows.Forms.ListBox();
+            this.m_oAssignWeaponsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oClearWeaponsButton = new System.Windows.Forms.Button();
+            this.m_oAssignAllWeaponsButton = new System.Windows.Forms.Button();
+            this.m_oAssignWeaponsButton = new System.Windows.Forms.Button();
+            this.m_oWeaponListBox = new System.Windows.Forms.ListBox();
             this.m_oCombatSummaryTab = new System.Windows.Forms.TabPage();
             this.m_oOrdnanceManagementTab = new System.Windows.Forms.TabPage();
-            this.m_oAssignWeaponsGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oAssignTargetsGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oSelectedFireControlGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oPointDefenseModeGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oECCMAssignGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oAutoFireGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oFireControlsGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oShieldGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oActiveSensorGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oArmourStatusTab.SuspendLayout();
             this.m_oDamageControlTab.SuspendLayout();
@@ -96,6 +169,15 @@ namespace Pulsar4X.UI.Panels
             this.m_oDamagedSystemsGroupBox.SuspendLayout();
             this.m_oDACGroupBox.SuspendLayout();
             this.m_oCombatSettingsTab.SuspendLayout();
+            this.m_oActiveSensorGroupBox.SuspendLayout();
+            this.m_oShieldGroupBox.SuspendLayout();
+            this.m_oFireControlsGroupBox.SuspendLayout();
+            this.m_oAutoFireGroupBox.SuspendLayout();
+            this.m_oECCMAssignGroupBox.SuspendLayout();
+            this.m_oPointDefenseModeGroupBox.SuspendLayout();
+            this.m_oSelectedFireControlGroupBox.SuspendLayout();
+            this.m_oAssignTargetsGroupBox.SuspendLayout();
+            this.m_oAssignWeaponsGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupTabControl
@@ -427,6 +509,375 @@ namespace Pulsar4X.UI.Panels
             this.m_oCombatSettingsTab.Text = "Combat Settings";
             this.m_oCombatSettingsTab.UseVisualStyleBackColor = true;
             // 
+            // m_oActiveSensorGroupBox
+            // 
+            this.m_oActiveSensorGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oActiveSensorGroupBox.Controls.Add(this.m_oSelectedActiveComboBox);
+            this.m_oActiveSensorGroupBox.Controls.Add(this.m_oInactiveButton);
+            this.m_oActiveSensorGroupBox.Controls.Add(this.m_oActiveButton);
+            this.m_oActiveSensorGroupBox.Location = new System.Drawing.Point(3, 418);
+            this.m_oActiveSensorGroupBox.Name = "m_oActiveSensorGroupBox";
+            this.m_oActiveSensorGroupBox.Size = new System.Drawing.Size(247, 119);
+            this.m_oActiveSensorGroupBox.TabIndex = 41;
+            this.m_oActiveSensorGroupBox.TabStop = false;
+            this.m_oActiveSensorGroupBox.Text = "Selected Active(Off)";
+            // 
+            // m_oSelectedActiveComboBox
+            // 
+            this.m_oSelectedActiveComboBox.FormattingEnabled = true;
+            this.m_oSelectedActiveComboBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oSelectedActiveComboBox.Name = "m_oSelectedActiveComboBox";
+            this.m_oSelectedActiveComboBox.Size = new System.Drawing.Size(229, 21);
+            this.m_oSelectedActiveComboBox.TabIndex = 52;
+            // 
+            // m_oInactiveButton
+            // 
+            this.m_oInactiveButton.BackColor = System.Drawing.Color.LimeGreen;
+            this.m_oInactiveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oInactiveButton.Location = new System.Drawing.Point(142, 69);
+            this.m_oInactiveButton.Margin = new System.Windows.Forms.Padding(12);
+            this.m_oInactiveButton.Name = "m_oInactiveButton";
+            this.m_oInactiveButton.Size = new System.Drawing.Size(90, 35);
+            this.m_oInactiveButton.TabIndex = 51;
+            this.m_oInactiveButton.Text = "Inactive";
+            this.m_oInactiveButton.UseVisualStyleBackColor = false;
+            // 
+            // m_oActiveButton
+            // 
+            this.m_oActiveButton.BackColor = System.Drawing.Color.Red;
+            this.m_oActiveButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oActiveButton.Location = new System.Drawing.Point(15, 69);
+            this.m_oActiveButton.Margin = new System.Windows.Forms.Padding(12);
+            this.m_oActiveButton.Name = "m_oActiveButton";
+            this.m_oActiveButton.Size = new System.Drawing.Size(90, 35);
+            this.m_oActiveButton.TabIndex = 51;
+            this.m_oActiveButton.Text = "Active";
+            this.m_oActiveButton.UseVisualStyleBackColor = false;
+            // 
+            // m_oShieldGroupBox
+            // 
+            this.m_oShieldGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oShieldGroupBox.Controls.Add(this.m_oLowerShieldsButton);
+            this.m_oShieldGroupBox.Controls.Add(this.m_oRaiseShieldsButton);
+            this.m_oShieldGroupBox.Location = new System.Drawing.Point(3, 342);
+            this.m_oShieldGroupBox.Name = "m_oShieldGroupBox";
+            this.m_oShieldGroupBox.Size = new System.Drawing.Size(247, 70);
+            this.m_oShieldGroupBox.TabIndex = 41;
+            this.m_oShieldGroupBox.TabStop = false;
+            this.m_oShieldGroupBox.Text = "Shields(Off)";
+            // 
+            // m_oLowerShieldsButton
+            // 
+            this.m_oLowerShieldsButton.BackColor = System.Drawing.Color.LimeGreen;
+            this.m_oLowerShieldsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oLowerShieldsButton.Location = new System.Drawing.Point(136, 20);
+            this.m_oLowerShieldsButton.Margin = new System.Windows.Forms.Padding(12);
+            this.m_oLowerShieldsButton.Name = "m_oLowerShieldsButton";
+            this.m_oLowerShieldsButton.Size = new System.Drawing.Size(90, 35);
+            this.m_oLowerShieldsButton.TabIndex = 50;
+            this.m_oLowerShieldsButton.Text = "Lower";
+            this.m_oLowerShieldsButton.UseVisualStyleBackColor = false;
+            // 
+            // m_oRaiseShieldsButton
+            // 
+            this.m_oRaiseShieldsButton.BackColor = System.Drawing.Color.Red;
+            this.m_oRaiseShieldsButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oRaiseShieldsButton.Location = new System.Drawing.Point(15, 20);
+            this.m_oRaiseShieldsButton.Margin = new System.Windows.Forms.Padding(12);
+            this.m_oRaiseShieldsButton.Name = "m_oRaiseShieldsButton";
+            this.m_oRaiseShieldsButton.Size = new System.Drawing.Size(90, 35);
+            this.m_oRaiseShieldsButton.TabIndex = 50;
+            this.m_oRaiseShieldsButton.Text = "Raise";
+            this.m_oRaiseShieldsButton.UseVisualStyleBackColor = false;
+            // 
+            // m_oFireControlsGroupBox
+            // 
+            this.m_oFireControlsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oFireControlsGroupBox.Controls.Add(this.m_oCeaseFireButton);
+            this.m_oFireControlsGroupBox.Controls.Add(this.m_oOpenFireButton);
+            this.m_oFireControlsGroupBox.Location = new System.Drawing.Point(3, 266);
+            this.m_oFireControlsGroupBox.Name = "m_oFireControlsGroupBox";
+            this.m_oFireControlsGroupBox.Size = new System.Drawing.Size(241, 70);
+            this.m_oFireControlsGroupBox.TabIndex = 41;
+            this.m_oFireControlsGroupBox.TabStop = false;
+            this.m_oFireControlsGroupBox.Text = "Fire Controls";
+            // 
+            // m_oCeaseFireButton
+            // 
+            this.m_oCeaseFireButton.BackColor = System.Drawing.Color.LimeGreen;
+            this.m_oCeaseFireButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oCeaseFireButton.Location = new System.Drawing.Point(136, 20);
+            this.m_oCeaseFireButton.Margin = new System.Windows.Forms.Padding(12);
+            this.m_oCeaseFireButton.Name = "m_oCeaseFireButton";
+            this.m_oCeaseFireButton.Size = new System.Drawing.Size(90, 35);
+            this.m_oCeaseFireButton.TabIndex = 49;
+            this.m_oCeaseFireButton.Text = "Cease Fire";
+            this.m_oCeaseFireButton.UseVisualStyleBackColor = false;
+            // 
+            // m_oOpenFireButton
+            // 
+            this.m_oOpenFireButton.BackColor = System.Drawing.Color.Red;
+            this.m_oOpenFireButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.m_oOpenFireButton.Location = new System.Drawing.Point(15, 20);
+            this.m_oOpenFireButton.Margin = new System.Windows.Forms.Padding(12);
+            this.m_oOpenFireButton.Name = "m_oOpenFireButton";
+            this.m_oOpenFireButton.Size = new System.Drawing.Size(90, 35);
+            this.m_oOpenFireButton.TabIndex = 48;
+            this.m_oOpenFireButton.Text = "Open Fire";
+            this.m_oOpenFireButton.UseVisualStyleBackColor = false;
+            // 
+            // m_oAutoFireGroupBox
+            // 
+            this.m_oAutoFireGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oAutoFireGroupBox.Controls.Add(this.m_oSyncFireCheckBox);
+            this.m_oAutoFireGroupBox.Controls.Add(this.m_oAutoFireCheckBox);
+            this.m_oAutoFireGroupBox.Location = new System.Drawing.Point(3, 210);
+            this.m_oAutoFireGroupBox.Name = "m_oAutoFireGroupBox";
+            this.m_oAutoFireGroupBox.Size = new System.Drawing.Size(241, 50);
+            this.m_oAutoFireGroupBox.TabIndex = 41;
+            this.m_oAutoFireGroupBox.TabStop = false;
+            this.m_oAutoFireGroupBox.Text = "Automated Firing Options";
+            // 
+            // m_oSyncFireCheckBox
+            // 
+            this.m_oSyncFireCheckBox.AutoSize = true;
+            this.m_oSyncFireCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oSyncFireCheckBox.Location = new System.Drawing.Point(133, 23);
+            this.m_oSyncFireCheckBox.Name = "m_oSyncFireCheckBox";
+            this.m_oSyncFireCheckBox.Size = new System.Drawing.Size(76, 17);
+            this.m_oSyncFireCheckBox.TabIndex = 50;
+            this.m_oSyncFireCheckBox.Text = "Synch Fire";
+            this.m_oSyncFireCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oAutoFireCheckBox
+            // 
+            this.m_oAutoFireCheckBox.AutoSize = true;
+            this.m_oAutoFireCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oAutoFireCheckBox.Location = new System.Drawing.Point(32, 23);
+            this.m_oAutoFireCheckBox.Name = "m_oAutoFireCheckBox";
+            this.m_oAutoFireCheckBox.Size = new System.Drawing.Size(68, 17);
+            this.m_oAutoFireCheckBox.TabIndex = 49;
+            this.m_oAutoFireCheckBox.Text = "Auto Fire";
+            this.m_oAutoFireCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oECCMAssignGroupBox
+            // 
+            this.m_oECCMAssignGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oECCMAssignGroupBox.Controls.Add(this.m_oAssignECCMButton);
+            this.m_oECCMAssignGroupBox.Controls.Add(this.m_oECCMComboBox);
+            this.m_oECCMAssignGroupBox.Location = new System.Drawing.Point(3, 154);
+            this.m_oECCMAssignGroupBox.Name = "m_oECCMAssignGroupBox";
+            this.m_oECCMAssignGroupBox.Size = new System.Drawing.Size(241, 50);
+            this.m_oECCMAssignGroupBox.TabIndex = 41;
+            this.m_oECCMAssignGroupBox.TabStop = false;
+            this.m_oECCMAssignGroupBox.Text = "Assign ECCM to FireControl";
+            // 
+            // m_oAssignECCMButton
+            // 
+            this.m_oAssignECCMButton.Location = new System.Drawing.Point(166, 15);
+            this.m_oAssignECCMButton.Name = "m_oAssignECCMButton";
+            this.m_oAssignECCMButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oAssignECCMButton.TabIndex = 51;
+            this.m_oAssignECCMButton.Text = "Assign";
+            this.m_oAssignECCMButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oECCMComboBox
+            // 
+            this.m_oECCMComboBox.FormattingEnabled = true;
+            this.m_oECCMComboBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oECCMComboBox.Name = "m_oECCMComboBox";
+            this.m_oECCMComboBox.Size = new System.Drawing.Size(142, 21);
+            this.m_oECCMComboBox.TabIndex = 50;
+            // 
+            // m_oPointDefenseModeGroupBox
+            // 
+            this.m_oPointDefenseModeGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oPointDefenseModeGroupBox.Controls.Add(this.m_oPDRangeLabel2);
+            this.m_oPointDefenseModeGroupBox.Controls.Add(this.m_oSelectRangeLabel);
+            this.m_oPointDefenseModeGroupBox.Controls.Add(this.m_oPDRangeTextBox);
+            this.m_oPointDefenseModeGroupBox.Controls.Add(this.m_oSetModeButton);
+            this.m_oPointDefenseModeGroupBox.Controls.Add(this.m_oPDModeComboBox);
+            this.m_oPointDefenseModeGroupBox.Location = new System.Drawing.Point(3, 61);
+            this.m_oPointDefenseModeGroupBox.Name = "m_oPointDefenseModeGroupBox";
+            this.m_oPointDefenseModeGroupBox.Size = new System.Drawing.Size(241, 87);
+            this.m_oPointDefenseModeGroupBox.TabIndex = 41;
+            this.m_oPointDefenseModeGroupBox.TabStop = false;
+            this.m_oPointDefenseModeGroupBox.Text = "Point Defense Mode for SFC";
+            // 
+            // m_oPDRangeLabel2
+            // 
+            this.m_oPDRangeLabel2.AutoSize = true;
+            this.m_oPDRangeLabel2.Location = new System.Drawing.Point(6, 66);
+            this.m_oPDRangeLabel2.Name = "m_oPDRangeLabel2";
+            this.m_oPDRangeLabel2.Size = new System.Drawing.Size(63, 13);
+            this.m_oPDRangeLabel2.TabIndex = 54;
+            this.m_oPDRangeLabel2.Text = "in 10k Units";
+            // 
+            // m_oSelectRangeLabel
+            // 
+            this.m_oSelectRangeLabel.AutoSize = true;
+            this.m_oSelectRangeLabel.Location = new System.Drawing.Point(6, 53);
+            this.m_oSelectRangeLabel.Name = "m_oSelectRangeLabel";
+            this.m_oSelectRangeLabel.Size = new System.Drawing.Size(80, 13);
+            this.m_oSelectRangeLabel.TabIndex = 53;
+            this.m_oSelectRangeLabel.Text = "Max PD Range";
+            // 
+            // m_oPDRangeTextBox
+            // 
+            this.m_oPDRangeTextBox.Location = new System.Drawing.Point(105, 57);
+            this.m_oPDRangeTextBox.Name = "m_oPDRangeTextBox";
+            this.m_oPDRangeTextBox.Size = new System.Drawing.Size(43, 20);
+            this.m_oPDRangeTextBox.TabIndex = 50;
+            this.m_oPDRangeTextBox.Text = "1000";
+            // 
+            // m_oSetModeButton
+            // 
+            this.m_oSetModeButton.Location = new System.Drawing.Point(166, 53);
+            this.m_oSetModeButton.Name = "m_oSetModeButton";
+            this.m_oSetModeButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oSetModeButton.TabIndex = 52;
+            this.m_oSetModeButton.Text = "Set Mode";
+            this.m_oSetModeButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPDModeComboBox
+            // 
+            this.m_oPDModeComboBox.FormattingEnabled = true;
+            this.m_oPDModeComboBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oPDModeComboBox.Name = "m_oPDModeComboBox";
+            this.m_oPDModeComboBox.Size = new System.Drawing.Size(229, 21);
+            this.m_oPDModeComboBox.TabIndex = 49;
+            // 
+            // m_oSelectedFireControlGroupBox
+            // 
+            this.m_oSelectedFireControlGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oSelectedFireControlGroupBox.Controls.Add(this.m_oSFCComboBox);
+            this.m_oSelectedFireControlGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.m_oSelectedFireControlGroupBox.Name = "m_oSelectedFireControlGroupBox";
+            this.m_oSelectedFireControlGroupBox.Size = new System.Drawing.Size(241, 52);
+            this.m_oSelectedFireControlGroupBox.TabIndex = 40;
+            this.m_oSelectedFireControlGroupBox.TabStop = false;
+            this.m_oSelectedFireControlGroupBox.Text = "Selected Fire Control(SFC)";
+            // 
+            // m_oSFCComboBox
+            // 
+            this.m_oSFCComboBox.FormattingEnabled = true;
+            this.m_oSFCComboBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oSFCComboBox.Name = "m_oSFCComboBox";
+            this.m_oSFCComboBox.Size = new System.Drawing.Size(229, 21);
+            this.m_oSFCComboBox.TabIndex = 48;
+            // 
+            // m_oAssignTargetsGroupBox
+            // 
+            this.m_oAssignTargetsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oAssignTargetsGroupBox.Controls.Add(this.m_oClearTargetButton);
+            this.m_oAssignTargetsGroupBox.Controls.Add(this.m_oAssignTargetButton);
+            this.m_oAssignTargetsGroupBox.Controls.Add(this.m_oContactsListBox);
+            this.m_oAssignTargetsGroupBox.Location = new System.Drawing.Point(250, 3);
+            this.m_oAssignTargetsGroupBox.Name = "m_oAssignTargetsGroupBox";
+            this.m_oAssignTargetsGroupBox.Size = new System.Drawing.Size(322, 534);
+            this.m_oAssignTargetsGroupBox.TabIndex = 39;
+            this.m_oAssignTargetsGroupBox.TabStop = false;
+            this.m_oAssignTargetsGroupBox.Text = "Assign Targets to Selected Fire Control";
+            // 
+            // m_oClearTargetButton
+            // 
+            this.m_oClearTargetButton.Location = new System.Drawing.Point(247, 497);
+            this.m_oClearTargetButton.Name = "m_oClearTargetButton";
+            this.m_oClearTargetButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oClearTargetButton.TabIndex = 53;
+            this.m_oClearTargetButton.Text = "Clear";
+            this.m_oClearTargetButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAssignTargetButton
+            // 
+            this.m_oAssignTargetButton.Location = new System.Drawing.Point(6, 497);
+            this.m_oAssignTargetButton.Name = "m_oAssignTargetButton";
+            this.m_oAssignTargetButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oAssignTargetButton.TabIndex = 52;
+            this.m_oAssignTargetButton.Text = "Assign";
+            this.m_oAssignTargetButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oContactsListBox
+            // 
+            this.m_oContactsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oContactsListBox.FormattingEnabled = true;
+            this.m_oContactsListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oContactsListBox.Name = "m_oContactsListBox";
+            this.m_oContactsListBox.Size = new System.Drawing.Size(310, 472);
+            this.m_oContactsListBox.TabIndex = 47;
+            // 
+            // m_oAssignWeaponsGroupBox
+            // 
+            this.m_oAssignWeaponsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oAssignWeaponsGroupBox.Controls.Add(this.m_oClearWeaponsButton);
+            this.m_oAssignWeaponsGroupBox.Controls.Add(this.m_oAssignAllWeaponsButton);
+            this.m_oAssignWeaponsGroupBox.Controls.Add(this.m_oAssignWeaponsButton);
+            this.m_oAssignWeaponsGroupBox.Controls.Add(this.m_oWeaponListBox);
+            this.m_oAssignWeaponsGroupBox.Location = new System.Drawing.Point(578, 3);
+            this.m_oAssignWeaponsGroupBox.Name = "m_oAssignWeaponsGroupBox";
+            this.m_oAssignWeaponsGroupBox.Size = new System.Drawing.Size(452, 534);
+            this.m_oAssignWeaponsGroupBox.TabIndex = 38;
+            this.m_oAssignWeaponsGroupBox.TabStop = false;
+            this.m_oAssignWeaponsGroupBox.Text = "Assign Weapons to Selected Fire Control";
+            // 
+            // m_oClearWeaponsButton
+            // 
+            this.m_oClearWeaponsButton.Location = new System.Drawing.Point(377, 497);
+            this.m_oClearWeaponsButton.Name = "m_oClearWeaponsButton";
+            this.m_oClearWeaponsButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oClearWeaponsButton.TabIndex = 56;
+            this.m_oClearWeaponsButton.Text = "Clear";
+            this.m_oClearWeaponsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAssignAllWeaponsButton
+            // 
+            this.m_oAssignAllWeaponsButton.Location = new System.Drawing.Point(81, 497);
+            this.m_oAssignAllWeaponsButton.Name = "m_oAssignAllWeaponsButton";
+            this.m_oAssignAllWeaponsButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oAssignAllWeaponsButton.TabIndex = 55;
+            this.m_oAssignAllWeaponsButton.Text = "Assign All";
+            this.m_oAssignAllWeaponsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAssignWeaponsButton
+            // 
+            this.m_oAssignWeaponsButton.Location = new System.Drawing.Point(6, 497);
+            this.m_oAssignWeaponsButton.Name = "m_oAssignWeaponsButton";
+            this.m_oAssignWeaponsButton.Size = new System.Drawing.Size(69, 26);
+            this.m_oAssignWeaponsButton.TabIndex = 54;
+            this.m_oAssignWeaponsButton.Text = "Assign";
+            this.m_oAssignWeaponsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oWeaponListBox
+            // 
+            this.m_oWeaponListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oWeaponListBox.FormattingEnabled = true;
+            this.m_oWeaponListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oWeaponListBox.Name = "m_oWeaponListBox";
+            this.m_oWeaponListBox.Size = new System.Drawing.Size(440, 472);
+            this.m_oWeaponListBox.TabIndex = 47;
+            // 
             // m_oCombatSummaryTab
             // 
             this.m_oCombatSummaryTab.Location = new System.Drawing.Point(4, 22);
@@ -444,114 +895,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrdnanceManagementTab.TabIndex = 10;
             this.m_oOrdnanceManagementTab.Text = "Ordnance Management";
             this.m_oOrdnanceManagementTab.UseVisualStyleBackColor = true;
-            // 
-            // m_oAssignWeaponsGroupBox
-            // 
-            this.m_oAssignWeaponsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oAssignWeaponsGroupBox.Location = new System.Drawing.Point(578, 3);
-            this.m_oAssignWeaponsGroupBox.Name = "m_oAssignWeaponsGroupBox";
-            this.m_oAssignWeaponsGroupBox.Size = new System.Drawing.Size(452, 534);
-            this.m_oAssignWeaponsGroupBox.TabIndex = 38;
-            this.m_oAssignWeaponsGroupBox.TabStop = false;
-            this.m_oAssignWeaponsGroupBox.Text = "Assign Weapons to Selected Fire Control";
-            // 
-            // m_oAssignTargetsGroupBox
-            // 
-            this.m_oAssignTargetsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oAssignTargetsGroupBox.Location = new System.Drawing.Point(250, 3);
-            this.m_oAssignTargetsGroupBox.Name = "m_oAssignTargetsGroupBox";
-            this.m_oAssignTargetsGroupBox.Size = new System.Drawing.Size(322, 534);
-            this.m_oAssignTargetsGroupBox.TabIndex = 39;
-            this.m_oAssignTargetsGroupBox.TabStop = false;
-            this.m_oAssignTargetsGroupBox.Text = "Assign Targets to Selected Fire Control";
-            // 
-            // m_oSelectedFireControlGroupBox
-            // 
-            this.m_oSelectedFireControlGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oSelectedFireControlGroupBox.Location = new System.Drawing.Point(3, 3);
-            this.m_oSelectedFireControlGroupBox.Name = "m_oSelectedFireControlGroupBox";
-            this.m_oSelectedFireControlGroupBox.Size = new System.Drawing.Size(241, 66);
-            this.m_oSelectedFireControlGroupBox.TabIndex = 40;
-            this.m_oSelectedFireControlGroupBox.TabStop = false;
-            this.m_oSelectedFireControlGroupBox.Text = "Selected Fire Control(SFC)";
-            // 
-            // m_oPointDefenseModeGroupBox
-            // 
-            this.m_oPointDefenseModeGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oPointDefenseModeGroupBox.Location = new System.Drawing.Point(3, 75);
-            this.m_oPointDefenseModeGroupBox.Name = "m_oPointDefenseModeGroupBox";
-            this.m_oPointDefenseModeGroupBox.Size = new System.Drawing.Size(241, 102);
-            this.m_oPointDefenseModeGroupBox.TabIndex = 41;
-            this.m_oPointDefenseModeGroupBox.TabStop = false;
-            this.m_oPointDefenseModeGroupBox.Text = "Point Defense Mode for SFC";
-            // 
-            // m_oECCMAssignGroupBox
-            // 
-            this.m_oECCMAssignGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oECCMAssignGroupBox.Location = new System.Drawing.Point(3, 183);
-            this.m_oECCMAssignGroupBox.Name = "m_oECCMAssignGroupBox";
-            this.m_oECCMAssignGroupBox.Size = new System.Drawing.Size(241, 66);
-            this.m_oECCMAssignGroupBox.TabIndex = 41;
-            this.m_oECCMAssignGroupBox.TabStop = false;
-            this.m_oECCMAssignGroupBox.Text = "Assign ECCM to FireControl";
-            // 
-            // m_oAutoFireGroupBox
-            // 
-            this.m_oAutoFireGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oAutoFireGroupBox.Location = new System.Drawing.Point(3, 255);
-            this.m_oAutoFireGroupBox.Name = "m_oAutoFireGroupBox";
-            this.m_oAutoFireGroupBox.Size = new System.Drawing.Size(241, 66);
-            this.m_oAutoFireGroupBox.TabIndex = 41;
-            this.m_oAutoFireGroupBox.TabStop = false;
-            this.m_oAutoFireGroupBox.Text = "Automated Firing Options";
-            // 
-            // m_oFireControlsGroupBox
-            // 
-            this.m_oFireControlsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oFireControlsGroupBox.Location = new System.Drawing.Point(3, 327);
-            this.m_oFireControlsGroupBox.Name = "m_oFireControlsGroupBox";
-            this.m_oFireControlsGroupBox.Size = new System.Drawing.Size(241, 66);
-            this.m_oFireControlsGroupBox.TabIndex = 41;
-            this.m_oFireControlsGroupBox.TabStop = false;
-            this.m_oFireControlsGroupBox.Text = "Fire Controls";
-            // 
-            // m_oShieldGroupBox
-            // 
-            this.m_oShieldGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oShieldGroupBox.Location = new System.Drawing.Point(3, 399);
-            this.m_oShieldGroupBox.Name = "m_oShieldGroupBox";
-            this.m_oShieldGroupBox.Size = new System.Drawing.Size(241, 66);
-            this.m_oShieldGroupBox.TabIndex = 41;
-            this.m_oShieldGroupBox.TabStop = false;
-            this.m_oShieldGroupBox.Text = "Shields(Off)";
-            // 
-            // m_oActiveSensorGroupBox
-            // 
-            this.m_oActiveSensorGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oActiveSensorGroupBox.Location = new System.Drawing.Point(3, 471);
-            this.m_oActiveSensorGroupBox.Name = "m_oActiveSensorGroupBox";
-            this.m_oActiveSensorGroupBox.Size = new System.Drawing.Size(241, 66);
-            this.m_oActiveSensorGroupBox.TabIndex = 41;
-            this.m_oActiveSensorGroupBox.TabStop = false;
-            this.m_oActiveSensorGroupBox.Text = "Actives(Off)";
             // 
             // Individual_Unit_Details_Panel
             // 
@@ -574,6 +917,17 @@ namespace Pulsar4X.UI.Panels
             this.m_oDamagedSystemsGroupBox.ResumeLayout(false);
             this.m_oDACGroupBox.ResumeLayout(false);
             this.m_oCombatSettingsTab.ResumeLayout(false);
+            this.m_oActiveSensorGroupBox.ResumeLayout(false);
+            this.m_oShieldGroupBox.ResumeLayout(false);
+            this.m_oFireControlsGroupBox.ResumeLayout(false);
+            this.m_oAutoFireGroupBox.ResumeLayout(false);
+            this.m_oAutoFireGroupBox.PerformLayout();
+            this.m_oECCMAssignGroupBox.ResumeLayout(false);
+            this.m_oPointDefenseModeGroupBox.ResumeLayout(false);
+            this.m_oPointDefenseModeGroupBox.PerformLayout();
+            this.m_oSelectedFireControlGroupBox.ResumeLayout(false);
+            this.m_oAssignTargetsGroupBox.ResumeLayout(false);
+            this.m_oAssignWeaponsGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -620,5 +974,29 @@ namespace Pulsar4X.UI.Panels
         private GroupBox m_oSelectedFireControlGroupBox;
         private GroupBox m_oAssignTargetsGroupBox;
         private GroupBox m_oAssignWeaponsGroupBox;
+        private ListBox m_oContactsListBox;
+        private ListBox m_oWeaponListBox;
+        private ComboBox m_oECCMComboBox;
+        private ComboBox m_oPDModeComboBox;
+        private ComboBox m_oSFCComboBox;
+        private CheckBox m_oSyncFireCheckBox;
+        private CheckBox m_oAutoFireCheckBox;
+        private Button m_oOpenFireButton;
+        private Button m_oAssignECCMButton;
+        private Button m_oSetModeButton;
+        private TextBox m_oPDRangeTextBox;
+        private Label m_oSelectRangeLabel;
+        private Label m_oPDRangeLabel2;
+        private ComboBox m_oSelectedActiveComboBox;
+        private Button m_oInactiveButton;
+        private Button m_oActiveButton;
+        private Button m_oLowerShieldsButton;
+        private Button m_oRaiseShieldsButton;
+        private Button m_oCeaseFireButton;
+        private Button m_oClearTargetButton;
+        private Button m_oAssignTargetButton;
+        private Button m_oClearWeaponsButton;
+        private Button m_oAssignAllWeaponsButton;
+        private Button m_oAssignWeaponsButton;
     }
 }

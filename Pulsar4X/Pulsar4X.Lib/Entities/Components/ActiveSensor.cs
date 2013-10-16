@@ -46,7 +46,7 @@ namespace Pulsar4X.Entities.Components
         }
         
         /// <summary>
-        /// Range at which sensor can detect craft of same HS as resolution.
+        /// Range at which sensor can detect craft of same HS as resolution. multiply this by 10000 to get value in km.
         /// </summary>
         private int MaxRange;
         public int maxRange
@@ -149,7 +149,10 @@ namespace Pulsar4X.Entities.Components
             ///</summary>
             GPS = (int)((float)ActiveStrength * size * (float)Resolution);
 
-            MaxRange = (int)((float)ActiveStrength * size * (float)Math.Sqrt((double)Resolution) * (float)EMRecv * 10000.0f);
+            /// <summary>
+            /// MaxRange omits a 10,000 km adjustment factor due to integer limitations.
+            /// </summary>
+            MaxRange = (int)((float)ActiveStrength * size * (float)Math.Sqrt((double)Resolution) * (float)EMRecv);
 
             if (IsMFC == true)
             {
@@ -231,7 +234,7 @@ namespace Pulsar4X.Entities.Components
 
             GPS = (int)(ActiveStrength * Resolution);
 
-            MaxRange = (int)((float)ActiveStr * EMS * (float)Math.Sqrt((double)Resolution) * 10000.0f);
+            MaxRange = (int)((float)ActiveStr * EMS * (float)Math.Sqrt((double)Resolution));
 
             LookUpST = new BindingList<int>();
             LookUpMT = new BindingList<int>();

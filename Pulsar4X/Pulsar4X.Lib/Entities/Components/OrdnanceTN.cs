@@ -1003,10 +1003,31 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void GetTimeRequirement()
         {
-            double dXKM = dX * Constants.Units.KM_PER_AU;
-            double dYKM = dY * Constants.Units.KM_PER_AU;
-            float dZ = (float)Math.Sqrt(((dXKM * dXKM) + (dYKM * dYKM)));
-            TimeReq = (uint)Math.Ceiling((dZ / Missiles[0].missileDef.maxSpeed));
+            float dZ = (float)Math.Sqrt(((dX * dX) + (dY * dY)));
+
+            if (dZ >= Constants.Units.MAX_KM_IN_AU)
+            {
+                double Count = dZ / Constants.Units.MAX_KM_IN_AU;
+
+                /// <summary>
+                /// TimeRequirement is safe to calculate.
+                /// </summary>
+                if (Count < (double)Missiles[0].missileDef.maxSpeed)
+                {
+                    TimeReq = (uint)Math.Ceiling((dZ / (double)Missiles[0].missileDef.maxSpeed));
+                }
+                else
+                {
+                    /// <summary>
+                    /// even though TimeReq is a uint I'll treat it as a "signed" int except in this case.
+                    /// </summary>
+                    TimeReq = 2147483649;
+                }
+            }
+            else
+            {
+                TimeReq = (uint)Math.Ceiling((dZ / (double)Missiles[0].missileDef.maxSpeed));
+            }
         }
 
         /// <summary>
@@ -1031,8 +1052,6 @@ namespace Pulsar4X.Entities.Components
                     case StarSystemEntityType.TaskGroup:
                         Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
                         Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
-                        Contact.SystemKmX = (float)(Contact.XSystem / Constants.Units.KM_PER_AU);
-                        Contact.SystemKmX = (float)(Contact.YSystem / Constants.Units.KM_PER_AU);
 
                         for (int loop = 0; loop < Missiles.Count; loop++)
                         {
@@ -1091,11 +1110,8 @@ namespace Pulsar4X.Entities.Components
                 Contact.LastXSystem = Contact.XSystem;
                 Contact.LastYSystem = Contact.YSystem;
 
-                Contact.SystemKmX = Contact.SystemKmX + (float)((double)TimeSlice * CurrentSpeedX);
-                Contact.SystemKmY = Contact.SystemKmY + (float)((double)TimeSlice * CurrentSpeedY);
-
-                Contact.XSystem = Contact.SystemKmX / Constants.Units.KM_PER_AU;
-                Contact.YSystem = Contact.SystemKmY / Constants.Units.KM_PER_AU;
+                Contact.XSystem = Contact.XSystem + ((double)(TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
+                Contact.YSystem = Contact.YSystem + ((double)(TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);
 
                 //UseFuel(TimeSlice);
                 for (int loop = 0; loop < Missiles.Count; loop++)

@@ -470,8 +470,8 @@ namespace Pulsar4X.Entities
                         }
                         else
                         {
-                            float distX = (TaskGroups[loop].Contact.SystemKmX - System.SystemContactList[loop2].SystemKmX);
-                            float distY = (TaskGroups[loop].Contact.SystemKmY - System.SystemContactList[loop2].SystemKmY);
+                            float distX = (float)(TaskGroups[loop].Contact.XSystem - System.SystemContactList[loop2].XSystem);
+                            float distY = (float)(TaskGroups[loop].Contact.YSystem - System.SystemContactList[loop2].YSystem);
                             dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
 
                             TaskGroups[loop].Contact.DistanceTable[loop2] = dist;
@@ -482,9 +482,6 @@ namespace Pulsar4X.Entities
                             System.SystemContactList[loop2].DistanceTable[TGID] = dist;
                             System.SystemContactList[loop2].DistanceUpdate[TGID] = YearTickValue;
                         }
-
-
-                        
 
                         /// <summary>
                         /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since
@@ -502,9 +499,14 @@ namespace Pulsar4X.Entities
                             detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
 
                             /// <summary>
+                            /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
+                            /// </summary>
+                            bool det = LargeDetection(System, dist, detection);
+
+                            /// <summary>
                             /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
                             /// </summary>
-                            if (dist < (float)detection)
+                            if (det == true)
                             {
                                 System.SystemContactList[loop2].Pop.ThermalDetection[FactionID] = YearTickValue;
                                 System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
@@ -513,7 +515,9 @@ namespace Pulsar4X.Entities
                             sig = System.SystemContactList[loop2].Pop.EMSignature;
                             detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
 
-                            if (dist < (float)detection)
+                            det = LargeDetection(System, dist, detection);
+
+                            if (det == true)
                             {
                                 System.SystemContactList[loop2].Pop.EMDetection[FactionID] = YearTickValue;
                                 System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
@@ -525,11 +529,17 @@ namespace Pulsar4X.Entities
                             /// </summary>
                             detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[ sig ]].aSensorDef.GetActiveDetectionRange(sig,-1);
 
-                            if (dist < (float)detection)
+                            /// <summary>
+                            /// Do detection calculations here.
+                            /// </summary>
+                            det = LargeDetection(System, dist, detection);
+
+                            if (det == true)
                             {
                                 System.SystemContactList[loop2].Pop.ActiveDetection[FactionID] = YearTickValue;
                                 System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                             }
+
                         }
                         else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup && System.SystemContactList[loop2].TaskGroup.Ships.Count != 0)
                         {
@@ -541,7 +551,7 @@ namespace Pulsar4X.Entities
                             bool noDetection = false;
                             bool allDetection = false;
 
-                            #region Ship Thermal Detection Code. 528 to 651
+                            #region Ship Thermal Detection Code
 
                             if (System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue)
                             {
@@ -565,12 +575,15 @@ namespace Pulsar4X.Entities
                                     detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                 }
 
-
+                                /// <summary>
+                                /// Test the biggest signature against the best sensor.
+                                /// </summary>
+                                bool det = LargeDetection(System, dist, detection);
 
                                 /// <summary>
                                 /// Good case, none of the ships are detected.
                                 /// </summary>
-                                if (dist > (float)detection)
+                                if (det == false)
                                 {
                                     noDetection = true;
                                 }
@@ -597,9 +610,14 @@ namespace Pulsar4X.Entities
                                     }
 
                                     /// <summary>
+                                    /// Now for the smallest vs the best.
+                                    /// </summary>
+                                    det = LargeDetection(System, dist, detection);
+
+                                    /// <summary>
                                     /// Best case, everything is detected.
                                     /// </summary>
-                                    if (dist <= (float)detection)
+                                    if (det == true)
                                     {
                                         allDetection = true;
 
@@ -636,7 +654,12 @@ namespace Pulsar4X.Entities
                                                         detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                                     }
 
-                                                    if (dist <= (float)detection)
+                                                    /// <summary>
+                                                    /// Test each ship until I get to one I don't see.
+                                                    /// </summary>
+                                                    det = LargeDetection(System, dist, detection);
+
+                                                    if (det == true)
                                                     {
                                                         scratch.ThermalDetection[FactionID] = YearTickValue;
                                                     }
@@ -666,7 +689,7 @@ namespace Pulsar4X.Entities
                             }
                             #endregion
 
-                            #region Ship EM Detection Code. 653 to 800
+                            #region Ship EM Detection Code
 
                             if (System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue)
                             {
@@ -693,11 +716,12 @@ namespace Pulsar4X.Entities
                                     detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                 }
 
+                                bool det = LargeDetection(System, dist, detection);
 
                                 /// <summary>
                                 /// Good case, none of the ships are detected.
                                 /// </summary>
-                                if (dist > (float)detection)
+                                if (det == false)
                                 {
                                     noDetection = true;
                                 }
@@ -723,10 +747,12 @@ namespace Pulsar4X.Entities
                                         detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                     }
 
+                                    det = LargeDetection(System, dist, detection);
+
                                     /// <summary>
                                     /// Best case, everything is detected.
                                     /// </summary>
-                                    if (dist <= (float)detection)
+                                    if (det == true)
                                     {
                                         allDetection = true;
 
@@ -785,7 +811,9 @@ namespace Pulsar4X.Entities
                                                         detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                                     }
 
-                                                    if (dist <= (float)detection)
+                                                    det = LargeDetection(System, dist, detection);
+
+                                                    if (det == true)
                                                     {
                                                         scratch.EMDetection[FactionID] = YearTickValue;
                                                     }
@@ -815,7 +843,7 @@ namespace Pulsar4X.Entities
                             }
                             #endregion
 
-                            #region Ship Active Detection Code. 802 to 913
+                            #region Ship Active Detection Code
 
                             if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue && TaskGroups[loop].ActiveSensorQue.Count > 0)
                             {
@@ -834,10 +862,13 @@ namespace Pulsar4X.Entities
 
                                 detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig,-1);
 
+
+                                bool det = LargeDetection(System, dist, detection);
+
                                 /// <summary>
                                 /// Good case, none of the ships are detected.
                                 /// </summary>
-                                if (dist > (float)detection)
+                                if (det == false)
                                 {
                                     noDetection = true;
                                 }
@@ -856,10 +887,12 @@ namespace Pulsar4X.Entities
 
                                     detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
+                                    det = LargeDetection(System, dist, detection);
+
                                     /// <summary>
                                     /// Best case, everything is detected.
                                     /// </summary>
-                                    if (dist <= (float)detection)
+                                    if (det == true)
                                     {
                                         allDetection = true;
 
@@ -898,7 +931,9 @@ namespace Pulsar4X.Entities
 
                                                     detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
-                                                    if (dist <= (float)detection)
+                                                    det = LargeDetection(System, dist, detection);
+
+                                                    if (det == true)
                                                     {
                                                         scratch.ActiveDetection[FactionID] = YearTickValue;
                                                     }
@@ -989,5 +1024,54 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// End SensorSweep()
         /// </summary>
+
+        /// <summary>
+        /// ActiveLargeDetection handles potentially greater than MAX distance in KM detection for actives.
+        /// </summary>
+        /// <param name="System">Starsystem this takes place in</param>
+        /// <param name="dist">distance in AU</param>
+        /// <param name="detection">Detection factor, KM / 10,000</param>
+        /// <returns>Whether or not detection has occured.</returns>
+        public bool LargeDetection(StarSystem System, float dist, int detection)
+        {
+            /// <summary>
+            /// Then I need to use the large distance detection model.
+            /// </summary>
+            if (detection > 214748)
+            {
+                double factor = Constants.Units.KM_PER_AU / 10000.0;
+                double AUDetection = (double)detection / factor;
+
+                /// <summary>
+                /// Distance is in AU. If dist is greater, then no detection.
+                /// </summary>
+                if (dist < (float)AUDetection)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                /// <summary>
+                /// Due to this else, we know that our sensor cannot spot objects beyond MAX_KM_IN_AU at this point, so no detection if not true.
+                /// </summary>
+                if (dist < Constants.Units.MAX_KM_IN_AU)
+                {
+                    float distKM = dist * (float)Constants.Units.KM_PER_AU;
+
+                    /// <summary>
+                    /// if distKM is less than detection(KM) then detection occurs.
+                    /// </summary>
+                    if (distKM < (float)detection)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
     }
 }

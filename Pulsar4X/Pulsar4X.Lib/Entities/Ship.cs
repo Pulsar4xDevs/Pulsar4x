@@ -205,6 +205,11 @@ namespace Pulsar4X.Entities
         public BindingList<ComponentTN> ShipComponents { get; set; }
 
         /// <summary>
+        /// List of FCs for the UI.
+        /// </summary>
+        public BindingList<ComponentTN> ShipFireControls { get; set; }
+
+        /// <summary>
         /// In shipclass is a member ListOfComponentDefs. This will store the starting index of each of these in ShipComponents.
         /// </summary>
         public BindingList<ushort> ComponentDefIndex { get; set; }
@@ -399,6 +404,11 @@ namespace Pulsar4X.Entities
             /// Make sure to initialize this important variable that everything uses.
             /// </summary>
             ShipComponents = new BindingList<ComponentTN>();
+
+            /// <summary>
+            /// Initialize the list of Ship fire controls.
+            /// </summary>
+            ShipFireControls = new BindingList<ComponentTN>();
 
             /// <summary>
             /// Likewise the ListOfComponentDefs counterpart here is important.
@@ -597,6 +607,10 @@ namespace Pulsar4X.Entities
                 {
                     ActiveSensorTN ASensor = new ActiveSensorTN(ClassDefinition.ShipASensorDef[loop]);
                     ASensor.componentIndex = ShipASensor.Count;
+
+                    int ASIndex = loop2 + 1;
+                    ASensor.Name = ASensor.aSensorDef.Name + " #" + ASIndex.ToString();
+
                     ShipASensor.Add(ASensor);
                     ShipComponents.Add(ASensor);
                 }
@@ -634,8 +648,13 @@ namespace Pulsar4X.Entities
                 {
                     BeamFireControlTN BFC = new BeamFireControlTN(ClassDefinition.ShipBFCDef[loop]);
                     BFC.componentIndex = ShipBFC.Count;
+
+                    int BFCIndex = loop2 + 1;
+                    BFC.Name = BFC.beamFireControlDef.Name + " #" + BFCIndex.ToString();
+
                     ShipBFC.Add(BFC);
                     ShipComponents.Add(BFC);
+                    ShipFireControls.Add(BFC);
                 }
             }
 
@@ -648,6 +667,10 @@ namespace Pulsar4X.Entities
                 {
                     BeamTN Beam = new BeamTN(ClassDefinition.ShipBeamDef[loop]);
                     Beam.componentIndex = ShipBeam.Count;
+                    
+                    int BeamIndex = loop2 + 1;
+                    Beam.Name = Beam.beamDef.Name + " #" + BeamIndex.ToString();
+
                     ShipBeam.Add(Beam);
                     ShipComponents.Add(Beam);
                 }
@@ -697,6 +720,10 @@ namespace Pulsar4X.Entities
                 {
                     MissileLauncherTN Tube = new MissileLauncherTN(ClassDefinition.ShipMLaunchDef[loop]);
                     Tube.componentIndex = ShipMLaunchers.Count;
+
+                    int TubeIndex = loop2 + 1;
+                    Tube.Name = Tube.missileLauncherDef.Name + " #" + TubeIndex.ToString();
+
                     ShipMLaunchers.Add(Tube);
                     ShipComponents.Add(Tube);
                 }
@@ -725,8 +752,13 @@ namespace Pulsar4X.Entities
                 {
                     MissileFireControlTN MFC = new MissileFireControlTN(ClassDefinition.ShipMFCDef[loop]);
                     MFC.componentIndex = ShipMFC.Count;
+
+                    int MFCIndex = loop2 + 1;
+                    MFC.Name = MFC.mFCSensorDef.Name + " #" + MFCIndex.ToString();
+
                     ShipMFC.Add(MFC);
                     ShipComponents.Add(MFC);
+                    ShipFireControls.Add(MFC);
                 }
             }
 

@@ -635,7 +635,7 @@ namespace Pulsar4X.Tests
             while (TaskGroup1.TaskGroupOrders.Count != 0)
             {
                 TaskGroup1.FollowOrders(5);
-                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.SystemKmX, TaskGroup1.Contact.SystemKmY, TaskGroup1.Contact.XSystem, TaskGroup1.Contact.YSystem);
+                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.XSystem * Constants.Units.KM_PER_AU, TaskGroup1.Contact.YSystem * Constants.Units.KM_PER_AU, TaskGroup1.Contact.XSystem, TaskGroup1.Contact.YSystem);
             }
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
@@ -1000,8 +1000,6 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[1].IsOrbiting = false;
             PlayerFaction1.TaskGroups[1].Contact.XSystem = 3.0;
             PlayerFaction1.TaskGroups[1].Contact.YSystem = 0.0;
-            PlayerFaction1.TaskGroups[1].Contact.SystemKmX = (float)(PlayerFaction1.TaskGroups[1].Contact.XSystem * Constants.Units.KM_PER_AU);
-            PlayerFaction1.TaskGroups[1].Contact.SystemKmY = (float)(PlayerFaction1.TaskGroups[1].Contact.YSystem * Constants.Units.KM_PER_AU);
 
             Orders RefuelFromColony = new Orders(Constants.ShipTN.OrderType.RefuelFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(RefuelFromColony);
@@ -1119,8 +1117,6 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[1].IsOrbiting = false;
             PlayerFaction1.TaskGroups[1].Contact.XSystem = 3.0;
             PlayerFaction1.TaskGroups[1].Contact.YSystem = 0.0;
-            PlayerFaction1.TaskGroups[1].Contact.SystemKmX = (float)(PlayerFaction1.TaskGroups[1].Contact.XSystem * Constants.Units.KM_PER_AU);
-            PlayerFaction1.TaskGroups[1].Contact.SystemKmY = (float)(PlayerFaction1.TaskGroups[1].Contact.YSystem * Constants.Units.KM_PER_AU);
 
             Orders ResupplyFromColony = new Orders(Constants.ShipTN.OrderType.ResupplyFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromColony);
