@@ -513,10 +513,12 @@ namespace Pulsar4X.Entities.Components
         public void assignLaunchTube(MissileLauncherTN tube)
         {
             if (LinkedWeapons.Contains(tube) == false)
+            {
                 LinkedWeapons.Add(tube);
 
-            if (tube.mFC != this)
-                tube.AssignMFC(this);
+                if (tube.mFC != this)
+                    tube.AssignMFC(this);
+            }
         }
 
         /// <summary>
@@ -525,11 +527,13 @@ namespace Pulsar4X.Entities.Components
         /// <param name="tube">tube to be removed.</param>
         public void removeLaunchTube(MissileLauncherTN tube)
         {
-            if (LinkedWeapons.Contains(tube) == false)
+            if (LinkedWeapons.Contains(tube) == true)
+            {
                 LinkedWeapons.Remove(tube);
 
-            if(tube.mFC == this)
-               tube.ClearMFC();
+                if (tube.mFC == this)
+                    tube.ClearMFC();
+            }
             
         }
 

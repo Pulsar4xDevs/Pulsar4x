@@ -233,10 +233,10 @@ namespace Pulsar4X.Entities.Components
 
         public void ClearMFC()
         {
-            MFC = null;
-
             if (MFC.linkedWeapons.Contains(this) == true)
                MFC.removeLaunchTube(this);
+
+            MFC = null;
         }
 
         /// <summary>

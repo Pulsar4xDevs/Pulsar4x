@@ -59,6 +59,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// User selected active sensor from ship sensor list.
+        /// </summary>
+        public ComboBox SelectedActiveComboBox
+        {
+            get { return m_oSelectedActiveComboBox; }
+        }
+
+        /// <summary>
         /// Set FC to open fire mode.
         /// </summary>
         public Button OpenFireButton
@@ -72,6 +80,102 @@ namespace Pulsar4X.UI.Panels
         public Button CeaseFireButton
         {
             get { return m_oCeaseFireButton; }
+        }
+
+        /// <summary>
+        /// Raises shields
+        /// </summary>
+        public Button RaiseShieldsButton
+        {
+            get { return m_oRaiseShieldsButton; }
+        }
+        
+        /// <summary>
+        /// Lowers shields.
+        /// </summary>
+        public Button LowerShieldsButton
+        {
+            get { return m_oLowerShieldsButton; }
+        }
+
+        /// <summary>
+        /// Sets selected sensor to active.
+        /// </summary>
+        public Button ActiveButton
+        {
+            get { return m_oActiveButton; }
+        }
+
+        /// <summary>
+        /// Sets selected sensor to Inactive.
+        /// </summary>
+        public Button InactiveButton
+        {
+            get { return m_oInactiveButton; }
+        }
+
+        /// <summary>
+        /// Assign target from contact box to FC.
+        /// </summary>
+        public Button AssignTargetButton
+        {
+            get { return m_oAssignTargetButton; }
+        }
+
+        /// <summary>
+        /// Clear FC targeting.
+        /// </summary>
+        public Button ClearTargetButton
+        {
+            get { return m_oClearTargetButton; }
+        }
+
+        /// <summary>
+        /// Assigns the selected weapon to the current FC.
+        /// </summary>
+        public Button AssignWeaponButton
+        {
+            get { return m_oAssignWeaponsButton; }
+        }
+
+        /// <summary>
+        /// Assigns all weapons to the selected FC., deassigns them from other FCs.
+        /// </summary>
+        public Button AssignAllWeaponsButton
+        {
+            get { return m_oAssignAllWeaponsButton; }
+        }
+
+        /// <summary>
+        /// Clears all weapons from the selected FC.
+        /// </summary>
+        public Button ClearWeaponsButton
+        {
+            get { return m_oClearWeaponsButton; }
+        }
+
+        /// <summary>
+        /// Groupbox for shields, will display on/off status.
+        /// </summary>
+        public GroupBox ShieldGroupBox
+        {
+            get { return m_oShieldGroupBox; }
+        }
+
+        /// <summary>
+        /// Groupbox for sensors, will display on/off status.
+        /// </summary>
+        public GroupBox ActiveGroupBox
+        {
+            get { return m_oActiveSensorGroupBox; }
+        }
+
+        /// <summary>
+        /// Textbox for printing combat summary.
+        /// </summary>
+        public RichTextBox CombatSummaryTextBox
+        {
+            get { return m_oCombatSummaryRTBox; }
         }
 
         /// <summary>
@@ -159,6 +263,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oWeaponListBox = new System.Windows.Forms.ListBox();
             this.m_oCombatSummaryTab = new System.Windows.Forms.TabPage();
             this.m_oOrdnanceManagementTab = new System.Windows.Forms.TabPage();
+            this.m_oCombatSummaryGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCombatSummaryRTBox = new System.Windows.Forms.RichTextBox();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oArmourStatusTab.SuspendLayout();
             this.m_oDamageControlTab.SuspendLayout();
@@ -178,6 +284,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oSelectedFireControlGroupBox.SuspendLayout();
             this.m_oAssignTargetsGroupBox.SuspendLayout();
             this.m_oAssignWeaponsGroupBox.SuspendLayout();
+            this.m_oCombatSummaryTab.SuspendLayout();
+            this.m_oCombatSummaryGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupTabControl
@@ -195,7 +303,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oCombatSettingsTab);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oCombatSummaryTab);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oOrdnanceManagementTab);
-            this.m_oTaskGroupTabControl.Location = new System.Drawing.Point(56, 166);
+            this.m_oTaskGroupTabControl.Location = new System.Drawing.Point(71, 261);
             this.m_oTaskGroupTabControl.MaximumSize = new System.Drawing.Size(1041, 566);
             this.m_oTaskGroupTabControl.MinimumSize = new System.Drawing.Size(1041, 566);
             this.m_oTaskGroupTabControl.Name = "m_oTaskGroupTabControl";
@@ -880,6 +988,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oCombatSummaryTab
             // 
+            this.m_oCombatSummaryTab.Controls.Add(this.m_oCombatSummaryGroupBox);
             this.m_oCombatSummaryTab.Location = new System.Drawing.Point(4, 22);
             this.m_oCombatSummaryTab.Name = "m_oCombatSummaryTab";
             this.m_oCombatSummaryTab.Size = new System.Drawing.Size(1033, 540);
@@ -895,6 +1004,28 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrdnanceManagementTab.TabIndex = 10;
             this.m_oOrdnanceManagementTab.Text = "Ordnance Management";
             this.m_oOrdnanceManagementTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oCombatSummaryGroupBox
+            // 
+            this.m_oCombatSummaryGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oCombatSummaryGroupBox.Controls.Add(this.m_oCombatSummaryRTBox);
+            this.m_oCombatSummaryGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.m_oCombatSummaryGroupBox.Name = "m_oCombatSummaryGroupBox";
+            this.m_oCombatSummaryGroupBox.Size = new System.Drawing.Size(1027, 534);
+            this.m_oCombatSummaryGroupBox.TabIndex = 38;
+            this.m_oCombatSummaryGroupBox.TabStop = false;
+            this.m_oCombatSummaryGroupBox.Text = "Weapon and Fire Control Summary";
+            // 
+            // m_oCombatSummaryRTBox
+            // 
+            this.m_oCombatSummaryRTBox.Location = new System.Drawing.Point(13, 26);
+            this.m_oCombatSummaryRTBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oCombatSummaryRTBox.Name = "m_oCombatSummaryRTBox";
+            this.m_oCombatSummaryRTBox.Size = new System.Drawing.Size(1001, 495);
+            this.m_oCombatSummaryRTBox.TabIndex = 0;
+            this.m_oCombatSummaryRTBox.Text = "";
             // 
             // Individual_Unit_Details_Panel
             // 
@@ -928,6 +1059,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oSelectedFireControlGroupBox.ResumeLayout(false);
             this.m_oAssignTargetsGroupBox.ResumeLayout(false);
             this.m_oAssignWeaponsGroupBox.ResumeLayout(false);
+            this.m_oCombatSummaryTab.ResumeLayout(false);
+            this.m_oCombatSummaryGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -998,5 +1131,7 @@ namespace Pulsar4X.UI.Panels
         private Button m_oClearWeaponsButton;
         private Button m_oAssignAllWeaponsButton;
         private Button m_oAssignWeaponsButton;
+        private GroupBox m_oCombatSummaryGroupBox;
+        private RichTextBox m_oCombatSummaryRTBox;
     }
 }

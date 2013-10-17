@@ -1798,11 +1798,7 @@ namespace Pulsar4X.Entities
         /// <param name="Weapon">Beam Weapon</param>
         public void LinkWeaponToBeamFC(BeamFireControlTN BFC, BeamTN Weapon)
         {
-            if (BFC.linkedWeapons.IndexOf(Weapon) == -1)
-            {
-                BFC.linkedWeapons.Add(Weapon);
-                Weapon.fireController = BFC;
-            }
+            BFC.linkWeapon(Weapon);
         }
 
         /// <summary>
@@ -1821,10 +1817,7 @@ namespace Pulsar4X.Entities
         /// <param name="Tube">Launch tube to be disconnected.</param>
         public void UnlinkTube(MissileLauncherTN Tube)
         {
-            if (Tube.mFC != null)
-            {
-                Tube.ClearMFC();
-            }
+            Tube.ClearMFC();
         }
 
         /// <summary>
@@ -1835,8 +1828,8 @@ namespace Pulsar4X.Entities
         {
             if (Weapon.fireController != null)
             {
-                Weapon.fireController.linkedWeapons.Remove(Weapon);
-                Weapon.fireController = null;
+                BeamFireControlTN BFC = Weapon.fireController;
+                BFC.unlinkWeapon(Weapon);
             }
         }
 
@@ -1846,10 +1839,6 @@ namespace Pulsar4X.Entities
         /// <param name="MFC"></param>
         public void UnlinkAllTubes(MissileFireControlTN MFC)
         {
-            for (int loop = 0; loop < MFC.linkedWeapons.Count; loop++)
-            {
-                MFC.linkedWeapons[loop].ClearMFC();
-            }
             MFC.linkedWeapons.Clear();
         }
 
@@ -1859,11 +1848,7 @@ namespace Pulsar4X.Entities
         /// <param name="BFC">Beam fire Control to be cleared.</param>
         public void UnlinkAllWeapons(BeamFireControlTN BFC)
         {
-            for (int loop = 0; loop < BFC.linkedWeapons.Count; loop++)
-            {
-                BFC.linkedWeapons[loop].fireController = null;
-            }
-            BFC.linkedWeapons.Clear();
+            BFC.clearWeapons();
         }
 
         /// <summary>
@@ -2023,22 +2008,25 @@ namespace Pulsar4X.Entities
         /// <param name="Active">Whether shields are active(true), or inactive(false)</param>
         public void SetShields(bool Active)
         {
-            if(ShieldIsActive == true && Active == false)
+            if (ShipShield.Count != 0)
             {
-                CurrentEMSignature = CurrentEMSignature - (int)(CurrentShieldPoolMax * 30.0f);
-                ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
-            }
-            else if(ShieldIsActive == false && Active == true)
-            {
-                CurrentEMSignature = CurrentEMSignature + (int)(CurrentShieldPoolMax * 30.0f);
-                ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
-            }
+                if (ShieldIsActive == true && Active == false)
+                {
+                    CurrentEMSignature = CurrentEMSignature - (int)(CurrentShieldPoolMax * 30.0f);
+                    ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                }
+                else if (ShieldIsActive == false && Active == true)
+                {
+                    CurrentEMSignature = CurrentEMSignature + (int)(CurrentShieldPoolMax * 30.0f);
+                    ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                }
 
-            ShieldIsActive = Active;
+                ShieldIsActive = Active;
 
-            if (ShieldIsActive == false)
-            {
-                CurrentShieldPool = 0.0f;
+                if (ShieldIsActive == false)
+                {
+                    CurrentShieldPool = 0.0f;
+                }
             }
         }
 

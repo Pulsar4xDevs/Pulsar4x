@@ -89,6 +89,22 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Currently selected sensor.
+        /// </summary>
+        private Pulsar4X.Entities.Components.ActiveSensorTN _CurrnetSensor;
+        public Pulsar4X.Entities.Components.ActiveSensorTN CurrentSensor
+        {
+            get { return _CurrnetSensor; }
+            set
+            {
+                if (value != _CurrnetSensor)
+                {
+                    _CurrnetSensor = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// I need to know what type of BFC I have.
         /// </summary>
         public bool isBFC { get; set; }
@@ -123,8 +139,21 @@ namespace Pulsar4X.UI.Handlers
             m_oShipListPanel.FactionSelectionComboBox.SelectedIndexChanged += new EventHandler(FactionSelectComboBox_SelectedIndexChanged);
 
             m_oDetailsPanel.SFCComboBox.SelectedIndexChanged += new EventHandler(SFCComboBox_SelectedIndexChanged);
+            m_oDetailsPanel.SelectedActiveComboBox.SelectedIndexChanged += new EventHandler(SelectedActiveComboBox_SelectIndexChanged);
 
             m_oShipListPanel.ShipsListBox.SelectedIndexChanged += new EventHandler(ShipListBox_SelectedIndexChanged);
+
+            m_oDetailsPanel.OpenFireButton.Click += new EventHandler(OpenFireButton_Click);
+            m_oDetailsPanel.CeaseFireButton.Click += new EventHandler(CeaseFireButton_Click);
+            m_oDetailsPanel.RaiseShieldsButton.Click += new EventHandler(RaiseShieldsButton_Click);
+            m_oDetailsPanel.LowerShieldsButton.Click += new EventHandler(LowerShieldsButton_Click);
+            m_oDetailsPanel.ActiveButton.Click += new EventHandler(ActiveButton_Click);
+            m_oDetailsPanel.InactiveButton.Click += new EventHandler(InactiveButton_Click);
+            m_oDetailsPanel.AssignTargetButton.Click += new EventHandler(AssignTargetButton_Click);
+            m_oDetailsPanel.ClearTargetButton.Click += new EventHandler(ClearTargetButton_Click);
+            m_oDetailsPanel.AssignWeaponButton.Click += new EventHandler(AssignWeaponButton_Click);
+            m_oDetailsPanel.AssignAllWeaponsButton.Click += new EventHandler(AssignAllWeaponsButton_Click);
+            m_oDetailsPanel.ClearWeaponsButton.Click += new EventHandler(ClearWeaponsButton_Click);
         }
 
 
@@ -223,6 +252,25 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oDetailsPanel.SFCComboBox.Items.Add(CurrentShip.ShipFireControls[loop].Name);
             }
+
+            /// <summary>
+            /// Same will probably be true for sensors.
+            /// </summary>
+            m_oDetailsPanel.SelectedActiveComboBox.Items.Clear();
+            for (int loop = 0; loop < CurrentShip.ShipASensor.Count; loop++)
+            {
+                m_oDetailsPanel.SelectedActiveComboBox.Items.Add(CurrentShip.ShipASensor[loop].Name);
+            }
+
+
+            if (CurrentShip.ShieldIsActive == true && CurrentShip.CurrentShieldPoolMax != 0.0f)
+            {
+                m_oDetailsPanel.ShieldGroupBox.Text = "Shields(On)";
+            }
+            else
+            {
+                m_oDetailsPanel.ShieldGroupBox.Text = "Shields(Off)";
+            }
         }
 
         /// <summary>
@@ -245,6 +293,303 @@ namespace Pulsar4X.UI.Handlers
             }
 
             RefreshFCInfo();
+        }
+
+        private void SelectedActiveComboBox_SelectIndexChanged(object sender, EventArgs e)
+        {
+            CurrentSensor = CurrentShip.ShipASensor[m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex];
+
+            if (CurrentSensor.isActive == true && CurrentSensor.isDestroyed == false)
+                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(On)";
+            else
+                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
+        }
+
+        /// <summary>
+        /// Handle open fire button clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OpenFireButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentFC != null)
+            {
+                if (isBFC == true)
+                {
+                    CurrentShip.ShipBFC[CurrentFC.componentIndex].openFire = true;
+                }
+                else
+                {
+                    CurrentShip.ShipMFC[CurrentFC.componentIndex].openFire = true;
+                }
+                BuildCombatSummary();
+            }
+        }
+
+        /// <summary>
+        /// Handle cease fire button clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CeaseFireButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentFC != null)
+            {
+                if (isBFC == true)
+                {
+                    CurrentShip.ShipBFC[CurrentFC.componentIndex].openFire = false;
+                }
+                else
+                {
+                    CurrentShip.ShipMFC[CurrentFC.componentIndex].openFire = false;
+                }
+                BuildCombatSummary();
+            }
+        }
+
+        /// <summary>
+        /// Handle Raise Shields button clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RaiseShieldsButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentShip != null)
+            {
+                CurrentShip.SetShields(true);
+
+                if (CurrentShip.ShieldIsActive == true && CurrentShip.CurrentShieldPoolMax != 0.0f)
+                {
+                    m_oDetailsPanel.ShieldGroupBox.Text = "Shields(On)";
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handle Lower Shields button clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LowerShieldsButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentShip != null)
+            {
+                CurrentShip.SetShields(false);
+                m_oDetailsPanel.ShieldGroupBox.Text = "Shields(Off)";
+            }
+        }
+
+        /// <summary>
+        /// Activate the currently selected sensor.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ActiveButton_Click(object sender, EventArgs e)
+        {
+            CurrentShip.SetSensor(CurrentSensor, true);
+
+            if (CurrentSensor.isActive == true && CurrentSensor.isDestroyed == false)
+                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(On)";
+        }
+
+        /// <summary>
+        /// Deactivate the currently selected sensor.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void InactiveButton_Click(object sender, EventArgs e)
+        {
+            CurrentShip.SetSensor(CurrentSensor, false);
+
+            if(CurrentSensor.isActive == false || CurrentSensor.isDestroyed == true)
+                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
+        }
+
+        /// <summary>
+        /// Assign the selected target to the FC.
+        /// I have to rebuild the contact list to find out which contact goes with what entry.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AssignTargetButton_Click(object sender, EventArgs e)
+        {
+            if (m_oDetailsPanel.ContactListBox.SelectedIndex != -1 && CurrentFC != null)
+            {
+                if (isBFC == true)
+                {
+                    int count = 0;
+                    foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+                    {
+                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
+                        {
+                            if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                            {
+                                CurrentShip.ShipBFC[CurrentFC.componentIndex].assignTarget(pair.Key);
+                                break;
+                            }
+
+                            count++;
+                        }
+                    }
+
+
+
+                }
+                else
+                {
+                    int count = 0;
+                    foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+                    {
+                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
+                        {
+                            StarSystem CurSystem = CurrentShip.ShipsTaskGroup.Contact.CurrentSystem;
+                            int MyID = CurSystem.SystemContactList.IndexOf(CurrentShip.ShipsTaskGroup.Contact);
+                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+
+                            /// <summary>
+                            /// Validate tick here?
+                            /// </summary>
+                            int Targettick = CurrentShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                            float distance = CurrentShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                            int TCS = pair.Key.TotalCrossSection;
+                            int detectFactor = CurrentShip.ShipMFC[CurrentFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
+
+                            bool det = CurrentShip.Faction.LargeDetection(CurSystem, distance, detectFactor);
+
+                            if (det == true)
+                            {
+                                if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                {
+                                    CurrentShip.ShipMFC[CurrentFC.componentIndex].assignTarget(pair.Key);
+                                    break;
+                                }
+                                count++;
+                            }
+                        }
+                    }
+                }
+            }
+            BuildCombatSummary();
+        }
+
+        /// <summary>
+        /// Clears the selected FC of its target.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearTargetButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentFC != null)
+            {
+                if (isBFC == true)
+                {
+                    CurrentShip.ShipBFC[CurrentFC.componentIndex].clearTarget();
+                }
+                else
+                {
+                    CurrentShip.ShipMFC[CurrentFC.componentIndex].clearTarget();
+                }
+            }
+            BuildCombatSummary();
+        }
+
+        /// <summary>
+        /// Assigns selected weapon to the current FC.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AssignWeaponButton_Click(object sender, EventArgs e)
+        {
+            if(CurrentFC != null && m_oDetailsPanel.WeaponListBox.SelectedIndex != -1)
+            {
+                if (isBFC == true)
+                {
+                    BeamTN SelectedBeam = CurrentShip.ShipBeam[m_oDetailsPanel.WeaponListBox.SelectedIndex];
+                    if (SelectedBeam.fireController != null)
+                    {
+                        BeamFireControlTN BFC = SelectedBeam.fireController;
+                        BFC.unlinkWeapon(SelectedBeam);
+                    }
+                    CurrentShip.ShipBFC[CurrentFC.componentIndex].linkWeapon(SelectedBeam);
+                }
+                else
+                {
+                    MissileLauncherTN SelectedTube = CurrentShip.ShipMLaunchers[m_oDetailsPanel.WeaponListBox.SelectedIndex];
+
+                    if (SelectedTube.mFC != null)
+                    {
+                        MissileFireControlTN MFC = SelectedTube.mFC;
+
+                        MFC.removeLaunchTube(SelectedTube);
+                    }
+
+                    CurrentShip.ShipMFC[CurrentFC.componentIndex].assignLaunchTube(SelectedTube);
+                }
+            }
+            BuildCombatSummary();
+        }
+
+        /// <summary>
+        /// Assigns all weapons to the selected FC.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AssignAllWeaponsButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentFC != null)
+            {
+                if (isBFC == true)
+                {
+                    for (int loop = 0; loop < CurrentShip.ShipBeam.Count; loop++)
+                    {
+                        BeamTN SelectedBeam = CurrentShip.ShipBeam[loop];
+                        if (SelectedBeam.fireController != null)
+                        {
+                            BeamFireControlTN BFC = SelectedBeam.fireController;
+                            BFC.unlinkWeapon(SelectedBeam);
+                        }
+                        CurrentShip.ShipBFC[CurrentFC.componentIndex].linkWeapon(SelectedBeam);
+                    }
+                }
+                else
+                {
+                    for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
+                    {
+                        MissileLauncherTN SelectedTube = CurrentShip.ShipMLaunchers[loop];
+
+                        if (SelectedTube.mFC != null)
+                        {
+                            MissileFireControlTN MFC = SelectedTube.mFC;
+
+                            MFC.removeLaunchTube(SelectedTube);
+                        }
+
+                        CurrentShip.ShipMFC[CurrentFC.componentIndex].assignLaunchTube(SelectedTube);
+                    }
+                }
+            }
+            BuildCombatSummary();
+        }
+
+        /// <summary>
+        /// Clears assigned weapons from the current FC
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearWeaponsButton_Click(object sender, EventArgs e)
+        {
+            if (isBFC == true)
+            {
+                CurrentShip.ShipBFC[CurrentFC.componentIndex].clearWeapons();
+            }
+            else
+            {
+                CurrentShip.ShipMFC[CurrentFC.componentIndex].ClearAllWeapons();
+            }
+
+            BuildCombatSummary();
         }
 
         /// <summary>
@@ -414,6 +759,125 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// List information about all FCs and Weapons.
+        /// </summary>
+        private void BuildCombatSummary()
+        {
+            m_oDetailsPanel.CombatSummaryTextBox.Clear();
+            String Entry = "N/A";
+            String fireAuth = "N/A";
+
+            for (int loop = 0; loop < CurrentShip.ShipBFC.Count; loop++)
+            {
+                ShipTN Target = CurrentShip.ShipBFC[loop].getTarget();
+
+                if (Target == null)
+                {
+                    Entry = String.Format("{0}: No Target Assignment\n", CurrentShip.ShipBFC[loop].Name);
+                }
+                else
+                {
+                    if (CurrentShip.ShipBFC[loop].openFire == true)
+                        fireAuth = "Weapons Firing";
+                    else
+                        fireAuth = "Holding Fire";
+
+                    Entry = String.Format("{0}: Targeting {1} - {2}\n", CurrentShip.ShipBFC[loop].Name, Target.Name, fireAuth);
+                }
+
+                m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+
+                for (int loop2 = 0; loop2 < CurrentShip.ShipBFC[loop].linkedWeapons.Count; loop2++)
+                {
+                    if (CurrentShip.ShipBFC[loop].linkedWeapons[loop2].currentCapacitor == CurrentShip.ShipBFC[loop].linkedWeapons[loop2].beamDef.powerRequirement)
+                    {
+                        Entry = String.Format("{0}: (Ready to Fire)\n", CurrentShip.ShipBFC[loop].linkedWeapons[loop2].Name);
+                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                    }
+                    else
+                    {
+                        Entry = String.Format("{0}: ({1} / {2} power recharged)\n", CurrentShip.ShipBFC[loop].linkedWeapons[loop2].Name,
+                                                                    CurrentShip.ShipBFC[loop].linkedWeapons[loop2].currentCapacitor.ToString(), CurrentShip.ShipBFC[loop].linkedWeapons[loop2].beamDef.powerRequirement.ToString());
+                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                    }
+                }
+            }
+
+            for (int loop = 0; loop < CurrentShip.ShipMFC.Count; loop++)
+            {
+                OrdnanceTargetTN Target = CurrentShip.ShipMFC[loop].getTarget();
+
+                if (Target == null)
+                {
+                    Entry = String.Format("{0}: No Target Assignment\n", CurrentShip.ShipMFC[loop].Name);
+                }
+                else
+                {
+                    if (CurrentShip.ShipBFC[loop].openFire == true)
+                        fireAuth = "Weapons Firing";
+                    else
+                        fireAuth = "Holding Fire";
+
+                    switch (Target.targetType)
+                    {
+                        case StarSystemEntityType.TaskGroup:
+                            Entry = String.Format("{0}: {1} - {2}\n", CurrentShip.ShipMFC[loop].Name, Target.ship.Name, fireAuth);
+                        break;
+                    }
+
+                    m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+
+                    for (int loop2 = 0; loop2 < CurrentShip.ShipMFC[loop].linkedWeapons.Count; loop2++)
+                    {
+                        if (CurrentShip.ShipMFC[loop].linkedWeapons[loop2].ReadyToFire() == true)
+                        {
+                            Entry = String.Format("{0} - {1}: (Ready to Fire)\n", CurrentShip.ShipMFC[loop].linkedWeapons[loop2].Name,
+                                                                                  CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name);
+
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        }
+                        else
+                        {
+                            Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", CurrentShip.ShipMFC[loop].linkedWeapons[loop2].Name,
+                                                                                  CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name,
+                                                                                  CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
+
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        }
+                    }
+                }
+            }
+
+            bool hasPrinted = false;
+
+            for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
+            {
+                if (CurrentShip.ShipMLaunchers[loop].loadedOrdnance != null && CurrentShip.ShipMLaunchers[loop].mFC == null)
+                {
+                    if (hasPrinted == false)
+                    {
+                        Entry = "Assigned Missiles/Buoys without Shipboard Fire Control\n";
+                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+
+                        hasPrinted = true;
+                    }
+
+                    if(CurrentShip.ShipMLaunchers[loop].ReadyToFire() == true)
+                    {
+                        Entry = String.Format("{0} - {1}: (Ready to Fire)\n", CurrentShip.ShipMLaunchers[loop].Name,CurrentShip.ShipMLaunchers[loop].loadedOrdnance.Name);
+                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                    }
+                    else
+                    {
+                        Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", CurrentShip.ShipMLaunchers[loop].Name, CurrentShip.ShipMLaunchers[loop].loadedOrdnance.Name,
+                                                                                   CurrentShip.ShipMLaunchers[loop].loadTime);
+                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Print the names of every weapon on this ship.
         /// </summary>
         private void BuildWeaponList()
@@ -489,7 +953,35 @@ namespace Pulsar4X.UI.Handlers
             }
             else
             {
+                /// <summary>
+                /// Each MFC entry will be range checked, also there have been some tick errors, this may be the place to hunt them down.
+                /// </summary>
+                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+                {
+                    if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
+                    {
+                        StarSystem CurSystem = CurrentShip.ShipsTaskGroup.Contact.CurrentSystem;
+                        int MyID = CurSystem.SystemContactList.IndexOf(CurrentShip.ShipsTaskGroup.Contact);
+                        int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
 
+                        /// <summary>
+                        /// Validate tick here?
+                        /// </summary>
+                        int Targettick = CurrentShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                        float distance = CurrentShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                        int TCS = pair.Key.TotalCrossSection;
+                        int detectFactor = CurrentShip.ShipMFC[CurrentFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
+
+                        bool det = CurrentShip.Faction.LargeDetection(CurSystem, distance, detectFactor);
+
+                        if (det == true)
+                        {
+                            m_oDetailsPanel.ContactListBox.Items.Add(pair.Key);
+                        }
+                    }
+                }
             }
         }
 
@@ -527,6 +1019,8 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
                 BuildDACInfo();
                 BuildDamagedSystemsList();
+
+                BuildCombatSummary();
             }
         }
 
@@ -543,6 +1037,7 @@ namespace Pulsar4X.UI.Handlers
                 
                 BuildWeaponList();
                 BuildPDComboBox();
+                BuildContactsList();
             }
         }
         #endregion

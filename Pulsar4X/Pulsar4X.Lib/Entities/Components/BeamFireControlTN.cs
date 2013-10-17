@@ -336,6 +336,46 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Clears all weapon links.
+        /// </summary>
+        public void clearWeapons()
+        {
+            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            {
+                LinkedWeapons[loop].fireController = null;
+            }
+            LinkedWeapons.Clear();
+        }
+
+        /// <summary>
+        /// Links a weapon to this fc
+        /// </summary>
+        /// <param name="beam">beam weapon to link</param>
+        public void linkWeapon(BeamTN beam)
+        {
+            if (linkedWeapons.Contains(beam) == false)
+            {
+                linkedWeapons.Add(beam);
+
+                beam.fireController = this;
+            }
+        }
+
+        /// <summary>
+        /// removes a weapon from this FC
+        /// </summary>
+        /// <param name="beam">beamweapon to unlink</param>
+        public void unlinkWeapon(BeamTN beam)
+        {
+            if (linkedWeapons.Contains(beam) == true)
+            {
+                linkedWeapons.Remove(beam);
+
+                beam.fireController = null;
+            }
+        }
+
+        /// <summary>
         /// The Fire control itself must determine if the target is in range of both itself and its weapons.
         /// </summary>
         /// <param name="DistanceToTarget">Distance in KM to target.</param>
