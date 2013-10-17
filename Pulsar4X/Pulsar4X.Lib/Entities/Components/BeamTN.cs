@@ -170,7 +170,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// Lasers have the longest range of all beam weapons due to their high damage, normal 10,000km factor and weapon range tech.
                     /// </summary>
-                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 10000.0f * (float)WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 10000.0f * (float)(WeaponRangeTech+1);
 
                     /// <summary>
                     /// The first entry in the damage table is max damage at point blank(0-10k range) damage.
@@ -187,7 +187,7 @@ namespace Pulsar4X.Entities.Components
                     /// FullDamage * ( Wavelength / RangeIncrement Tick) with a minimum of 1 over range.
                     /// </summary>
                     /// 
-                    RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Beam;
@@ -195,7 +195,7 @@ namespace Pulsar4X.Entities.Components
 
                 case ComponentTypeTN.AdvLaser :
                     size = (float)Constants.BeamWeaponTN.LaserSize[WeaponSizeTech] * Reduction;
-                    Range = (float)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech] * 10000.0f * (float)WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech] * 10000.0f * (float)(WeaponRangeTech+1);
                     Damage.Add((ushort)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech]);
 
                     /// <summary>
@@ -203,7 +203,7 @@ namespace Pulsar4X.Entities.Components
                     /// </summary>
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
 
-                    RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Beam;
@@ -213,7 +213,7 @@ namespace Pulsar4X.Entities.Components
                 /// Plasmas are essentially cheaper infared lasers.
                 /// </summary>
                 case ComponentTypeTN.Plasma :
-                    WeaponRangeTech = 1;
+                    WeaponRangeTech = 0;
 
                     /// <summary>
                     /// I Suspect that size is 3.2cm per HS but am just using a table for now. No reductions for plasma.
@@ -223,7 +223,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// Plasma carronades have the same range as an infared laser of equal size.
                     /// </summary>
-                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 10000.0f * (float)WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 10000.0f * (float)(WeaponRangeTech+1);
 
                     /// <summary>
                     /// The first entry in the damage table is max damage at point blank(0-10k range) damage.
@@ -240,19 +240,19 @@ namespace Pulsar4X.Entities.Components
                     /// FullDamage * ( Wavelength / RangeIncrement Tick) with a minimum of 1 over range.
                     /// </summary>
                     /// 
-                    RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Plasma;
                 break;
 
                 case ComponentTypeTN.AdvPlasma :
-                    WeaponRangeTech = 1;
+                    WeaponRangeTech = 0;
                     size = (float)Constants.BeamWeaponTN.LaserSize[WeaponSizeTech];
-                    Range = (float)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech] * 10000.0f * (float)WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech] * 10000.0f * (float)(WeaponRangeTech+1);
                     Damage.Add((ushort)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech]);
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
-                    RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Plasma;
@@ -267,10 +267,10 @@ namespace Pulsar4X.Entities.Components
                     ShotCount = 4;
 
                     size = (float)Constants.BeamWeaponTN.RailGunSize[WeaponSizeTech];
-                    Range = (float)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 10000.0f * WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 10000.0f * (WeaponRangeTech+1);
                     Damage.Add((ushort)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech]);
                     PowerRequirement = (ushort)(Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 3);
-                    RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Kinetic;
@@ -283,10 +283,10 @@ namespace Pulsar4X.Entities.Components
                     ShotCount = 5;
 
                     size = (float)Constants.BeamWeaponTN.RailGunSize[WeaponSizeTech];
-                    Range = (float)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 10000.0f * WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 10000.0f * (WeaponRangeTech + 1);
                     Damage.Add((ushort)Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech]);
                     PowerRequirement = (ushort)(Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech] * 3);
-                    RangeIncrement = WeaponRangeTech * Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech + 1) * Constants.BeamWeaponTN.RailGunDamage[WeaponSizeTech];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Kinetic;
@@ -298,11 +298,11 @@ namespace Pulsar4X.Entities.Components
                 case ComponentTypeTN.Meson:
 
                     size = (float)Constants.BeamWeaponTN.LaserSize[WeaponSizeTech];
-                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 5000.0f * (float)WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 5000.0f * (float)(WeaponRangeTech + 1);
 
                     Damage.Add(1);
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
-                    RangeIncrement = ((WeaponRangeTech * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech]) / 2);
+                    RangeIncrement = (((WeaponRangeTech + 1) * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech]) / 2);
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(1);
@@ -319,12 +319,12 @@ namespace Pulsar4X.Entities.Components
                 case ComponentTypeTN.Microwave:
 
                     size = (float)Constants.BeamWeaponTN.LaserSize[WeaponSizeTech];
-                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 5000.0f * (float)WeaponRangeTech;
+                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 5000.0f * (float)(WeaponRangeTech + 1);
 
                     Damage.Add(1);
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
 
-                    RangeIncrement = ((WeaponRangeTech * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech]) / 2);
+                    RangeIncrement = (((WeaponRangeTech + 1) * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech]) / 2);
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(1);
@@ -381,12 +381,12 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
                 case ComponentTypeTN.Gauss:
                     size = Constants.BeamWeaponTN.GaussSize[WeaponSizeTech];
-                    Range = WeaponRangeTech * 10000.0f;
+                    Range = (WeaponRangeTech + 1) * 10000.0f;
                     ShotCount = Constants.BeamWeaponTN.GaussShots[CapacitorTech];
                     BaseAccuracy = Constants.BeamWeaponTN.GaussAccuracy[WeaponSizeTech];
                     PowerRequirement = 0;
                     Damage.Add(1);
-                    RangeIncrement = WeaponRangeTech;
+                    RangeIncrement = (WeaponRangeTech + 1);
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(1);
@@ -405,7 +405,7 @@ namespace Pulsar4X.Entities.Components
                 htk = (byte)(size / 2.0f);
                 crew = (byte)(size * 5.0f);
 
-                cost = htk * WeaponRangeTech * WeaponCapacitor;
+                cost = htk * (WeaponRangeTech + 1) * (WeaponCapacitor+1);
             }
             else
             {
@@ -417,7 +417,7 @@ namespace Pulsar4X.Entities.Components
                     htk = 0;
             
                 crew = (byte)(size * 2.0f);
-                cost = (byte)(size * 2.0f * (float)WeaponRangeTech * (float)WeaponCapacitor);
+                cost = (byte)(size * 2.0f * (float)(WeaponRangeTech + 1) * (float)(WeaponCapacitor + 1));
             }
 
             isMilitary = true;
@@ -436,13 +436,13 @@ namespace Pulsar4X.Entities.Components
             for (int loop = 1; loop < RangeIncrement; loop++)
             {
                 ushort IncrementDamage = 0;
-                if (loop < WeaponRangeTech)
+                if (loop < (WeaponRangeTech+1))
                 {
                     IncrementDamage = Damage[0];
                 }
                 else
                 {
-                    IncrementDamage = (ushort)Math.Floor((float)((float)WeaponRangeTech / (float)(loop + 1)));
+                    IncrementDamage = (ushort)Math.Floor((float)((float)(WeaponRangeTech+1) / (float)(loop + 1)));
 
                     if (IncrementDamage == 0)
                         IncrementDamage = 1;

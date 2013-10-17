@@ -253,6 +253,9 @@ namespace Pulsar4X.UI.Handlers
                 m_oDetailsPanel.SFCComboBox.Items.Add(CurrentShip.ShipFireControls[loop].Name);
             }
 
+            if (m_oDetailsPanel.SFCComboBox.Items.Count != 0)
+                m_oDetailsPanel.SFCComboBox.SelectedIndex = 0;
+
             /// <summary>
             /// Same will probably be true for sensors.
             /// </summary>
@@ -261,6 +264,9 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oDetailsPanel.SelectedActiveComboBox.Items.Add(CurrentShip.ShipASensor[loop].Name);
             }
+
+            if (m_oDetailsPanel.SelectedActiveComboBox.Items.Count != 0)
+                m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex = 0;
 
 
             if (CurrentShip.ShieldIsActive == true && CurrentShip.CurrentShieldPoolMax != 0.0f)
@@ -456,7 +462,7 @@ namespace Pulsar4X.UI.Handlers
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = CurrentShip.ShipMFC[CurrentFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
 
-                            bool det = CurrentShip.Faction.LargeDetection(CurSystem, distance, detectFactor);
+                            bool det = CurrentShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
 
                             if (det == true)
                             {
@@ -878,6 +884,314 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Build the class design info for the current ship. Ship class, geo rating, grav rating not done but displayed. Maintenance by and large isn't done. fighters aren't done.
+        /// Ultimately I want to move this to Class design proper so that this code isn't copy pasted everywhere, and keeping everything the same version is simpler.
+        /// </summary>
+        private void BuildClassDesign()
+        {
+            m_oDetailsPanel.ClassDesignTextBox.Clear();
+
+            String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", CurrentShip.ShipClass.Name, CurrentShip.ShipClass.SizeTons.ToString(), 
+                CurrentShip.ShipClass.TotalRequiredCrew.ToString(), Math.Floor(CurrentShip.ShipClass.BuildPointCost).ToString(),CurrentShip.ShipClass.TotalCrossSection.ToString(),
+                CurrentShip.ShipClass.MaxThermalSignature.ToString(), CurrentShip.ShipClass.MaxEMSignature.ToString());
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+            string ShieldR = "0";
+
+            if (CurrentShip.ShipClass.ShipShieldDef != null)
+            {
+                if (CurrentShip.ShipClass.ShipShieldDef.shieldGen == CurrentShip.ShipClass.ShipShieldDef.shieldPool)
+                {
+                    ShieldR = "300";
+                }
+                else
+                {
+                    float shield = (float)Math.Floor((CurrentShip.ShipClass.ShipShieldDef.shieldPool / CurrentShip.ShipClass.ShipShieldDef.shieldGen) * 300.0f);
+                    ShieldR = shield.ToString();
+                }
+            }
+
+            Entry = String.Format("{0} km/s   Armour {1}-{2}   Shields {3}-{4}   Sensors {5}/{6}/{7}/{8}   Damage Control Rating {9}  PPV {10}\n", CurrentShip.ShipClass.MaxSpeed, 
+                                                               CurrentShip.ShipClass.ShipArmorDef.depth,CurrentShip.ShipClass.ShipArmorDef.cNum,
+                                                               CurrentShip.ShipClass.TotalShieldPool,ShieldR, 
+                                                               CurrentShip.ShipClass.BestThermalRating,CurrentShip.ShipClass.BestEMRating, 0,0,
+                                                               CurrentShip.ShipClass.MaxDamageControlRating, CurrentShip.ShipClass.PlanetaryProtectionValue);
+
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+            Entry = String.Format("Maint Life {0} Years   MSP {1}   AFR {2}   IFR {3}   1YR {4}   5YR {5}   Max Repair {6} MSP\n", CurrentShip.ShipClass.MaintenanceLife,
+                                                               CurrentShip.ShipClass.TotalMSPCapacity,CurrentShip.ShipClass.AnnualFailureRate,CurrentShip.ShipClass.InitialFailureRate,
+                                                               CurrentShip.ShipClass.YearOneFailureTotal,CurrentShip.ShipClass.YearFiveFailureTotal, CurrentShip.ShipClass.MaxRepair);
+
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+            Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n\n", CurrentShip.ShipClass.MaxDeploymentTime, CurrentShip.ShipClass.SpareCrewQuarters);
+
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+            if(CurrentShip.ShipClass.ShipEngineDef != null)
+            {
+                float fuelCon = (float)Math.Floor(CurrentShip.ShipClass.ShipEngineDef.fuelConsumptionMod * 100.0f);
+                String FuelString = String.Format("{0}",fuelCon);
+
+                Entry = String.Format("{0} ({1})   Power {2}   Fuel Use {3}%    Signature {4}    Armour 0    Exp {5}%\n",CurrentShip.ShipClass.ShipEngineDef.Name,CurrentShip.ShipClass.ShipEngineCount,
+                                                               CurrentShip.ShipClass.ShipEngineDef.enginePower, FuelString, CurrentShip.ShipClass.ShipEngineDef.thermalSignature, CurrentShip.ShipClass.ShipEngineDef.expRisk);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            if (CurrentShip.ShipClass.TotalFuelCapacity != 0)
+            {
+                String Range = "Range N/A";
+                if (CurrentShip.ShipClass.ShipEngineDef != null)
+                {
+                    String Time = "N/A";
+                    float HoursOfFuel = CurrentShip.ShipClass.TotalFuelCapacity / CurrentShip.ShipClass.MaxFuelUsePerHour;
+
+
+                    if (HoursOfFuel < 72)
+                    {
+                        Time = String.Format("({0} hours at full power)", Math.Floor(HoursOfFuel).ToString());
+                    }
+                    else
+                    {
+                        float DaysOfFuel = HoursOfFuel / 24.0f;
+                        Time = String.Format("({0} days at full power)", Math.Floor(DaysOfFuel).ToString());
+                    }
+
+                    float SecondsPerBillion = 1000000000.0f / CurrentShip.ShipClass.MaxSpeed;
+                    float HoursPerBillion = SecondsPerBillion / 3600.0f;
+
+                    float billions = HoursOfFuel / HoursPerBillion;
+
+                    if (billions >= 0.1)
+                    {
+                        billions = (float)(Math.Floor(10.0 * billions) / 10.0f);
+                        Range = String.Format("Range {0} B km {1}", billions, Time);
+                    }
+                    else
+                    {
+                        float millions = billions * 1000.0f;
+                        millions = (float)(Math.Floor(10.0 * millions) / 10.0f);
+                        Range = String.Format("Range {0} M km {1}", millions, Time);
+                    }
+
+
+                    
+                }
+
+                Entry = String.Format("Fuel Capacity {0} Litres   {1}\n", CurrentShip.ShipClass.TotalFuelCapacity,Range);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            if (CurrentShip.ShipClass.ShipShieldDef != null)
+            {
+
+                float FuelCostPerHour = CurrentShip.ShipClass.ShipShieldDef.fuelCostPerHour * CurrentShip.ShipClass.ShipShieldCount;
+                float FuelCostPerDay = FuelCostPerHour * 24.0f;
+
+                Entry = String.Format("{0} ({1})   Total Fuel Cost  {2} Litres per hour  ({3} per day)\n", CurrentShip.ShipClass.ShipShieldDef, CurrentShip.ShipClass.ShipShieldCount,
+                                                                         FuelCostPerHour, FuelCostPerDay);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            Entry = "\n";
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+            for (int loop = 0; loop < CurrentShip.ShipClass.ShipBeamDef.Count; loop++)
+            {
+                String Range = "N/A";
+
+                float MaxRange = 0;
+
+                for (int loop2 = 0; loop2 < CurrentShip.ShipClass.ShipBFCDef.Count; loop2++)
+                {
+                    if (CurrentShip.ShipClass.ShipBFCDef[loop2].range > MaxRange)
+                        MaxRange = CurrentShip.ShipClass.ShipBFCDef[loop2].range;
+                }
+
+               if (MaxRange > CurrentShip.ShipClass.ShipBeamDef[loop].range)
+                {
+                    Range = String.Format("Range {0}km", CurrentShip.ShipClass.ShipBeamDef[loop].range);
+               }
+                else
+                {
+                    Range = String.Format("Range {0}km", MaxRange);
+                }
+
+                String Tracking = "N/A";
+                if (CurrentShip.ShipClass.MaxSpeed > CurrentShip.ShipsFaction.BaseTracking)
+                {
+                    Tracking = String.Format("TS: {0} km/s", CurrentShip.ShipClass.MaxSpeed);
+                }
+                else
+                {
+                    Tracking = String.Format("TS: {0} km/s", CurrentShip.ShipsFaction.BaseTracking);
+                }
+
+                String Power = "N/A";
+                if (CurrentShip.ShipClass.ShipBeamDef[loop].componentType == ComponentTypeTN.Gauss)
+                {
+                    Power = "0-0";
+                }
+                else
+                {
+                    Power = String.Format("{0}-{1}", CurrentShip.ShipClass.ShipBeamDef[loop].powerRequirement, CurrentShip.ShipClass.ShipBeamDef[loop].weaponCapacitor);
+                }
+
+                float ROF = (CurrentShip.ShipClass.ShipBeamDef[loop].powerRequirement / CurrentShip.ShipClass.ShipBeamDef[loop].weaponCapacitor) * 5;
+
+                if(ROF < 5)
+                    ROF = 5;
+                String DamageString = CurrentShip.ShipClass.ShipBeamDef[loop].damage[0].ToString();
+
+                for(int loop2 = 1; loop2 < 10; loop2++)
+                {
+                    int value = -1;
+                    if(loop2 >= CurrentShip.ShipClass.ShipBeamDef[loop].damage.Count)
+                    {
+                        value = 0;
+                    }
+                    else
+                    {
+                        value = CurrentShip.ShipClass.ShipBeamDef[loop].damage[loop2];
+                    }
+                    DamageString = String.Format("{0} {1}", DamageString, value);
+                }
+
+                Entry = String.Format("{0} ({1})   {2}   {3}   Power {4}   RM {5}   ROF {6}   {7}\n",
+                                      CurrentShip.ShipClass.ShipBeamDef[loop].Name, CurrentShip.ShipClass.ShipBeamCount[loop], Range, Tracking, Power,
+                                      (CurrentShip.ShipClass.ShipBeamDef[loop].damage.Count - 1) , ROF, DamageString);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            for (int loop = 0; loop < CurrentShip.ShipClass.ShipBFCDef.Count; loop++)
+            {
+                String AccString = String.Format("{0}", (CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable[0] * 100.0f));
+
+                for(int loop2 = 1; loop2 < 10; loop2++)
+                {
+                    if( loop2 < CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable.Count )
+                    {
+                        AccString = String.Format("{0} {1}",AccString, (CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable[loop2] * 100.0f));
+                    }
+                    else
+                    {
+                        AccString = String.Format("{0} 0",AccString);
+                    }
+                }
+
+
+                Entry = String.Format("{0} ({1})   Max Range: {2} km   TS: {3} km/s   {4}\n",
+                                      CurrentShip.ShipClass.ShipBFCDef[loop].Name,CurrentShip.ShipClass.ShipBFCCount[loop], CurrentShip.ShipClass.ShipBFCDef[loop].range,
+                                      CurrentShip.ShipClass.ShipBFCDef[loop].tracking,AccString);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            for (int loop = 0; loop < CurrentShip.ShipClass.ShipReactorDef.Count; loop++)
+            {
+                int TPO = CurrentShip.ShipClass.ShipReactorDef[loop].powerGen * CurrentShip.ShipClass.ShipReactorCount[loop];
+
+                Entry = String.Format("{0} ({1})   Total Power Output {2}   Armour 0    Exp {3}%\n",CurrentShip.ShipClass.ShipReactorDef[loop].Name,
+                                      CurrentShip.ShipClass.ShipReactorCount[loop], TPO, CurrentShip.ShipClass.ShipReactorDef[loop].expRisk);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            Entry = "\n";
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+            for (int loop = 0; loop < CurrentShip.ShipClass.ShipASensorDef.Count; loop++)
+            {
+                String RangeString = "-4.2m";
+
+                if (CurrentShip.ShipClass.ShipASensorDef[loop].maxRange >= 100000)
+                {
+                    float RangeB = (float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange / 10000.0) / 10.0f;
+
+                    RangeString = String.Format("{0}B", RangeB);
+                }
+                else if (CurrentShip.ShipClass.ShipASensorDef[loop].maxRange >= 100)
+                {
+                    float RangeM = (float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange / 10.0) / 10.0f;
+
+                    RangeString = String.Format("{0}M", RangeM);
+                }
+                else
+                {
+                    RangeString = String.Format("{0}K", ((float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange) * 10.0f));
+                }
+
+                String MCRString = " ";
+
+                if (CurrentShip.ShipClass.ShipASensorDef[loop].resolution == 1)
+                {
+                    int minRange = CurrentShip.ShipClass.ShipASensorDef[loop].lookUpMT[0];
+
+                    if(minRange >= 100000)
+                    {
+                        float RangeB = (float)Math.Floor((double)minRange / 10000.0) / 10.0f;
+                        MCRString = String.Format(" MCR {0}B km   ",RangeB);
+                    }
+                    else if(minRange >= 100)
+                    {
+                        float RangeM = (float)Math.Floor((double)minRange / 10.0) / 10.0f;
+                        MCRString = String.Format(" MCR {0}M km   ",RangeM);
+                    }
+                    else
+                    {
+                        MCRString = String.Format(" MCR {0}K km   ", ((float)Math.Floor((double)minRange) * 10.0f));
+                    }
+                }
+
+
+                Entry = String.Format("{0} ({1})   GPS {2}   Range {3} km  {4}Resolution {5}\n", CurrentShip.ShipClass.ShipASensorDef[loop].Name,
+                                      CurrentShip.ShipClass.ShipASensorCount[loop], CurrentShip.ShipClass.ShipASensorDef[loop].gps, RangeString, MCRString,
+                                      CurrentShip.ShipClass.ShipASensorDef[loop].resolution);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            for (int loop = 0; loop < CurrentShip.ShipClass.ShipPSensorDef.Count; loop++)
+            {
+                String RangeString = "20m";
+
+                int range = CurrentShip.ShipClass.ShipPSensorDef[loop].range;
+
+                if (range >= 100000)
+                {
+                    float RangeB = (float)Math.Floor((double)range / 10000.0) / 10.0f;
+                    RangeString = String.Format("{0}B", RangeB);
+                }
+                else
+                {
+                    float RangeM = (float)Math.Floor((double)range / 10.0) / 10.0f;
+                    RangeString = String.Format("{0}M", RangeM);
+                }
+
+                Entry = String.Format("{0} ({1})     Sensitivity {2}     Detect Sig Strength 1000:  {3} km\n", CurrentShip.ShipClass.ShipPSensorDef[loop].Name,
+                                      CurrentShip.ShipClass.ShipPSensorCount[loop], CurrentShip.ShipClass.ShipPSensorDef[loop].rating, RangeString);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+            }
+
+            if (CurrentShip.ShipClass.IsMilitary == true)
+            {
+                Entry = "\nThis design is classed as a Military Vessel for maintenance purposes\n";
+            }
+            else
+            {
+                Entry = "\nThis design is classed as a Commercial Vessel for maintenance purposes\n";
+            }
+
+            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+        }
+
+        /// <summary>
         /// Print the names of every weapon on this ship.
         /// </summary>
         private void BuildWeaponList()
@@ -924,6 +1238,8 @@ namespace Pulsar4X.UI.Handlers
                 m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM4v1);
                 m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM5v1);
             }
+
+            m_oDetailsPanel.PDComboBox.SelectedIndex = 0;
         }
 
 
@@ -974,7 +1290,7 @@ namespace Pulsar4X.UI.Handlers
                         int TCS = pair.Key.TotalCrossSection;
                         int detectFactor = CurrentShip.ShipMFC[CurrentFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
 
-                        bool det = CurrentShip.Faction.LargeDetection(CurSystem, distance, detectFactor);
+                        bool det = CurrentShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
 
                         if (det == true)
                         {
@@ -1021,6 +1337,7 @@ namespace Pulsar4X.UI.Handlers
                 BuildDamagedSystemsList();
 
                 BuildCombatSummary();
+                BuildClassDesign();
             }
         }
 

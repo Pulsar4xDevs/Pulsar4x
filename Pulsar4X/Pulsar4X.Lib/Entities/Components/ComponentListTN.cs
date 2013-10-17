@@ -156,7 +156,7 @@ namespace Pulsar4X.Entities.Components
             PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
             PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("EM Sensor EM1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
             BeamFireControlDefTN BFCDef = new BeamFireControlDefTN("Fire Control S01 10-1250", 10000.0f, 1250.0f, 1.0f, 1.0f, false, false, 1.0f, 1);
-            BeamDefTN BeamDef = new BeamDefTN("10cm C1 Infrared Laser", ComponentTypeTN.Laser, 1, 1, 1, 1.0f);
+            BeamDefTN BeamDef = new BeamDefTN("10cm C1 Infrared Laser", ComponentTypeTN.Laser, 0, 0, 0, 1.0f);
             ReactorDefTN ReactDef = new ReactorDefTN("PWR S1 P2", 0, 1.0f, 1.0f);
             ShieldDefTN AShieldDef = new ShieldDefTN("Alpha R300/240 Shields", 0, 0, 1.0f, 1.0f, ComponentTypeTN.Shield);
             MissileLauncherDefTN TubeDef = new MissileLauncherDefTN("Size 1 Launcher", 1.0f, 1, false, 1.0f);

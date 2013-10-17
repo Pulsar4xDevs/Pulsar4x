@@ -28,12 +28,12 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// How much fuel this shield uses on a per day basis.
+        /// How much fuel this shield uses on a per Hour basis.
         /// </summary>
-        private float FuelCostPerDay;
-        public float fuelCostPerDay
+        private float FuelCostPerHour;
+        public float fuelCostPerHour
         {
-            get { return FuelCostPerDay; }
+            get { return FuelCostPerHour; }
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Pulsar4X.Entities.Components
                 cost = (decimal)((2.0f * ShieldGen) + (2.0f * ShieldPool));
             }
 
-            FuelCostPerDay = 240.0f * ShieldPool * FuelConsumptionMod;
+            FuelCostPerHour = 10.0f * ShieldPool * FuelConsumptionMod;
 
             isMilitary = true;
             isObsolete = false;

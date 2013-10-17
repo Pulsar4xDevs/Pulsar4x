@@ -322,9 +322,14 @@ namespace Pulsar4X.Entities
         public Color FactionColor { get; set; }
 
         /// <summary>
-        /// Going to get rid of this, don't get attached to it.
+        /// This may go away in future revisions.
         /// </summary>
         public BindingList<OrdnanceGroupTN> MissileGroups { get; set; }
+
+        /// <summary>
+        /// Faction base tracking that all ships will use. This may eventually get moved to the tech department
+        /// </summary>
+        public int BaseTracking { get; set; }
 
         public Faction(int ID)
         {
@@ -357,6 +362,8 @@ namespace Pulsar4X.Entities
             MessageLog = new BindingList<MessageEntry>();
 
             MissileGroups = new BindingList<OrdnanceGroupTN>();
+
+            BaseTracking = 1250;
         }
 
         public Faction(string a_oName, Species a_oSpecies, int ID)
@@ -390,6 +397,8 @@ namespace Pulsar4X.Entities
             MessageLog = new BindingList<MessageEntry>();
 
             MissileGroups = new BindingList<OrdnanceGroupTN>();
+
+            BaseTracking = 1250;
         }
 
         /// <summary>
@@ -978,7 +987,7 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// Sanity check to keep allied ships out of the DetectedContacts list.
                                 /// </summary>
-                                if (detectedShip.Faction != this)
+                                if (detectedShip.ShipsFaction != this)
                                 {
 
                                     bool inDict = DetectedContacts.ContainsKey(detectedShip);

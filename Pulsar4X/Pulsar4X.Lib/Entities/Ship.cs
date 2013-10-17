@@ -12,8 +12,6 @@ namespace Pulsar4X.Entities
 {
     public class ShipTN : GameEntity
     {
-        public Faction Faction { get; set; }
-
         /// <summary>
         /// Class of this ship.
         /// </summary>
@@ -1522,7 +1520,7 @@ namespace Pulsar4X.Entities
 
                    CurrentShieldPoolMax = CurrentShieldPoolMax - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool;
                    CurrentShieldGen = CurrentShieldGen - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldGenPerTick;
-                   CurrentShieldFuelUse = CurrentShieldFuelUse - (ShipShield[ShipComponents[ID].componentIndex].shieldDef.fuelCostPerDay / 17280.0f);
+                   CurrentShieldFuelUse = CurrentShieldFuelUse - (ShipShield[ShipComponents[ID].componentIndex].shieldDef.fuelCostPerHour / 720.0f);
 
                    /// <summary>
                    /// In the event of meson damage/mixed meson and non-meson damage:
@@ -1733,12 +1731,12 @@ namespace Pulsar4X.Entities
                 break;
 
                 /// <summary>
-                /// For shields I will preserve ShieldIsActive as is, but set the other values down on component destruction.
+                /// For shields I will preserve ShieldIsActive as is, but set the other values up on component repair.
                 /// </summary.
                 case ComponentTypeTN.Shield:
                     CurrentShieldPoolMax = CurrentShieldPoolMax + ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool;
                     CurrentShieldGen = CurrentShieldGen + ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldGenPerTick;
-                    CurrentShieldFuelUse = CurrentShieldFuelUse + (ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.fuelCostPerDay / 17280.0f);
+                    CurrentShieldFuelUse = CurrentShieldFuelUse + (ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.fuelCostPerHour / 720.0f);
 
                     if (ShieldIsActive == true)
                     {
@@ -1963,7 +1961,14 @@ namespace Pulsar4X.Entities
 
                         float distance = ShipsTaskGroup.Contact.DistanceTable[targetID];
 
-                        ShipBFC[loop].FireWeapons(distance, RNG);
+                        int track = ShipsFaction.BaseTracking;
+                        if (CurrentSpeed > ShipsFaction.BaseTracking)
+                        {
+                            track = CurrentSpeed;
+                        }
+
+
+                        ShipBFC[loop].FireWeapons(distance, RNG, track);
                     }
                 }
             }

@@ -179,6 +179,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Textbox for printing class design information.
+        /// </summary>
+        public RichTextBox ClassDesignTextBox
+        {
+            get { return m_oClassDesignRTBox; }
+        }
+
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -227,6 +235,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oHistoryNotesTDTab = new System.Windows.Forms.TabPage();
             this.m_oShipDesignTab = new System.Windows.Forms.TabPage();
             this.m_oClassDesignTab = new System.Windows.Forms.TabPage();
+            this.m_oClassDesignGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oClassDesignRTBox = new System.Windows.Forms.RichTextBox();
             this.m_oCombatSettingsTab = new System.Windows.Forms.TabPage();
             this.m_oActiveSensorGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oSelectedActiveComboBox = new System.Windows.Forms.ComboBox();
@@ -262,9 +272,9 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsButton = new System.Windows.Forms.Button();
             this.m_oWeaponListBox = new System.Windows.Forms.ListBox();
             this.m_oCombatSummaryTab = new System.Windows.Forms.TabPage();
-            this.m_oOrdnanceManagementTab = new System.Windows.Forms.TabPage();
             this.m_oCombatSummaryGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oCombatSummaryRTBox = new System.Windows.Forms.RichTextBox();
+            this.m_oOrdnanceManagementTab = new System.Windows.Forms.TabPage();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oArmourStatusTab.SuspendLayout();
             this.m_oDamageControlTab.SuspendLayout();
@@ -274,6 +284,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oCurrentDCGroupBox.SuspendLayout();
             this.m_oDamagedSystemsGroupBox.SuspendLayout();
             this.m_oDACGroupBox.SuspendLayout();
+            this.m_oClassDesignTab.SuspendLayout();
+            this.m_oClassDesignGroupBox.SuspendLayout();
             this.m_oCombatSettingsTab.SuspendLayout();
             this.m_oActiveSensorGroupBox.SuspendLayout();
             this.m_oShieldGroupBox.SuspendLayout();
@@ -592,12 +604,34 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oClassDesignTab
             // 
+            this.m_oClassDesignTab.Controls.Add(this.m_oClassDesignGroupBox);
             this.m_oClassDesignTab.Location = new System.Drawing.Point(4, 22);
             this.m_oClassDesignTab.Name = "m_oClassDesignTab";
             this.m_oClassDesignTab.Size = new System.Drawing.Size(1033, 540);
             this.m_oClassDesignTab.TabIndex = 7;
             this.m_oClassDesignTab.Text = "Class Design Display";
             this.m_oClassDesignTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oClassDesignGroupBox
+            // 
+            this.m_oClassDesignGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oClassDesignGroupBox.Controls.Add(this.m_oClassDesignRTBox);
+            this.m_oClassDesignGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.m_oClassDesignGroupBox.Name = "m_oClassDesignGroupBox";
+            this.m_oClassDesignGroupBox.Size = new System.Drawing.Size(1027, 534);
+            this.m_oClassDesignGroupBox.TabIndex = 39;
+            this.m_oClassDesignGroupBox.TabStop = false;
+            // 
+            // m_oClassDesignRTBox
+            // 
+            this.m_oClassDesignRTBox.Location = new System.Drawing.Point(13, 26);
+            this.m_oClassDesignRTBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oClassDesignRTBox.Name = "m_oClassDesignRTBox";
+            this.m_oClassDesignRTBox.Size = new System.Drawing.Size(1001, 495);
+            this.m_oClassDesignRTBox.TabIndex = 0;
+            this.m_oClassDesignRTBox.Text = "";
             // 
             // m_oCombatSettingsTab
             // 
@@ -996,15 +1030,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oCombatSummaryTab.Text = "Combat Summary";
             this.m_oCombatSummaryTab.UseVisualStyleBackColor = true;
             // 
-            // m_oOrdnanceManagementTab
-            // 
-            this.m_oOrdnanceManagementTab.Location = new System.Drawing.Point(4, 22);
-            this.m_oOrdnanceManagementTab.Name = "m_oOrdnanceManagementTab";
-            this.m_oOrdnanceManagementTab.Size = new System.Drawing.Size(1033, 540);
-            this.m_oOrdnanceManagementTab.TabIndex = 10;
-            this.m_oOrdnanceManagementTab.Text = "Ordnance Management";
-            this.m_oOrdnanceManagementTab.UseVisualStyleBackColor = true;
-            // 
             // m_oCombatSummaryGroupBox
             // 
             this.m_oCombatSummaryGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -1027,6 +1052,15 @@ namespace Pulsar4X.UI.Panels
             this.m_oCombatSummaryRTBox.TabIndex = 0;
             this.m_oCombatSummaryRTBox.Text = "";
             // 
+            // m_oOrdnanceManagementTab
+            // 
+            this.m_oOrdnanceManagementTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oOrdnanceManagementTab.Name = "m_oOrdnanceManagementTab";
+            this.m_oOrdnanceManagementTab.Size = new System.Drawing.Size(1033, 540);
+            this.m_oOrdnanceManagementTab.TabIndex = 10;
+            this.m_oOrdnanceManagementTab.Text = "Ordnance Management";
+            this.m_oOrdnanceManagementTab.UseVisualStyleBackColor = true;
+            // 
             // Individual_Unit_Details_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1047,6 +1081,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oCurrentDCGroupBox.PerformLayout();
             this.m_oDamagedSystemsGroupBox.ResumeLayout(false);
             this.m_oDACGroupBox.ResumeLayout(false);
+            this.m_oClassDesignTab.ResumeLayout(false);
+            this.m_oClassDesignGroupBox.ResumeLayout(false);
             this.m_oCombatSettingsTab.ResumeLayout(false);
             this.m_oActiveSensorGroupBox.ResumeLayout(false);
             this.m_oShieldGroupBox.ResumeLayout(false);
@@ -1133,5 +1169,7 @@ namespace Pulsar4X.UI.Panels
         private Button m_oAssignWeaponsButton;
         private GroupBox m_oCombatSummaryGroupBox;
         private RichTextBox m_oCombatSummaryRTBox;
+        private GroupBox m_oClassDesignGroupBox;
+        private RichTextBox m_oClassDesignRTBox;
     }
 }

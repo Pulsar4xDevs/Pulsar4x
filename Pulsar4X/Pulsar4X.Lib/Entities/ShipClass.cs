@@ -932,7 +932,7 @@ namespace Pulsar4X.Entities
             /// Size of the craft has to be adjusted
             /// </summary>
             SizeHS = SizeHS + (Component.size * (float)increment);
-            SizeTons = SizeHS * 50.0f;
+            SizeTons = (float)Math.Ceiling(SizeHS) * 50.0f;
 
             /// <summary>
             /// The ship has a new total required crew now.
@@ -1708,7 +1708,7 @@ namespace Pulsar4X.Entities
                     {
                         TotalShieldPool = TotalShieldPool + (ShipShieldDef.shieldPool * inc);
                         TotalShieldGenPerTick = TotalShieldGenPerTick + (ShipShieldDef.shieldGenPerTick * inc);
-                        TotalShieldFuelCostPerTick = TotalShieldFuelCostPerTick + ((ShipShieldDef.fuelCostPerDay / 17280.0f) * inc);
+                        TotalShieldFuelCostPerTick = TotalShieldFuelCostPerTick + ((ShipShieldDef.fuelCostPerHour / 720.0f) * inc);
                     }
                     else
                     {
@@ -1742,7 +1742,7 @@ namespace Pulsar4X.Entities
                 ShipShieldCount = (ushort)((short)ShipShieldCount + inc);
                 TotalShieldPool = TotalShieldPool + (ShipShieldDef.shieldPool * inc);
                 TotalShieldGenPerTick = TotalShieldGenPerTick + (ShipShieldDef.shieldGenPerTick * inc);
-                TotalShieldFuelCostPerTick = TotalShieldFuelCostPerTick + ((ShipShieldDef.fuelCostPerDay / 17280.0f) * inc);
+                TotalShieldFuelCostPerTick = TotalShieldFuelCostPerTick + ((ShipShieldDef.fuelCostPerHour / 720.0f) * inc);
             }
             else
             {

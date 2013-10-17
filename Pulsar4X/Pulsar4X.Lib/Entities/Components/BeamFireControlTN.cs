@@ -380,8 +380,9 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="DistanceToTarget">Distance in KM to target.</param>
         /// <param name="RNG">RNG passed to this function from source further up the chain.</param>
+        /// <param name="track">Base empire tracking or ship speed ,whichever is higher. Turrets should set track to their tracking speed.</param>
         /// <returns>Whether or not a weapon was able to fire.</returns>
-        public bool FireWeapons(float DistanceToTarget, Random RNG)
+        public bool FireWeapons(float DistanceToTarget, Random RNG, int track)
         {
             if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0 || isDestroyed == true)
             {
@@ -462,6 +463,13 @@ namespace Pulsar4X.Entities.Components
                         }
                     }
                 }
+                if (track < BeamFireControlDef.tracking)
+                {
+                    float fireAccMod = (float)track / BeamFireControlDef.tracking;
+
+                    FireAccuracy = FireAccuracy * fireAccMod;
+                }
+
                 
                 /// <summary>
                 /// Fire Accuracy is the likelyhood of a shot hitting from this FC at this point.
