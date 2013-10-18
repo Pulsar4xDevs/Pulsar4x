@@ -44,7 +44,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// If the taskgroup is orbiting a body it will be this one. and position must be derived from here.
         /// </summary>
-        public StarSystemEntity OrbitingBody { get; set; }
+        public OrbitingEntity OrbitingBody { get; set; }
 
         /// <summary>
         /// Taskgroup speed. All speeds are in KM/S
@@ -183,7 +183,7 @@ namespace Pulsar4X.Entities
         /// <param name="Title">Name</param>
         /// <param name="FID">Faction</param>
         /// <param name="StartingBody">body taskgroup will orbit at creation.</param>
-        public TaskGroupTN(string Title, Faction FID, StarSystemEntity StartingBody, StarSystem StartingSystem)
+        public TaskGroupTN(string Title, Faction FID, OrbitingEntity StartingBody, StarSystem StartingSystem)
         {
             Name = Title;
 
@@ -951,8 +951,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void GetPositionFromOrbit()
         {
-            Contact.XSystem = OrbitingBody.XSystem;
-            Contact.YSystem = OrbitingBody.YSystem;
+            Contact.XSystem = OrbitingBody.XSystem + OrbitingBody.Primary.XSystem;
+            Contact.YSystem = OrbitingBody.YSystem + OrbitingBody.Primary.YSystem;
         }
 
         /// <summary>
@@ -968,8 +968,27 @@ namespace Pulsar4X.Entities
 
             if (TaskGroupOrders.Count > 0)
             {
-                double dX = Contact.XSystem - TaskGroupOrders[0].target.XSystem;
-                double dY = Contact.YSystem - TaskGroupOrders[0].target.YSystem;
+                double dX,dY;
+
+                /// <summary>
+                /// planets (and populations on planets) positions are stored relative to their star.
+                /// I'll need to change all of this AGAIN when moons get rolled out. Gah. do it right then.
+                /// </summary>
+                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = Contact.XSystem - (TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].body.Primary.XSystem);
+                    dY = Contact.YSystem - (TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].body.Primary.YSystem);
+                }
+                else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = Contact.XSystem - (TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].pop.Planet.Primary.XSystem);
+                    dY = Contact.YSystem - (TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].pop.Planet.Primary.YSystem);
+                }
+                else
+                {
+                    dX = Contact.XSystem - TaskGroupOrders[0].target.XSystem;
+                    dY = Contact.YSystem - TaskGroupOrders[0].target.YSystem;
+                }
 
                 CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
             }
@@ -984,8 +1003,26 @@ namespace Pulsar4X.Entities
         {
             if (TaskGroupOrders.Count > 0)
             {
-                double dX = Contact.XSystem - TaskGroupOrders[0].target.XSystem;
-                double dY = Contact.XSystem - TaskGroupOrders[0].target.YSystem;
+                double dX, dY;
+
+                /// <summary>
+                /// planets (and populations on planets) positions are stored relative to their star.
+                /// </summary>
+                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = Contact.XSystem - (TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].body.Primary.XSystem);
+                    dY = Contact.YSystem - (TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].body.Primary.YSystem);
+                }
+                else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = Contact.XSystem - (TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].pop.Planet.Primary.XSystem);
+                    dY = Contact.YSystem - (TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].pop.Planet.Primary.YSystem);
+                }
+                else
+                {
+                    dX = Contact.XSystem - TaskGroupOrders[0].target.XSystem;
+                    dY = Contact.YSystem - TaskGroupOrders[0].target.YSystem;
+                }
 
                 double sign = 1.0;
                 if (dX > 0.0)
@@ -1013,8 +1050,29 @@ namespace Pulsar4X.Entities
         {
             if (TaskGroupOrders.Count > 0)
             {
-                double dX = Math.Abs(TaskGroupOrders[0].target.XSystem - Contact.XSystem);
-                double dY = Math.Abs(TaskGroupOrders[0].target.YSystem - Contact.YSystem);
+                double dX, dY;
+
+                /// <summary>
+                /// planets (and populations on planets) positions are stored relative to their star.
+                /// </summary>
+                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = Math.Abs((TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].body.Primary.XSystem) - Contact.XSystem);
+                    dY = Math.Abs((TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].body.Primary.YSystem) - Contact.YSystem);
+                }
+                else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = Math.Abs((TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].pop.Planet.Primary.XSystem) - Contact.XSystem);
+                    dY = Math.Abs((TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].pop.Planet.Primary.YSystem) - Contact.YSystem);
+                }
+                else
+                {
+                    dX = Math.Abs(TaskGroupOrders[0].target.XSystem - Contact.XSystem);
+                    dY = Math.Abs(TaskGroupOrders[0].target.YSystem - Contact.YSystem);
+                }
+
+
+                
                 double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
                 /// <summary>
@@ -1029,7 +1087,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if (Count < (double)CurrentSpeed)
                     {
-                        TimeRequirement = (uint)Math.Ceiling((dZ / (double)CurrentSpeed / Constants.Units.KM_PER_AU));
+                        TimeRequirement = (uint)Math.Ceiling((dZ / ((double)CurrentSpeed / Constants.Units.KM_PER_AU)));
                     }
                     else
                     {
@@ -1120,21 +1178,90 @@ namespace Pulsar4X.Entities
                 if (IsOrbiting)
                     GetPositionFromOrbit();
 
-                dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - Contact.XSystem);
-                dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - Contact.YSystem);
+                /// <summary>
+                /// planets (and populations on planets) positions are stored relative to their star.
+                /// </summary>
+                if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = Math.Abs((TaskGroupOrders[OrderCount].target.XSystem + TaskGroupOrders[OrderCount].body.Primary.XSystem) - Contact.XSystem);
+                    dY = Math.Abs((TaskGroupOrders[OrderCount].target.YSystem + TaskGroupOrders[OrderCount].body.Primary.YSystem) - Contact.YSystem);
+                }
+                else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = Math.Abs((TaskGroupOrders[OrderCount].target.XSystem + TaskGroupOrders[OrderCount].pop.Planet.Primary.XSystem) - Contact.XSystem);
+                    dY = Math.Abs((TaskGroupOrders[OrderCount].target.YSystem + TaskGroupOrders[OrderCount].pop.Planet.Primary.YSystem) - Contact.YSystem);
+                }
+                else
+                {
+                    dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - Contact.XSystem);
+                    dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - Contact.YSystem);
+                }
 
             }
             else if (TaskGroupOrders[OrderCount - 1].typeOf == Constants.ShipTN.OrderType.StandardTransit ||
                      TaskGroupOrders[OrderCount - 1].typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
                      TaskGroupOrders[OrderCount - 1].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
             {
-                dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.XSystem);
-                dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.YSystem);
+
+                /// <summary>
+                /// planets (and populations on planets) positions are stored relative to their star.
+                /// </summary>
+                if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = Math.Abs((TaskGroupOrders[OrderCount].target.XSystem + TaskGroupOrders[OrderCount].body.Primary.XSystem) - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.XSystem);
+                    dY = Math.Abs((TaskGroupOrders[OrderCount].target.YSystem + TaskGroupOrders[OrderCount].body.Primary.YSystem) - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.YSystem);
+                }
+                else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = Math.Abs((TaskGroupOrders[OrderCount].target.XSystem + TaskGroupOrders[OrderCount].pop.Planet.Primary.XSystem) - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.XSystem);
+                    dY = Math.Abs((TaskGroupOrders[OrderCount].target.YSystem + TaskGroupOrders[OrderCount].pop.Planet.Primary.YSystem) - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.YSystem);
+                }
+                else
+                {
+                    dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.XSystem);
+                    dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.YSystem);
+                }
             }
             else
             {
                 dX = Math.Abs(TaskGroupOrders[OrderCount].target.XSystem - TaskGroupOrders[OrderCount - 1].target.XSystem);
                 dY = Math.Abs(TaskGroupOrders[OrderCount].target.YSystem - TaskGroupOrders[OrderCount - 1].target.YSystem);
+
+                /// <summary>
+                /// planets (and populations on planets) positions are stored relative to their star.
+                /// </summary>
+                if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = (TaskGroupOrders[OrderCount].target.XSystem + TaskGroupOrders[OrderCount].body.Primary.XSystem);
+                    dY = (TaskGroupOrders[OrderCount].target.YSystem + TaskGroupOrders[OrderCount].body.Primary.YSystem);
+                }
+                else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = (TaskGroupOrders[OrderCount].target.XSystem + TaskGroupOrders[OrderCount].pop.Planet.Primary.XSystem);
+                    dY = (TaskGroupOrders[OrderCount].target.YSystem + TaskGroupOrders[OrderCount].pop.Planet.Primary.YSystem);
+                }
+                else
+                {
+                    dX = TaskGroupOrders[OrderCount].target.XSystem;
+                    dY = TaskGroupOrders[OrderCount].target.YSystem;
+                }
+
+                if (TaskGroupOrders[OrderCount - 1].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    dX = Math.Abs(dX - (TaskGroupOrders[OrderCount - 1].target.XSystem + TaskGroupOrders[OrderCount - 1].body.Primary.XSystem));
+                    dY = Math.Abs(dY - (TaskGroupOrders[OrderCount - 1].target.YSystem + TaskGroupOrders[OrderCount - 1].body.Primary.YSystem));
+                }
+                else if (TaskGroupOrders[OrderCount - 1].target.SSEntity == StarSystemEntityType.Population)
+                {
+                    dX = Math.Abs(dX - (TaskGroupOrders[OrderCount - 1].target.XSystem + TaskGroupOrders[OrderCount - 1].pop.Planet.Primary.XSystem));
+                    dY = Math.Abs(dY - (TaskGroupOrders[OrderCount - 1].target.YSystem + TaskGroupOrders[OrderCount - 1].pop.Planet.Primary.YSystem));
+                }
+                else
+                {
+                    dX = Math.Abs(dX - TaskGroupOrders[OrderCount - 1].target.XSystem);
+                    dY = Math.Abs(dY - TaskGroupOrders[OrderCount - 1].target.YSystem);
+                }
+
             }
             dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
             TotalOrderDistance = TotalOrderDistance + dZ;
@@ -1171,7 +1298,26 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Move the taskgroup to the targeted location.
                     /// </summary>
-                    Contact.UpdateLocationInSystem(TaskGroupOrders[0].target.XSystem, TaskGroupOrders[0].target.YSystem);
+                    
+                    double dX,dY;
+
+                    if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                    {
+                        dX = TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].body.Primary.XSystem;
+                        dY = TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].body.Primary.YSystem;
+                    }
+                    else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                    {
+                        dX = TaskGroupOrders[0].target.XSystem + TaskGroupOrders[0].pop.Planet.Primary.XSystem;
+                        dY = TaskGroupOrders[0].target.YSystem + TaskGroupOrders[0].pop.Planet.Primary.YSystem;
+                    }
+                    else
+                    {
+                        dX = TaskGroupOrders[0].target.XSystem;
+                        dY = TaskGroupOrders[0].target.YSystem;
+                    }
+
+                    Contact.UpdateLocationInSystem(dX,dY);
                     TotalOrderDistance = TotalOrderDistance - (double)(CurrentSpeed * TimeRequirement);
 
                     /// <summary>
@@ -1186,7 +1332,12 @@ namespace Pulsar4X.Entities
                     if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     {
                         IsOrbiting = true;
-                        OrbitingBody = TaskGroupOrders[0].target;
+
+                        if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                            OrbitingBody = TaskGroupOrders[0].body;
+                        else
+                            OrbitingBody = TaskGroupOrders[0].pop.Planet;
+
                     }
                 }
 
@@ -1837,7 +1988,11 @@ namespace Pulsar4X.Entities
                     && (Contact.XSystem == TaskGroupOrders[0].target.XSystem && Contact.YSystem == TaskGroupOrders[0].target.YSystem))
                 {
                     IsOrbiting = true;
-                    OrbitingBody = TaskGroupOrders[0].target;
+
+                    if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                        OrbitingBody = TaskGroupOrders[0].body;
+                    else
+                        OrbitingBody = TaskGroupOrders[0].pop.Planet;
                 }   
             }
             TaskGroupOrders.Clear();

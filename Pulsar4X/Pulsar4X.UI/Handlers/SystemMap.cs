@@ -96,10 +96,17 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Add time button handlers to ViewPortPanel.
             /// </summary>
-            m_oViewPortPanel.AdvanceTime5Seconds.Click += new EventHandler(AdvanceTime5Seconds_Click);
-            m_oViewPortPanel.AdvanceTime10Seconds.Click += new EventHandler(AdvanceTime10Seconds_Click);
-            m_oViewPortPanel.AdvanceTime100Seconds.Click += new EventHandler(AdvanceTime100Seconds_Click);
-            m_oViewPortPanel.AdvanceTime1000Seconds.Click += new EventHandler(AdvanceTime1000Seconds_Click);
+            m_oViewPortPanel.AdvanceTime5S.Click += new EventHandler(AdvanceTime5S_Click);
+            m_oViewPortPanel.AdvanceTime30S.Click += new EventHandler(AdvanceTime30S_Click);
+            m_oViewPortPanel.AdvanceTime2M.Click += new EventHandler(AdvanceTime2M_Click);
+            m_oViewPortPanel.AdvanceTime5M.Click += new EventHandler(AdvanceTime5M_Click);
+            m_oViewPortPanel.AdvanceTime20M.Click += new EventHandler(AdvanceTime20M_Click);
+            m_oViewPortPanel.AdvanceTime1H.Click += new EventHandler(AdvanceTime1H_Click);
+            m_oViewPortPanel.AdvanceTime3H.Click += new EventHandler(AdvanceTime3H_Click);
+            m_oViewPortPanel.AdvanceTime8H.Click += new EventHandler(AdvanceTime8H_Click);
+            m_oViewPortPanel.AdvanceTime1D.Click += new EventHandler(AdvanceTime1D_Click);
+            m_oViewPortPanel.AdvanceTime5D.Click += new EventHandler(AdvanceTime5D_Click);
+            m_oViewPortPanel.AdvanceTime30D.Click += new EventHandler(AdvanceTime30D_Click);
             m_oViewPortPanel.StartSim.Click += new EventHandler(StartSim_Click);
 
             // setup GL Canvas and insert it into the ViewPort:
@@ -194,17 +201,46 @@ namespace Pulsar4X.UI.Handlers
             m_bCreateMapMarkerOnNextClick = true;
         }
 
-        void AdvanceTime5Seconds_Click(object sender, EventArgs e)
+
+        /// <summary>
+        /// Function to advance time for all buttons.
+        /// </summary>
+        /// <param name="TickValue"></param>
+        private void AdvanceTime(int TickValue)
+        {
+            GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, TickValue);
+
+            /// <summary>
+            /// Kludge to draw the ships.
+            /// </summary>
+            m_oCurrentSceen.ShipMarkers.Clear();
+            for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
+            {
+                for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
+                {
+                    Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
+                    string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
+
+                    m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
+                }
+            }
+
+            GameState.Instance.GameDateTime.AddSeconds(TickValue);
+            m_oCurrentSceen.Refresh();
+        }
+
+        void AdvanceTime5S_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
+                AdvanceTime((int)Constants.TimeInSeconds.FiveSeconds);
+            }
+                /*
+                 * Section preserved in case someone wishes to ressurect RunSim for some reason. all other copies will be deleted.
                 //GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 5);
-
-                GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, 5);
-
                 /// <summary>
                 /// Kludge to draw the ships.
                 /// </summary>
@@ -223,116 +259,119 @@ namespace Pulsar4X.UI.Handlers
                         m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
                     }
                 }
-                GameState.Instance.GameDateTime.AddSeconds(5.0);
-                m_oCurrentSceen.Refresh();
-            }
+                 * */
         }
 
-        void AdvanceTime10Seconds_Click(object sender, EventArgs e)
+        void AdvanceTime30S_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 10 seconds.
+            /// Advance simtime by 5 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
-                //GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 10);
-
-                GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, 10);
-
-                /// <summary>
-                /// Kludge to draw the ships.
-                /// </summary>
-                m_oCurrentSceen.ShipMarkers.Clear();
-                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-                {
-                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
-                    {
-                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-                        //ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
-                        //string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
-
-
-
-                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-                        //+ "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString() + ">>" + info;
-                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                    }
-                }
-                GameState.Instance.GameDateTime.AddSeconds(10.0);
-                m_oCurrentSceen.Refresh();
+                AdvanceTime((int)Constants.TimeInSeconds.ThirtySeconds);
             }
         }
 
-        void AdvanceTime100Seconds_Click(object sender, EventArgs e)
+        void AdvanceTime2M_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 100 seconds.
+            /// Advance simtime by 5 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
-                //GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 100);
-
-                GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, 100);
-
-                /// <summary>
-                /// Kludge to draw the ships.
-                /// </summary>
-                m_oCurrentSceen.ShipMarkers.Clear();
-                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-                {
-                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
-                    {
-                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-                        //ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
-                        //string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
-
-
-
-                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-                        //+"-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString() + ">>" + info;
-                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                    }
-                }
-                GameState.Instance.GameDateTime.AddSeconds(100.0);
-                m_oCurrentSceen.Refresh();
+                AdvanceTime((int)Constants.TimeInSeconds.TwoMinutes);
             }
         }
 
-        void AdvanceTime1000Seconds_Click(object sender, EventArgs e)
+        void AdvanceTime5M_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 1000 seconds.
+            /// Advance simtime by 5 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
-                //GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 1000);
-
-                GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, 1000);
-
-                /// <summary>
-                /// Kludge to draw the ships.
-                /// </summary>
-                m_oCurrentSceen.ShipMarkers.Clear();
-                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-                {
-                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
-                    {
-                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-                        //ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
-                        //string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
-
-
-
-                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-                        
-                        //+"-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString() + ">>" + info;
-                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                    }
-                }
-                GameState.Instance.GameDateTime.AddSeconds(1000.0);
-                m_oCurrentSceen.Refresh();
+                AdvanceTime((int)Constants.TimeInSeconds.FiveMinutes);
             }
         }
+
+        void AdvanceTime20M_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)Constants.TimeInSeconds.TwentyMinutes);
+            }
+        }
+
+        void AdvanceTime1H_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)Constants.TimeInSeconds.Hour);
+            }
+        }
+
+        void AdvanceTime3H_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)(Constants.TimeInSeconds.Hour * 3));
+            }
+        }
+
+        void AdvanceTime8H_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)(Constants.TimeInSeconds.Hour * 8));
+            }
+        }
+
+        void AdvanceTime1D_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)Constants.TimeInSeconds.Day);
+            }
+        }
+
+        void AdvanceTime5D_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)(Constants.TimeInSeconds.Day * 5));
+            }
+        }
+        void AdvanceTime30D_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// Advance simtime by 5 seconds.
+            /// </summary>
+            if (GameState.SE.SimCreated == true)
+            {
+                AdvanceTime((int)Constants.TimeInSeconds.Month);
+            }
+        }
+
+
 
         void StartSim_Click(object sender, EventArgs e)
         {

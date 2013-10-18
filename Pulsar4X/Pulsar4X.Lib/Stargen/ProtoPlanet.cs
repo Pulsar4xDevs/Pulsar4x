@@ -22,9 +22,9 @@ namespace Pulsar4X.Stargen
 
         public double CloudDensity { get; set; }
 
-        public ProtoPlanet()
+        public ProtoPlanet(Star Primary)
         {
-            Planet = new Planet();
+            Planet = new Planet(Primary);
         }
 
         public void init()

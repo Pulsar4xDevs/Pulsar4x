@@ -22,7 +22,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
+            Planet pl1 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -127,7 +127,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
+            Planet pl1 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -166,7 +166,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
+            Planet pl1 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -212,7 +212,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
+            Planet pl1 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -324,7 +324,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
+            Planet pl1 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -393,7 +393,8 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
-            Planet planet = new Planet();
+            Star S1 = new Star();
+            Planet planet = new Planet(S1);
 
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
@@ -480,7 +481,8 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
-            Planet planet = new Planet();
+            Star S1 = new Star();
+            Planet planet = new Planet(S1);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
             for (int loop = 0; loop < 4; loop++)
@@ -527,7 +529,8 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
-            Planet planet = new Planet();
+            Star S1 = new Star();
+            Planet planet = new Planet(S1);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
             for (int loop = 0; loop < 4; loop++)
@@ -604,7 +607,8 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
-            Planet planet = new Planet();
+            Star S1 = new Star();
+            Planet planet = new Planet(S1);
 
 
             Waypoint WP1 = new Waypoint("WP TG Orders",System,0.1,0.1,0);
@@ -649,10 +653,20 @@ namespace Pulsar4X.Tests
             Faction PlayerFaction2 = new Faction(1);
 
             StarSystem System1 = new StarSystem("Sol");
+            Star S1 = new Star();
+            System1.Stars.Add(S1);
             StarSystem System2 = new StarSystem("Alpha Centauri");
+            Star S2 = new Star();
+            System2.Stars.Add(S2);
 
-            Waypoint Start1 = new Waypoint("WP FST1",System1,1.0, 1.0,0);
-            Waypoint Start2 = new Waypoint("WP FST2",System1,1.0005, 1.0005,0);
+            Planet Start1 = new Planet(System1.Stars[0]);
+            Start1.XSystem = 1.0;
+            Start1.YSystem = 1.0;
+            
+
+            Planet Start2 = new Planet(System2.Stars[0]);
+            Start2.XSystem = 1.0005;
+            Start2.YSystem = 1.0005;
 
 
 
@@ -749,7 +763,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
+            Planet pl1 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -801,8 +815,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -852,7 +866,7 @@ namespace Pulsar4X.Tests
                 Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
     PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
 
-                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.TwentyMinutes);
 
                 Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
             }
@@ -872,8 +886,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -918,7 +932,7 @@ namespace Pulsar4X.Tests
                 Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
     PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
 
-                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.TwentyMinutes);
 
                 Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
             }
@@ -935,9 +949,9 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
-            Planet pl3 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
+            Planet pl3 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1047,9 +1061,9 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
-            Planet pl3 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
+            Planet pl3 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1166,8 +1180,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1219,7 +1233,7 @@ namespace Pulsar4X.Tests
                 Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
                    PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
 
-                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.TwentyMinutes);
 
                 Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
             }
@@ -1240,8 +1254,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1371,7 +1385,9 @@ namespace Pulsar4X.Tests
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    Waypoint Start = new Waypoint("WP Random",Sol, wx, wy,loop);
+                    Planet Start = new Planet(Sol.Stars[0]);
+                    Start.XSystem = wx;
+                    Start.YSystem = wy;
 
                     string ID1 = loop.ToString();
 
@@ -1745,8 +1761,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1832,8 +1848,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1888,7 +1904,7 @@ namespace Pulsar4X.Tests
                 Console.WriteLine("Current Order Time: {0} {1}", PlayerFaction1.TaskGroups[0].TimeRequirement,
     PlayerFaction1.TaskGroups[0].TaskGroupOrders[0].orderTimeRequirement);
 
-                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.TwentyMinutes);
 
                 Console.WriteLine("Order Count: {0}", PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count);
             }
@@ -1948,8 +1964,8 @@ namespace Pulsar4X.Tests
             /// Planets and populations are needed for house keeping.
             /// </summary>
             Star S1 = new Star();
-            Planet pl1 = new Planet();
-            Planet pl2 = new Planet();
+            Planet pl1 = new Planet(S1);
+            Planet pl2 = new Planet(S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1); 
             System1.Stars[0].Planets.Add(pl2);
@@ -2011,7 +2027,7 @@ namespace Pulsar4X.Tests
 
             while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
             {
-                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.ThirtyMinutes);
+                PlayerFaction1.TaskGroups[0].FollowOrders(Constants.TimeInSeconds.TwentyMinutes);
             }
 
             /// <summary>

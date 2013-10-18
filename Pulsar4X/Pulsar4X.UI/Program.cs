@@ -46,7 +46,12 @@ namespace Pulsar4X.UI
             oNewFaction.Populations.First().CivilianPopulation = 100.0f;
             GameState.Instance.Factions.Add(oNewFaction);
             oNewFaction.AddNewContactList(otest);
-            oNewFaction.AddNewTaskGroup("Combat Taskgroup", new Entities.Waypoint("WP1",otest, 1.0,1.0,0), otest);
+
+            Entities.Planet P1 = new Entities.Planet(otest.Stars[0]);
+            P1.XSystem = 1.0;
+            P1.YSystem = 1.0;
+
+            oNewFaction.AddNewTaskGroup("Combat Taskgroup", P1, otest);
             oNewFaction.FactionColor = System.Drawing.Color.Blue;
 
             Entities.Faction oNewFaction2 = new Entities.Faction(1);
@@ -54,7 +59,12 @@ namespace Pulsar4X.UI
             oNewFaction2.Populations.Add(new Entities.Population(otest.Stars[0].Planets[3], oNewFaction2));
             GameState.Instance.Factions.Add(oNewFaction2);
             oNewFaction2.AddNewContactList(otest);
-            oNewFaction2.AddNewTaskGroup("Combat Taskgroup", new Entities.Waypoint("WP1", otest, 1.05, 1.05, 1), otest);
+
+            Entities.Planet P2 = new Entities.Planet(otest.Stars[0]);
+            P2.XSystem = 1.05;
+            P2.YSystem = 1.05;
+
+            oNewFaction2.AddNewTaskGroup("Combat Taskgroup", P2, otest);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 
             oNewFaction.AddNewShipDesign("Sword");

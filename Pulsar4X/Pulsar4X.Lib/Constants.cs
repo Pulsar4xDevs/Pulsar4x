@@ -974,7 +974,7 @@ namespace Pulsar4X
             public const uint Minute = 60;
             public const uint TwoMinutes = 120;
             public const uint FiveMinutes = 300;
-            public const uint ThirtyMinutes = 1800;
+            public const uint TwentyMinutes = 1200;
             public const uint Hour = 3600;
             public const uint Day = 86400;
             public const uint Week = 604800;

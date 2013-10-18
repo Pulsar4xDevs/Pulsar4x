@@ -439,7 +439,7 @@ namespace Pulsar4X.Entities
         /// <param name="Title">Name.</param>
         /// <param name="StartBody">Body with population that built the ship that will be put into the TG.</param>
         /// <param name="StartSystem">System in which the TG starts in.</param>
-        public void AddNewTaskGroup(String Title,StarSystemEntity StartBody, StarSystem StartSystem)
+        public void AddNewTaskGroup(String Title,OrbitingEntity StartBody, StarSystem StartSystem)
         {
             TaskGroupTN TG = new TaskGroupTN(Title, this, StartBody, StartSystem);
             TaskGroups.Add(TG);

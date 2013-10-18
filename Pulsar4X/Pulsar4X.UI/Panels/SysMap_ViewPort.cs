@@ -15,24 +15,58 @@ namespace Pulsar4X.UI.Panels
     {
 
         #region Properties
-        public Button AdvanceTime5Seconds
+        public Button AdvanceTime5S
         {
-            get { return m_oAdvanceTime5Seconds; }
+            get { return m_oAdvanceTime5S; }
         }
 
-        public Button AdvanceTime10Seconds
+        public Button AdvanceTime30S
         {
-            get { return m_oAdvanceTime10Seconds; }
+            get { return m_oAdvanceTime30S; }
         }
-        public Button AdvanceTime100Seconds
+        public Button AdvanceTime2M
         {
-            get { return m_oAdvanceTime100Seconds; }
+            get { return m_oAdvanceTime2M; }
         }
 
-        public Button AdvanceTime1000Seconds
+        public Button AdvanceTime5M
         {
-            get { return m_oAdvanceTime1000Seconds; }
+            get { return m_oAdvanceTime5M; }
         }
+
+        public Button AdvanceTime20M
+        {
+            get { return m_oAdvanceTime20M; }
+        }
+
+        public Button AdvanceTime1H
+        {
+            get { return m_oAdvanceTime1H; }
+        }
+        public Button AdvanceTime3H
+        {
+            get { return m_oAdvanceTime3H; }
+        }
+
+        public Button AdvanceTime8H
+        {
+            get { return m_oAdvanceTime8H; }
+        }
+
+        public Button AdvanceTime1D
+        {
+            get { return m_oAdvanceTime1D; }
+        }
+        public Button AdvanceTime5D
+        {
+            get { return m_oAdvanceTime5D; }
+        }
+
+        public Button AdvanceTime30D
+        {
+            get { return m_oAdvanceTime30D; }
+        }
+
         public Button StartSim
         {
             get { return m_oStartSim; }

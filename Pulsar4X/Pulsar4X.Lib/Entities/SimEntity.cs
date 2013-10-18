@@ -46,7 +46,12 @@ namespace Pulsar4X.Entities
                     Species NewSpecies = new Species();
                     P1 = new Faction(Race, NewSpecies, loop);
                     Waypoint Start = new Waypoint("WP Start",Sol, 0.0, 0.0,P1.FactionID);
-                    P1.AddNewTaskGroup("Shipyard TG", Start, Sol);
+
+                    Planet Pl1 = new Planet(Sol.Stars[0]);
+                    Pl1.XSystem = 0.0;
+                    Pl1.YSystem = 0.0;
+
+                    P1.AddNewTaskGroup("Shipyard TG", Pl1, Sol);
                 }
 
                 P1.AddNewContactList(Sol);
@@ -72,13 +77,15 @@ namespace Pulsar4X.Entities
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    Waypoint Start = new Waypoint("WP Random",Sol, wx, wy, P1.FactionID);
+                    Planet Pl2 = new Planet(Sol.Stars[0]);
+                    Pl2.XSystem = wx;
+                    Pl2.YSystem = wy;
 
                     string ID1 = loop.ToString();
 
                     string TGName = "P" + ID1 + "TG" + loop2.ToString();
 
-                    P1.AddNewTaskGroup(TGName, Start, Sol);
+                    P1.AddNewTaskGroup(TGName, Pl2, Sol);
 
                     for (int loop3 = 0; loop3 < ShipCount; loop3++)
                     {

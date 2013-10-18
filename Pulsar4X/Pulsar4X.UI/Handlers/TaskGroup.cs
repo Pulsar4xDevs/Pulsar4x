@@ -824,21 +824,50 @@ namespace Pulsar4X.UI.Handlers
 
                 if (m_oTaskGroupPanel.CurrentTDRadioButton.Checked == true)
                 {
-                    dX = CurrentTaskGroup.TaskGroupOrders[0].target.XSystem - CurrentTaskGroup.Contact.XSystem;
-                    dY = CurrentTaskGroup.TaskGroupOrders[0].target.YSystem - CurrentTaskGroup.Contact.YSystem;
+                    if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                    {
+                        dX = CurrentTaskGroup.Contact.XSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.XSystem + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.XSystem);
+                        dY = CurrentTaskGroup.Contact.YSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.YSystem + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.YSystem);
+                    }
+                    else if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+                    {
+                        dX = CurrentTaskGroup.Contact.XSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.XSystem + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.XSystem);
+                        dY = CurrentTaskGroup.Contact.YSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.YSystem + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.YSystem);
+                    }
+                    else
+                    {
+                        dX = CurrentTaskGroup.Contact.XSystem - CurrentTaskGroup.TaskGroupOrders[0].target.XSystem;
+                        dY = CurrentTaskGroup.Contact.YSystem - CurrentTaskGroup.TaskGroupOrders[0].target.YSystem;
+                    }
 
                     dZ = Math.Sqrt((dX * dX) + (dY * dY));
 
                 }
                 else if (m_oTaskGroupPanel.AllOrdersTDRadioButton.Checked == true)
                 {
+                    if (CurrentTaskGroup.IsOrbiting == true)
+                        CurrentTaskGroup.GetPositionFromOrbit();
+
                     double tX = CurrentTaskGroup.Contact.XSystem;
                     double tY = CurrentTaskGroup.Contact.YSystem;
 
                     for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
                     {
-                        dX = CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem - tX;
-                        dY = CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem - tY;
+                        if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                        {
+                            dX = CurrentTaskGroup.Contact.XSystem - (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.XSystem);
+                            dY = CurrentTaskGroup.Contact.YSystem - (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.YSystem);
+                        }
+                        else if (CurrentTaskGroup.TaskGroupOrders[loop].target.SSEntity == StarSystemEntityType.Population)
+                        {
+                            dX = tX - (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.XSystem);
+                            dY = tY - (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.YSystem);
+                        }
+                        else
+                        {
+                            dX = tX - CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem;
+                            dY = tY - CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem;
+                        }
 
                         dZ = dZ + Math.Sqrt((dX * dX) + (dY * dY));
 
@@ -846,8 +875,21 @@ namespace Pulsar4X.UI.Handlers
                             CurrentTaskGroup.TaskGroupOrders[loop].typeOf != Constants.ShipTN.OrderType.SquadronTransit &&
                             CurrentTaskGroup.TaskGroupOrders[loop].typeOf != Constants.ShipTN.OrderType.TransitAndDivide)
                         {
-                            tX = CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem;
-                            tY = CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem;
+                            if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                            {
+                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.XSystem);
+                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.YSystem);
+                            }
+                            else if (CurrentTaskGroup.TaskGroupOrders[loop].target.SSEntity == StarSystemEntityType.Population)
+                            {
+                                tX =(CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.XSystem);
+                                tY =(CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.YSystem);
+                            }
+                            else
+                            {
+                                tX = CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem;
+                                tY = CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem;
+                            }
                         }
                         else
                         {
