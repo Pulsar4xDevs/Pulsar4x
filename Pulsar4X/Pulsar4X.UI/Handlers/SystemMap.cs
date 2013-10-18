@@ -225,7 +225,8 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
 
-            GameState.Instance.GameDateTime.AddSeconds(TickValue);
+            TimeSpan TS = new TimeSpan(0,0,TickValue);
+            GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
             m_oCurrentSceen.Refresh();
         }
 
