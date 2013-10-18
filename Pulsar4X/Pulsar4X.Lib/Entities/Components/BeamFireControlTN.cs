@@ -382,7 +382,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="RNG">RNG passed to this function from source further up the chain.</param>
         /// <param name="track">Base empire tracking or ship speed ,whichever is higher. Turrets should set track to their tracking speed.</param>
         /// <returns>Whether or not a weapon was able to fire.</returns>
-        public bool FireWeapons(float DistanceToTarget, Random RNG, int track)
+        public bool FireWeapons(float DistanceToTarget, Random RNG, int track, ShipTN FiringShip)
         {
             if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0 || isDestroyed == true)
             {
@@ -486,21 +486,28 @@ namespace Pulsar4X.Entities.Components
                     {
                         RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
-                        int Hit = RNG.Next(1, 100);
-
-
                         weaponFired = LinkedWeapons[loop].Fire();
 
-                        if(toHit >= Hit && weaponFired == true)
+                        if (weaponFired == true)
                         {
-                            ushort location = (ushort)RNG.Next(0,Columns);
-                            bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);
 
-                            if (ShipDest == true)
+                            for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
                             {
-                                Target = null;
-                                OpenFire = false;
-                                return weaponFired;
+
+                                int Hit = RNG.Next(1, 100);
+
+                                if (toHit >= Hit)
+                                {
+                                    ushort location = (ushort)RNG.Next(0, Columns);
+                                    bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);
+
+                                    if (ShipDest == true)
+                                    {
+                                        Target = null;
+                                        OpenFire = false;
+                                        return weaponFired;
+                                    }
+                                }
                             }
                         }
                     }

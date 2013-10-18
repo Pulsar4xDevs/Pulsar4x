@@ -1060,8 +1060,7 @@ namespace Pulsar4X.Entities
                 /// This is a meson strike.
                 /// </summary>
                 internalDamage = 1;
-            }
-            
+            }            
 
             /// <summary>
             /// Internal Component Damage. Each component with an HTK >0 can take atleast 1 hit. a random number is rolled over the entire dac. the selected component's HTK
@@ -2006,7 +2005,7 @@ namespace Pulsar4X.Entities
                         {
                             float DistKM = distance * (float)Constants.Units.KM_PER_AU;
 
-                            fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track);
+                            fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
                         }
                     }
                 }
@@ -2033,7 +2032,10 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
-                                Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                                MessageEntry Entry = new MessageEntry(ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                ShipsFaction.MessageLog.Add(Entry); 
+                                
                                 return false;
                             }
 

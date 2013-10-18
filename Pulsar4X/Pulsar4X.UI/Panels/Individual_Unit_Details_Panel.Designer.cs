@@ -195,6 +195,22 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Current Shield value will go here.
+        /// </summary>
+        public TextBox CurShieldTextBox
+        {
+            get { return m_oCurShieldTextBox; }
+        }
+
+        /// <summary>
+        /// Max shield value will go here.
+        /// </summary>
+        public TextBox MaxShieldTextBox
+        {
+            get { return m_oMaxShieldTextBox; }
+        }
+
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -290,6 +306,10 @@ namespace Pulsar4X.UI.Panels
             this.m_oMotherShipGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oMaintenanceGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oShieldCrewGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oCurrentShieldLabel = new System.Windows.Forms.Label();
+            this.m_oMaxShieldLabel = new System.Windows.Forms.Label();
+            this.m_oCurShieldTextBox = new System.Windows.Forms.TextBox();
+            this.m_oMaxShieldTextBox = new System.Windows.Forms.TextBox();
             this.m_oPowerSystemsGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oParasiteGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oBlankGroupBox = new System.Windows.Forms.GroupBox();
@@ -319,6 +339,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsGroupBox.SuspendLayout();
             this.m_oCombatSummaryTab.SuspendLayout();
             this.m_oCombatSummaryGroupBox.SuspendLayout();
+            this.m_oShieldCrewGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupTabControl
@@ -1165,6 +1186,10 @@ namespace Pulsar4X.UI.Panels
             this.m_oShieldCrewGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oShieldCrewGroupBox.Controls.Add(this.m_oCurrentShieldLabel);
+            this.m_oShieldCrewGroupBox.Controls.Add(this.m_oMaxShieldLabel);
+            this.m_oShieldCrewGroupBox.Controls.Add(this.m_oCurShieldTextBox);
+            this.m_oShieldCrewGroupBox.Controls.Add(this.m_oMaxShieldTextBox);
             this.m_oShieldCrewGroupBox.Location = new System.Drawing.Point(497, 67);
             this.m_oShieldCrewGroupBox.MaximumSize = new System.Drawing.Size(180, 188);
             this.m_oShieldCrewGroupBox.MinimumSize = new System.Drawing.Size(180, 188);
@@ -1172,6 +1197,44 @@ namespace Pulsar4X.UI.Panels
             this.m_oShieldCrewGroupBox.Size = new System.Drawing.Size(180, 188);
             this.m_oShieldCrewGroupBox.TabIndex = 47;
             this.m_oShieldCrewGroupBox.TabStop = false;
+            // 
+            // m_oCurrentShieldLabel
+            // 
+            this.m_oCurrentShieldLabel.AutoSize = true;
+            this.m_oCurrentShieldLabel.Location = new System.Drawing.Point(46, 48);
+            this.m_oCurrentShieldLabel.Name = "m_oCurrentShieldLabel";
+            this.m_oCurrentShieldLabel.Size = new System.Drawing.Size(78, 13);
+            this.m_oCurrentShieldLabel.TabIndex = 43;
+            this.m_oCurrentShieldLabel.Text = "Current Shields";
+            // 
+            // m_oMaxShieldLabel
+            // 
+            this.m_oMaxShieldLabel.AutoSize = true;
+            this.m_oMaxShieldLabel.Location = new System.Drawing.Point(36, 22);
+            this.m_oMaxShieldLabel.Name = "m_oMaxShieldLabel";
+            this.m_oMaxShieldLabel.Size = new System.Drawing.Size(88, 13);
+            this.m_oMaxShieldLabel.TabIndex = 42;
+            this.m_oMaxShieldLabel.Text = "Maximum Shields";
+            // 
+            // m_oCurShieldTextBox
+            // 
+            this.m_oCurShieldTextBox.Enabled = false;
+            this.m_oCurShieldTextBox.Location = new System.Drawing.Point(130, 45);
+            this.m_oCurShieldTextBox.Name = "m_oCurShieldTextBox";
+            this.m_oCurShieldTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oCurShieldTextBox.TabIndex = 32;
+            this.m_oCurShieldTextBox.Text = "0";
+            this.m_oCurShieldTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oMaxShieldTextBox
+            // 
+            this.m_oMaxShieldTextBox.Enabled = false;
+            this.m_oMaxShieldTextBox.Location = new System.Drawing.Point(130, 19);
+            this.m_oMaxShieldTextBox.Name = "m_oMaxShieldTextBox";
+            this.m_oMaxShieldTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oMaxShieldTextBox.TabIndex = 31;
+            this.m_oMaxShieldTextBox.Text = "0";
+            this.m_oMaxShieldTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oPowerSystemsGroupBox
             // 
@@ -1275,6 +1338,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsGroupBox.ResumeLayout(false);
             this.m_oCombatSummaryTab.ResumeLayout(false);
             this.m_oCombatSummaryGroupBox.ResumeLayout(false);
+            this.m_oShieldCrewGroupBox.ResumeLayout(false);
+            this.m_oShieldCrewGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1360,5 +1425,9 @@ namespace Pulsar4X.UI.Panels
         private GroupBox m_oAssignedPopulationGroupBox;
         private GroupBox m_oTEMPPRINTGB;
         private RichTextBox m_oTEMPPRINTRTB;
+        private TextBox m_oCurShieldTextBox;
+        private TextBox m_oMaxShieldTextBox;
+        private Label m_oCurrentShieldLabel;
+        private Label m_oMaxShieldLabel;
     }
 }

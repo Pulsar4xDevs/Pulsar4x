@@ -774,7 +774,11 @@ namespace Pulsar4X.UI.Handlers
                 {
                     foreach (KeyValuePair<ushort, ushort> pair in _CurrnetShip.ShipArmor.armorDamage)
                     {
-                        for (int loop = 0; loop < pair.Value; loop++)
+                        /// <summary>
+                        /// Armor Damage is Healthy = 4, 1 damage = 3, 2 damage = 2, 3 damage = 1, and 4 damage = 4.
+                        /// count down from health.
+                        /// </summary>
+                        for (int loop = (_CurrnetShip.ShipArmor.armorDef.depth - pair.Value - 1); loop >= 0; loop--)
                         {
                             m_oDetailsPanel.ArmorDisplayDataGrid.Rows[loop].Cells[pair.Key].Style.BackColor = Color.Red;
                         }
@@ -1509,6 +1513,12 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RefreshShipInfo()
         {
+            /// <summary>
+            /// General Area info:
+            /// </summary>
+            m_oDetailsPanel.MaxShieldTextBox.Text = Math.Floor(_CurrnetShip.ShipClass.TotalShieldPool).ToString();
+            m_oDetailsPanel.CurShieldTextBox.Text = Math.Floor(_CurrnetShip.CurrentShieldPool).ToString();
+
             /// <summary>
             /// Armor tab:
             /// </summary>
