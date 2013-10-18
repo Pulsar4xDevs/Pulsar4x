@@ -363,6 +363,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool IsDestroyed { get; set; }
 
+        /// <summary>
+        /// List of ships targeted on this vessel.
+        /// </summary>
+        public BindingList<ShipTN> ShipsTargetting { get; set; }
+
 
         /// <summary>
         /// ShipTN creates a ship of classDefinition in Index ShipIndex for the taskgroup ship list.
@@ -766,6 +771,8 @@ namespace Pulsar4X.Entities
             CurrentMagazineCapacityMax = ClassDefinition.TotalMagazineCapacity;
 
             IsDestroyed = false;
+
+            ShipsTargetting = new BindingList<ShipTN>();
         }
 
         /// <summary>
@@ -1219,9 +1226,9 @@ namespace Pulsar4X.Entities
                                 Attempts++;
                                 if (Attempts == 5)
                                 {
-                                    internalDamage = 0;
-                                    break;
+                                    internalDamage = 0;   
                                 }
+                                break;
                             }
                             else
                             {

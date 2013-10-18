@@ -486,6 +486,35 @@ namespace Pulsar4X.Entities
                             pair.Key.ShipsFaction.TaskGroups.Remove(pair.Key.ShipsTaskGroup);
                         }
 
+                        for(int loop5 = 0; loop5 < pair.Key.ShipsTargetting.Count; loop5++)
+                        {
+                            ShipTN nextShip = pair.Key.ShipsTargetting[loop5];
+                            for (int loop6 = 0; loop6 < nextShip.ShipBFC.Count; loop6++)
+                            {
+                                if (nextShip.ShipBFC[loop6].getTarget() == pair.Key)
+                                {
+                                    nextShip.ShipBFC[loop6].clearTarget();
+                                    nextShip.ShipBFC[loop6].openFire = false;
+                                    nextShip.ShipsFaction.OpenFireFC.Remove(nextShip.ShipBFC[loop6]);
+                                    nextShip.ShipsFaction.OpenFireFCType.Remove(nextShip.ShipBFC[loop6]);
+                                }
+                            }
+
+                            for (int loop6 = 0; loop6 < nextShip.ShipMFC.Count; loop6++)
+                            {
+                                if (nextShip.ShipMFC[loop6].getTarget().targetType == StarSystemEntityType.TaskGroup)
+                                {
+                                    if (nextShip.ShipMFC[loop6].getTarget().ship == pair.Key)
+                                    {
+                                        nextShip.ShipMFC[loop6].clearTarget();
+                                        nextShip.ShipMFC[loop6].openFire = false;
+                                        nextShip.ShipsFaction.OpenFireFC.Remove(nextShip.ShipMFC[loop6]);
+                                        nextShip.ShipsFaction.OpenFireFCType.Remove(nextShip.ShipMFC[loop6]);
+                                    }
+                                }
+                            }
+                        }
+
                         P[loop].RechargeList.Remove(pair.Key);
 
                         /// <summary>

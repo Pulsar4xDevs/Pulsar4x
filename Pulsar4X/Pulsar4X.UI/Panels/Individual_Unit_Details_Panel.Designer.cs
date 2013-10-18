@@ -240,6 +240,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oDACListBox = new System.Windows.Forms.ListBox();
             this.m_oParaCargoGUTab = new System.Windows.Forms.TabPage();
             this.m_oMiscellaneousTab = new System.Windows.Forms.TabPage();
+            this.m_oTEMPPRINTGB = new System.Windows.Forms.GroupBox();
+            this.m_oTEMPPRINTRTB = new System.Windows.Forms.RichTextBox();
             this.m_oHistoryNotesTDTab = new System.Windows.Forms.TabPage();
             this.m_oShipDesignTab = new System.Windows.Forms.TabPage();
             this.m_oClassDesignTab = new System.Windows.Forms.TabPage();
@@ -292,8 +294,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oParasiteGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oBlankGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oAssignedPopulationGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oTEMPPRINTGB = new System.Windows.Forms.GroupBox();
-            this.m_oTEMPPRINTRTB = new System.Windows.Forms.RichTextBox();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oArmourStatusTab.SuspendLayout();
             this.m_oDamageControlTab.SuspendLayout();
@@ -304,6 +304,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oDamagedSystemsGroupBox.SuspendLayout();
             this.m_oDACGroupBox.SuspendLayout();
             this.m_oMiscellaneousTab.SuspendLayout();
+            this.m_oTEMPPRINTGB.SuspendLayout();
             this.m_oClassDesignTab.SuspendLayout();
             this.m_oClassDesignGroupBox.SuspendLayout();
             this.m_oCombatSettingsTab.SuspendLayout();
@@ -318,7 +319,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsGroupBox.SuspendLayout();
             this.m_oCombatSummaryTab.SuspendLayout();
             this.m_oCombatSummaryGroupBox.SuspendLayout();
-            this.m_oTEMPPRINTGB.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupTabControl
@@ -605,6 +605,27 @@ namespace Pulsar4X.UI.Panels
             this.m_oMiscellaneousTab.TabIndex = 4;
             this.m_oMiscellaneousTab.Text = "Miscellaneous";
             this.m_oMiscellaneousTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oTEMPPRINTGB
+            // 
+            this.m_oTEMPPRINTGB.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oTEMPPRINTGB.Controls.Add(this.m_oTEMPPRINTRTB);
+            this.m_oTEMPPRINTGB.Location = new System.Drawing.Point(3, 3);
+            this.m_oTEMPPRINTGB.Name = "m_oTEMPPRINTGB";
+            this.m_oTEMPPRINTGB.Size = new System.Drawing.Size(1027, 534);
+            this.m_oTEMPPRINTGB.TabIndex = 40;
+            this.m_oTEMPPRINTGB.TabStop = false;
+            // 
+            // m_oTEMPPRINTRTB
+            // 
+            this.m_oTEMPPRINTRTB.Location = new System.Drawing.Point(13, 26);
+            this.m_oTEMPPRINTRTB.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTEMPPRINTRTB.Name = "m_oTEMPPRINTRTB";
+            this.m_oTEMPPRINTRTB.Size = new System.Drawing.Size(1001, 495);
+            this.m_oTEMPPRINTRTB.TabIndex = 0;
+            this.m_oTEMPPRINTRTB.Text = "";
             // 
             // m_oHistoryNotesTDTab
             // 
@@ -1207,27 +1228,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignedPopulationGroupBox.TabStop = false;
             this.m_oAssignedPopulationGroupBox.Text = "Assigned Population";
             // 
-            // m_oTEMPPRINTGB
-            // 
-            this.m_oTEMPPRINTGB.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oTEMPPRINTGB.Controls.Add(this.m_oTEMPPRINTRTB);
-            this.m_oTEMPPRINTGB.Location = new System.Drawing.Point(3, 3);
-            this.m_oTEMPPRINTGB.Name = "m_oTEMPPRINTGB";
-            this.m_oTEMPPRINTGB.Size = new System.Drawing.Size(1027, 534);
-            this.m_oTEMPPRINTGB.TabIndex = 40;
-            this.m_oTEMPPRINTGB.TabStop = false;
-            // 
-            // m_oTEMPPRINTRTB
-            // 
-            this.m_oTEMPPRINTRTB.Location = new System.Drawing.Point(13, 26);
-            this.m_oTEMPPRINTRTB.Margin = new System.Windows.Forms.Padding(10);
-            this.m_oTEMPPRINTRTB.Name = "m_oTEMPPRINTRTB";
-            this.m_oTEMPPRINTRTB.Size = new System.Drawing.Size(1001, 495);
-            this.m_oTEMPPRINTRTB.TabIndex = 0;
-            this.m_oTEMPPRINTRTB.Text = "";
-            // 
             // Individual_Unit_Details_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1258,6 +1258,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oDamagedSystemsGroupBox.ResumeLayout(false);
             this.m_oDACGroupBox.ResumeLayout(false);
             this.m_oMiscellaneousTab.ResumeLayout(false);
+            this.m_oTEMPPRINTGB.ResumeLayout(false);
             this.m_oClassDesignTab.ResumeLayout(false);
             this.m_oClassDesignGroupBox.ResumeLayout(false);
             this.m_oCombatSettingsTab.ResumeLayout(false);
@@ -1274,7 +1275,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsGroupBox.ResumeLayout(false);
             this.m_oCombatSummaryTab.ResumeLayout(false);
             this.m_oCombatSummaryGroupBox.ResumeLayout(false);
-            this.m_oTEMPPRINTGB.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
