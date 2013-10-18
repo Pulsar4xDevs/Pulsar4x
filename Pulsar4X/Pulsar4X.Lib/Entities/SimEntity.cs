@@ -308,6 +308,196 @@ namespace Pulsar4X.Entities
             TGDestroyed = 0;
         }
 
+        /// <summary>
+        /// AdvanceSim is a more general pulsar simulation than runsim.
+        /// </summary>
+        /// <param name="P"></param>
+        /// <param name="RNG"></param>
+        /// <param name="tickValue"></param>
+        public void AdvanceSim(BindingList<Faction> P, Random RNG, int tickValue)
+        {
+            lastTick = CurrentTick;
+            CurrentTick += tickValue;
+
+            /// <summary>
+            /// Do sensor sweeps here.
+            /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                P[loop].SensorSweep(CurrentTick);
+            }
+
+            /// <summary>
+            /// Follow orders here.
+            /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                for (int loop2 = 0; loop2 < P[loop].TaskGroups.Count; loop2++)
+                {
+                    /// <summary>
+                    /// Adding new taskgroups means adding a loop here to run through them all.
+                    /// </summary>
+                    if (P[loop].TaskGroups[loop2].TaskGroupOrders.Count != 0)
+                        P[loop].TaskGroups[loop2].FollowOrders((uint)(CurrentTick - lastTick));
+                }
+            }
+
+            /// <summary>
+            /// attempt to fire weapons at target here.
+            /// Initiative will have to be implemented here for "fairness". right now lower P numbers have the advantage.
+            /// Check for destroyed ships as well.
+            /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                foreach (KeyValuePair<ComponentTN, ShipTN> pair in P[loop].OpenFireFC)
+                {
+                    /// <summary>
+                    /// Is BFC
+                    /// </summary>
+                    if (P[loop].OpenFireFCType[pair.Key] == true)
+                    {
+                        /// <summary>
+                        /// Open fire and not destroyed.
+                        /// </summary>
+                        if (pair.Value.ShipBFC[pair.Key.componentIndex].openFire == true && pair.Value.ShipBFC[pair.Key.componentIndex].isDestroyed == false)
+                        {
+                            ShipTN Target = pair.Value.ShipBFC[pair.Key.componentIndex].target;
+
+                            /// <summary>
+                            /// Same System as target.
+                            /// </summary>
+                            if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.ShipsTaskGroup.Contact.CurrentSystem)
+                            {
+
+                                StarSystem CurSystem = pair.Value.ShipsTaskGroup.Contact.CurrentSystem;
+                                int MyID = CurSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
+                                int TargetID = CurSystem.SystemContactList.IndexOf(Target.ShipsTaskGroup.Contact);
+
+                                if (pair.Value.ShipsFaction.DetectedContacts.ContainsKey(Target) == true)
+                                {
+                                    /// <summary>
+                                    /// This tick active detection.
+                                    /// </summary>
+                                    if (pair.Value.ShipsFaction.DetectedContacts[Target].active == true)
+                                    {
+                                        bool WF = pair.Value.ShipFireWeapons(CurrentTick, RNG);
+
+                                        if (Target.IsDestroyed == true)
+                                        {
+                                            if (Target.ShipsFaction.RechargeList.ContainsKey(Target) == true)
+                                            {
+                                                Target.ShipsFaction.RechargeList[Target] = (int)Faction.RechargeStatus.Destroyed;
+                                            }
+                                            else
+                                            {
+                                                Target.ShipsFaction.RechargeList.Add(Target, (int)Faction.RechargeStatus.Destroyed);
+                                            }
+                                        }
+
+                                        /*String Fire = String.Format("Weapons Fired: {0}", WF );
+                                        MessageEntry Entry = new MessageEntry(P[loop].TaskGroups[0].Contact.CurrentSystem, P[loop].TaskGroups[0].Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                        P[loop].MessageLog.Add(Entry);*/
+
+                                        if (WF == true)
+                                        {
+                                            if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                            {
+                                                int value = P[loop].RechargeList[pair.Value];
+
+                                                if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                                {
+                                                    P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //pair.Value.ShipMFC[pair.Key.componentIndex]
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Do simulation maintenance here, shields,reload,recharge,etc.
+            /// </summary>
+            uint TimeValue = (uint)(CurrentTick - lastTick);
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                foreach (KeyValuePair<ShipTN, int> pair in P[loop].RechargeList)
+                {
+                    int value = pair.Value;
+
+                    if ((value & (int)Faction.RechargeStatus.Shields) == (int)Faction.RechargeStatus.Shields)
+                    {
+                        pair.Key.RechargeShields(TimeValue);
+                    }
+
+
+                    if ((value & (int)Faction.RechargeStatus.Weapons) == (int)Faction.RechargeStatus.Weapons)
+                    {
+                        int ret = pair.Key.RechargeBeamWeapons(TimeValue);
+
+                        ushort amt = (ushort)(Math.Floor((float)TimeValue / 5.0f));
+                        int PowerComp = pair.Key.CurrentPowerGen * amt;
+
+                        if (ret == PowerComp)
+                        {
+                            P[loop].RechargeList[pair.Key] = P[loop].RechargeList[pair.Key] - (int)Faction.RechargeStatus.Weapons;
+
+                            if (P[loop].RechargeList[pair.Key] == 0)
+                            {
+                                P[loop].RechargeList.Remove(pair.Key);
+                                loop--;
+                                break;
+                            }
+                        }
+                    }
+
+                    /// <summary>
+                    /// Ship destruction, very involving.
+                    if((value & (int)Faction.RechargeStatus.Destroyed) == (int)Faction.RechargeStatus.Destroyed)
+                    {
+                        for (int loop4 = factionStart; loop4 < factionCount; loop4++)
+                        {
+                            if (P[loop4].DetectedContacts.ContainsKey(pair.Key) == true)
+                            {
+                                P[loop4].DetectedContacts.Remove(pair.Key);
+                            }
+                        }
+
+                        bool nodeGone = pair.Key.OnDestroyed();
+                        pair.Key.ShipClass.ShipsInClass.Remove(pair.Key);
+                        pair.Key.ShipsTaskGroup.Ships.Remove(pair.Key);
+                        pair.Key.ShipsFaction.Ships.Remove(pair.Key);
+
+                        if (pair.Key.ShipsTaskGroup.Ships.Count == 0)
+                        {
+                            pair.Key.ShipsTaskGroup.clearAllOrders();
+                            pair.Key.ShipsTaskGroup.Contact.CurrentSystem.RemoveContact(pair.Key.ShipsTaskGroup.Contact);
+                            pair.Key.ShipsFaction.TaskGroups.Remove(pair.Key.ShipsTaskGroup);
+                        }
+
+                        P[loop].RechargeList.Remove(pair.Key);
+
+                        /// <summary>
+                        /// Have to re-run loop since a ship was removed from all kinds of things.
+                        loop--;
+                        break;
+                    }
+                }
+            }
+              
+        }
+
         public void RunSim(BindingList<Faction> P, Random RNG, int tickValue)
         {
             bool done = false;
@@ -416,6 +606,15 @@ namespace Pulsar4X.Entities
         public SimEntity()
         {
             SimCreated = false;
+        }
+
+        public SimEntity(int factCount, int factStart)
+        {
+            SimCreated = true;
+            factionStart = factStart;
+            factionCount = factCount;
+            TGStart = 0;
+            TGCount = 0;
         }
     }
 }

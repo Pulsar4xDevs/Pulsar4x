@@ -77,6 +77,8 @@ namespace Pulsar4X.Entities.Components
         {
             GenCompDef = definition;
 
+            Name = definition.Name;
+
             /// <summary>
             /// In the case of destroyed fuel/engineering bays I will assume that all supplies are evenly distributed by percentage and merely subtract an average.
             /// </summary>

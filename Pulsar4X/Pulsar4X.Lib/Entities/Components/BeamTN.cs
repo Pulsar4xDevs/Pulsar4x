@@ -128,7 +128,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Type">What type of beam weapon this is, note that componentTypeTN encompasses much more than beam weapon types, don't give those values to this function.</param>
         /// <param name="SizeTech">Every beam weapon either has a calibre size, except for particle beams, which use warhead strength, and gauss which give a rate of fire. All use this variable.</param>
         /// <param name="RangeTech">Every beam weapon has a range tech except for plasma carronades which do not have any way to increase range or decrease damage falloff.</param>
-        /// <param name="CapacitorTech">Every beam weapon has a capacitor tech associated with it except gauss.</param>
+        /// <param name="CapacitorTech">Every beam weapon has a capacitor tech associated with it except gauss. Shotcount tech for gauss.</param>
         /// <param name="Reduction">Lasers and Gauss both have size reduction capabilities, though with drawbacks for both types: recharge rate and accuracy respectively.</param>
         public BeamDefTN(String Title, ComponentTypeTN Type, byte SizeTech, byte RangeTech, byte CapacitorTech, float Reduction)
         {
@@ -345,7 +345,7 @@ namespace Pulsar4X.Entities.Components
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.ParticlePower[WeaponSizeTech];
 
                     Damage.Add(Constants.BeamWeaponTN.ParticleDamage[WeaponSizeTech]);
-                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech];
+                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech] / 10;
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(Constants.BeamWeaponTN.ParticleDamage[WeaponSizeTech]);
@@ -365,7 +365,7 @@ namespace Pulsar4X.Entities.Components
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.ParticlePower[WeaponSizeTech];
 
                     Damage.Add(Constants.BeamWeaponTN.AdvancedParticleDamage[WeaponSizeTech]);
-                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech];
+                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech] / 10;
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(Constants.BeamWeaponTN.AdvancedParticleDamage[WeaponSizeTech]);
@@ -529,8 +529,14 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public bool Fire()
         {
-            CurrentCapacitor = 0;
-            return isDestroyed;
+            bool ready = readyToFire();
+
+            if (ready == true)
+            {
+                CurrentCapacitor = 0;
+            }
+
+            return ready;
         }
     }
 }

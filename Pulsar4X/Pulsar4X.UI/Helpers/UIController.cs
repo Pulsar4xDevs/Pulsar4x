@@ -204,6 +204,10 @@ namespace Pulsar4X.UI.Helpers
                 m_oClassDesign.ActivateOptionsPanel();
                 m_oClassDesign.ActivatePropertiesPanel();
             }
+            else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.TaskGroup_Panel))
+            {
+                m_oTaskGroup.ShowAllPanels(a_oDockPanel);
+            }
         }
 
         #endregion

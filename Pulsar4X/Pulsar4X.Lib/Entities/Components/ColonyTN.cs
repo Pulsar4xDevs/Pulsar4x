@@ -67,6 +67,9 @@ namespace Pulsar4X.Entities.Components
         public ColonyTN(ColonyDefTN definition)
         {
             ColonyDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
 

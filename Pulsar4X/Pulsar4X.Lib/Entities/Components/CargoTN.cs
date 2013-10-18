@@ -116,6 +116,9 @@ namespace Pulsar4X.Entities.Components
         public CargoTN(CargoDefTN definition)
         {
             CargoDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
     }

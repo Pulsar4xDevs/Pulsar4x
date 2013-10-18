@@ -43,6 +43,17 @@ namespace Pulsar4X.UI.Handlers
                 if (value != _CurrnetShip)
                 {
                     _CurrnetShip = value;
+
+                    if (_CurrnetShip.ShipASensor.Count != 0)
+                        _CurrnetSensor = _CurrnetShip.ShipASensor[0];
+                    else
+                        _CurrnetSensor = null;
+
+                    if (_CurrnetShip.ShipFireControls.Count != 0)
+                        _CurrnetFC = _CurrnetShip.ShipFireControls[0];
+                    else
+                        _CurrnetFC = null;
+
                     RefreshShipInfo();
                 }
             }
@@ -62,9 +73,27 @@ namespace Pulsar4X.UI.Handlers
                     _CurrnetFaction = value;
 
                     if (_CurrnetFaction.Ships.Count != 0)
+                    {
                         _CurrnetShip = _CurrnetFaction.Ships[0];
+                        if (_CurrnetShip.ShipASensor.Count != 0)
+                            _CurrnetSensor = _CurrnetShip.ShipASensor[0];
+                        else
+                            _CurrnetSensor = null;
+
+
+                        if (_CurrnetShip.ShipFireControls.Count != 0)
+                        {
+                            _CurrnetFC = _CurrnetShip.ShipFireControls[0];
+                        }
+                        else
+                            _CurrnetFC = null;
+                    }
                     else
+                    {
                         _CurrnetShip = null;
+                        _CurrnetSensor = null;
+                        _CurrnetFC = null;
+                    }
                     RefreshShipPanels();
                 }
             }
@@ -105,7 +134,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// I need to know what type of BFC I have.
+        /// I need to know what type of FC I have.
         /// </summary>
         public bool isBFC { get; set; }
         
@@ -231,6 +260,18 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void FactionSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            /// <summary>
+            /// This is a part of the kludge below for the SFC and SA combo boxes.
+            /// Order of operations matters, set the index to -1 to delete BEFORE clearing everything.
+            /// </summary>
+            
+
+            m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex = -1;
+            m_oDetailsPanel.SelectedActiveComboBox.Items.Clear();
+
+            m_oDetailsPanel.SFCComboBox.SelectedIndex = -1;
+            m_oDetailsPanel.SFCComboBox.Items.Clear();
+
             RefreshShipPanels();
         }
 
@@ -241,41 +282,43 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ShipListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //RefreshShipInfo();
-            CurrentShip = CurrentFaction.Ships[m_oShipListPanel.ShipsListBox.SelectedIndex];
-
-            /// <summary>
-            /// This is a kludge, plain and simple, I was not able to successfully bind the SFCComboBox, so I am doing this.
-            /// </summary>
-            m_oDetailsPanel.SFCComboBox.Items.Clear();
-            for (int loop = 0; loop < CurrentShip.ShipFireControls.Count; loop++)
+            if (m_oShipListPanel.ShipsListBox.SelectedIndex != -1)
             {
-                m_oDetailsPanel.SFCComboBox.Items.Add(CurrentShip.ShipFireControls[loop].Name);
-            }
+                _CurrnetShip = _CurrnetFaction.Ships[m_oShipListPanel.ShipsListBox.SelectedIndex];
 
-            if (m_oDetailsPanel.SFCComboBox.Items.Count != 0)
-                m_oDetailsPanel.SFCComboBox.SelectedIndex = 0;
+                /// <summary>
+                /// This is a kludge, plain and simple, I was not able to successfully bind the SFCComboBox, so I am doing this.
+                /// </summary>
+                m_oDetailsPanel.SFCComboBox.Items.Clear();
+                for (int loop = 0; loop < _CurrnetShip.ShipFireControls.Count; loop++)
+                {
+                    m_oDetailsPanel.SFCComboBox.Items.Add(_CurrnetShip.ShipFireControls[loop].Name);
+                }
 
-            /// <summary>
-            /// Same will probably be true for sensors.
-            /// </summary>
-            m_oDetailsPanel.SelectedActiveComboBox.Items.Clear();
-            for (int loop = 0; loop < CurrentShip.ShipASensor.Count; loop++)
-            {
-                m_oDetailsPanel.SelectedActiveComboBox.Items.Add(CurrentShip.ShipASensor[loop].Name);
-            }
+                if (m_oDetailsPanel.SFCComboBox.Items.Count != 0)
+                    m_oDetailsPanel.SFCComboBox.SelectedIndex = 0;
 
-            if (m_oDetailsPanel.SelectedActiveComboBox.Items.Count != 0)
-                m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex = 0;
+                /// <summary>
+                /// Same will probably be true for sensors.
+                /// </summary>
+                m_oDetailsPanel.SelectedActiveComboBox.Items.Clear();
+                for (int loop = 0; loop < _CurrnetShip.ShipASensor.Count; loop++)
+                {
+                    m_oDetailsPanel.SelectedActiveComboBox.Items.Add(CurrentShip.ShipASensor[loop].Name);
+                }
+
+                if (m_oDetailsPanel.SelectedActiveComboBox.Items.Count != 0)
+                    m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex = 0;
 
 
-            if (CurrentShip.ShieldIsActive == true && CurrentShip.CurrentShieldPoolMax != 0.0f)
-            {
-                m_oDetailsPanel.ShieldGroupBox.Text = "Shields(On)";
-            }
-            else
-            {
-                m_oDetailsPanel.ShieldGroupBox.Text = "Shields(Off)";
+                if (_CurrnetShip.ShieldIsActive == true && _CurrnetShip.CurrentShieldPoolMax != 0.0f)
+                {
+                    m_oDetailsPanel.ShieldGroupBox.Text = "Shields(On)";
+                }
+                else
+                {
+                    m_oDetailsPanel.ShieldGroupBox.Text = "Shields(Off)";
+                }
             }
         }
 
@@ -286,16 +329,19 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void SFCComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (m_oDetailsPanel.SFCComboBox.SelectedIndex < CurrentShip.ShipBFC.Count)
+            if (_CurrnetShip != null && m_oDetailsPanel.SFCComboBox.SelectedIndex != -1)
             {
-                CurrentFC = CurrentShip.ShipBFC[m_oDetailsPanel.SFCComboBox.SelectedIndex];
-                isBFC = true;
-            }
-            else
-            {
-                int newIndex = m_oDetailsPanel.SFCComboBox.SelectedIndex - CurrentShip.ShipBFC.Count;
-                CurrentFC = CurrentShip.ShipMFC[newIndex];
-                isBFC = false;
+                if (m_oDetailsPanel.SFCComboBox.SelectedIndex < _CurrnetShip.ShipBFC.Count)
+                {
+                    _CurrnetFC = _CurrnetShip.ShipBFC[m_oDetailsPanel.SFCComboBox.SelectedIndex];
+                    isBFC = true;
+                }
+                else
+                {
+                    int newIndex = m_oDetailsPanel.SFCComboBox.SelectedIndex - _CurrnetShip.ShipBFC.Count;
+                    _CurrnetFC = _CurrnetShip.ShipMFC[newIndex];
+                    isBFC = false;
+                }
             }
 
             RefreshFCInfo();
@@ -303,51 +349,66 @@ namespace Pulsar4X.UI.Handlers
 
         private void SelectedActiveComboBox_SelectIndexChanged(object sender, EventArgs e)
         {
-            CurrentSensor = CurrentShip.ShipASensor[m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex];
+            if (_CurrnetShip != null && m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex != -1)
+            {
+                _CurrnetSensor = _CurrnetShip.ShipASensor[m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex];
 
-            if (CurrentSensor.isActive == true && CurrentSensor.isDestroyed == false)
-                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(On)";
-            else
-                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
+                if (_CurrnetSensor.isActive == true && _CurrnetSensor.isDestroyed == false)
+                    m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(On)";
+                else
+                    m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
+            }
         }
 
         /// <summary>
-        /// Handle open fire button clicked.
+        /// Handle open fire button clicked. Faction stores a list of FCs with fire authorization, add this FC to that list if it isn't there already.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void OpenFireButton_Click(object sender, EventArgs e)
         {
-            if (CurrentFC != null)
+            if (_CurrnetFC != null)
             {
+                if (_CurrnetFaction.OpenFireFC.ContainsKey(_CurrnetFC) == false)
+                {
+                    _CurrnetFaction.OpenFireFC.Add(_CurrnetFC, _CurrnetShip);
+                    _CurrnetFaction.OpenFireFCType.Add(_CurrnetFC, isBFC);
+                }
+
                 if (isBFC == true)
                 {
-                    CurrentShip.ShipBFC[CurrentFC.componentIndex].openFire = true;
+                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].openFire = true;
                 }
                 else
                 {
-                    CurrentShip.ShipMFC[CurrentFC.componentIndex].openFire = true;
+                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].openFire = true;
                 }
                 BuildCombatSummary();
             }
         }
 
         /// <summary>
-        /// Handle cease fire button clicked.
+        /// Handle cease fire button clicked. Faction stores a list of FCs with fire authorization, remove this FC from that list if it is there.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void CeaseFireButton_Click(object sender, EventArgs e)
         {
-            if (CurrentFC != null)
+            if (_CurrnetFC != null)
             {
+                if (_CurrnetFaction.OpenFireFC.ContainsKey(_CurrnetFC) == true)
+                {
+                    _CurrnetFaction.OpenFireFC.Remove(_CurrnetFC);
+                    _CurrnetFaction.OpenFireFCType.Remove(_CurrnetFC);
+                }
+
                 if (isBFC == true)
                 {
-                    CurrentShip.ShipBFC[CurrentFC.componentIndex].openFire = false;
+                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].openFire = false;
                 }
                 else
                 {
-                    CurrentShip.ShipMFC[CurrentFC.componentIndex].openFire = false;
+                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].openFire = false;
                 }
                 BuildCombatSummary();
             }
@@ -360,11 +421,16 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RaiseShieldsButton_Click(object sender, EventArgs e)
         {
-            if (CurrentShip != null)
+            if (_CurrnetShip != null)
             {
-                CurrentShip.SetShields(true);
+                _CurrnetShip.SetShields(true);
 
-                if (CurrentShip.ShieldIsActive == true && CurrentShip.CurrentShieldPoolMax != 0.0f)
+                if (_CurrnetFaction.RechargeList.ContainsKey(_CurrnetShip) == false)
+                {
+                    _CurrnetFaction.RechargeList.Add(_CurrnetShip, (int)Faction.RechargeStatus.Shields);
+                }
+
+                if (_CurrnetShip.ShieldIsActive == true && _CurrnetShip.CurrentShieldPoolMax != 0.0f)
                 {
                     m_oDetailsPanel.ShieldGroupBox.Text = "Shields(On)";
                 }
@@ -378,9 +444,32 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void LowerShieldsButton_Click(object sender, EventArgs e)
         {
-            if (CurrentShip != null)
+            if (_CurrnetShip != null)
             {
-                CurrentShip.SetShields(false);
+                _CurrnetShip.SetShields(false);
+
+                if (_CurrnetFaction.RechargeList.ContainsKey(_CurrnetShip) == true)
+                {
+                    int value = _CurrnetFaction.RechargeList[_CurrnetShip];
+
+                    /// <summary>
+                    /// Value here is a bitwise status word.
+                    /// </summary>
+                    if ((value & (int)Faction.RechargeStatus.Shields) == 1)
+                    {
+                        value = value - (int)Faction.RechargeStatus.Shields;
+
+                        if (value == 0)
+                        {
+                            _CurrnetFaction.RechargeList.Remove(_CurrnetShip);
+                        }
+                        else
+                        {
+                            _CurrnetFaction.RechargeList[_CurrnetShip] = value;
+                        }
+                    }
+                }
+
                 m_oDetailsPanel.ShieldGroupBox.Text = "Shields(Off)";
             }
         }
@@ -392,10 +481,13 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ActiveButton_Click(object sender, EventArgs e)
         {
-            CurrentShip.SetSensor(CurrentSensor, true);
+            if (_CurrnetShip != null && _CurrnetSensor != null)
+            {
+                _CurrnetShip.ShipsTaskGroup.SetActiveSensor(_CurrnetShip.ShipsTaskGroup.Ships.IndexOf(_CurrnetShip), _CurrnetSensor.componentIndex, true);
 
-            if (CurrentSensor.isActive == true && CurrentSensor.isDestroyed == false)
-                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(On)";
+                if (_CurrnetSensor.isActive == true && _CurrnetSensor.isDestroyed == false)
+                    m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(On)";
+            }
         }
 
         /// <summary>
@@ -405,7 +497,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void InactiveButton_Click(object sender, EventArgs e)
         {
-            CurrentShip.SetSensor(CurrentSensor, false);
+            _CurrnetShip.ShipsTaskGroup.SetActiveSensor(_CurrnetShip.ShipsTaskGroup.Ships.IndexOf(_CurrnetShip), _CurrnetSensor.componentIndex, false);
 
             if(CurrentSensor.isActive == false || CurrentSensor.isDestroyed == true)
                 m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
@@ -643,30 +735,34 @@ namespace Pulsar4X.UI.Handlers
             m_oDetailsPanel.ArmorDisplayDataGrid.Rows.Clear();
             m_oDetailsPanel.ArmorDisplayDataGrid.Columns.Clear();
 
-            Padding newPadding = new Padding(2, 0, 2, 0);
-            for (int loop = 0; loop < CurrentShip.ShipArmor.armorDef.cNum; loop++)
+            if (_CurrnetShip != null)
             {
-                AddColumn(newPadding);
-            }
 
-            for (int loop = 0; loop < CurrentShip.ShipArmor.armorDef.depth; loop++)
-            {
-                AddRow(loop);
-            }
-
-            m_oDetailsPanel.ArmorDisplayDataGrid.ClearSelection();
-
-
-            if (CurrentShip.ShipArmor.isDamaged == true)
-            {
-                foreach( KeyValuePair<ushort, ushort>  pair in CurrentShip.ShipArmor.armorDamage)
+                Padding newPadding = new Padding(2, 0, 2, 0);
+                for (int loop = 0; loop < CurrentShip.ShipArmor.armorDef.cNum; loop++)
                 {
-                    for (int loop = 0; loop < pair.Value; loop++)
+                    AddColumn(newPadding);
+                }
+
+                for (int loop = 0; loop < CurrentShip.ShipArmor.armorDef.depth; loop++)
+                {
+                    AddRow(loop);
+                }
+
+                if (CurrentShip.ShipArmor.isDamaged == true)
+                {
+                    foreach (KeyValuePair<ushort, ushort> pair in CurrentShip.ShipArmor.armorDamage)
                     {
-                        m_oDetailsPanel.ArmorDisplayDataGrid.Rows[loop].Cells[pair.Key].Style.BackColor = Color.Red;
+                        for (int loop = 0; loop < pair.Value; loop++)
+                        {
+                            m_oDetailsPanel.ArmorDisplayDataGrid.Rows[loop].Cells[pair.Key].Style.BackColor = Color.Red;
+                        }
                     }
                 }
+
+                m_oDetailsPanel.ArmorDisplayDataGrid.ClearSelection();
             }
+
         }
 
         /// <summary>
@@ -676,78 +772,82 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.DACListBox.Items.Clear();
 
-            int DAC = 1;
-            String Entry = "N/A";
-            for (int loop = 0; loop < CurrentShip.ShipClass.ListOfComponentDefs.Count; loop++)
+            if (_CurrnetShip != null)
             {
-                String DACString = DAC.ToString();
-                if (DAC < 10)
+
+                int DAC = 1;
+                String Entry = "N/A";
+                for (int loop = 0; loop < CurrentShip.ShipClass.ListOfComponentDefs.Count; loop++)
                 {
-                    DACString = "00" + DAC.ToString();
-                }
-                else if(DAC < 100)
-                {
-                    DACString = "0" + DAC.ToString();
-                }
+                    String DACString = DAC.ToString();
+                    if (DAC < 10)
+                    {
+                        DACString = "00" + DAC.ToString();
+                    }
+                    else if (DAC < 100)
+                    {
+                        DACString = "0" + DAC.ToString();
+                    }
 
-                String DAC2 = CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
-                if (CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] < 10)
-                {
-                    DAC2 = "00" + CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
-                }
-                else if (CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] < 100)
-                {
-                    DAC2 = "0" + CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
-                }
+                    String DAC2 = CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
+                    if (CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] < 10)
+                    {
+                        DAC2 = "00" + CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
+                    }
+                    else if (CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] < 100)
+                    {
+                        DAC2 = "0" + CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]].ToString();
+                    }
 
 
 
-                Entry = DACString + "-" + DAC2 + " " + CurrentShip.ShipClass.ListOfComponentDefs[loop].Name + 
-                    "(" + CurrentShip.ShipClass.ListOfComponentDefsCount[loop].ToString() + "/" + 
-                    CurrentShip.ShipClass.ListOfComponentDefs[loop].htk.ToString() + ")";
+                    Entry = DACString + "-" + DAC2 + " " + CurrentShip.ShipClass.ListOfComponentDefs[loop].Name +
+                        "(" + CurrentShip.ShipClass.ListOfComponentDefsCount[loop].ToString() + "/" +
+                        CurrentShip.ShipClass.ListOfComponentDefs[loop].htk.ToString() + ")";
 
-                m_oDetailsPanel.DACListBox.Items.Add(Entry);
+                    m_oDetailsPanel.DACListBox.Items.Add(Entry);
 
-                DAC = CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] + 1;
+                    DAC = CurrentShip.ShipClass.DamageAllocationChart[CurrentShip.ShipClass.ListOfComponentDefs[loop]] + 1;
 
-                
-            }
 
-            m_oDetailsPanel.DACListBox.Items.Add("");
-            m_oDetailsPanel.DACListBox.Items.Add("Electronic Only DAC");
-
-            DAC = 1;
-
-            foreach (KeyValuePair<ComponentDefTN, int> pair in CurrentShip.ShipClass.ElectronicDamageAllocationChart)
-            {
-                String DACString = DAC.ToString();
-                if (DAC < 10)
-                {
-                    DACString = "00" + DAC.ToString();
-                }
-                else if (DAC < 100)
-                {
-                    DACString = "0" + DAC.ToString();
                 }
 
-                String DAC2 = pair.Value.ToString();
-                if (pair.Value < 10)
+                m_oDetailsPanel.DACListBox.Items.Add("");
+                m_oDetailsPanel.DACListBox.Items.Add("Electronic Only DAC");
+
+                DAC = 1;
+
+                foreach (KeyValuePair<ComponentDefTN, int> pair in CurrentShip.ShipClass.ElectronicDamageAllocationChart)
                 {
-                    DAC2 = "00" + pair.Value.ToString();
+                    String DACString = DAC.ToString();
+                    if (DAC < 10)
+                    {
+                        DACString = "00" + DAC.ToString();
+                    }
+                    else if (DAC < 100)
+                    {
+                        DACString = "0" + DAC.ToString();
+                    }
+
+                    String DAC2 = pair.Value.ToString();
+                    if (pair.Value < 10)
+                    {
+                        DAC2 = "00" + pair.Value.ToString();
+                    }
+                    else if (pair.Value < 100)
+                    {
+                        DAC2 = "0" + pair.Value.ToString();
+                    }
+
+                    int index = CurrentShip.ShipClass.ListOfComponentDefs.IndexOf(pair.Key);
+
+                    Entry = DACString + "-" + DAC2 + " " + pair.Key.Name + "(" + CurrentShip.ShipClass.ListOfComponentDefsCount[index].ToString() + "/" +
+                        pair.Key.htk.ToString() + ")";
+
+                    m_oDetailsPanel.DACListBox.Items.Add(Entry);
+
+                    DAC = CurrentShip.ShipClass.ElectronicDamageAllocationChart[pair.Key] + 1;
                 }
-                else if (pair.Value < 100)
-                {
-                    DAC2 = "0" + pair.Value.ToString();
-                }
-
-                int index = CurrentShip.ShipClass.ListOfComponentDefs.IndexOf(pair.Key);
-
-                Entry = DACString + "-" + DAC2 + " " + pair.Key.Name + "(" + CurrentShip.ShipClass.ListOfComponentDefsCount[index].ToString() + "/" +
-                    pair.Key.htk.ToString() + ")";
-
-                m_oDetailsPanel.DACListBox.Items.Add(Entry);
-
-                DAC = CurrentShip.ShipClass.ElectronicDamageAllocationChart[pair.Key] + 1;
             }
         }
 
@@ -758,9 +858,15 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.DamagedSystemsListBox.Items.Clear();
 
-            for (int loop = 0; loop < CurrentShip.DestroyedComponents.Count; loop++)
+            if (_CurrnetShip != null)
             {
-                m_oDetailsPanel.DamagedSystemsListBox.Items.Add(CurrentShip.ShipComponents[CurrentShip.DestroyedComponents[loop]].Name);
+
+                for (int loop = 0; loop < CurrentShip.DestroyedComponents.Count; loop++)
+                {
+
+
+                    m_oDetailsPanel.DamagedSystemsListBox.Items.Add(CurrentShip.ShipComponents[CurrentShip.DestroyedComponents[loop]].Name);
+                }
             }
         }
 
@@ -770,114 +876,120 @@ namespace Pulsar4X.UI.Handlers
         private void BuildCombatSummary()
         {
             m_oDetailsPanel.CombatSummaryTextBox.Clear();
-            String Entry = "N/A";
-            String fireAuth = "N/A";
 
-            for (int loop = 0; loop < CurrentShip.ShipBFC.Count; loop++)
+            if (_CurrnetShip != null)
             {
-                ShipTN Target = CurrentShip.ShipBFC[loop].getTarget();
+                String Entry = "N/A";
+                String fireAuth = "N/A";
 
-                if (Target == null)
+                for (int loop = 0; loop < CurrentShip.ShipBFC.Count; loop++)
                 {
-                    Entry = String.Format("{0}: No Target Assignment\n", CurrentShip.ShipBFC[loop].Name);
-                }
-                else
-                {
-                    if (CurrentShip.ShipBFC[loop].openFire == true)
-                        fireAuth = "Weapons Firing";
-                    else
-                        fireAuth = "Holding Fire";
+                    ShipTN Target = CurrentShip.ShipBFC[loop].getTarget();
 
-                    Entry = String.Format("{0}: Targeting {1} - {2}\n", CurrentShip.ShipBFC[loop].Name, Target.Name, fireAuth);
-                }
-
-                m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
-
-                for (int loop2 = 0; loop2 < CurrentShip.ShipBFC[loop].linkedWeapons.Count; loop2++)
-                {
-                    if (CurrentShip.ShipBFC[loop].linkedWeapons[loop2].currentCapacitor == CurrentShip.ShipBFC[loop].linkedWeapons[loop2].beamDef.powerRequirement)
+                    if (Target == null)
                     {
-                        Entry = String.Format("{0}: (Ready to Fire)\n", CurrentShip.ShipBFC[loop].linkedWeapons[loop2].Name);
-                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        Entry = String.Format("{0}: No Target Assignment\n", CurrentShip.ShipBFC[loop].Name);
                     }
                     else
                     {
-                        Entry = String.Format("{0}: ({1} / {2} power recharged)\n", CurrentShip.ShipBFC[loop].linkedWeapons[loop2].Name,
-                                                                    CurrentShip.ShipBFC[loop].linkedWeapons[loop2].currentCapacitor.ToString(), CurrentShip.ShipBFC[loop].linkedWeapons[loop2].beamDef.powerRequirement.ToString());
-                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
-                    }
-                }
-            }
+                        if (CurrentShip.ShipBFC[loop].openFire == true)
+                            fireAuth = "Weapons Firing";
+                        else
+                            fireAuth = "Holding Fire";
 
-            for (int loop = 0; loop < CurrentShip.ShipMFC.Count; loop++)
-            {
-                OrdnanceTargetTN Target = CurrentShip.ShipMFC[loop].getTarget();
-
-                if (Target == null)
-                {
-                    Entry = String.Format("{0}: No Target Assignment\n", CurrentShip.ShipMFC[loop].Name);
-                }
-                else
-                {
-                    if (CurrentShip.ShipBFC[loop].openFire == true)
-                        fireAuth = "Weapons Firing";
-                    else
-                        fireAuth = "Holding Fire";
-
-                    switch (Target.targetType)
-                    {
-                        case StarSystemEntityType.TaskGroup:
-                            Entry = String.Format("{0}: {1} - {2}\n", CurrentShip.ShipMFC[loop].Name, Target.ship.Name, fireAuth);
-                        break;
+                        Entry = String.Format("{0}: Targeting {1} - {2}\n", CurrentShip.ShipBFC[loop].Name, Target.Name, fireAuth);
                     }
 
                     m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
 
-                    for (int loop2 = 0; loop2 < CurrentShip.ShipMFC[loop].linkedWeapons.Count; loop2++)
+                    for (int loop2 = 0; loop2 < CurrentShip.ShipBFC[loop].linkedWeapons.Count; loop2++)
                     {
-                        if (CurrentShip.ShipMFC[loop].linkedWeapons[loop2].ReadyToFire() == true)
+                        if (CurrentShip.ShipBFC[loop].linkedWeapons[loop2].currentCapacitor == CurrentShip.ShipBFC[loop].linkedWeapons[loop2].beamDef.powerRequirement)
                         {
-                            Entry = String.Format("{0} - {1}: (Ready to Fire)\n", CurrentShip.ShipMFC[loop].linkedWeapons[loop2].Name,
-                                                                                  CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name);
-
+                            Entry = String.Format("{0}: (Ready to Fire)\n", CurrentShip.ShipBFC[loop].linkedWeapons[loop2].Name);
                             m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
                         }
                         else
                         {
-                            Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", CurrentShip.ShipMFC[loop].linkedWeapons[loop2].Name,
-                                                                                  CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name,
-                                                                                  CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
-
+                            Entry = String.Format("{0}: ({1} / {2} power recharged)\n", CurrentShip.ShipBFC[loop].linkedWeapons[loop2].Name,
+                                                                        CurrentShip.ShipBFC[loop].linkedWeapons[loop2].currentCapacitor.ToString(), CurrentShip.ShipBFC[loop].linkedWeapons[loop2].beamDef.powerRequirement.ToString());
                             m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
                         }
                     }
+                    m_oDetailsPanel.CombatSummaryTextBox.AppendText("\n");
                 }
-            }
 
-            bool hasPrinted = false;
-
-            for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
-            {
-                if (CurrentShip.ShipMLaunchers[loop].loadedOrdnance != null && CurrentShip.ShipMLaunchers[loop].mFC == null)
+                for (int loop = 0; loop < CurrentShip.ShipMFC.Count; loop++)
                 {
-                    if (hasPrinted == false)
-                    {
-                        Entry = "Assigned Missiles/Buoys without Shipboard Fire Control\n";
-                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                    OrdnanceTargetTN Target = CurrentShip.ShipMFC[loop].getTarget();
 
-                        hasPrinted = true;
-                    }
-
-                    if(CurrentShip.ShipMLaunchers[loop].ReadyToFire() == true)
+                    if (Target == null)
                     {
-                        Entry = String.Format("{0} - {1}: (Ready to Fire)\n", CurrentShip.ShipMLaunchers[loop].Name,CurrentShip.ShipMLaunchers[loop].loadedOrdnance.Name);
-                        m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        Entry = String.Format("{0}: No Target Assignment\n", CurrentShip.ShipMFC[loop].Name);
                     }
                     else
                     {
-                        Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", CurrentShip.ShipMLaunchers[loop].Name, CurrentShip.ShipMLaunchers[loop].loadedOrdnance.Name,
-                                                                                   CurrentShip.ShipMLaunchers[loop].loadTime);
+                        if (CurrentShip.ShipBFC[loop].openFire == true)
+                            fireAuth = "Weapons Firing";
+                        else
+                            fireAuth = "Holding Fire";
+
+                        switch (Target.targetType)
+                        {
+                            case StarSystemEntityType.TaskGroup:
+                                Entry = String.Format("{0}: {1} - {2}\n", CurrentShip.ShipMFC[loop].Name, Target.ship.Name, fireAuth);
+                                break;
+                        }
+
                         m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+
+                        for (int loop2 = 0; loop2 < CurrentShip.ShipMFC[loop].linkedWeapons.Count; loop2++)
+                        {
+                            if (CurrentShip.ShipMFC[loop].linkedWeapons[loop2].ReadyToFire() == true)
+                            {
+                                Entry = String.Format("{0} - {1}: (Ready to Fire)\n", CurrentShip.ShipMFC[loop].linkedWeapons[loop2].Name,
+                                                                                      CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name);
+
+                                m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                            }
+                            else
+                            {
+                                Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", CurrentShip.ShipMFC[loop].linkedWeapons[loop2].Name,
+                                                                                      CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name,
+                                                                                      CurrentShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
+
+                                m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                            }
+                        }
+                    }
+                    m_oDetailsPanel.CombatSummaryTextBox.AppendText("\n");
+                }
+
+                bool hasPrinted = false;
+
+                for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
+                {
+                    if (CurrentShip.ShipMLaunchers[loop].loadedOrdnance != null && CurrentShip.ShipMLaunchers[loop].mFC == null)
+                    {
+                        if (hasPrinted == false)
+                        {
+                            Entry = "Assigned Missiles/Buoys without Shipboard Fire Control\n";
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+
+                            hasPrinted = true;
+                        }
+
+                        if (CurrentShip.ShipMLaunchers[loop].ReadyToFire() == true)
+                        {
+                            Entry = String.Format("{0} - {1}: (Ready to Fire)\n", CurrentShip.ShipMLaunchers[loop].Name, CurrentShip.ShipMLaunchers[loop].loadedOrdnance.Name);
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        }
+                        else
+                        {
+                            Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", CurrentShip.ShipMLaunchers[loop].Name, CurrentShip.ShipMLaunchers[loop].loadedOrdnance.Name,
+                                                                                       CurrentShip.ShipMLaunchers[loop].loadTime);
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        }
                     }
                 }
             }
@@ -891,304 +1003,308 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.ClassDesignTextBox.Clear();
 
-            String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", CurrentShip.ShipClass.Name, CurrentShip.ShipClass.SizeTons.ToString(), 
-                CurrentShip.ShipClass.TotalRequiredCrew.ToString(), Math.Floor(CurrentShip.ShipClass.BuildPointCost).ToString(),CurrentShip.ShipClass.TotalCrossSection.ToString(),
-                CurrentShip.ShipClass.MaxThermalSignature.ToString(), CurrentShip.ShipClass.MaxEMSignature.ToString());
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-
-            string ShieldR = "0";
-
-            if (CurrentShip.ShipClass.ShipShieldDef != null)
+            if (_CurrnetShip != null)
             {
-                if (CurrentShip.ShipClass.ShipShieldDef.shieldGen == CurrentShip.ShipClass.ShipShieldDef.shieldPool)
+
+                String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", CurrentShip.ShipClass.Name, CurrentShip.ShipClass.SizeTons.ToString(),
+                    CurrentShip.ShipClass.TotalRequiredCrew.ToString(), Math.Floor(CurrentShip.ShipClass.BuildPointCost).ToString(), CurrentShip.ShipClass.TotalCrossSection.ToString(),
+                    CurrentShip.ShipClass.MaxThermalSignature.ToString(), CurrentShip.ShipClass.MaxEMSignature.ToString());
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+                string ShieldR = "0";
+
+                if (CurrentShip.ShipClass.ShipShieldDef != null)
                 {
-                    ShieldR = "300";
+                    if (CurrentShip.ShipClass.ShipShieldDef.shieldGen == CurrentShip.ShipClass.ShipShieldDef.shieldPool)
+                    {
+                        ShieldR = "300";
+                    }
+                    else
+                    {
+                        float shield = (float)Math.Floor((CurrentShip.ShipClass.ShipShieldDef.shieldPool / CurrentShip.ShipClass.ShipShieldDef.shieldGen) * 300.0f);
+                        ShieldR = shield.ToString();
+                    }
                 }
-                else
-                {
-                    float shield = (float)Math.Floor((CurrentShip.ShipClass.ShipShieldDef.shieldPool / CurrentShip.ShipClass.ShipShieldDef.shieldGen) * 300.0f);
-                    ShieldR = shield.ToString();
-                }
-            }
 
-            Entry = String.Format("{0} km/s   Armour {1}-{2}   Shields {3}-{4}   Sensors {5}/{6}/{7}/{8}   Damage Control Rating {9}  PPV {10}\n", CurrentShip.ShipClass.MaxSpeed, 
-                                                               CurrentShip.ShipClass.ShipArmorDef.depth,CurrentShip.ShipClass.ShipArmorDef.cNum,
-                                                               CurrentShip.ShipClass.TotalShieldPool,ShieldR, 
-                                                               CurrentShip.ShipClass.BestThermalRating,CurrentShip.ShipClass.BestEMRating, 0,0,
-                                                               CurrentShip.ShipClass.MaxDamageControlRating, CurrentShip.ShipClass.PlanetaryProtectionValue);
-
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-
-            Entry = String.Format("Maint Life {0} Years   MSP {1}   AFR {2}   IFR {3}   1YR {4}   5YR {5}   Max Repair {6} MSP\n", CurrentShip.ShipClass.MaintenanceLife,
-                                                               CurrentShip.ShipClass.TotalMSPCapacity,CurrentShip.ShipClass.AnnualFailureRate,CurrentShip.ShipClass.InitialFailureRate,
-                                                               CurrentShip.ShipClass.YearOneFailureTotal,CurrentShip.ShipClass.YearFiveFailureTotal, CurrentShip.ShipClass.MaxRepair);
-
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-
-            Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n\n", CurrentShip.ShipClass.MaxDeploymentTime, CurrentShip.ShipClass.SpareCrewQuarters);
-
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-
-            if(CurrentShip.ShipClass.ShipEngineDef != null)
-            {
-                float fuelCon = (float)Math.Floor(CurrentShip.ShipClass.ShipEngineDef.fuelConsumptionMod * 100.0f);
-                String FuelString = String.Format("{0}",fuelCon);
-
-                Entry = String.Format("{0} ({1})   Power {2}   Fuel Use {3}%    Signature {4}    Armour 0    Exp {5}%\n",CurrentShip.ShipClass.ShipEngineDef.Name,CurrentShip.ShipClass.ShipEngineCount,
-                                                               CurrentShip.ShipClass.ShipEngineDef.enginePower, FuelString, CurrentShip.ShipClass.ShipEngineDef.thermalSignature, CurrentShip.ShipClass.ShipEngineDef.expRisk);
+                Entry = String.Format("{0} km/s   Armour {1}-{2}   Shields {3}-{4}   Sensors {5}/{6}/{7}/{8}   Damage Control Rating {9}  PPV {10}\n", CurrentShip.ShipClass.MaxSpeed,
+                                                                   CurrentShip.ShipClass.ShipArmorDef.depth, CurrentShip.ShipClass.ShipArmorDef.cNum,
+                                                                   CurrentShip.ShipClass.TotalShieldPool, ShieldR,
+                                                                   CurrentShip.ShipClass.BestThermalRating, CurrentShip.ShipClass.BestEMRating, 0, 0,
+                                                                   CurrentShip.ShipClass.MaxDamageControlRating, CurrentShip.ShipClass.PlanetaryProtectionValue);
 
                 m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
 
-            if (CurrentShip.ShipClass.TotalFuelCapacity != 0)
-            {
-                String Range = "Range N/A";
+                Entry = String.Format("Maint Life {0} Years   MSP {1}   AFR {2}   IFR {3}   1YR {4}   5YR {5}   Max Repair {6} MSP\n", CurrentShip.ShipClass.MaintenanceLife,
+                                                                   CurrentShip.ShipClass.TotalMSPCapacity, CurrentShip.ShipClass.AnnualFailureRate, CurrentShip.ShipClass.InitialFailureRate,
+                                                                   CurrentShip.ShipClass.YearOneFailureTotal, CurrentShip.ShipClass.YearFiveFailureTotal, CurrentShip.ShipClass.MaxRepair);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+                Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n\n", CurrentShip.ShipClass.MaxDeploymentTime, CurrentShip.ShipClass.SpareCrewQuarters);
+
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
                 if (CurrentShip.ShipClass.ShipEngineDef != null)
                 {
-                    String Time = "N/A";
-                    float HoursOfFuel = CurrentShip.ShipClass.TotalFuelCapacity / CurrentShip.ShipClass.MaxFuelUsePerHour;
+                    float fuelCon = (float)Math.Floor(CurrentShip.ShipClass.ShipEngineDef.fuelConsumptionMod * 100.0f);
+                    String FuelString = String.Format("{0}", fuelCon);
 
+                    Entry = String.Format("{0} ({1})   Power {2}   Fuel Use {3}%    Signature {4}    Armour 0    Exp {5}%\n", CurrentShip.ShipClass.ShipEngineDef.Name, CurrentShip.ShipClass.ShipEngineCount,
+                                                                   CurrentShip.ShipClass.ShipEngineDef.enginePower, FuelString, CurrentShip.ShipClass.ShipEngineDef.thermalSignature, CurrentShip.ShipClass.ShipEngineDef.expRisk);
 
-                    if (HoursOfFuel < 72)
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+                }
+
+                if (CurrentShip.ShipClass.TotalFuelCapacity != 0)
+                {
+                    String Range = "Range N/A";
+                    if (CurrentShip.ShipClass.ShipEngineDef != null)
                     {
-                        Time = String.Format("({0} hours at full power)", Math.Floor(HoursOfFuel).ToString());
+                        String Time = "N/A";
+                        float HoursOfFuel = CurrentShip.ShipClass.TotalFuelCapacity / CurrentShip.ShipClass.MaxFuelUsePerHour;
+
+
+                        if (HoursOfFuel < 72)
+                        {
+                            Time = String.Format("({0} hours at full power)", Math.Floor(HoursOfFuel).ToString());
+                        }
+                        else
+                        {
+                            float DaysOfFuel = HoursOfFuel / 24.0f;
+                            Time = String.Format("({0} days at full power)", Math.Floor(DaysOfFuel).ToString());
+                        }
+
+                        float SecondsPerBillion = 1000000000.0f / CurrentShip.ShipClass.MaxSpeed;
+                        float HoursPerBillion = SecondsPerBillion / 3600.0f;
+
+                        float billions = HoursOfFuel / HoursPerBillion;
+
+                        if (billions >= 0.1)
+                        {
+                            billions = (float)(Math.Floor(10.0 * billions) / 10.0f);
+                            Range = String.Format("Range {0} B km {1}", billions, Time);
+                        }
+                        else
+                        {
+                            float millions = billions * 1000.0f;
+                            millions = (float)(Math.Floor(10.0 * millions) / 10.0f);
+                            Range = String.Format("Range {0} M km {1}", millions, Time);
+                        }
+
+
+
+                    }
+
+                    Entry = String.Format("Fuel Capacity {0} Litres   {1}\n", CurrentShip.ShipClass.TotalFuelCapacity, Range);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+                }
+
+                if (CurrentShip.ShipClass.ShipShieldDef != null)
+                {
+
+                    float FuelCostPerHour = CurrentShip.ShipClass.ShipShieldDef.fuelCostPerHour * CurrentShip.ShipClass.ShipShieldCount;
+                    float FuelCostPerDay = FuelCostPerHour * 24.0f;
+
+                    Entry = String.Format("{0} ({1})   Total Fuel Cost  {2} Litres per hour  ({3} per day)\n", CurrentShip.ShipClass.ShipShieldDef, CurrentShip.ShipClass.ShipShieldCount,
+                                                                             FuelCostPerHour, FuelCostPerDay);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+                }
+
+                Entry = "\n";
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+                for (int loop = 0; loop < CurrentShip.ShipClass.ShipBeamDef.Count; loop++)
+                {
+                    String Range = "N/A";
+
+                    float MaxRange = 0;
+
+                    for (int loop2 = 0; loop2 < CurrentShip.ShipClass.ShipBFCDef.Count; loop2++)
+                    {
+                        if (CurrentShip.ShipClass.ShipBFCDef[loop2].range > MaxRange)
+                            MaxRange = CurrentShip.ShipClass.ShipBFCDef[loop2].range;
+                    }
+
+                    if (MaxRange > CurrentShip.ShipClass.ShipBeamDef[loop].range)
+                    {
+                        Range = String.Format("Range {0}km", CurrentShip.ShipClass.ShipBeamDef[loop].range);
                     }
                     else
                     {
-                        float DaysOfFuel = HoursOfFuel / 24.0f;
-                        Time = String.Format("({0} days at full power)", Math.Floor(DaysOfFuel).ToString());
+                        Range = String.Format("Range {0}km", MaxRange);
                     }
 
-                    float SecondsPerBillion = 1000000000.0f / CurrentShip.ShipClass.MaxSpeed;
-                    float HoursPerBillion = SecondsPerBillion / 3600.0f;
-
-                    float billions = HoursOfFuel / HoursPerBillion;
-
-                    if (billions >= 0.1)
+                    String Tracking = "N/A";
+                    if (CurrentShip.ShipClass.MaxSpeed > CurrentShip.ShipsFaction.BaseTracking)
                     {
-                        billions = (float)(Math.Floor(10.0 * billions) / 10.0f);
-                        Range = String.Format("Range {0} B km {1}", billions, Time);
+                        Tracking = String.Format("TS: {0} km/s", CurrentShip.ShipClass.MaxSpeed);
                     }
                     else
                     {
-                        float millions = billions * 1000.0f;
-                        millions = (float)(Math.Floor(10.0 * millions) / 10.0f);
-                        Range = String.Format("Range {0} M km {1}", millions, Time);
+                        Tracking = String.Format("TS: {0} km/s", CurrentShip.ShipsFaction.BaseTracking);
                     }
 
-
-                    
-                }
-
-                Entry = String.Format("Fuel Capacity {0} Litres   {1}\n", CurrentShip.ShipClass.TotalFuelCapacity,Range);
-
-                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
-
-            if (CurrentShip.ShipClass.ShipShieldDef != null)
-            {
-
-                float FuelCostPerHour = CurrentShip.ShipClass.ShipShieldDef.fuelCostPerHour * CurrentShip.ShipClass.ShipShieldCount;
-                float FuelCostPerDay = FuelCostPerHour * 24.0f;
-
-                Entry = String.Format("{0} ({1})   Total Fuel Cost  {2} Litres per hour  ({3} per day)\n", CurrentShip.ShipClass.ShipShieldDef, CurrentShip.ShipClass.ShipShieldCount,
-                                                                         FuelCostPerHour, FuelCostPerDay);
-
-                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
-
-            Entry = "\n";
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-
-            for (int loop = 0; loop < CurrentShip.ShipClass.ShipBeamDef.Count; loop++)
-            {
-                String Range = "N/A";
-
-                float MaxRange = 0;
-
-                for (int loop2 = 0; loop2 < CurrentShip.ShipClass.ShipBFCDef.Count; loop2++)
-                {
-                    if (CurrentShip.ShipClass.ShipBFCDef[loop2].range > MaxRange)
-                        MaxRange = CurrentShip.ShipClass.ShipBFCDef[loop2].range;
-                }
-
-               if (MaxRange > CurrentShip.ShipClass.ShipBeamDef[loop].range)
-                {
-                    Range = String.Format("Range {0}km", CurrentShip.ShipClass.ShipBeamDef[loop].range);
-               }
-                else
-                {
-                    Range = String.Format("Range {0}km", MaxRange);
-                }
-
-                String Tracking = "N/A";
-                if (CurrentShip.ShipClass.MaxSpeed > CurrentShip.ShipsFaction.BaseTracking)
-                {
-                    Tracking = String.Format("TS: {0} km/s", CurrentShip.ShipClass.MaxSpeed);
-                }
-                else
-                {
-                    Tracking = String.Format("TS: {0} km/s", CurrentShip.ShipsFaction.BaseTracking);
-                }
-
-                String Power = "N/A";
-                if (CurrentShip.ShipClass.ShipBeamDef[loop].componentType == ComponentTypeTN.Gauss)
-                {
-                    Power = "0-0";
-                }
-                else
-                {
-                    Power = String.Format("{0}-{1}", CurrentShip.ShipClass.ShipBeamDef[loop].powerRequirement, CurrentShip.ShipClass.ShipBeamDef[loop].weaponCapacitor);
-                }
-
-                float ROF = (CurrentShip.ShipClass.ShipBeamDef[loop].powerRequirement / CurrentShip.ShipClass.ShipBeamDef[loop].weaponCapacitor) * 5;
-
-                if(ROF < 5)
-                    ROF = 5;
-                String DamageString = CurrentShip.ShipClass.ShipBeamDef[loop].damage[0].ToString();
-
-                for(int loop2 = 1; loop2 < 10; loop2++)
-                {
-                    int value = -1;
-                    if(loop2 >= CurrentShip.ShipClass.ShipBeamDef[loop].damage.Count)
+                    String Power = "N/A";
+                    if (CurrentShip.ShipClass.ShipBeamDef[loop].componentType == ComponentTypeTN.Gauss)
                     {
-                        value = 0;
+                        Power = "0-0";
                     }
                     else
                     {
-                        value = CurrentShip.ShipClass.ShipBeamDef[loop].damage[loop2];
+                        Power = String.Format("{0}-{1}", CurrentShip.ShipClass.ShipBeamDef[loop].powerRequirement, CurrentShip.ShipClass.ShipBeamDef[loop].weaponCapacitor);
                     }
-                    DamageString = String.Format("{0} {1}", DamageString, value);
+
+                    float ROF = (CurrentShip.ShipClass.ShipBeamDef[loop].powerRequirement / CurrentShip.ShipClass.ShipBeamDef[loop].weaponCapacitor) * 5;
+
+                    if (ROF < 5)
+                        ROF = 5;
+                    String DamageString = CurrentShip.ShipClass.ShipBeamDef[loop].damage[0].ToString();
+
+                    for (int loop2 = 1; loop2 < 10; loop2++)
+                    {
+                        int value = -1;
+                        if (loop2 >= CurrentShip.ShipClass.ShipBeamDef[loop].damage.Count)
+                        {
+                            value = 0;
+                        }
+                        else
+                        {
+                            value = CurrentShip.ShipClass.ShipBeamDef[loop].damage[loop2];
+                        }
+                        DamageString = String.Format("{0} {1}", DamageString, value);
+                    }
+
+                    Entry = String.Format("{0} ({1})   {2}   {3}   Power {4}   RM {5}   ROF {6}   {7}\n",
+                                          CurrentShip.ShipClass.ShipBeamDef[loop].Name, CurrentShip.ShipClass.ShipBeamCount[loop], Range, Tracking, Power,
+                                          (CurrentShip.ShipClass.ShipBeamDef[loop].damage.Count - 1), ROF, DamageString);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
                 }
 
-                Entry = String.Format("{0} ({1})   {2}   {3}   Power {4}   RM {5}   ROF {6}   {7}\n",
-                                      CurrentShip.ShipClass.ShipBeamDef[loop].Name, CurrentShip.ShipClass.ShipBeamCount[loop], Range, Tracking, Power,
-                                      (CurrentShip.ShipClass.ShipBeamDef[loop].damage.Count - 1) , ROF, DamageString);
-
-                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
-
-            for (int loop = 0; loop < CurrentShip.ShipClass.ShipBFCDef.Count; loop++)
-            {
-                String AccString = String.Format("{0}", (CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable[0] * 100.0f));
-
-                for(int loop2 = 1; loop2 < 10; loop2++)
+                for (int loop = 0; loop < CurrentShip.ShipClass.ShipBFCDef.Count; loop++)
                 {
-                    if( loop2 < CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable.Count )
+                    String AccString = String.Format("{0}", Math.Floor(CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable[0] * 100.0f));
+
+                    for (int loop2 = 1; loop2 < 10; loop2++)
                     {
-                        AccString = String.Format("{0} {1}",AccString, (CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable[loop2] * 100.0f));
+                        if (loop2 < CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable.Count)
+                        {
+                            AccString = String.Format("{0} {1}", AccString, Math.Floor(CurrentShip.ShipClass.ShipBFCDef[loop].rangeAccuracyTable[loop2] * 100.0f));
+                        }
+                        else
+                        {
+                            AccString = String.Format("{0} 0", AccString);
+                        }
+                    }
+
+
+                    Entry = String.Format("{0} ({1})   Max Range: {2} km   TS: {3} km/s   {4}\n",
+                                          CurrentShip.ShipClass.ShipBFCDef[loop].Name, CurrentShip.ShipClass.ShipBFCCount[loop], CurrentShip.ShipClass.ShipBFCDef[loop].range,
+                                          CurrentShip.ShipClass.ShipBFCDef[loop].tracking, AccString);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+                }
+
+                for (int loop = 0; loop < CurrentShip.ShipClass.ShipReactorDef.Count; loop++)
+                {
+                    int TPO = CurrentShip.ShipClass.ShipReactorDef[loop].powerGen * CurrentShip.ShipClass.ShipReactorCount[loop];
+
+                    Entry = String.Format("{0} ({1})   Total Power Output {2}   Armour 0    Exp {3}%\n", CurrentShip.ShipClass.ShipReactorDef[loop].Name,
+                                          CurrentShip.ShipClass.ShipReactorCount[loop], TPO, CurrentShip.ShipClass.ShipReactorDef[loop].expRisk);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+                }
+
+                Entry = "\n";
+                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+
+                for (int loop = 0; loop < CurrentShip.ShipClass.ShipASensorDef.Count; loop++)
+                {
+                    String RangeString = "-4.2m";
+
+                    if (CurrentShip.ShipClass.ShipASensorDef[loop].maxRange >= 100000)
+                    {
+                        float RangeB = (float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange / 10000.0) / 10.0f;
+
+                        RangeString = String.Format("{0}B", RangeB);
+                    }
+                    else if (CurrentShip.ShipClass.ShipASensorDef[loop].maxRange >= 100)
+                    {
+                        float RangeM = (float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange / 10.0) / 10.0f;
+
+                        RangeString = String.Format("{0}M", RangeM);
                     }
                     else
                     {
-                        AccString = String.Format("{0} 0",AccString);
+                        RangeString = String.Format("{0}K", ((float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange) * 10.0f));
                     }
-                }
 
+                    String MCRString = " ";
 
-                Entry = String.Format("{0} ({1})   Max Range: {2} km   TS: {3} km/s   {4}\n",
-                                      CurrentShip.ShipClass.ShipBFCDef[loop].Name,CurrentShip.ShipClass.ShipBFCCount[loop], CurrentShip.ShipClass.ShipBFCDef[loop].range,
-                                      CurrentShip.ShipClass.ShipBFCDef[loop].tracking,AccString);
-
-                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
-
-            for (int loop = 0; loop < CurrentShip.ShipClass.ShipReactorDef.Count; loop++)
-            {
-                int TPO = CurrentShip.ShipClass.ShipReactorDef[loop].powerGen * CurrentShip.ShipClass.ShipReactorCount[loop];
-
-                Entry = String.Format("{0} ({1})   Total Power Output {2}   Armour 0    Exp {3}%\n",CurrentShip.ShipClass.ShipReactorDef[loop].Name,
-                                      CurrentShip.ShipClass.ShipReactorCount[loop], TPO, CurrentShip.ShipClass.ShipReactorDef[loop].expRisk);
-
-                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
-
-            Entry = "\n";
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-
-            for (int loop = 0; loop < CurrentShip.ShipClass.ShipASensorDef.Count; loop++)
-            {
-                String RangeString = "-4.2m";
-
-                if (CurrentShip.ShipClass.ShipASensorDef[loop].maxRange >= 100000)
-                {
-                    float RangeB = (float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange / 10000.0) / 10.0f;
-
-                    RangeString = String.Format("{0}B", RangeB);
-                }
-                else if (CurrentShip.ShipClass.ShipASensorDef[loop].maxRange >= 100)
-                {
-                    float RangeM = (float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange / 10.0) / 10.0f;
-
-                    RangeString = String.Format("{0}M", RangeM);
-                }
-                else
-                {
-                    RangeString = String.Format("{0}K", ((float)Math.Floor((double)CurrentShip.ShipClass.ShipASensorDef[loop].maxRange) * 10.0f));
-                }
-
-                String MCRString = " ";
-
-                if (CurrentShip.ShipClass.ShipASensorDef[loop].resolution == 1)
-                {
-                    int minRange = CurrentShip.ShipClass.ShipASensorDef[loop].lookUpMT[0];
-
-                    if(minRange >= 100000)
+                    if (CurrentShip.ShipClass.ShipASensorDef[loop].resolution == 1)
                     {
-                        float RangeB = (float)Math.Floor((double)minRange / 10000.0) / 10.0f;
-                        MCRString = String.Format(" MCR {0}B km   ",RangeB);
+                        int minRange = CurrentShip.ShipClass.ShipASensorDef[loop].lookUpMT[0];
+
+                        if (minRange >= 100000)
+                        {
+                            float RangeB = (float)Math.Floor((double)minRange / 10000.0) / 10.0f;
+                            MCRString = String.Format(" MCR {0}B km   ", RangeB);
+                        }
+                        else if (minRange >= 100)
+                        {
+                            float RangeM = (float)Math.Floor((double)minRange / 10.0) / 10.0f;
+                            MCRString = String.Format(" MCR {0}M km   ", RangeM);
+                        }
+                        else
+                        {
+                            MCRString = String.Format(" MCR {0}K km   ", ((float)Math.Floor((double)minRange) * 10.0f));
+                        }
                     }
-                    else if(minRange >= 100)
+
+
+                    Entry = String.Format("{0} ({1})   GPS {2}   Range {3} km  {4}Resolution {5}\n", CurrentShip.ShipClass.ShipASensorDef[loop].Name,
+                                          CurrentShip.ShipClass.ShipASensorCount[loop], CurrentShip.ShipClass.ShipASensorDef[loop].gps, RangeString, MCRString,
+                                          CurrentShip.ShipClass.ShipASensorDef[loop].resolution);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
+                }
+
+                for (int loop = 0; loop < CurrentShip.ShipClass.ShipPSensorDef.Count; loop++)
+                {
+                    String RangeString = "20m";
+
+                    int range = CurrentShip.ShipClass.ShipPSensorDef[loop].range;
+
+                    if (range >= 100000)
                     {
-                        float RangeM = (float)Math.Floor((double)minRange / 10.0) / 10.0f;
-                        MCRString = String.Format(" MCR {0}M km   ",RangeM);
+                        float RangeB = (float)Math.Floor((double)range / 10000.0) / 10.0f;
+                        RangeString = String.Format("{0}B", RangeB);
                     }
                     else
                     {
-                        MCRString = String.Format(" MCR {0}K km   ", ((float)Math.Floor((double)minRange) * 10.0f));
+                        float RangeM = (float)Math.Floor((double)range / 10.0) / 10.0f;
+                        RangeString = String.Format("{0}M", RangeM);
                     }
+
+                    Entry = String.Format("{0} ({1})     Sensitivity {2}     Detect Sig Strength 1000:  {3} km\n", CurrentShip.ShipClass.ShipPSensorDef[loop].Name,
+                                          CurrentShip.ShipClass.ShipPSensorCount[loop], CurrentShip.ShipClass.ShipPSensorDef[loop].rating, RangeString);
+
+                    m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
                 }
 
-
-                Entry = String.Format("{0} ({1})   GPS {2}   Range {3} km  {4}Resolution {5}\n", CurrentShip.ShipClass.ShipASensorDef[loop].Name,
-                                      CurrentShip.ShipClass.ShipASensorCount[loop], CurrentShip.ShipClass.ShipASensorDef[loop].gps, RangeString, MCRString,
-                                      CurrentShip.ShipClass.ShipASensorDef[loop].resolution);
-
-                m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
-            }
-
-            for (int loop = 0; loop < CurrentShip.ShipClass.ShipPSensorDef.Count; loop++)
-            {
-                String RangeString = "20m";
-
-                int range = CurrentShip.ShipClass.ShipPSensorDef[loop].range;
-
-                if (range >= 100000)
+                if (CurrentShip.ShipClass.IsMilitary == true)
                 {
-                    float RangeB = (float)Math.Floor((double)range / 10000.0) / 10.0f;
-                    RangeString = String.Format("{0}B", RangeB);
+                    Entry = "\nThis design is classed as a Military Vessel for maintenance purposes\n";
                 }
                 else
                 {
-                    float RangeM = (float)Math.Floor((double)range / 10.0) / 10.0f;
-                    RangeString = String.Format("{0}M", RangeM);
+                    Entry = "\nThis design is classed as a Commercial Vessel for maintenance purposes\n";
                 }
-
-                Entry = String.Format("{0} ({1})     Sensitivity {2}     Detect Sig Strength 1000:  {3} km\n", CurrentShip.ShipClass.ShipPSensorDef[loop].Name,
-                                      CurrentShip.ShipClass.ShipPSensorCount[loop], CurrentShip.ShipClass.ShipPSensorDef[loop].rating, RangeString);
 
                 m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
             }
-
-            if (CurrentShip.ShipClass.IsMilitary == true)
-            {
-                Entry = "\nThis design is classed as a Military Vessel for maintenance purposes\n";
-            }
-            else
-            {
-                Entry = "\nThis design is classed as a Commercial Vessel for maintenance purposes\n";
-            }
-
-            m_oDetailsPanel.ClassDesignTextBox.AppendText(Entry);
         }
 
         /// <summary>
@@ -1198,18 +1314,22 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.WeaponListBox.Items.Clear();
 
-            if (isBFC == true)
+            if (_CurrnetShip != null && _CurrnetFC != null)
             {
-                for (int loop = 0; loop < CurrentShip.ShipBeam.Count; loop++)
+
+                if (isBFC == true)
                 {
-                    m_oDetailsPanel.WeaponListBox.Items.Add(CurrentShip.ShipBeam[loop].Name);
+                    for (int loop = 0; loop < CurrentShip.ShipBeam.Count; loop++)
+                    {
+                        m_oDetailsPanel.WeaponListBox.Items.Add(CurrentShip.ShipBeam[loop].Name);
+                    }
                 }
-            }
-            else
-            {
-                for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
+                else
                 {
-                    m_oDetailsPanel.WeaponListBox.Items.Add(CurrentShip.ShipMLaunchers[loop].Name);
+                    for (int loop = 0; loop < CurrentShip.ShipMLaunchers.Count; loop++)
+                    {
+                        m_oDetailsPanel.WeaponListBox.Items.Add(CurrentShip.ShipMLaunchers[loop].Name);
+                    }
                 }
             }
         }
@@ -1221,25 +1341,29 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.PDComboBox.Items.Clear();
 
-            m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.None);
-
-            if (isBFC == true)
+            if (_CurrnetShip != null && _CurrnetFC != null)
             {
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AreaDefense);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.FinalDefensiveFire);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.FinalDefensiveFireSelf);
-            }
-            else
-            {
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM1v2);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM1v1);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM2v1);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM3v1);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM4v1);
-                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM5v1);
-            }
 
-            m_oDetailsPanel.PDComboBox.SelectedIndex = 0;
+                m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.None);
+
+                if (isBFC == true)
+                {
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AreaDefense);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.FinalDefensiveFire);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.FinalDefensiveFireSelf);
+                }
+                else
+                {
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM1v2);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM1v1);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM2v1);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM3v1);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM4v1);
+                    m_oDetailsPanel.PDComboBox.Items.Add(PointDefenseState.AMM5v1);
+                }
+
+                m_oDetailsPanel.PDComboBox.SelectedIndex = 0;
+            }
         }
 
 
@@ -1250,54 +1374,93 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.ContactListBox.Items.Clear();
 
-            /// <summary>
-            /// Planetary enemy populations should always be displayed.
-            /// </summary>
-
-            if (isBFC == true)
+            if (_CurrnetShip != null && _CurrnetFC != null)
             {
+
                 /// <summary>
-                /// BFC range is so short that we'll just print all contacts and let the user sort em out.
+                /// Planetary enemy populations should always be displayed.
                 /// </summary>
-                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+
+                if (isBFC == true)
                 {
-                    if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
+                    /// <summary>
+                    /// BFC range is so short that we'll just print all contacts and let the user sort em out.
+                    /// </summary>
+                    foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
                     {
-                        m_oDetailsPanel.ContactListBox.Items.Add(pair.Key);
-                    }
-                }
-            }
-            else
-            {
-                /// <summary>
-                /// Each MFC entry will be range checked, also there have been some tick errors, this may be the place to hunt them down.
-                /// </summary>
-                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
-                {
-                    if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
-                    {
-                        StarSystem CurSystem = CurrentShip.ShipsTaskGroup.Contact.CurrentSystem;
-                        int MyID = CurSystem.SystemContactList.IndexOf(CurrentShip.ShipsTaskGroup.Contact);
-                        int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
-
-                        /// <summary>
-                        /// Validate tick here?
-                        /// </summary>
-                        int Targettick = CurrentShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
-
-                        float distance = CurrentShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
-                        int TCS = pair.Key.TotalCrossSection;
-                        int detectFactor = CurrentShip.ShipMFC[CurrentFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
-
-                        bool det = CurrentShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
-
-                        if (det == true)
+                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem && pair.Value.active == true)
                         {
-                            m_oDetailsPanel.ContactListBox.Items.Add(pair.Key);
+                            String TH = "";
+                            if (pair.Value.thermal == true)
+                            {
+                                TH = String.Format("[Thermal {0}]", pair.Key.CurrentThermalSignature);
+                            }
+
+                            String EM = "";
+                            if (pair.Value.EM == true)
+                            {
+                                EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
+                            }
+
+                            String ACT = "";
+                            if (pair.Value.active == true)
+                            {
+                                ACT = String.Format("[ACT {0}]", pair.Key.TotalCrossSection);
+                            }
+
+                            String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+
+                            m_oDetailsPanel.ContactListBox.Items.Add(Entry);
                         }
                     }
                 }
+                else
+                {
+                    /// <summary>
+                    /// Each MFC entry will be range checked, also there have been some tick errors, this may be the place to hunt them down.
+                    /// </summary>
+                    foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+                    {
+                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentShip.ShipsTaskGroup.Contact.CurrentSystem)
+                        {
+                            StarSystem CurSystem = CurrentShip.ShipsTaskGroup.Contact.CurrentSystem;
+                            int MyID = CurSystem.SystemContactList.IndexOf(CurrentShip.ShipsTaskGroup.Contact);
+                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+
+                            /// <summary>
+                            /// Validate tick here?
+                            /// </summary>
+                            int Targettick = CurrentShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                            float distance = CurrentShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                            int TCS = pair.Key.TotalCrossSection;
+                            int detectFactor = CurrentShip.ShipMFC[CurrentFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
+
+                            bool det = CurrentShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+
+                            if (det == true)
+                            {
+                                m_oDetailsPanel.ContactListBox.Items.Add(pair.Key);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// this is a TEMPORARY messagelog builder
+        /// </summary>
+        private void TEMPBuildMessageLog()
+        {
+            m_oDetailsPanel.TEMPPRINTTextBox.Clear();
+
+            for (int loop = 0; loop < _CurrnetFaction.MessageLog.Count; loop++)
+            {
+                String Entry = String.Format("{0} - {1}: {2}\n", _CurrnetFaction.MessageLog[loop].Location, _CurrnetFaction.MessageLog[loop].TimeSlice, _CurrnetFaction.MessageLog[loop].Text);
+
+                m_oDetailsPanel.TEMPPRINTTextBox.AppendText(Entry);
             }
         }
 
@@ -1314,6 +1477,9 @@ namespace Pulsar4X.UI.Handlers
                 m_oShipListPanel.ShipsListBox.Items.Add(CurrentFaction.Ships[loop]);
             }
 
+            if (m_oShipListPanel.ShipsListBox.Items.Count != 0)
+                m_oShipListPanel.ShipsListBox.SelectedIndex = 0;
+
             RefreshShipInfo();
             RefreshFCInfo();
         }
@@ -1323,22 +1489,21 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RefreshShipInfo()
         {
-            if (CurrentShip != null)
-            {
-                /// <summary>
-                /// Armor tab:
-                /// </summary>
-                BuildArmor();
+            /// <summary>
+            /// Armor tab:
+            /// </summary>
+            BuildArmor();
 
-                /// <summary>
-                /// Damage Control Tab:
-                /// </summary>
-                BuildDACInfo();
-                BuildDamagedSystemsList();
+            /// <summary>
+            /// Damage Control Tab:
+            /// </summary>
+            BuildDACInfo();
+            BuildDamagedSystemsList();
 
-                BuildCombatSummary();
-                BuildClassDesign();
-            }
+            BuildCombatSummary();
+            BuildClassDesign();
+
+            TEMPBuildMessageLog();
         }
 
         /// <summary>
@@ -1346,16 +1511,13 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RefreshFCInfo()
         {
-            if (CurrentFC != null)
-            {
-                /// <summary>
-                /// Combat Settings Tab:
-                /// </summary>
+            /// <summary>
+            /// Combat Settings Tab:
+            /// </summary>
                 
-                BuildWeaponList();
-                BuildPDComboBox();
-                BuildContactsList();
-            }
+            BuildWeaponList();
+            BuildPDComboBox();
+            BuildContactsList();
         }
         #endregion
     }

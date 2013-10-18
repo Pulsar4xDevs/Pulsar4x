@@ -256,6 +256,9 @@ namespace Pulsar4X.Entities.Components
         public PassiveSensorTN(PassiveSensorDefTN definition)
         {
             PSensorDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
     }

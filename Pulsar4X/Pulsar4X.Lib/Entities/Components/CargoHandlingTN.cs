@@ -63,6 +63,9 @@ namespace Pulsar4X.Entities.Components
         public CargoHandlingTN(CargoHandlingDefTN definition)
         {
             CargoHandleDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
     }

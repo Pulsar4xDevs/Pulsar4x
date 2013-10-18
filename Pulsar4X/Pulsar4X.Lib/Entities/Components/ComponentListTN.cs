@@ -151,7 +151,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// These components aren't really basic, but I'll put them in anyway for the time being.
             /// </summary>
-            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
+            EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5.0f, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
             ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
             PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
             PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("EM Sensor EM1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
@@ -162,6 +162,7 @@ namespace Pulsar4X.Entities.Components
             MissileLauncherDefTN TubeDef = new MissileLauncherDefTN("Size 1 Launcher", 1.0f, 1, false, 1.0f);
             MagazineDefTN MagDef = new MagazineDefTN("Mag S1", 1.0f, 1, 0, 0, 1);
             ActiveSensorDefTN MFCDef = new ActiveSensorDefTN("Wasp I FC", 1.0f, 10, 5, 100, true, 1.0f, 1);
+
 
             Engines.Add(EngDef);
             ActiveSensorDef.Add(ActDef);
@@ -205,6 +206,57 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             CargoHandlingDefTN CHS = new CargoHandlingDefTN("Cargo Handling System", 5);
             CargoHandleSystemDef.Add(CHS);
+
+
+            /// <summary>
+            /// Alpha build components:
+            /// </summary>
+
+            EngineDefTN AlphaEngine = new EngineDefTN("Ion Engine 120", 12.0f, 1.0f, 0.7f, 1.0f, 1, 10.0f, -1.0f);
+            ActiveSensorDefTN AlphaBigSensor = new ActiveSensorDefTN("Search 181M - 10000", 10.0f, 16, 8, 200, false, 1.0f, 1);
+            ActiveSensorDefTN AlphaSmallSensor = new ActiveSensorDefTN("Search 57M - 1000", 10.0f, 16, 8, 20, false, 1.0f, 1);
+            ActiveSensorDefTN AlphaMissileSensor = new ActiveSensorDefTN("Search 1.4M - Missile", 10.0f, 16, 8, 1, false, 1.0f, 1);
+            PassiveSensorDefTN AlphaEMSensor = new PassiveSensorDefTN("EM Detection Sensor EM10-80", 10.0f, 8, PassiveSensorType.EM, 1.0f, 1);
+            PassiveSensorDefTN AlphaTHSensor = new PassiveSensorDefTN("TH Detection Sensor TH10-80", 10.0f, 8, PassiveSensorType.Thermal, 1.0f, 1);
+            BeamFireControlDefTN AlphaFireControl = new BeamFireControlDefTN("Primary III FC R96K T6K", 24000.0f, 3000.0f, 4.0f, 2.0f, false, false, 1.0f, 1);
+
+            BeamDefTN AlphaRailGun = new BeamDefTN("15cm Railgun V3/C3", ComponentTypeTN.Rail, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaLaser = new BeamDefTN("15cm C3 Near UV Laser", ComponentTypeTN.Laser, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaParticle = new BeamDefTN("PBW-4 150K", ComponentTypeTN.Particle, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaPlasma = new BeamDefTN("15cm C3 Plasma Beam", ComponentTypeTN.Plasma, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaMeson = new BeamDefTN("R9/C3 Meson Cannon", ComponentTypeTN.Meson, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaHPM = new BeamDefTN("R9/C3 Microwave", ComponentTypeTN.Microwave, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaGauss = new BeamDefTN("Gauss R3-100", ComponentTypeTN.Gauss, 2, 2, 2, 1.0f);
+
+            ReactorDefTN AlphaReactor = new ReactorDefTN("GCFR S1 P4.5", 2, 1.0f, 1.0f);
+
+            ShieldDefTN AlphaShield = new ShieldDefTN("Gamma R300/336 Shields", 2, 2, 0.7f, 1.0f, ComponentTypeTN.Shield);
+
+            Engines.Add(AlphaEngine);
+
+            ActiveSensorDef.Add(AlphaBigSensor);
+            ActiveSensorDef.Add(AlphaSmallSensor);
+            ActiveSensorDef.Add(AlphaMissileSensor);
+
+            PassiveSensorDef.Add(AlphaEMSensor);
+            PassiveSensorDef.Add(AlphaTHSensor);
+
+            BeamFireControlDef.Add(AlphaFireControl);
+
+            BeamWeaponDef.Add(AlphaRailGun);
+            BeamWeaponDef.Add(AlphaLaser);
+            BeamWeaponDef.Add(AlphaParticle);
+            BeamWeaponDef.Add(AlphaPlasma);
+            BeamWeaponDef.Add(AlphaMeson);
+            BeamWeaponDef.Add(AlphaHPM);
+            BeamWeaponDef.Add(AlphaGauss);
+
+            ReactorDef.Add(AlphaReactor);
+
+            ShieldDef.Add(AlphaShield);
+
+
+
         }
     }
 }

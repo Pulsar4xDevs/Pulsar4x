@@ -225,6 +225,9 @@ namespace Pulsar4X.Entities.Components
         public EngineTN(EngineDefTN definition)
         {
             EngineDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
     }

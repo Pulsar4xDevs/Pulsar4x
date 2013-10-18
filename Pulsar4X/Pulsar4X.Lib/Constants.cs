@@ -38,12 +38,17 @@ namespace Pulsar4X
 
             public const double KM_PER_LIGHTYEAR = 9460730472580.8;
 
-            public const double KM_PER_AU = CM_PER_AU / CM_PER_KM;
+            public const double KM_PER_AU = CM_PER_AU / CM_PER_KM; //149597870.7
 
             /// <summary>
             /// 32 bit limitation number for distances in KM. //14.35504154
             /// </summary>
             public const double MAX_KM_IN_AU = 2147483648.0 / KM_PER_AU;
+
+            /// <summary>
+            /// speed of light limitation for beam weapons.
+            /// </summary>
+            public const double BEAM_AU_MAX = 300000.0 / KM_PER_AU; //0.002005376
 
             /// <summary>
             /// Plus or Minus 65Km

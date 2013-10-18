@@ -223,6 +223,8 @@ namespace Pulsar4X.Entities.Components
             ArmorDamage = new Dictionary<ushort, ushort>();
             ArmorDef = protectionDef;
 
+            Name = protectionDef.Name;
+
             /// <summary>
             /// This won't be used but will be set in any event.
             /// </summary>

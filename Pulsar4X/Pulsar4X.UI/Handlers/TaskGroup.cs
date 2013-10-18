@@ -469,6 +469,11 @@ namespace Pulsar4X.UI.Handlers
             CalculateTimeDistance();
         }
 
+        /// <summary>
+        /// Removes the top order.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RemoveButton_Clicked(object sender, EventArgs e)
         {
             if (CurrentTaskGroup.TaskGroupOrders.Count != 0)
@@ -480,6 +485,11 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// removes all orders
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RemoveAllButton_Clicked(object sender, EventArgs e)
         {
             CurrentTaskGroup.TaskGroupOrders.Clear();
@@ -489,12 +499,14 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// Shows all the System Map Panels.
+        /// Shows the TG Panel
         /// </summary>
         /// <param name="a_oDockPanel"> The target Docking Panel. </param>
         public void ShowAllPanels(DockPanel a_oDockPanel)
         {
             ShowViewPortPanel(a_oDockPanel);
+
+            RefreshTGPanel();
         }
 
         /// <summary>
@@ -537,14 +549,14 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
-                logger.Error("Something whent wrong Creating Columns for Taskgroup summary screen...");
+                logger.Error("Something went wrong Creating Columns for Taskgroup summary screen...");
             }
         }
 
         private void RefreshShipCells()
         {
             m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Clear();
-            if (CurrentTaskGroup != null)
+            if (m_oCurrnetTaskGroup != null && m_oTaskGroupPanel.TaskGroupDataGrid.Columns.Count != 0)
             {
                 try
                 {
@@ -567,7 +579,7 @@ namespace Pulsar4X.UI.Handlers
                 }
                 catch
                 {
-                    logger.Error("Something whent wrong Creating Rows for Taskgroup summary screen...");
+                    logger.Error("Something went wrong Creating Rows for Taskgroup summary screen...");
                 }
             }
         }
@@ -641,7 +653,7 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
-                logger.Error("Something whent wrong Refreshing Cells for Taskgroup Ship summary screen...");
+                logger.Error("Something went wrong Refreshing Cells for Taskgroup Ship summary screen...");
             }
         }
 
@@ -732,7 +744,27 @@ namespace Pulsar4X.UI.Handlers
             {
                 if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentTaskGroup.Contact.CurrentSystem)
                 {
-                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(pair.Key);
+                    String TH = "";
+                    if (pair.Value.thermal == true)
+                    {
+                        TH = String.Format("[Thermal {0}]", pair.Key.CurrentThermalSignature);
+                    }
+
+                    String EM = "";
+                    if (pair.Value.EM == true)
+                    {
+                        EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
+                    }
+
+                    String ACT = "";
+                    if (pair.Value.active == true)
+                    {
+                        ACT = String.Format("[ACT {0}]", pair.Key.TotalCrossSection);
+                    }
+
+                    String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+
+                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
                 }
             }
         }
@@ -766,7 +798,6 @@ namespace Pulsar4X.UI.Handlers
         {
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
             SystemLocationListTypes.Add(SystemLocationListType.Waypoints);
-
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count; loop++)
             {

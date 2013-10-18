@@ -85,7 +85,7 @@ namespace Pulsar4X.Entities.Components
         private float Hardening;
         public float hardening
         {
-            get { return hardening; }
+            get { return Hardening; }
         }
 
         /// <summary>

@@ -176,6 +176,8 @@ namespace Pulsar4X.Entities.Components
         {
             MagazineDef = definition;
 
+            Name = definition.Name;
+
             MagOrdnance = new Dictionary<OrdnanceDefTN, int>();
 
             CurCapacity = 0;

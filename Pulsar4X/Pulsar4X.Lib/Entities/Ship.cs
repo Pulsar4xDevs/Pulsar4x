@@ -784,6 +784,7 @@ namespace Pulsar4X.Entities
                 {
                     GeneralComponentTN NewComponent = new GeneralComponentTN(fromList[loop]);
                     NewComponent.componentIndex = AddList.Count;
+
                     AddList.Add(NewComponent);
                     ShipComponents.Add(NewComponent);
                 }
@@ -1481,8 +1482,17 @@ namespace Pulsar4X.Entities
                 break;
 
 
+                /// <summary>
+                /// The fire control open fire list has to be updated.
+                /// </summary>
                 case ComponentTypeTN.BeamFireControl:
                     UnlinkAllWeapons(ShipBFC[ShipComponents[ID].componentIndex]);
+                    ShipBFC[ShipComponents[ID].componentIndex].openFire = false;
+                    if (ShipsFaction.OpenFireFC.ContainsKey(ShipComponents[ID]) == true)
+                    {
+                        ShipsFaction.OpenFireFC.Remove(ShipComponents[ID]);
+                        ShipsFaction.OpenFireFCType.Remove(ShipComponents[ID]);
+                    }
                 break;
                 case ComponentTypeTN.Rail:
                 case ComponentTypeTN.Gauss:
@@ -1578,6 +1588,12 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.MissileFireControl:
                     ShipMFC[ShipComponents[ID].componentIndex].ClearAllWeapons();
                     ShipMFC[ShipComponents[ID].componentIndex].ClearAllMissiles();
+                    ShipMFC[ShipComponents[ID].componentIndex].openFire = false;
+                    if (ShipsFaction.OpenFireFC.ContainsKey(ShipComponents[ID]) == true)
+                    {
+                        ShipsFaction.OpenFireFC.Remove(ShipComponents[ID]);
+                        ShipsFaction.OpenFireFCType.Remove(ShipComponents[ID]);
+                    }
                 break;
             }
             return DamageReturn;
@@ -1768,7 +1784,6 @@ namespace Pulsar4X.Entities
                 break;
             }
         }
-
         /// <summary>
         /// Handle the consequences of a ship destruction in game mechanics. C# loses its cookies if I try to actually delete anything here.
         /// still many things need to be cleaned up when a ship is destroyed outright.
@@ -1868,7 +1883,8 @@ namespace Pulsar4X.Entities
         /// Recharges energyweapons to currentPowerGeneration of the ship.
         /// </summary>
         /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
-        public void RechargeBeamWeapons(uint tick)
+        /// <returns>Power not used.</returns>
+        public int RechargeBeamWeapons(uint tick)
         {
             ushort amt = (ushort)(Math.Floor((float)tick / 5.0f));
 
@@ -1882,12 +1898,17 @@ namespace Pulsar4X.Entities
                     if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
                     {
                         ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
+
+                        PowerRecharge = PowerRecharge - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
                     }
                     else
                     {
                         ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + beamCap);
+                        PowerRecharge = PowerRecharge - beamCap;
                     }
                 }
+
+                return PowerRecharge;
             }
             else
             {
@@ -1925,6 +1946,8 @@ namespace Pulsar4X.Entities
                         }
                     }
                 }
+
+                return AvailablePower;
             }
         }
 
@@ -1934,8 +1957,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="CurrentTick">Tick the ship is ordered to fire.</param>
         /// <param name="RNG">RNG passed from further up the food chain since I can't generate random results except by having a "global" rng.</param>
-        public void ShipFireWeapons(int CurrentTick,Random RNG)
+        public bool ShipFireWeapons(int CurrentTick,Random RNG)
         {
+            bool fired = false;
             for (int loop = 0; loop < ShipBFC.Count; loop++)
             {
                 if (ShipBFC[loop].openFire == true && ShipBFC[loop].isDestroyed == false)
@@ -1955,8 +1979,12 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                             /// </summary>
-                            Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                            return;
+                            String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
+                            MessageEntry Entry = new MessageEntry(ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                            ShipsFaction.MessageLog.Add(Entry);
+                            
+                            
+                            return false;
                         }
 
                         float distance = ShipsTaskGroup.Contact.DistanceTable[targetID];
@@ -1967,8 +1995,12 @@ namespace Pulsar4X.Entities
                             track = CurrentSpeed;
                         }
 
+                        if (distance < Constants.Units.BEAM_AU_MAX)
+                        {
+                            float DistKM = distance * (float)Constants.Units.KM_PER_AU;
 
-                        ShipBFC[loop].FireWeapons(distance, RNG, track);
+                            fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track);
+                        }
                     }
                 }
             }
@@ -1995,14 +2027,15 @@ namespace Pulsar4X.Entities
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
                                 Console.WriteLine("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                return;
+                                return false;
                             }
 
-                            ShipMFC[loop].FireWeapons(ShipsTaskGroup);
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup);
                         }
                     }
                 }
             }
+            return fired;
         }
 
         #endregion

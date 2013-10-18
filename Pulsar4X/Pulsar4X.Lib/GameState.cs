@@ -46,7 +46,7 @@ namespace Pulsar4X
             {
                 if (_SE == null)
                 {
-                    _SE = new SimEntity();
+                    _SE = new SimEntity(2,0);
                 }
                 return _SE;
             }
@@ -69,7 +69,7 @@ namespace Pulsar4X
 
             if(_SE == null)
             {
-                _SE = new SimEntity();
+                _SE = new SimEntity(2, 0);
             }
         }
 

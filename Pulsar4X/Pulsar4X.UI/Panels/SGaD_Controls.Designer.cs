@@ -30,6 +30,8 @@
         {
             this.m_oSystemSelectionComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSystemInfoGroupBox = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.m_oSeedTextBox = new System.Windows.Forms.TextBox();
             this.m_oDisscoveredDateTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
@@ -44,8 +46,6 @@
             this.m_oDeleteSystemButton = new System.Windows.Forms.Button();
             this.m_oGenGalaxyButton = new System.Windows.Forms.Button();
             this.m_oGenSystemButton = new System.Windows.Forms.Button();
-            this.m_oSeedTextBox = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.m_oSystemInfoGroupBox.SuspendLayout();
             this.m_oControlsGroupBox.SuspendLayout();
             this.m_oSMControlsGroupBox.SuspendLayout();
@@ -75,6 +75,22 @@
             this.m_oSystemInfoGroupBox.TabIndex = 1;
             this.m_oSystemInfoGroupBox.TabStop = false;
             this.m_oSystemInfoGroupBox.Text = "System Information";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(11, 104);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(35, 13);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Seed:";
+            // 
+            // m_oSeedTextBox
+            // 
+            this.m_oSeedTextBox.Location = new System.Drawing.Point(52, 102);
+            this.m_oSeedTextBox.Name = "m_oSeedTextBox";
+            this.m_oSeedTextBox.Size = new System.Drawing.Size(124, 20);
+            this.m_oSeedTextBox.TabIndex = 6;
             // 
             // m_oDisscoveredDateTextBox
             // 
@@ -201,22 +217,6 @@
             this.m_oGenSystemButton.TabIndex = 0;
             this.m_oGenSystemButton.Text = "Gen System";
             this.m_oGenSystemButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSeedTextBox
-            // 
-            this.m_oSeedTextBox.Location = new System.Drawing.Point(52, 102);
-            this.m_oSeedTextBox.Name = "m_oSeedTextBox";
-            this.m_oSeedTextBox.Size = new System.Drawing.Size(124, 20);
-            this.m_oSeedTextBox.TabIndex = 6;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(11, 104);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(35, 13);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "Seed:";
             // 
             // SGaD_Controls
             // 

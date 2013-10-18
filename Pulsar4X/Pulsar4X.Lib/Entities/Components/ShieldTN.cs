@@ -143,6 +143,9 @@ namespace Pulsar4X.Entities.Components
         public ShieldTN(ShieldDefTN definition)
         {
             ShieldDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
     }

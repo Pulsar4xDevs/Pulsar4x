@@ -81,7 +81,10 @@ namespace Pulsar4X.Entities
             //logger.Info("Waypoint Removed.");
             //logger.Info(Remove.XSystem.ToString());
             //logger.Info(Remove.YSystem.ToString());
-            Waypoints.Remove(Remove);
+            if (Waypoints.Count == 1)
+                Waypoints.Clear();
+            else
+                Waypoints.Remove(Remove);
         }
 
         /// <summary>

@@ -39,8 +39,8 @@ namespace Pulsar4X.UI.Panels
             m_oArmorDisplayDataGrid.AllowUserToOrderColumns = false;
             m_oArmorDisplayDataGrid.AllowUserToResizeColumns = false;
             m_oArmorDisplayDataGrid.AllowUserToResizeRows = false;
+            m_oArmorDisplayDataGrid.Enabled = true;
             m_oArmorDisplayDataGrid.ReadOnly = true;
-            m_oArmorDisplayDataGrid.Enabled = false;
             m_oArmorDisplayDataGrid.ColumnHeadersVisible = false;
             m_oArmorDisplayDataGrid.RowHeadersVisible = false;
             m_oArmorDisplayDataGrid.ClearSelection();

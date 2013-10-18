@@ -120,6 +120,9 @@ namespace Pulsar4X.Entities.Components
         public ReactorTN(ReactorDefTN definition)
         {
             ReactorDef = definition;
+
+            Name = definition.Name;
+
             isDestroyed = false;
         }
     }

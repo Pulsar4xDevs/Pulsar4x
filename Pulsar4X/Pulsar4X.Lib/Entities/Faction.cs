@@ -241,7 +241,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Text of the message for the log.
         /// </summary>
-        public string Text { get; set; }
+        public String Text { get; set; }
 
 
         /// <summary>
@@ -331,6 +331,28 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int BaseTracking { get; set; }
 
+        /// <summary>
+        /// These are Firecontrols set to open fire.
+        /// </summary>
+        public Dictionary<ComponentTN,ShipTN> OpenFireFC { get; set; }
+        public Dictionary<ComponentTN, bool> OpenFireFCType { get; set; }
+
+        /// <summary>
+        /// List of ships that need various combat related functionality. the int is a status word.
+        /// </summary>
+        public Dictionary<ShipTN,int> RechargeList { get; set; }
+
+        /// <summary>
+        /// Bitwise status flag enumerator.
+        /// </summary>
+        public enum RechargeStatus
+        {
+            Shields=1,
+            Weapons=2,
+            Destroyed=4,
+            Count=8
+        }
+
         public Faction(int ID)
         {
             Name = "Human Federation";
@@ -364,6 +386,11 @@ namespace Pulsar4X.Entities
             MissileGroups = new BindingList<OrdnanceGroupTN>();
 
             BaseTracking = 1250;
+
+            OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
+            OpenFireFCType = new Dictionary<ComponentTN,bool>();
+
+            RechargeList = new Dictionary<ShipTN,int>();
         }
 
         public Faction(string a_oName, Species a_oSpecies, int ID)
@@ -399,6 +426,11 @@ namespace Pulsar4X.Entities
             MissileGroups = new BindingList<OrdnanceGroupTN>();
 
             BaseTracking = 1250;
+
+            OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
+            OpenFireFCType = new Dictionary<ComponentTN, bool>();
+
+            RechargeList = new Dictionary<ShipTN, int>();
         }
 
         /// <summary>
@@ -472,7 +504,7 @@ namespace Pulsar4X.Entities
                     if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue &&
                         System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue && System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue)
                     {
-                        float dist;
+                        float dist = -1.0f;
                         if (TaskGroups[loop].Contact.DistanceUpdate[loop2] == YearTickValue)
                         {
                             dist = TaskGroups[loop].Contact.DistanceTable[loop2];
@@ -804,7 +836,7 @@ namespace Pulsar4X.Entities
                                                         /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
                                                         /// Mark the entire group as "spotted" because no other detection will occur.
                                                         /// </summary>
-                                                        if (System.SystemContactList[loop2].TaskGroup.Ships[node.Previous.Value].EMDetection[FactionID] == YearTickValue)
+                                                        if (System.SystemContactList[loop2].TaskGroup.Ships[node.Next.Value].EMDetection[FactionID] == YearTickValue)
                                                         {
                                                             System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                                         }
@@ -1066,7 +1098,7 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 if (dist < Constants.Units.MAX_KM_IN_AU)
                 {
-                    float distKM = dist * (float)Constants.Units.KM_PER_AU;
+                    float distKM = (dist * (float)Constants.Units.KM_PER_AU) / 10000.0f;
 
                     /// <summary>
                     /// if distKM is less than detection(KM) then detection occurs.
