@@ -154,6 +154,11 @@ namespace Pulsar4X.Entities.Components
 
             size = size * ModRange * ModTracking;
 
+            if (size >= 1.0f)
+                htk = 1;
+            else
+                htk = 0;
+
             Range = RangeBase * RangeMod;
             Tracking = TrackBase * TrackMod;
 
