@@ -125,8 +125,8 @@ namespace Pulsar4X.UI
             }
             oNewFaction2.ShipDesigns[0].NewArmor("Composite", 8, 4);
 
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
+            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0], 0);
+            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0], 0);
             oNewFaction2.TaskGroups[0].Ships[0].Refuel(1000000.0f);
             oNewFaction2.TaskGroups[0].Ships[1].Refuel(1000000.0f);
 
