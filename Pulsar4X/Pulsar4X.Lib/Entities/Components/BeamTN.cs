@@ -442,7 +442,7 @@ namespace Pulsar4X.Entities.Components
                 }
                 else
                 {
-                    IncrementDamage = (ushort)Math.Floor((float)((float)(WeaponRangeTech+1) / (float)(loop + 1)));
+                    IncrementDamage = (ushort)Math.Floor(((float)((float)(WeaponRangeTech+1) / (float)(loop + 1)) * (float)Damage[0]));
 
                     if (IncrementDamage == 0)
                         IncrementDamage = 1;
