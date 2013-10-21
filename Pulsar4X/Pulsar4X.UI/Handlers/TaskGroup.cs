@@ -999,18 +999,21 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RefreshTGPanel()
         {
-            m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.CurrentSystem.Name;
-            m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
-            m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
+            if (CurrentTaskGroup != null)
+            {
+                m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.CurrentSystem.Name;
+                m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
+                m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
 
-            RefreshShipCells();
+                RefreshShipCells();
 
-            BuildSystemLocationList();
-            ClearActionList();
+                BuildSystemLocationList();
+                ClearActionList();
 
-            BuildPlottedMoveList();
+                BuildPlottedMoveList();
 
-            CalculateTimeDistance();
+                CalculateTimeDistance();
+            }
         }
         #endregion
     }
