@@ -41,6 +41,7 @@
             this.classDesignToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.shipsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.taskGroupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commanderNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,7 +51,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.m_oSystemMapToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.m_oSystemViewToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.taskGroupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createResearchProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_oMainMenuStrip.SuspendLayout();
             this.m_oToolStripContainer.TopToolStripPanel.SuspendLayout();
             this.m_oToolStripContainer.SuspendLayout();
@@ -119,7 +120,8 @@
             this.classDesignToolStripMenuItem,
             this.shipsToolStripMenuItem,
             this.systemInformationToolStripMenuItem,
-            this.taskGroupsToolStripMenuItem});
+            this.taskGroupsToolStripMenuItem,
+            this.createResearchProjectToolStripMenuItem});
             this.empireToolStripMenuItem.Name = "empireToolStripMenuItem";
             this.empireToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.E)));
             this.empireToolStripMenuItem.Size = new System.Drawing.Size(51, 20);
@@ -129,36 +131,44 @@
             // 
             this.economicsToolStripMenuItem.Name = "economicsToolStripMenuItem";
             this.economicsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F2;
-            this.economicsToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.economicsToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             this.economicsToolStripMenuItem.Text = "Economics";
             // 
             // systemMapToolStripMenuItem
             // 
             this.systemMapToolStripMenuItem.Name = "systemMapToolStripMenuItem";
             this.systemMapToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F3;
-            this.systemMapToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.systemMapToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             this.systemMapToolStripMenuItem.Text = "System Map";
             // 
             // classDesignToolStripMenuItem
             // 
             this.classDesignToolStripMenuItem.Name = "classDesignToolStripMenuItem";
             this.classDesignToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F5;
-            this.classDesignToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.classDesignToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             this.classDesignToolStripMenuItem.Text = "Class Design";
             // 
             // shipsToolStripMenuItem
             // 
             this.shipsToolStripMenuItem.Name = "shipsToolStripMenuItem";
             this.shipsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F6;
-            this.shipsToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.shipsToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             this.shipsToolStripMenuItem.Text = "Ships";
             // 
             // systemInformationToolStripMenuItem
             // 
             this.systemInformationToolStripMenuItem.Name = "systemInformationToolStripMenuItem";
             this.systemInformationToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
-            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
+            this.systemInformationToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             this.systemInformationToolStripMenuItem.Text = "System Information";
+            // 
+            // taskGroupsToolStripMenuItem
+            // 
+            this.taskGroupsToolStripMenuItem.Name = "taskGroupsToolStripMenuItem";
+            this.taskGroupsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F12;
+            this.taskGroupsToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.taskGroupsToolStripMenuItem.Text = "Task Groups";
+            this.taskGroupsToolStripMenuItem.Click += new System.EventHandler(this.taskGroupsToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
@@ -240,13 +250,13 @@
             this.m_oSystemViewToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.m_oSystemViewToolStripButton.Text = "System View";
             // 
-            // taskGroupsToolStripMenuItem
+            // createResearchProjectToolStripMenuItem
             // 
-            this.taskGroupsToolStripMenuItem.Name = "taskGroupsToolStripMenuItem";
-            this.taskGroupsToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F12;
-            this.taskGroupsToolStripMenuItem.Size = new System.Drawing.Size(187, 22);
-            this.taskGroupsToolStripMenuItem.Text = "Task Groups";
-            this.taskGroupsToolStripMenuItem.Click += new System.EventHandler(this.taskGroupsToolStripMenuItem_Click);
+            this.createResearchProjectToolStripMenuItem.Name = "createResearchProjectToolStripMenuItem";
+            this.createResearchProjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F6)));
+            this.createResearchProjectToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.createResearchProjectToolStripMenuItem.Text = "Create Research Project";
+            this.createResearchProjectToolStripMenuItem.Click += new System.EventHandler(this.createResearchProjectToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -297,5 +307,6 @@
         private System.Windows.Forms.ToolStripMenuItem classDesignToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem shipsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem taskGroupsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem createResearchProjectToolStripMenuItem;
     }
 }

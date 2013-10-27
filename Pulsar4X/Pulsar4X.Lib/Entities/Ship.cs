@@ -368,6 +368,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<ShipTN> ShipsTargetting { get; set; }
 
+        /// <summary>
+        /// Taskgroups with orders to this ship.
+        /// </summary>
+        public BindingList<TaskGroupTN> TaskGroupsOrdered { get; set; }
+
 
         /// <summary>
         /// ShipTN creates a ship of classDefinition in Index ShipIndex for the taskgroup ship list.
@@ -773,6 +778,8 @@ namespace Pulsar4X.Entities
             IsDestroyed = false;
 
             ShipsTargetting = new BindingList<ShipTN>();
+
+            TaskGroupsOrdered = new BindingList<TaskGroupTN>();
         }
 
         /// <summary>
@@ -1009,7 +1016,7 @@ namespace Pulsar4X.Entities
                     left = (short)(HitLocation - 1);
                     right = (short)(HitLocation + 1);
                     internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
-                    if (Type == DamageTypeTN.Plasma)
+                    if (Type == DamageTypeTN.Plasma && Table.hitPoint + 1 < Table.damageTemplate.Count)
                     {
                         internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
                         right++;

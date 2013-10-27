@@ -316,7 +316,7 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// AdvanceSim is a more general pulsar simulation than runsim.
+        /// AdvanceSim is a more general pulsar simulation than runsim. This is the Current Time advancement function in Pulsar 4X
         /// </summary>
         /// <param name="P"></param>
         /// <param name="RNG"></param>
@@ -471,8 +471,38 @@ namespace Pulsar4X.Entities
 
                     /// <summary>
                     /// Ship destruction, very involving.
+                    /// </summary>
                     if((value & (int)Faction.RechargeStatus.Destroyed) == (int)Faction.RechargeStatus.Destroyed)
                     {
+                        for(int loop4 = 0; loop4 < pair.Key.TaskGroupsOrdered.Count; loop4++)
+                        {
+                            for (int loop5 = 0; loop5 < pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.Count; loop5++)
+                            {
+                                if (pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders[loop5].target.SSEntity == StarSystemEntityType.TaskGroup)
+                                {
+                                    if (pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders[loop5].taskGroup == pair.Key.ShipsTaskGroup)
+                                    {
+                                        /// <summary>
+                                        /// At this point it has been established that the destroyed ship has TGs ordered to it some how(enemy contact ordering).
+                                        /// That the ordered TG has multiple TG orders
+                                        /// That the current order target is a taskgroup, and in fact this taskgroup.
+                                        /// </summary>
+
+                                        String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.",pair.Key.TaskGroupsOrdered[loop4].Name);
+                                        MessageEntry Entry2 = new MessageEntry(pair.Key.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.TaskGroupsOrdered[loop4].Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                        pair.Key.TaskGroupsOrdered[loop4].TaskGroupFaction.MessageLog.Add(Entry2);
+
+                                        int lastOrder = pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.Count - 1;
+                                        for (int loop6 = lastOrder; loop6 >= loop5; loop6--)
+                                        {
+                                            pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.RemoveAt(loop6);
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         for (int loop4 = factionStart; loop4 < factionCount; loop4++)
                         {
                             if (P[loop4].DetectedContacts.ContainsKey(pair.Key) == true)
@@ -488,6 +518,37 @@ namespace Pulsar4X.Entities
 
                         if (pair.Key.ShipsTaskGroup.Ships.Count == 0)
                         {
+                            for (int loop4 = 0; loop4 < pair.Key.ShipsTaskGroup.TaskGroupsOrdered.Count; loop4++)
+                            {
+                                for (int loop5 = 0; loop5 < pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupOrders.Count; loop5++)
+                                {
+                                    if (pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupOrders[loop5].target.SSEntity == StarSystemEntityType.TaskGroup)
+                                    {
+                                        if (pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupOrders[loop5].taskGroup == pair.Key.ShipsTaskGroup)
+                                        {
+                                            /// <summary>
+                                            /// At this point it has been established that the destroyed TG has TGs ordered to it, friendly TGs.
+                                            /// That the ordered TG has multiple TG orders
+                                            /// That the current order target is a taskgroup, and in fact this taskgroup.
+                                            /// </summary>
+
+                                            String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.", pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Name);
+                                            MessageEntry Entry2 = new MessageEntry(pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                            pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupFaction.MessageLog.Add(Entry2);
+
+                                            int lastOrder = pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupOrders.Count - 1;
+                                            for (int loop6 = lastOrder; loop6 >= loop5; loop6--)
+                                            {
+                                                pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupOrders.RemoveAt(loop6);
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+
+
                             pair.Key.ShipsTaskGroup.clearAllOrders();
                             pair.Key.ShipsTaskGroup.Contact.CurrentSystem.RemoveContact(pair.Key.ShipsTaskGroup.Contact);
                             pair.Key.ShipsFaction.TaskGroups.Remove(pair.Key.ShipsTaskGroup);

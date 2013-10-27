@@ -377,6 +377,7 @@ namespace Pulsar4X.UI.Handlers
                                             Counter = 0;
                                             NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, pair.Key.ShipsTaskGroup);
                                             CurrentTaskGroup.IssueOrder(NewOrder);
+                                            pair.Key.TaskGroupsOrdered.Add(CurrentTaskGroup);
                                             break;
                                         }
 
@@ -422,6 +423,7 @@ namespace Pulsar4X.UI.Handlers
                                 {
                                     NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, TargetOfOrder);
                                     CurrentTaskGroup.IssueOrder(NewOrder);
+                                    TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
                                 }
                                 else
                                 {

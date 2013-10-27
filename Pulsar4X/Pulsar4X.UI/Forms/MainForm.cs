@@ -134,6 +134,11 @@ namespace Pulsar4X.UI.Forms
             Helpers.UIController.Instance.TaskGroup.ShowAllPanels(m_oDockPanel);
         }
 
+        private void createResearchProjectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.ComponentRP.Popup();
+        }
+
         #endregion
     }
 }

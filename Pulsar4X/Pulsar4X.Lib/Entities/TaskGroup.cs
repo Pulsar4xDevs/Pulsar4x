@@ -175,6 +175,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int MapMarkerId { get; set; }
 
+        /// <summary>
+        /// Taskgroups with orders to this ship.
+        /// </summary>
+        public BindingList<TaskGroupTN> TaskGroupsOrdered { get; set; }
+
 
 
         /// <summary>
@@ -270,6 +275,8 @@ namespace Pulsar4X.Entities
             CurrentCryoStorage = 0;
 
             AttachedMissileGroups = new BindingList<OrdnanceGroupTN>();
+
+            TaskGroupsOrdered = new BindingList<TaskGroupTN>();
 
         }
 
@@ -1353,6 +1360,41 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 if (TimeSlice > 0)
                 {
+                    if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.TaskGroup)
+                    {
+
+                        /// <summary>
+                        /// Same TG, so TG to TG order
+                        /// </summary>
+                        if (TaskGroupOrders[0].taskGroup.TaskGroupFaction == TaskGroupFaction)
+                        {
+                            if (TaskGroupOrders[0].taskGroup.TaskGroupsOrdered.IndexOf(this) != -1)
+                            {
+                                TaskGroupOrders[0].taskGroup.TaskGroupsOrdered.Remove(this);
+                            }
+                        }
+                        else
+                        {
+                            int check = -1;
+                            for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
+                            {
+                                if (TaskGroupOrders[0].taskGroup.Ships[loop].TaskGroupsOrdered.IndexOf(this) != -1)
+                                {
+                                    check = loop;
+                                    TaskGroupOrders[0].taskGroup.Ships[loop].TaskGroupsOrdered.Remove(this);
+                                    break;
+                                }
+                            }
+
+                            if (check == -1)
+                            {
+                                String Entry = String.Format("Ship Error, no TaskGroupsOrdered found for TG {0} in Faction {1}, {2} has completed an order to move.",TaskGroupOrders[0].taskGroup.Name,
+                                    TaskGroupOrders[0].taskGroup.TaskGroupFaction.Name, Name);
+                                MessageEntry NME = new MessageEntry(Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                TaskGroupFaction.MessageLog.Add(NME);
+                            }
+                        }
+                    }
                     TaskGroupOrders.RemoveAt(0);
 
                     if (TaskGroupOrders.Count > 0)

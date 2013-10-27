@@ -105,6 +105,16 @@ namespace Pulsar4X.UI.Helpers
             get { return m_oTaskGroup; }
         }
 
+        Handlers.Components m_oComponentRP;
+
+        /// <summary>
+        /// Handles research project creation.
+        /// </summary>
+        public Handlers.Components ComponentRP
+        {
+            get { return m_oComponentRP; }
+        }
+
         public bool SuspendAutoPanelDisplay { get; set; }
 
         /// <summary>
@@ -137,6 +147,7 @@ namespace Pulsar4X.UI.Helpers
             m_oShips = new Handlers.Ships();
             m_oClassDesign = new Handlers.ClassDesign();
             m_oTaskGroup = new Handlers.TaskGroup();
+            m_oComponentRP = new Handlers.Components();
         }
 
         #region PublicMethods
@@ -149,6 +160,7 @@ namespace Pulsar4X.UI.Helpers
             m_oSystemGenAndDisplay.SMOn();
             m_oShips.SMOn();
             m_oClassDesign.SMOn();
+            m_oComponentRP.SMOn();
         }
 
         /// <summary>
@@ -159,6 +171,7 @@ namespace Pulsar4X.UI.Helpers
             m_oSystemGenAndDisplay.SMOff();
             m_oShips.SMOff();
             m_oClassDesign.SMOff();
+            m_oComponentRP.SMOff();
         }
 
         /// <summary>

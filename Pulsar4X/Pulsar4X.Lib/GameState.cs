@@ -77,6 +77,7 @@ namespace Pulsar4X
         {
             m_oStarSystemFactory = new Stargen.StarSystemFactory();
             m_oGameDateTime = new DateTime(2025, 1, 1); // sets the date to 1 Jan 2025, just like aurora!!!
+            m_oYearTickValue = 0;
         }
 
         #endregion
@@ -121,6 +122,16 @@ namespace Pulsar4X
             {
                 m_oGameDateTime = value; 
             }
+        }
+
+        /// <summary>
+        /// Value of current tick on a year by year basis.
+        /// </summary>
+        private int m_oYearTickValue;
+        public int YearTickValue
+        {
+            get { return m_oYearTickValue; }
+            set { m_oYearTickValue = value; }
         }
 
         #endregion
@@ -201,6 +212,47 @@ namespace Pulsar4X
             }
             set { _planets = value; }
         }
+
+        private BindingList<String> _compResearchTechs;
+        public BindingList<String> CompResearchTechs
+        {
+            get
+            {
+                if (_compResearchTechs == null)
+                {
+                    //Load from DB here
+                    _compResearchTechs = new BindingList<String>();
+
+                    _compResearchTechs.Add("Active Sensor / Missile Fire Control");
+                    _compResearchTechs.Add("Beam Fire Control");
+                    _compResearchTechs.Add("CIWS");
+                    _compResearchTechs.Add("Cloaking Device");
+                    _compResearchTechs.Add("EM Detection Sensors");
+                    _compResearchTechs.Add("Engines");
+                    _compResearchTechs.Add("Gauss Cannons");
+                    _compResearchTechs.Add("High Power Microwaves");
+                    _compResearchTechs.Add("Jump Engines");
+                    _compResearchTechs.Add("Lasers");
+                    _compResearchTechs.Add("Magazine");
+                    _compResearchTechs.Add("Meson Cannons");
+                    _compResearchTechs.Add("Missile Engines");
+                    _compResearchTechs.Add("Missile Launchers");
+                    _compResearchTechs.Add("New Species");
+                    _compResearchTechs.Add("Particle Beams");
+                    _compResearchTechs.Add("Plasma Carronade");
+                    _compResearchTechs.Add("Plasma Torpedos");
+                    _compResearchTechs.Add("Power Plants");
+                    _compResearchTechs.Add("Railguns");
+                    _compResearchTechs.Add("Shields - Absorption");
+                    _compResearchTechs.Add("Shields - Standard");
+                    _compResearchTechs.Add("Thermal Sensors");
+                }
+                return _compResearchTechs;
+            }
+            set { _compResearchTechs = value; }
+        }
+
+            
 #endregion Entities
 
     }
