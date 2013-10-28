@@ -230,7 +230,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oBackgroundTechGroupBox.Location = new System.Drawing.Point(12, 67);
             this.m_oBackgroundTechGroupBox.Margin = new System.Windows.Forms.Padding(12);
             this.m_oBackgroundTechGroupBox.Name = "m_oBackgroundTechGroupBox";
-            this.m_oBackgroundTechGroupBox.Size = new System.Drawing.Size(568, 294);
+            this.m_oBackgroundTechGroupBox.Size = new System.Drawing.Size(568, 269);
             this.m_oBackgroundTechGroupBox.TabIndex = 1;
             this.m_oBackgroundTechGroupBox.TabStop = false;
             this.m_oBackgroundTechGroupBox.Text = "Background Technology";
@@ -367,9 +367,9 @@ namespace Pulsar4X.UI.Panels
             this.m_oSysParaGroupBox.Controls.Add(this.m_oSMInstantButton);
             this.m_oSysParaGroupBox.Controls.Add(this.m_oTechParaTextBox);
             this.m_oSysParaGroupBox.Controls.Add(this.m_oTechNameTextBox);
-            this.m_oSysParaGroupBox.Location = new System.Drawing.Point(12, 496);
+            this.m_oSysParaGroupBox.Location = new System.Drawing.Point(12, 471);
             this.m_oSysParaGroupBox.Name = "m_oSysParaGroupBox";
-            this.m_oSysParaGroupBox.Size = new System.Drawing.Size(568, 221);
+            this.m_oSysParaGroupBox.Size = new System.Drawing.Size(568, 248);
             this.m_oSysParaGroupBox.TabIndex = 1;
             this.m_oSysParaGroupBox.TabStop = false;
             this.m_oSysParaGroupBox.Text = "Proposed System Parameters";
@@ -396,14 +396,16 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oTechParaTextBox
             // 
+            this.m_oTechParaTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_oTechParaTextBox.Location = new System.Drawing.Point(9, 55);
             this.m_oTechParaTextBox.Name = "m_oTechParaTextBox";
-            this.m_oTechParaTextBox.Size = new System.Drawing.Size(553, 160);
+            this.m_oTechParaTextBox.Size = new System.Drawing.Size(553, 187);
             this.m_oTechParaTextBox.TabIndex = 1;
             this.m_oTechParaTextBox.Text = "";
             // 
             // m_oTechNameTextBox
             // 
+            this.m_oTechNameTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.m_oTechNameTextBox.Location = new System.Drawing.Point(6, 19);
             this.m_oTechNameTextBox.Name = "m_oTechNameTextBox";
             this.m_oTechNameTextBox.Size = new System.Drawing.Size(395, 29);
@@ -451,7 +453,7 @@ namespace Pulsar4X.UI.Panels
             // m_oNotesGroupBox
             // 
             this.m_oNotesGroupBox.Controls.Add(this.m_oNotesLabel);
-            this.m_oNotesGroupBox.Location = new System.Drawing.Point(12, 376);
+            this.m_oNotesGroupBox.Location = new System.Drawing.Point(12, 351);
             this.m_oNotesGroupBox.Name = "m_oNotesGroupBox";
             this.m_oNotesGroupBox.Size = new System.Drawing.Size(562, 114);
             this.m_oNotesGroupBox.TabIndex = 8;

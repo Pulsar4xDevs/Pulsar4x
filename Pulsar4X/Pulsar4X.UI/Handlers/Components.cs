@@ -67,6 +67,8 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        private ActiveSensorDefTN ActiveSensorProject;
+
         private IntPtr eventMask;
 
         [DllImport("user32", CharSet = CharSet.Auto)]
@@ -103,10 +105,24 @@ namespace Pulsar4X.UI.Handlers
             //m_oComponentDesignPanel.ResearchComboBox.SelectedIndexChanged += (s, args) => m_oComponentDesignPanel.ResearchComboBox.DataBindings["SelectedItem"].WriteValue();
             m_oComponentDesignPanel.ResearchComboBox.SelectedIndexChanged += new EventHandler(ResearchComboBox_SelectedIndexChanged);
 
+            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndexChanged   += new EventHandler(TechComboBox_SelectedIndexChanged);
+            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndexChanged   += new EventHandler(TechComboBox_SelectedIndexChanged);
+            m_oComponentDesignPanel.TechComboBoxThree.SelectedIndexChanged += new EventHandler(TechComboBox_SelectedIndexChanged);
+            m_oComponentDesignPanel.TechComboBoxFour.SelectedIndexChanged  += new EventHandler(TechComboBox_SelectedIndexChanged);
+            m_oComponentDesignPanel.TechComboBoxFive.SelectedIndexChanged  += new EventHandler(TechComboBox_SelectedIndexChanged);
+            m_oComponentDesignPanel.TechComboBoxSix.SelectedIndexChanged   += new EventHandler(TechComboBox_SelectedIndexChanged);
+            m_oComponentDesignPanel.TechComboBoxSeven.SelectedIndexChanged += new EventHandler(TechComboBox_SelectedIndexChanged);
+
             m_oComponentDesignPanel.CloseButton.Click += new EventHandler(CloseButton_Click);
 
-            m_oComponentDesignPanel.ResizeBegin +=new EventHandler(ResizeBegin);
-            m_oComponentDesignPanel.ResizeEnd += new EventHandler(ResizeEnd);
+            m_oComponentDesignPanel.SizeTonsCheckBox.Click += new EventHandler(SizeTonsCheckBox_Click);
+
+            m_oComponentDesignPanel.InstantButton.Click += new EventHandler(InstantButton_Click);
+
+            //m_oComponentDesignPanel.ResizeBegin +=new EventHandler(ResizeBegin);
+            //m_oComponentDesignPanel.ResizeEnd += new EventHandler(ResizeEnd);
+
+            ActiveSensorProject = null;
         }
 
         /// <summary>
@@ -185,7 +201,7 @@ namespace Pulsar4X.UI.Handlers
         private void FactionComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             _CurrnetComponent = ComponentsViewModel.Components.ActiveMFC;
-            BuildBackgroundTech();
+            m_oComponentDesignPanel.ResearchComboBox.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -199,6 +215,16 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// On any of the tech combo boxes being changed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TechComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BuildSystemParameters();
+        }
+
+        /// <summary>
         /// Closes the dialogbox
         /// </summary>
         /// <param name="sender"></param>
@@ -208,14 +234,156 @@ namespace Pulsar4X.UI.Handlers
             m_oComponentDesignPanel.Close();
         }
 
+        /// <summary>
+        /// Sets display of tonnage from HS to Tons if clicked
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SizeTonsCheckBox_Click(object sender, EventArgs e)
+        {
+            BuildSystemParameters();
+        }
 
         /// <summary>
-        /// Builds the display for the background technology group box
+        /// Instant Adds the current tech project as a component to the faction component list, well, instantly.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void InstantButton_Click(object sender, EventArgs e)
+        {
+            #region InstantButton Switch
+            switch ((ComponentsViewModel.Components)m_oComponentDesignPanel.ResearchComboBox.SelectedIndex)
+            {
+                #region Active Sensors / MFC
+                case ComponentsViewModel.Components.ActiveMFC:
+                break;
+                #endregion
+
+                #region Beam Fire Control
+                case ComponentsViewModel.Components.BFC:
+                break;
+                #endregion
+
+                #region CIWS
+                case ComponentsViewModel.Components.CIWS:
+                break;
+                #endregion
+
+                #region Cloak
+                case ComponentsViewModel.Components.Cloak:
+                break;
+                #endregion
+
+                #region EM
+                case ComponentsViewModel.Components.EM:
+                break;
+                #endregion
+
+                #region Engines
+                case ComponentsViewModel.Components.Engine:
+                break;
+                #endregion
+
+                #region Gauss Cannon
+                case ComponentsViewModel.Components.Gauss:
+                break;
+                #endregion
+
+                #region High Power Microwave
+                case ComponentsViewModel.Components.Microwave:
+                break;
+                #endregion
+
+                #region Jump Engines
+                case ComponentsViewModel.Components.Jump:
+                break;
+                #endregion
+
+                #region Lasers
+                case ComponentsViewModel.Components.Laser:
+                break;
+                #endregion
+
+                #region Magazines
+                case ComponentsViewModel.Components.Magazine:
+                break;
+                #endregion
+
+                #region Meson Cannons
+                case ComponentsViewModel.Components.Meson:
+                break;
+                #endregion
+
+                #region Missile Engines
+                case ComponentsViewModel.Components.MissileEngine:
+                break;
+                #endregion
+
+                #region Missile Launcher
+                case ComponentsViewModel.Components.MissileLauncher:
+                break;
+                #endregion
+
+                #region New Species
+                case ComponentsViewModel.Components.NewSpecies:
+                break;
+                #endregion
+
+                #region Particle beams
+                case ComponentsViewModel.Components.Particle:
+                break;
+                #endregion
+
+                #region Plasma Carronades
+                case ComponentsViewModel.Components.Plasma:
+                break;
+                #endregion
+
+                #region Plasma Torpedos
+                case ComponentsViewModel.Components.PlasmaTorp:
+                break;
+                #endregion
+
+                #region Power Plants
+                case ComponentsViewModel.Components.Reactor:
+                break;
+                #endregion
+
+                #region Railguns
+                case ComponentsViewModel.Components.Rail:
+                break;
+                #endregion
+
+                #region Absorption Shields
+                case ComponentsViewModel.Components.ShieldAbs:
+                break;
+                #endregion
+
+                #region Standard Shields
+                case ComponentsViewModel.Components.ShieldStd:
+                break;
+                #endregion
+
+                #region Thermal Sensors
+                case ComponentsViewModel.Components.Thermal:
+                break;
+                #endregion
+            }
+            #endregion
+        }
+
+
+        /// <summary>
+        /// Builds the display for the background technology group box. Sanity checking is done here as the all techs function sets every tech level to 100 rather than its respective max.
         /// </summary>
         private void BuildBackgroundTech()
         {
+            int TechLevel = -1;
+
             if (m_oComponentDesignPanel.ResearchComboBox.SelectedIndex != -1)
             {
+
+                #region BuildBackgroundTech Switch
                 switch ((ComponentsViewModel.Components)m_oComponentDesignPanel.ResearchComboBox.SelectedIndex)
                 {
                     #region Active Sensors / MFC
@@ -226,6 +394,129 @@ namespace Pulsar4X.UI.Handlers
                         SetLabels("Active Sensor Strength","EM Sensor Sensitivity","Total Sensor Size","Minimum Resolution","Hardening","Active Sensor Type","");
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Sensor Range = Active Strength x Size x SQRT(Resolution) x EM Sensitivity x 10,000 km\nMissile Fire Controls multiply this by 3 in exchange for only being able to guide missiles, while losing the ability to perform active scanning.";
+
+
+                        /// <summary>
+                        /// Active Sensor tech listing
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ActiveSensorStrength];
+                        if (TechLevel >= 0)
+                        {
+                            if(TechLevel > 11)
+                                TechLevel = 11;
+
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                String Entry = String.Format("Active Sensor Strength {0}", Constants.SensorTN.ActiveStrength[loop]);
+                                m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// EM sensitivity tech listing.
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity];
+                        if (TechLevel >= 0)
+                        {
+                            if(TechLevel > 11)
+                                TechLevel = 11;
+
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                String Entry = String.Format("EM Sensor Sensitivity {0}", Constants.SensorTN.PassiveStrength[loop]);
+                                m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// Overall size from 0.1 to 50
+                        /// </summary>
+                        for (int loop = 1; loop < 10; loop++)
+                        {
+                            String Entry = String.Format("0.{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        for (int loop = 0; loop < 10; loop += 2)
+                        {
+                            String Entry = "N/A";
+                            if (loop == 0)
+                                Entry = "1";
+                            else
+                                Entry = String.Format("1.{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        for (int loop = 2; loop < 5; loop++)
+                        {
+                            for (int loop2 = 0; loop2 < 100; loop2 += 25)
+                            {
+                                String Entry = "N/A";
+                                if (loop2 == 0)
+                                    Entry = String.Format("{0}", loop);
+                                else
+                                    Entry = String.Format("{0}.{1}", loop, loop2);
+
+                                m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                            }
+                        }
+
+                        for (int loop = 5; loop < 51; loop++)
+                        {
+                            String Entry = String.Format("{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 9;
+
+                        /// <summary>
+                        /// Resolution for sensor listing.
+                        /// </summary>
+                        for (int loop = 1; loop <= 20; loop++)
+                        {
+                            String Entry = String.Format("{0} tons ({1} HS)", (loop * 50), loop);
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+                        }
+
+                        for (int loop = 25; loop <= 200; loop+=5)
+                        {
+                            String Entry = String.Format("{0} tons ({1} HS)", (loop * 50), loop);
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+                        }
+
+                        for (int loop = 220; loop <= 500; loop += 20)
+                        {
+                            String Entry = String.Format("{0} tons ({1} HS)", (loop * 50), loop);
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 35;
+
+                        /// <summary>
+                        /// Electronic hardening tech listing.
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.Hardening];
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 8)
+                                TechLevel = 8;
+
+                            for (int loop = 0; loop <= TechLevel; loop++)
+                            {
+                                String Entry = String.Format("Electronic Hardening Level {0}", loop);
+                                m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxSix.Items.Add("Search Sensor");
+                        m_oComponentDesignPanel.TechComboBoxSix.Items.Add("Missile Fire Control");
+                        m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = 0;
 
                         
                     break;
@@ -504,7 +795,355 @@ namespace Pulsar4X.UI.Handlers
                     break;
                     #endregion
                 }
+                #endregion
+
             }
+        }
+
+        /// <summary>
+        /// Update the display/Name for the proposed component.
+        /// </summary>
+        private void BuildSystemParameters()
+        {
+            String Entry = "N/A";
+            float Size = 0.0f;
+            float Hard = 1.0f;
+            int FactTech = -1;
+
+            m_oComponentDesignPanel.TechNameTextBox.Clear();
+            m_oComponentDesignPanel.ParametersTextBox.Clear();
+
+            #region BuildSystemParamters Switch
+            switch ((ComponentsViewModel.Components)m_oComponentDesignPanel.ResearchComboBox.SelectedIndex)
+            {
+                #region Active Sensors / MFC
+                case ComponentsViewModel.Components.ActiveMFC:
+
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex != -1)
+                    {
+
+
+                        #region Size
+                        /// <summary>
+                        /// Pull size out of this mess.
+                        /// </summary>
+                        if(m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex < 9)
+                        {
+                            Size = (float)(m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex+1) / 10.0f;
+                        }
+                        else if( m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex >= 9 && m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex <= 13)
+                        {
+                            Size = 1.0f + (float)((m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex-9)*2) / 10.0f;
+                        }
+                        else if( m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex >= 14 && m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex <= 25)
+                        {
+                            Size = 2.0f + (float)(((m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex-14) * 25) / 100.0f);
+                        }
+                        else if (m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex > 25)
+                        {
+                            Size = (float)(m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex - 21);
+                        }
+                        #endregion
+
+                        #region Resolution
+                        ushort Resolution = 501;
+                        if (m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex < 20)
+                        {
+                            Resolution = (ushort)(m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex + 1);
+                        }
+                        else if (m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex >= 20 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex <= 55)
+                        {
+                            Resolution = (ushort)(20 + ((m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex - 19) * 5));
+                        }
+                        else if (m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex > 55)
+                        {
+                            Resolution = (ushort)(200 + ((m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex - 55) * 20));
+                        }
+                        #endregion
+
+                        #region Hardening
+                        /// <summary>
+                        /// Get chance of destruction due to electronic damage.
+                        /// </summary>
+                        switch (m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex)
+                        {
+                            case 0:
+                            Hard = 1.0f;
+                            break;
+                            case 1:
+                            Hard = 0.7f;
+                            break;
+                            case 2:
+                            Hard = 0.5f;
+                            break;
+                            case 3:
+                            Hard = 0.4f;
+                            break;
+                            case 4:
+                            Hard = 0.3f;
+                            break;
+                            case 5:
+                            Hard = 0.25f;
+                            break;
+                            case 6:
+                            Hard = 0.2f;
+                            break;
+                            case 7:
+                            Hard = 0.15f;
+                            break;
+                            case 8:
+                            Hard = 0.1f;
+                            break;
+                        }
+                        #endregion
+
+                        bool isMFC = false;
+
+                        if (m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex == 0)
+                        {
+                            Entry = "Active Search Sensor MR";
+                            isMFC = false;
+                        }
+                        else
+                        {
+                            Entry = "Missile Fire Control FC";
+                            isMFC = true;
+                        }
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ActiveSensorStrength];
+
+                        /// <summary>
+                        /// More sanity checking as give all does not do this. I might not want to hard code all of this however.
+                        /// </summary>
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int AS = FactTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity];
+
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int EM = FactTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+
+                        ActiveSensorProject = new ActiveSensorDefTN(Entry,Size, Constants.SensorTN.ActiveStrength[AS],
+                                                                               Constants.SensorTN.PassiveStrength[EM],
+                                                                               Resolution, isMFC,
+                                                                               Hard, (byte)(m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex+1));
+
+                        int mkm = (int)Math.Floor((float)ActiveSensorProject.maxRange / 100.0f);
+
+                        Entry = String.Format("{0}{1}-R{2}", Entry, mkm, Resolution);
+
+                        if (Hard != 1.0f)
+                        {
+                            Entry = String.Format("{0} ({1}%)", Entry, (Hard*100.0f));
+                        }
+
+                        ActiveSensorProject.Name = Entry;
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = ActiveSensorProject.Name;
+
+                        Entry = String.Format("Active Sensor Strength: {0} Sensitivity Modifier: {1}%\n", (ActiveSensorProject.activeStrength * ActiveSensorProject.size), ((float)ActiveSensorProject.eMRecv * 10.0f));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Sensor Size: {0} Tons  Sensor HTK: {1}\n", (ActiveSensorProject.size * 50.0f), ActiveSensorProject.htk);
+                        else
+                            Entry = String.Format("Sensor Size: {0} HS  Sensor HTK: {1}\n", ActiveSensorProject.size, ActiveSensorProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+
+                        int RangeFormat = (ActiveSensorProject.maxRange*10);
+                        string FormattedRange = RangeFormat.ToString("#,##0");
+
+
+
+                        Entry = String.Format("Resolution: {0}    Maximum Range vs {1} ton object (or larger): {2},000 km\n", ActiveSensorProject.resolution, (ActiveSensorProject.resolution * 50), FormattedRange);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (Resolution == 1)
+                        {
+                            RangeFormat = ActiveSensorProject.GetActiveDetectionRange(0,0) * 10;
+                            if (RangeFormat < 100)
+                            {
+                                int Range1 = (int)((float)ActiveSensorProject.maxRange * 10000.0f * (float)Math.Pow((0.33 / (float)Resolution), 2.0f));
+                                FormattedRange = Range1.ToString("#,##0");
+                                Entry = String.Format("Range vs Size 6 Missile (or smaller): {0} km\n", FormattedRange);
+                                m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                                int Range2 = (int)((float)ActiveSensorProject.maxRange * 10000.0f * (float)Math.Pow((0.40 / (float)Resolution), 2.0f));
+                                FormattedRange = Range2.ToString("#,##0");
+                                Entry = String.Format("Range vs Size 8 Missile: {0} km\n", FormattedRange);
+                                m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                                int Range3 = (int)((float)ActiveSensorProject.maxRange * 10000.0f * (float)Math.Pow((0.60 / (float)Resolution), 2.0f));
+                                FormattedRange = Range3.ToString("#,##0");
+                                Entry = String.Format("Range vs Size 12 Missile: {0} km\n", FormattedRange);
+                                m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                            }
+                            else
+                            {
+
+                                FormattedRange = RangeFormat.ToString("#,##0");
+                                Entry = String.Format("Range vs Size 6 Missile (or smaller): {0},000 km\n", FormattedRange);
+                                m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                                RangeFormat = ActiveSensorProject.GetActiveDetectionRange(0, 2) * 10;
+                                FormattedRange = RangeFormat.ToString("#,##0");
+                                Entry = String.Format("Range vs Size 8 Missile: {0},000 km\n", FormattedRange);
+                                m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                                RangeFormat = ActiveSensorProject.GetActiveDetectionRange(0, 4) * 10;
+                                FormattedRange = RangeFormat.ToString("#,##0");
+                                Entry = String.Format("Range vs Size 12 Missile: {0},000 km\n", FormattedRange);
+                                m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                            }
+                        }
+                        else
+                        {
+                            RangeFormat = ActiveSensorProject.GetActiveDetectionRange(19,-1) *10;
+                            FormattedRange = RangeFormat.ToString("#,##0");
+                            Entry = String.Format("Range vs 1000 ton object: {0},000 km\n",FormattedRange);
+                            m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                            RangeFormat = ActiveSensorProject.GetActiveDetectionRange(4, -1) * 10;
+                            FormattedRange = RangeFormat.ToString("#,##0");
+                            Entry = String.Format("Range vs 250 ton object: {0},000 km\n",FormattedRange);
+                            m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                        }
+
+                        Entry = String.Format("Chance of destruction by electronic damage: {0}%\n", (Hard * 100.0f));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n",ActiveSensorProject.cost, ActiveSensorProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Development Cost for Project: {0}RP\n", ActiveSensorProject.cost * 10);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    }
+
+                break;
+                #endregion
+
+                #region Beam Fire Control
+                case ComponentsViewModel.Components.BFC:
+                break;
+                #endregion
+
+                #region CIWS
+                case ComponentsViewModel.Components.CIWS:
+                break;
+                #endregion
+
+                #region Cloak
+                case ComponentsViewModel.Components.Cloak:
+                break;
+                #endregion
+
+                #region EM
+                case ComponentsViewModel.Components.EM:
+                break;
+                #endregion
+
+                #region Engines
+                case ComponentsViewModel.Components.Engine:
+                break;
+                #endregion
+
+                #region Gauss Cannon
+                case ComponentsViewModel.Components.Gauss:
+                break;
+                #endregion
+
+                #region High Power Microwave
+                case ComponentsViewModel.Components.Microwave:
+                break;
+                #endregion
+
+                #region Jump Engines
+                case ComponentsViewModel.Components.Jump:
+                break;
+                #endregion
+
+                #region Lasers
+                case ComponentsViewModel.Components.Laser:
+                break;
+                #endregion
+
+                #region Magazines
+                case ComponentsViewModel.Components.Magazine:
+                break;
+                #endregion
+
+                #region Meson Cannons
+                case ComponentsViewModel.Components.Meson:
+                break;
+                #endregion
+
+                #region Missile Engines
+                case ComponentsViewModel.Components.MissileEngine:
+                break;
+                #endregion
+
+                #region Missile Launcher
+                case ComponentsViewModel.Components.MissileLauncher:
+                break;
+                #endregion
+
+                #region New Species
+                case ComponentsViewModel.Components.NewSpecies:
+                break;
+                #endregion
+
+                #region Particle beams
+                case ComponentsViewModel.Components.Particle:
+                break;
+                #endregion
+
+                #region Plasma Carronades
+                case ComponentsViewModel.Components.Plasma:
+                break;
+                #endregion
+
+                #region Plasma Torpedos
+                case ComponentsViewModel.Components.PlasmaTorp:
+                break;
+                #endregion
+
+                #region Power Plants
+                case ComponentsViewModel.Components.Reactor:
+                break;
+                #endregion
+
+                #region Railguns
+                case ComponentsViewModel.Components.Rail:
+                break;
+                #endregion
+
+                #region Absorption Shields
+                case ComponentsViewModel.Components.ShieldAbs:
+                break;
+                #endregion
+
+                #region Standard Shields
+                case ComponentsViewModel.Components.ShieldStd:
+                break;
+                #endregion
+
+                #region Thermal Sensors
+                case ComponentsViewModel.Components.Thermal:
+                break;
+                #endregion
+            }
+            #endregion
         }
 
         /// <summary>
@@ -514,7 +1153,6 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="count">1 to 7 indicates which tech combo boxes should be visible.</param>
         private void SetTechVisible(int count)
         {
-            SendMessage(m_oComponentDesignPanel.Handle, 0x000B, 0, IntPtr.Zero);
 
             #region Switch visibility settings
             switch (count)
@@ -666,11 +1304,6 @@ namespace Pulsar4X.UI.Handlers
             m_oComponentDesignPanel.TechLabelSeven.Text = "";
 
             m_oComponentDesignPanel.NotesLabel.Text = "";
-
-            SendMessage(m_oComponentDesignPanel.Handle, 0x000B, 1, IntPtr.Zero);
-
-            m_oComponentDesignPanel.Invalidate();
-            m_oComponentDesignPanel.Refresh();
         }
 
         /// <summary>

@@ -353,6 +353,187 @@ namespace Pulsar4X.Entities
             Count=8
         }
 
+        public BindingList<SByte> FactionTechLevel { get; set; }
+
+        /// <summary>
+        /// Techs start at -1(undiscovered). some techs have multiple levels, others have only 1.
+        /// </summary>
+        public enum FactionTechnology
+        {
+            /// <summary>
+            /// Biology Techs. Genome Sequence is the precursor for all biology related techs(excepting terraforming and rate)
+            /// </summary>
+            GenomeSequence,
+            BaseGravityPlus,
+            BaseGravityMinus,
+            BaseOxygenPlus,
+            BaseOxygenMinus,
+            BaseTemperaturePlus,
+            BaseTemperatureMinus,
+            TemperatureRange,
+            TerraformingModule,
+            TerraformRate,
+            BiologyCount,
+
+            /// <summary>
+            /// Construction & Production Techs. TNTech is the precursor for all TN related techs. Only a few techs are not TN.
+            /// </summary>
+            AsteroidModule,
+            ConstructionProdRate,
+            ExpandCivilianEconomy,
+            FighterProdRate,
+            FuelProdRate,
+            JumpGateModule,
+            MiningProdRate,
+            ResearchProdRate,
+            ShipProdRate,
+            ShipOps,
+            SmallJumpGateModule,
+            SoriumModule,
+            TransNewtonianTech,
+            ConstructionCount,
+
+            /// <summary>
+            /// Defense Techs. techs that hide ship signatures or increase resistance to damage. Cloak theory is required for cloaking devices.
+            /// </summary>
+            AbsorptionShieldStrength,
+            AbsorptionShieldRadiateRate,
+            ArmourProtection,
+            CloakSensorReduction,
+            CloakEfficiency,
+            CloakTheory,
+            CloakMinimumSize,
+            DamageControl,
+            StandardShieldStrength,
+            StandardShieldRegen,
+            ThermalReduction,
+            DefenseCount,
+
+            /// <summary>
+            /// Energy weapon techs. These don't need to carry ammunition of any sort, though reactor power may be required.
+            /// </summary>
+            AdvancedLaserFocal,
+            LaserFocal,
+            MesonFocal,
+            MicrowaveFocal,
+            PlasmaCarronadeCalibre,
+            AdvancedPlasmaCarronadeCalibre,
+            ParticleBeamStrength,
+            AdvancedParticleBeamStrength,
+            SpinalMount,
+            ReducedSizeLasers,
+            LaserWarhead,
+            LaserWavelength,
+            MesonFocusing,
+            MicrowaveFocusing,
+            ParticleBeamRange,
+            PlasmaTorpedoStrength,
+            PlasmaTorpedoSpeed,
+            PlasmaTorpedoIntegrity,
+            PlasmaTorpedoRechargeRate,
+            TurretTracking,
+            EnergyCount,
+
+            /// <summary>
+            /// Logistics and Ground Combat. many one offs here.
+            /// </summary>
+            MaintStorage,
+            CargoHandlingSystems,
+            BoatBays,
+            Hangars,
+            ReplacementBat,
+            Garrison,
+            ConstructionBrigade,
+            CombatEngineer,
+            MobileInfantry,
+            AssaultInfantry,
+            MarineBat,
+            MarineCompany,
+            HeavyAssaultBat,
+            BrigadeHQ,
+            DivisionHQ,
+            GroundCombatStrength,
+            ColonyCostReduction,
+            CombatDropBat,
+            CombatDropComp,
+            CryoCombatDropBat,
+            CryoCombatDropComp,
+            SmallCrewQuarters,
+            CryoTransport,
+            SmallEngineeringSection,
+            FlagBridge,
+            FuelStorage,
+            MaintModule,
+            OrbHabitat,
+            RecModule,
+            SalvageModule,
+            TroopTransport,
+            LogisticsCount,
+
+            /// <summary>
+            /// Missile and Kinetic weapons technologies. Railguns require energy, Missiles require ordnance, and gauss requires neither.
+            /// </summary>
+            Railgun,
+            AdvancedRailgun,
+            RailgunVelocity,
+            GaussCannonVelocity,
+            GaussCannonROF,
+            WarheadStrength,
+            EnhancedRadiationWarhead,
+            MissileAgility,
+            MagazineEjectionSystem,
+            MagazineFeedEfficiency,
+            LauncherReloadRate,
+            ReducedSizeLaunchers,
+            OrdnanceProdRate,
+            MissileCount,
+
+            /// <summary>
+            /// Power and Propulsion Technologies, Engines, Jump Engines, and power plants.
+            /// </summary>
+            EngineBaseTech,
+            CapacitorChargeRate,
+            FuelConsumption,
+            HyperdriveSizeMod,
+            MaxEnginePowerMod,
+            MinEnginePowerMod,
+            JumpPointTheory,
+            JumpEngineEfficiency,
+            MaxSquadJumpSize,
+            MaxSquadJumpRadius,
+            MinJumpEngineSize,
+            ReactorPowerBoost,
+            ReactorBaseTech,
+            PowerCount,
+
+            /// <summary>
+            /// Sensors and Fire Control Technologies.
+            /// </summary>
+            ActiveSensorStrength,
+            BeamFireControlRange,
+            BeamFireControlTracking,
+            EMSensorSensitivity,
+            ThermalSensorSensitivity,
+            Hardening,
+            GeoSensor,
+            GravSensor,
+            ElectronicWarfare,
+            ECM,
+            ECCM,
+            CompactECM,
+            CompactECCM,
+            SmallECM,
+            SmallECCM,
+            MaxTrackVsMissiles,
+            MissileECM,
+            DSTSSensorStrength,
+
+            /// <summary>
+            /// Overall Count and Sensor Count
+            /// </summary>
+            Count
+        }
+
         public Faction(int ID)
         {
             Name = "Human Federation";
@@ -391,6 +572,15 @@ namespace Pulsar4X.Entities
             OpenFireFCType = new Dictionary<ComponentTN,bool>();
 
             RechargeList = new Dictionary<ShipTN,int>();
+
+            FactionTechLevel = new BindingList<SByte>();
+
+            for (int loop = 0; loop < (int)FactionTechnology.Count; loop++)
+            {
+                FactionTechLevel.Add(-1);
+            }
+
+            FactionTechLevel[(int)Faction.FactionTechnology.Hardening] = 0;
         }
 
         public Faction(string a_oName, Species a_oSpecies, int ID)
@@ -431,6 +621,14 @@ namespace Pulsar4X.Entities
             OpenFireFCType = new Dictionary<ComponentTN, bool>();
 
             RechargeList = new Dictionary<ShipTN, int>();
+
+            FactionTechLevel = new BindingList<SByte>();
+            for (int loop = 0; loop < (int)FactionTechnology.Count; loop++)
+            {
+                FactionTechLevel.Add(-1);
+            }
+
+            FactionTechLevel[(int)Faction.FactionTechnology.Hardening] = 0;
         }
 
         /// <summary>
@@ -474,7 +672,7 @@ namespace Pulsar4X.Entities
         }
 
 
-
+        #region Sensor Sweep Code
 
         /// <summary>
         /// Galaxy wide sensor sweep of all systems in which this faction has a presence. Here is where things start to get complicated.
@@ -1113,6 +1311,21 @@ namespace Pulsar4X.Entities
             return false;
         }
 
+        #endregion
+
+
+        /// <summary>
+        /// Sets all tech levels to above maximum(usually around 12). Sanity checking will be elsewhere.
+        /// </summary>
+        public void GiveAllTechs()
+        {
+            for (int loop = 0; loop < (int)FactionTechnology.Count; loop++)
+            {
+                FactionTechLevel[loop] = 100;
+            }
+
+            BaseTracking = 25000;
+        }
 
     }
 }
