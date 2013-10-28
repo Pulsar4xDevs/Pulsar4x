@@ -67,7 +67,11 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// These are the componentdefTNs for each research project.
+        /// </summary>
         private ActiveSensorDefTN ActiveSensorProject;
+        private PassiveSensorDefTN PassiveSensorProject;
 
         private IntPtr eventMask;
 
@@ -123,6 +127,7 @@ namespace Pulsar4X.UI.Handlers
             //m_oComponentDesignPanel.ResizeEnd += new EventHandler(ResizeEnd);
 
             ActiveSensorProject = null;
+            PassiveSensorProject = null;
         }
 
         /// <summary>
@@ -570,6 +575,80 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.NotesLabel.Text = "Rating is EM Sensor Sensitivity x Size. This is the distance in Millions of Km that a signature of 1000 may be detected. smaller or larger signatures are detected by (Signature/1000) * Rating. " +
                                                                   "Not all ships will emit an EM signature, but those that do tend to be very large.";
 
+                        /// <summary>
+                        /// EM sensitivity tech listing.
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity];
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 11)
+                                TechLevel = 11;
+
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                String Entry = String.Format("EM Sensor Sensitivity {0}", Constants.SensorTN.PassiveStrength[loop]);
+                                m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// Overall size from 0.1 to 50
+                        /// </summary>
+                        for (int loop = 1; loop < 10; loop++)
+                        {
+                            String Entry = String.Format("0.{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        for (int loop = 0; loop < 10; loop += 2)
+                        {
+                            String Entry = "N/A";
+                            if (loop == 0)
+                                Entry = "1";
+                            else
+                                Entry = String.Format("1.{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        for (int loop = 2; loop < 5; loop++)
+                        {
+                            for (int loop2 = 0; loop2 < 100; loop2 += 25)
+                            {
+                                String Entry = "N/A";
+                                if (loop2 == 0)
+                                    Entry = String.Format("{0}", loop);
+                                else
+                                    Entry = String.Format("{0}.{1}", loop, loop2);
+
+                                m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                            }
+                        }
+
+                        for (int loop = 5; loop < 51; loop++)
+                        {
+                            String Entry = String.Format("{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 9;
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.Hardening];
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 8)
+                                TechLevel = 8;
+
+                            for (int loop = 0; loop <= TechLevel; loop++)
+                            {
+                                String Entry = String.Format("Electronic Hardening Level {0}", loop);
+                                m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        }
+
                     break;
                     #endregion
 
@@ -791,7 +870,79 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.NotesLabel.Text = "Rating is Thermal Sensor Sensitivity x Size. This is the distance in Millions of Km that a signature of 1000 may be detected. smaller or larger signatures are detected by (Signature/1000) * Rating. " +
                                                                   "All ships always emit a thermal signature, even if it is tiny.";
 
+                        /// <summary>
+                        /// EM sensitivity tech listing.
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity];
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 11)
+                                TechLevel = 11;
 
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                String Entry = String.Format("Thermal Sensor Sensitivity {0}", Constants.SensorTN.PassiveStrength[loop]);
+                                m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// Overall size from 0.1 to 50
+                        /// </summary>
+                        for (int loop = 1; loop < 10; loop++)
+                        {
+                            String Entry = String.Format("0.{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        for (int loop = 0; loop < 10; loop += 2)
+                        {
+                            String Entry = "N/A";
+                            if (loop == 0)
+                                Entry = "1";
+                            else
+                                Entry = String.Format("1.{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        for (int loop = 2; loop < 5; loop++)
+                        {
+                            for (int loop2 = 0; loop2 < 100; loop2 += 25)
+                            {
+                                String Entry = "N/A";
+                                if (loop2 == 0)
+                                    Entry = String.Format("{0}", loop);
+                                else
+                                    Entry = String.Format("{0}.{1}", loop, loop2);
+
+                                m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                            }
+                        }
+
+                        for (int loop = 5; loop < 51; loop++)
+                        {
+                            String Entry = String.Format("{0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 9;
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.Hardening];
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 8)
+                                TechLevel = 8;
+
+                            for (int loop = 0; loop <= TechLevel; loop++)
+                            {
+                                String Entry = String.Format("Electronic Hardening Level {0}", loop);
+                                m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        }
                     break;
                     #endregion
                 }
@@ -1050,6 +1201,112 @@ namespace Pulsar4X.UI.Handlers
 
                 #region EM
                 case ComponentsViewModel.Components.EM:
+
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1)
+                    {
+                        #region Size
+                        /// <summary>
+                        /// Pull size out of this mess.
+                        /// </summary>
+                        if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex < 9)
+                        {
+                            Size = (float)(m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex + 1) / 10.0f;
+                        }
+                        else if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex >= 9 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex <= 13)
+                        {
+                            Size = 1.0f + (float)((m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex - 9) * 2) / 10.0f;
+                        }
+                        else if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex >= 14 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex <= 25)
+                        {
+                            Size = 2.0f + (float)(((m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex - 14) * 25) / 100.0f);
+                        }
+                        else if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex > 25)
+                        {
+                            Size = (float)(m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex - 21);
+                        }
+                        #endregion
+
+                        #region Hardening
+                        /// <summary>
+                        /// Get chance of destruction due to electronic damage.
+                        /// </summary>
+                        switch (m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex)
+                        {
+                            case 0:
+                                Hard = 1.0f;
+                            break;
+                            case 1:
+                                Hard = 0.7f;
+                            break;
+                            case 2:
+                                Hard = 0.5f;
+                            break;
+                            case 3:
+                                Hard = 0.4f;
+                            break;
+                            case 4:
+                                Hard = 0.3f;
+                            break;
+                            case 5:
+                                Hard = 0.25f;
+                            break;
+                            case 6:
+                                Hard = 0.2f;
+                            break;
+                            case 7:
+                                Hard = 0.15f;
+                            break;
+                            case 8:
+                                Hard = 0.1f;
+                            break;
+                        }
+                        #endregion
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity];
+
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int EM = FactTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+                        Entry = "EM Detection Sensor EM";
+                        PassiveSensorProject = new PassiveSensorDefTN(Entry, Size, Constants.SensorTN.PassiveStrength[EM], PassiveSensorType.EM, Hard, 
+                                                                     (byte)(m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex + 1));
+
+                        if(Hard == 1.0f)
+                            Entry = String.Format("{0}{1}-{2}", Entry, Size, PassiveSensorProject.rating);
+                        else
+                            Entry = String.Format("{0}{1}-{2}({3}%)", Entry, Size, PassiveSensorProject.rating, (Hard * 100.0f));
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        Entry = String.Format("EM Sensitivity: {0}\n", PassiveSensorProject.rating);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if(m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Sensor Size: {0} tons    Sensor HTK: {1}\n",(PassiveSensorProject.size*50.0f),PassiveSensorProject.htk);
+                        else
+                            Entry = String.Format("Sensor Size: {0} HS    Sensor HTK: {1}\n", PassiveSensorProject.size, PassiveSensorProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Chance of destruction by electronic damage: {0}%\n", (Hard * 100.0f));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n", PassiveSensorProject.cost, PassiveSensorProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Development Cost for Project: {0}RP", (PassiveSensorProject.cost * 10));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+
+                    }
+
+                    
+
                 break;
                 #endregion
 
@@ -1140,6 +1397,108 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Thermal Sensors
                 case ComponentsViewModel.Components.Thermal:
+                if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                    m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1)
+                {
+                    #region Size
+                    /// <summary>
+                    /// Pull size out of this mess.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex < 9)
+                    {
+                        Size = (float)(m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex + 1) / 10.0f;
+                    }
+                    else if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex >= 9 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex <= 13)
+                    {
+                        Size = 1.0f + (float)((m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex - 9) * 2) / 10.0f;
+                    }
+                    else if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex >= 14 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex <= 25)
+                    {
+                        Size = 2.0f + (float)(((m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex - 14) * 25) / 100.0f);
+                    }
+                    else if (m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex > 25)
+                    {
+                        Size = (float)(m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex - 21);
+                    }
+                    #endregion
+
+                    #region Hardening
+                    /// <summary>
+                    /// Get chance of destruction due to electronic damage.
+                    /// </summary>
+                    switch (m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex)
+                    {
+                        case 0:
+                            Hard = 1.0f;
+                            break;
+                        case 1:
+                            Hard = 0.7f;
+                            break;
+                        case 2:
+                            Hard = 0.5f;
+                            break;
+                        case 3:
+                            Hard = 0.4f;
+                            break;
+                        case 4:
+                            Hard = 0.3f;
+                            break;
+                        case 5:
+                            Hard = 0.25f;
+                            break;
+                        case 6:
+                            Hard = 0.2f;
+                            break;
+                        case 7:
+                            Hard = 0.15f;
+                            break;
+                        case 8:
+                            Hard = 0.1f;
+                            break;
+                    }
+                    #endregion
+
+                    FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity];
+
+                    if (FactTech > 11)
+                        FactTech = 11;
+
+                    int TH = FactTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+                    Entry = "Thermal Sensor TH";
+                    PassiveSensorProject = new PassiveSensorDefTN(Entry, Size, Constants.SensorTN.PassiveStrength[TH], PassiveSensorType.Thermal, Hard,
+                                                                 (byte)(m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex + 1));
+
+                    if (Hard == 1.0f)
+                        Entry = String.Format("{0}{1}-{2}", Entry, Size, PassiveSensorProject.rating);
+                    else
+                        Entry = String.Format("{0}{1}-{2}({3}%)", Entry, Size, PassiveSensorProject.rating, (Hard * 100.0f));
+
+                    m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                    Entry = String.Format("Thermal Sensor Sensitivity: {0}\n", PassiveSensorProject.rating);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                        Entry = String.Format("Sensor Size: {0} tons    Sensor HTK: {1}\n", (PassiveSensorProject.size * 50.0f), PassiveSensorProject.htk);
+                    else
+                        Entry = String.Format("Sensor Size: {0} HS    Sensor HTK: {1}\n", PassiveSensorProject.size, PassiveSensorProject.htk);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Chance of destruction by electronic damage: {0}%\n", (Hard * 100.0f));
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Cost: {0}    Crew: {1}\n", PassiveSensorProject.cost, PassiveSensorProject.crew);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Development Cost for Project: {0}RP", (PassiveSensorProject.cost * 10));
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+
+                }
                 break;
                 #endregion
             }
