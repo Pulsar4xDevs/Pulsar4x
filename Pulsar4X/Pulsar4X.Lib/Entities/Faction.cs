@@ -353,6 +353,9 @@ namespace Pulsar4X.Entities
             Count=8
         }
 
+        /// <summary>
+        /// Total faction tech levels.
+        /// </summary>
         public BindingList<SByte> FactionTechLevel { get; set; }
 
         /// <summary>
@@ -534,6 +537,20 @@ namespace Pulsar4X.Entities
             Count
         }
 
+        /// <summary>
+        /// Need tech names somewhere
+        /// Reactor Technologies:
+        /// "Pressurised Water(1.5k)", "Pebble Bed(3k)", "Gas Cooled Fast(6k)", "Stellarator Fusion(12k)", "Tokamak Fusion(24k)", "Magnetic Confinement Fusion(45k)"
+        /// "Inertial Confinement Fusion(90k)", "Beam-Core Antimatter(150k)","Solid-Core Antimatter(180k)", "Gas-Core Antimatter(375k)","Plasma-Core Antimatter(750k)","Vacuum Energy(3M)"
+        /// Shield:
+        /// //Alpha(1K) Beta(2K) Gamma(4K) Delta(8K) Epsilon(15K) Theta(30K) Xi(60K) Omicron(120K) Sigma(250K) Tau(500K) Psi(1M) Omega(2M)
+        /// </summary>
+
+
+        /// <summary>
+        /// Constructor for basic faction.
+        /// </summary>
+        /// <param name="ID">placement of this faction in the factionsystemdetection lists. must be in order.</param>
         public Faction(int ID)
         {
             Name = "Human Federation";
@@ -580,9 +597,26 @@ namespace Pulsar4X.Entities
                 FactionTechLevel.Add(-1);
             }
 
+            /// <summary>
+            /// Hardening is a special case that must start at zero and not negative 1.
+            /// </summary>
             FactionTechLevel[(int)Faction.FactionTechnology.Hardening] = 0;
+
+            /// <summary>
+            /// These are conventional tech starts, each conventional faction starts with them researched.
+            /// If anyone has a better idea about how these should be organized feel free, but note that changing this will have repercussions in Component design(specifically components.cs)
+            /// </summary>
+            FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
         }
 
+        /// <summary>
+        /// String for faction with specified name and species.
+        /// </summary>
+        /// <param name="a_oName">Faction name</param>
+        /// <param name="a_oSpecies">Faction species</param>
+        /// <param name="ID">Faction placement in its order(0th faction is 0, 1st faction is 1, and so on)</param>
         public Faction(string a_oName, Species a_oSpecies, int ID)
         {
             Name = a_oName;
@@ -628,7 +662,18 @@ namespace Pulsar4X.Entities
                 FactionTechLevel.Add(-1);
             }
 
+            /// <summary>
+            /// Hardening is a special case that must start at zero and not negative 1.
+            /// </summary>
             FactionTechLevel[(int)Faction.FactionTechnology.Hardening] = 0;
+
+            /// <summary>
+            /// These are conventional tech starts, each conventional faction starts with them researched.
+            /// If anyone has a better idea about how these should be organized feel free, but note that changing this will have repercussions in Component design(specifically components.cs)
+            /// </summary>
+            FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
         }
 
         /// <summary>

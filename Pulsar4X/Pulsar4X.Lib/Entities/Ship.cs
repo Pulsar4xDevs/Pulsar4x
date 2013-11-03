@@ -1524,7 +1524,7 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.Reactor:
 
-                    CurrentPowerGen = CurrentPowerGen - ShipReactor[ShipComponents[ID].componentIndex].reactorDef.powerGen;
+                    CurrentPowerGen = CurrentPowerGen - (int)(Math.Round(ShipReactor[ShipComponents[ID].componentIndex].reactorDef.powerGen));
 
                     ExpTest = DacRNG.Next(1, 100);
 
@@ -1756,7 +1756,7 @@ namespace Pulsar4X.Entities
                 break;
 
                 case ComponentTypeTN.Reactor:
-                    CurrentPowerGen = CurrentPowerGen + ShipReactor[ShipComponents[ComponentIndex].componentIndex].reactorDef.powerGen;
+                    CurrentPowerGen = CurrentPowerGen + (int)(Math.Round(ShipReactor[ShipComponents[ComponentIndex].componentIndex].reactorDef.powerGen));
                 break;
 
                 /// <summary>

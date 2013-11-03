@@ -1234,7 +1234,14 @@ namespace Pulsar4X.UI.Handlers
 
                 for (int loop = 0; loop < _CurrnetShip.ShipClass.ShipReactorDef.Count; loop++)
                 {
-                    int TPO = _CurrnetShip.ShipClass.ShipReactorDef[loop].powerGen * _CurrnetShip.ShipClass.ShipReactorCount[loop];
+                    float TPO = _CurrnetShip.ShipClass.ShipReactorDef[loop].powerGen * _CurrnetShip.ShipClass.ShipReactorCount[loop];
+
+                    /// <summary>
+                    /// probably a better way to format this.
+                    /// </summary>
+                    TPO = TPO * 10.0f;
+                    TPO = (float)Math.Round(TPO);
+                    TPO = TPO / 10.0f;
 
                     Entry = String.Format("{0} ({1})   Total Power Output {2}   Armour 0    Exp {3}%\n", _CurrnetShip.ShipClass.ShipReactorDef[loop].Name,
                                           _CurrnetShip.ShipClass.ShipReactorCount[loop], TPO, _CurrnetShip.ShipClass.ShipReactorDef[loop].expRisk);

@@ -134,7 +134,7 @@ namespace Pulsar4X.UI
             oNewFaction2.TaskGroups[0].Ships[1].Name = "Backup Battleship";
 
             oNewFaction.GiveAllTechs();
-            oNewFaction2.GiveAllTechs();
+            //oNewFaction2.GiveAllTechs();
 
             /// <summary>
             /// End Alpha.

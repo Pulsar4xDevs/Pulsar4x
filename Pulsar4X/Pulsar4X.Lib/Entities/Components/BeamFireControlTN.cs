@@ -26,6 +26,23 @@ namespace Pulsar4X.Entities.Components
     public class BeamFireControlDefTN : ComponentDefTN
     {
         /// <summary>
+        /// Range tech level.
+        /// </summary>
+        private int RangeTech;
+        public int rangeTech
+        {
+            get { return RangeTech; }
+        }
+        /// <summary>
+        /// Tracking tech level
+        /// </summary>
+        private int TrackTech;
+        private int trackTech
+        {
+            get { return TrackTech; }
+        }
+
+        /// <summary>
         /// Base range tech this BFC is built with.
         /// </summary>
         private float RangeBase;
@@ -138,7 +155,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Fighter">Is this a FTR BFC? if so +200% tracking.</param>
         /// <param name="hard">Chance of damage due to electronic damage.</param>
         /// <param name="hardTech">Tech level for electronic hardening.</param>
-        public BeamFireControlDefTN(string Title, float BaseRange, float BaseTracking, float ModRange, float ModTracking, bool PDC, bool Fighter, float hard, byte hardTech)
+        public BeamFireControlDefTN(string Title, int techRange, int techTrack, float ModRange, float ModTracking, bool PDC, bool Fighter, float hard, byte hardTech)
         {
             Id = Guid.NewGuid();
             componentType = ComponentTypeTN.BeamFireControl;
@@ -146,8 +163,11 @@ namespace Pulsar4X.Entities.Components
             Name = Title;
             size = 1.0f;
 
-            RangeBase = BaseRange;
-            TrackBase = BaseTracking;
+            RangeTech = techRange;
+            TrackTech = techTrack;
+
+            RangeBase = Constants.BFCTN.BeamFireControlRange[RangeTech] * 1000.0f;
+            TrackBase = Constants.BFCTN.BeamFireControlTracking[TrackTech];
 
             RangeMod = ModRange;
             TrackMod = ModTracking;
@@ -158,9 +178,6 @@ namespace Pulsar4X.Entities.Components
                 htk = 1;
             else
                 htk = 0;
-
-            Range = RangeBase * RangeMod;
-            Tracking = TrackBase * TrackMod;
 
             IsPDC = PDC;
             IsFighter = Fighter;
@@ -182,13 +199,25 @@ namespace Pulsar4X.Entities.Components
                 TrackBase = TrackBase * 4.0f;
             }
 
+            Range = RangeBase * RangeMod;
+            Tracking = TrackBase * TrackMod;
+
             crew = (byte)(size * 2.0f);
 
             /// <summary>
-            /// Not the exact cost calculation but close.
+            /// Not the exact cost calculation, or close for that matter. I think cost is just a data base entry.
             /// </summary>
-            cost = (decimal)(5.0f * (Range / 16000.0f) * (Tracking / 2000.0f)); 
-            cost = cost + (decimal)((float)cost * 0.25f * (float)(hardTech - 1));
+
+            float RTechAdjust = 10666.6667f / (float)(RangeTech+1);
+            float TTechAdjust = 1666.6667f / (float)(TrackTech+1);
+
+
+            float R = (RangeBase / RTechAdjust);
+            float T = (TrackBase / TTechAdjust);
+            float res = (float)Math.Round((R + T) * size);
+            res = (float)Math.Round(res + ((float)res * 0.25f * (float)(hardTech - 1)));
+
+            cost = (decimal)(res); 
 
             /// <summary>
             /// Range * 2 / 10000.0

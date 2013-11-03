@@ -1684,7 +1684,13 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            TotalPowerGeneration = TotalPowerGeneration + (int)(Reactor.powerGen * inc);
+            float PowerTemp = 0.0f;
+            for (int loop = 0; loop < ShipReactorDef.Count; loop++)
+            {
+                PowerTemp = PowerTemp + (ShipReactorDef[loop].powerGen * ShipReactorCount[loop]);
+            }
+
+            TotalPowerGeneration = (int)Math.Round(PowerTemp);
             UpdateClass(Reactor, inc);
         }
 

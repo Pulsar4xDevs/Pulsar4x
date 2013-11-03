@@ -983,11 +983,42 @@ namespace Pulsar4X
             public const uint Century = 3110400000;
         }
 
+        /// <summary>
+        /// Sensor TN describes tech levels for active and passive sensors.
+        /// </summary>
         public static class SensorTN
         {
             public static byte[] ActiveStrength = { 10, 12, 16, 21, 28, 36, 48, 60, 80, 100, 135, 180 };
             public static byte[] PassiveStrength = { 5,  6,  8, 11, 14, 18, 24, 32, 40,  50,  60,  75 };
         }
+
+        /// <summary>
+        /// Beam fire control tech levels.  multiply these values by 1,000 for Range.
+        /// </summary>
+        public static class BFCTN
+        {
+            public static byte[] BeamFireControlRange = { 10, 16, 24, 32, 40, 48, 60, 75, 100, 125, 150, 175 };
+            public static ushort[] BeamFireControlTracking = { 1250, 2000, 3000, 4000, 5000, 6250, 8000, 10000, 12500, 15000, 20000, 25000 };
+        };
+
+        /// <summary>
+        /// Power plant tech levels. Power generation per HS.
+        /// </summary>
+        public static class ReactorTN
+        {
+            /// <summary>
+            /// Reactor Base Power Generation.
+            /// </summary>
+            public static float[] Power = { 2.0f, 3.0f, 4.5f, 6.0f, 8.0f, 10.0f, 12.0f, 16.0f, 20.0f, 24.0f, 32.0f, 40.0f };
+        };
+
+        /// <summary>
+        /// Engine related tech levels for Power and Fuel consumption.
+        /// </summary>
+        public static class EngineTN
+        {
+            public static float[] FuelConsumption = { 1.0f, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.25f, 0.2f, 0.16f, 0.125f, 0.1f};
+        };
 
         /// <summary>
         /// Beam Weapon constants are related to tech values.
@@ -998,11 +1029,6 @@ namespace Pulsar4X
             /// Capacitor power per tech level
             /// </summary>
             public static byte[] Capacitor = { 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 25 };
-
-            /// <summary>
-            /// Reactor Base Power Generation.
-            /// </summary>
-            public static float[] Power = { 2.0f, 3.0f, 4.5f, 6.0f, 8.0f, 10.0f, 12.0f, 16.0f, 20.0f, 24.0f, 32.0f, 40.0f };
 
             /// <summary>
             /// Point blank damage value for each calibre of railgun.

@@ -155,7 +155,7 @@ namespace Pulsar4X.Entities.Components
             ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
             PassiveSensorDefTN ThPasDef = new PassiveSensorDefTN("Thermal Sensor TH1-5", 1.0f, 5, PassiveSensorType.Thermal, 1.0f, 1);
             PassiveSensorDefTN EMPasDef = new PassiveSensorDefTN("EM Sensor EM1-5", 1.0f, 5, PassiveSensorType.EM, 1.0f, 1);
-            BeamFireControlDefTN BFCDef = new BeamFireControlDefTN("Fire Control S01 10-1250", 10000.0f, 1250.0f, 1.0f, 1.0f, false, false, 1.0f, 1);
+            BeamFireControlDefTN BFCDef = new BeamFireControlDefTN("Fire Control S01 10-1250", 0, 0, 1.0f, 1.0f, false, false, 1.0f, 1);
             BeamDefTN BeamDef = new BeamDefTN("10cm C1 Infrared Laser", ComponentTypeTN.Laser, 0, 0, 0, 1.0f);
             ReactorDefTN ReactDef = new ReactorDefTN("PWR S1 P2", 0, 1.0f, 1.0f);
             ShieldDefTN AShieldDef = new ShieldDefTN("Alpha R300/240 Shields", 0, 0, 1.0f, 1.0f, ComponentTypeTN.Shield);
@@ -218,7 +218,7 @@ namespace Pulsar4X.Entities.Components
             ActiveSensorDefTN AlphaMissileSensor = new ActiveSensorDefTN("Search 1.4M - Missile", 10.0f, 16, 8, 1, false, 1.0f, 1);
             PassiveSensorDefTN AlphaEMSensor = new PassiveSensorDefTN("EM Detection Sensor EM10-80", 10.0f, 8, PassiveSensorType.EM, 1.0f, 1);
             PassiveSensorDefTN AlphaTHSensor = new PassiveSensorDefTN("TH Detection Sensor TH10-80", 10.0f, 8, PassiveSensorType.Thermal, 1.0f, 1);
-            BeamFireControlDefTN AlphaFireControl = new BeamFireControlDefTN("Primary III FC R96K T6K", 24000.0f, 3000.0f, 4.0f, 2.0f, false, false, 1.0f, 1);
+            BeamFireControlDefTN AlphaFireControl = new BeamFireControlDefTN("Primary III FC R96K T6K", 2, 2, 4.0f, 2.0f, false, false, 1.0f, 1);
 
             BeamDefTN AlphaRailGun = new BeamDefTN("15cm Railgun V3/C3", ComponentTypeTN.Rail, 2, 2, 2, 1.0f);
             BeamDefTN AlphaLaser = new BeamDefTN("15cm C3 Near UV Laser", ComponentTypeTN.Laser, 2, 2, 2, 1.0f);
