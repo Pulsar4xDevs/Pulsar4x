@@ -403,9 +403,11 @@ namespace Pulsar4X.Entities.Components
             if (componentType != ComponentTypeTN.Gauss)
             {
                 htk = (byte)(size / 2.0f);
-                crew = (byte)(size * 5.0f);
+                crew = (byte)(size * 2.0f);
 
-                cost = htk * (WeaponRangeTech + 1) * (WeaponCapacitor+1);
+                cost = (decimal)((int)htk * (int)(WeaponRangeTech + 1) * (int)(WeaponCapacitor+1));
+
+                ROF = (ushort)((ushort)Math.Ceiling( (float)((float)PowerRequirement / (float)WeaponCapacitor)) * 5);
             }
             else
             {
@@ -418,6 +420,8 @@ namespace Pulsar4X.Entities.Components
             
                 crew = (byte)(size * 2.0f);
                 cost = (byte)(size * 2.0f * (float)(WeaponRangeTech + 1) * (float)(WeaponCapacitor + 1));
+
+                ROF = 5;
             }
 
             isMilitary = true;

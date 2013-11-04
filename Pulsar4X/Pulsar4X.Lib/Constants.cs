@@ -1017,7 +1017,25 @@ namespace Pulsar4X
         /// </summary>
         public static class EngineTN
         {
+            /// <summary>
+            /// Engine base Power per 1 HS.
+            /// </summary>
+            public static float[] EngineBase = { 0.2f, 5.0f, 8.0f, 12.0f, 16.0f, 20.0f, 25.0f, 32.0f, 40.0f, 50.0f, 60.0f, 80.0f, 100.0f };
+
+            /// <summary>
+            /// Fuel consumption reduction per engine power hour(or else per hour for standard shields).
+            /// </summary>
             public static float[] FuelConsumption = { 1.0f, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.25f, 0.2f, 0.16f, 0.125f, 0.1f};
+
+            /// <summary>
+            /// Thermal reduction for engines.
+            /// </summary>
+            public static float[] ThermalReduction = { 1.0f, 0.75f, 0.5f, 0.35f, 0.25f, 0.16f, 0.12f, 0.08f, 0.06f, 0.04f, 0.03f, 0.02f, 0.01f };
+
+            /// <summary>
+            /// Hyperdrive size modifier for engines.
+            /// </summary>
+            public static float[] HyperDriveSize = { 2.0f, 1.8f, 1.6f, 1.5f, 1.4f, 1.3f, 1.2f, 1.15f, 1.1f, 1.05f, 1.0f };
         };
 
         /// <summary>
@@ -1025,6 +1043,11 @@ namespace Pulsar4X
         /// </summary>
         public static class BeamWeaponTN
         {
+            /// <summary>
+            /// Size in cm of weapons.
+            /// </summary>
+            public static byte[] SizeClass = { 10, 12, 15, 20, 25, 30, 35, 40, 50, 60, 70, 80 };
+
             /// <summary>
             /// Capacitor power per tech level
             /// </summary>

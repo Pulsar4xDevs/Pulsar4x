@@ -1368,8 +1368,8 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// All engines have to be the same, so engine 0 is used for these for convienience.
                     /// </summary>
-                    CurrentMaxEnginePower = CurrentMaxEnginePower - ShipEngine[0].engineDef.enginePower;
-                    CurrentMaxThermalSignature = CurrentMaxThermalSignature - ShipEngine[0].engineDef.thermalSignature;
+                    CurrentMaxEnginePower = CurrentMaxEnginePower - (int)Math.Round(ShipEngine[0].engineDef.enginePower);
+                    CurrentMaxThermalSignature = CurrentMaxThermalSignature - (int)Math.Round(ShipEngine[0].engineDef.thermalSignature);
                     CurrentMaxFuelUsePerHour = CurrentMaxFuelUsePerHour - ShipEngine[0].engineDef.fuelUsePerHour;
 
                     if (CurrentMaxEnginePower != 0)
@@ -1657,8 +1657,8 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// All engines have to be the same, so engine 0 is used for these for convienience.
                     /// </summary>
-                    CurrentMaxEnginePower = CurrentMaxEnginePower + ShipEngine[0].engineDef.enginePower;
-                    CurrentMaxThermalSignature = CurrentMaxThermalSignature + ShipEngine[0].engineDef.thermalSignature;
+                    CurrentMaxEnginePower = CurrentMaxEnginePower + (int)Math.Round(ShipEngine[0].engineDef.enginePower);
+                    CurrentMaxThermalSignature = CurrentMaxThermalSignature + (int)Math.Round(ShipEngine[0].engineDef.thermalSignature);
                     CurrentMaxFuelUsePerHour = CurrentMaxFuelUsePerHour + ShipEngine[0].engineDef.fuelUsePerHour;
 
                     if (CurrentMaxEnginePower == 0)

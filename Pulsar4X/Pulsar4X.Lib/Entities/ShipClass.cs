@@ -1331,8 +1331,17 @@ namespace Pulsar4X.Entities
             ShipEngineDef = Engine;
             ShipEngineCount = (ushort)((short)ShipEngineCount + inc);
 
-            MaxEnginePower = MaxEnginePower + (int)(Engine.enginePower * (ushort)inc);
-            MaxThermalSignature = MaxThermalSignature + (int)(Engine.thermalSignature * (ushort)inc);
+            float EP = Engine.enginePower * ShipEngineCount;
+            float TS = Engine.thermalSignature * ShipEngineCount;
+
+            MaxEnginePower = (int)Math.Round(EP);
+            if (MaxEnginePower == 0)
+                MaxEnginePower = 1;
+
+            MaxThermalSignature = (int)Math.Round(TS);
+            if (MaxThermalSignature == 0)
+                MaxThermalSignature = 1;
+
             MaxFuelUsePerHour = MaxFuelUsePerHour + (Engine.fuelUsePerHour * (float)inc);
 
             UpdateClass(Engine, inc);

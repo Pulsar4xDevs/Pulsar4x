@@ -77,8 +77,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Engine power determined by size, and base. Speed and thermal signature are derived from this.
         /// </summary>
-        private ushort EnginePower;
-        public ushort enginePower
+        private float EnginePower;
+        public float enginePower
         {
             get { return EnginePower; }
         }
@@ -86,8 +86,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Thermal Signature is EnginePower * ThermalReduction.
         /// </summary>
-        private ushort ThermalSignature;
-        public ushort thermalSignature
+        private float ThermalSignature;
+        public float thermalSignature
         {
             get { return ThermalSignature; }
         }
@@ -144,8 +144,8 @@ namespace Pulsar4X.Entities.Components
             /// The float typecast probably isn't necessary but I'll do it anyway.
             /// This is the overall engine power of the craft, and consequently its thermal signature as well.
             /// </summary>
-            EnginePower = (ushort)(((float)EngineBase * size) * PowerMod);
-            ThermalSignature = (ushort)((float)EnginePower * ThermalReduction);
+            EnginePower = ((EngineBase * size) * PowerMod);
+            ThermalSignature = (EnginePower * ThermalReduction);
 
             /// <summary>
             /// The power modifier adjusts fuel consumption by PowerMod^2.5
@@ -166,7 +166,7 @@ namespace Pulsar4X.Entities.Components
             /// Cost is 1/2 of EnginePower modified by thermal reduction tech.
             /// </summary>
             float ThermalReductionCostMod = (float)((float)(ThmRedTech-1) * 0.25f);
-            cost = (decimal)((ushort)(((float)EnginePower / 2.0f) * (float)ThermalReductionCostMod) + (ushort)(((float)EnginePower / 2.0f)));
+            cost = (decimal)(((EnginePower / 2.0f) * ((float)ThermalReductionCostMod) + (EnginePower / 2.0f)));
 
             /// <summary>
             /// Cost may not dip below 5.
@@ -189,7 +189,7 @@ namespace Pulsar4X.Entities.Components
 
             if (HyperDriveMod != -1.0)
             {
-                size = (size * HyperDriveMod);
+                size = (float)Math.Round(size * HyperDriveMod);
             }
 
             isObsolete = false;

@@ -541,9 +541,12 @@ namespace Pulsar4X.Entities
         /// Need tech names somewhere
         /// Reactor Technologies:
         /// "Pressurised Water(1.5k)", "Pebble Bed(3k)", "Gas Cooled Fast(6k)", "Stellarator Fusion(12k)", "Tokamak Fusion(24k)", "Magnetic Confinement Fusion(45k)"
-        /// "Inertial Confinement Fusion(90k)", "Beam-Core Antimatter(150k)","Solid-Core Antimatter(180k)", "Gas-Core Antimatter(375k)","Plasma-Core Antimatter(750k)","Vacuum Energy(3M)"
+        /// "Inertial Confinement Fusion(90k)","Solid-Core Antimatter(180k)", "Gas-Core Antimatter(375k)","Plasma-Core Antimatter(750k)","Beam-Core Antimatter(1.5M)","Vacuum Energy(3M)"
         /// Shield:
         /// //Alpha(1K) Beta(2K) Gamma(4K) Delta(8K) Epsilon(15K) Theta(30K) Xi(60K) Omicron(120K) Sigma(250K) Tau(500K) Psi(1M) Omega(2M)
+        /// Engines:
+        /// Nuclear Thermal(2500) Nuclear Pulse(5000) Ion(10000) Magneto-Plasma(20k) Internal Confinement Fusion(40k) Magnetic Confinement Fusion(80k) Inertial Confinement fusion(150k)
+        ///   Solid-Core Antimatter(300k) Gas-Core Antimatter(600k) Plasma-Core Antimatter(1.25M) Beam-Core Antimater(2.5M) Photonic(5M)
         /// </summary>
 
 
@@ -609,6 +612,8 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
         }
 
         /// <summary>
@@ -674,6 +679,8 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
         }
 
         /// <summary>
