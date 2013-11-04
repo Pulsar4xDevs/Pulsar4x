@@ -419,7 +419,7 @@ namespace Pulsar4X.Entities.Components
                     htk = 0;
             
                 crew = (byte)(size * 2.0f);
-                cost = (byte)(size * 2.0f * (float)(WeaponRangeTech + 1) * (float)(WeaponCapacitor + 1));
+                cost = (decimal)((size * 2.0f) * (float)(WeaponRangeTech + 1) * (float)(WeaponCapacitor + 1));
 
                 ROF = 5;
             }

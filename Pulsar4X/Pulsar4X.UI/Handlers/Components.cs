@@ -325,6 +325,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Gauss Cannon
                 case ComponentsViewModel.Components.Gauss:
+
+                    if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
                 break;
                 #endregion
 
@@ -1058,7 +1063,45 @@ namespace Pulsar4X.UI.Handlers
                         SetLabels("Gauss Cannon Rate of Fire", "Gauss Cannon Velocity", "Gauss Cannon Size vs Accuracy", "", "", "", "");
 
                         m_oComponentDesignPanel.NotesLabel.Text = "With enough research Gauss cannons become the fastest firing weapon available, which in addition to being turretable makes them ideal for point defense. They may also trade size for accuracy making smaller craft able to mount them.";
-                    
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonROF];
+
+                        if (TechLevel > 6)
+                            TechLevel = 6;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Gauss Cannon Rate of Fire {0}", Constants.BeamWeaponTN.GaussShots[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonVelocity];
+
+                        if (TechLevel > 5)
+                            TechLevel = 5;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Gauss Cannon Launch Velocity {0}", (loop + 1));
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+
+                        for (int loop = 0; loop < 10; loop++)
+                        {
+                            Entry = String.Format("Gauss Cannon Size vs Accuracy {0}HS and {1}%", Constants.BeamWeaponTN.GaussSize[loop], (Constants.BeamWeaponTN.GaussAccuracy[loop]*100.0f));
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+
+
                     break;
                     #endregion
 
@@ -2472,6 +2515,56 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Gauss Cannon
                 case ComponentsViewModel.Components.Gauss:
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1)
+                    {
+                        int GaussROF = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonROF];
+                        int GaussVel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonVelocity];
+
+                        if (GaussROF > 6)
+                            GaussROF = 6;
+
+                        if (GaussVel > 5)
+                            GaussVel = 5;
+
+                        int GR = GaussROF - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+                        int GV = GaussVel - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+
+                        int GA = m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+
+                        Entry = String.Format("Gauss Cannon R{0}-{1}",(GV+1),(Constants.BeamWeaponTN.GaussAccuracy[GA] * 100.0f));
+                        BeamProject = new BeamDefTN(Entry, ComponentTypeTN.Gauss, (byte)GA, (byte)GV, (byte)GR, 1.0f);
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        Entry = String.Format("Damage Output 1     Rate of Fire: {0} shots every 5 seconds     Range Modifier: {1}\n",BeamProject.shotCount,(BeamProject.weaponRangeTech+1));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        String FormattedRange = BeamProject.range.ToString("#,###0");
+                        if(m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Max Range {0} km     Size: {1} Tons    HTK: {2}\n",FormattedRange,(BeamProject.size*50.0f),BeamProject.htk);
+                        else
+                            Entry = String.Format("Max Range {0} km     Size: {1} HS    HTK: {2}\n", FormattedRange, BeamProject.size, BeamProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (BeamProject.size != 6.0f)
+                        {
+                            Entry = String.Format("This weapon has a penalty to accuracy. Chance to hit is multiplied by {0}\n",Constants.BeamWeaponTN.GaussAccuracy[GA]);
+                            m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                        }
+                        Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n",(BeamProject.cost*50));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    }
                 break;
                 #endregion
 
