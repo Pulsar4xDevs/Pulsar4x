@@ -1901,7 +1901,7 @@ namespace Pulsar4X.Entities
         {
             ushort amt = (ushort)(Math.Floor((float)tick / 5.0f));
 
-            int PowerRecharge = CurrentPowerGen * amt;
+            float PowerRecharge = CurrentPowerGen * amt;
 
             if (PowerRecharge > ShipClass.TotalPowerRequirement)
             {
@@ -1912,7 +1912,7 @@ namespace Pulsar4X.Entities
                     {
                         ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
 
-                        PowerRecharge = PowerRecharge - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
+                        PowerRecharge = PowerRecharge - ((float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
                     }
                     else
                     {
@@ -1921,15 +1921,15 @@ namespace Pulsar4X.Entities
                     }
                 }
 
-                return PowerRecharge;
+                return (int)PowerRecharge;
             }
             else
             {
-                int AvailablePower = PowerRecharge;
+                float AvailablePower = PowerRecharge;
 
                 for (int loop = 0; loop < ShipBeam.Count; loop++)
                 {
-                    int WeaponPowerRequirement = ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
+                    float WeaponPowerRequirement = (float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
                     ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
 
                     if (AvailablePower > beamCap)
@@ -1960,7 +1960,7 @@ namespace Pulsar4X.Entities
                     }
                 }
 
-                return AvailablePower;
+                return (int)AvailablePower;
             }
         }
 

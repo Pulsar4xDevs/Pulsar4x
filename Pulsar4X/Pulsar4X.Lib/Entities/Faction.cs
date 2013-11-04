@@ -547,6 +547,8 @@ namespace Pulsar4X.Entities
         /// Engines:
         /// Nuclear Thermal(2500) Nuclear Pulse(5000) Ion(10000) Magneto-Plasma(20k) Internal Confinement Fusion(40k) Magnetic Confinement Fusion(80k) Inertial Confinement fusion(150k)
         ///   Solid-Core Antimatter(300k) Gas-Core Antimatter(600k) Plasma-Core Antimatter(1.25M) Beam-Core Antimater(2.5M) Photonic(5M)
+        /// Laser Wavelengths:
+        /// Infared, Visible Light, Near Ultraviolet, Ultraviolet, Far Ultraviolet, Soft X-Ray(30), X-Ray(60), Far X-Ray(125), Extreme X-Ray(250), Near Gamma Ray(500), Gamma Ray(1M), Far Gamma Ray(2M)
         /// </summary>
 
 

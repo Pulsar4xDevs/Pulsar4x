@@ -350,6 +350,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Lasers
                 case ComponentsViewModel.Components.Laser:
+
+                    if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
                 break;
                 #endregion
 
@@ -385,6 +390,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Particle beams
                 case ComponentsViewModel.Components.Particle:
+
+                    if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
                 break;
                 #endregion
 
@@ -1182,6 +1192,143 @@ namespace Pulsar4X.UI.Handlers
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Damage dropoff due to range is controlled by wavelength, higher wavelengths forestall damage dropoff in addition to raising weapon range. Lasers have the outright highest armor penetration pattern of all weapons.";
 
+
+                        int AdvLaserTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.AdvancedLaserFocal];
+                        int LaserTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LaserFocal];
+                        int WaveTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LaserWavelength];
+
+                        if (AdvLaserTech > 11)
+                            AdvLaserTech = 11;
+
+                        if (LaserTech > 11)
+                            LaserTech = 11;
+
+                        if (WaveTech > 11)
+                            WaveTech = 11;
+
+                        for (int loop = AdvLaserTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("{0}cm Advanced Laser Focal Size", Constants.BeamWeaponTN.SizeClass[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        for (int loop = LaserTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("{0}cm Laser Focal Size", Constants.BeamWeaponTN.SizeClass[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        for (int loop = WaveTech; loop >= 0; loop--)
+                        {
+                            //Infared, Visible Light, Near Ultraviolet, Ultraviolet, Far Ultraviolet, Soft X-Ray(30), X-Ray(60), Far X-Ray(125), Extreme X-Ray(250), Near Gamma Ray(500), Gamma Ray(1M), Far Gamma Ray(2M)
+        
+                            switch (loop)
+                            {
+                                case 0:
+                                    Entry = "Infared Laser";
+                                    break;
+                                case 1:
+                                    Entry = "Visible Light Laser";
+                                    break;
+                                case 2:
+                                    Entry = "Near Ultraviolet Laser";
+                                    break;
+                                case 3:
+                                    Entry = "Ultraviolet Laser";
+                                    break;
+                                case 4:
+                                    Entry = "Far Ultraviolet Laser";
+                                    break;
+                                case 5:
+                                    Entry = "Soft X-Ray Laser";
+                                    break;
+                                case 6:
+                                    Entry = "X-Ray Laser";
+                                    break;
+                                case 7:
+                                    Entry = "Far X-Ray Laser";
+                                    break;
+                                case 8:
+                                    Entry = "Extreme X-Ray Laser";
+                                    break;
+                                case 9:
+                                    Entry = "Near Gamma Ray Laser";
+                                    break;
+                                case 10:
+                                    Entry = "Gamma Ray Laser";
+                                    break;
+                                case 11:
+                                    Entry = "Far Gamma Ray Laser";
+                                    break;
+                            }
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                        if (TechLevel > 11)
+                            TechLevel = 11;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Capacitor Recharge Rate {0}", Constants.BeamWeaponTN.Capacitor[loop]);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+
+                        TechLevel  = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ReducedSizeLasers];
+                        if (TechLevel > 1)
+                            TechLevel = 1;
+
+                        m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Standard Laser Size and Recharge Rate");
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            switch (loop)
+                            {
+                                case 1:
+                                    Entry = "Reduced-Size Laser 0.75 Size / 4x Recharge";
+                                    break;
+                                case 0:
+                                    Entry = "Reduced-Size Laser 0.5 Size / 20x Recharge";
+                                    break;
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.SpinalMount];
+                        if (TechLevel > 1)
+                            TechLevel = 1;
+
+                        m_oComponentDesignPanel.TechComboBoxFive.Items.Add("Standard Mount");
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            switch (loop)
+                            {
+                                case 1:
+                                    Entry = "Spinal Mount";
+                                    break;
+                                case 0:
+                                    Entry = "Advanced Spinal Mount";
+                                    break;
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+
                     break;
                     #endregion
 
@@ -1295,6 +1442,57 @@ namespace Pulsar4X.UI.Handlers
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Particle beams have slightly shorter range, are somewhat larger, and cannot be turreted compared to lasers, but never suffer damage drop off.";
 
+                        int AdvPartTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.AdvancedParticleBeamStrength];
+                        int PartTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ParticleBeamStrength];
+                        int PartRangeTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ParticleBeamRange];
+
+                        if (AdvPartTech > 10)
+                            AdvPartTech = 10;
+
+                        if (PartTech > 10)
+                            PartTech = 10;
+
+                        if (PartRangeTech > 11)
+                            PartRangeTech = 11;
+
+                        for (int loop = AdvPartTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Advanced Particle Beam Strength {0}", Constants.BeamWeaponTN.AdvancedParticleDamage[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        for (int loop = PartTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Particle Beam Strength {0}", Constants.BeamWeaponTN.ParticleDamage[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        for (int loop = PartRangeTech; loop >= 0; loop--)
+                        {
+                            float range = (float)Constants.BeamWeaponTN.ParticleRange[loop] * 10000.0f;
+                            String FormattedRange = range.ToString("#,###0");
+                            Entry = String.Format("Particle Beam Range {0}km", FormattedRange);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                        if (TechLevel > 11)
+                            TechLevel = 11;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Capacitor Recharge Rate {0}", Constants.BeamWeaponTN.Capacitor[loop]);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
                     break;
                     #endregion
 
@@ -2633,6 +2831,158 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Lasers
                 case ComponentsViewModel.Components.Laser:
+                /// <summary>
+                /// Sanity check.
+                /// </summary>
+                if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                    m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1 &&
+                    m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex != -1)
+                {
+                    int AdvLaserTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.AdvancedLaserFocal];
+                    int LaserTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LaserFocal];
+                    int WaveTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LaserWavelength];
+                    int CapTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+                    int ReduceTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ReducedSizeLasers];
+                    int SpinalTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.SpinalMount];
+
+                    if (AdvLaserTech > 11)
+                        AdvLaserTech = 11;
+                    if (LaserTech > 11)
+                        LaserTech = 11;
+                    if (WaveTech > 11)
+                        WaveTech = 11;
+                    if (CapTech > 11)
+                        CapTech = 11;
+                    if (ReduceTech > 1)
+                        ReduceTech = 1;
+                    if (SpinalTech > 1)
+                        SpinalTech = 1;
+
+                    int Cal = -1;
+                    ComponentTypeTN BeamType = ComponentTypeTN.TypeCount;
+                    int Cap = CapTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+                    int Vel = WaveTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+                    int Reduce = (ReduceTech - m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex + 1);
+                    int Spinal = (SpinalTech - m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex  + 1);
+                    float red = 1.0f;
+                    BeamDefTN.MountType MType = BeamDefTN.MountType.Standard;
+
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex > AdvLaserTech)
+                    {
+                        Cal = LaserTech - (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex - AdvLaserTech - 1);
+                        BeamType = ComponentTypeTN.Laser;
+
+                        float Capacitor = Constants.BeamWeaponTN.Capacitor[Cap];
+                        switch (Reduce)
+                        {
+                            case 1:
+                                Capacitor = Capacitor / 4.0f;
+                                red = 0.75f;
+                                break;
+                            case 0:
+                                Capacitor = Capacitor / 20.0f;
+                                red = 0.5f;
+                                break;
+                        }
+
+                        String CapString = "N/A";
+                        if (red == 1.0f)
+                            CapString = String.Format("{0}", Capacitor);
+                        else
+                            CapString = String.Format("{0:N1}", Capacitor);
+
+
+                        String Calibre = Constants.BeamWeaponTN.SizeClass[Cal].ToString();
+                        switch (Spinal)
+                        {
+                            case 1:
+                                MType = BeamDefTN.MountType.Spinal;
+                                Calibre = Math.Round(Constants.BeamWeaponTN.SizeClass[Cal] * 1.25f).ToString();
+                                break;
+                            case 0:
+                                MType = BeamDefTN.MountType.AdvancedSpinal;
+                                Calibre = Math.Round(Constants.BeamWeaponTN.SizeClass[Cal] * 1.5f).ToString();
+                                break;
+                        }
+
+
+                        Entry = String.Format("{0}cm C{1} {2}", Calibre , CapString , m_oComponentDesignPanel.TechComboBoxTwo.SelectedItem);
+                    
+
+                    }
+                    else
+                    {
+                        Cal = AdvLaserTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+                        BeamType = ComponentTypeTN.AdvLaser;
+
+                        float Capacitor = Constants.BeamWeaponTN.Capacitor[Cap];
+                        switch (Reduce)
+                        {
+                            case 1:
+                                Capacitor = Capacitor / 4.0f;
+                                red = 0.75f;
+                                break;
+                            case 0:
+                                Capacitor = Capacitor / 20.0f;
+                                red = 0.5f;
+                                break;
+                        }
+
+                        String CapString = "N/A";
+                        if(red == 1.0f)
+                            CapString = String.Format("{0}", Capacitor);
+                        else
+                            CapString = String.Format("{0:N1}", Capacitor);
+
+
+                        String Calibre = Constants.BeamWeaponTN.SizeClass[Cal].ToString();
+                        switch (Spinal)
+                        {
+                            case 1:
+                                MType = BeamDefTN.MountType.Spinal;
+                                Calibre = Math.Round(Constants.BeamWeaponTN.SizeClass[Cal] * 1.25f).ToString();
+                                break;
+                            case 0:
+                                MType = BeamDefTN.MountType.AdvancedSpinal;
+                                Calibre = Math.Round(Constants.BeamWeaponTN.SizeClass[Cal] * 1.5f).ToString();
+                                break;
+                        }
+
+
+                        Entry = String.Format("{0}cm C{1} Advanced {2}", Calibre, CapString, m_oComponentDesignPanel.TechComboBoxTwo.SelectedItem);
+                    }
+                    m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                    BeamProject = new BeamDefTN(Entry, BeamType, (byte)Cal, (byte)Vel, (byte)Cap, red, MType);
+
+                    Entry = String.Format("Damage Output {0}     Rate of Fire: {1} seconds     Range Modifier: {2}\n", BeamProject.damage[0], BeamProject.rof, (Vel+1));
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    String FormattedRange = BeamProject.range.ToString("#,###0");
+
+                    if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                        Entry = String.Format("Max Range {0} km     Laser Size: {1} Tons    Laser HTK: {2}\n", FormattedRange, (BeamProject.size * 50.0f), BeamProject.htk);
+                    else
+                        Entry = String.Format("Max Range {0} km     Laser Size: {1} HS    Laser HTK: {2}\n", FormattedRange, BeamProject.size, BeamProject.htk);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n", BeamProject.powerRequirement, BeamProject.weaponCapacitor);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    if (Spinal != 2)
+                    {
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText("Spinal Weapon Only\n");
+                    }
+
+                    Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost * 50));
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                }
                 break;
                 #endregion
 
@@ -2716,6 +3066,75 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Particle beams
                 case ComponentsViewModel.Components.Particle:
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1)
+                    {
+                        int AdvPartTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.AdvancedParticleBeamStrength];
+                        int PartTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ParticleBeamStrength];
+                        int PartRangeTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ParticleBeamRange];
+                        int CapTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                        if (AdvPartTech > 10)
+                            AdvPartTech = 10;
+                        if (PartTech > 10)
+                            PartTech = 10;
+                        if (PartRangeTech > 11)
+                            PartRangeTech = 11;
+                        if (CapTech > 11)
+                            CapTech = 11;
+
+                        int Cal = -1;
+                        ComponentTypeTN BeamType = ComponentTypeTN.TypeCount;
+                        int Range = PartRangeTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+                        int Cap = CapTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex > AdvPartTech)
+                        {
+                            BeamType = ComponentTypeTN.Particle;
+                            Cal = PartTech - (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex - AdvPartTech - 1);
+
+                            float RangeAdjust = (float)Constants.BeamWeaponTN.ParticleRange[Cal] / 10.0f;
+                            Entry = String.Format("Particle Beam-{0} C{1}/R{2}",Constants.BeamWeaponTN.ParticleDamage[Cal],Constants.BeamWeaponTN.Capacitor[Cap],RangeAdjust);
+                        }
+                        else
+                        {
+                            BeamType = ComponentTypeTN.AdvParticle;
+                            Cal = AdvPartTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+                            float RangeAdjust = (float)Constants.BeamWeaponTN.ParticleRange[Cal] / 10.0f;
+                            Entry = String.Format("Advanced Particle Beam-{0} C{1}/R{2}", Constants.BeamWeaponTN.ParticleDamage[Cal], Constants.BeamWeaponTN.Capacitor[Cap], RangeAdjust);
+                        }
+
+                        BeamProject = new BeamDefTN(Entry, BeamType, (byte)Cal, (byte)Range, (byte)Cap, 1.0f);
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        String FormattedRange = BeamProject.range.ToString("#,###0");
+
+                        Entry = String.Format("Beam Strength {0}     Rate of Fire: {1} seconds     Maximum Range: {2} km\n", BeamProject.damage[0], BeamProject.rof, FormattedRange);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Launcher Size: {0} Tons    Launcher HTK: {1}\n", (BeamProject.size * 50.0f), BeamProject.htk);
+                        else
+                            Entry = String.Format("Launcher Size: {0} HS    Launcher HTK: {1}\n", BeamProject.size, BeamProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n", BeamProject.powerRequirement, BeamProject.weaponCapacitor);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost * 50));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                    }
                 break;
                 #endregion
 

@@ -1102,7 +1102,7 @@ namespace Pulsar4X
             /// <summary>
             /// Range modifier for particle beam technology, in 10k units.
             /// </summary>
-            public static ushort[] ParticleRange = { 60, 100, 150, 200, 240, 320, 400, 500, 640, 800, 1000, 1200 };
+            public static ushort[] ParticleRange = { 6, 10, 15, 20, 24, 32, 40, 50, 64, 80, 100, 120 };
 
             /// <summary>
             /// Size reduction and accuracy modifiers for Gauss weapons.

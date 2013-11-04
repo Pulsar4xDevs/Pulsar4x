@@ -44,8 +44,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Every beam weapon excepting gauss cannons will have a capacitor. this is the strength value, not the tech value
         /// </summary>
-        private byte WeaponCapacitor;
-        public byte weaponCapacitor
+        private float WeaponCapacitor;
+        public float weaponCapacitor
         {
             get { return WeaponCapacitor; }
             set { WeaponCapacitor = value; }
@@ -120,6 +120,14 @@ namespace Pulsar4X.Entities.Components
             get { return DamageType; }
         }
 
+        public enum MountType
+        {
+            Standard,
+            Spinal,
+            AdvancedSpinal,
+            Count
+        }
+
 
         /// <summary>
         /// Constructor for all beam weapon types.
@@ -130,7 +138,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="RangeTech">Every beam weapon has a range tech except for plasma carronades which do not have any way to increase range or decrease damage falloff.</param>
         /// <param name="CapacitorTech">Every beam weapon has a capacitor tech associated with it except gauss. Shotcount tech for gauss.</param>
         /// <param name="Reduction">Lasers and Gauss both have size reduction capabilities, though with drawbacks for both types: recharge rate and accuracy respectively.</param>
-        public BeamDefTN(String Title, ComponentTypeTN Type, byte SizeTech, byte RangeTech, byte CapacitorTech, float Reduction)
+        public BeamDefTN(String Title, ComponentTypeTN Type, byte SizeTech, byte RangeTech, byte CapacitorTech, float Reduction, MountType MType = MountType.Standard)
         {
             if (Type < ComponentTypeTN.Rail || Type > ComponentTypeTN.AdvParticle)
             {
@@ -165,17 +173,40 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I Suspect that size is 3.2cm per HS but am just using a table for now.
                     /// </summary>
-                    size = (float)Constants.BeamWeaponTN.LaserSize[WeaponSizeTech] * Reduction;
-
-                    /// <summary>
-                    /// Lasers have the longest range of all beam weapons due to their high damage, normal 10,000km factor and weapon range tech.
-                    /// </summary>
-                    Range = (float)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech] * 10000.0f * (float)(WeaponRangeTech+1);
+                    size = (float)Math.Round(Constants.BeamWeaponTN.LaserSize[WeaponSizeTech] * Reduction);
 
                     /// <summary>
                     /// The first entry in the damage table is max damage at point blank(0-10k range) damage.
                     /// </summary>
                     Damage.Add((ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech]);
+
+                    /// <summary>
+                    /// Have to modify capacitor by size reduction values.
+                    /// </summary>
+                    if (Reduction == 0.75f)
+                        WeaponCapacitor = WeaponCapacitor / 4.0f;
+                    else if (Reduction == 0.5f)
+                        WeaponCapacitor = WeaponCapacitor / 20.0f;
+
+                    /// <summary>
+                    /// Damage, Size, and Range are all modified by spinal mounting:
+                    /// </summary>
+                    switch (MType)
+                    {
+                        case MountType.Spinal :
+                            size = (float)Math.Round(size * 1.25f);
+                            Damage[0] = (ushort)Math.Round((float)Damage[0] * 1.5f);
+                            break;
+                        case MountType.AdvancedSpinal :
+                            size = (float)Math.Round(size * 1.5f);
+                            Damage[0] = (ushort)Math.Round((float)Damage[0] * 2.0f);
+                            break;
+                    }
+
+                    /// <summary>
+                    /// Lasers have the longest range of all beam weapons due to their high damage, normal 10,000km factor and weapon range tech.
+                    /// </summary>
+                    Range = (float)Damage[0] * 10000.0f * (float)(WeaponRangeTech + 1);
 
                     /// <summary>
                     /// Lasers require 1 unit of power for every unit of damage that they do.
@@ -187,23 +218,49 @@ namespace Pulsar4X.Entities.Components
                     /// FullDamage * ( Wavelength / RangeIncrement Tick) with a minimum of 1 over range.
                     /// </summary>
                     /// 
-                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
+                    RangeIncrement = (WeaponRangeTech + 1) * Damage[0];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Beam;
                 break;
 
                 case ComponentTypeTN.AdvLaser :
-                    size = (float)Constants.BeamWeaponTN.LaserSize[WeaponSizeTech] * Reduction;
-                    Range = (float)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech] * 10000.0f * (float)(WeaponRangeTech+1);
+                    size = (float)Math.Round(Constants.BeamWeaponTN.LaserSize[WeaponSizeTech] * Reduction);
                     Damage.Add((ushort)Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech]);
 
                     /// <summary>
                     /// Advanced lasers do more damage per unit of power than regular lasers.
                     /// </summary>
-                    PowerRequirement = (ushort)Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
+                    PowerRequirement = Constants.BeamWeaponTN.LaserDamage[WeaponSizeTech];
 
-                    RangeIncrement = (WeaponRangeTech+1) * Constants.BeamWeaponTN.AdvancedLaserDamage[WeaponSizeTech];
+                    /// <summary>
+                    /// Have to modify capacitor by size reduction values.
+                    /// </summary>
+                    if (Reduction == 0.75f)
+                        WeaponCapacitor = WeaponCapacitor / 4.0f;
+                    else if (Reduction == 0.5f)
+                        WeaponCapacitor = WeaponCapacitor / 20.0f;
+
+                    /// <summary>
+                    /// Damage, Size, and Range are all modified by spinal mounting:
+                    /// </summary>
+                    switch (MType)
+                    {
+                        case MountType.Spinal:
+                            size = (float)Math.Round(size * 1.25f);
+                            Damage[0] = (ushort)Math.Round((float)Damage[0] * 1.5f);
+                            PowerRequirement = (ushort)Math.Round((float)PowerRequirement * 1.5f);
+                            break;
+                        case MountType.AdvancedSpinal:
+                            size = (float)Math.Round(size * 1.5f);
+                            Damage[0] = (ushort)Math.Round((float)Damage[0] * 2.0f);
+                            PowerRequirement = (ushort)Math.Round((float)PowerRequirement * 2.0f);
+                            break;
+                    }
+
+                    Range = (float)Damage[0] * 10000.0f * (float)(WeaponRangeTech + 1);
+
+                    RangeIncrement = (WeaponRangeTech + 1) * Damage[0];
                     CalcDamageTable(RangeIncrement);
 
                     DamageType = DamageTypeTN.Beam;
@@ -345,7 +402,7 @@ namespace Pulsar4X.Entities.Components
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.ParticlePower[WeaponSizeTech];
 
                     Damage.Add(Constants.BeamWeaponTN.ParticleDamage[WeaponSizeTech]);
-                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech] / 10;
+                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech];
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(Constants.BeamWeaponTN.ParticleDamage[WeaponSizeTech]);
@@ -365,7 +422,7 @@ namespace Pulsar4X.Entities.Components
                     PowerRequirement = (ushort)Constants.BeamWeaponTN.ParticlePower[WeaponSizeTech];
 
                     Damage.Add(Constants.BeamWeaponTN.AdvancedParticleDamage[WeaponSizeTech]);
-                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech] / 10;
+                    RangeIncrement = Constants.BeamWeaponTN.ParticleRange[WeaponRangeTech];
                     for (int loop = 1; loop < RangeIncrement; loop++)
                     {
                         Damage.Add(Constants.BeamWeaponTN.AdvancedParticleDamage[WeaponSizeTech]);
@@ -486,8 +543,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// What is the state of this beam weapon's capacitor?
         /// </summary>
-        private ushort CurrentCapacitor;
-        public ushort currentCapacitor
+        private float CurrentCapacitor;
+        public float currentCapacitor
         {
             get { return CurrentCapacitor; }
             set { CurrentCapacitor = value; }
