@@ -330,6 +330,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region High Power Microwave
                 case ComponentsViewModel.Components.Microwave:
+
+                    if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
                 break;
                 #endregion
 
@@ -350,6 +355,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Meson Cannons
                 case ComponentsViewModel.Components.Meson:
+
+                    if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
                 break;
                 #endregion
 
@@ -1063,6 +1073,46 @@ namespace Pulsar4X.UI.Handlers
                                                                   "Likewise hardening of electronic components does not convey additional hit to kill, but reduces on a percentage basis the chance of destruction vs electronic damage. " +
                                                                   "Microwaves have 1/2 the range of a similarly sized and focused laser.";
 
+                        int MicrowaveTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MicrowaveFocal];
+                        int MicroFocusTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MicrowaveFocusing];
+
+                        if (MicrowaveTech > 11)
+                            MicrowaveTech = 11;
+                        if (MicroFocusTech > 11)
+                            MicroFocusTech = 11;
+
+                        for (int loop = MicrowaveTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("{0}cm Microwave Focal Size", Constants.BeamWeaponTN.SizeClass[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        for (int loop = MicroFocusTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Microwave Focusing Technology {0}", (loop+1));
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                        if (TechLevel > 11)
+                            TechLevel = 11;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Capacitor Recharge Rate {0}", Constants.BeamWeaponTN.Capacitor[loop]);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+
                     break;
                     #endregion
 
@@ -1112,6 +1162,47 @@ namespace Pulsar4X.UI.Handlers
                         SetLabels("Meson Focal Size", "Meson Focusing", "Capacitor Recharge Rate", "", "", "", "");
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Mesons pass through shields and armour to strike components directly, but only do a damage of 1, so larger and harder to kill components may survive. As with microwaves Mesons have half the range of a similar laser.";
+
+
+                        int MesonTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MesonFocal];
+                        int MesonFocusTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MesonFocusing];
+
+                        if (MesonTech > 11)
+                            MesonTech = 11;
+                        if (MesonFocusTech > 11)
+                            MesonFocusTech = 11;
+
+                        for (int loop = MesonTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("{0}cm Meson Focal Size", Constants.BeamWeaponTN.SizeClass[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        for (int loop = MesonFocusTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Meson Focusing Technology {0}", (loop+1));
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                        if (TechLevel > 11)
+                            TechLevel = 11;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Capacitor Recharge Rate {0}", Constants.BeamWeaponTN.Capacitor[loop]);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
 
                     break;
                     #endregion
@@ -2386,6 +2477,59 @@ namespace Pulsar4X.UI.Handlers
 
                 #region High Power Microwave
                 case ComponentsViewModel.Components.Microwave:
+                /// <summary>
+                /// Sanity check.
+                /// </summary>
+                if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                    m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1)
+                {
+                    int MicroTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MicrowaveFocal];
+                    int MicroFocusTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MicrowaveFocusing];
+                    int CapTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                    if (MicroTech > 11)
+                        MicroTech = 11;
+                    if (MicroFocusTech > 11)
+                        MicroFocusTech = 11;
+                    if (CapTech > 11)
+                        CapTech = 11;
+
+                    int Cal = MicroTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+                    ComponentTypeTN BeamType = ComponentTypeTN.Meson;
+                    int Cap = CapTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+                    int Foc = MicroFocusTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+
+                    BeamProject = new BeamDefTN("Microwave", BeamType, (byte)Cal, (byte)Foc, (byte)Cap, 1.0f);
+
+                    float RangeAdjust = BeamProject.range / 10000.0f;
+
+                    Entry = String.Format("R{0}/C{1} High Power Microwave", RangeAdjust, BeamProject.weaponCapacitor);
+                    BeamProject.Name = Entry;
+
+                    m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                    String FormattedRange = BeamProject.range.ToString("#,###0");
+                    Entry = String.Format("Max Range {0} km     Rate of Fire: {1} seconds     Focus Modifier: {2}\n", FormattedRange, BeamProject.rof, (BeamProject.weaponRangeTech + 1));
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                        Entry = String.Format("HPM Size: {0} Tons    HTK: {1}\n", (BeamProject.size * 50.0f), BeamProject.htk);
+                    else
+                        Entry = String.Format("HPM Size: {0} HS    HTK: {1}\n", BeamProject.size, BeamProject.htk);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n", BeamProject.powerRequirement, BeamProject.weaponCapacitor);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                    Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost * 50));
+                    m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                }
                 break;
                 #endregion
 
@@ -2406,6 +2550,59 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Meson Cannons
                 case ComponentsViewModel.Components.Meson:
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                    m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1)
+                {
+                        int MesonTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MesonFocal];
+                        int MesonFocusTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MesonFocusing];
+                        int CapTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
+
+                        if (MesonTech > 11)
+                             MesonTech = 11;
+                        if (MesonFocusTech > 11)
+                            MesonFocusTech = 11;
+                        if (CapTech > 11)
+                            CapTech = 11;
+
+                        int Cal = MesonTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+                        ComponentTypeTN BeamType = ComponentTypeTN.Meson;
+                        int Cap = CapTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+                        int Foc = MesonFocusTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+
+                        BeamProject = new BeamDefTN("Meson",BeamType,(byte)Cal,(byte)Foc,(byte)Cap,1.0f);
+
+                        float RangeAdjust = BeamProject.range / 10000.0f;
+
+                        Entry = String.Format("R{0}/C{1} Meson Cannon", RangeAdjust, BeamProject.weaponCapacitor);
+                        BeamProject.Name = Entry;
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        String FormattedRange = BeamProject.range.ToString("#,###0");
+                        Entry = String.Format("Max Range {0} km     Rate of Fire: {1} seconds     Focus Modifier: {2}\n",FormattedRange,BeamProject.rof,(BeamProject.weaponRangeTech+1));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Meson Cannon Size: {0} Tons    Meson Cannon HTK: {1}\n", (BeamProject.size*50.0f), BeamProject.htk);
+                        else
+                            Entry = String.Format("Meson Cannon Size: {0} HS    Meson Cannon HTK: {1}\n",BeamProject.size,BeamProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n",BeamProject.powerRequirement,BeamProject.weaponCapacitor);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n",BeamProject.cost, BeamProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n",(BeamProject.cost * 50));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                }
                 break;
                 #endregion
 
