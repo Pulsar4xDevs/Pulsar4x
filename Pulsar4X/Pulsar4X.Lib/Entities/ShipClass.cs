@@ -54,6 +54,16 @@ namespace Pulsar4X.Entities
         ReadOnly(false)]
         public string Notes { get; set; }
 
+        /// <summary>
+        /// Class design summary.
+        /// </summary>
+        [DisplayName("Summary"),
+        Category("Description"),
+        Description("Class Summary"),
+        Browsable(true),
+        ReadOnly(false)]
+        public String Summary { get; set; }
+
         [Browsable(false)]
         public BindingList<ShipTN> ShipsInClass { get; set; }
 
@@ -311,7 +321,7 @@ namespace Pulsar4X.Entities
         [Browsable(false)]
         public bool HasBridge { get; set; }
 
-        #region Engine 314
+        #region Engine
         /// <summary>
         /// each ship class can only have one type of engine, though several copies may be present.
         /// </summary>
@@ -361,7 +371,7 @@ namespace Pulsar4X.Entities
         public int MaxSpeed { get; set; }
         #endregion
 
-        #region Active and Passive Sensors 364
+        #region Active and Passive Sensors
         /// <summary>
         /// List of passive sensor types, and how many of each that there are in this ship.
         /// Likewise the best possible sensors are stored.
@@ -435,7 +445,7 @@ namespace Pulsar4X.Entities
         public int MaxEMSignature { get; set; }
         #endregion
 
-        #region Cargo/Cryo/Troop loading and unloading 438
+        #region Cargo/Cryo/Troop loading and unloading
         /// <summary>
         /// List of Cargo hold definitions present on this ship class.
         /// </summary>
@@ -561,7 +571,7 @@ namespace Pulsar4X.Entities
         public int TroopLoadTime { get; set; }
         #endregion
 
-        #region Beam & FC Info 564
+        #region Beam & FC Info
         [DisplayName("Beam Fire Controls"),
         Category("Component Lists"),
         Description("List of Beam Fire Controls on this ship class."),
@@ -619,8 +629,7 @@ namespace Pulsar4X.Entities
         public int TotalPowerGeneration { get; set; }
         #endregion
 
-
-        #region Shield Info 623
+        #region Shield Info
         /// <summary>
         /// Only 1 shield is allowed per class.
         /// </summary>
@@ -660,7 +669,7 @@ namespace Pulsar4X.Entities
         public float TotalShieldFuelCostPerTick { get; set; }
         #endregion
 
-        #region Missile Components 663
+        #region Missile Components
         /// <summary>
         /// Ships need magazines(though launchers have some innate magazine capacity), launch tubes, and missile fire controls to fire missiles at targets.
         /// </summary>
@@ -736,9 +745,10 @@ namespace Pulsar4X.Entities
         /// This constructor will initialize the craft class to a default conventional armored 0 space ship, with a deployment time of 3 months and a name of title.
         /// </summary>
         /// <param name="Title">Class name</param>
-        public ShipClassTN(string Title)
+        public ShipClassTN(string Title, Faction ShipClassFaction)
         {
             Name = Title;
+            Faction = ShipClassFaction;
 
             ShipsInClass = new BindingList<ShipTN>();
 
@@ -760,11 +770,6 @@ namespace Pulsar4X.Entities
             ListOfComponentDefsCount = new BindingList<short>();
             DamageAllocationChart = new Dictionary<ComponentDefTN,int>();
             ElectronicDamageAllocationChart = new Dictionary<ComponentDefTN, int>();
-
-            ShipArmorDef = new ArmorDefTN("Conventional Armor");
-            NewArmor("Conventional Armor", 2, 1);
-
-            BuildPointCost = ShipArmorDef.cost;
 
             CrewQuarters = new BindingList<GeneralComponentDefTN>();
             CrewQuartersCount = new BindingList<ushort>();
@@ -858,6 +863,11 @@ namespace Pulsar4X.Entities
             TotalMagazineCapacity = 0;
             ShipClassOrdnance = new Dictionary<OrdnanceDefTN, int>();
             PreferredOrdnanceSize = 0;
+
+            ShipArmorDef = new ArmorDefTN("Conventional Armor");
+            NewArmor("Conventional Armor", 2, 1);
+
+            BuildPointCost = ShipArmorDef.cost;
         }
         #endregion
 
@@ -871,6 +881,8 @@ namespace Pulsar4X.Entities
             TonsPerMan = (float)Math.Pow((double)MaxDeploymentTime, (1.0 / 3.0));
             CapPerHS = 50.0f / TonsPerMan;
             AccomHSRequirement = (((float)TotalRequiredCrew * TonsPerMan) / 50.0f);
+
+            BuildClassSummary();
         }
 
         /// <summary>
@@ -1083,6 +1095,8 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
+
+            BuildClassSummary();
         }
 
         /// <summary>
@@ -1103,6 +1117,8 @@ namespace Pulsar4X.Entities
 
             BuildPointCost = BuildPointCost + ShipArmorDef.cost;
             SizeHS = SizeHS + ShipArmorDef.size;
+
+            BuildClassSummary();
         }
 
         /// <summary>
@@ -1957,6 +1973,316 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds the class summary.
+        /// Geo/Grav values not handled yet. or present for that matter.
+        /// Missile related components not yet handled.
+        /// many other components not handled either.
+        /// Need to pass desired range/tracking for bfc adjustment.
+        /// </summary>
+        public void BuildClassSummary()
+        {
+            Summary = "N/A";
+
+            String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", Name, SizeTons.ToString(),
+                                         TotalRequiredCrew.ToString(), Math.Floor(BuildPointCost).ToString(), TotalCrossSection.ToString(),
+                                         MaxThermalSignature.ToString(), MaxEMSignature.ToString());
+                
+            Summary = String.Format("{0}",Entry);
+
+            String ShieldR = "0";
+            if (ShipShieldDef != null)
+            {
+                if (ShipShieldDef.shieldGen == ShipShieldDef.shieldPool)
+                {
+                    ShieldR = "300";
+                }
+                else
+                {
+                    float shield = (float)Math.Floor((ShipShieldDef.shieldPool / ShipShieldDef.shieldGen) * 300.0f);
+                    ShieldR = shield.ToString();
+                }
+            }
+
+            Entry = String.Format("{0} km/s   Armour {1}-{2}   Shields {3}-{4}   Sensors {5}/{6}/{7}/{8}   Damage Control Rating {9}  PPV {10}\n", MaxSpeed,
+                                  ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating, 
+                                  PlanetaryProtectionValue);
+
+            Summary = String.Format("{0}{1}",Summary,Entry);
+
+            Entry = String.Format("Maint Life {0} Years   MSP {1}   AFR {2}   IFR {3}   1YR {4}   5YR {5}   Max Repair {6} MSP\n", MaintenanceLife, TotalMSPCapacity, AnnualFailureRate, 
+                                  InitialFailureRate, YearOneFailureTotal, YearFiveFailureTotal, MaxRepair);
+
+            Summary = String.Format("{0}{1}",Summary,Entry);
+
+            Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n\n", MaxDeploymentTime, SpareCrewQuarters);
+
+            Summary = String.Format("{0}{1}",Summary,Entry);
+
+            if (ShipEngineDef != null)
+            {
+                float fuelCon = (float)Math.Floor(ShipEngineDef.fuelConsumptionMod * 100.0f);
+                String FuelString = String.Format("{0}", fuelCon);
+
+                Entry = String.Format("{0} ({1})   Power {2}   Fuel Use {3}%    Signature {4}    Armour 0    Exp {5}%\n", ShipEngineDef.Name, ShipEngineCount,
+                                                                   ShipEngineDef.enginePower, FuelString, ShipEngineDef.thermalSignature, ShipEngineDef.expRisk);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            if (TotalFuelCapacity != 0)
+            {
+                String Range = "Range N/A";
+                if (ShipEngineDef != null)
+                {
+                    String Time = "N/A";
+                    float HoursOfFuel = TotalFuelCapacity / MaxFuelUsePerHour;
+
+
+                    if (HoursOfFuel < 72)
+                    {
+                        Time = String.Format("({0} hours at full power)", Math.Floor(HoursOfFuel).ToString());
+                    }
+                    else
+                    {
+                        float DaysOfFuel = HoursOfFuel / 24.0f;
+                        Time = String.Format("({0} days at full power)", Math.Floor(DaysOfFuel).ToString());
+                    }
+
+                    float SecondsPerBillion = 1000000000.0f / MaxSpeed;
+                    float HoursPerBillion = SecondsPerBillion / 3600.0f;
+
+                    float billions = HoursOfFuel / HoursPerBillion;
+
+                    if (billions >= 0.1)
+                    {
+                        billions = (float)(Math.Floor(10.0 * billions) / 10.0f);
+                        Range = String.Format("Range {0} B km {1}", billions, Time);
+                    }
+                    else
+                    {
+                        float millions = billions * 1000.0f;
+                        millions = (float)(Math.Floor(10.0 * millions) / 10.0f);
+                        Range = String.Format("Range {0} M km {1}", millions, Time);
+                    }
+                }
+
+                Entry = String.Format("Fuel Capacity {0} Litres   {1}\n", TotalFuelCapacity, Range);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            if (ShipShieldDef != null)
+            {
+                float FuelCostPerHour = ShipShieldDef.fuelCostPerHour * ShipShieldCount;
+                float FuelCostPerDay = FuelCostPerHour * 24.0f;
+
+                Entry = String.Format("{0} ({1})   Total Fuel Cost  {2} Litres per hour  ({3} per day)\n", ShipShieldDef, ShipShieldCount,
+                                                                             FuelCostPerHour, FuelCostPerDay);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            Entry = "\n";
+            Summary = String.Format("{0}{1}",Summary,Entry);
+
+            for (int loop = 0; loop < ShipBeamDef.Count; loop++)
+            {
+                String Range = "N/A";
+
+                float MaxRange = 0;
+
+                for (int loop2 = 0; loop2 < ShipBFCDef.Count; loop2++)
+                {
+                    if (ShipBFCDef[loop2].range > MaxRange)
+                        MaxRange = ShipBFCDef[loop2].range;
+                }
+
+                if (MaxRange > ShipBeamDef[loop].range)
+                {
+                    Range = String.Format("Range {0}km", ShipBeamDef[loop].range);
+                }
+                else
+                {
+                    Range = String.Format("Range {0}km", MaxRange);
+                }
+
+                String Tracking = "N/A";
+                if (MaxSpeed > Faction.BaseTracking)
+                {
+                    Tracking = String.Format("TS: {0} km/s", MaxSpeed);
+                }
+                else
+                {
+                    Tracking = String.Format("TS: {0} km/s", Faction.BaseTracking);
+                }
+
+                String Power = "N/A";
+                if (ShipBeamDef[loop].componentType == ComponentTypeTN.Gauss)
+                {
+                    Power = "0-0";
+                }
+                else
+                {
+                    Power = String.Format("{0}-{1}", ShipBeamDef[loop].powerRequirement, ShipBeamDef[loop].weaponCapacitor);
+                }
+
+                float ROF = (ShipBeamDef[loop].powerRequirement / ShipBeamDef[loop].weaponCapacitor) * 5;
+
+                if (ROF < 5)
+                    ROF = 5;
+                String DamageString = ShipBeamDef[loop].damage[0].ToString();
+
+                for (int loop2 = 1; loop2 < 10; loop2++)
+                {
+                    int value = -1;
+                    if (loop2 >= ShipBeamDef[loop].damage.Count)
+                    {
+                        value = 0;
+                    }
+                    else
+                    {
+                        value = ShipBeamDef[loop].damage[loop2];
+                    }
+                    DamageString = String.Format("{0} {1}", DamageString, value);
+                }
+
+                Entry = String.Format("{0} ({1})   {2}   {3}   Power {4}   RM {5}   ROF {6}   {7}\n",
+                                          ShipBeamDef[loop].Name, ShipBeamCount[loop], Range, Tracking, Power,
+                                          (ShipBeamDef[loop].damage.Count - 1), ROF, DamageString);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            for (int loop = 0; loop < ShipBFCDef.Count; loop++)
+            {
+                String AccString = String.Format("{0}", Math.Floor(ShipBFCDef[loop].rangeAccuracyTable[0] * 100.0f));
+
+                for (int loop2 = 1; loop2 < 10; loop2++)
+                {
+                    if (loop2 < ShipBFCDef[loop].rangeAccuracyTable.Count)
+                    {
+                        AccString = String.Format("{0} {1}", AccString, Math.Floor(ShipBFCDef[loop].rangeAccuracyTable[loop2] * 100.0f));
+                    }
+                    else
+                    {
+                        AccString = String.Format("{0} 0", AccString);
+                    }
+                }
+
+
+                Entry = String.Format("{0} ({1})   Max Range: {2} km   TS: {3} km/s   {4}\n", ShipBFCDef[loop].Name, ShipBFCCount[loop], ShipBFCDef[loop].range,
+                                      ShipBFCDef[loop].tracking, AccString);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            for (int loop = 0; loop < ShipReactorDef.Count; loop++)
+            {
+                float TPO = ShipReactorDef[loop].powerGen * ShipReactorCount[loop];
+
+                /// <summary>
+                /// probably a better way to format this.
+                /// </summary>
+                TPO = TPO * 10.0f;
+                TPO = (float)Math.Round(TPO);
+                TPO = TPO / 10.0f;
+
+                Entry = String.Format("{0} ({1})   Total Power Output {2}   Armour 0    Exp {3}%\n", ShipReactorDef[loop].Name,
+                                          ShipReactorCount[loop], TPO, ShipReactorDef[loop].expRisk);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            Entry = "\n";
+            Summary = String.Format("{0}{1}",Summary,Entry);
+
+            for (int loop = 0; loop < ShipASensorDef.Count; loop++)
+            {
+                String RangeString = "-4.2m";
+
+                if (ShipASensorDef[loop].maxRange >= 100000)
+                {
+                    float RangeB = (float)Math.Floor((double)ShipASensorDef[loop].maxRange / 10000.0) / 10.0f;
+
+                    RangeString = String.Format("{0}B", RangeB);
+                }
+                else if (ShipASensorDef[loop].maxRange >= 100)
+                {
+                    float RangeM = (float)Math.Floor((double)ShipASensorDef[loop].maxRange / 10.0) / 10.0f;
+
+                    RangeString = String.Format("{0}M", RangeM);
+                }
+                else
+                {
+                    RangeString = String.Format("{0}K", ((float)Math.Floor((double)ShipASensorDef[loop].maxRange) * 10.0f));
+                }
+
+                String MCRString = " ";
+
+                if (ShipASensorDef[loop].resolution == 1)
+                {
+                    int minRange = ShipASensorDef[loop].lookUpMT[0];
+
+                    if (minRange >= 100000)
+                    {
+                        float RangeB = (float)Math.Floor((double)minRange / 10000.0) / 10.0f;
+                        MCRString = String.Format(" MCR {0}B km   ", RangeB);
+                    }
+                    else if (minRange >= 100)
+                    {
+                        float RangeM = (float)Math.Floor((double)minRange / 10.0) / 10.0f;
+                        MCRString = String.Format(" MCR {0}M km   ", RangeM);
+                    }
+                    else
+                    {
+                        MCRString = String.Format(" MCR {0}K km   ", ((float)Math.Floor((double)minRange) * 10.0f));
+                    }
+                }
+
+
+                Entry = String.Format("{0} ({1})   GPS {2}   Range {3} km  {4}Resolution {5}\n", ShipASensorDef[loop].Name,
+                                          ShipASensorCount[loop], ShipASensorDef[loop].gps, RangeString, MCRString,
+                                          ShipASensorDef[loop].resolution);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            for (int loop = 0; loop < ShipPSensorDef.Count; loop++)
+            {
+                String RangeString = "20m";
+
+                int range = ShipPSensorDef[loop].range;
+
+                if (range >= 100000)
+                {
+                    float RangeB = (float)Math.Floor((double)range / 10000.0) / 10.0f;
+                    RangeString = String.Format("{0}B", RangeB);
+                }
+                else
+                {
+                    float RangeM = (float)Math.Floor((double)range / 10.0) / 10.0f;
+                    RangeString = String.Format("{0}M", RangeM);
+                }
+
+                Entry = String.Format("{0} ({1})     Sensitivity {2}     Detect Sig Strength 1000:  {3} km\n", ShipPSensorDef[loop].Name,
+                                          ShipPSensorCount[loop], ShipPSensorDef[loop].rating, RangeString);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+            }
+
+            if (IsMilitary == true)
+            {
+                Entry = "\nThis design is classed as a Military Vessel for maintenance purposes\n";
+            }
+            else
+            {
+                Entry = "\nThis design is classed as a Commercial Vessel for maintenance purposes\n";
+            }
+
+            Summary = String.Format("{0}{1}",Summary,Entry);
         }
     }
 }

@@ -699,7 +699,7 @@ namespace Pulsar4X.Entities
 
         public void AddNewShipDesign(String Title)
         {
-            ShipClassTN Ship = new ShipClassTN(Title);
+            ShipClassTN Ship = new ShipClassTN(Title,this);
             ShipDesigns.Add(Ship);
         }
 

@@ -16,8 +16,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void testArmor()
         {
-            ShipClassTN ts2 = new ShipClassTN("Test");
             Faction newFaction = new Faction(0);
+            ShipClassTN ts2 = new ShipClassTN("Test",newFaction);
 
             StarSystem System1 = new StarSystem("Sol");
 
@@ -133,7 +133,7 @@ namespace Pulsar4X.Tests
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
-            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipClassTN ts2 = new ShipClassTN("Test",newFaction);
             ShipTN ts = new ShipTN(ts2,0,0,newTG,newFaction);
 
             ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive",32,2.65f,0.6f,0.75f,2,37,-1.0f);
@@ -172,7 +172,7 @@ namespace Pulsar4X.Tests
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
-            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipClassTN ts2 = new ShipClassTN("Test",newFaction);
             ShipTN ts = new ShipTN(ts2,0,0,newTG,newFaction);
 
             PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, PassiveSensorType.Thermal, 1.0f, 1);
@@ -218,7 +218,7 @@ namespace Pulsar4X.Tests
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
-            ShipClassTN ts2 = new ShipClassTN("Test");
+            ShipClassTN ts2 = new ShipClassTN("Test",newFaction);
             ShipTN ts = new ShipTN(ts2,0,0,newTG,newFaction);
 
             ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36, 24, 185, false, 1.0f, 1);
@@ -252,6 +252,8 @@ namespace Pulsar4X.Tests
         [Test]
         public void testShip()
         {
+            Faction newFaction = new Faction(0);
+
             /// <summary>
             /// These would go into a faction component list I think
             /// </summary>
@@ -265,7 +267,7 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, ComponentTypeTN.Engineering);
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, ComponentTypeTN.Bridge);
 
-            ShipClassTN TestClass = new ShipClassTN("Test Ship Class");
+            ShipClassTN TestClass = new ShipClassTN("Test Ship Class",newFaction);
 
             TestClass.AddCrewQuarters(CrewQ, 2);
             TestClass.AddFuelStorage(FuelT, 2);
@@ -318,8 +320,6 @@ namespace Pulsar4X.Tests
 
 
             TestClass.AddCrewQuarters(CrewQ, 2);
-
-            Faction newFaction = new Faction(0);
 
             StarSystem System1 = new StarSystem("Sol");
 
@@ -401,7 +401,7 @@ namespace Pulsar4X.Tests
 
             for (int loop = 0; loop < 5; loop++)
             {
-                ShipClassTN test = new ShipClassTN("Ship");
+                ShipClassTN test = new ShipClassTN("Ship",FID);
                 test.AddCrewQuarters(CrewQ, 2);
                 test.AddFuelStorage(FuelT, 2);
                 test.AddEngineeringSpaces(EBay, 2);
@@ -489,7 +489,7 @@ namespace Pulsar4X.Tests
             {
 
 
-                ShipClassTN test = new ShipClassTN("Ship");
+                ShipClassTN test = new ShipClassTN("Ship",FID);
                 test.AddCrewQuarters(CrewQ, 2);
                 test.AddFuelStorage(FuelT, 2);
                 test.AddEngineeringSpaces(EBay, 2);
@@ -537,7 +537,7 @@ namespace Pulsar4X.Tests
             {
 
 
-                ShipClassTN test = new ShipClassTN("Ship");
+                ShipClassTN test = new ShipClassTN("Ship",FID);
                 test.AddCrewQuarters(CrewQ, 2);
                 test.AddFuelStorage(FuelT, 2);
                 test.AddEngineeringSpaces(EBay, 2);
@@ -619,7 +619,7 @@ namespace Pulsar4X.Tests
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
 
-            ShipClassTN test = new ShipClassTN("Ship");
+            ShipClassTN test = new ShipClassTN("Ship",FID);
             test.AddCrewQuarters(CrewQ, 2);
             test.AddFuelStorage(FuelT, 2);
             test.AddEngineeringSpaces(EBay, 2);

@@ -50,6 +50,7 @@ namespace Pulsar4X.UI.ViewModels
             set
             {
                 _CurrentShipClass = value;
+
                 OnPropertyChanged(() => CurrentShipClass);
                 OnShipClassChanged();
             }
@@ -69,6 +70,7 @@ namespace Pulsar4X.UI.ViewModels
                 _CurrentShipClass = _ShipDesigns[0];
             }
         }
+
 
         //private ShipClassTN _CurrentClassType;
         //public ShipClassTN CurrentClassType
@@ -125,6 +127,14 @@ namespace Pulsar4X.UI.ViewModels
             }
         }
 
+        private void OnFactionChanged()
+        {
+            if (FactionChanged != null)
+            {
+                FactionChanged(this, new EventArgs());
+            }
+        }
+
         private void OnPropertyChanged(Expression<Func<object>> property)
         {
             if (PropertyChanged != null)
@@ -137,5 +147,7 @@ namespace Pulsar4X.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         public event EventHandler ShipClassChanged;
+
+        public event EventHandler FactionChanged;
     }
 }

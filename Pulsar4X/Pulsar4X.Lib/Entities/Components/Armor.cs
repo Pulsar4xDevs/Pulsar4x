@@ -49,6 +49,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Strength of Armor, purely needed for display.
+        /// </summary>
+        private double Strength;
+        public double strength
+        {
+            get { return Strength; }
+        }
+
+        /// <summary>
         /// Column number counts how many columns of armor this ship can have, and hence how well protected it is from normal damage.
         /// This is determined by taking the overall strength requirement divided by the depth of the armor.
         /// </summary>
@@ -159,6 +168,7 @@ namespace Pulsar4X.Entities.Components
 			    }
 		    }
 
+            Strength = strengthReq;
 		    Area = ( area * Depth ) / 4.0;
 		    cost = (decimal)Area;
 		    CNum = (ushort)Math.Floor( strengthReq / (double)Depth );

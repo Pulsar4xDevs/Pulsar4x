@@ -215,7 +215,7 @@ namespace Pulsar4X.UI.Helpers
             else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.ClassDes_DesignAndInfo))
             {
                 m_oClassDesign.ActivateOptionsPanel();
-                m_oClassDesign.ActivatePropertiesPanel();
+                //m_oClassDesign.ActivatePropertiesPanel();
             }
             else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.TaskGroup_Panel))
             {

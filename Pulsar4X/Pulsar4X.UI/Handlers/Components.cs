@@ -3666,7 +3666,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// This is a helper function that should reduce the clutter in background tech. visibility for each of the seven labels and combo boxes needs to be controlled and set.
-        /// This is done here.
+        /// This is done here. No I couldn't figure out how to make an array of tech combo boxes, why do you ask?
         /// </summary>
         /// <param name="count">1 to 7 indicates which tech combo boxes should be visible.</param>
         private void SetTechVisible(int count)
