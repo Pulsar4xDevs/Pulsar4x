@@ -168,10 +168,7 @@ namespace Pulsar4X.UI.Panels
 
         public CheckBox SizeInTonsCheckBox
         {
-            get
-            {
-                return m_oSizeinTonsCheckBox;
-            }
+            get { return m_oSizeinTonsCheckBox; }
         }
 
         public bool Obsolete
@@ -340,6 +337,18 @@ namespace Pulsar4X.UI.Panels
 
         #endregion
 
+        /// <summary>
+        /// Display for Ship information.
+        /// </summary>
+        private DataGridView m_oComponentDataGrid;
+        public DataGridView ComponentDataGrid
+        {
+            get { return m_oComponentDataGrid; }
+        }
+
+
+            
+
 
         public ClassDes_Options()
         {
@@ -356,6 +365,18 @@ namespace Pulsar4X.UI.Panels
             m_oSortCostRadioButton.CheckedChanged += new EventHandler(m_oSortCostRadioButton_CheckedChanged);
             m_oSortHullRadioButton.CheckedChanged += new EventHandler(m_oSortHullRadioButton_CheckedChanged);
             m_oSortSizeRadioButton.CheckedChanged += new EventHandler(m_oSortSizeRadioButton_CheckedChanged);
+
+            m_oComponentDataGrid = new DataGridView();
+            m_oComponentDataGrid.Dock = DockStyle.Top;
+            m_oComponentDataGrid.SetBounds(3, 3, 745, 350);
+            m_oComponentDataGrid.AllowUserToAddRows = false;
+            m_oComponentDataGrid.AllowUserToDeleteRows = false;
+            m_oComponentDataGrid.AllowUserToOrderColumns = false;
+            m_oComponentDataGrid.AllowUserToResizeColumns = false;
+            m_oComponentDataGrid.AllowUserToResizeRows = false;
+            m_oComponentDataGrid.ReadOnly = true;
+            m_oComponentDataGrid.Enabled = true;
+            this.m_oAvailCompGroupBox.Controls.Add(m_oComponentDataGrid);
         }
 
         #region Events

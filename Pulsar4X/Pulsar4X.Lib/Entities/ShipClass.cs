@@ -952,6 +952,8 @@ namespace Pulsar4X.Entities
             TotalRequiredCrew = TotalRequiredCrew + (Component.crew * increment);
             AccomHSRequirement = (((float)TotalRequiredCrew * TonsPerMan) / 50.0f);
 
+            SpareCrewQuarters = TotalCrewQuarters - TotalRequiredCrew;
+
             /// <summary>
             /// The Cost of the ship has likewise gone up.
             /// </summary>
@@ -1173,7 +1175,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Total Crew Berths. AccomHS / Tons per man.
             /// </summary>
-            TotalCrewQuarters = (int)Math.Floor(AccomHSAvailable / TonsPerMan);
+            TotalCrewQuarters = (int)Math.Floor((AccomHSAvailable * 50.0f) / TonsPerMan);
 
             /// <summary>
             /// General Housekeeping

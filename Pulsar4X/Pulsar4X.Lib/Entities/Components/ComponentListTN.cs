@@ -192,9 +192,9 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Cryostorage is a TN only starting option. otherwise it must be researched.
             /// </summary>
-            ColonyDefTN ColonyStandard = new ColonyDefTN("Cryogenic Storage - Standard", 50.0f, 100.0m, 10);
-            ColonyDefTN ColonySmall = new ColonyDefTN("Cryogenic Storage - Small", 5.0f, 20.0m, 2);
-            ColonyDefTN ColonyEmergency = new ColonyDefTN("Cryogenic Storage - Emergency", 1.0f, 5.0m, 0);
+            ColonyDefTN ColonyStandard = new ColonyDefTN("Cryogenic Transport", 50.0f, 100.0m, 10);
+            ColonyDefTN ColonySmall = new ColonyDefTN("Cryogenic Transport - Small", 5.0f, 20.0m, 2);
+            ColonyDefTN ColonyEmergency = new ColonyDefTN("Cryogenic Transport - Emergency", 1.0f, 5.0m, 0);
 
             ColonyBayDef.Add(ColonyStandard);
             ColonyBayDef.Add(ColonySmall);

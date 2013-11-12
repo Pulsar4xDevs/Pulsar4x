@@ -9,6 +9,7 @@ namespace Pulsar4X.UI.Panels
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
+        #region Misc
         /// <summary>
         /// Class summary text should be printed here.
         /// </summary>
@@ -17,6 +18,15 @@ namespace Pulsar4X.UI.Panels
             get { return m_oClassSummaryTextBox; }
         }
 
+
+        /// <summary>
+        /// overall cost of the ship design in build points.
+        /// </summary>
+        public TextBox BPCostTextBox
+        {
+            get { return m_oBuildPointTextBox; }
+        }
+        #endregion
 
         #region Power Systems
         /// <summary>
@@ -116,6 +126,148 @@ namespace Pulsar4X.UI.Panels
         }
         #endregion
 
+        #region Crew Accomodations
+
+        /// <summary>
+        /// Deployment time in months the ship can be out before suffering morale loss.
+        /// </summary>
+        public TextBox DeploymentTimeTextBox
+        {
+            get { return m_oDeployTimeTextBox; }
+        }
+
+        /// <summary>
+        /// Tons of space each crewman requires.
+        /// </summary>
+        public TextBox TonsPerManTextBox
+        {
+            get { return m_oTonsManTextBox; }
+        }
+
+        /// <summary>
+        /// Crew accomodated by a single HS of crew quarters.
+        /// </summary>
+        public TextBox CapPerHSTextBox
+        {
+            get { return m_oCapPerHSTextBox; }
+        }
+
+        /// <summary>
+        /// HS required for crew at current deploy time.
+        /// </summary>
+        public TextBox AccomHSReqTextBox
+        {
+            get { return m_oAccomHSReqTextBox; }
+        }
+
+        /// <summary>
+        /// HS devoted to crew quarters.
+        /// </summary>
+        public TextBox AccomHSAvailTextBox
+        {
+            get { return m_oAccomHSAvailTextBox; }
+        }
+
+
+        /// <summary>
+        /// Crew berths, actual crew of the ship requirements.
+        /// </summary>
+        public TextBox CrewBerthsTextBox
+        {
+            get { return m_oCrewBerthsTextBox; }
+        }
+
+        /// <summary>
+        /// Spare crew berths, flight crew typically.
+        /// </summary>
+        public TextBox SpareBerthsTextBox
+        {
+            get { return m_oSpareBerthsTextBox; }
+        }
+
+        /// <summary>
+        /// Cryogenic berths, usually colonists.
+        /// </summary>
+        public TextBox CryoBerthsTextBox
+        {
+            get { return m_oCryoBerthsTextBox; }
+        }
+        #endregion
+
+        #region Design Tab
+        /// <summary>
+        /// Smaller version of the complete summary.
+        /// </summary>
+        public RichTextBox BriefSummaryTextBox
+        {
+            get { return m_oBriefSummaryTextBox; }
+        }
+
+        /// <summary>
+        /// Display for design errors.
+        /// </summary>
+        public RichTextBox DesignErrorsTextBox
+        {
+            get { return m_oDesignErrorsTextBox; }
+        }
+
+        /// <summary>
+        /// List of components.
+        /// </summary>
+        public ListBox ComponentsListBox
+        {
+            get { return m_oShipCompListBox; }
+        }
+
+        /// <summary>
+        /// Filter components by type in the listbox?
+        /// </summary>
+        public CheckBox GroupComponentsCheckBox
+        {
+            get { return m_oGroupCompCheckBox; }
+        }
+
+        /// <summary>
+        /// Add components.
+        /// </summary>
+        public Button AddButton
+        {
+            get { return m_oAddButton; }
+        }
+
+        /// <summary>
+        /// Remove components.
+        /// </summary>
+        public Button RemoveButton
+        {
+            get { return m_oRemoveButton; }
+        }
+
+        /// <summary>
+        /// Radio selection for number of components to add/subtract.
+        /// </summary>
+        public RadioButton OneRadioButton
+        {
+            get { return m_oOneRadioButton; }
+        }
+
+        public RadioButton FiveRadioButton
+        {
+            get { return m_oFiveRadioButton; }
+        }
+
+        public RadioButton TenRadioButton
+        {
+            get { return m_oTenRadioButton; }
+        }
+
+        public RadioButton HundredRadioButton
+        {
+            get { return m_oHundredRadioButton; }
+        }
+        #endregion
+
+
         /// <summary> 
         /// Clean up any resources being used.
         /// </summary>
@@ -212,6 +364,23 @@ namespace Pulsar4X.UI.Panels
             this.m_oTange100000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oRange10000RadioButton = new System.Windows.Forms.RadioButton();
             this.m_oDesignTab = new System.Windows.Forms.TabPage();
+            this.m_oDesignErrorsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oDesignErrorsTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oCompListGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oShipCompListBox = new System.Windows.Forms.ListBox();
+            this.m_oBriefSummaryGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oBriefSummaryTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oAvailCompGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oComOnlyCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oObsTechCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oOwnTechCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oGroupCompCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oHundredRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oTenRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oFiveRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oOneRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oRemoveButton = new System.Windows.Forms.Button();
+            this.m_oAddButton = new System.Windows.Forms.Button();
             this.m_oOrdFightersTab = new System.Windows.Forms.TabPage();
             this.m_oCompSummaryTab = new System.Windows.Forms.TabPage();
             this.m_oDACRankInfoTab = new System.Windows.Forms.TabPage();
@@ -221,6 +390,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oArmourDownButton = new System.Windows.Forms.Button();
             this.m_oGeneralInfoGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oBuildPointGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oBuildPointTextBox = new System.Windows.Forms.TextBox();
+            this.m_oBPLabel = new System.Windows.Forms.Label();
             this.m_oBuildLoadGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oLoadTimeLabel = new System.Windows.Forms.Label();
             this.m_oBuildTimeLabel = new System.Windows.Forms.Label();
@@ -282,7 +453,13 @@ namespace Pulsar4X.UI.Panels
             this.m_oClassSummaryGroupBox.SuspendLayout();
             this.m_oTargetSpeedGroupBox.SuspendLayout();
             this.m_oRangeBandsGroupBox.SuspendLayout();
+            this.m_oDesignTab.SuspendLayout();
+            this.m_oDesignErrorsGroupBox.SuspendLayout();
+            this.m_oCompListGroupBox.SuspendLayout();
+            this.m_oBriefSummaryGroupBox.SuspendLayout();
+            this.m_oAvailCompGroupBox.SuspendLayout();
             this.m_oGeneralInfoGroupBox.SuspendLayout();
+            this.m_oBuildPointGroupBox.SuspendLayout();
             this.m_oBuildLoadGroupBox.SuspendLayout();
             this.m_oPowerSystemGroupBox.SuspendLayout();
             this.m_oPassiveDefGroupBox.SuspendLayout();
@@ -382,7 +559,7 @@ namespace Pulsar4X.UI.Panels
             // m_oHullLabel
             // 
             this.m_oHullLabel.AutoSize = true;
-            this.m_oHullLabel.Location = new System.Drawing.Point(522, 16);
+            this.m_oHullLabel.Location = new System.Drawing.Point(522, 21);
             this.m_oHullLabel.Name = "m_oHullLabel";
             this.m_oHullLabel.Size = new System.Drawing.Size(25, 13);
             this.m_oHullLabel.TabIndex = 7;
@@ -391,7 +568,7 @@ namespace Pulsar4X.UI.Panels
             // m_oTypeLabel
             // 
             this.m_oTypeLabel.AutoSize = true;
-            this.m_oTypeLabel.Location = new System.Drawing.Point(374, 16);
+            this.m_oTypeLabel.Location = new System.Drawing.Point(374, 21);
             this.m_oTypeLabel.Name = "m_oTypeLabel";
             this.m_oTypeLabel.Size = new System.Drawing.Size(31, 13);
             this.m_oTypeLabel.TabIndex = 6;
@@ -400,7 +577,7 @@ namespace Pulsar4X.UI.Panels
             // m_oClassLabel
             // 
             this.m_oClassLabel.AutoSize = true;
-            this.m_oClassLabel.Location = new System.Drawing.Point(194, 16);
+            this.m_oClassLabel.Location = new System.Drawing.Point(197, 21);
             this.m_oClassLabel.Name = "m_oClassLabel";
             this.m_oClassLabel.Size = new System.Drawing.Size(32, 13);
             this.m_oClassLabel.TabIndex = 5;
@@ -409,7 +586,7 @@ namespace Pulsar4X.UI.Panels
             // m_oEmpireLabel
             // 
             this.m_oEmpireLabel.AutoSize = true;
-            this.m_oEmpireLabel.Location = new System.Drawing.Point(6, 16);
+            this.m_oEmpireLabel.Location = new System.Drawing.Point(6, 21);
             this.m_oEmpireLabel.Name = "m_oEmpireLabel";
             this.m_oEmpireLabel.Size = new System.Drawing.Size(39, 13);
             this.m_oEmpireLabel.TabIndex = 4;
@@ -418,7 +595,7 @@ namespace Pulsar4X.UI.Panels
             // m_oHullComboBox
             // 
             this.m_oHullComboBox.FormattingEnabled = true;
-            this.m_oHullComboBox.Location = new System.Drawing.Point(556, 13);
+            this.m_oHullComboBox.Location = new System.Drawing.Point(559, 18);
             this.m_oHullComboBox.Name = "m_oHullComboBox";
             this.m_oHullComboBox.Size = new System.Drawing.Size(140, 21);
             this.m_oHullComboBox.TabIndex = 3;
@@ -426,7 +603,7 @@ namespace Pulsar4X.UI.Panels
             // m_oTypeComboBox
             // 
             this.m_oTypeComboBox.FormattingEnabled = true;
-            this.m_oTypeComboBox.Location = new System.Drawing.Point(414, 13);
+            this.m_oTypeComboBox.Location = new System.Drawing.Point(411, 18);
             this.m_oTypeComboBox.Name = "m_oTypeComboBox";
             this.m_oTypeComboBox.Size = new System.Drawing.Size(102, 21);
             this.m_oTypeComboBox.TabIndex = 2;
@@ -434,7 +611,7 @@ namespace Pulsar4X.UI.Panels
             // m_oClassComboBox
             // 
             this.m_oClassComboBox.FormattingEnabled = true;
-            this.m_oClassComboBox.Location = new System.Drawing.Point(235, 13);
+            this.m_oClassComboBox.Location = new System.Drawing.Point(235, 18);
             this.m_oClassComboBox.Name = "m_oClassComboBox";
             this.m_oClassComboBox.Size = new System.Drawing.Size(133, 21);
             this.m_oClassComboBox.TabIndex = 1;
@@ -442,7 +619,7 @@ namespace Pulsar4X.UI.Panels
             // m_oFactionComboBox
             // 
             this.m_oFactionComboBox.FormattingEnabled = true;
-            this.m_oFactionComboBox.Location = new System.Drawing.Point(57, 13);
+            this.m_oFactionComboBox.Location = new System.Drawing.Point(58, 18);
             this.m_oFactionComboBox.Name = "m_oFactionComboBox";
             this.m_oFactionComboBox.Size = new System.Drawing.Size(122, 21);
             this.m_oFactionComboBox.TabIndex = 0;
@@ -515,6 +692,8 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oSizeinTonsCheckBox.AutoSize = true;
             this.m_oSizeinTonsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oSizeinTonsCheckBox.Checked = true;
+            this.m_oSizeinTonsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.m_oSizeinTonsCheckBox.Location = new System.Drawing.Point(142, 31);
             this.m_oSizeinTonsCheckBox.Margin = new System.Windows.Forms.Padding(2);
             this.m_oSizeinTonsCheckBox.Name = "m_oSizeinTonsCheckBox";
@@ -860,6 +1039,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpeedCustomTextBox.Name = "m_oSpeedCustomTextBox";
             this.m_oSpeedCustomTextBox.Size = new System.Drawing.Size(52, 20);
             this.m_oSpeedCustomTextBox.TabIndex = 20;
+            this.m_oSpeedCustomTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSpeedCustomRadioButton
             // 
@@ -987,6 +1167,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oRangeCustomTextBox.Name = "m_oRangeCustomTextBox";
             this.m_oRangeCustomTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oRangeCustomTextBox.TabIndex = 9;
+            this.m_oRangeCustomTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oRangeCustomRadioButton
             // 
@@ -1081,12 +1262,205 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oDesignTab
             // 
+            this.m_oDesignTab.Controls.Add(this.m_oDesignErrorsGroupBox);
+            this.m_oDesignTab.Controls.Add(this.m_oCompListGroupBox);
+            this.m_oDesignTab.Controls.Add(this.m_oBriefSummaryGroupBox);
+            this.m_oDesignTab.Controls.Add(this.m_oAvailCompGroupBox);
             this.m_oDesignTab.Location = new System.Drawing.Point(4, 22);
             this.m_oDesignTab.Name = "m_oDesignTab";
             this.m_oDesignTab.Size = new System.Drawing.Size(1026, 725);
             this.m_oDesignTab.TabIndex = 2;
             this.m_oDesignTab.Text = "Design View";
             this.m_oDesignTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oDesignErrorsGroupBox
+            // 
+            this.m_oDesignErrorsGroupBox.Controls.Add(this.m_oDesignErrorsTextBox);
+            this.m_oDesignErrorsGroupBox.Location = new System.Drawing.Point(754, 556);
+            this.m_oDesignErrorsGroupBox.Name = "m_oDesignErrorsGroupBox";
+            this.m_oDesignErrorsGroupBox.Size = new System.Drawing.Size(269, 166);
+            this.m_oDesignErrorsGroupBox.TabIndex = 3;
+            this.m_oDesignErrorsGroupBox.TabStop = false;
+            this.m_oDesignErrorsGroupBox.Text = "Design Errors";
+            // 
+            // m_oDesignErrorsTextBox
+            // 
+            this.m_oDesignErrorsTextBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oDesignErrorsTextBox.Name = "m_oDesignErrorsTextBox";
+            this.m_oDesignErrorsTextBox.Size = new System.Drawing.Size(253, 141);
+            this.m_oDesignErrorsTextBox.TabIndex = 0;
+            this.m_oDesignErrorsTextBox.Text = "";
+            // 
+            // m_oCompListGroupBox
+            // 
+            this.m_oCompListGroupBox.Controls.Add(this.m_oShipCompListBox);
+            this.m_oCompListGroupBox.Location = new System.Drawing.Point(754, 3);
+            this.m_oCompListGroupBox.Name = "m_oCompListGroupBox";
+            this.m_oCompListGroupBox.Size = new System.Drawing.Size(268, 547);
+            this.m_oCompListGroupBox.TabIndex = 2;
+            this.m_oCompListGroupBox.TabStop = false;
+            this.m_oCompListGroupBox.Text = "Components";
+            // 
+            // m_oShipCompListBox
+            // 
+            this.m_oShipCompListBox.FormattingEnabled = true;
+            this.m_oShipCompListBox.Location = new System.Drawing.Point(3, 17);
+            this.m_oShipCompListBox.Name = "m_oShipCompListBox";
+            this.m_oShipCompListBox.Size = new System.Drawing.Size(256, 524);
+            this.m_oShipCompListBox.TabIndex = 0;
+            // 
+            // m_oBriefSummaryGroupBox
+            // 
+            this.m_oBriefSummaryGroupBox.Controls.Add(this.m_oBriefSummaryTextBox);
+            this.m_oBriefSummaryGroupBox.Location = new System.Drawing.Point(3, 426);
+            this.m_oBriefSummaryGroupBox.Name = "m_oBriefSummaryGroupBox";
+            this.m_oBriefSummaryGroupBox.Size = new System.Drawing.Size(743, 296);
+            this.m_oBriefSummaryGroupBox.TabIndex = 1;
+            this.m_oBriefSummaryGroupBox.TabStop = false;
+            this.m_oBriefSummaryGroupBox.Text = "Brief Summary Display";
+            // 
+            // m_oBriefSummaryTextBox
+            // 
+            this.m_oBriefSummaryTextBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oBriefSummaryTextBox.Name = "m_oBriefSummaryTextBox";
+            this.m_oBriefSummaryTextBox.Size = new System.Drawing.Size(731, 271);
+            this.m_oBriefSummaryTextBox.TabIndex = 0;
+            this.m_oBriefSummaryTextBox.Text = "";
+            // 
+            // m_oAvailCompGroupBox
+            // 
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oComOnlyCheckBox);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oObsTechCheckBox);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oOwnTechCheckBox);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oGroupCompCheckBox);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oHundredRadioButton);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oTenRadioButton);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oFiveRadioButton);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oOneRadioButton);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oRemoveButton);
+            this.m_oAvailCompGroupBox.Controls.Add(this.m_oAddButton);
+            this.m_oAvailCompGroupBox.Location = new System.Drawing.Point(3, 3);
+            this.m_oAvailCompGroupBox.Name = "m_oAvailCompGroupBox";
+            this.m_oAvailCompGroupBox.Size = new System.Drawing.Size(745, 417);
+            this.m_oAvailCompGroupBox.TabIndex = 0;
+            this.m_oAvailCompGroupBox.TabStop = false;
+            this.m_oAvailCompGroupBox.Text = "Available Components";
+            // 
+            // m_oComOnlyCheckBox
+            // 
+            this.m_oComOnlyCheckBox.AutoSize = true;
+            this.m_oComOnlyCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oComOnlyCheckBox.Location = new System.Drawing.Point(622, 394);
+            this.m_oComOnlyCheckBox.MaximumSize = new System.Drawing.Size(117, 17);
+            this.m_oComOnlyCheckBox.MinimumSize = new System.Drawing.Size(117, 17);
+            this.m_oComOnlyCheckBox.Name = "m_oComOnlyCheckBox";
+            this.m_oComOnlyCheckBox.Size = new System.Drawing.Size(117, 17);
+            this.m_oComOnlyCheckBox.TabIndex = 9;
+            this.m_oComOnlyCheckBox.Text = "Commercial Only";
+            this.m_oComOnlyCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oObsTechCheckBox
+            // 
+            this.m_oObsTechCheckBox.AutoSize = true;
+            this.m_oObsTechCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oObsTechCheckBox.Location = new System.Drawing.Point(485, 394);
+            this.m_oObsTechCheckBox.MaximumSize = new System.Drawing.Size(131, 17);
+            this.m_oObsTechCheckBox.MinimumSize = new System.Drawing.Size(131, 17);
+            this.m_oObsTechCheckBox.Name = "m_oObsTechCheckBox";
+            this.m_oObsTechCheckBox.Size = new System.Drawing.Size(131, 17);
+            this.m_oObsTechCheckBox.TabIndex = 8;
+            this.m_oObsTechCheckBox.Text = "Show Obsolete Techs";
+            this.m_oObsTechCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oOwnTechCheckBox
+            // 
+            this.m_oOwnTechCheckBox.AutoSize = true;
+            this.m_oOwnTechCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oOwnTechCheckBox.Checked = true;
+            this.m_oOwnTechCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.m_oOwnTechCheckBox.Location = new System.Drawing.Point(485, 374);
+            this.m_oOwnTechCheckBox.MaximumSize = new System.Drawing.Size(131, 17);
+            this.m_oOwnTechCheckBox.MinimumSize = new System.Drawing.Size(131, 17);
+            this.m_oOwnTechCheckBox.Name = "m_oOwnTechCheckBox";
+            this.m_oOwnTechCheckBox.Size = new System.Drawing.Size(131, 17);
+            this.m_oOwnTechCheckBox.TabIndex = 7;
+            this.m_oOwnTechCheckBox.Text = "Own Tech Only";
+            this.m_oOwnTechCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oGroupCompCheckBox
+            // 
+            this.m_oGroupCompCheckBox.AutoSize = true;
+            this.m_oGroupCompCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oGroupCompCheckBox.Checked = true;
+            this.m_oGroupCompCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.m_oGroupCompCheckBox.Location = new System.Drawing.Point(622, 374);
+            this.m_oGroupCompCheckBox.MaximumSize = new System.Drawing.Size(117, 17);
+            this.m_oGroupCompCheckBox.MinimumSize = new System.Drawing.Size(117, 17);
+            this.m_oGroupCompCheckBox.Name = "m_oGroupCompCheckBox";
+            this.m_oGroupCompCheckBox.Size = new System.Drawing.Size(117, 17);
+            this.m_oGroupCompCheckBox.TabIndex = 6;
+            this.m_oGroupCompCheckBox.Text = "Group Components";
+            this.m_oGroupCompCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oHundredRadioButton
+            // 
+            this.m_oHundredRadioButton.AutoSize = true;
+            this.m_oHundredRadioButton.Location = new System.Drawing.Point(299, 381);
+            this.m_oHundredRadioButton.Name = "m_oHundredRadioButton";
+            this.m_oHundredRadioButton.Size = new System.Drawing.Size(43, 17);
+            this.m_oHundredRadioButton.TabIndex = 5;
+            this.m_oHundredRadioButton.Text = "100";
+            this.m_oHundredRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oTenRadioButton
+            // 
+            this.m_oTenRadioButton.AutoSize = true;
+            this.m_oTenRadioButton.Location = new System.Drawing.Point(256, 381);
+            this.m_oTenRadioButton.Name = "m_oTenRadioButton";
+            this.m_oTenRadioButton.Size = new System.Drawing.Size(37, 17);
+            this.m_oTenRadioButton.TabIndex = 4;
+            this.m_oTenRadioButton.Text = "10";
+            this.m_oTenRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oFiveRadioButton
+            // 
+            this.m_oFiveRadioButton.AutoSize = true;
+            this.m_oFiveRadioButton.Location = new System.Drawing.Point(219, 381);
+            this.m_oFiveRadioButton.Name = "m_oFiveRadioButton";
+            this.m_oFiveRadioButton.Size = new System.Drawing.Size(31, 17);
+            this.m_oFiveRadioButton.TabIndex = 3;
+            this.m_oFiveRadioButton.Text = "5";
+            this.m_oFiveRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOneRadioButton
+            // 
+            this.m_oOneRadioButton.AutoSize = true;
+            this.m_oOneRadioButton.Checked = true;
+            this.m_oOneRadioButton.Location = new System.Drawing.Point(182, 381);
+            this.m_oOneRadioButton.Name = "m_oOneRadioButton";
+            this.m_oOneRadioButton.Size = new System.Drawing.Size(31, 17);
+            this.m_oOneRadioButton.TabIndex = 2;
+            this.m_oOneRadioButton.TabStop = true;
+            this.m_oOneRadioButton.Text = "1";
+            this.m_oOneRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oRemoveButton
+            // 
+            this.m_oRemoveButton.Location = new System.Drawing.Point(89, 378);
+            this.m_oRemoveButton.Name = "m_oRemoveButton";
+            this.m_oRemoveButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oRemoveButton.TabIndex = 1;
+            this.m_oRemoveButton.Text = "Remove";
+            this.m_oRemoveButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAddButton
+            // 
+            this.m_oAddButton.Location = new System.Drawing.Point(8, 378);
+            this.m_oAddButton.Name = "m_oAddButton";
+            this.m_oAddButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oAddButton.TabIndex = 0;
+            this.m_oAddButton.Text = "Add";
+            this.m_oAddButton.UseVisualStyleBackColor = true;
             // 
             // m_oOrdFightersTab
             // 
@@ -1173,11 +1547,30 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oBuildPointGroupBox
             // 
+            this.m_oBuildPointGroupBox.Controls.Add(this.m_oBuildPointTextBox);
+            this.m_oBuildPointGroupBox.Controls.Add(this.m_oBPLabel);
             this.m_oBuildPointGroupBox.Location = new System.Drawing.Point(721, 12);
             this.m_oBuildPointGroupBox.Name = "m_oBuildPointGroupBox";
             this.m_oBuildPointGroupBox.Size = new System.Drawing.Size(150, 51);
             this.m_oBuildPointGroupBox.TabIndex = 44;
             this.m_oBuildPointGroupBox.TabStop = false;
+            // 
+            // m_oBuildPointTextBox
+            // 
+            this.m_oBuildPointTextBox.Location = new System.Drawing.Point(81, 18);
+            this.m_oBuildPointTextBox.Name = "m_oBuildPointTextBox";
+            this.m_oBuildPointTextBox.Size = new System.Drawing.Size(56, 20);
+            this.m_oBuildPointTextBox.TabIndex = 56;
+            this.m_oBuildPointTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oBPLabel
+            // 
+            this.m_oBPLabel.AutoSize = true;
+            this.m_oBPLabel.Location = new System.Drawing.Point(13, 21);
+            this.m_oBPLabel.Name = "m_oBPLabel";
+            this.m_oBPLabel.Size = new System.Drawing.Size(62, 13);
+            this.m_oBPLabel.TabIndex = 55;
+            this.m_oBPLabel.Text = "Build Points";
             // 
             // m_oBuildLoadGroupBox
             // 
@@ -1217,6 +1610,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oLoadTimeTextBox.Name = "m_oLoadTimeTextBox";
             this.m_oLoadTimeTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oLoadTimeTextBox.TabIndex = 12;
+            this.m_oLoadTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oBuildTimeTextBox
             // 
@@ -1224,6 +1618,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oBuildTimeTextBox.Name = "m_oBuildTimeTextBox";
             this.m_oBuildTimeTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oBuildTimeTextBox.TabIndex = 11;
+            this.m_oBuildTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oPowerSystemGroupBox
             // 
@@ -1307,6 +1702,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oRequiredPowerTextBox.Name = "m_oRequiredPowerTextBox";
             this.m_oRequiredPowerTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oRequiredPowerTextBox.TabIndex = 19;
+            this.m_oRequiredPowerTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oReactorPowerTextBox
             // 
@@ -1314,6 +1710,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oReactorPowerTextBox.Name = "m_oReactorPowerTextBox";
             this.m_oReactorPowerTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oReactorPowerTextBox.TabIndex = 18;
+            this.m_oReactorPowerTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oJumpDistTextBox
             // 
@@ -1321,6 +1718,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oJumpDistTextBox.Name = "m_oJumpDistTextBox";
             this.m_oJumpDistTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oJumpDistTextBox.TabIndex = 17;
+            this.m_oJumpDistTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oJumpRatingTextBox
             // 
@@ -1328,6 +1726,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oJumpRatingTextBox.Name = "m_oJumpRatingTextBox";
             this.m_oJumpRatingTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oJumpRatingTextBox.TabIndex = 16;
+            this.m_oJumpRatingTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oMaxSpeedTextBox
             // 
@@ -1335,6 +1734,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oMaxSpeedTextBox.Name = "m_oMaxSpeedTextBox";
             this.m_oMaxSpeedTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oMaxSpeedTextBox.TabIndex = 15;
+            this.m_oMaxSpeedTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oEnginePowerTextBox
             // 
@@ -1342,6 +1742,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oEnginePowerTextBox.Name = "m_oEnginePowerTextBox";
             this.m_oEnginePowerTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oEnginePowerTextBox.TabIndex = 14;
+            this.m_oEnginePowerTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oPassiveDefGroupBox
             // 
@@ -1386,6 +1787,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oArmorRatingTextBox.Name = "m_oArmorRatingTextBox";
             this.m_oArmorRatingTextBox.Size = new System.Drawing.Size(52, 20);
             this.m_oArmorRatingTextBox.TabIndex = 37;
+            this.m_oArmorRatingTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oClassSizeTextBox
             // 
@@ -1393,6 +1795,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oClassSizeTextBox.Name = "m_oClassSizeTextBox";
             this.m_oClassSizeTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oClassSizeTextBox.TabIndex = 39;
+            this.m_oClassSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oClassSizeLabel
             // 
@@ -1436,6 +1839,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAAreaTextBox.Name = "m_oAAreaTextBox";
             this.m_oAAreaTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oAAreaTextBox.TabIndex = 25;
+            this.m_oAAreaTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSStrengthLabel
             // 
@@ -1452,6 +1856,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAStrengthTextBox.Name = "m_oAStrengthTextBox";
             this.m_oAStrengthTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oAStrengthTextBox.TabIndex = 27;
+            this.m_oAStrengthTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oAColumnLabel
             // 
@@ -1468,6 +1873,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAColumnsTextBox.Name = "m_oAColumnsTextBox";
             this.m_oAColumnsTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oAColumnsTextBox.TabIndex = 28;
+            this.m_oAColumnsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oAStrengthLabel
             // 
@@ -1484,6 +1890,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSStrengthTextBox.Name = "m_oSStrengthTextBox";
             this.m_oSStrengthTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oSStrengthTextBox.TabIndex = 29;
+            this.m_oSStrengthTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSRechargeTextBox
             // 
@@ -1491,6 +1898,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSRechargeTextBox.Name = "m_oSRechargeTextBox";
             this.m_oSRechargeTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oSRechargeTextBox.TabIndex = 30;
+            this.m_oSRechargeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oInternalHTKTextBox
             // 
@@ -1498,6 +1906,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oInternalHTKTextBox.Name = "m_oInternalHTKTextBox";
             this.m_oInternalHTKTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oInternalHTKTextBox.TabIndex = 31;
+            this.m_oInternalHTKTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // groupBox4
             // 
@@ -1540,6 +1949,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oDeployTimeTextBox.Name = "m_oDeployTimeTextBox";
             this.m_oDeployTimeTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oDeployTimeTextBox.TabIndex = 53;
+            this.m_oDeployTimeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oTonsManTextBox
             // 
@@ -1547,6 +1957,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oTonsManTextBox.Name = "m_oTonsManTextBox";
             this.m_oTonsManTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oTonsManTextBox.TabIndex = 55;
+            this.m_oTonsManTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oTonPerManLabel
             // 
@@ -1590,6 +2001,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCapPerHSTextBox.Name = "m_oCapPerHSTextBox";
             this.m_oCapPerHSTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oCapPerHSTextBox.TabIndex = 41;
+            this.m_oCapPerHSTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oCrewBerthsLabel
             // 
@@ -1606,6 +2018,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAccomHSReqTextBox.Name = "m_oAccomHSReqTextBox";
             this.m_oAccomHSReqTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oAccomHSReqTextBox.TabIndex = 43;
+            this.m_oAccomHSReqTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oAccomHSAvailLabel
             // 
@@ -1622,6 +2035,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAccomHSAvailTextBox.Name = "m_oAccomHSAvailTextBox";
             this.m_oAccomHSAvailTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oAccomHSAvailTextBox.TabIndex = 44;
+            this.m_oAccomHSAvailTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oAccomHSReqLabel
             // 
@@ -1638,6 +2052,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCrewBerthsTextBox.Name = "m_oCrewBerthsTextBox";
             this.m_oCrewBerthsTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oCrewBerthsTextBox.TabIndex = 45;
+            this.m_oCrewBerthsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSpareBerthsTextBox
             // 
@@ -1645,6 +2060,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpareBerthsTextBox.Name = "m_oSpareBerthsTextBox";
             this.m_oSpareBerthsTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oSpareBerthsTextBox.TabIndex = 46;
+            this.m_oSpareBerthsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oCryoBerthsTextBox
             // 
@@ -1652,6 +2068,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCryoBerthsTextBox.Name = "m_oCryoBerthsTextBox";
             this.m_oCryoBerthsTextBox.Size = new System.Drawing.Size(72, 20);
             this.m_oCryoBerthsTextBox.TabIndex = 47;
+            this.m_oCryoBerthsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // ClassDes_Options
             // 
@@ -1684,8 +2101,16 @@ namespace Pulsar4X.UI.Panels
             this.m_oTargetSpeedGroupBox.PerformLayout();
             this.m_oRangeBandsGroupBox.ResumeLayout(false);
             this.m_oRangeBandsGroupBox.PerformLayout();
+            this.m_oDesignTab.ResumeLayout(false);
+            this.m_oDesignErrorsGroupBox.ResumeLayout(false);
+            this.m_oCompListGroupBox.ResumeLayout(false);
+            this.m_oBriefSummaryGroupBox.ResumeLayout(false);
+            this.m_oAvailCompGroupBox.ResumeLayout(false);
+            this.m_oAvailCompGroupBox.PerformLayout();
             this.m_oGeneralInfoGroupBox.ResumeLayout(false);
             this.m_oGeneralInfoGroupBox.PerformLayout();
+            this.m_oBuildPointGroupBox.ResumeLayout(false);
+            this.m_oBuildPointGroupBox.PerformLayout();
             this.m_oBuildLoadGroupBox.ResumeLayout(false);
             this.m_oBuildLoadGroupBox.PerformLayout();
             this.m_oPowerSystemGroupBox.ResumeLayout(false);
@@ -1836,5 +2261,24 @@ namespace Pulsar4X.UI.Panels
         private System.Windows.Forms.RichTextBox m_oClassSummaryTextBox;
         private Button m_oArmourUpButton;
         private Button m_oArmourDownButton;
+        private TextBox m_oBuildPointTextBox;
+        private Label m_oBPLabel;
+        private GroupBox m_oDesignErrorsGroupBox;
+        private GroupBox m_oCompListGroupBox;
+        private GroupBox m_oBriefSummaryGroupBox;
+        private GroupBox m_oAvailCompGroupBox;
+        private RichTextBox m_oDesignErrorsTextBox;
+        private ListBox m_oShipCompListBox;
+        private RichTextBox m_oBriefSummaryTextBox;
+        private RadioButton m_oHundredRadioButton;
+        private RadioButton m_oTenRadioButton;
+        private RadioButton m_oFiveRadioButton;
+        private RadioButton m_oOneRadioButton;
+        private Button m_oRemoveButton;
+        private Button m_oAddButton;
+        private CheckBox m_oComOnlyCheckBox;
+        private CheckBox m_oObsTechCheckBox;
+        private CheckBox m_oOwnTechCheckBox;
+        private CheckBox m_oGroupCompCheckBox;
     }
 }

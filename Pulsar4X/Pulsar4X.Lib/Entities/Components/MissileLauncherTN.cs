@@ -100,7 +100,7 @@ namespace Pulsar4X.Entities.Components
             else
             {
                 crew = (byte)Math.Round(size * 3.0f);
-                cost = (decimal)(size * 4.0f * (float)(ReloadTech - 1));
+                cost = (decimal)(size * 4.0f * (float)(ReloadTech));
             }
 
             /// <summary>

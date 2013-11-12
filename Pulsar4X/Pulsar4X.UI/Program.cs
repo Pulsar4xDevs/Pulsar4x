@@ -72,7 +72,7 @@ namespace Pulsar4X.UI
 
 
             oNewFaction.ShipDesigns[0].AddEngine(CL.Engines[1], 8);
-            oNewFaction.ShipDesigns[0].AddCrewQuarters(CL.CrewQuarters[0], 10);
+            oNewFaction.ShipDesigns[0].AddCrewQuarters(CL.CrewQuarters[0], 11);
             oNewFaction.ShipDesigns[0].AddFuelStorage(CL.FuelStorage[0], 10);
             oNewFaction.ShipDesigns[0].AddEngineeringSpaces(CL.EngineeringSpaces[0], 10);
             oNewFaction.ShipDesigns[0].AddOtherComponent(CL.OtherComponents[0], 1);
@@ -105,7 +105,7 @@ namespace Pulsar4X.UI
 
 
             oNewFaction2.ShipDesigns[0].AddEngine(CL.Engines[1], 8);
-            oNewFaction2.ShipDesigns[0].AddCrewQuarters(CL.CrewQuarters[0], 10);
+            oNewFaction2.ShipDesigns[0].AddCrewQuarters(CL.CrewQuarters[0], 11);
             oNewFaction2.ShipDesigns[0].AddFuelStorage(CL.FuelStorage[0], 10);
             oNewFaction2.ShipDesigns[0].AddEngineeringSpaces(CL.EngineeringSpaces[0], 10);
             oNewFaction2.ShipDesigns[0].AddOtherComponent(CL.OtherComponents[0], 1);
