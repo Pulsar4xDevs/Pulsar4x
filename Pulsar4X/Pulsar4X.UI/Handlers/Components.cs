@@ -263,6 +263,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Instant Adds the current tech project as a component to the faction component list, well, instantly.
+        /// Clicking Instant on an undefined component will break this.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -456,6 +457,8 @@ namespace Pulsar4X.UI.Handlers
                 #endregion
             }
             #endregion
+
+            _CurrnetFaction.ComponentList.TotalComponents = _CurrnetFaction.ComponentList.TotalComponents + 1;
         }
 
 
@@ -869,47 +872,47 @@ namespace Pulsar4X.UI.Handlers
                         #region Engine Base
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech];
-                        if(TechLevel > 11)
-                            TechLevel = 11;
+                        if(TechLevel > 12)
+                            TechLevel = 12;
 
-                        for (int loop = TechLevel; loop >= 0; loop--)
+                        for (int loop = TechLevel; loop >= 1; loop--)
                         {
                             switch (loop)
                             {
-                                case 0 :
+                                case 1 :
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Nuclear Thermal Engine Technology");
                                 break;
-                                case 1:
+                                case 2:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Nuclear Pulse Engine Technology");
                                 break;
-                                case 2:
+                                case 3:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Ion Drive Technology");
                                 break;
-                                case 3:
+                                case 4:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Magneto-Plasma Drive Technology");
                                 break;
-                                case 4:
+                                case 5:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Internal Confinement Fusion Drive Technology");
                                 break;
-                                case 5:
+                                case 6:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Magnetic Confinement Fusion Drive Technology");
                                 break;
-                                case 6:
+                                case 7:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Inertial Confinement Fusion Drive Technology");
                                 break;
-                                case 7:
+                                case 8:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Solid-Core Antimatter Drive Technology");
                                 break;
-                                case 8:
+                                case 9:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Gas-Core Antimatter Drive Technology");
                                 break;
-                                case 9:
+                                case 10:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Plasma-Core Antimatter Drive Technology");
                                 break;
-                                case 10:
+                                case 11:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Beam-Core Antimatter Drive Technology");
                                 break;
-                                case 11:
+                                case 12:
                                     m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Photonic Drive Technology");
                                 break;
 
@@ -1021,10 +1024,10 @@ namespace Pulsar4X.UI.Handlers
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction];
 
-                        if (TechLevel > 13)
-                            TechLevel = 13;
+                        if (TechLevel > 12)
+                            TechLevel = 12;
 
-                        for (int loop = 0; loop < TechLevel; loop++)
+                        for (int loop = 0; loop <= TechLevel; loop++)
                         {
                             Entry = String.Format("Thermal Reduction: Signature {0}% Normal", (Constants.EngineTN.ThermalReduction[loop] * 100.0f));
                             m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);

@@ -374,6 +374,9 @@ namespace Pulsar4X.UI.Panels
             m_oComponentDataGrid.AllowUserToOrderColumns = false;
             m_oComponentDataGrid.AllowUserToResizeColumns = false;
             m_oComponentDataGrid.AllowUserToResizeRows = false;
+            m_oComponentDataGrid.MultiSelect = false;
+            m_oComponentDataGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            m_oComponentDataGrid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             m_oComponentDataGrid.ReadOnly = true;
             m_oComponentDataGrid.Enabled = true;
             this.m_oAvailCompGroupBox.Controls.Add(m_oComponentDataGrid);

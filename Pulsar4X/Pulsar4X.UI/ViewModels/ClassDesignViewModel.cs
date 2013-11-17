@@ -26,15 +26,20 @@ namespace Pulsar4X.UI.ViewModels
             }
             set
             {
-                _currentFaction = value;
-
-                // safty check:
-                if (_currentFaction == null)
+                if (_currentFaction != value)
                 {
-                    return;
-                }
+                    _currentFaction = value;
 
-                _ShipDesigns = _currentFaction.ShipDesigns;
+                    // safty check:
+                    if (_currentFaction == null)
+                    {
+                        return;
+                    }
+
+                    OnPropertyChanged(() => CurrentFaction);
+                    _ShipDesigns = _currentFaction.ShipDesigns;
+                    OnFactionChanged();
+                }
             }
         }
 
@@ -49,10 +54,13 @@ namespace Pulsar4X.UI.ViewModels
             }
             set
             {
-                _CurrentShipClass = value;
+                if (_CurrentShipClass != value)
+                {
+                    _CurrentShipClass = value;
 
-                OnPropertyChanged(() => CurrentShipClass);
-                OnShipClassChanged();
+                    OnPropertyChanged(() => CurrentShipClass);
+                    OnShipClassChanged();
+                }
             }
         }
 
@@ -65,9 +73,12 @@ namespace Pulsar4X.UI.ViewModels
             }
             set
             {
-                _ShipDesigns = value;
-                OnPropertyChanged(() => ShipDesigns);
-                _CurrentShipClass = _ShipDesigns[0];
+                if (_ShipDesigns != value)
+                {
+                    _ShipDesigns = value;
+                    OnPropertyChanged(() => ShipDesigns);
+                    _CurrentShipClass = _ShipDesigns[0];
+                }
             }
         }
 

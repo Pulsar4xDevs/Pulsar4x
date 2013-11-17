@@ -616,6 +616,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech] = 0;
         }
 
         /// <summary>
@@ -683,6 +684,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech] = 0;
         }
 
         /// <summary>

@@ -99,10 +99,17 @@ namespace Pulsar4X.Entities.Components
         public BindingList<ActiveSensorDefTN> MissileFireControlDef { get; set; }
 
         /// <summary>
+        /// Number of the total components this faction has.
+        /// </summary>
+        public int TotalComponents { get; set; }
+
+        /// <summary>
         /// ComponentDefList creates lists for every TN component. ClassTN and Faction should eventually both use this, but only faction does right now.
         /// </summary>
         public ComponentDefListTN()
         {
+            TotalComponents = 0;
+
             CrewQuarters = new BindingList<GeneralComponentDefTN>();
             FuelStorage = new BindingList<GeneralComponentDefTN>();
             EngineeringSpaces = new BindingList<GeneralComponentDefTN>();
@@ -134,6 +141,11 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void AddInitialComponents()
         {
+            /// <summary>
+            /// If components are removed here reduce this.
+            /// </summary>
+            TotalComponents = 39;
+
             GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, ComponentTypeTN.Crew);
             GeneralComponentDefTN CrewQS = new GeneralComponentDefTN("Crew Quarters - Small", 0.2f, 0, 2.0m, ComponentTypeTN.Crew);
             GeneralComponentDefTN FuelT = new GeneralComponentDefTN("Fuel Storage", 1.0f, 0, 10.0m, ComponentTypeTN.Fuel);
@@ -254,8 +266,17 @@ namespace Pulsar4X.Entities.Components
             ReactorDef.Add(AlphaReactor);
 
             ShieldDef.Add(AlphaShield);
+        }
 
-
+        /// <summary>
+        /// Verify the Total Component value here as needed.
+        /// </summary>
+        public void SanityCheck()
+        {
+            TotalComponents = CrewQuarters.Count + FuelStorage.Count + EngineeringSpaces.Count + OtherComponents.Count + Engines.Count +
+                              PassiveSensorDef.Count + ActiveSensorDef.Count + CargoHoldDef.Count + ColonyBayDef.Count + CargoHandleSystemDef.Count +
+                              BeamFireControlDef.Count + BeamWeaponDef.Count + ReactorDef.Count + ShieldDef.Count + MLauncherDef.Count + MagazineDef.Count +
+                              MissileFireControlDef.Count;
 
         }
     }
