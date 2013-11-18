@@ -184,6 +184,8 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.TenRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
             m_oOptionsPanel.HundredRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
 
+            m_oOptionsPanel.ObsoleteCompButton.Click += new EventHandler(ObsoleteCompButton_Click);
+
             if (CurrentFaction != null)
             {
                 if(CurrentFaction.ShipDesigns.Count != 0)
@@ -193,9 +195,11 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.ComponentDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
             m_oOptionsPanel.ComponentDataGrid.RowHeadersVisible = false;
             m_oOptionsPanel.ComponentDataGrid.AutoGenerateColumns = false;
+            m_oOptionsPanel.ComponentDataGrid.SelectionChanged += new EventHandler(ComponentDataGrid_SelectionChanged);
             SetupComponentDataGrid();
 
             m_oOptionsPanel.RefreshTechButton.Click += new EventHandler(RefreshTechButton_Click);
+
 
             UpdateDisplay();
 
@@ -213,9 +217,204 @@ namespace Pulsar4X.UI.Handlers
             BuildComponentDataGrid();
         }
 
+        /// <summary>
+        /// Refreshes the tech list in a slightly more optimal way than a total rebuild
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void RefreshTechButton_Click(object sender, EventArgs e)
         {
             BuildComponentDataGrid();
+        }
+
+        /// <summary>
+        /// Sets the currently selected component to obsolete.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ObsoleteCompButton_Click(object sender, EventArgs e)
+        {
+            ComponentDefListTN List = _CurrnetFaction.ComponentList;
+
+            if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)
+            {
+                if (m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value != null)
+                {
+
+                    int CType;
+                    int CIndex = (int)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value;
+
+                    Int32.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CType].Value, out CType);
+
+                    if ((string)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.Obsolete].Value == "False")
+                    {
+                        m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.Obsolete].Value = "True";
+
+                        #region CType True Switch (Absorption listed but not implemented)
+                        switch ((ComponentTypeTN)CType)
+                        {
+                            case ComponentTypeTN.Crew:
+                                List.CrewQuarters[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Fuel:
+                                List.FuelStorage[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Engineering:
+                                List.EngineeringSpaces[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Bridge:
+                            case ComponentTypeTN.MaintenanceBay:
+                            case ComponentTypeTN.FlagBridge:
+                            case ComponentTypeTN.DamageControl:
+                            case ComponentTypeTN.OrbitalHabitat:
+                            case ComponentTypeTN.RecFacility:
+                                List.OtherComponents[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Engine: 
+                                List.Engines[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.PassiveSensor: 
+                                List.PassiveSensorDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.ActiveSensor: 
+                                List.ActiveSensorDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.CargoHold: 
+                                List.CargoHoldDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.CargoHandlingSystem: 
+                                List.CargoHandleSystemDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.CryoStorage: 
+                                List.ColonyBayDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.BeamFireControl:
+                                List.BeamFireControlDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Rail: 
+                            case ComponentTypeTN.Gauss:
+                            case ComponentTypeTN.Plasma:
+                            case ComponentTypeTN.Laser:
+                            case ComponentTypeTN.Meson:
+                            case ComponentTypeTN.Microwave:
+                            case ComponentTypeTN.Particle:
+                            case ComponentTypeTN.AdvRail:
+                            case ComponentTypeTN.AdvLaser:
+                            case ComponentTypeTN.AdvPlasma:
+                            case ComponentTypeTN.AdvParticle:
+                                List.BeamWeaponDef[CIndex].isObsolete = true;
+                            break;
+                            case ComponentTypeTN.Reactor: 
+                                List.ReactorDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Shield: 
+                                List.ShieldDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.AbsorptionShield:
+                                break;
+                            case ComponentTypeTN.MissileLauncher: 
+                                List.MLauncherDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.Magazine: 
+                                List.MagazineDef[CIndex].isObsolete = true;
+                                break;
+                            case ComponentTypeTN.MissileFireControl: 
+                                List.MissileFireControlDef[CIndex].isObsolete = true;
+                                break;
+                        }
+#endregion
+
+                    }
+                    else
+                    {
+                        m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.Obsolete].Value = "False";
+
+                        #region CType false switch (Absorption listed here, but not implemented)
+                        switch ((ComponentTypeTN)CType)
+                        {
+                            case ComponentTypeTN.Crew:
+                                List.CrewQuarters[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Fuel:
+                                List.FuelStorage[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Engineering:
+                                List.EngineeringSpaces[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Bridge:
+                            case ComponentTypeTN.MaintenanceBay:
+                            case ComponentTypeTN.FlagBridge:
+                            case ComponentTypeTN.DamageControl:
+                            case ComponentTypeTN.OrbitalHabitat:
+                            case ComponentTypeTN.RecFacility:
+                                List.OtherComponents[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Engine:
+                                List.Engines[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.PassiveSensor:
+                                List.PassiveSensorDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.ActiveSensor:
+                                List.ActiveSensorDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.CargoHold:
+                                List.CargoHoldDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.CargoHandlingSystem:
+                                List.CargoHandleSystemDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.CryoStorage:
+                                List.ColonyBayDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.BeamFireControl:
+                                List.BeamFireControlDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Rail:
+                            case ComponentTypeTN.Gauss:
+                            case ComponentTypeTN.Plasma:
+                            case ComponentTypeTN.Laser:
+                            case ComponentTypeTN.Meson:
+                            case ComponentTypeTN.Microwave:
+                            case ComponentTypeTN.Particle:
+                            case ComponentTypeTN.AdvRail:
+                            case ComponentTypeTN.AdvLaser:
+                            case ComponentTypeTN.AdvPlasma:
+                            case ComponentTypeTN.AdvParticle:
+                                List.BeamWeaponDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Reactor:
+                                List.ReactorDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Shield:
+                                List.ShieldDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.AbsorptionShield:
+                                break;
+                            case ComponentTypeTN.MissileLauncher:
+                                List.MLauncherDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Magazine:
+                                List.MagazineDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.MissileFireControl:
+                                List.MissileFireControlDef[CIndex].isObsolete = false;
+                                break;
+                        }
+                        #endregion
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Handles current selection changed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComponentDataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+
         }
 
         private  void ClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -278,6 +477,8 @@ namespace Pulsar4X.UI.Handlers
             else if (m_oOptionsPanel.HundredRadioButton.Checked == true)
                 ComponentAmt = 100;
         }
+
+
         #endregion
 
 
