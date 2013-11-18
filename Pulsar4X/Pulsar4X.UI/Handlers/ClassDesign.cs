@@ -94,6 +94,7 @@ namespace Pulsar4X.UI.Handlers
             Materials,
             CType,
             CIndex,
+            Obsolete,
             TypeCount
         }
 
@@ -626,6 +627,7 @@ namespace Pulsar4X.UI.Handlers
 
                 AddColumn("CType", newPadding);
                 AddColumn("CIndex", newPadding);
+                AddColumn("Obsolete", newPadding);
 
                 m_oOptionsPanel.ComponentDataGrid.Columns[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
@@ -634,9 +636,12 @@ namespace Pulsar4X.UI.Handlers
                     Column.SortMode = DataGridViewColumnSortMode.NotSortable;
                 }
 
-                //m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 1].Visible = false;
-                //m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 2].Visible = false;
-
+                /*
+                 * These are needed for debug for right now.
+                m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 1].Visible = false;
+                m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 2].Visible = false;
+                m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 3].Visible = false;
+                */
 
             }
             catch
@@ -722,6 +727,7 @@ namespace Pulsar4X.UI.Handlers
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CrewQuarters[loop].isObsolete.ToString();
 
                             row++;
                             TotalComponents = TotalComponents + 1;
@@ -749,6 +755,7 @@ namespace Pulsar4X.UI.Handlers
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.FuelStorage[loop].isObsolete.ToString();
 
                             row++;
                             TotalComponents = TotalComponents + 1;
@@ -776,6 +783,7 @@ namespace Pulsar4X.UI.Handlers
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.EngineeringSpaces[loop].isObsolete.ToString();
 
                             row++;
                             TotalComponents = TotalComponents + 1;
@@ -826,6 +834,7 @@ namespace Pulsar4X.UI.Handlers
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.OtherComponents[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.OtherComponents[loop].isObsolete.ToString();
 
                             row++;
                             TotalComponents = TotalComponents + 1;
@@ -876,6 +885,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.Engines[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -927,6 +937,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.BeamFireControlDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -972,6 +983,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.MissileFireControlDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1047,6 +1059,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.BeamWeaponDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1100,6 +1113,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MLauncherDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.MLauncherDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1149,6 +1163,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MagazineDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.MagazineDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1222,6 +1237,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ReactorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ReactorDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1288,6 +1304,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ActiveSensorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ActiveSensorDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1337,6 +1354,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.PassiveSensorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.PassiveSensorDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1344,7 +1362,7 @@ namespace Pulsar4X.UI.Handlers
                         }
                     #endregion
 
-                    #region Shields / Electronic Warfare (Cloak not implemented,ecm/eccm not implemented)
+                    #region Shields / Electronic Warfare (Cloak not implemented,ecm/eccm not implemented, absorption shield not implemented)
                         using (DataGridViewRow NewRow = new DataGridViewRow())
                         {
                             /// <summary>
@@ -1386,6 +1404,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ShieldDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ShieldDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1435,6 +1454,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHandleSystemDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHandleSystemDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1462,6 +1482,7 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHoldDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHoldDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -1489,11 +1510,17 @@ namespace Pulsar4X.UI.Handlers
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ColonyBayDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ColonyBayDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
                             }
                         }
+
+                    /// <summary>
+                    /// Now for TypeCount
+                    /// </summary>
+                    CompLocation.Add(row);
                     #endregion
 
                 }
@@ -1506,380 +1533,1117 @@ namespace Pulsar4X.UI.Handlers
             {
                 //rowCount = 1;
                 //m_oOptionsPanel.ComponentDataGrid.Rows.Insert(int rowIndex, int rowCount);
-
-                #region Basic Component Addition
-                /// <summary>
-                /// A basic Component was added.
-                /// </summary>
-                if (CompLocation[(int)ComponentGroup.Engines] != (List.CrewQuarters.Count + List.FuelStorage.Count + List.EngineeringSpaces.Count + List.OtherComponents.Count + 1))
+                try
                 {
-                    int CQCount = 0, FSCount = 0, ESCount = 0, OCCount = 0;
-                    int rowLine = 1;
 
+                    #region Basic Component Addition
                     /// <summary>
-                    /// Count the crew quarters rows:
+                    /// A basic Component was added.
                     /// </summary>
-                    while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "0")
+                    if (CompLocation[(int)ComponentGroup.Engines] != (List.CrewQuarters.Count + List.FuelStorage.Count + List.EngineeringSpaces.Count + List.OtherComponents.Count + 1))
                     {
-                        rowLine++;
-                    }
+                        int CQCount = 0, FSCount = 0, ESCount = 0, OCCount = 0;
+                        int rowLine = 1;
 
-                    CQCount = rowLine - 1;
-
-                    int AddedRows = List.CrewQuarters.Count - CQCount;
-
-                    /// <summary>
-                    /// Increment all the component locations past the current one(Engine) by added rows count.
-                    /// </summary>
-                    for (int loop = (int)ComponentGroup.Engines; loop < (int)ComponentGroup.TypeCount; loop++)
-                    {
-                        CompLocation[loop] = CompLocation[loop] + AddedRows;
-                    }
-
-                    /// <summary>
-                    /// insert and fill in the rows where appropriate.
-                    /// </summary>
-                    for (int loop = CQCount; loop <= (List.CrewQuarters.Count - 1); loop++)
-                    {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        /// <summary>
+                        /// Count the crew quarters rows:
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "0")
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CrewQuarters[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Life Support";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CrewQuarters[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CrewQuarters[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-
-                            TotalComponents = TotalComponents + 1;
+                            rowLine++;
                         }
-                        rowLine++;
-                    }
 
-                    /// <summary>
-                    /// Fuel Storage Section.
-                    /// </summary>
-                    int CQEnd = rowLine;
+                        CQCount = rowLine - 1;
 
-                    while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "1")
-                    {
-                        rowLine++;
-                    }
+                        int AddedRows = List.CrewQuarters.Count - CQCount;
 
-                    FSCount = rowLine - CQEnd;
-
-                    AddedRows = List.FuelStorage.Count - FSCount;
-
-                    /// <summary>
-                    /// Increment all the component locations past the current one(Engine) by added rows count.
-                    /// </summary>
-                    for (int loop = (int)ComponentGroup.Engines; loop < (int)ComponentGroup.TypeCount; loop++)
-                    {
-                        CompLocation[loop] = CompLocation[loop] + AddedRows;
-                    }
-
-                    /// <summary>
-                    /// insert and fill in the rows where appropriate.
-                    /// </summary>
-                    for (int loop = FSCount; loop <= (List.FuelStorage.Count - 1); loop++)
-                    {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Engines; loop <= (int)ComponentGroup.TypeCount; loop++)
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.FuelStorage[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Litres of Fuel";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = (List.FuelStorage[loop].size * 50000.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.FuelStorage[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.FuelStorage[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.FuelStorage[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-
-                            TotalComponents = TotalComponents + 1;
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
                         }
-                        rowLine++;
-                    }
 
-                    /// <summary>
-                    /// Engineering spaces Section
-                    /// </summary>
-                    int FSEnd = rowLine;
-
-                    while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "2")
-                    {
-                        rowLine++;
-                    }
-
-                    ESCount = rowLine - FSEnd;
-
-                    AddedRows = List.EngineeringSpaces.Count - ESCount;
-
-                    /// <summary>
-                    /// Increment all the component locations past the current one(Engine) by added rows count.
-                    /// </summary>
-                    for (int loop = (int)ComponentGroup.Engines; loop < (int)ComponentGroup.TypeCount; loop++)
-                    {
-                        CompLocation[loop] = CompLocation[loop] + AddedRows;
-                    }
-
-                    /// <summary>
-                    /// insert and fill in the rows where appropriate.
-                    /// </summary>
-                    for (int loop = ESCount; loop <= (List.EngineeringSpaces.Count - 1); loop++)
-                    {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = CQCount; loop <= (List.CrewQuarters.Count - 1); loop++)
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.EngineeringSpaces[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Failure Rate";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.EngineeringSpaces[loop].size;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.EngineeringSpaces[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.EngineeringSpaces[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.EngineeringSpaces[loop].crew;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CrewQuarters[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Life Support";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CrewQuarters[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CrewQuarters[loop].crew;
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CrewQuarters[loop].isObsolete.ToString();
 
-                            TotalComponents = TotalComponents + 1;
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
                         }
-                        rowLine++;
+
+                        /// <summary>
+                        /// Fuel Storage Section.
+                        /// </summary>
+                        int CQEnd = rowLine;
+
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "1")
+                        {
+                            rowLine++;
+                        }
+
+                        FSCount = rowLine - CQEnd;
+
+                        AddedRows = List.FuelStorage.Count - FSCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Engines; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = FSCount; loop <= (List.FuelStorage.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.FuelStorage[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Litres of Fuel";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = (List.FuelStorage[loop].size * 50000.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.FuelStorage[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.FuelStorage[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.FuelStorage[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.FuelStorage[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+                        /// <summary>
+                        /// Engineering spaces Section
+                        /// </summary>
+                        int FSEnd = rowLine;
+
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "2")
+                        {
+                            rowLine++;
+                        }
+
+                        ESCount = rowLine - FSEnd;
+
+                        AddedRows = List.EngineeringSpaces.Count - ESCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Engines; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = ESCount; loop <= (List.EngineeringSpaces.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.EngineeringSpaces[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Failure Rate";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.EngineeringSpaces[loop].size;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.EngineeringSpaces[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.EngineeringSpaces[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.EngineeringSpaces[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.EngineeringSpaces[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+                        /// <summary>
+                        /// Other Component Section.
+                        /// </summary>
+                        int ESEnd = rowLine;
+
+                        int out1, out2;
+
+                        int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
+                        int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
+
+                        while (out1 >= 3 && out2 <= 8)
+                        {
+                            rowLine++;
+
+                            int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
+                            int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
+                        }
+
+                        OCCount = rowLine - ESEnd;
+
+                        AddedRows = List.OtherComponents.Count - OCCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Engines; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = OCCount; loop <= (List.OtherComponents.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.OtherComponents[loop].Name;
+                                switch (List.OtherComponents[loop].componentType)
+                                {
+                                    case ComponentTypeTN.Bridge:
+                                        Entry = "CommandControl";
+                                        Entry2 = "1";
+                                        break;
+                                    case ComponentTypeTN.MaintenanceBay:
+                                        Entry = "MaintStorage";
+                                        Entry2 = "1000";
+                                        break;
+                                    case ComponentTypeTN.OrbitalHabitat:
+                                        Entry = "Worker Capacity";
+                                        Entry2 = "50000";
+                                        break;
+                                    case ComponentTypeTN.RecFacility:
+                                        Entry = "Crew Recreation";
+                                        Entry2 = "0";
+                                        break;
+                                    default:
+                                        Entry = "UNK Component";
+                                        Entry2 = "*********UNK*********";
+                                        break;
+                                }
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.OtherComponents[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.OtherComponents[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.OtherComponents[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.OtherComponents[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.OtherComponents[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
                     }
+                    #endregion
 
-                    int out1,out2;
-
-                    int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
-                    int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
-
-                    while ( out1 >= 3 && out2 <= 8 )
+                    #region Engine Addition
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.FireControl] != (List.Engines.Count + CompLocation[(int)ComponentGroup.Engines] + 1))
                     {
-                        rowLine++;
+                        int rowLine = CompLocation[(int)ComponentGroup.Engines] + 1;
+                        int EngineCount = 0;
 
-                        int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value,out out1);
-                        int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value,out out2);
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 10 or "Engine"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "10")
+                        {
+                            rowLine++;
+                        }
+                        EngineCount = (rowLine - CompLocation[(int)ComponentGroup.Engines] - 1);
+
+                        int AddedRows = List.Engines.Count - EngineCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.FireControl; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = EngineCount; loop <= (List.Engines.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.Engines[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Engine Power";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.Engines[loop].enginePower.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.Engines[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.Engines[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.Engines[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.Engines[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
                     }
+                    #endregion
 
-                    OCCount = rowLine - ESCount;
+                    #region Fire Control Addition
+                    if (CompLocation[(int)ComponentGroup.Beam] != (List.BeamFireControlDef.Count + List.MissileFireControlDef.Count + CompLocation[(int)ComponentGroup.FireControl] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.FireControl] + 1;
+                        int BFCCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 16 or "BFC"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "16")
+                        {
+                            rowLine++;
+                        }
+                        BFCCount = (rowLine - CompLocation[(int)ComponentGroup.FireControl] - 1);
+
+                        int AddedRows = List.BeamFireControlDef.Count - BFCCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(FireControl) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Beam; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = BFCCount; loop <= (List.BeamFireControlDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.BeamFireControlDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "50% Acc. Distance";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.BeamFireControlDef[loop].range.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.BeamFireControlDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamFireControlDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamFireControlDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.BeamFireControlDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+
+                        /// <summary>
+                        /// Missile fire control Section.
+                        /// </summary>
+                        int BFCEnd = rowLine;
+                        int MFCCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 33 or "MFC"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "33")
+                        {
+                            rowLine++;
+                        }
+                        MFCCount = (rowLine - BFCEnd);
+
+                        AddedRows = List.MissileFireControlDef.Count - MFCCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(FireControl) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Beam; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = MFCCount; loop <= (List.MissileFireControlDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MissileFireControlDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Range km";
+
+
+                                if (List.MissileFireControlDef[loop].maxRange >= 100000)
+                                {
+                                    float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100000.0f;
+                                    Entry = String.Format("{0:N1}B", RNG);
+                                }
+                                else if (List.MissileFireControlDef[loop].maxRange >= 100)
+                                {
+                                    float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100.0f;
+                                    Entry = String.Format("{0:N1}M", RNG);
+                                }
+                                else
+                                {
+                                    float RNG = (float)List.MissileFireControlDef[loop].maxRange;
+                                    Entry = String.Format("{0:N1}K", RNG);
+                                }
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MissileFireControlDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MissileFireControlDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MissileFireControlDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.MissileFireControlDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Energy Weapon Addition / CIWS,Turrets not implemented
+                    /// <summary>
+                    /// A Beam weapon was added.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Missiles] != (List.BeamWeaponDef.Count + CompLocation[(int)ComponentGroup.Beam] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Beam] + 1;
+                        int BeamCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component types corresponding to beam weapons.
+                        /// </summary>
+                        int out1, out2;
+
+                        int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
+                        int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
+
+                        while (out1 >= 17 && out2 <= 27)
+                        {
+                            rowLine++;
+
+                            int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
+                            int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
+                        }
+
+                        BeamCount = (rowLine - CompLocation[(int)ComponentGroup.Beam] - 1);
+
+                        int AddedRows = List.BeamWeaponDef.Count - BeamCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Beam) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Missiles; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = BeamCount; loop <= (List.BeamWeaponDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                switch (List.BeamWeaponDef[loop].componentType)
+                                {
+                                    case ComponentTypeTN.Laser:
+                                    case ComponentTypeTN.AdvLaser:
+                                    case ComponentTypeTN.Plasma:
+                                    case ComponentTypeTN.AdvPlasma:
+                                    case ComponentTypeTN.Rail:
+                                    case ComponentTypeTN.AdvRail:
+                                    case ComponentTypeTN.Particle:
+                                    case ComponentTypeTN.AdvParticle:
+                                        Entry = "Damage";
+                                        Entry2 = List.BeamWeaponDef[loop].damage[0].ToString();
+                                        break;
+
+                                    case ComponentTypeTN.Meson:
+                                    case ComponentTypeTN.Microwave:
+                                        Entry = "Range";
+                                        Entry2 = (List.BeamWeaponDef[loop].range / 10000.0f).ToString();
+                                        break;
+
+                                    case ComponentTypeTN.Gauss:
+                                        Entry = "Rate of Fire";
+                                        Entry2 = List.BeamWeaponDef[loop].shotCount.ToString();
+                                        break;
+                                }
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.BeamWeaponDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.BeamWeaponDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamWeaponDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamWeaponDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.BeamWeaponDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Missile/Torpedo Launchers(Plasma torps not implemented)
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Magazines] != (List.MLauncherDef.Count + CompLocation[(int)ComponentGroup.Missiles] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Missiles] + 1;
+                        int MLauncherCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 31 or "Missile Launcher"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "31")
+                        {
+                            rowLine++;
+                        }
+                        MLauncherCount = (rowLine - CompLocation[(int)ComponentGroup.Missiles] - 1);
+
+                        int AddedRows = List.MLauncherDef.Count - MLauncherCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Magazines; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = MLauncherCount; loop <= (List.MLauncherDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MLauncherDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Max Missile Size";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.MLauncherDef[loop].launchMaxSize.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MLauncherDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MLauncherDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MLauncherDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MLauncherDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.MLauncherDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Magazines
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Ground] != (List.MLauncherDef.Count + CompLocation[(int)ComponentGroup.Magazines] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Missiles] + 1;
+                        int MagazineCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 32 or "Magazines"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "32")
+                        {
+                            rowLine++;
+                        }
+                        MagazineCount = (rowLine - CompLocation[(int)ComponentGroup.Magazines] - 1);
+
+                        int AddedRows = List.MagazineDef.Count - MagazineCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Ground; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = MagazineCount; loop <= (List.MagazineDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MagazineDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Ordnance Storage";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.MagazineDef[loop].capacity.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MagazineDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MagazineDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MagazineDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MagazineDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.MagazineDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Planetary Combat (Troop bays et all not yet implemented)
+                    #endregion
+
+                    #region Reactor
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Actives] != (List.ReactorDef.Count + CompLocation[(int)ComponentGroup.Reactors] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Reactors] + 1;
+                        int ReactorCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 28 or "Reactor"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "28")
+                        {
+                            rowLine++;
+                        }
+                        ReactorCount = (rowLine - CompLocation[(int)ComponentGroup.Reactors] - 1);
+
+                        int AddedRows = List.ReactorDef.Count - ReactorCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Actives; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = ReactorCount; loop <= (List.ReactorDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ReactorDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Power Produced";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.ReactorDef[loop].powerGen.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ReactorDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ReactorDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ReactorDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ReactorDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ReactorDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Actives
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Passives] != (List.ActiveSensorDef.Count + CompLocation[(int)ComponentGroup.Actives] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Actives] + 1;
+                        int ActiveCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 12 or "Active"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "12")
+                        {
+                            rowLine++;
+                        }
+                        ActiveCount = (rowLine - CompLocation[(int)ComponentGroup.Actives] - 1);
+
+                        int AddedRows = List.ActiveSensorDef.Count - ActiveCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Passives; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = ActiveCount; loop <= (List.ActiveSensorDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ActiveSensorDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Range km";
+
+                                if (List.ActiveSensorDef[loop].maxRange >= 100000)
+                                {
+                                    float RNG = (float)(List.ActiveSensorDef[loop].maxRange) / 100000.0f;
+                                    Entry = String.Format("{0:N1}B", RNG);
+                                }
+                                else if (List.ActiveSensorDef[loop].maxRange >= 100)
+                                {
+                                    float RNG = (float)(List.ActiveSensorDef[loop].maxRange) / 100.0f;
+                                    Entry = String.Format("{0:N1}M", RNG);
+                                }
+                                else
+                                {
+                                    float RNG = (float)List.ActiveSensorDef[loop].maxRange;
+                                    Entry = String.Format("{0:N1}K", RNG);
+                                }
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ActiveSensorDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ActiveSensorDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ActiveSensorDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ActiveSensorDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ActiveSensorDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Passives
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Shields] != (List.PassiveSensorDef.Count + CompLocation[(int)ComponentGroup.Passives] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Passives] + 1;
+                        int PassiveCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 11 or "Passive"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "11")
+                        {
+                            rowLine++;
+                        }
+                        PassiveCount = (rowLine - CompLocation[(int)ComponentGroup.Passives] - 1);
+
+                        int AddedRows = List.PassiveSensorDef.Count - PassiveCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Shields; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = PassiveCount; loop <= (List.PassiveSensorDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.PassiveSensorDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Sensor Strength";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.PassiveSensorDef[loop].rating.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.PassiveSensorDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.PassiveSensorDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.PassiveSensorDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.PassiveSensorDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.PassiveSensorDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Shields (ECM,ECCM,Cloaks,Absorption shields not yet implemented)
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.Industry] != (List.PassiveSensorDef.Count + CompLocation[(int)ComponentGroup.Shields] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Shields] + 1;
+                        int ShieldCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 29 or "Shield"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "29")
+                        {
+                            rowLine++;
+                        }
+                        ShieldCount = (rowLine - CompLocation[(int)ComponentGroup.Shields] - 1);
+
+                        int AddedRows = List.ShieldDef.Count - ShieldCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Industry; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = ShieldCount; loop <= (List.ShieldDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ShieldDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Shield Strength";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.ShieldDef[loop].shieldPool.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ShieldDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ShieldDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ShieldDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ShieldDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ShieldDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
+                    #region Transportation and Industry (Hangar, Maint Module, Terraformer, Sorium Harvester, Tractor, Salvage, Luxury, construction module not yet implemented)
+                    /// <summary>
+                    /// An engine was added to the component list.
+                    /// </summary>
+                    if (CompLocation[(int)ComponentGroup.TypeCount] != (List.CargoHandleSystemDef.Count + List.CargoHoldDef.Count + List.ColonyBayDef.Count + CompLocation[(int)ComponentGroup.Industry] + 1))
+                    {
+                        int rowLine = CompLocation[(int)ComponentGroup.Industry] + 1;
+                        int CHSCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 14 or "Cargo Handling System"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "14")
+                        {
+                            rowLine++;
+                        }
+                        CHSCount = (rowLine - CompLocation[(int)ComponentGroup.Industry] - 1);
+
+                        int AddedRows = List.CargoHandleSystemDef.Count - CHSCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.TypeCount; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = CHSCount; loop <= (List.CargoHandleSystemDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CargoHandleSystemDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Cargo Handling Multiplier";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.CargoHandleSystemDef[loop].tractorMultiplier.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CargoHandleSystemDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CargoHandleSystemDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CargoHandleSystemDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHandleSystemDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHandleSystemDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+                        /// <summary>
+                        /// Cargo Hold Section
+                        /// </summary>
+                        int CHSEnd = rowLine;
+                        int CHCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 13 or "Cargo Hold"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "13")
+                        {
+                            rowLine++;
+                        }
+
+                        CHCount = rowLine - CHSEnd;
+
+                        AddedRows = List.CargoHoldDef.Count - CHCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.TypeCount; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = CHCount; loop <= (List.CargoHoldDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CargoHoldDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Cargo Capacity";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.CargoHoldDef[loop].cargoCapacity.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CargoHoldDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CargoHoldDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CargoHoldDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHoldDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHoldDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+                        /// <summary>
+                        ///Colony Bay Section
+                        /// </summary>
+                        int CHEnd = rowLine;
+                        int CBCount = 0;
+
+                        /// <summary>
+                        /// Count the rows that are already filled with component type 15 or "Cryobay"
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "15")
+                        {
+                            rowLine++;
+                        }
+
+                        CBCount = rowLine - CHEnd;
+
+                        AddedRows = List.ColonyBayDef.Count - CBCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.TypeCount; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = CBCount; loop <= (List.ColonyBayDef.Count - 1); loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ColonyBayDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Colonist Capacity";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.ColonyBayDef[loop].cryoBerths.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ColonyBayDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ColonyBayDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ColonyBayDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ColonyBayDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ColonyBayDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+                    }
+                    #endregion
+
                 }
-                #endregion
-
-                #region Engine Addition
-                /// <summary>
-                /// An engine was added to the component list.
-                /// </summary>
-                if (CompLocation[(int)ComponentGroup.FireControl] != (List.Engines.Count + CompLocation[(int)ComponentGroup.Engines] + 1 ))
+                catch
                 {
-                    int rowLine = CompLocation[(int)ComponentGroup.Engines] + 1;
-                    int EngineCount = 0;
-
-                    /// <summary>
-                    /// Count the rows that are already filled with component type 10 or "Engine"
-                    /// </summary>
-                    while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "10")
-                    {
-                        rowLine++;
-                    }
-                    EngineCount = (rowLine - CompLocation[(int)ComponentGroup.Engines] - 1);
-
-                    int AddedRows = List.Engines.Count - EngineCount;
-
-                    /// <summary>
-                    /// Increment all the component locations past the current one(Engine) by added rows count.
-                    /// </summary>
-                    for (int loop = (int)ComponentGroup.FireControl; loop < (int)ComponentGroup.TypeCount; loop++)
-                    {
-                        CompLocation[loop] = CompLocation[loop] + AddedRows;
-                    }
-
-                    /// <summary>
-                    /// insert and fill in the rows where appropriate.
-                    /// </summary>
-                    for (int loop = EngineCount; loop <= (List.Engines.Count-1); loop++)
-                    {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine,NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.Engines[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Engine Power";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.Engines[loop].enginePower.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.Engines[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.Engines[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.Engines[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-
-                            TotalComponents = TotalComponents + 1;
-                        }
-                        rowLine++;
-                    }
-
+                    logger.Error("Something went wrong with updating rows for class design componentGrid screen...");
                 }
-                #endregion
-
-                #region Fire Control Addition
-                if (CompLocation[(int)ComponentGroup.Beam] != (List.BeamFireControlDef.Count + List.MissileFireControlDef.Count + CompLocation[(int)ComponentGroup.FireControl] + 1))
-                {
-                    int rowLine = CompLocation[(int)ComponentGroup.FireControl] + 1;
-                    int BFCCount = 0;
-
-                    /// <summary>
-                    /// Count the rows that are already filled with component type 16 or "BFC"
-                    /// </summary>
-                    while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "16")
-                    {
-                        rowLine++;
-                    }
-                    BFCCount = (rowLine - CompLocation[(int)ComponentGroup.FireControl] - 1);
-
-                    int AddedRows = List.BeamFireControlDef.Count - BFCCount;
-
-                    /// <summary>
-                    /// Increment all the component locations past the current one(FireControl) by added rows count.
-                    /// </summary>
-                    for (int loop = (int)ComponentGroup.Beam; loop < (int)ComponentGroup.TypeCount; loop++)
-                    {
-                        CompLocation[loop] = CompLocation[loop] + AddedRows;
-                    }
-
-                    /// <summary>
-                    /// insert and fill in the rows where appropriate.
-                    /// </summary>
-                    for (int loop = BFCCount; loop <= (List.BeamFireControlDef.Count - 1); loop++)
-                    {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.BeamFireControlDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "50% Acc. Distance";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.BeamFireControlDef[loop].range.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.BeamFireControlDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamFireControlDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamFireControlDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-
-                            TotalComponents = TotalComponents + 1;
-                        }
-                        rowLine++;
-                    }
-
-
-
-                    /// <summary>
-                    /// Missile fire control Section.
-                    /// </summary>
-                    int BFCEnd = rowLine;
-                    int MFCCount = 0;
-
-                    /// <summary>
-                    /// Count the rows that are already filled with component type 33 or "MFC"
-                    /// </summary>
-                    while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "33")
-                    {
-                        rowLine++;
-                    }
-                    MFCCount = (rowLine - BFCEnd);
-
-                    AddedRows = List.MissileFireControlDef.Count - MFCCount;
-
-                    /// <summary>
-                    /// Increment all the component locations past the current one(FireControl) by added rows count.
-                    /// </summary>
-                    for (int loop = (int)ComponentGroup.Beam; loop < (int)ComponentGroup.TypeCount; loop++)
-                    {
-                        CompLocation[loop] = CompLocation[loop] + AddedRows;
-                    }
-
-                    /// <summary>
-                    /// insert and fill in the rows where appropriate.
-                    /// </summary>
-                    for (int loop = MFCCount; loop <= (List.MissileFireControlDef.Count - 1); loop++)
-                    {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MissileFireControlDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Range km";
-
-
-                            if (List.MissileFireControlDef[loop].maxRange >= 100000)
-                            {
-                                float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100000.0f;
-                                Entry = String.Format("{0:N1}B", RNG);
-                            }
-                            else if (List.MissileFireControlDef[loop].maxRange >= 100)
-                            {
-                                float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100.0f;
-                                Entry = String.Format("{0:N1}M", RNG);
-                            }
-                            else
-                            {
-                                float RNG = (float)List.MissileFireControlDef[loop].maxRange;
-                                Entry = String.Format("{0:N1}K", RNG);
-                            }
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MissileFireControlDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MissileFireControlDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MissileFireControlDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-
-                            TotalComponents = TotalComponents + 1;
-                        }
-                        rowLine++;
-                    }
-
-                }
-                #endregion
             }
         }
         #endregion
