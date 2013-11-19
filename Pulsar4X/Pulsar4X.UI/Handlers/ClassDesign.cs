@@ -480,7 +480,11 @@ namespace Pulsar4X.UI.Handlers
             int CT = -1;
             Guid CID;
 
-            if (m_oOptionsPanel.GroupComponentsCheckBox.Checked == false && m_oOptionsPanel.ComponentsListBox.SelectedIndex != -1)
+
+            /// <summary>
+            /// Armor takes slot 0, and Null selection is -1, so checking for selectedIndex > 0 covers both conditions.
+            /// </summary>
+            if (m_oOptionsPanel.GroupComponentsCheckBox.Checked == false && m_oOptionsPanel.ComponentsListBox.SelectedIndex > 0)
             {
                 SelIndex = m_oOptionsPanel.ComponentsListBox.SelectedIndex - 1;
 
