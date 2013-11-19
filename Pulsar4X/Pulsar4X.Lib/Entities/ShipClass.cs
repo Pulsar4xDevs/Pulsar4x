@@ -136,6 +136,12 @@ namespace Pulsar4X.Entities
         /// </summary>
         [Browsable(false)]
         public bool IsObsolete { get; set; }
+        
+        /// <summary>
+        /// Is this design locked to further changes?
+        /// </summary>
+        [Browsable(false)]
+        public bool IsLocked { get; set; }
 
         /// <summary>
         /// How many military grade components are part of this ship?
@@ -763,6 +769,7 @@ namespace Pulsar4X.Entities
             IsTanker = false;
             IsSupply = false;
             IsCollier = false;
+            IsLocked = false;
             MilitaryComponentCount = 0;
             PlanetaryProtectionValue = 0;
 
@@ -864,8 +871,8 @@ namespace Pulsar4X.Entities
             ShipClassOrdnance = new Dictionary<OrdnanceDefTN, int>();
             PreferredOrdnanceSize = 0;
 
-            ShipArmorDef = new ArmorDefTN("Conventional Armor");
-            NewArmor("Conventional Armor", 2, 1);
+            ShipArmorDef = new ArmorDefTN("Conventional");
+            NewArmor("Conventional", 2, 1);
 
             BuildPointCost = ShipArmorDef.cost;
         }
@@ -899,7 +906,8 @@ namespace Pulsar4X.Entities
             {
                 ListOfComponentDefsCount[CIndex] = (short)(ListOfComponentDefsCount[CIndex] + increment);
             }
-            else if (CIndex == -1 && increment >= 1)
+            
+            if (CIndex == -1 && increment >= 1)
             {
                 /// <summary>
                 /// The damage allocation chart values will be recalculated later in this very function. A DAC of -1 is obviously indicative of an error.
@@ -920,13 +928,12 @@ namespace Pulsar4X.Entities
                     if (ListOfComponentDefsCount[CIndex] <= 0)
                     {
                         DamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
-                        ListOfComponentDefsCount.RemoveAt(CIndex);
-                        ListOfComponentDefs.RemoveAt(CIndex);
-
                         if (Component.isElectronic == true)
                         {
                             ElectronicDamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
                         }
+                        ListOfComponentDefsCount.RemoveAt(CIndex);
+                        ListOfComponentDefs.RemoveAt(CIndex);  
                     }
                 }
                 else
@@ -994,7 +1001,14 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Likewise speed shall change.
             /// </summary>
-            MaxSpeed = (int)((1000.0f / (float)TotalCrossSection) * (float)MaxEnginePower);
+            if (TotalCrossSection != 0)
+            {
+                MaxSpeed = (int)((1000.0f / (float)TotalCrossSection) * (float)MaxEnginePower);
+            }
+            else
+            {
+                MaxSpeed = 0;
+            }
 
             /// <summary>
             /// MSP capacity and later maintenance will change. ***The rest of maintenance is not yet finished***.
@@ -1143,7 +1157,8 @@ namespace Pulsar4X.Entities
             {
                 CrewQuartersCount[CrewIndex] = (ushort)((short)CrewQuartersCount[CrewIndex] + inc);
             }
-            else if (CrewIndex == -1 && inc >= 1)
+            
+            if (CrewIndex == -1 && inc >= 1)
             {
                 CrewQuarters.Add(CrewQ);
                 CrewQuartersCount.Add((ushort)inc);
@@ -1237,7 +1252,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="EBay">Component definition.</param>
         /// <param name="inc">Number of components.</param>
-        public void AddEngineeringSpaces(GeneralComponentDefTN EBay, byte inc)
+        public void AddEngineeringSpaces(GeneralComponentDefTN EBay, short inc)
         {
             /// <summary>
             /// Wrong type of generalComponent def sent to add Engineering Spaces.
@@ -1257,7 +1272,7 @@ namespace Pulsar4X.Entities
             if (EBayIndex == -1 && inc >= 1)
             {
                 EngineeringBays.Add(EBay);
-                EngineeringBaysCount.Add(inc);
+                EngineeringBaysCount.Add((ushort)inc);
             }
             else
             {
@@ -1349,20 +1364,37 @@ namespace Pulsar4X.Entities
             ShipEngineDef = Engine;
             ShipEngineCount = (ushort)((short)ShipEngineCount + inc);
 
-            float EP = Engine.enginePower * ShipEngineCount;
-            float TS = Engine.thermalSignature * ShipEngineCount;
+            if (ShipEngineCount > 0)
+            {
 
-            MaxEnginePower = (int)Math.Round(EP);
-            if (MaxEnginePower == 0)
+                float EP = Engine.enginePower * ShipEngineCount;
+                float TS = Engine.thermalSignature * ShipEngineCount;
+
+                MaxEnginePower = (int)Math.Round(EP);
+                if (MaxEnginePower == 0)
+                    MaxEnginePower = 1;
+
+                MaxThermalSignature = (int)Math.Round(TS);
+                if (MaxThermalSignature == 0)
+                    MaxThermalSignature = 1;
+
+                MaxFuelUsePerHour = MaxFuelUsePerHour + (Engine.fuelUsePerHour * (float)inc);
+
+                UpdateClass(Engine, inc);
+            }
+            else
+            {
+                ShipEngineDef = null;
                 MaxEnginePower = 1;
-
-            MaxThermalSignature = (int)Math.Round(TS);
-            if (MaxThermalSignature == 0)
                 MaxThermalSignature = 1;
 
-            MaxFuelUsePerHour = MaxFuelUsePerHour + (Engine.fuelUsePerHour * (float)inc);
+                /// <summary>
+                /// Nav thrusters don't use fuel?
+                /// </summary>
+                MaxFuelUsePerHour = 0.0f;
 
-            UpdateClass(Engine, inc);
+                UpdateClass(Engine, inc);
+            }
         }
 
         /// <summary>
@@ -1608,7 +1640,8 @@ namespace Pulsar4X.Entities
             {
                 ShipBFCCount[BFCIndex] = (ushort)((short)ShipBFCCount[BFCIndex] + inc);
             }
-            else if (BFCIndex == -1 && inc >= 1)
+            
+            if (BFCIndex == -1 && inc >= 1)
             {
                 ShipBFCDef.Add(BFC);
                 ShipBFCCount.Add((ushort)inc);
@@ -1647,7 +1680,8 @@ namespace Pulsar4X.Entities
             {
                 ShipBeamCount[BeamIndex] = (ushort)((short)ShipBeamCount[BeamIndex] + inc);
             }
-            else if (BeamIndex == -1 && inc >= 1)
+            
+            if (BeamIndex == -1 && inc >= 1)
             {
                 ShipBeamDef.Add(Beam);
                 ShipBeamCount.Add((ushort)inc);
@@ -1687,7 +1721,8 @@ namespace Pulsar4X.Entities
             {
                 ShipReactorCount[ReactorIndex] = (ushort)((short)ShipReactorCount[ReactorIndex] + inc);
             }
-            else if (ReactorIndex == -1 && inc >= 1)
+            
+            if (ReactorIndex == -1 && inc >= 1)
             {
                 ShipReactorDef.Add(Reactor);
                 ShipReactorCount.Add((ushort)inc);
@@ -1728,6 +1763,7 @@ namespace Pulsar4X.Entities
         /// <param name="inc">Amount to add or remove</param>
         public void AddShield(ShieldDefTN Shield, short inc)
         {
+            bool ShieldAllowed = true;
             /// <summary>
             /// Just blow away the previous definition.
             /// </summary>
@@ -1782,10 +1818,14 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// Multiple shield types are not allowed.
                 /// </summary>
+                ShieldAllowed = false;
             }
 
-            MaxEMSignature = MaxEMSignature + (int)(Shield.shieldPool * 30.0f * (float)inc);
-            UpdateClass(Shield, inc);
+            if (ShieldAllowed == true)
+            {
+                MaxEMSignature = MaxEMSignature + (int)(Shield.shieldPool * 30.0f * (float)inc);
+                UpdateClass(Shield, inc);
+            }
         }
 
         /// <summary>
@@ -1800,7 +1840,8 @@ namespace Pulsar4X.Entities
             {
                 ShipMLaunchCount[TubeIndex] = (ushort)((short)ShipMLaunchCount[TubeIndex] + inc);
             }
-            else if (TubeIndex == -1 && inc >= 1)
+            
+            if (TubeIndex == -1 && inc >= 1)
             {
                 ShipMLaunchDef.Add(Tube);
                 ShipMLaunchCount.Add((ushort)inc);
@@ -1840,7 +1881,8 @@ namespace Pulsar4X.Entities
             {
                 ShipMagazineCount[MagIndex] = (ushort)((short)ShipMagazineCount[MagIndex] + inc);
             }
-            else if (MagIndex == -1 && inc >= 1)
+            
+            if (MagIndex == -1 && inc >= 1)
             {
                 ShipMagazineDef.Add(Mag);
                 ShipMagazineCount.Add((ushort)inc);
@@ -1880,7 +1922,8 @@ namespace Pulsar4X.Entities
             {
                 ShipMFCCount[MFCIndex] = (ushort)((short)ShipMFCCount[MFCIndex] + inc);
             }
-            else if (MFCIndex == -1 && inc >= 1)
+            
+            if (MFCIndex == -1 && inc >= 1)
             {
                 ShipMFCDef.Add(MFC);
                 ShipMFCCount.Add((ushort)inc);

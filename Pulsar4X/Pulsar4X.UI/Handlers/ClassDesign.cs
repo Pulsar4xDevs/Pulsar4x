@@ -128,12 +128,22 @@ namespace Pulsar4X.UI.Handlers
             TypeCount
         }
 
+        /// <summary>
+        /// ComponentListBox and ComponentDataGrid will mutually annihilate each other's selections without these control variables.
+        /// SelectedIndexchanged is where they are called.
+        /// </summary>
+        private bool CLBSet { get; set; }
+        private bool CDGSet { get; set; }
+
         public ClassDesign()
         {
 
             ComponentAmt = 1;
 
             TotalComponents = 0;
+
+            CLBSet = false;
+            CDGSet = false;
 
             CompLocation = new BindingList<int>();
 
@@ -196,9 +206,16 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.ComponentDataGrid.RowHeadersVisible = false;
             m_oOptionsPanel.ComponentDataGrid.AutoGenerateColumns = false;
             m_oOptionsPanel.ComponentDataGrid.SelectionChanged += new EventHandler(ComponentDataGrid_SelectionChanged);
+            m_oOptionsPanel.ComponentDataGrid.DoubleClick += new EventHandler(ComponentDataGrid_DoubleClick);
             SetupComponentDataGrid();
 
+            m_oOptionsPanel.ComponentsListBox.SelectedIndexChanged += new EventHandler(ComponentsListBox_SelectedIndexChanged);
+            m_oOptionsPanel.ComponentsListBox.DoubleClick += new EventHandler(ComponentsListBox_DoubleClick);
+
             m_oOptionsPanel.RefreshTechButton.Click += new EventHandler(RefreshTechButton_Click);
+
+            m_oOptionsPanel.AddButton.Click += new EventHandler(AddButton_Click);
+            m_oOptionsPanel.RemoveButton.Click += new EventHandler(RemoveButton_Click);
 
 
             UpdateDisplay();
@@ -408,18 +425,169 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Adds ComponentAmt components to the current design.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddButton_Click(object sender, EventArgs e)
+        {
+            if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)
+            {
+                if (m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value != null)
+                {
+                    int CType;
+                    int CIndex = (int)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value;
+
+                    Int32.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CType].Value, out CType);
+
+                    AddComponent(CType, CIndex, ComponentAmt);
+                    UpdateDisplay();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds componentAmt components to the current design, this time based on double clicking the CDG.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComponentDataGrid_DoubleClick(object sender, EventArgs e)
+        {
+            if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)
+            {
+                if (m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value != null)
+                {
+                    int CType;
+                    int CIndex = (int)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value;
+
+                    Int32.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CType].Value, out CType);
+
+                    AddComponent(CType, CIndex, ComponentAmt);
+                    UpdateDisplay();
+                }
+            }
+        }
+
+        /// <summary>
+        /// handles component list box selection events. will remove components. This can be optimized by storing ShipClass component indices in ComponentDefTN.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComponentsListBox_DoubleClick(object sender, EventArgs e)
+        {
+            ComponentDefListTN List = _CurrnetFaction.ComponentList;
+            int SelIndex=-1;
+            int CT = -1;
+            Guid CID;
+
+            if (m_oOptionsPanel.GroupComponentsCheckBox.Checked == false && m_oOptionsPanel.ComponentsListBox.SelectedIndex != -1)
+            {
+                SelIndex = m_oOptionsPanel.ComponentsListBox.SelectedIndex - 1;
+
+                CT = (int)CurrentShipClass.ListOfComponentDefs[SelIndex].componentType;
+                CID = CurrentShipClass.ListOfComponentDefs[SelIndex].Id;
+            }
+            else
+            {
+                GetListBoxComponent(out CT, out CID);
+                
+            }
+            int CAmt = -1 * ComponentAmt;
+
+            FindAddListBoxComponent(CT, CID, CAmt);
+                
+            UpdateDisplay();
+        }
+
+        /// <summary>
+        /// Removes components specified by either the Datagrid, or the list box.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RemoveButton_Click(object sender, EventArgs e)
+        {
+            int CAmt = -1 * ComponentAmt;
+
+            if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)
+            {
+                if (m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value != null)
+                {
+                    int CType;
+                    int CIndex = (int)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value;
+
+                    Int32.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CType].Value, out CType);
+
+                    AddComponent(CType, CIndex, CAmt);
+                    UpdateDisplay();
+                }
+            }
+            else if (m_oOptionsPanel.ComponentsListBox.SelectedIndex != -1)
+            {
+                int CT;
+                Guid CID;
+                int SelIndex;
+
+                if (m_oOptionsPanel.GroupComponentsCheckBox.Checked == false)
+                {
+                    SelIndex = m_oOptionsPanel.ComponentsListBox.SelectedIndex - 1;
+
+                    CT = (int)CurrentShipClass.ListOfComponentDefs[SelIndex].componentType;
+                    CID = CurrentShipClass.ListOfComponentDefs[SelIndex].Id;
+                }
+                else
+                {
+                    GetListBoxComponent(out CT, out CID);
+
+                }
+
+                FindAddListBoxComponent(CT, CID, CAmt);
+            }
+        }
+
+        /// <summary>
         /// Handles current selection changed.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ComponentDataGrid_SelectionChanged(object sender, EventArgs e)
         {
+            if (CLBSet == true)
+            {
+                CLBSet = false;
+            }
+            else
+            {
+                if (m_oOptionsPanel.ComponentsListBox.SelectedIndex != -1)
+                {
+                    CDGSet = true;
+                    m_oOptionsPanel.ComponentsListBox.ClearSelected();
+                }
+            }
+        }
 
+        /// <summary>
+        /// Handles current list box selection change events.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ComponentsListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (CDGSet == true)
+            {
+                CDGSet = false;
+            }
+            else
+            {
+                if (m_oOptionsPanel.ComponentDataGrid.SelectedCells.Count != 0)
+                {
+                    CLBSet = true;
+                    m_oOptionsPanel.ComponentDataGrid.ClearSelection();
+                }
+            }
         }
 
         private  void ClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
             //if (VM.CurrentShipClass != null)
             //{
             //    m_oClassPropertiesPanel.ClassPropertyGrid.SelectedObject = VM.CurrentShipClass;
@@ -434,8 +602,14 @@ namespace Pulsar4X.UI.Handlers
         private void NewButton_Click(object sender, EventArgs e)
         {
             ShipClassTN oNewShipClass = new ShipClassTN("New Class",VM.CurrentFaction);
+            oNewShipClass.AddCrewQuarters(_CurrnetFaction.ComponentList.CrewQuarters[0], 1);
+            oNewShipClass.AddFuelStorage(_CurrnetFaction.ComponentList.FuelStorage[0], 1);
+            oNewShipClass.AddEngineeringSpaces(_CurrnetFaction.ComponentList.EngineeringSpaces[0], 1);
+            oNewShipClass.AddOtherComponent(_CurrnetFaction.ComponentList.OtherComponents[0], 1);
             VM.ShipDesigns.Add(oNewShipClass);
             m_oOptionsPanel.ClassComboBox.SelectedItem = oNewShipClass;
+
+
         }
 
         /// <summary>
@@ -555,7 +729,23 @@ namespace Pulsar4X.UI.Handlers
                 BuildPassiveDefences();
                 BuildCrewAccomPanel();
 
-                BuildDesignTab();
+                if (CurrentShipClass.IsLocked == true)
+                {
+                    int TabId = m_oOptionsPanel.ClassDesignTabControl.TabPages.IndexOf(m_oOptionsPanel.DesignTabPage);
+                    if (TabId != -1)
+                    {
+                        m_oOptionsPanel.ClassDesignTabControl.TabPages.RemoveAt(TabId);
+                    }
+                }
+                else
+                {
+                    int TabId = m_oOptionsPanel.ClassDesignTabControl.TabPages.IndexOf(m_oOptionsPanel.DesignTabPage);
+                    if (TabId == -1)
+                    {
+                        m_oOptionsPanel.ClassDesignTabControl.TabPages.Insert(1, m_oOptionsPanel.DesignTabPage);
+                    }
+                    BuildDesignTab();
+                }
             }
         }
 
@@ -690,10 +880,10 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0}x {1}", CurrentShipClass.ShipMFCCount[loop], CurrentShipClass.ShipMFCDef[loop].Name);
                         m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                     }
-                }
 
-                Entry = "";
-                m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    Entry = "";
+                    m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                }
 
                 Entry = "Defences:";
                 m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
@@ -717,10 +907,10 @@ namespace Pulsar4X.UI.Handlers
 
                     Entry = String.Format("{0}x {1}", CurrentShipClass.ShipEngineCount, CurrentShipClass.ShipEngineDef.Name);
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
-                }
 
-                Entry = "";
-                m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    Entry = "";
+                    m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                }
 
                 if (CurrentShipClass.ShipCargoDef.Count != 0 || CurrentShipClass.ShipColonyDef.Count != 0 || CurrentShipClass.ShipCHSDef.Count != 0)
                 {
@@ -744,10 +934,10 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0}x {1}", CurrentShipClass.ShipCHSCount[loop], CurrentShipClass.ShipCHSDef[loop].Name);
                         m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                     }
-                }
 
-                Entry = "";
-                m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    Entry = "";
+                    m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                }
 
                 if (CurrentShipClass.ShipASensorDef.Count != 0 || CurrentShipClass.ShipPSensorDef.Count != 0)
                 {
@@ -765,10 +955,10 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0}x {1}", CurrentShipClass.ShipPSensorCount[loop], CurrentShipClass.ShipPSensorDef[loop].Name);
                         m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                     }
-                }
 
-                Entry = "";
-                m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    Entry = "";
+                    m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                }
 
                 Entry = "General:";
                 m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
@@ -806,6 +996,294 @@ namespace Pulsar4X.UI.Handlers
                     Entry = String.Format("{0}x {1}",CurrentShipClass.ListOfComponentDefsCount[loop], CurrentShipClass.ListOfComponentDefs[loop].Name);
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Almost exactly the same as the above design tab builder, but this one gets the component selected from the grouped list.
+        /// </summary>
+        /// <param name="LineIndex">Line we want to find</param>
+        /// <param name="CType">Component type to be "returned"</param>
+        /// <param name="CIndex">Component index to be "returned"</param>
+        private void GetListBoxComponent(out int CType, out Guid CIndex)
+        {
+            CType = -1;
+            CIndex = Guid.Empty;
+            int CurrentLine = 0;
+
+            if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+            {
+                return;
+            }
+
+            if (CurrentShipClass.ShipBFCDef.Count != 0 || CurrentShipClass.ShipBeamDef.Count != 0 || CurrentShipClass.ShipReactorDef.Count != 0 ||
+                    CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0)
+            {
+                CurrentLine++;
+
+                for (int loop = 0; loop < CurrentShipClass.ShipBeamDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipBeamDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipBeamDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipMLaunchDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipMLaunchDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipMLaunchDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipReactorDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipReactorDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipReactorDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipMagazineDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipMagazineDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipMagazineDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipBFCDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipBFCDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipBFCDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipMFCDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipMFCDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipMFCDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+            {
+                return;
+            }
+            CurrentLine++;
+
+            if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+            {
+                return;
+            }
+            CurrentLine++;
+
+            if (CurrentShipClass.ShipShieldDef != null)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    CType = (int)CurrentShipClass.ShipShieldDef.componentType;
+                    CIndex = CurrentShipClass.ShipShieldDef.Id;
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+            {
+                return;
+            }
+            CurrentLine++;
+
+            if (CurrentShipClass.ShipEngineDef != null)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    CType = (int)CurrentShipClass.ShipEngineDef.componentType;
+                    CIndex = CurrentShipClass.ShipEngineDef.Id;
+                    return;
+                }
+                CurrentLine++;
+
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            if (CurrentShipClass.ShipCargoDef.Count != 0 || CurrentShipClass.ShipColonyDef.Count != 0 || CurrentShipClass.ShipCHSDef.Count != 0)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+
+                for (int loop = 0; loop < CurrentShipClass.ShipCargoDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipCargoDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipCargoDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipColonyDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipColonyDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipColonyDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipCHSDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipCHSDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipCHSDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            if (CurrentShipClass.ShipASensorDef.Count != 0 || CurrentShipClass.ShipPSensorDef.Count != 0)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+
+                for (int loop = 0; loop < CurrentShipClass.ShipASensorDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipASensorDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipASensorDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipPSensorDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipPSensorDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipPSensorDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+            {
+                return;
+            }
+            CurrentLine++;
+
+            for (int loop = 0; loop < CurrentShipClass.CrewQuarters.Count; loop++)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    CType = (int)CurrentShipClass.CrewQuarters[loop].componentType;
+                    CIndex = CurrentShipClass.CrewQuarters[loop].Id;
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            for (int loop = 0; loop < CurrentShipClass.FuelTanks.Count; loop++)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    CType = (int)CurrentShipClass.FuelTanks[loop].componentType;
+                    CIndex = CurrentShipClass.FuelTanks[loop].Id;
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            for (int loop = 0; loop < CurrentShipClass.EngineeringBays.Count; loop++)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    CType = (int)CurrentShipClass.EngineeringBays[loop].componentType;
+                    CIndex = CurrentShipClass.EngineeringBays[loop].Id;
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            for (int loop = 0; loop < CurrentShipClass.OtherComponents.Count; loop++)
+            {
+                if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                {
+                    CType = (int)CurrentShipClass.OtherComponents[loop].componentType;
+                    CIndex = CurrentShipClass.OtherComponents[loop].Id;
+                    return;
+                }
+                CurrentLine++;
+            }
+
+            if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+            {
+                return;
             }
         }
 
@@ -2847,6 +3325,604 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
         }
+
+
+        /// <summary>
+        /// Adds or subtracts a component to/from the design.
+        /// </summary>
+        /// <param name="CType">Type of component</param>
+        /// <param name="CIndex">Index in faction component list of component(of type)</param>
+        /// <param name="CompAmt">Number to add/subtract</param>
+        private void AddComponent(int CType, int CIndex, int CompAmt)
+        {
+            ComponentDefListTN List = _CurrnetFaction.ComponentList;
+            #region Add Component Switch(Absorption shield listed but not implemented
+            switch ((ComponentTypeTN)CType)
+            {
+                case ComponentTypeTN.Crew:
+
+                    /// <summary>
+                    /// Check to see if a subtraction is happening.
+                    /// </summary>
+                    if (CompAmt <= -1)
+                    {
+                        /// <summary>
+                        /// Get the Index of the component in question on the ship.
+                        /// </summary>
+                        int Index = CurrentShipClass.CrewQuarters.IndexOf(List.CrewQuarters[CIndex]);
+
+                        ///<summary>
+                        ///if present then proceed
+                        ///</summary>
+                        if (Index != -1)
+                        {
+                            /// <summary>
+                            /// get absolute value of CompAmt and compare it to crew quarters
+                            /// </summary>
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.CrewQuartersCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.CrewQuartersCount[Index] * -1;
+                            }
+
+                            /// <summary>
+                            /// Subtract the appropriate component amount from the ship. This is the only place in the UI where this happens, so hopefully this error check will be sufficient.
+                            /// </summary>
+                            CurrentShipClass.AddCrewQuarters(List.CrewQuarters[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Add the component as normal.
+                        /// </summary>
+                        CurrentShipClass.AddCrewQuarters(List.CrewQuarters[CIndex], (short)CompAmt);
+                    }
+                    break;
+                case ComponentTypeTN.Fuel:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.FuelTanks.IndexOf(List.FuelStorage[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.FuelTanksCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.FuelTanksCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddFuelStorage(List.FuelStorage[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddFuelStorage(List.FuelStorage[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.Engineering:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.EngineeringBays.IndexOf(List.EngineeringSpaces[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.EngineeringBaysCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.EngineeringBaysCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddEngineeringSpaces(List.EngineeringSpaces[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddEngineeringSpaces(List.EngineeringSpaces[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.Bridge:
+                case ComponentTypeTN.MaintenanceBay:
+                case ComponentTypeTN.FlagBridge:
+                case ComponentTypeTN.DamageControl:
+                case ComponentTypeTN.OrbitalHabitat:
+                case ComponentTypeTN.RecFacility:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.OtherComponents.IndexOf(List.OtherComponents[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.OtherComponentsCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.OtherComponentsCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddOtherComponent(List.OtherComponents[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddOtherComponent(List.OtherComponents[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.Engine:
+                    if (CompAmt <= -1)
+                    {
+                        if (CurrentShipClass.ShipEngineDef != null)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipEngineCount)
+                            {
+                                CompAmt = CurrentShipClass.ShipEngineCount * -1;
+                            }
+                            CurrentShipClass.AddEngine(List.Engines[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddEngine(List.Engines[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.PassiveSensor:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipPSensorDef.IndexOf(List.PassiveSensorDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipPSensorCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipPSensorCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddPassiveSensor(List.PassiveSensorDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddPassiveSensor(List.PassiveSensorDef[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.ActiveSensor:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipASensorDef.IndexOf(List.ActiveSensorDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipASensorCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipASensorCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddActiveSensor(List.ActiveSensorDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddActiveSensor(List.ActiveSensorDef[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.CargoHold:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipCargoDef.IndexOf(List.CargoHoldDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipCargoCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipCargoCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddCargoHold(List.CargoHoldDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddCargoHold(List.CargoHoldDef[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.CargoHandlingSystem:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipCHSDef.IndexOf(List.CargoHandleSystemDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipCHSCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipCHSCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddCargoHandlingSystem(List.CargoHandleSystemDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddCargoHandlingSystem(List.CargoHandleSystemDef[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.CryoStorage:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipColonyDef.IndexOf(List.ColonyBayDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipColonyCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipColonyCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddColonyBay(List.ColonyBayDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddColonyBay(List.ColonyBayDef[CIndex], (short)CompAmt); 
+                    break;
+                case ComponentTypeTN.BeamFireControl:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipBFCDef.IndexOf(List.BeamFireControlDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipBFCCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipBFCCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddBeamFireControl(List.BeamFireControlDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddBeamFireControl(List.BeamFireControlDef[CIndex], (short)CompAmt); 
+                    break;
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.Gauss:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvRail:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.AdvParticle:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipBeamDef.IndexOf(List.BeamWeaponDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipBeamCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipBeamCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddBeamWeapon(List.BeamWeaponDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddBeamWeapon(List.BeamWeaponDef[CIndex], (short)CompAmt);
+                    
+                    break;
+                case ComponentTypeTN.Reactor:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipReactorDef.IndexOf(List.ReactorDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipReactorCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipReactorCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddReactor(List.ReactorDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddReactor(List.ReactorDef[CIndex], (short)CompAmt);               
+                    break;
+                case ComponentTypeTN.Shield:
+                    if (CompAmt <= -1)
+                    {
+                        if (CurrentShipClass.ShipShieldDef != null)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipShieldCount)
+                            {
+                                CompAmt = CurrentShipClass.ShipShieldCount * -1;
+                            }
+                            CurrentShipClass.AddShield(List.ShieldDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddShield(List.ShieldDef[CIndex], (short)CompAmt);
+                    break;
+                case ComponentTypeTN.AbsorptionShield:
+                    break;
+                case ComponentTypeTN.MissileLauncher:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipMLaunchDef.IndexOf(List.MLauncherDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipMLaunchCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipMLaunchCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddLauncher(List.MLauncherDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddLauncher(List.MLauncherDef[CIndex], (short)CompAmt);
+                    
+                    break;
+                case ComponentTypeTN.Magazine:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipMagazineDef.IndexOf(List.MagazineDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipMagazineCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipMagazineCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddMagazine(List.MagazineDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddMagazine(List.MagazineDef[CIndex], (short)CompAmt);
+                    
+                    break;
+                case ComponentTypeTN.MissileFireControl:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipMFCDef.IndexOf(List.MissileFireControlDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipMFCCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipMFCCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddMFC(List.MissileFireControlDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddMFC(List.MissileFireControlDef[CIndex], (short)CompAmt);
+                    
+                    break;
+            }
+            #endregion
+            
+        }
+
+        /// <summary>
+        /// Rather than block copy this, it is its own function. The list box has some funky logic for finding out what component is added/subtracted, so here it is.
+        /// </summary>
+        /// <param name="CT">ComponentType, what type of component I am looking for.</param>
+        /// <param name="CID">ComponentID, what global unique Identifier is associated with this component definition.</param>
+        /// <param name="CAmt">ComponentAmount, number of components to add(or more probably subtract)</param>
+        private void FindAddListBoxComponent(int CT,Guid CID, int CAmt)
+        {
+            ComponentDefListTN List = _CurrnetFaction.ComponentList;
+            #region ComponentListBox double click switch(absorption shield listed but not implemented)
+            switch ((ComponentTypeTN)CT)
+            {
+                case ComponentTypeTN.Crew:
+                    for (int loop = 0; loop < List.CrewQuarters.Count; loop++)
+                    {
+                        if (List.CrewQuarters[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Fuel:
+                    for (int loop = 0; loop < List.FuelStorage.Count; loop++)
+                    {
+                        if (List.FuelStorage[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Engineering:
+                    for (int loop = 0; loop < List.EngineeringSpaces.Count; loop++)
+                    {
+                        if (List.EngineeringSpaces[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Bridge:
+                case ComponentTypeTN.MaintenanceBay:
+                case ComponentTypeTN.FlagBridge:
+                case ComponentTypeTN.DamageControl:
+                case ComponentTypeTN.OrbitalHabitat:
+                case ComponentTypeTN.RecFacility:
+                    for (int loop = 0; loop < List.OtherComponents.Count; loop++)
+                    {
+                        if (List.OtherComponents[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Engine:
+                    for (int loop = 0; loop < List.Engines.Count; loop++)
+                    {
+                        if (List.Engines[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.PassiveSensor:
+                    for (int loop = 0; loop < List.PassiveSensorDef.Count; loop++)
+                    {
+                        if (List.PassiveSensorDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.ActiveSensor:
+                    for (int loop = 0; loop < List.ActiveSensorDef.Count; loop++)
+                    {
+                        if (List.ActiveSensorDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.CargoHold:
+                    for (int loop = 0; loop < List.CargoHoldDef.Count; loop++)
+                    {
+                        if (List.CargoHoldDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.CargoHandlingSystem:
+                    for (int loop = 0; loop < List.CargoHandleSystemDef.Count; loop++)
+                    {
+                        if (List.CargoHandleSystemDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.CryoStorage:
+                    for (int loop = 0; loop < List.ColonyBayDef.Count; loop++)
+                    {
+                        if (List.ColonyBayDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.BeamFireControl:
+                    for (int loop = 0; loop < List.BeamFireControlDef.Count; loop++)
+                    {
+                        if (List.BeamFireControlDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.Gauss:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvRail:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.AdvParticle:
+                    for (int loop = 0; loop < List.BeamWeaponDef.Count; loop++)
+                    {
+                        if (List.BeamWeaponDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Reactor:
+                    for (int loop = 0; loop < List.ReactorDef.Count; loop++)
+                    {
+                        if (List.ReactorDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Shield:
+                    for (int loop = 0; loop < List.ShieldDef.Count; loop++)
+                    {
+                        if (List.ShieldDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.AbsorptionShield:
+                    break;
+                case ComponentTypeTN.MissileLauncher:
+                    for (int loop = 0; loop < List.MLauncherDef.Count; loop++)
+                    {
+                        if (List.MLauncherDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Magazine:
+                    for (int loop = 0; loop < List.MagazineDef.Count; loop++)
+                    {
+                        if (List.MagazineDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.MissileFireControl:
+                    for (int loop = 0; loop < List.MissileFireControlDef.Count; loop++)
+                    {
+                        if (List.MissileFireControlDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+            }
+            #endregion
+        }
+
         #endregion
     }
 }

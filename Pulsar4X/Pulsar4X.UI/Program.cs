@@ -84,7 +84,7 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[0].AddReactor(CL.ReactorDef[1], 10);
             oNewFaction.ShipDesigns[0].AddBeamFireControl(CL.BeamFireControlDef[1], 2);
             oNewFaction.ShipDesigns[0].AddShield(CL.ShieldDef[1], 20);
-
+            oNewFaction.ShipDesigns[0].IsLocked = true;
 
             for (int loop = 1; loop < 8; loop++)
             {
@@ -117,7 +117,7 @@ namespace Pulsar4X.UI
             oNewFaction2.ShipDesigns[0].AddReactor(CL.ReactorDef[1], 10);
             oNewFaction2.ShipDesigns[0].AddBeamFireControl(CL.BeamFireControlDef[1], 2);
             oNewFaction2.ShipDesigns[0].AddShield(CL.ShieldDef[1], 20);
-
+            oNewFaction2.ShipDesigns[0].IsLocked = true;
 
             for (int loop = 1; loop < 8; loop++)
             {
