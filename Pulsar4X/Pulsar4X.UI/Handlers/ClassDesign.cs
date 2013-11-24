@@ -217,6 +217,13 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.AddButton.Click += new EventHandler(AddButton_Click);
             m_oOptionsPanel.RemoveButton.Click += new EventHandler(RemoveButton_Click);
 
+            m_oOptionsPanel.ArmourUpButton.Click += new EventHandler(ArmourUpButton_Click);
+            m_oOptionsPanel.ArmourDownButton.Click += new EventHandler(ArmourDownButton_Click);
+
+            m_oOptionsPanel.NewArmorButton.Click += new EventHandler(NewArmorButton_Click);   
+
+            m_oOptionsPanel.DeploymentTimeTextBox.TextChanged += new EventHandler(DeploymentTimeTextBox_TextChanged);
+
 
             UpdateDisplay();
 
@@ -547,6 +554,147 @@ namespace Pulsar4X.UI.Handlers
                 FindAddListBoxComponent(CT, CID, CAmt);
             }
         }
+        
+        /// <summary>
+        /// Increases the armour level on this ship by 1, up to 65535.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ArmourUpButton_Click(object sender, EventArgs e)
+        {
+            if (_CurrnetShipClass != null)
+            {
+                if (_CurrnetShipClass.ShipArmorDef.depth < 65535 && _CurrnetShipClass.IsLocked == false)
+                {
+                    _CurrnetShipClass.NewArmor(_CurrnetShipClass.ShipArmorDef.Name, _CurrnetShipClass.ShipArmorDef.armorPerHS, (ushort)(_CurrnetShipClass.ShipArmorDef.depth + 1));
+
+                    BuildMisc();
+                    BuildPassiveDefences();
+                    BuildDesignTab();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decreases the armour level of the ship by 1, down to 1 layer.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ArmourDownButton_Click(object sender, EventArgs e)
+        {
+            if (_CurrnetShipClass != null)
+            {
+                if (_CurrnetShipClass.ShipArmorDef.depth > 1 && _CurrnetShipClass.IsLocked == false)
+                {
+                    _CurrnetShipClass.NewArmor(_CurrnetShipClass.ShipArmorDef.Name, _CurrnetShipClass.ShipArmorDef.armorPerHS,(ushort)(_CurrnetShipClass.ShipArmorDef.depth - 1));
+
+                    BuildMisc();
+                    BuildPassiveDefences();
+                    BuildDesignTab();
+                }
+            }
+        }
+
+        /// <summary>
+        /// updates the design to the latest armor available.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewArmorButton_Click(object sender, EventArgs e)
+        {
+            if (_CurrnetFaction != null)
+            {
+                if (_CurrnetShipClass != null)
+                {
+                    if (_CurrnetShipClass.IsLocked == false)
+                    {
+                        int ArmorTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
+
+                        if (ArmorTech > 12)
+                            ArmorTech = 12;
+
+                        #region Armor Tech names
+                        String Title = "N/A";
+                        switch (ArmorTech)
+                        {
+                            case 0: 
+                                Title = "Conventional";
+                            break;
+                            case 1:
+                                Title = "Duranium";
+                            break;
+                            case 2:
+                                Title = "High Density Duranium";
+                            break;
+                            case 3:
+                                Title = "Composite";
+                            break;
+                            case 4:
+                                Title = "Ceramic Composite";
+                            break;
+                            case 5:
+                                Title = "Laminate Composite";
+                            break;
+                            case 6:
+                                Title = "Compressed Carbon";
+                            break;
+                            case 7:
+                                Title = "Biphased Carbide";
+                            break;
+                            case 8:
+                                Title = "Crystaline Composite";
+                            break;
+                            case 9:
+                                Title = "Superdense";
+                            break;
+                            case 10:
+                                Title = "Bonded Superdense";
+                            break;
+                            case 11:
+                                Title = "Coherent Superdense";
+                            break;
+                            case 12:
+                                Title = "Collapsium";
+                            break;
+                        }
+                        #endregion
+
+                        _CurrnetShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], _CurrnetShipClass.ShipArmorDef.depth);
+
+                        BuildMisc();
+                        BuildPassiveDefences();
+                        BuildDesignTab();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get new deployment time for ship.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DeploymentTimeTextBox_TextChanged(object sender, EventArgs e)
+        {
+            if (_CurrnetShipClass != null)
+            {
+                if (_CurrnetShipClass.IsLocked == false)
+                {
+                    int newDepTime;
+
+                    Int32.TryParse(m_oOptionsPanel.DeploymentTimeTextBox.Text, out newDepTime);
+
+                    if (newDepTime > 0)
+                    {
+                        _CurrnetShipClass.SetDeploymentTime(newDepTime);
+
+                        BuildMisc();
+                        BuildCrewAccomPanel();
+                        BuildDesignTab();
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Handles current selection changed.
@@ -610,6 +758,61 @@ namespace Pulsar4X.UI.Handlers
             oNewShipClass.AddFuelStorage(_CurrnetFaction.ComponentList.FuelStorage[0], 1);
             oNewShipClass.AddEngineeringSpaces(_CurrnetFaction.ComponentList.EngineeringSpaces[0], 1);
             oNewShipClass.AddOtherComponent(_CurrnetFaction.ComponentList.OtherComponents[0], 1);
+
+            int ArmorTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
+
+            if (ArmorTech > 12)
+                ArmorTech = 12;
+
+            #region Armor Tech names
+            String Title = "N/A";
+            switch (ArmorTech)
+            {
+                case 0:
+                    Title = "Conventional";
+                    break;
+                case 1:
+                    Title = "Duranium";
+                    break;
+                case 2:
+                    Title = "High Density Duranium";
+                    break;
+                case 3:
+                    Title = "Composite";
+                    break;
+                case 4:
+                    Title = "Ceramic Composite";
+                    break;
+                case 5:
+                    Title = "Laminate Composite";
+                    break;
+                case 6:
+                    Title = "Compressed Carbon";
+                    break;
+                case 7:
+                    Title = "Biphased Carbide";
+                    break;
+                case 8:
+                    Title = "Crystaline Composite";
+                    break;
+                case 9:
+                    Title = "Superdense";
+                    break;
+                case 10:
+                    Title = "Bonded Superdense";
+                    break;
+                case 11:
+                    Title = "Coherent Superdense";
+                    break;
+                case 12:
+                    Title = "Collapsium";
+                    break;
+            }
+            #endregion
+
+            oNewShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], oNewShipClass.ShipArmorDef.depth);
+
+
             VM.ShipDesigns.Add(oNewShipClass);
             m_oOptionsPanel.ClassComboBox.SelectedItem = oNewShipClass;
 
@@ -789,8 +992,8 @@ namespace Pulsar4X.UI.Handlers
             else
                m_oOptionsPanel.ExactClassSizeTextBox.Text = CurrentShipClass.SizeHS.ToString();
 
-            m_oOptionsPanel.ArmorAreaTextBox.Text = (CurrentShipClass.ShipArmorDef.area / 4.0f).ToString();
-            m_oOptionsPanel.ArmorStrengthTextBox.Text = Math.Round((CurrentShipClass.ShipArmorDef.area / 16.0) * (double)CurrentShipClass.ShipArmorDef.depth).ToString();
+            m_oOptionsPanel.ArmorAreaTextBox.Text = CurrentShipClass.ShipArmorDef.area.ToString();
+            m_oOptionsPanel.ArmorStrengthTextBox.Text = CurrentShipClass.ShipArmorDef.strength.ToString();
             m_oOptionsPanel.ArmorColumnsTextBox.Text = CurrentShipClass.ShipArmorDef.cNum.ToString();
             m_oOptionsPanel.ShieldStrengthTextBox.Text = CurrentShipClass.TotalShieldPool.ToString();
 

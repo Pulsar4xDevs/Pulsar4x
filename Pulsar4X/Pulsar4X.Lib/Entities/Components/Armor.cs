@@ -169,9 +169,15 @@ namespace Pulsar4X.Entities.Components
 		    }
 
             Strength = strengthReq;
-		    Area = ( area * Depth ) / 4.0;
+		    Area = area / Depth;
 		    cost = (decimal)Area;
 		    CNum = (ushort)Math.Floor( strengthReq / (double)Depth );
+
+            double Tonnage = Math.Ceiling(size + sizeOfCraft);
+            if (CNum > (ushort)Math.Floor((Tonnage) / 2.0))
+            {
+                CNum = (ushort)Math.Floor((Tonnage) / 2.0);
+            }
 	    }
         /// <summary>
         /// End of Function CalcArmor

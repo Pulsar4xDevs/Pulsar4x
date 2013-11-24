@@ -279,6 +279,22 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oHundredRadioButton; }
         }
+
+        /// <summary>
+        /// Increases the armor depth on this design.
+        /// </summary>
+        public Button ArmourUpButton
+        {
+            get { return m_oArmourUpButton; }
+        }
+
+        /// <summary>
+        /// Decreases armor depth on this design. not below 1.
+        /// </summary>
+        public Button ArmourDownButton
+        {
+            get { return m_oArmourDownButton; }
+        }
         #endregion
 
 

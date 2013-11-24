@@ -889,6 +889,10 @@ namespace Pulsar4X.Entities
             CapPerHS = 50.0f / TonsPerMan;
             AccomHSRequirement = (((float)TotalRequiredCrew * TonsPerMan) / 50.0f);
 
+            TotalCrewQuarters = (int)Math.Floor((AccomHSAvailable * 50.0f) / TonsPerMan);
+
+            SpareCrewQuarters = TotalCrewQuarters - TotalRequiredCrew;
+
             BuildClassSummary();
         }
 
@@ -1003,7 +1007,12 @@ namespace Pulsar4X.Entities
             /// </summary>
             if (TotalCrossSection != 0)
             {
-                MaxSpeed = (int)((1000.0f / (float)TotalCrossSection) * (float)MaxEnginePower);
+                if (ShipEngineDef != null)
+                {
+                    MaxSpeed = (int)((1000.0f / (float)TotalCrossSection) * (float)MaxEnginePower);
+                }
+                else
+                    MaxSpeed = 1;
             }
             else
             {
@@ -1127,14 +1136,17 @@ namespace Pulsar4X.Entities
             /// Armor requires that size and cost be subtracted from the ship before recalculation/readding.
             /// </summary>
             BuildPointCost = BuildPointCost - ShipArmorDef.cost;
-            SizeHS = SizeHS - ShipArmorDef.size;
+            SizeHS = SizeHS - ShipArmorDef.size; 
 
             ShipArmorDef.CalcArmor(Title, ArmorPHS, SizeHS, ArmorDepth);
 
             BuildPointCost = BuildPointCost + ShipArmorDef.cost;
             SizeHS = SizeHS + ShipArmorDef.size;
 
+            SizeTons = SizeHS * 50.0f;
+
             BuildClassSummary();
+
         }
 
         /// <summary>
@@ -2031,7 +2043,13 @@ namespace Pulsar4X.Entities
         {
             Summary = "N/A";
 
-            String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", Name, SizeTons.ToString(),
+            /// <summary>
+            /// if (isFighter)
+            ///    Tons = SizeTons;
+            /// </summary>
+            float Tons = (float)Math.Ceiling(SizeHS) * 50.0f;
+
+            String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", Name, Tons.ToString(),
                                          TotalRequiredCrew.ToString(), Math.Floor(BuildPointCost).ToString(), TotalCrossSection.ToString(),
                                          MaxThermalSignature.ToString(), MaxEMSignature.ToString());
                 
@@ -2174,7 +2192,7 @@ namespace Pulsar4X.Entities
                     Power = String.Format("{0}-{1}", ShipBeamDef[loop].powerRequirement, ShipBeamDef[loop].weaponCapacitor);
                 }
 
-                float ROF = (ShipBeamDef[loop].powerRequirement / ShipBeamDef[loop].weaponCapacitor) * 5;
+                float ROF = (float)Math.Ceiling(ShipBeamDef[loop].powerRequirement / ShipBeamDef[loop].weaponCapacitor) * 5.0f;
 
                 if (ROF < 5)
                     ROF = 5;

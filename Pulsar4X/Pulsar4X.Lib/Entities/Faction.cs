@@ -549,6 +549,9 @@ namespace Pulsar4X.Entities
         ///   Solid-Core Antimatter(300k) Gas-Core Antimatter(600k) Plasma-Core Antimatter(1.25M) Beam-Core Antimater(2.5M) Photonic(5M)
         /// Laser Wavelengths:
         /// Infared, Visible Light, Near Ultraviolet, Ultraviolet, Far Ultraviolet, Soft X-Ray(30), X-Ray(60), Far X-Ray(125), Extreme X-Ray(250), Near Gamma Ray(500), Gamma Ray(1M), Far Gamma Ray(2M)
+        /// Armour:
+        /// Conventional(0),Duranium(500),High Density Duranium(2500),Composite(5K),Ceramic Composite(10K),Laminate Composite(20K),Compressed Carbon(40K),Biphased Carbide(80K),Crystaline Composite(150K),
+        /// Superdense(300K),Bonded Superdense(600K),Coherent Superdense(1.25M),Collapsium(2.5M);
         /// </summary>
 
 
