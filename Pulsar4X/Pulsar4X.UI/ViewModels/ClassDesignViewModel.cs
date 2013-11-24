@@ -129,7 +129,6 @@ namespace Pulsar4X.UI.ViewModels
             CurrentFaction = Factions.FirstOrDefault();
         }
 
-
         private void OnShipClassChanged()
         {
             if (ShipClassChanged != null)

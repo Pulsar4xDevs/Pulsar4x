@@ -72,6 +72,7 @@ namespace Pulsar4X.UI.Handlers
         //Panels.ClassDes_DesignAndInfo m_oDesignAndInformationPanel;
         Panels.ClassDes_Options m_oOptionsPanel;
         //Panels.ClassDes_Properties m_oClassPropertiesPanel;
+        Panels.ClassDes_RenameClass m_oRenameClassPanel;
 
         ClassDesignViewModel VM;
 
@@ -151,6 +152,7 @@ namespace Pulsar4X.UI.Handlers
             //m_oClassPropertiesPanel = new Panels.ClassDes_Properties();
             //m_oDesignAndInformationPanel = new Panels.ClassDes_DesignAndInfo();
             m_oOptionsPanel = new Panels.ClassDes_Options();
+            m_oRenameClassPanel = new Panels.ClassDes_RenameClass();
 
             //m_oClassPropertiesPanel.ClassPropertyGrid.PropertySort = PropertySort.CategorizedAlphabetical;
 
@@ -212,15 +214,24 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.ComponentsListBox.SelectedIndexChanged += new EventHandler(ComponentsListBox_SelectedIndexChanged);
             m_oOptionsPanel.ComponentsListBox.DoubleClick += new EventHandler(ComponentsListBox_DoubleClick);
 
-            m_oOptionsPanel.RefreshTechButton.Click += new EventHandler(RefreshTechButton_Click);
 
+            /// <summary>
+            /// Button click handlers:
+            /// </summary>
+            m_oOptionsPanel.RefreshTechButton.Click += new EventHandler(RefreshTechButton_Click);
             m_oOptionsPanel.AddButton.Click += new EventHandler(AddButton_Click);
             m_oOptionsPanel.RemoveButton.Click += new EventHandler(RemoveButton_Click);
-
             m_oOptionsPanel.ArmourUpButton.Click += new EventHandler(ArmourUpButton_Click);
             m_oOptionsPanel.ArmourDownButton.Click += new EventHandler(ArmourDownButton_Click);
+            m_oOptionsPanel.NewArmorButton.Click += new EventHandler(NewArmorButton_Click);  
+            m_oOptionsPanel.DesignTechButton.Click += new EventHandler(DesignTechButton_Click);
+            m_oOptionsPanel.RenameButton.Click += new EventHandler(RenameButton_Click);
 
-            m_oOptionsPanel.NewArmorButton.Click += new EventHandler(NewArmorButton_Click);   
+            /// <summary>
+            /// Rename Class Button Handlers:
+            /// </summary>
+            m_oRenameClassPanel.OKButton.Click +=new EventHandler(OKButton_Click);
+            m_oRenameClassPanel.CancelButton.Click += new EventHandler(CancelButton_Click);
 
             m_oOptionsPanel.DeploymentTimeTextBox.TextChanged += new EventHandler(DeploymentTimeTextBox_TextChanged);
 
@@ -241,6 +252,7 @@ namespace Pulsar4X.UI.Handlers
             BuildComponentDataGrid();
         }
 
+        #region Buttons and doubleclicks
         /// <summary>
         /// Refreshes the tech list in a slightly more optimal way than a total rebuild
         /// </summary>
@@ -452,6 +464,50 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
         }
+
+
+        #region Class Rename Panel
+        /// <summary>
+        /// Rename this class
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RenameButton_Click(object sender, EventArgs e)
+        {
+            if (_CurrnetShipClass != null)
+            {
+                m_oRenameClassPanel.RenameClassTextBox.Text = _CurrnetShipClass.Name;
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+                m_oRenameClassPanel.Show();
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+            }
+        }
+
+        private void OKButton_Click(object sender, EventArgs e)
+        {
+            _CurrnetShipClass.Name = m_oRenameClassPanel.RenameClassTextBox.Text;
+            _CurrnetShipClass.BuildClassSummary();
+
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oRenameClassPanel.Hide();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+
+
+            UpdateDisplay();
+        }
+
+        /// <summary>
+        /// Disregard the rename.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oRenameClassPanel.Hide();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+        #endregion
 
         /// <summary>
         /// Adds componentAmt components to the current design, this time based on double clicking the CDG.
@@ -670,6 +726,16 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// brings up the tech research button from the class design page.
+        /// </summary>
+        /// <param name="sneder"></param>
+        /// <param name="e"></param>
+        private void DesignTechButton_Click(object sneder, EventArgs e)
+        {
+            Helpers.UIController.Instance.ComponentRP.Popup();
+        }
+
+        /// <summary>
         /// Get new deployment time for ship.
         /// </summary>
         /// <param name="sender"></param>
@@ -695,6 +761,7 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
         }
+        #endregion
 
         /// <summary>
         /// Handles current selection changed.
