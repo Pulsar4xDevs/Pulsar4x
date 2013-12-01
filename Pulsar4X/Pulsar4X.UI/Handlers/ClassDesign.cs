@@ -171,12 +171,14 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.FactionComboBox.SelectedIndexChanged += (s, args) => m_oOptionsPanel.FactionComboBox.DataBindings["SelectedItem"].WriteValue();
             m_oOptionsPanel.FactionComboBox.SelectedIndexChanged += new EventHandler(FactionComboBox_SelectedIndexChanged);
 
-            m_oOptionsPanel.ClassComboBox.Bind(c => c.DataSource, VM, d => d.ShipDesigns);
+            BuildShipClassComboBox();
+
+            /*m_oOptionsPanel.ClassComboBox.Bind(c => c.DataSource, VM, d => d.ShipDesigns);
             m_oOptionsPanel.ClassComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentShipClass, DataSourceUpdateMode.OnPropertyChanged);
             m_oOptionsPanel.ClassComboBox.DisplayMember = "Name";
             VM.ShipClassChanged += (s, args) => CurrentShipClass = VM.CurrentShipClass;
             CurrentShipClass = VM.CurrentShipClass;
-            m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += (s, args) => m_oOptionsPanel.ClassComboBox.DataBindings["SelectedItem"].WriteValue();
+            m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += (s, args) => m_oOptionsPanel.ClassComboBox.DataBindings["SelectedItem"].WriteValue();*/
             m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += new EventHandler(ClassComboBox_SelectedIndexChanged);
 
             //if (VM.CurrentShipClass != null)
@@ -492,7 +494,7 @@ namespace Pulsar4X.UI.Handlers
             m_oRenameClassPanel.Hide();
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
 
-
+            m_oOptionsPanel.ClassComboBox.Items[m_oOptionsPanel.ClassComboBox.SelectedIndex] = _CurrnetShipClass.Name;
             UpdateDisplay();
         }
 
@@ -807,6 +809,13 @@ namespace Pulsar4X.UI.Handlers
 
         private  void ClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (m_oOptionsPanel.ClassComboBox.SelectedIndex != -1 && m_oOptionsPanel.ClassComboBox.SelectedIndex < _CurrnetFaction.ShipDesigns.Count)
+            {
+                _CurrnetShipClass = _CurrnetFaction.ShipDesigns[m_oOptionsPanel.ClassComboBox.SelectedIndex];
+
+                UpdateDisplay();
+            }
+
             //if (VM.CurrentShipClass != null)
             //{
             //    m_oClassPropertiesPanel.ClassPropertyGrid.SelectedObject = VM.CurrentShipClass;
@@ -879,9 +888,14 @@ namespace Pulsar4X.UI.Handlers
 
             oNewShipClass.NewArmor(Title, (ushort)Constants.MagazineTN.MagArmor[ArmorTech], oNewShipClass.ShipArmorDef.depth);
 
+            _CurrnetFaction.ShipDesigns.Add(oNewShipClass);
 
-            VM.ShipDesigns.Add(oNewShipClass);
-            m_oOptionsPanel.ClassComboBox.SelectedItem = oNewShipClass;
+            BuildShipClassComboBox();
+
+            m_oOptionsPanel.ClassComboBox.SelectedIndex = m_oOptionsPanel.ClassComboBox.Items.Count - 1;
+            _CurrnetShipClass = _CurrnetFaction.ShipDesigns[m_oOptionsPanel.ClassComboBox.SelectedIndex];
+
+            UpdateDisplay();
 
 
         }
@@ -4195,6 +4209,25 @@ namespace Pulsar4X.UI.Handlers
                     break;
             }
             #endregion
+        }
+
+        /// <summary>
+        /// Build the ship class combo box here.
+        /// </summary>
+        private void BuildShipClassComboBox()
+        {
+            m_oOptionsPanel.ClassComboBox.Items.Clear();
+
+            for (int loop = 0; loop < _CurrnetFaction.ShipDesigns.Count; loop++)
+            {
+                m_oOptionsPanel.ClassComboBox.Items.Add(_CurrnetFaction.ShipDesigns[loop].Name);
+            }
+
+            if (m_oOptionsPanel.ClassComboBox.SelectedIndex == -1 && _CurrnetFaction.ShipDesigns.Count != 0)
+            {
+                m_oOptionsPanel.ClassComboBox.SelectedIndex = 0;
+                _CurrnetShipClass = _CurrnetFaction.ShipDesigns[0];
+            }
         }
 
         #endregion
