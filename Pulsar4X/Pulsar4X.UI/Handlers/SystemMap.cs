@@ -225,8 +225,23 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
 
+            
             TimeSpan TS = new TimeSpan(0,0,TickValue);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
+
+
+
+
+            int Seconds = GameState.Instance.GameDateTime.Second + (GameState.Instance.GameDateTime.Minute * 60) + (GameState.Instance.GameDateTime.Hour * 3600) +
+                           (GameState.Instance.GameDateTime.DayOfYear * 86400);
+
+            GameState.Instance.YearTickValue = Seconds;
+
+            /// <summary>
+            /// Put the date time somewhere.
+            /// </summary>
+            m_oControlsPanel.TabText = "SystemMap.cs Kludge(241): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString();
+
             m_oCurrentSceen.Refresh();
         }
 

@@ -48,9 +48,10 @@ namespace Pulsar4X.UI
             oNewFaction.AddNewContactList(otest);
 
             Entities.Planet P1 = new Entities.Planet(otest.Stars[0]);
-            P1.XSystem = 1.0;
-            P1.YSystem = 1.0;
+            P1.XSystem = 10.0;
+            P1.YSystem = 10.0;
 
+            oNewFaction.Capitol = P1;
             oNewFaction.AddNewTaskGroup("Combat Taskgroup", P1, otest);
             oNewFaction.FactionColor = System.Drawing.Color.Blue;
 
@@ -61,9 +62,11 @@ namespace Pulsar4X.UI
             oNewFaction2.AddNewContactList(otest);
 
             Entities.Planet P2 = new Entities.Planet(otest.Stars[0]);
-            P2.XSystem = 1.05;
-            P2.YSystem = 1.05;
+            P2.XSystem = -10.0;
+            P2.YSystem = -10.0;
 
+
+            oNewFaction2.Capitol = P2;
             oNewFaction2.AddNewTaskGroup("Combat Taskgroup", P2, otest);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 

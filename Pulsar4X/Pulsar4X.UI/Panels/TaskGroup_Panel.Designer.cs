@@ -114,6 +114,22 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// creates a new task group.
+        /// </summary>
+        public Button NewTaskGroupButton
+        {
+            get { return m_oNewTGButton; }
+        }
+
+        /// <summary>
+        /// Renames the selected task group.
+        /// </summary>
+        public Button RenameTaskGroupButton
+        {
+            get { return m_oRenameTGButton; }
+        }
+
+        /// <summary>
         /// Sets speed to user entered value if valid.
         /// </summary>
         public Button SetSpeedButton
@@ -1529,7 +1545,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oDeleteTGButton.Name = "m_oDeleteTGButton";
             this.m_oDeleteTGButton.Size = new System.Drawing.Size(78, 31);
             this.m_oDeleteTGButton.TabIndex = 50;
-            this.m_oDeleteTGButton.Text = "Delete TG";
+            this.m_oDeleteTGButton.Text = "&Delete TG";
             this.m_oDeleteTGButton.UseVisualStyleBackColor = true;
             // 
             // m_oOOBButton
@@ -1575,7 +1591,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oNewTGButton.Name = "m_oNewTGButton";
             this.m_oNewTGButton.Size = new System.Drawing.Size(78, 31);
             this.m_oNewTGButton.TabIndex = 45;
-            this.m_oNewTGButton.Text = "New TG";
+            this.m_oNewTGButton.Text = "&New TG";
             this.m_oNewTGButton.UseVisualStyleBackColor = true;
             // 
             // TaskGroup_Panel

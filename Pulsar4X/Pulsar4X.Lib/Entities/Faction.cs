@@ -274,6 +274,11 @@ namespace Pulsar4X.Entities
         public string Title { get; set; }
         public Species Species { get; set; }
 
+        /// <summary>
+        /// For now this is a stub for where ships will be created.
+        /// </summary>
+        public Planet Capitol { get; set; }
+
         public FactionTheme FactionTheme { get; set; }
         public FactionCommanderTheme CommanderTheme { get; set; }
 
@@ -555,6 +560,18 @@ namespace Pulsar4X.Entities
         /// </summary>
 
 
+
+        /// <summary>
+        /// Ship BP this faction starts with.
+        /// </summary>
+        public decimal ShipBPTotal { get; set; }
+
+        /// <summary>
+        /// PDC BP this faction starts with.
+        /// </summary>
+        public decimal PDCBPTotal { get; set; }
+
+
         /// <summary>
         /// Constructor for basic faction.
         /// </summary>
@@ -620,6 +637,10 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech] = 0;
+
+
+            ShipBPTotal = 8000.0m;
+            PDCBPTotal = 4000.0m;
         }
 
         /// <summary>
@@ -688,6 +709,9 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech] = 0;
+
+            ShipBPTotal = 8000.0m;
+            PDCBPTotal = 4000.0m;
         }
 
         /// <summary>

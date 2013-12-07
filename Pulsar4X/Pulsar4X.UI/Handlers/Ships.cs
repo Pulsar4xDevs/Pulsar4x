@@ -483,6 +483,11 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ActiveButton_Click(object sender, EventArgs e)
         {
+            if (_CurrnetShip.ShipASensor.Count == 0)
+            {
+                _CurrnetSensor = null;
+            }
+
             if (_CurrnetShip != null && _CurrnetSensor != null)
             {
                 _CurrnetShip.ShipsTaskGroup.SetActiveSensor(_CurrnetShip.ShipsTaskGroup.Ships.IndexOf(_CurrnetShip), _CurrnetSensor.componentIndex, true);
@@ -499,10 +504,18 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void InactiveButton_Click(object sender, EventArgs e)
         {
-            _CurrnetShip.ShipsTaskGroup.SetActiveSensor(_CurrnetShip.ShipsTaskGroup.Ships.IndexOf(_CurrnetShip), _CurrnetSensor.componentIndex, false);
+            if (_CurrnetShip.ShipASensor.Count == 0)
+            {
+                _CurrnetSensor = null;
+            }
 
-            if (_CurrnetSensor.isActive == false || _CurrnetSensor.isDestroyed == true)
-                m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
+            if (_CurrnetShip != null && _CurrnetSensor != null)
+            {
+                _CurrnetShip.ShipsTaskGroup.SetActiveSensor(_CurrnetShip.ShipsTaskGroup.Ships.IndexOf(_CurrnetShip), _CurrnetSensor.componentIndex, false);
+
+                if (_CurrnetSensor.isActive == false || _CurrnetSensor.isDestroyed == true)
+                    m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
+            }
         }
 
         /// <summary>

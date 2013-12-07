@@ -34,6 +34,14 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Will want to change this text in certain places.
+        /// </summary>
+        public Label NewClassNameLabel
+        {
+            get { return m_oNewClassNameLabel; }
+        }
+
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>

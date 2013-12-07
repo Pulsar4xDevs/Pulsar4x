@@ -83,8 +83,10 @@ namespace Pulsar4X.UI.Handlers
         [DllImport("user32", CharSet = CharSet.Auto)]
         private extern static IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, IntPtr lParam);
 
+
         public Components()
         {
+
             eventMask = IntPtr.Zero;
 
             m_oComponentDesignPanel = new Panels.Component_Design();
@@ -128,6 +130,7 @@ namespace Pulsar4X.UI.Handlers
 
             m_oComponentDesignPanel.InstantButton.Click += new EventHandler(InstantButton_Click);
 
+
             //m_oComponentDesignPanel.ResizeBegin +=new EventHandler(ResizeBegin);
             //m_oComponentDesignPanel.ResizeEnd += new EventHandler(ResizeEnd);
 
@@ -145,7 +148,9 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         public void Popup()
         {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oComponentDesignPanel.ShowDialog();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
         /// <summary>
@@ -248,7 +253,9 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void CloseButton_Click(object sender, EventArgs e)
         {
-            m_oComponentDesignPanel.Close();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oComponentDesignPanel.Hide();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;    
         }
 
         /// <summary>

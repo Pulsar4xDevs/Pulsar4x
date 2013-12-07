@@ -139,6 +139,11 @@ namespace Pulsar4X.UI.Forms
             Helpers.UIController.Instance.ComponentRP.Popup();
         }
 
+        private void fastOOBCreationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.FastOOBScreen.Popup();
+        }
+
         #endregion
     }
 }

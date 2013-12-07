@@ -42,6 +42,7 @@
             this.shipsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemInformationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.taskGroupsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.createResearchProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.commanderNamesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +52,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.m_oSystemMapToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.m_oSystemViewToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.createResearchProjectToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fastOOBCreationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_oMainMenuStrip.SuspendLayout();
             this.m_oToolStripContainer.TopToolStripPanel.SuspendLayout();
             this.m_oToolStripContainer.SuspendLayout();
@@ -92,7 +93,8 @@
             // 
             this.spaceMasterToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.sMOnToolStripMenuItem,
-            this.sMOffToolStripMenuItem});
+            this.sMOffToolStripMenuItem,
+            this.fastOOBCreationToolStripMenuItem});
             this.spaceMasterToolStripMenuItem.Name = "spaceMasterToolStripMenuItem";
             this.spaceMasterToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.S)));
             this.spaceMasterToolStripMenuItem.Size = new System.Drawing.Size(84, 20);
@@ -102,14 +104,14 @@
             // 
             this.sMOnToolStripMenuItem.Name = "sMOnToolStripMenuItem";
             this.sMOnToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.sMOnToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.sMOnToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.sMOnToolStripMenuItem.Text = "SM On";
             // 
             // sMOffToolStripMenuItem
             // 
             this.sMOffToolStripMenuItem.Name = "sMOffToolStripMenuItem";
             this.sMOffToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.sMOffToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.sMOffToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.sMOffToolStripMenuItem.Text = "SM Off";
             // 
             // empireToolStripMenuItem
@@ -169,6 +171,14 @@
             this.taskGroupsToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
             this.taskGroupsToolStripMenuItem.Text = "Task Groups";
             this.taskGroupsToolStripMenuItem.Click += new System.EventHandler(this.taskGroupsToolStripMenuItem_Click);
+            // 
+            // createResearchProjectToolStripMenuItem
+            // 
+            this.createResearchProjectToolStripMenuItem.Name = "createResearchProjectToolStripMenuItem";
+            this.createResearchProjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F6)));
+            this.createResearchProjectToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
+            this.createResearchProjectToolStripMenuItem.Text = "Create Research Project";
+            this.createResearchProjectToolStripMenuItem.Click += new System.EventHandler(this.createResearchProjectToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
@@ -250,13 +260,13 @@
             this.m_oSystemViewToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.m_oSystemViewToolStripButton.Text = "System View";
             // 
-            // createResearchProjectToolStripMenuItem
+            // fastOOBCreationToolStripMenuItem
             // 
-            this.createResearchProjectToolStripMenuItem.Name = "createResearchProjectToolStripMenuItem";
-            this.createResearchProjectToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F6)));
-            this.createResearchProjectToolStripMenuItem.Size = new System.Drawing.Size(236, 22);
-            this.createResearchProjectToolStripMenuItem.Text = "Create Research Project";
-            this.createResearchProjectToolStripMenuItem.Click += new System.EventHandler(this.createResearchProjectToolStripMenuItem_Click);
+            this.fastOOBCreationToolStripMenuItem.Name = "fastOOBCreationToolStripMenuItem";
+            this.fastOOBCreationToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F9)));
+            this.fastOOBCreationToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.fastOOBCreationToolStripMenuItem.Text = "Fast OOB Creation";
+            this.fastOOBCreationToolStripMenuItem.Click += new System.EventHandler(this.fastOOBCreationToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -308,5 +318,6 @@
         private System.Windows.Forms.ToolStripMenuItem shipsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem taskGroupsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem createResearchProjectToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fastOOBCreationToolStripMenuItem;
     }
 }

@@ -26,6 +26,9 @@ namespace Pulsar4X
             }
         }
 
+        /// <summary>
+        /// top level random number generator
+        /// </summary>
         private static Random _RNG;
         public static Random RNG
         {
@@ -39,6 +42,9 @@ namespace Pulsar4X
             }
         }
 
+        /// <summary>
+        /// The simulation proper, all the game mechanics are brought together here.
+        /// </summary>
         private static SimEntity _SE;
         public static SimEntity SE
         {
@@ -51,6 +57,7 @@ namespace Pulsar4X
                 return _SE;
             }
         }
+
 
         /// <summary>
         /// Constructor.

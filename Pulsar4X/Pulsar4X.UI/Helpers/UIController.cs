@@ -115,6 +115,17 @@ namespace Pulsar4X.UI.Helpers
             get { return m_oComponentRP; }
         }
 
+
+        Handlers.FastOOB m_oFastOOB;
+
+        /// <summary>
+        /// Handles Racial order of battle creation.
+        /// </summary>
+        public Handlers.FastOOB FastOOBScreen
+        {
+            get { return m_oFastOOB; }
+        }
+
         public bool SuspendAutoPanelDisplay { get; set; }
 
         /// <summary>
@@ -148,6 +159,7 @@ namespace Pulsar4X.UI.Helpers
             m_oClassDesign = new Handlers.ClassDesign();
             m_oTaskGroup = new Handlers.TaskGroup();
             m_oComponentRP = new Handlers.Components();
+            m_oFastOOB = new Handlers.FastOOB();
         }
 
         #region PublicMethods
@@ -186,7 +198,8 @@ namespace Pulsar4X.UI.Helpers
             }
 
             if (a_oDockPanel == null || m_oSystemGenAndDisplay == null || m_oSystemMap == null
-                || m_oEconomics == null || m_oShips == null || m_oClassDesign == null || m_oTaskGroup == null)
+                || m_oEconomics == null || m_oShips == null || m_oClassDesign == null || m_oTaskGroup == null
+                || m_oComponentRP == null || m_oFastOOB == null)
             {
                 return; // do nothing if we dont have the full UI!!
             }

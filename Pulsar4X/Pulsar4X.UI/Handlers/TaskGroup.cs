@@ -58,6 +58,7 @@ namespace Pulsar4X.UI.Handlers
         /// Panel for taskgroup related stuff. Opengl shouldn't be used here I don't think, but I'm not sure. Included everything from SystemMap.cs anyway.
         /// </summary>
         Panels.TaskGroup_Panel m_oTaskGroupPanel;
+        Panels.ClassDes_RenameClass m_oRenameTaskGroupPanel;
 
         /// <summary>
         /// Misspelling intentional to keep this in line with systemMap's misspelling.
@@ -118,6 +119,7 @@ namespace Pulsar4X.UI.Handlers
         public TaskGroup()
         {
             m_oTaskGroupPanel = new Panels.TaskGroup_Panel();
+            m_oRenameTaskGroupPanel = new Panels.ClassDes_RenameClass();
 
             /// <summary>
             /// setup viewmodel:
@@ -165,6 +167,8 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayTaskGroupsCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayWaypointsCheckBox_CheckChanged);
 
+            m_oTaskGroupPanel.NewTaskGroupButton.Click += new EventHandler(NewTaskGroupButton_Click);
+            m_oTaskGroupPanel.RenameTaskGroupButton.Click += new EventHandler(RenameTaskGroupButton_Click);
             m_oTaskGroupPanel.SetSpeedButton.Click += new EventHandler(SetSpeedButton_Clicked);
             m_oTaskGroupPanel.MaxSpeedButton.Click += new EventHandler(MaxSpeedButton_Clicked);
             m_oTaskGroupPanel.AddMoveButton.Click += new EventHandler(AddMoveButton_Clicked);
@@ -173,6 +177,14 @@ namespace Pulsar4X.UI.Handlers
 
             m_oTaskGroupPanel.CurrentTDRadioButton.CheckedChanged += new EventHandler(CurrentTDRadioButton_CheckChanged);
             m_oTaskGroupPanel.AllOrdersTDRadioButton.CheckedChanged += new EventHandler(AllOrdersTDRadioButton_CheckChanged);
+
+            /// <summary>
+            /// Rename Class Button Handlers:
+            /// </summary>
+            m_oRenameTaskGroupPanel.NewClassNameLabel.Text = "Please enter a new taskgroup name";
+            m_oRenameTaskGroupPanel.OKButton.Click += new EventHandler(OKButton_Click);
+            m_oRenameTaskGroupPanel.CancelButton.Click += new EventHandler(CancelButton_Click);
+            m_oRenameTaskGroupPanel.RenameClassTextBox.KeyPress += new KeyPressEventHandler(RenameClassTextBox_KeyPress);
 
             RefreshTGPanel();
         }
@@ -259,6 +271,86 @@ namespace Pulsar4X.UI.Handlers
         {
             BuildActionList();
         }
+
+        /// <summary>
+        /// Create a new taskgroup.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewTaskGroupButton_Click(object sender, EventArgs e)
+        {
+            String Title = String.Format("New Taskgroup #{0}",m_oCurrnetFaction.TaskGroups.Count);
+            m_oCurrnetFaction.AddNewTaskGroup(Title, m_oCurrnetFaction.Capitol, m_oCurrnetFaction.Capitol.Primary.StarSystem);
+
+            m_oTaskGroupPanel.TaskGroupSelectionComboBox.SelectedIndex = (m_oTaskGroupPanel.TaskGroupSelectionComboBox.Items.Count - 1);
+        }
+
+        #region TG Rename Panel
+        /// <summary>
+        /// Renames the current taskgroup
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RenameTaskGroupButton_Click(object sender, EventArgs e)
+        {
+            if (m_oCurrnetTaskGroup != null)
+            {
+
+                m_oRenameTaskGroupPanel.RenameClassTextBox.Text = m_oCurrnetTaskGroup.Name;
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+                m_oRenameTaskGroupPanel.ShowDialog();
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+            } 
+        }
+
+        /// <summary>
+        /// Actually change the name
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OKButton_Click(object sender, EventArgs e)
+        {
+            m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
+
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oRenameTaskGroupPanel.Hide();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+
+            RefreshTGPanel();
+        }
+
+        /// <summary>
+        /// Same as above, only on enter pressed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RenameClassTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
+
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+                m_oRenameTaskGroupPanel.Hide();
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+
+                RefreshTGPanel();
+            }
+        }
+
+        /// <summary>
+        /// Disregard the rename.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oRenameTaskGroupPanel.Hide();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        #endregion
 
         /// <summary>
         /// Sets the speed of the taskgroup to its user entered value.

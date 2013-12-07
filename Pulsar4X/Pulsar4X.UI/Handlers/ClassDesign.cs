@@ -15,6 +15,9 @@ using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 
 
+/// <summary>
+/// BuildDesignTab and getListBoxComponents both need to be updated if a component is added in addition to everything else.
+/// </summary>
 namespace Pulsar4X.UI.Handlers
 {
     public class ClassDesign
@@ -234,6 +237,7 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             m_oRenameClassPanel.OKButton.Click +=new EventHandler(OKButton_Click);
             m_oRenameClassPanel.CancelButton.Click += new EventHandler(CancelButton_Click);
+            m_oRenameClassPanel.RenameClassTextBox.KeyPress += new KeyPressEventHandler(RenameClassTextBox_KeyPress);
 
             m_oOptionsPanel.DeploymentTimeTextBox.TextChanged += new EventHandler(DeploymentTimeTextBox_TextChanged);
 
@@ -480,11 +484,16 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oRenameClassPanel.RenameClassTextBox.Text = _CurrnetShipClass.Name;
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
-                m_oRenameClassPanel.Show();
+                m_oRenameClassPanel.ShowDialog();
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
             }
         }
 
+        /// <summary>
+        /// Actually change the name
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OKButton_Click(object sender, EventArgs e)
         {
             _CurrnetShipClass.Name = m_oRenameClassPanel.RenameClassTextBox.Text;
@@ -496,6 +505,28 @@ namespace Pulsar4X.UI.Handlers
 
             m_oOptionsPanel.ClassComboBox.Items[m_oOptionsPanel.ClassComboBox.SelectedIndex] = _CurrnetShipClass.Name;
             UpdateDisplay();
+        }
+
+        /// <summary>
+        /// Same as above, only on enter pressed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RenameClassTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Return)
+            {
+                _CurrnetShipClass.Name = m_oRenameClassPanel.RenameClassTextBox.Text;
+                _CurrnetShipClass.BuildClassSummary();
+
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+                m_oRenameClassPanel.Hide();
+                Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+
+                m_oOptionsPanel.ClassComboBox.Items[m_oOptionsPanel.ClassComboBox.SelectedIndex] = _CurrnetShipClass.Name;
+                UpdateDisplay();
+
+            }
         }
 
         /// <summary>
@@ -1103,7 +1134,14 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildCrewAccomPanel()
         {
+
             m_oOptionsPanel.DeploymentTimeTextBox.Text = CurrentShipClass.MaxDeploymentTime.ToString();
+
+            if (_CurrnetShipClass.IsLocked == true)
+                m_oOptionsPanel.DeploymentTimeTextBox.ReadOnly = true;
+            else
+                m_oOptionsPanel.DeploymentTimeTextBox.ReadOnly = false;
+
             m_oOptionsPanel.TonsPerManTextBox.Text = String.Format("{0:N3}",CurrentShipClass.TonsPerMan);
             m_oOptionsPanel.CapPerHSTextBox.Text = String.Format("{0:N2}",CurrentShipClass.CapPerHS);
             m_oOptionsPanel.AccomHSReqTextBox.Text = String.Format("{0:N4}",CurrentShipClass.AccomHSRequirement);
