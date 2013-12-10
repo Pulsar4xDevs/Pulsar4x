@@ -486,7 +486,7 @@ namespace Pulsar4X.UI.Panels
             this.MaximumSize = new System.Drawing.Size(600, 800);
             this.MinimumSize = new System.Drawing.Size(600, 800);
             this.Name = "Component_Design";
-            this.Text = "Component_Design";
+            this.Text = "Create Research Project";
             this.m_oEmpireGroupBox.ResumeLayout(false);
             this.m_oResProjectGroupBox.ResumeLayout(false);
             this.m_oBackgroundTechGroupBox.ResumeLayout(false);

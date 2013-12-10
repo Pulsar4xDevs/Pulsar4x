@@ -182,6 +182,9 @@ namespace Pulsar4X.UI.Handlers
 
                 for(int loop = 0; loop < Number; loop++)
                 {
+                    if (m_oCurrnetShipClass.IsLocked == false)
+                        m_oCurrnetShipClass.IsLocked = true;
+
                     m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass, GameState.Instance.YearTickValue);
                     m_oCurrnetFaction.ShipBPTotal = m_oCurrnetFaction.ShipBPTotal - m_oCurrnetShipClass.BuildPointCost;
 
