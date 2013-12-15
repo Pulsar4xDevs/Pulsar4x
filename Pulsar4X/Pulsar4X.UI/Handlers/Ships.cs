@@ -1196,9 +1196,18 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.TEMPPRINTTextBox.Clear();
 
+            if (_CurrnetFaction.MessageLog.Count > 200)
+            {
+                while (_CurrnetFaction.MessageLog.Count > 200)
+                {
+                    _CurrnetFaction.MessageLog.RemoveAt(0);
+                }
+            }
+
+
             for (int loop = 0; loop < _CurrnetFaction.MessageLog.Count; loop++)
             {
-                String Entry = String.Format("{0} - {1}: {2}\n", _CurrnetFaction.MessageLog[loop].Location, _CurrnetFaction.MessageLog[loop].TimeSlice, _CurrnetFaction.MessageLog[loop].Text);
+                String Entry = String.Format("{0} | {1} | {2} - {3}: {4}\n", _CurrnetFaction.MessageLog[loop].TypeOf, _CurrnetFaction.MessageLog[loop].TimeOfMessage, _CurrnetFaction.MessageLog[loop].Location, _CurrnetFaction.MessageLog[loop].TimeSlice, _CurrnetFaction.MessageLog[loop].Text);
 
                 m_oDetailsPanel.TEMPPRINTTextBox.AppendText(Entry);
             }

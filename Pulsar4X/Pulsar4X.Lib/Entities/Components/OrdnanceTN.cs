@@ -805,15 +805,27 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Which ship fired this missile?
+        /// </summary>
+        private ShipTN FiringShip;
+        public ShipTN firingShip
+        {
+            get { return FiringShip; }
+            set { FiringShip = value; }
+        }
+
+        /// <summary>
         /// Constructor for missiles.
         /// </summary>
         /// <param name="mfCtrl">MFC directing this missile.</param>
         /// <param name="definition">definition of the missile.</param>
-        public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition)
+        public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition, ShipTN ShipFiredFrom)
         {
             MFC = mfCtrl;
 
             Target = MFC.target;
+
+            FiringShip = ShipFiredFrom;
 
             MissileDef = definition;
 
@@ -1089,7 +1101,7 @@ namespace Pulsar4X.Entities.Components
                                 ///<summary>
                                 ///Missile damage type always? laser damage type if implemented will need to change this.
                                 ///</summary>
-                                bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location);
+                                bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location,Missiles[loop].firingShip);
 
                                 /// <summary>
                                 /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.

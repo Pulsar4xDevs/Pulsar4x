@@ -1290,11 +1290,11 @@ namespace Pulsar4X.Tests
             Random Gen = new Random();
             ushort HitLocation = (ushort)Gen.Next(0, Columns);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
             HitLocation = (ushort)Gen.Next(0, Columns);
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
             HitLocation = (ushort)Gen.Next(0, Columns);
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Missile, 4, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
 
             Console.WriteLine("Damage Template:");
             for (int loop = 0; loop < DamageValuesTN.MissileTable[3].damageTemplate.Count; loop++)
@@ -1804,25 +1804,25 @@ namespace Pulsar4X.Tests
             Random Gen = new Random();
             ushort HitLocation = (ushort)Gen.Next(0, Columns);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
 
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
 
             HitLocation = (ushort)Gen.Next(0, Columns);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
 
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
 
             HitLocation = (ushort)Gen.Next(0, Columns);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
 
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax);
 
             HitLocation = (ushort)Gen.Next(0, Columns);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Microwave, 1, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
 
             Console.WriteLine("{0} {1} {2}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax,
                                              PlayerFaction1.TaskGroups[0].Ships[0].DestroyedComponents.Count);
@@ -1833,7 +1833,7 @@ namespace Pulsar4X.Tests
 
             HitLocation = (ushort)Gen.Next(0, Columns);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Meson, 1, HitLocation);
+            PlayerFaction1.TaskGroups[0].Ships[0].OnDamaged(DamageTypeTN.Meson, 1, HitLocation, PlayerFaction1.TaskGroups[0].Ships[0]);
 
             Console.WriteLine("{0} {1} {2}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPool, PlayerFaction1.TaskGroups[0].Ships[0].CurrentShieldPoolMax,
                                  PlayerFaction1.TaskGroups[0].Ships[0].DestroyedComponents.Count);

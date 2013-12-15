@@ -16,7 +16,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// The detected ship.
         /// </summary>
-        public ShipTN Ship{ get; set; }
+        public ShipTN ship{ get; set; }
 
         /// <summary>
         /// Detected via thermal.
@@ -58,20 +58,38 @@ namespace Pulsar4X.Entities
         /// <param name="em">Detection via EM?</param>
         /// <param name="Active">Active detection?</param>
         /// <param name="tick">What tick did this detection event occur on?</param>
-        public FactionContact(ShipTN DetectedShip, bool Thermal, bool em, bool Active, uint tick)
+        public FactionContact(Faction CurrentFaction, ShipTN DetectedShip, bool Thermal, bool em, bool Active, uint tick)
         {
+            ship = DetectedShip;
             thermal = Thermal;
             EM = em;
             active = Active;
 
+            String Contact = "New contact detected:";
+
             if (thermal == true)
+            {
                 thermalTick = tick;
+                Contact = String.Format("{0} Thermal Signature {1}", Contact, DetectedShip.CurrentThermalSignature);
+            }
 
             if (EM == true)
+            {
                 EMTick = tick;
+                Contact = String.Format("{0} EM Signature {1}", Contact, DetectedShip.CurrentEMSignature);
+            }
 
             if (active == true)
+            {
                 activeTick = tick;
+                Contact = String.Format("{0} TCS {1}", Contact, DetectedShip.TotalCrossSection);
+            }
+
+            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedShip.ShipsTaskGroup.Contact.CurrentSystem, DetectedShip.ShipsTaskGroup.Contact,
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
+
+            CurrentFaction.MessageLog.Add(NMsg);
+
         }
 
         /// <summary>
@@ -81,50 +99,84 @@ namespace Pulsar4X.Entities
         /// <param name="Em">Detected on EM?</param>
         /// <param name="Active">Detected by actives?</param>
         /// <param name="tick">Current tick.</param>
-        public void updateFactionContact(bool Thermal, bool Em, bool Active, uint tick)
+        public void updateFactionContact(Faction CurrentFaction, bool Thermal, bool Em, bool Active, uint tick)
         {
-            if (thermal == false && Thermal == true)
+            if (thermal == Thermal && EM == Em && active == Active)
             {
-                /// <summary>
-                /// New thermal detection event, message logic should be here.
-                /// </summary>
-                thermalTick = tick;
-            }
-            else if (thermal == true && Thermal == false)
-            {
-                /// <summary>
-                /// Thermal contact lost.
-                /// </summary>
+                return;
             }
 
-            if (EM == false && Em == true)
+            String Contact = "N/A";
+            MessageEntry.MessageType type = MessageEntry.MessageType.Count;
+
+            if (Thermal == false && Em == false && Active == false)
             {
-                /// <summary>
-                /// New EM detection event, message logic should be here.
-                /// </summary>
-                EMTick = tick;
+                Contact = "Existing contact lost";
+                type = MessageEntry.MessageType.ContactLost;
             }
-            if (EM == true && Em == false)
+            else
             {
-                /// <summary>
-                /// EM contact lost.
-                /// </summary>
+                Contact = "Update on existing contact:";
+                type = MessageEntry.MessageType.ContactUpdate;
+
+                if (thermal == false && Thermal == true)
+                {
+                    /// <summary>
+                    /// New thermal detection event, message logic should be here.
+                    /// </summary>
+                    thermalTick = tick;
+
+                    Contact = String.Format("{0} Thermal Signature {1}", Contact, ship.CurrentThermalSignature);
+                }
+                else if (thermal == true && Thermal == false)
+                {
+                    /// <summary>
+                    /// Thermal contact lost.
+                    /// </summary>
+                    Contact = String.Format("{0} Thermal contact lost", Contact);
+                }
+
+                if (EM == false && Em == true)
+                {
+                    /// <summary>
+                    /// New EM detection event, message logic should be here.
+                    /// </summary>
+                    EMTick = tick;
+
+                    Contact = String.Format("{0} EM Signature {1}", Contact, ship.CurrentEMSignature);
+                }
+                if (EM == true && Em == false)
+                {
+                    /// <summary>
+                    /// EM contact lost.
+                    /// </summary>
+                    Contact = String.Format("{0} EM contact lost", Contact);
+                }
+
+                if (active == false && Active == true)
+                {
+                    /// <summary>
+                    /// New active detection event, message logic should be here.
+                    /// </summary>
+                    activeTick = tick;
+
+                    Contact = String.Format("{0} TCS {1}", Contact, ship.TotalCrossSection);
+                }
+                if (active == true && Active == false)
+                {
+                    /// <summary>
+                    /// Active contact lost.
+                    /// </summary>
+                    
+                    Contact = String.Format("{0} Active contact lost", Contact);
+                }
+
             }
 
-            if (active == false && Active == true)
-            {
-                /// <summary>
-                /// New active detection event, message logic should be here.
-                /// </summary>
-                activeTick = tick;
-            }
-            if (active == true && Active == false)
-            {
-                /// <summary>
-                /// Active contact lost.
-                /// </summary>
-            }
+            MessageEntry NMsg = new MessageEntry(type, ship.ShipsTaskGroup.Contact.CurrentSystem, ship.ShipsTaskGroup.Contact,
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
 
+            CurrentFaction.MessageLog.Add(NMsg);
 
             thermal = Thermal;
             EM = Em;
@@ -219,6 +271,37 @@ namespace Pulsar4X.Entities
     public class MessageEntry
     {
         /// <summary>
+        /// Message types that will be printed to the event log.
+        /// </summary>
+        public enum MessageType
+        {
+            ContactNew,
+            ContactUpdate,
+            ContactLost,
+
+            FiringHit,
+            FiringMissed,
+            FiringRecharging,
+            FiringZeroHitChance,
+
+            OrdersCompleted,
+            OrdersNotCompleted,
+
+            ShieldRecharge,
+
+            ShipDamage,
+            ShipDamageReport,
+
+            Error,
+            Count
+        }
+
+        /// <summary>
+        /// What specific type of message is this?
+        /// </summary>
+        public MessageType TypeOf { get; set; }
+
+        /// <summary>
         /// which starsystem does this message occur in.
         /// </summary>
         public StarSystem Location { get; set; }
@@ -236,7 +319,6 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// How long since the last time increment?
         /// </summary>
-        
         public int TimeSlice { get; set; }
         /// <summary>
         /// Text of the message for the log.
@@ -252,8 +334,9 @@ namespace Pulsar4X.Entities
         /// <param name="Time">Game time of message.</param>
         /// <param name="timeSlice">Time since last increment.</param>
         /// <param name="text">text of the message.</param>
-        public MessageEntry(StarSystem Loc, StarSystemEntity Ref, DateTime Time, int timeSlice, string text)
+        public MessageEntry(MessageType Type, StarSystem Loc, StarSystemEntity Ref, DateTime Time, int timeSlice, string text)
         {
+            TypeOf = Type;
             Location = Loc;
             entity = Ref;
             TimeOfMessage = Time;
@@ -1310,7 +1393,7 @@ namespace Pulsar4X.Entities
 
                                     if (inDict == true)
                                     {
-                                        DetectedContacts[detectedShip].updateFactionContact(th, em, ac, (uint)YearTickValue);
+                                        DetectedContacts[detectedShip].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
 
                                         if (th == false && em == false && ac == false)
                                         {
@@ -1319,7 +1402,7 @@ namespace Pulsar4X.Entities
                                     }
                                     else if (inDict == false && (th == true || em == true || ac == true))
                                     {
-                                        FactionContact newContact = new FactionContact(detectedShip, th, em, ac, (uint)YearTickValue);
+                                        FactionContact newContact = new FactionContact(this,detectedShip, th, em, ac, (uint)YearTickValue);
                                         DetectedContacts.Add(detectedShip, newContact);
                                     }
                                 }

@@ -327,14 +327,6 @@ namespace Pulsar4X.Entities
             CurrentTick += tickValue;
 
             /// <summary>
-            /// Do sensor sweeps here.
-            /// </summary>
-            for (int loop = factionStart; loop < factionCount; loop++)
-            {
-                P[loop].SensorSweep(CurrentTick);
-            }
-
-            /// <summary>
             /// Follow orders here.
             /// </summary>
             for (int loop = factionStart; loop < factionCount; loop++)
@@ -347,6 +339,14 @@ namespace Pulsar4X.Entities
                     if (P[loop].TaskGroups[loop2].TaskGroupOrders.Count != 0)
                         P[loop].TaskGroups[loop2].FollowOrders((uint)(CurrentTick - lastTick));
                 }
+            }
+
+            /// <summary>
+            /// Do sensor sweeps here. Sensors must be done after movement, not before.
+            /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                P[loop].SensorSweep(CurrentTick);
             }
 
             /// <summary>
@@ -366,7 +366,8 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Open fire and not destroyed.
                         /// </summary>
-                        if (pair.Value.ShipBFC[pair.Key.componentIndex].openFire == true && pair.Value.ShipBFC[pair.Key.componentIndex].isDestroyed == false)
+                        if (pair.Value.ShipBFC[pair.Key.componentIndex].openFire == true && pair.Value.ShipBFC[pair.Key.componentIndex].isDestroyed == false &&
+                            pair.Value.ShipBFC[pair.Key.componentIndex].target != null)
                         {
                             ShipTN Target = pair.Value.ShipBFC[pair.Key.componentIndex].target;
 
@@ -489,7 +490,8 @@ namespace Pulsar4X.Entities
                                         /// </summary>
 
                                         String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.",pair.Key.TaskGroupsOrdered[loop4].Name);
-                                        MessageEntry Entry2 = new MessageEntry(pair.Key.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.TaskGroupsOrdered[loop4].Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                        MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.OrdersNotCompleted,pair.Key.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.TaskGroupsOrdered[loop4].Contact, 
+                                                                               GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                                         pair.Key.TaskGroupsOrdered[loop4].TaskGroupFaction.MessageLog.Add(Entry2);
 
                                         int lastOrder = pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.Count - 1;
@@ -533,7 +535,8 @@ namespace Pulsar4X.Entities
                                             /// </summary>
 
                                             String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.", pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Name);
-                                            MessageEntry Entry2 = new MessageEntry(pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                            MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.OrdersNotCompleted, pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].Contact,
+                                                                                   GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                                             pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupFaction.MessageLog.Add(Entry2);
 
                                             int lastOrder = pair.Key.ShipsTaskGroup.TaskGroupsOrdered[loop4].TaskGroupOrders.Count - 1;

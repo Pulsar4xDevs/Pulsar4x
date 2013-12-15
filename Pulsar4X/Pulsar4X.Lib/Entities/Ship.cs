@@ -13,9 +13,27 @@ namespace Pulsar4X.Entities
     public class ShipTN : GameEntity
     {
         /// <summary>
+        /// Ships may be standard crewed vessels, organic lifeforms, or completely machine run solid state vessels.
+        /// </summary>
+        public enum ShipType
+        {
+            Standard,
+            Organic,
+            SolidState,
+            Count
+        }
+
+
+        /// <summary>
         /// Class of this ship.
         /// </summary>
         public ShipClassTN ShipClass { get; set; }
+
+
+        /// <summary>
+        /// What type of ship is this?
+        /// </summary>
+        public ShipType TypeOf { get; set; }
 
         /// <summary>
         /// Taskgroup the ship is part of.
@@ -392,6 +410,11 @@ namespace Pulsar4X.Entities
             /// Inform the class that it has a new member.
             /// </summary>
             ClassDefinition.ShipsInClass.Add(this);
+            
+            /// <summary>
+            /// Ships are standard crewed vessels for now.
+            /// </summary>
+            TypeOf = ShipType.Standard;
 
             /// <summary>
             /// Tell the Ship which TG it is a part of.
@@ -928,10 +951,13 @@ namespace Pulsar4X.Entities
         /// <param name="Value">How much damage is being done.</param>
         /// <param name="HitLocation">Where Armor damage is inflicted. Temporary argument for the time being. remove these when rngs are resolved.</param>
         /// <returns>Whether or not the ship was destroyed as a result of this action.</returns>
-        public bool OnDamaged(DamageTypeTN Type, ushort Value, ushort HitLocation)
+        public bool OnDamaged(DamageTypeTN Type, ushort Value, ushort HitLocation, ShipTN FiringShip)
         {
             ushort Damage = Value;
             ushort internalDamage = 0;
+            ushort startDamage = Value;
+            bool ColumnPenetration = false;
+            int LastColumnValue = ShipArmor.armorDef.depth;
 
             if (Type != DamageTypeTN.Meson)
             {
@@ -975,6 +1001,7 @@ namespace Pulsar4X.Entities
                     else
                     {
                         Damage = (ushort)(Damage - (ushort)Math.Floor(CurrentShieldPool));
+
                         CurrentShieldPool = 0.0f;
                     }
                 }
@@ -983,7 +1010,29 @@ namespace Pulsar4X.Entities
                 /// Shields absorbed all damage.
                 /// </summary>
                 if (Damage == 0)
+                {
+                    String DamageString = String.Format("All damage to {0} absorbed by shields", Name);
+                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                    ShipsFaction.MessageLog.Add(NMsg);
+
                     return false;
+                }
+                else
+                {
+
+                    if ((startDamage - Damage) > 0)
+                    {
+                        String DamageString = String.Format("{0} damage to {1} absorbed by shields", (startDamage - Damage), Name);
+                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                        ShipsFaction.MessageLog.Add(NMsg);
+                    }
+                }
+
+                startDamage = Damage;
 
                 if (Type != DamageTypeTN.Microwave)
                 {
@@ -1015,10 +1064,36 @@ namespace Pulsar4X.Entities
                     }
                     left = (short)(HitLocation - 1);
                     right = (short)(HitLocation + 1);
+
+                    if (ShipArmor.isDamaged == true)
+                    {
+                        LastColumnValue = ShipArmor.armorColumns[HitLocation];
+                    }
+
                     internalDamage = (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, HitLocation, Table.damageTemplate[Table.hitPoint]);
+
+                    if (LastColumnValue != 0 && internalDamage != 0)
+                    {
+                        ColumnPenetration = true;
+                    }
+
+
                     if (Type == DamageTypeTN.Plasma && Table.hitPoint + 1 < Table.damageTemplate.Count)
                     {
+
+                        if (ShipArmor.isDamaged == true)
+                        {
+                            LastColumnValue = ShipArmor.armorColumns[(HitLocation + 1)];
+                        }
+
                         internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)(HitLocation + 1), Table.damageTemplate[Table.hitPoint + 1]));
+
+
+                        if (LastColumnValue != 0 && internalDamage != 0)
+                        {
+                            ColumnPenetration = true;
+                        }
+                        
                         right++;
                     }
 
@@ -1038,18 +1113,78 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         if (Table.hitPoint - loop >= 0)
                         {
+                            if (ShipArmor.isDamaged == true)
+                            {
+                                LastColumnValue = ShipArmor.armorColumns[left];
+                            }
+
                             if (ImpactLevel - Table.damageTemplate[Table.hitPoint - loop] < ShipArmor.armorColumns[left])
                                 internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)left, Table.damageTemplate[Table.hitPoint - loop]));
+
+                            if (LastColumnValue != 0 && internalDamage != 0)
+                            {
+                                ColumnPenetration = true;
+                            }
+                        
                         }
 
                         if (Table.hitPoint + loop < Table.damageTemplate.Count)
                         {
+                            if (ShipArmor.isDamaged == true)
+                            {
+                                LastColumnValue = ShipArmor.armorColumns[right];
+                            }
+
                             if (ImpactLevel - Table.damageTemplate[Table.hitPoint + loop] < ShipArmor.armorColumns[right])
                                 internalDamage = (ushort)((ushort)internalDamage + (ushort)ShipArmor.SetDamage(Columns, ShipArmor.armorDef.depth, (ushort)right, Table.damageTemplate[Table.hitPoint + loop]));
+
+                            if (LastColumnValue != 0 && internalDamage != 0)
+                            {
+                                ColumnPenetration = true;
+                            }
+                        
                         }
 
                         left--;
                         right++;
+                    }
+
+                    if ((startDamage - internalDamage) > 0)
+                    {
+
+                        String DamageString = String.Format("{0} damage to {1} absorbed by Armour", (startDamage - internalDamage), Name);
+                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                        ShipsFaction.MessageLog.Add(NMsg);
+                    }
+
+                    if (ColumnPenetration == true)
+                    {
+
+                        String DamageString = "N/A";
+
+                        /// <summary>
+                        /// Need a switch here for organic or solid state ships to change or remove this message.
+                        /// </summary>
+                        switch (TypeOf)
+                        {
+                            case ShipType.Standard :
+                                DamageString = String.Format("{0} is streaming atmosphere", Name);
+                                break;
+                            case ShipType.Organic :
+                                DamageString = String.Format("{0} is streaming fluid", Name);
+                                break;
+                        }
+
+                        if (TypeOf == ShipType.Standard || TypeOf == ShipType.Organic)
+                        {
+
+                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamageReport, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                        }
                     }
 
                 }
@@ -1110,6 +1245,28 @@ namespace Pulsar4X.Entities
 
                             int DamageDone = DestroyComponent(ShipClass.ListOfComponentDefs[loop].componentType, loop, internalDamage, destroy, DacRNG);
 
+                            if (DamageDone != -1)
+                            {
+                                int ID = ComponentDefIndex[loop] + destroy;
+
+                                if (ShipComponents[ID].isDestroyed == true)
+                                {
+                                    String DamageString = String.Format("{0} hit by {1} damage and was destroyed", ShipComponents[ID].Name, DamageDone);
+                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                                    ShipsFaction.MessageLog.Add(NMsg);
+                                }
+                                else
+                                {
+                                    String DamageString = String.Format("{0} Absorbed {1} damage", ShipComponents[ID].Name, DamageDone);
+                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                                    ShipsFaction.MessageLog.Add(NMsg);
+                                }
+                            }
+
                             /// <summary>
                             /// No components are left to destroy, so short circuit the loops,destroy the ship, and create a wreck.
                             /// </summary>
@@ -1147,6 +1304,14 @@ namespace Pulsar4X.Entities
 
                 if (Attempts == 20)
                 {
+                    String DamageString = String.Format("{0} Destroyed", Name);
+                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                    ShipsFaction.MessageLog.Add(NMsg);
+                    FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+
+
                     IsDestroyed = true;
                     return true;
                 }
@@ -1222,6 +1387,40 @@ namespace Pulsar4X.Entities
                                 if (hardCheck < hardValue)
                                 {
                                     DamageDone = DestroyComponent(list.Key.componentType, CI, internalDamage, destroy, DacRNG);
+
+                                    if (DamageDone != -1)
+                                    {
+                                        int ID = ComponentDefIndex[CI] + destroy;
+
+                                        if (ShipComponents[ID].isDestroyed == true)
+                                        {
+                                            String DamageString = String.Format("{0} hit by {1} damage and was destroyed", ShipComponents[ID].Name, DamageDone);
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                                            ShipsFaction.MessageLog.Add(NMsg);
+                                        }
+                                        else
+                                        {
+                                            String DamageString = String.Format("{0} Absorbed {1} damage. Electronic Components shouldn't resist damage like this", ShipComponents[ID].Name, DamageDone);
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                                            ShipsFaction.MessageLog.Add(NMsg);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+
+                                    int ID = ComponentDefIndex[CI] + destroy;
+                                    String DamageString = String.Format("{0} Absorbed {1} damage", ShipComponents[ID].Name, DamageDone);
+                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                                    ShipsFaction.MessageLog.Add(NMsg);
+
+                                    DamageDone = 0;
                                 }
                             }
 
@@ -1993,7 +2192,7 @@ namespace Pulsar4X.Entities
                             /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                             /// </summary>
                             String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                            MessageEntry Entry = new MessageEntry(ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                            MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error,ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
                             ShipsFaction.MessageLog.Add(Entry);
                             
                             
@@ -2040,13 +2239,13 @@ namespace Pulsar4X.Entities
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
                                 String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                MessageEntry Entry = new MessageEntry(ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error,ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
                                 ShipsFaction.MessageLog.Add(Entry); 
                                 
                                 return false;
                             }
 
-                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup);
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup,this);
                         }
                     }
                 }
@@ -2090,20 +2289,29 @@ namespace Pulsar4X.Entities
         /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
         public void RechargeShields(uint tick)
         {
-            if (ShieldIsActive == true)
+            if (ShieldIsActive == true && CurrentShieldPool != CurrentShieldPoolMax)
             {
+                String Charge = "Shield Recharge: ";
                 float amt = (float)tick / 5.0f;
 
                 float ShieldRecharge = CurrentShieldGen * amt;
 
                 if (CurrentShieldPool + ShieldRecharge >= CurrentShieldPoolMax)
                 {
-                    CurrentShieldPool = CurrentShieldPoolMax;
+                    ShieldRecharge = CurrentShieldPoolMax - CurrentShieldPool;
+                    CurrentShieldPool = CurrentShieldPoolMax;  
                 }
                 else
                 {
                     CurrentShieldPool = CurrentShieldPool + ShieldRecharge;
                 }
+
+                Charge = String.Format("{0} {1} points", Charge, ShieldRecharge);
+
+                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShieldRecharge, this.ShipsTaskGroup.Contact.CurrentSystem, this.ShipsTaskGroup.Contact, GameState.Instance.GameDateTime,
+                                                     (GameState.SE.CurrentTick - GameState.SE.lastTick), Charge);
+
+                ShipsFaction.MessageLog.Add(NMsg);
             }
         }
 

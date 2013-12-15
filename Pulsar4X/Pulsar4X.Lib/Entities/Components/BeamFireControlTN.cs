@@ -420,6 +420,14 @@ namespace Pulsar4X.Entities.Components
         {
             if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0 || isDestroyed == true)
             {
+                if (DistanceToTarget > BeamFireControlDef.range)
+                {
+                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringZeroHitChance, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), (this.Name + " Zero % chance to hit."));
+
+                    FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                }
+
                 return false;
             }
             else
@@ -524,7 +532,6 @@ namespace Pulsar4X.Entities.Components
 
                         if (weaponFired == true)
                         {
-
                             for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
                             {
 
@@ -532,8 +539,17 @@ namespace Pulsar4X.Entities.Components
 
                                 if (toHit >= Hit)
                                 {
+
+                                    String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedWeapons[loop].Name, LinkedWeapons[loop].beamDef.damage[RangeIncrement],toHit);
+
+                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                    FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+
+
                                     ushort location = (ushort)RNG.Next(0, Columns);
-                                    bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location);
+                                    bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location, FiringShip);
 
                                     if (ShipDest == true)
                                     {
@@ -542,7 +558,25 @@ namespace Pulsar4X.Entities.Components
                                         return weaponFired;
                                     }
                                 }
+                                else
+                                {
+                                    String WeaponFireS = String.Format("{0} missed at {2}% tohit", LinkedWeapons[loop].Name, LinkedWeapons[loop].beamDef.damage[RangeIncrement],toHit);
+
+                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                    FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                }
                             }
+                        }
+                        else if(LinkedWeapons[loop].isDestroyed == false)
+                        {
+                            String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapons[loop].Name, LinkedWeapons[loop].currentCapacitor, LinkedWeapons[loop].beamDef.weaponCapacitor);
+
+                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
                         }
                     }
                 }

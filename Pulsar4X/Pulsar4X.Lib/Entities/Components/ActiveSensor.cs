@@ -581,7 +581,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="TG">Taskgroup this MFC is in.</param>
         /// <returns>to be decided upon.</returns>
-        public bool FireWeapons(TaskGroupTN TG)
+        public bool FireWeapons(TaskGroupTN TG, ShipTN FiredFrom)
         {
 
 
@@ -595,7 +595,7 @@ namespace Pulsar4X.Entities.Components
                     {
                         if (TG.AttachedMissileGroups[loop2].missiles[0].missileDef.maxSpeed == LinkedWeapons[loop].loadedOrdnance.maxSpeed)
                         {
-                            OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
+                            OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance,FiredFrom);
                             TG.AttachedMissileGroups[loop].AddMissile(newMissile);
 
                             LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
@@ -606,7 +606,7 @@ namespace Pulsar4X.Entities.Components
 
                     if (used == false)
                     {
-                        OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance);
+                        OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance, FiredFrom);
                         newMissile.target = Target;
                         OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                         TG.AttachedMissileGroups.Add(newMissileGroup);

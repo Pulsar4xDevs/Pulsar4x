@@ -1390,7 +1390,7 @@ namespace Pulsar4X.Entities
                             {
                                 String Entry = String.Format("Ship Error, no TaskGroupsOrdered found for TG {0} in Faction {1}, {2} has completed an order to move.",TaskGroupOrders[0].taskGroup.Name,
                                     TaskGroupOrders[0].taskGroup.TaskGroupFaction.Name, Name);
-                                MessageEntry NME = new MessageEntry(Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error,Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
                                 TaskGroupFaction.MessageLog.Add(NME);
                             }
                         }
