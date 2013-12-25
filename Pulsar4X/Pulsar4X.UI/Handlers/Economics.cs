@@ -52,7 +52,7 @@ namespace Pulsar4X.UI.Handlers
 
             // Setup Pops List box
             m_oPopulationsPanel.PopulationsListBox.Bind(c => c.DataSource, VM, d => d.Populations);
-            m_oPopulationsPanel.PopulationsListBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
+            m_oPopulationsPanel.PopulationsListBox.Bind(c => c.SelectedItem, VM, d => d.CurrentPopulation, DataSourceUpdateMode.OnPropertyChanged);
             m_oPopulationsPanel.PopulationsListBox.DisplayMember = "Name";
             //VM.PopulationChanged += (s, args) => CurrentStarSystem = VM.CurrentStarSystem;
              
