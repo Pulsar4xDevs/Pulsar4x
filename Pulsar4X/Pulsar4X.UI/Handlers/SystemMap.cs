@@ -145,7 +145,10 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.ResetViewButton.Click += new EventHandler(ResetViewButton_Click);
             m_oControlsPanel.CreateMapMarkerButton.Click += new EventHandler(CreateMapMarkerButton_Click);
             m_oControlsPanel.DeleteMapMarkerButton.Click += new EventHandler(DeleteMapMarkerButton_Click);
-            m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += new EventHandler(SystemSelectComboBox_SelectedIndexChanged);            
+            m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += new EventHandler(SystemSelectComboBox_SelectedIndexChanged);
+
+
+            RefreshStarSystem();
         }
 
         #region EventHandlers

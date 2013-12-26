@@ -69,10 +69,8 @@ namespace Pulsar4X.UI.GLUtilities
         /// </summary>
         private float m_fZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
 
-        private Vector3 m_vZero;
-
         /// <summary> The view offset, i.e. how much the view should be offset from 0, 0 </summary>
-        private Vector3 m_v3ViewOffset;
+        private Vector3 m_v3ViewOffset = new Vector3(0.0f,0.0f,0.0f);
 
         /// <summary>
         /// The Current Sceen for the Canvas to Render.
@@ -152,8 +150,6 @@ namespace Pulsar4X.UI.GLUtilities
         /// <summary>   Default constructor. </summary>
         public GLCanvas()
         {
-            m_vZero = new Vector3(0.0f, 0.0f, 0.0f);
-            m_v3ViewOffset = m_vZero;
             RegisterEventHandlers();
         }
 
@@ -162,8 +158,6 @@ namespace Pulsar4X.UI.GLUtilities
         public GLCanvas(GraphicsMode a_oGraphicsMode)
             : base(a_oGraphicsMode)
         {
-            m_vZero = new Vector3(0.0f, 0.0f, 0.0f);
-            m_v3ViewOffset = m_vZero;
             RegisterEventHandlers();
         }
 
@@ -176,8 +170,6 @@ namespace Pulsar4X.UI.GLUtilities
         public GLCanvas(GraphicsMode a_oGraphicsMode, int a_iMajor, int a_iMinor, GraphicsContextFlags a_eFlags = GraphicsContextFlags.Default)
             : base(a_oGraphicsMode, a_iMajor, a_iMinor, a_eFlags)
         {
-            m_vZero = new Vector3(0.0f, 0.0f, 0.0f);
-            m_v3ViewOffset = m_vZero;
             RegisterEventHandlers();
         }
 
@@ -188,8 +180,6 @@ namespace Pulsar4X.UI.GLUtilities
         public GLCanvas(float a_version20)
             : base(new GraphicsMode(32, 24, 8, 4), 2, 0, GraphicsContextFlags.Default)
         {
-            m_vZero = new Vector3(0.0f, 0.0f, 0.0f);
-            m_v3ViewOffset = m_vZero;
             RegisterEventHandlers();
             #if DEBUG
                 logger.Info("UI: Creating an OpenGL 2.0+ GLCanvas");
@@ -203,8 +193,6 @@ namespace Pulsar4X.UI.GLUtilities
         public GLCanvas(int a_version30)
             : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Default)
         {
-            m_vZero = new Vector3(0.0f, 0.0f, 0.0f);
-            m_v3ViewOffset = m_vZero;
             RegisterEventHandlers();
             #if DEBUG
                 logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
@@ -547,7 +535,7 @@ namespace Pulsar4X.UI.GLUtilities
         /// </summary>
         public void CenterOnZero()
         {
-            m_v3ViewOffset = m_vZero; 
+            m_v3ViewOffset = Vector3.Zero;
             RecalculateViewMatrix();
             SceenToRender.ViewOffset = m_v3ViewOffset;
             this.Invalidate();
