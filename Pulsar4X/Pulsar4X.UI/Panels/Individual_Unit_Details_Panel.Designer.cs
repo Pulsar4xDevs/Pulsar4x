@@ -344,9 +344,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oTaskGroupTabControl
             // 
-            this.m_oTaskGroupTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oArmourStatusTab);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oDamageControlTab);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oParaCargoGUTab);
@@ -358,8 +355,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oCombatSummaryTab);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oOrdnanceManagementTab);
             this.m_oTaskGroupTabControl.Location = new System.Drawing.Point(12, 261);
-            this.m_oTaskGroupTabControl.MaximumSize = new System.Drawing.Size(1041, 566);
-            this.m_oTaskGroupTabControl.MinimumSize = new System.Drawing.Size(1041, 566);
             this.m_oTaskGroupTabControl.Name = "m_oTaskGroupTabControl";
             this.m_oTaskGroupTabControl.SelectedIndex = 0;
             this.m_oTaskGroupTabControl.Size = new System.Drawing.Size(1041, 566);
@@ -378,9 +373,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oArmorGroupBox
             // 
-            this.m_oArmorGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oArmorGroupBox.Location = new System.Drawing.Point(6, 6);
             this.m_oArmorGroupBox.Name = "m_oArmorGroupBox";
             this.m_oArmorGroupBox.Size = new System.Drawing.Size(1027, 534);
@@ -1127,12 +1119,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oShipCommanderGroupBox
             // 
-            this.m_oShipCommanderGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oShipCommanderGroupBox.Location = new System.Drawing.Point(12, 12);
-            this.m_oShipCommanderGroupBox.MaximumSize = new System.Drawing.Size(665, 49);
-            this.m_oShipCommanderGroupBox.MinimumSize = new System.Drawing.Size(665, 49);
             this.m_oShipCommanderGroupBox.Name = "m_oShipCommanderGroupBox";
             this.m_oShipCommanderGroupBox.Size = new System.Drawing.Size(665, 49);
             this.m_oShipCommanderGroupBox.TabIndex = 42;
@@ -1141,12 +1128,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oBasicInformationGroupBox
             // 
-            this.m_oBasicInformationGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oBasicInformationGroupBox.Location = new System.Drawing.Point(12, 67);
-            this.m_oBasicInformationGroupBox.MaximumSize = new System.Drawing.Size(293, 188);
-            this.m_oBasicInformationGroupBox.MinimumSize = new System.Drawing.Size(293, 188);
             this.m_oBasicInformationGroupBox.Name = "m_oBasicInformationGroupBox";
             this.m_oBasicInformationGroupBox.Size = new System.Drawing.Size(293, 188);
             this.m_oBasicInformationGroupBox.TabIndex = 43;
@@ -1155,12 +1137,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oMotherShipGroupBox
             // 
-            this.m_oMotherShipGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oMotherShipGroupBox.Location = new System.Drawing.Point(869, 67);
-            this.m_oMotherShipGroupBox.MaximumSize = new System.Drawing.Size(180, 63);
-            this.m_oMotherShipGroupBox.MinimumSize = new System.Drawing.Size(180, 63);
             this.m_oMotherShipGroupBox.Name = "m_oMotherShipGroupBox";
             this.m_oMotherShipGroupBox.Size = new System.Drawing.Size(180, 63);
             this.m_oMotherShipGroupBox.TabIndex = 46;
@@ -1169,12 +1146,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oMaintenanceGroupBox
             // 
-            this.m_oMaintenanceGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oMaintenanceGroupBox.Location = new System.Drawing.Point(683, 67);
-            this.m_oMaintenanceGroupBox.MaximumSize = new System.Drawing.Size(180, 134);
-            this.m_oMaintenanceGroupBox.MinimumSize = new System.Drawing.Size(180, 134);
             this.m_oMaintenanceGroupBox.Name = "m_oMaintenanceGroupBox";
             this.m_oMaintenanceGroupBox.Size = new System.Drawing.Size(180, 134);
             this.m_oMaintenanceGroupBox.TabIndex = 47;
@@ -1183,16 +1155,11 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oShieldCrewGroupBox
             // 
-            this.m_oShieldCrewGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oShieldCrewGroupBox.Controls.Add(this.m_oCurrentShieldLabel);
             this.m_oShieldCrewGroupBox.Controls.Add(this.m_oMaxShieldLabel);
             this.m_oShieldCrewGroupBox.Controls.Add(this.m_oCurShieldTextBox);
             this.m_oShieldCrewGroupBox.Controls.Add(this.m_oMaxShieldTextBox);
             this.m_oShieldCrewGroupBox.Location = new System.Drawing.Point(497, 67);
-            this.m_oShieldCrewGroupBox.MaximumSize = new System.Drawing.Size(180, 188);
-            this.m_oShieldCrewGroupBox.MinimumSize = new System.Drawing.Size(180, 188);
             this.m_oShieldCrewGroupBox.Name = "m_oShieldCrewGroupBox";
             this.m_oShieldCrewGroupBox.Size = new System.Drawing.Size(180, 188);
             this.m_oShieldCrewGroupBox.TabIndex = 47;
@@ -1238,12 +1205,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oPowerSystemsGroupBox
             // 
-            this.m_oPowerSystemsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oPowerSystemsGroupBox.Location = new System.Drawing.Point(311, 67);
-            this.m_oPowerSystemsGroupBox.MaximumSize = new System.Drawing.Size(180, 188);
-            this.m_oPowerSystemsGroupBox.MinimumSize = new System.Drawing.Size(180, 188);
             this.m_oPowerSystemsGroupBox.Name = "m_oPowerSystemsGroupBox";
             this.m_oPowerSystemsGroupBox.Size = new System.Drawing.Size(180, 188);
             this.m_oPowerSystemsGroupBox.TabIndex = 47;
@@ -1252,12 +1214,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oParasiteGroupBox
             // 
-            this.m_oParasiteGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oParasiteGroupBox.Location = new System.Drawing.Point(869, 138);
-            this.m_oParasiteGroupBox.MaximumSize = new System.Drawing.Size(180, 117);
-            this.m_oParasiteGroupBox.MinimumSize = new System.Drawing.Size(180, 117);
             this.m_oParasiteGroupBox.Name = "m_oParasiteGroupBox";
             this.m_oParasiteGroupBox.Size = new System.Drawing.Size(180, 117);
             this.m_oParasiteGroupBox.TabIndex = 47;
@@ -1266,12 +1223,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oBlankGroupBox
             // 
-            this.m_oBlankGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oBlankGroupBox.Location = new System.Drawing.Point(683, 207);
-            this.m_oBlankGroupBox.MaximumSize = new System.Drawing.Size(180, 48);
-            this.m_oBlankGroupBox.MinimumSize = new System.Drawing.Size(180, 48);
             this.m_oBlankGroupBox.Name = "m_oBlankGroupBox";
             this.m_oBlankGroupBox.Size = new System.Drawing.Size(180, 48);
             this.m_oBlankGroupBox.TabIndex = 47;
@@ -1279,12 +1231,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oAssignedPopulationGroupBox
             // 
-            this.m_oAssignedPopulationGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oAssignedPopulationGroupBox.Location = new System.Drawing.Point(683, 12);
-            this.m_oAssignedPopulationGroupBox.MaximumSize = new System.Drawing.Size(366, 49);
-            this.m_oAssignedPopulationGroupBox.MinimumSize = new System.Drawing.Size(366, 49);
             this.m_oAssignedPopulationGroupBox.Name = "m_oAssignedPopulationGroupBox";
             this.m_oAssignedPopulationGroupBox.Size = new System.Drawing.Size(366, 49);
             this.m_oAssignedPopulationGroupBox.TabIndex = 43;
@@ -1295,6 +1242,7 @@ namespace Pulsar4X.UI.Panels
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1066, 838);
             this.Controls.Add(this.m_oAssignedPopulationGroupBox);
             this.Controls.Add(this.m_oBlankGroupBox);

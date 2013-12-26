@@ -338,9 +338,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oShipsBox
             // 
-            this.m_oShipsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oShipsBox.Location = new System.Drawing.Point(380, 12);
             this.m_oShipsBox.MaximumSize = new System.Drawing.Size(810, 300);
             this.m_oShipsBox.MinimumSize = new System.Drawing.Size(810, 300);
@@ -352,9 +349,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oGeneralTGDetailsBox
             // 
-            this.m_oGeneralTGDetailsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oGeneralTGDetailsBox.Controls.Add(this.m_oTaskForceName);
             this.m_oGeneralTGDetailsBox.Controls.Add(this.m_oTFLabel);
             this.m_oGeneralTGDetailsBox.Controls.Add(this.m_oLocationLabel);
@@ -436,9 +430,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oSpeedBox
             // 
-            this.m_oSpeedBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedButton);
             this.m_oSpeedBox.Controls.Add(this.m_oSetSpeedButton);
             this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedBox);
@@ -487,9 +478,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oCenterShowGF
             // 
-            this.m_oCenterShowGF.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oCenterShowGF.Controls.Add(this.m_oShowGroundForces);
             this.m_oCenterShowGF.Controls.Add(this.m_oCenterMapCheckBox);
             this.m_oCenterShowGF.Location = new System.Drawing.Point(258, 94);
@@ -528,9 +516,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oSurveyBox
             // 
-            this.m_oSurveyBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oSurveyBox.Controls.Add(this.m_oGeoTextBox);
             this.m_oSurveyBox.Controls.Add(this.m_oGeoLabel);
             this.m_oSurveyBox.Controls.Add(this.m_oGravLabel);
@@ -584,9 +569,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oInitiativeBox
             // 
-            this.m_oInitiativeBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oInitiativeBox.Controls.Add(this.m_oInitiativeButton);
             this.m_oInitiativeBox.Controls.Add(this.m_oCurrentInitTextBox);
             this.m_oInitiativeBox.Controls.Add(this.m_oCurrentInitLabel);
@@ -668,9 +650,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oOrderTimeDistBox
             // 
-            this.m_oOrderTimeDistBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oOrderTimeDistBox.Controls.Add(this.m_oAllOrdersRadioButton);
             this.m_oOrderTimeDistBox.Controls.Add(this.m_oCurrentTDRadioButton);
             this.m_oOrderTimeDistBox.Controls.Add(this.m_oTimeDistTextBox);
@@ -721,9 +700,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oTaskGroupTabControl
             // 
-            this.m_oTaskGroupTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oTaskGroupOrdersTabPage);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oSpecialOrdersTabPage);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oHistoryTabPage);
@@ -754,9 +730,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oCargoFightersTroopsGroupBox
             // 
-            this.m_oCargoFightersTroopsGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oCargoFightersTroopsGroupBox.Location = new System.Drawing.Point(819, 398);
             this.m_oCargoFightersTroopsGroupBox.MaximumSize = new System.Drawing.Size(348, 125);
             this.m_oCargoFightersTroopsGroupBox.MinimumSize = new System.Drawing.Size(348, 125);
@@ -768,9 +741,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oDefaultCondEscortOrdersGroupBox
             // 
-            this.m_oDefaultCondEscortOrdersGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oDefaultCondEscortOrdersGroupBox.Location = new System.Drawing.Point(819, 262);
             this.m_oDefaultCondEscortOrdersGroupBox.MaximumSize = new System.Drawing.Size(348, 125);
             this.m_oDefaultCondEscortOrdersGroupBox.MinimumSize = new System.Drawing.Size(348, 125);
@@ -782,9 +752,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oOOBGroupBox
             // 
-            this.m_oOOBGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oOOBGroupBox.Location = new System.Drawing.Point(819, 6);
             this.m_oOOBGroupBox.MaximumSize = new System.Drawing.Size(348, 250);
             this.m_oOOBGroupBox.MinimumSize = new System.Drawing.Size(348, 250);
@@ -796,9 +763,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oTaskGroupOrdersBox
             // 
-            this.m_oTaskGroupOrdersBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrdersTextBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrderButton);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oCycleMovesCheckBox);
@@ -1015,9 +979,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oCopyOrdersGroupBox
             // 
-            this.m_oCopyOrdersGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncCondOrdersCheckBox);
             this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncDefaultCheckBox);
             this.m_oCopyOrdersGroupBox.Controls.Add(this.checkBox1);
@@ -1081,9 +1042,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oSystemDisplayOptionsBox
             // 
-            this.m_oSystemDisplayOptionsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oShowAllPopsCheckBox);
             this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oOrderFilteringCheckBox);
             this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oExcludeSurveyedCheckBox);
@@ -1293,9 +1251,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oButtonBox
             // 
-            this.m_oButtonBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oButtonBox.Controls.Add(this.m_oAssembleButton);
             this.m_oButtonBox.Controls.Add(this.m_oDetachButton);
             this.m_oButtonBox.Controls.Add(this.m_oEscortButton);
@@ -1598,6 +1553,7 @@ namespace Pulsar4X.UI.Panels
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1193, 986);
             this.Controls.Add(this.m_oButtonBox);
             this.Controls.Add(this.m_oTaskGroupTabControl);

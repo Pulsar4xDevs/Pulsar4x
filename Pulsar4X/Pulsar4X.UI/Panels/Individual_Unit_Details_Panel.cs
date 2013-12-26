@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
-using OpenTK;
+
 
 namespace Pulsar4X.UI.Panels
 {

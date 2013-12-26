@@ -35,6 +35,7 @@
             this.spaceMasterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sMOnToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sMOffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fastOOBCreationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.empireToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.economicsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.systemMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,7 +53,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.m_oSystemMapToolStripButton = new System.Windows.Forms.ToolStripButton();
             this.m_oSystemViewToolStripButton = new System.Windows.Forms.ToolStripButton();
-            this.fastOOBCreationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.m_oMainMenuStrip.SuspendLayout();
             this.m_oToolStripContainer.TopToolStripPanel.SuspendLayout();
             this.m_oToolStripContainer.SuspendLayout();
@@ -113,6 +113,14 @@
             this.sMOffToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.sMOffToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
             this.sMOffToolStripMenuItem.Text = "SM Off";
+            // 
+            // fastOOBCreationToolStripMenuItem
+            // 
+            this.fastOOBCreationToolStripMenuItem.Name = "fastOOBCreationToolStripMenuItem";
+            this.fastOOBCreationToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F9)));
+            this.fastOOBCreationToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.fastOOBCreationToolStripMenuItem.Text = "Fast OOB Creation";
+            this.fastOOBCreationToolStripMenuItem.Click += new System.EventHandler(this.fastOOBCreationToolStripMenuItem_Click);
             // 
             // empireToolStripMenuItem
             // 
@@ -260,23 +268,15 @@
             this.m_oSystemViewToolStripButton.Size = new System.Drawing.Size(23, 22);
             this.m_oSystemViewToolStripButton.Text = "System View";
             // 
-            // fastOOBCreationToolStripMenuItem
-            // 
-            this.fastOOBCreationToolStripMenuItem.Name = "fastOOBCreationToolStripMenuItem";
-            this.fastOOBCreationToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.F9)));
-            this.fastOOBCreationToolStripMenuItem.Size = new System.Drawing.Size(213, 22);
-            this.fastOOBCreationToolStripMenuItem.Text = "Fast OOB Creation";
-            this.fastOOBCreationToolStripMenuItem.Click += new System.EventHandler(this.fastOOBCreationToolStripMenuItem_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1016, 734);
             this.Controls.Add(this.m_oToolStripContainer);
             this.Controls.Add(this.m_oMainMenuStrip);
             this.MainMenuStrip = this.m_oMainMenuStrip;
-            this.MinimumSize = new System.Drawing.Size(1024, 768);
             this.Name = "MainForm";
             this.Text = "Pulsar4X";
             this.Load += new System.EventHandler(this.MainForm_Load);
