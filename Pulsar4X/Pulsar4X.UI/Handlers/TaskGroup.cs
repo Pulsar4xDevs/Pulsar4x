@@ -121,9 +121,6 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel = new Panels.TaskGroup_Panel();
             m_oRenameTaskGroupPanel = new Panels.ClassDes_RenameClass();
 
-            m_oTaskGroupPanel.AutoScroll = false;
-            m_oTaskGroupPanel.AutoScroll = true;
-
             /// <summary>
             /// setup viewmodel:
             /// Bind TG Selection Combo Box.
