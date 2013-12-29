@@ -380,6 +380,12 @@ namespace Pulsar4X.UI.GLUtilities
             {
                 InitOpenGL30();
             }
+            else
+            {
+                
+                String MSG = String.Format("Unknown OpenGL Version {0}.{1}",OpenGLVersionMajor,OpenGLVersionMinor);
+                logger.Error(MSG);
+            }
         }
 
         #endregion

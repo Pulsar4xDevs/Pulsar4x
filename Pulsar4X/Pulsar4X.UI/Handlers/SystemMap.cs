@@ -18,7 +18,7 @@ using OpenTK.Graphics.OpenGL;
 
 /// <summary>
 /// To Do: when multi faction system mapping is done, be sure to update waypoint creation further down.
-/// 5 seconds, 30 seconds, 2 minutes, 5 minutes, 20 minutes, 1 hour, 3 hours, 8 hours, 1 day, 5 days, 30 days
+/// Advance time,system select box, and refreshStarsystem() handle taskgroup dot creation and update. To Do: add past position line. Change from primitive to circle.
 /// </summary>
 
 namespace Pulsar4X.UI.Handlers
@@ -86,6 +86,11 @@ namespace Pulsar4X.UI.Handlers
 
         private bool m_bCreateMapMarkerOnNextClick = false;
 
+        /// <summary>
+        /// And here is how I'll be passing the DateTimeModifier correctly.
+        /// </summary>
+        public Pulsar4X.UI.Forms.MainForm MainFormReference { get; set; }
+
         #endregion
 
         public SystemMap()
@@ -146,9 +151,6 @@ namespace Pulsar4X.UI.Handlers
             m_oControlsPanel.CreateMapMarkerButton.Click += new EventHandler(CreateMapMarkerButton_Click);
             m_oControlsPanel.DeleteMapMarkerButton.Click += new EventHandler(DeleteMapMarkerButton_Click);
             m_oControlsPanel.SystemSelectionComboBox.SelectedIndexChanged += new EventHandler(SystemSelectComboBox_SelectedIndexChanged);
-
-
-            RefreshStarSystem();
         }
 
         #region EventHandlers
@@ -205,6 +207,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
 
+        #region Time Controls
         /// <summary>
         /// Function to advance time for all buttons.
         /// </summary>
@@ -216,19 +219,9 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Kludge to draw the ships.
             /// </summary>
-            m_oCurrentSceen.ShipMarkers.Clear();
-            for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-            {
-                for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
-                {
-                    Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-                    string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-
-                    m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                }
-            }
-
+            DrawTaskGroups();
             
+
             TimeSpan TS = new TimeSpan(0,0,TickValue);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
 
@@ -243,12 +236,19 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Put the date time somewhere.
             /// </summary>
-            m_oControlsPanel.TabText = "SystemMap.cs Kludge(243): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString();
+            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString();
+
+            MainFormReference.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
 
             m_oCurrentSceen.Refresh();
         }
 
-        void AdvanceTime5S_Click(object sender, EventArgs e)
+        /// <summary>
+        /// advances time by 5 seconds.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AdvanceTime5S_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -281,7 +281,7 @@ namespace Pulsar4X.UI.Handlers
                  * */
         }
 
-        void AdvanceTime30S_Click(object sender, EventArgs e)
+        private void AdvanceTime30S_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -292,7 +292,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime2M_Click(object sender, EventArgs e)
+        private void AdvanceTime2M_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -303,7 +303,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime5M_Click(object sender, EventArgs e)
+        private void AdvanceTime5M_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -314,7 +314,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime20M_Click(object sender, EventArgs e)
+        private void AdvanceTime20M_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -325,7 +325,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime1H_Click(object sender, EventArgs e)
+        private void AdvanceTime1H_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -336,7 +336,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime3H_Click(object sender, EventArgs e)
+        private void AdvanceTime3H_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -347,7 +347,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime8H_Click(object sender, EventArgs e)
+        private void AdvanceTime8H_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -358,7 +358,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime1D_Click(object sender, EventArgs e)
+        private void AdvanceTime1D_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -369,7 +369,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        void AdvanceTime5D_Click(object sender, EventArgs e)
+        private void AdvanceTime5D_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -379,7 +379,7 @@ namespace Pulsar4X.UI.Handlers
                 AdvanceTime((int)(Constants.TimeInSeconds.Day * 5));
             }
         }
-        void AdvanceTime30D_Click(object sender, EventArgs e)
+        private void AdvanceTime30D_Click(object sender, EventArgs e)
         {
             /// <summary>
             /// Advance simtime by 5 seconds.
@@ -390,9 +390,14 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        #endregion
 
-
-        void StartSim_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Deprecated simulation code
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StartSim_Click(object sender, EventArgs e)
         {
             if (GameState.SE.SimCreated == false)
             {
@@ -581,20 +586,7 @@ namespace Pulsar4X.UI.Handlers
                 /// Alpha Build:
                 /// Draw the faction ships.
                 /// </summary>
-                m_oCurrentSceen.ShipMarkers.Clear();
-                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-                {
-                    for (int loop2 = GameState.SE.TGStart; loop2 <= GameState.SE.TGCount; loop2++)
-                    {
-                        if (GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.CurrentSystem == m_oCurrnetSystem)
-                        {
-                            Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-
-                            string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-                            m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                        }
-                    }
-                }
+                DrawTaskGroups();
             }
         }
 
@@ -792,17 +784,7 @@ namespace Pulsar4X.UI.Handlers
             /// Alpha Build:
             /// Draw the faction ships.
             /// </summary>
-            m_oCurrentSceen.ShipMarkers.Clear();
-            for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-            {
-                for (int loop2 = GameState.SE.TGStart; loop2 <= GameState.SE.TGCount; loop2++)
-                {
-                    Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-
-                    string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-                    m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                }
-            }
+            DrawTaskGroups();
 
 
 
@@ -927,6 +909,38 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oCurrentSceen = a_oSceen;
             m_oGLCanvas.SceenToRender = a_oSceen;
+        }
+
+        /// <summary>
+        /// Draw all the contacts for now, later only draw detected enemy contacts. this is called from advanceSim and SystemSelectBox
+        /// </summary>
+        private void DrawTaskGroups()
+        {
+            for (int loop = 0; loop < CurrentStarSystem.SystemContactList.Count; loop++)
+            {
+                if (CurrentStarSystem.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
+                {
+                    if (CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId != -1)
+                    {
+                        //m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[0].Verticies[0].m_v4Position.X = (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem;
+                        //m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[0].Verticies[0].m_v4Position.Y = (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem;
+
+                        Vector3 WC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem, 0.0f);
+                        m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[0].Position = WC;
+                        m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Lable.Position = WC;
+
+                    }
+                    else
+                    {
+                        Vector3 WC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem, 0.0f);
+                        string name = CurrentStarSystem.SystemContactList[loop].TaskGroup.Name;
+
+                        int ID = (m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name) - 1);
+
+                        CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId = ID;
+                    }
+                }
+            }
         }
 
         #endregion

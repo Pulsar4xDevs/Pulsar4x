@@ -41,7 +41,8 @@ namespace Pulsar4X.UI.Forms
             VM = new MenuViewModel();
 
             // bind menu items to game data:
-            this.Bind(c => c.Text, VM, d => d.GameDateTime);
+            //this.Bind(c => c.Text, VM, d => d.GameDateTime);
+            this.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -68,6 +69,8 @@ namespace Pulsar4X.UI.Forms
             m_oDockPanel.DockLeftPortion = 0.2f;
             m_oDockPanel.DockRightPortion = 0.2f;
             m_oDockPanel.ActiveDocumentChanged += new EventHandler(m_oDockPanel_ActiveDocumentChanged);
+
+            Helpers.UIController.Instance.SystemMap.MainFormReference = this;
         }
 
         #region MenuAndToolStripEvents

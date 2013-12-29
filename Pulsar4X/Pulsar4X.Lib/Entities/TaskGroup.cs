@@ -5,6 +5,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
+using Pulsar4X;
 
 /// <summary>
 /// Need a unified component list and component definition list for
@@ -277,6 +278,8 @@ namespace Pulsar4X.Entities
             AttachedMissileGroups = new BindingList<OrdnanceGroupTN>();
 
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
+
+            MapMarkerId = -1;
 
         }
 
