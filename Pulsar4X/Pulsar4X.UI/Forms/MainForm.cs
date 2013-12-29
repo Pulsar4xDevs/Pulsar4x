@@ -70,7 +70,11 @@ namespace Pulsar4X.UI.Forms
             m_oDockPanel.DockRightPortion = 0.2f;
             m_oDockPanel.ActiveDocumentChanged += new EventHandler(m_oDockPanel_ActiveDocumentChanged);
 
+            /// <summary>
+            /// Who doesn't like spaghetti references?
+            /// </summary>
             Helpers.UIController.Instance.SystemMap.MainFormReference = this;
+            Helpers.UIController.Instance.TaskGroup.SystemMapReference = Helpers.UIController.Instance.SystemMap;
         }
 
         #region MenuAndToolStripEvents

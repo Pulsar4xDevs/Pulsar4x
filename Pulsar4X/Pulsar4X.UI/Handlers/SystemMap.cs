@@ -44,6 +44,10 @@ namespace Pulsar4X.UI.Handlers
         /// The GL Canvas, created here and inserted into the viewport panel.
         /// </summary>
         GLCanvas m_oGLCanvas;
+        public GLCanvas oGLCanvas
+        {
+            get { return m_oGLCanvas; }
+        }
 
         /// <summary>
         /// Keeps tract of the start location when calculation Panning.
@@ -78,7 +82,11 @@ namespace Pulsar4X.UI.Handlers
         }
 
         // List of sceens created for display.
-        List<Sceen> m_lSystemSceens = new List<Sceen>();
+        private List<Sceen> m_lSystemSceens = new List<Sceen>();
+        public List<Sceen> SystemSceens
+        {
+            get { return m_lSystemSceens; }
+        }
 
         private Sceen m_oCurrentSceen;
 

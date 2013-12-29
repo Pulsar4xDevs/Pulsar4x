@@ -112,6 +112,12 @@ namespace Pulsar4X.UI.Handlers
         private BindingList<SystemLocationListType> SystemLocationListTypes { get; set; }
 
 
+        /// <summary>
+        /// This reference I need to taskgroup renames to appear on the systemmap.
+        /// </summary>
+        public Pulsar4X.UI.Handlers.SystemMap SystemMapReference { get; set; }
+
+
 
         /// <summary>
         /// Constructor for this handler.
@@ -311,7 +317,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void OKButton_Click(object sender, EventArgs e)
         {
-            m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
+            RenameTaskGroup();
 
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oRenameTaskGroupPanel.Hide();
@@ -327,7 +333,8 @@ namespace Pulsar4X.UI.Handlers
         {
             if (e.KeyChar == (char)Keys.Return)
             {
-                m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
+                RenameTaskGroup();
+                
 
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
                 m_oRenameTaskGroupPanel.Hide();
@@ -345,6 +352,33 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oRenameTaskGroupPanel.Hide();
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        /// <summary>
+        /// Handle name changes here
+        /// </summary>
+        private void RenameTaskGroup()
+        {
+            m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
+
+            if (m_oCurrnetTaskGroup.MapMarkerId != -1)
+            {
+                for (int loop = 0; loop < SystemMapReference.SystemSceens.Count; loop++)
+                {
+                    if (SystemMapReference.SystemSceens[loop].SceenID == m_oCurrnetTaskGroup.Contact.CurrentSystem.Id)
+                    {
+                        Vector3 WC = new Vector3((float)m_oCurrnetTaskGroup.Contact.XSystem, (float)m_oCurrnetTaskGroup.Contact.YSystem, 0.0f);
+
+
+                        GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(SystemMapReference.oGLCanvas.DefaultEffect, WC,
+                                                                               SystemMapReference.SystemSceens[loop].ShipMarkers[m_oCurrnetTaskGroup.MapMarkerId].Lable.Size, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oCurrnetTaskGroup.Name);
+
+                        SystemMapReference.SystemSceens[loop].ShipMarkers[m_oCurrnetTaskGroup.MapMarkerId].Lable = oNameLable;
+
+                        SystemMapReference.SystemSceens[loop].Refresh();
+                    }
+                }
+            }
         }
 
         #endregion
