@@ -361,7 +361,11 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
 
-            if (m_oCurrnetTaskGroup.MapMarkerId != -1)
+            /// <summary>
+            /// This is not needed as taskgroup name changes are handled by mapmarker directly.
+            /// </summary>
+            
+            /*if (m_oCurrnetTaskGroup.MapMarkerId != -1)
             {
                 for (int loop = 0; loop < SystemMapReference.SystemSceens.Count; loop++)
                 {
@@ -378,7 +382,7 @@ namespace Pulsar4X.UI.Handlers
                         SystemMapReference.SystemSceens[loop].Refresh();
                     }
                 }
-            }
+            }*/
         }
 
         #endregion
