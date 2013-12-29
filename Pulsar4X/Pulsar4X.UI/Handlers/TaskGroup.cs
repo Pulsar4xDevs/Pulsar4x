@@ -297,6 +297,7 @@ namespace Pulsar4X.UI.Handlers
             {
 
                 m_oRenameTaskGroupPanel.RenameClassTextBox.Text = m_oCurrnetTaskGroup.Name;
+
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
                 m_oRenameTaskGroupPanel.ShowDialog();
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
@@ -315,8 +316,6 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oRenameTaskGroupPanel.Hide();
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
-
-            RefreshTGPanel();
         }
 
         /// <summary>
@@ -333,8 +332,6 @@ namespace Pulsar4X.UI.Handlers
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
                 m_oRenameTaskGroupPanel.Hide();
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
-
-                RefreshTGPanel();
             }
         }
 
@@ -1109,6 +1106,7 @@ namespace Pulsar4X.UI.Handlers
                 CalculateTimeDistance();
             }
         }
+
         #endregion
     }
 }
