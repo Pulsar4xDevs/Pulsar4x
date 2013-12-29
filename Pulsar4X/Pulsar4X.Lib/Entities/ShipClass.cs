@@ -8,14 +8,13 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
-    public class ShipClassTN
+    public class ShipClassTN : GameEntity
     {
         #region Class Members
         /// <summary>
         /// Not using these yet, may not use some of them at all.
         /// </summary>
-        [Browsable(false)]
-        public Guid Id { get; set; }
+
 
         [Browsable(false)]
         public Faction Faction { get; set; }
@@ -32,17 +31,6 @@ namespace Pulsar4X.Entities
 
         [Browsable(false)]
         public int MaxLifeSupport { get; set; } //not sure what life support is supposed to be? deployment time?
-
-
-        /// <summary>
-        /// Name of the class of craft.
-        /// </summary>
-        [DisplayName("Class Name"), 
-        Category("Description"),
-        Description("The Name of the Class"),
-        Browsable(true),
-        ReadOnly(true)]
-        public string Name { get; set; }
 
         /// <summary>
         /// Notes on this ship class, used by the UI/Player.
