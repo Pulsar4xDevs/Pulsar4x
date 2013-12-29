@@ -12,7 +12,20 @@ namespace Pulsar4X.Entities
     public class GameEntity : INotifyPropertyChanged
     {
         public Guid Id { get; set; }
-        public string Name { get; set; }
+
+        private string _name;
+        public string Name
+        {
+            get { return _name; }
+            set
+            {
+                if(value != _name)
+                {
+                    _name = value;
+                    OnPropertyChanged("Name");
+                }
+            }
+        }
 
         public GameEntity()
         {
@@ -65,6 +78,15 @@ namespace Pulsar4X.Entities
         //{
         //    return Id.GetHashCode();
         //}
+
+        public virtual void OnPropertyChanged(string propertyName)
+        {
+            var propertyChanged = PropertyChanged;
+            if (propertyChanged != null)
+            {
+                propertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
     }
