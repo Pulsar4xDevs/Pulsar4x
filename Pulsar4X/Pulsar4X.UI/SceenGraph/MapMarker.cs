@@ -7,11 +7,15 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+using log4net;
 
 namespace Pulsar4X.UI.SceenGraph
 {
     public class MapMarker : SceenElement
     {
+
+        public static readonly ILog logger = LogManager.GetLogger(typeof(MapMarker));
+
         private GameEntity m_oGameEntity;
 
         public override GameEntity SceenEntity
@@ -37,9 +41,28 @@ namespace Pulsar4X.UI.SceenGraph
         {
             if(e.PropertyName == "Name")
             {
+                
                 // Change Label here!
+                Lable.Text = m_oGameEntity.Name;
+
+
+                logger.Debug("This was infact run!");
+
+                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
+                                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oGameEntity.Name);
+
+                Lable = oNameLable;
+
+                ParentSceen.Refresh();
+
+                
             }
         }
+
+        /// <summary>
+        /// The parent has to be referenceable for name changes.
+        /// </summary>
+        public Sceen ParentSceen { get; set; }
 
         public MapMarker()
             : base()

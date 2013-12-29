@@ -869,7 +869,7 @@ namespace Pulsar4X.UI.Handlers
             Cursor.Current = Cursors.WaitCursor;
 
             // create new sceen root node:
-            Sceen oNewSceen = new Sceen(m_oCurrnetSystem, m_oGLCanvas.DefaultEffect);
+            Sceen oNewSceen = new Sceen(m_oCurrnetSystem, m_oGLCanvas.DefaultEffect, this);
             //oNewSceen.SceenID = m_oCurrnetSystem.Id;
             m_lSystemSceens.Add(oNewSceen);
             // set sceen to current:
@@ -943,7 +943,7 @@ namespace Pulsar4X.UI.Handlers
                         Vector3 WC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem, 0.0f);
                         string name = CurrentStarSystem.SystemContactList[loop].TaskGroup.Name;
 
-                        int ID = (m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[CurrentStarSystem.SystemContactList[loop].TaskGroup.TaskGroupFaction.FactionID].FactionColor, name) - 1);
+                        int ID = (m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[CurrentStarSystem.SystemContactList[loop].TaskGroup.TaskGroupFaction.FactionID].FactionColor, CurrentStarSystem.SystemContactList[loop].TaskGroup) - 1);
 
                         CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId = ID;
                     }

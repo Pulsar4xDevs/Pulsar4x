@@ -155,20 +155,30 @@ namespace Pulsar4X.UI.SceenGraph
         /// <summary> Used to draw a measurement on the screen. </summary>
         private MeasurementElement m_oMeasurementElement;
 
+
+        /// <summary>
+        /// need a link to our parent for map marker updates
+        /// </summary>
+        public Pulsar4X.UI.Handlers.SystemMap ParentSystemMap { get; set; }
+
         /// <summary>
         /// Default Constructor.
         /// </summary>
-        public Sceen()
+        public Sceen(Pulsar4X.UI.Handlers.SystemMap ParentSM)
         {
             MeasureMode = false;
             m_v3ViewOffset = Vector3.Zero;
+
+            ParentSystemMap = ParentSM;
         }
 
-        public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect)
+        public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect, Pulsar4X.UI.Handlers.SystemMap ParentSM)
         {
             // set member vars:
             m_v3ViewOffset = Vector3.Zero;
             MeasureMode = false;
+
+            ParentSystemMap = ParentSM;
 
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;
@@ -448,6 +458,8 @@ namespace Pulsar4X.UI.SceenGraph
             oMapMarker.PrimaryPrimitive = oMarkerQuad;
             oMapMarker.Lable = oNameLable;
 
+            oMapMarker.ParentSceen = this;
+
             m_lMapMarkers.Add(oMapMarker);
 
             Refresh();
@@ -478,6 +490,8 @@ namespace Pulsar4X.UI.SceenGraph
             oMapMarker.AddPrimitive(oMarkerQuad);
             oMapMarker.PrimaryPrimitive = oMarkerQuad;
             oMapMarker.Lable = oNameLable;
+
+            oMapMarker.ParentSceen = this;
 
             m_lTempShipMarkers.Add(oMapMarker);
 
