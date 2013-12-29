@@ -22,14 +22,28 @@ namespace Pulsar4X.UI.SceenGraph
             }
             set
             {
-                m_oGameEntity = value;
+                if (m_oGameEntity != value)
+                {
+                    if(m_oGameEntity!= null)
+                        m_oGameEntity.PropertyChanged -= m_oGameEntity_PropertyChanged;
+                    m_oGameEntity = value;
+                    if(value != null)
+                        m_oGameEntity.PropertyChanged += m_oGameEntity_PropertyChanged;
+                }
+            }
+        }
+
+        void m_oGameEntity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName == "Name")
+            {
+                // Change Label here!
             }
         }
 
         public MapMarker()
             : base()
-        {
-        }
+        { }
 
         public override void Render()
         {

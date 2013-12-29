@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 
@@ -8,7 +9,7 @@ namespace Pulsar4X.Entities
     /// <summary>
     /// Base Game Entity. All objects/entities in the game should inherit from this.
     /// </summary>
-    public class GameEntity
+    public class GameEntity : INotifyPropertyChanged
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -64,5 +65,7 @@ namespace Pulsar4X.Entities
         //{
         //    return Id.GetHashCode();
         //}
+
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

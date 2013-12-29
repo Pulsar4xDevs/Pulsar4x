@@ -461,9 +461,10 @@ namespace Pulsar4X.UI.SceenGraph
         /// <param name="MMColor">Color of marker</param>
         /// <param name="name">Name of marker</param>
         /// <returns>index of marker</returns>
-        public int AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect, Color MMColor, string name)
+        public int AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect, Color MMColor, GameEntity entity)
         {
             MapMarker oMapMarker = new MapMarker();
+            oMapMarker.SceenEntity = entity;
 
             GLUtilities.GLQuad oMarkerQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                         a_v3Pos,
@@ -472,7 +473,7 @@ namespace Pulsar4X.UI.SceenGraph
                                                                         UIConstants.Textures.DEFAULT_PLANET_ICON);
             // create name lable:
             GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, a_v3Pos,
-                UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, name);
+                UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, entity.Name);
 
             oMapMarker.AddPrimitive(oMarkerQuad);
             oMapMarker.PrimaryPrimitive = oMarkerQuad;
