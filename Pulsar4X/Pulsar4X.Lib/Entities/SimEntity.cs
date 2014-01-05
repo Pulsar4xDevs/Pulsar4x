@@ -337,7 +337,16 @@ namespace Pulsar4X.Entities
                     /// Adding new taskgroups means adding a loop here to run through them all.
                     /// </summary>
                     if (P[loop].TaskGroups[loop2].TaskGroupOrders.Count != 0)
+                    {
                         P[loop].TaskGroups[loop2].FollowOrders((uint)(CurrentTick - lastTick));
+                    }
+                    else if(P[loop].TaskGroups[loop2].DrawTravelLine == 1)
+                    {
+                        P[loop].TaskGroups[loop2].Contact.LastXSystem = P[loop].TaskGroups[loop2].Contact.XSystem;
+                        P[loop].TaskGroups[loop2].Contact.LastYSystem = P[loop].TaskGroups[loop2].Contact.YSystem;
+
+                        P[loop].TaskGroups[loop2].DrawTravelLine = 2;
+                    }
                 }
             }
 

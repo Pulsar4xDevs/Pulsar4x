@@ -478,7 +478,7 @@ namespace Pulsar4X.UI.SceenGraph
         /// <returns>index of marker</returns>
         public int AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect, Color MMColor, GameEntity entity)
         {
-            MapMarker oMapMarker = new MapMarker();
+            MapMarker oMapMarker = new MapMarker(a_oDefaultEffect, MMColor);
             oMapMarker.SceenEntity = entity;
 
             GLUtilities.GLQuad oMarkerQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
@@ -495,11 +495,6 @@ namespace Pulsar4X.UI.SceenGraph
             oMapMarker.Lable = oNameLable;
 
             oMapMarker.ParentSceen = this;
-
-            Vector2 LineVect = new Vector2(1.0f, 1.0f);
-            GLLine oLine = new GLLine(a_oDefaultEffect, a_v3Pos, LineVect, MMColor);
-
-            oMapMarker.AddPrimitive(oLine);
 
             m_lTempShipMarkers.Add(oMapMarker);
 

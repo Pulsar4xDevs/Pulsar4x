@@ -182,7 +182,12 @@ namespace Pulsar4X.Entities
         public BindingList<TaskGroupTN> TaskGroupsOrdered { get; set; }
 
 
-
+        /// <summary>
+        /// Controls whether or not the travel line will be set. 0 means draw the line, 1 means set last position to current position. 2 means that last position has been set to current position.
+        /// 3 means that the line has been updated on the system map as being not drawn, so do not display it again.
+        /// This is referenced in SimEntity and SystemMap as well as here.
+        /// </summary>
+        public byte DrawTravelLine { get; set; }
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
@@ -205,8 +210,11 @@ namespace Pulsar4X.Entities
             Contact.XSystem = OrbitingBody.XSystem;
             Contact.YSystem = OrbitingBody.YSystem;
             Contact.ZSystem = OrbitingBody.ZSystem;
+            Contact.LastXSystem = Contact.XSystem;
+            Contact.LastYSystem = Contact.YSystem;
             Contact.CurrentSystem = StartingSystem;
             StartingSystem.AddContact(Contact);
+            DrawTravelLine = 2;
             
             m_dMass = 0.0;
 
@@ -1165,8 +1173,11 @@ namespace Pulsar4X.Entities
         /// <param name="Secondary">Secondary will be an enum ID for facility type,component,troop formation, or tractorable ship/shipyard. -1 if not present.</param>
         public void IssueOrder(Orders OrderToTaskGroup)
         {
-            if(TaskGroupOrders.Count == 0)
+            if (TaskGroupOrders.Count == 0)
+            {
                 NewOrders = true;
+                DrawTravelLine = 0;
+            }
 
             TaskGroupOrders.Add(OrderToTaskGroup);
 
@@ -1407,6 +1418,7 @@ namespace Pulsar4X.Entities
                     }
                     else
                     {
+                        DrawTravelLine = 1;
                         CanOrder = Constants.ShipTN.OrderState.AcceptOrders;
                     }
                 }

@@ -28,10 +28,10 @@ namespace Pulsar4X.UI.SceenGraph
             {
                 if (m_oGameEntity != value)
                 {
-                    if(m_oGameEntity!= null)
+                    if (m_oGameEntity != null)
                         m_oGameEntity.PropertyChanged -= m_oGameEntity_PropertyChanged;
                     m_oGameEntity = value;
-                    if(value != null)
+                    if (value != null)
                         m_oGameEntity.PropertyChanged += m_oGameEntity_PropertyChanged;
                 }
             }
@@ -39,19 +39,19 @@ namespace Pulsar4X.UI.SceenGraph
 
         void m_oGameEntity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if(e.PropertyName == "Name")
+            if (e.PropertyName == "Name")
             {
-                 /// <summary>
-                 /// Change Label here!
-                 /// </summary>
-                 Lable.Text = m_oGameEntity.Name;
+                /// <summary>
+                /// Change Label here!
+                /// </summary>
+                Lable.Text = m_oGameEntity.Name;
 
-                 GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
-                                                                                Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oGameEntity.Name);
+                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
+                                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oGameEntity.Name);
 
-                 Lable = oNameLable;
+                Lable = oNameLable;
 
-                 ParentSceen.Refresh();
+                ParentSceen.Refresh();
 
             }
         }
@@ -61,15 +61,38 @@ namespace Pulsar4X.UI.SceenGraph
         /// </summary>
         public Sceen ParentSceen { get; set; }
 
+
+
+        /// <summary>
+        /// Line from Last Position to Current Position for taskgroups.
+        /// </summary>
+        private MeasurementElement TravelLine { get; set; }
+
+
         public MapMarker()
             : base()
         { }
+
+        public MapMarker(GLEffect a_oDefaultEffect, System.Drawing.Color MMColor)
+        {
+            // Create measurement element:
+            TravelLine = new MeasurementElement();
+            TravelLine.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), MMColor, UIConstants.Textures.DEFAULT_TEXTURE);
+            TravelLine.AddPrimitive(TravelLine.PrimaryPrimitive);
+            TravelLine.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, MMColor, UIConstants.Textures.DEFAULT_GLFONT2, "");
+
+        }
 
         public override void Render()
         {
             foreach (GLPrimitive oPrimitive in m_lPrimitives)
             {
                 oPrimitive.Render();
+
+                if (TravelLine != null)
+                {
+                    TravelLine.Render();
+                }
             }
 
             if (RenderChildren == true)
@@ -135,8 +158,12 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             // Adjust the size of the text so it is always 10 point:
-            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler; 
+            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
 
+            if (TravelLine != null)
+            {
+                TravelLine.Refresh(a_fZoomScaler);
+            }
 
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)
@@ -148,6 +175,41 @@ namespace Pulsar4X.UI.SceenGraph
         public override string ToString()
         {
             return Lable.Text;
+        }
+
+        public void SetMeasurementStartPos(Vector3 a_v3Pos)
+        {
+
+            GLLine temp = TravelLine.PrimaryPrimitive as GLLine;
+
+            a_v3Pos.X = a_v3Pos.X / 2;
+            a_v3Pos.Y = a_v3Pos.Y / 2;
+
+            if (temp != null)
+            {
+                temp.Position = a_v3Pos;
+                temp.Verticies[0].m_v4Position = new Vector4(a_v3Pos.X, a_v3Pos.Y, a_v3Pos.Z, 1.0f);
+                temp.UpdateVBOs();
+            }
+        }
+
+        public void SetMeasurementEndPos(Vector3 a_v3Pos)
+        {
+            GLLine temp = TravelLine.PrimaryPrimitive as GLLine;
+
+            a_v3Pos.X = a_v3Pos.X / 2;
+            a_v3Pos.Y = a_v3Pos.Y / 2;
+
+            float XAdjust = a_v3Pos.X - TravelLine.Primitives[0].Verticies[0].m_v4Position.X;
+            float YAdjust = a_v3Pos.Y - TravelLine.Primitives[0].Verticies[0].m_v4Position.Y;
+
+            a_v3Pos.X = a_v3Pos.X + XAdjust;
+            a_v3Pos.Y = a_v3Pos.Y + YAdjust;
+
+            if (temp != null)
+            {
+                temp.PosEnd = a_v3Pos;
+            }
         }
     }
 }

@@ -938,16 +938,17 @@ namespace Pulsar4X.UI.Handlers
                         m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Lable.Position = WC;
 
                         Vector3 LC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.LastXSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.LastYSystem, 0.0f);
-                        if (LC != WC)
+
+                        if (CurrentStarSystem.SystemContactList[loop].TaskGroup.DrawTravelLine != 3)
                         {
-                            m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[1].Position = WC;
-                            GLLine Temp = m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[1] as GLLine;
-                            if (Temp != null)
-                            {
-                                Temp.PosEnd = LC;
-                            }
+                            m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].SetMeasurementStartPos(LC);
+                            m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].SetMeasurementEndPos(WC);
                         }
 
+                        if (CurrentStarSystem.SystemContactList[loop].TaskGroup.DrawTravelLine == 2)
+                        {
+                            CurrentStarSystem.SystemContactList[loop].TaskGroup.DrawTravelLine = 3;
+                        }
                     }
                     else
                     {
