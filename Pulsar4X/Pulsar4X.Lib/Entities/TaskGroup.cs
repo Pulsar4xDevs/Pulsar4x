@@ -214,7 +214,7 @@ namespace Pulsar4X.Entities
             Contact.LastYSystem = Contact.YSystem;
             Contact.CurrentSystem = StartingSystem;
             StartingSystem.AddContact(Contact);
-            DrawTravelLine = 2;
+            DrawTravelLine = 3;
             
             m_dMass = 0.0;
 
