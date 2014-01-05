@@ -41,7 +41,9 @@ namespace Pulsar4X.UI.SceenGraph
         {
             if(e.PropertyName == "Name")
             {
-                // Change Label here! if this ever works.
+                 /// <summary>
+                 /// Change Label here!
+                 /// </summary>
                  Lable.Text = m_oGameEntity.Name;
 
                  GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,

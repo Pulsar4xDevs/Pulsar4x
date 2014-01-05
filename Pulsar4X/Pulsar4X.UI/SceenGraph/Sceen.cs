@@ -48,6 +48,9 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
+        /// <summary>
+        /// These are the markers for ship taskgroups
+        /// </summary>
         private BindingList<MapMarker> m_lTempShipMarkers = new BindingList<MapMarker>();
 
         public BindingList<MapMarker> ShipMarkers
@@ -56,6 +59,16 @@ namespace Pulsar4X.UI.SceenGraph
             {
                 return m_lTempShipMarkers;
             }
+        }
+
+        /// <summary>
+        /// List of ship last position lines.
+        /// </summary>
+        private BindingList<GLLine> m_lShipLastPosLine = new BindingList<GLLine>();
+
+        public BindingList<GLLine> ShipLastPosLine
+        {
+            get { return m_lShipLastPosLine; }
         }
 
         /// <summary> 
@@ -368,6 +381,11 @@ namespace Pulsar4X.UI.SceenGraph
                 oElement.Render();
             }
 
+            foreach (GLLine oLine in m_lShipLastPosLine)
+            {
+                oLine.Render();
+            }
+
             if (MeasureMode == true)
             {
                 m_oMeasurementElement.Render();
@@ -392,6 +410,11 @@ namespace Pulsar4X.UI.SceenGraph
             foreach (SceenElement oElement in m_lTempShipMarkers)
             {
                 oElement.Refresh(m_fZoomScaler);
+            }
+
+            foreach (GLLine oLine in m_lShipLastPosLine)
+            {
+                oLine.Render();
             }
 
             m_oMeasurementElement.Refresh(m_fZoomScaler);
@@ -494,6 +517,11 @@ namespace Pulsar4X.UI.SceenGraph
             oMapMarker.ParentSceen = this;
 
             m_lTempShipMarkers.Add(oMapMarker);
+
+            Vector2 LineVect = new Vector2(1.0f,1.0f);
+            GLLine oLine = new GLLine(a_oDefaultEffect,a_v3Pos, LineVect, MMColor);
+
+            m_lShipLastPosLine.Add(oLine);
 
             Refresh();
 
