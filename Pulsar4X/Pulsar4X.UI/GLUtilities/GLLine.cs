@@ -12,7 +12,7 @@ using log4net;
 
 namespace Pulsar4X.UI.GLUtilities
 {
-    public class GLLine : GLPrimitive
+    class GLLine : GLPrimitive
     {
         private Vector3 m_V3PosEnd;  
       

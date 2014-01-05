@@ -940,7 +940,12 @@ namespace Pulsar4X.UI.Handlers
                         Vector3 LC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.LastXSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.LastYSystem, 0.0f);
                         if (LC != WC)
                         {
-                            m_oCurrentSceen.ShipLastPosLine[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].PosEnd = WC;
+                            m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[1].Position = WC;
+                            GLLine Temp = m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[1] as GLLine;
+                            if (Temp != null)
+                            {
+                                Temp.PosEnd = LC;
+                            }
                         }
 
                     }
