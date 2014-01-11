@@ -3106,7 +3106,7 @@ namespace Pulsar4X.UI.Handlers
                             BeamType = ComponentTypeTN.Particle;
                             Cal = PartTech - (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex - AdvPartTech - 1);
 
-                            float RangeAdjust = (float)Constants.BeamWeaponTN.ParticleRange[Cal] / 10.0f;
+                            float RangeAdjust = (float)Constants.BeamWeaponTN.ParticleRange[Range];
                             Entry = String.Format("Particle Beam-{0} C{1}/R{2}",Constants.BeamWeaponTN.ParticleDamage[Cal],Constants.BeamWeaponTN.Capacitor[Cap],RangeAdjust);
                         }
                         else
@@ -3114,8 +3114,8 @@ namespace Pulsar4X.UI.Handlers
                             BeamType = ComponentTypeTN.AdvParticle;
                             Cal = AdvPartTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
 
-                            float RangeAdjust = (float)Constants.BeamWeaponTN.ParticleRange[Cal] / 10.0f;
-                            Entry = String.Format("Advanced Particle Beam-{0} C{1}/R{2}", Constants.BeamWeaponTN.ParticleDamage[Cal], Constants.BeamWeaponTN.Capacitor[Cap], RangeAdjust);
+                            float RangeAdjust = (float)Constants.BeamWeaponTN.ParticleRange[Range];
+                            Entry = String.Format("Advanced Particle Beam-{0} C{1}/R{2}", Constants.BeamWeaponTN.AdvancedParticleDamage[Cal], Constants.BeamWeaponTN.Capacitor[Cap], RangeAdjust);
                         }
 
                         BeamProject = new BeamDefTN(Entry, BeamType, (byte)Cal, (byte)Range, (byte)Cap, 1.0f);

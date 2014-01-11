@@ -694,6 +694,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// The target for this ordnance group is another ordnance group.
+        /// </summary>
+        private OrdnanceGroupTN MissileGroup;
+        public OrdnanceGroupTN missileGroup
+        {
+            get { return MissileGroup; }
+        }
+
+        /// <summary>
         /// Constructor for ship targets.
         /// </summary>
         /// <param name="ShipTarget">Ship that will be the target</param>
@@ -731,6 +740,16 @@ namespace Pulsar4X.Entities.Components
         {
             TargetType = WPTarget.SSEntity;
             WP = WPTarget;
+        }
+
+        /// <summary>
+        /// Constructor for Missile group targets.
+        /// </summary>
+        /// <param name="OGTarget">missile group that this group is targeted on.</param>
+        public OrdnanceTargetTN(OrdnanceGroupTN OGTarget)
+        {
+            TargetType = OGTarget.SSEntity;
+            MissileGroup = OGTarget;
         }
     }
 

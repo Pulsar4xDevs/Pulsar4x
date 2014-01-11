@@ -188,6 +188,8 @@ namespace Pulsar4X.Entities
         /// This is referenced in SimEntity and SystemMap as well as here.
         /// </summary>
         public byte DrawTravelLine { get; set; }
+
+
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
