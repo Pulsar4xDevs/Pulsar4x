@@ -1151,6 +1151,24 @@ namespace Pulsar4X
             public static float[] FeedMechanism = { 0.75f, 0.8f, 0.85f, 0.9f, 0.92f, 0.94f, 0.96f, 0.98f, 0.99f };
         }
 
+        public static class LauncherTN
+        {
+            /// <summary>
+            /// Launcher size adjustment
+            /// </summary>
+            public static float[] Reduction = { 1.0f, 0.75f, 0.5f, 0.33f, 0.25f, 0.15f };
+
+            /// <summary>
+            /// Launcher penalty from reduction.
+            /// </summary>
+            public static float[] Penalty     = { 1.0f, 2.0f, 5.0f, 20.0f, 100.0f, 15.0f };
+
+            /// <summary>
+            /// Which index is the boxlauncher?
+            /// </summary>
+            public static int BoxLauncher = 5;
+        }
+
 
         public static class OrdnanceTN
         {

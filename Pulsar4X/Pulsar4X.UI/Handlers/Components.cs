@@ -77,6 +77,7 @@ namespace Pulsar4X.UI.Handlers
         private ShieldDefTN ShieldProject;
         private EngineDefTN EngineProject;
         private BeamDefTN BeamProject;
+        private MissileLauncherDefTN LauncherProject;
 
         private IntPtr eventMask;
 
@@ -141,6 +142,7 @@ namespace Pulsar4X.UI.Handlers
             ShieldProject = null;
             EngineProject = null;
             BeamProject = null;
+            LauncherProject = null;
         }
 
         /// <summary>
@@ -388,6 +390,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Missile Launcher
                 case ComponentsViewModel.Components.MissileLauncher:
+
+                    if (LauncherProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        LauncherProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.MLauncherDef.Add(LauncherProject);
+
                 break;
                 #endregion
 
@@ -1427,6 +1434,57 @@ namespace Pulsar4X.UI.Handlers
                         SetLabels("Missile Launcher Size", "Missile Launcher Reload Rate", "Platform Type", "Reduced Size Launchers", "", "", "");
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Missile launchers may load ordnance of any size less than or equal to their own size before size reductions.";
+
+                        int ReloadTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LauncherReloadRate];
+                        int minTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ReducedSizeLaunchers];
+
+                        if (ReloadTech > 11)
+                            ReloadTech = 11;
+
+                        if (minTech > 5)
+                            minTech = 5;
+
+                        for (int loop = 1; loop <= 100; loop++)
+                        {
+                            Entry = String.Format("Missile Launcher Size {0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        for (int loop = ReloadTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Missile Launcher Reload Rate {0}", (loop + 1));
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+                        m_oComponentDesignPanel.TechComboBoxThree.Items.Add("Ship-based System");
+                        m_oComponentDesignPanel.TechComboBoxThree.Items.Add("PDC-based System");
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+
+
+                        for (int loop = 0; loop <= minTech; loop++)
+                        {
+                            switch (loop)
+                            {
+                                case 0: m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Standard Size and Reload Rate");
+                                break;
+                                case 1: m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Reduced Size Launcher 0.75 Size / 2x Reload");
+                                break;
+                                case 2: m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Reduced Size Launcher 0.5 Size / 5x Reload");
+                                break;
+                                case 3: m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Reduced Size Launcher 0.33 Size / 20x Reload");
+                                break;
+                                case 4: m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Reduced Size Launcher 0.25 Size / 100x Reload");
+                                break;
+                                case 5: m_oComponentDesignPanel.TechComboBoxFour.Items.Add("Box Launcher 0.15 Size / 15x (No Internal Reloads)");
+                                break;
+                            }
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
 
                     break;
                     #endregion
@@ -3066,6 +3124,96 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Missile Launcher
                 case ComponentsViewModel.Components.MissileLauncher:
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1)
+                    {
+
+                        int ReloadTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LauncherReloadRate];
+                        int ReduceTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ReducedSizeLaunchers];
+
+                        if (ReloadTech > 11)
+                            ReloadTech = 11;
+                        if (ReduceTech > 5)
+                            ReduceTech = 5;
+
+                        int size = m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex + 1;
+                        int reload = (ReloadTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex) + 1;
+
+                        bool ShipPDC = false;
+                        if (m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex == 0)
+                        {
+                            ShipPDC = false;
+                            Entry = String.Format("Size {0}", size);
+                        }
+                        else
+                        {
+                            ShipPDC = true;
+                            Entry = String.Format("PDC Size {0}", size);
+                        }
+
+                        int Reduce = m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex;
+
+                        if (Reduce == Constants.LauncherTN.BoxLauncher)
+                        {
+                            Entry = String.Format("{0} Box Launcher", Entry);
+                        }
+                        else if (Reduce == 0)
+                        {
+                            Entry = String.Format("{0} Missile Launcher", Entry);
+                        }
+                        else
+                        {
+                            Entry = String.Format("{0} Missile Launcher ({1}% Reduction)", Entry, (Constants.LauncherTN.Reduction[Reduce] * 100.0f));
+                        }
+
+                        LauncherProject = new MissileLauncherDefTN(Entry, (float)size, reload, ShipPDC, Reduce);
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        Entry = String.Format("Maximum Missile Size: {0}", size);
+
+                        if (Reduce != Constants.LauncherTN.BoxLauncher)
+                        {
+                            Entry = String.Format("{0}     Rate of Fire: {1} seconds\n", Entry, LauncherProject.rateOfFire);
+                        }
+                        else
+                        {
+                            float HR = (float)LauncherProject.hangarReload / 60.0f;
+                            float MF = (float)LauncherProject.mFReload / 3600.0f;
+                            Entry = String.Format("{0}     Hangar Reload: {1} minutes    MF Reload: {2} hours\n", Entry, HR, MF);
+                        }
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Launcher Size: {0} Tons    Launcher HTK: {1}\n", (LauncherProject.size * 50.0f), LauncherProject.htk);
+                        else
+                            Entry = String.Format("Launcher Size: {0} HS    Launcher HTK: {1}\n", LauncherProject.size, LauncherProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost Per Launcher: {0}    Crew Per Launcher: {1}\n",LauncherProject.cost, LauncherProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (ShipPDC == true)
+                        {
+                            Entry = "PDC Only\n";
+                            m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                        }
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", Math.Round(LauncherProject.cost * 10));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (Reduce == Constants.LauncherTN.BoxLauncher)
+                        {
+                            Entry = "\nNote that Box Launchers are not affected by increases in Reload Rate Technology as they are reloaded externally in a hangar deck or at maintenance facilities\n";
+                            m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                        }
+                    }
                 break;
                 #endregion
 

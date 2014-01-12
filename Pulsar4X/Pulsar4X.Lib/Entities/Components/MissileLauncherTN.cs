@@ -77,7 +77,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ReloadTech">Missile reload techlevel.</param>
         /// <param name="ShipOrPDC">Is this a ship launch tube, or a PDC launch silo? reload time is shorter for silos.</param>
         /// <param name="Reduction">Size reduction of the launcher, effects reload rate, cost, and crew as well.</param>
-        public MissileLauncherDefTN(string title, float hs, int ReloadTech, bool ShipOrPDC, float Reduction)
+        public MissileLauncherDefTN(string title, float hs, int ReloadTech, bool ShipOrPDC, int Reduction)
         {
             Id = Guid.NewGuid();
 
@@ -87,12 +87,13 @@ namespace Pulsar4X.Entities.Components
             /// Basic Stats:
             /// </summary>
             Name = title;
-            size = hs * Reduction;
+            size = hs * Constants.LauncherTN.Reduction[Reduction];
+            htk = (byte)Math.Round((size/2.0f));
 
             /// <summary>
             /// Boxlaunchers have no crew requirement, and reload rate should not affect their cost as it has no other effects.
             /// </summary>
-            if (Reduction == 0.15)
+            if (Reduction == Constants.LauncherTN.BoxLauncher)
             {
                 crew = 0;
                 cost = (decimal)(size * 4.0f);
@@ -100,7 +101,7 @@ namespace Pulsar4X.Entities.Components
             else
             {
                 crew = (byte)Math.Round(size * 3.0f);
-                cost = (decimal)(size * 4.0f * (float)(ReloadTech));
+                cost = (decimal)(size * 4.0f) + (decimal)(size * (float)(ReloadTech-1));
             }
 
             /// <summary>
@@ -111,41 +112,34 @@ namespace Pulsar4X.Entities.Components
             IsPDCSilo = ShipOrPDC;
 
             float ReloadFactor = ( 30.0f * hs ) / (float)ReloadTech;
-
-            if (Reduction == 0.75)
-            {
-                ReloadFactor = ReloadFactor * 2.0f;
-            }
-            else if (Reduction == 0.5)
-            {
-                ReloadFactor = ReloadFactor * 5.0f;
-            }
-            else if (Reduction == 0.33)
-            {
-                ReloadFactor = ReloadFactor * 20.0f;
-            }
-            else if (Reduction == 0.25)
-            {
-                ReloadFactor = ReloadFactor * 100.0f;
-            }
+            ReloadFactor = ReloadFactor * Constants.LauncherTN.Penalty[Reduction];
 
             if (isPDCSilo == true)
             {
                 ReloadFactor = ReloadFactor / 2.0f;
             }
 
-            RateOfFire = (int)ReloadFactor;
+            float FinalRF = ReloadFactor / 5.0f;
+            FinalRF = (float)Math.Ceiling((float)FinalRF);
+            FinalRF = FinalRF * 5.0f;
 
-            if (Reduction == 0.15)
+            RateOfFire = (int)FinalRF;
+
+
+            if (Reduction == Constants.LauncherTN.BoxLauncher)
             {
                 IsBoxLauncher = true;
                 RateOfFire = -1;
-                HangarReload = 450 * (int)hs;
+
+                ReloadFactor = 30.0f * hs * Constants.LauncherTN.Penalty[Reduction];
+                HangarReload = (int)ReloadFactor;
                 MFReload = HangarReload * 10;
+
                 if (isPDCSilo == true)
                 {
                     /// <summary>
                     /// PDCS don't actually have to load from maintenance facilities, but they use this time in any event.
+                    HangarReload = HangarReload / 2;
                     MFReload = MFReload / 2;
                     RateOfFire = MFReload;
                 }
