@@ -70,14 +70,15 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// These are the componentdefTNs for each research project.
         /// </summary>
-        private ActiveSensorDefTN ActiveSensorProject;
-        private PassiveSensorDefTN PassiveSensorProject;
+        private ActiveSensorDefTN    ActiveSensorProject;
+        private PassiveSensorDefTN   PassiveSensorProject;
         private BeamFireControlDefTN BeamFCProject;
-        private ReactorDefTN ReactorProject;
-        private ShieldDefTN ShieldProject;
-        private EngineDefTN EngineProject;
-        private BeamDefTN BeamProject;
+        private ReactorDefTN         ReactorProject;
+        private ShieldDefTN          ShieldProject;
+        private EngineDefTN          EngineProject;
+        private BeamDefTN            BeamProject;
         private MissileLauncherDefTN LauncherProject;
+        private MagazineDefTN        MagazineProject;
 
         private IntPtr eventMask;
 
@@ -143,6 +144,7 @@ namespace Pulsar4X.UI.Handlers
             EngineProject = null;
             BeamProject = null;
             LauncherProject = null;
+            MagazineProject = null;
         }
 
         /// <summary>
@@ -370,6 +372,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Magazines
                 case ComponentsViewModel.Components.Magazine:
+
+                    if (MagazineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        MagazineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.MagazineDef.Add(MagazineProject);
+
                 break;
                 #endregion
 
@@ -1357,6 +1364,100 @@ namespace Pulsar4X.UI.Handlers
                         SetLabels("Magazine Feed System Efficiency", "Magazine Ejection System", "Armour", "Magazine Size", "HTK", "", "");
 
                         m_oComponentDesignPanel.NotesLabel.Text = "HTK consumes internal magazine space as though it were armour being applied to the inside of the component.";
+
+                        int FeedTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MagazineFeedEfficiency];
+                        int EjectTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MagazineEjectionSystem];
+                        int ArmourTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
+
+                        if (FeedTech > 8)
+                            FeedTech = 8;
+                        if (EjectTech > 8)
+                            EjectTech = 8;
+                        if (ArmourTech > 12)
+                            ArmourTech = 12;
+
+                        for (int loop = FeedTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Magazine Feed System Efficiency - {0}%", (Constants.MagazineTN.FeedMechanism[loop] * 100.0f));
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        for(int loop = EjectTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Magazine Ejection System - {0}% Chance", (Constants.MagazineTN.Ejection[loop] * 100.0f));
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+
+                        for (int loop = ArmourTech; loop >= 0; loop--)
+                        {
+                            switch (loop)
+                            {
+                                case 0:
+                                    Entry = "Conventional";
+                                    break;
+                                case 1:
+                                    Entry = "Duranium";
+                                    break;
+                                case 2:
+                                    Entry = "High Density Duranium";
+                                    break;
+                                case 3:
+                                    Entry = "Composite";
+                                    break;
+                                case 4:
+                                    Entry = "Ceramic Composite";
+                                    break;
+                                case 5:
+                                    Entry = "Laminate Composite";
+                                    break;
+                                case 6:
+                                    Entry = "Compressed Carbon";
+                                    break;
+                                case 7:
+                                    Entry = "Biphased Carbide";
+                                    break;
+                                case 8:
+                                    Entry = "Crystaline Composite";
+                                    break;
+                                case 9:
+                                    Entry = "Superdense";
+                                    break;
+                                case 10:
+                                    Entry = "Bonded Superdense";
+                                    break;
+                                case 11:
+                                    Entry = "Coherent Superdense";
+                                    break;
+                                case 12:
+                                    Entry = "Collapsium";
+                                    break;
+                            }
+
+                            Entry = String.Format("{0} Armour", Entry);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+
+                        for (int loop = 1; loop <= 30; loop++)
+                        {
+                            Entry = loop.ToString();
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+
+                        for (int loop = 1; loop <= 10; loop++)
+                        {
+                            Entry = loop.ToString();
+                            m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
 
                     break;
                     #endregion
@@ -3056,6 +3157,59 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Magazines
                 case ComponentsViewModel.Components.Magazine:
+
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex != -1)
+                    {
+                        int FeedTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MagazineFeedEfficiency];
+                        int EjectTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MagazineEjectionSystem];
+                        int ArmourTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
+
+                        if (FeedTech > 8)
+                            FeedTech = 8;
+                        if (EjectTech > 8)
+                            EjectTech = 8;
+                        if (ArmourTech > 12)
+                            ArmourTech = 12;
+
+                        int feed = FeedTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+                        int eject = EjectTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+                        int armour = ArmourTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+                        int size = m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex + 1;
+                        int htk = m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex + 1;
+
+                        Entry = "Magazine";
+                        MagazineProject = new MagazineDefTN(Entry, (float)size, (byte)htk, feed, eject, armour);
+
+                        Entry = String.Format("Capacity {0} Magazine: Exp {1}%  HTK{2}", MagazineProject.capacity, Math.Round((1.0f - Constants.MagazineTN.Ejection[eject])*100.0f), htk);
+                        MagazineProject.Name = Entry;
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        Entry = String.Format("Capacity: {0}     Internal Armour: {1} HS     Explosion Chance: {2}\n", MagazineProject.capacity, MagazineProject.armourFactor, Math.Round((1.0f - Constants.MagazineTN.Ejection[eject]) * 100.0f));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Magazine Size: {0} Tons    Magazine HTK: {1}\n", (MagazineProject.size * 50.0f), MagazineProject.htk);
+                        else
+                            Entry = String.Format("Magazine Size: {0} HS    Magazine HTK: {1}\n", MagazineProject.size, MagazineProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n", MagazineProject.cost, MagazineProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (MagazineProject.cost * 10));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        //FormattedRange = RangeFormat.ToString("#,##0");
+                    }
                 break;
                 #endregion
 

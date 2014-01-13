@@ -52,6 +52,15 @@ namespace Pulsar4X.Entities.Components
             get { return Capacity; }
         }
 
+        /// <summary>
+        /// Internal armour HS
+        /// </summary>
+        private float ArmourFactor;
+        public float armourFactor
+        {
+            get { return ArmourFactor; }
+        }
+
 
 
         /// <summary>
@@ -110,7 +119,11 @@ namespace Pulsar4X.Entities.Components
                 float radius = (float)Math.Pow(radius3, temp1);
                 float radius2 = (float)Math.Pow(radius, 2.0f);
                 float area = (4.0f * pi) * radius2;
-                float StrReq = area / 8.0f;
+                float StrReq = area / 10.0f;
+
+                StrReq = StrReq * 100.0f;
+                StrReq = (float)Math.Round(StrReq);
+                StrReq = StrReq / 100.0f;
 
                 int mult = desiredHTK - 1;
 
@@ -119,9 +132,15 @@ namespace Pulsar4X.Entities.Components
                 ArmorFactor = (StrReq / Constants.MagazineTN.MagArmor[ArmorTech]) * (float)mult;
             }
 
+            ArmorFactor = ArmorFactor * 100.0f;
+            ArmorFactor = (float)Math.Round(ArmorFactor);
+            ArmorFactor = ArmorFactor / 100.0f;
+
             float modifiedSize = size - ArmorFactor;
             if (modifiedSize < 0.0f)
                 modifiedSize = 0.0f;
+
+            ArmourFactor = ArmorFactor;
 
             Capacity = (int)(modifiedSize * 20.0f * Constants.MagazineTN.FeedMechanism[FeedEfficiencyTech]);
 
