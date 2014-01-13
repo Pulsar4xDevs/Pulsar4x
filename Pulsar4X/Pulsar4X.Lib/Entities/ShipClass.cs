@@ -2029,6 +2029,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void BuildClassSummary()
         {
+            bool control = false;
             Summary = "N/A";
 
             /// <summary>
@@ -2068,9 +2069,17 @@ namespace Pulsar4X.Entities
 
             Summary = String.Format("{0}{1}",Summary,Entry);
 
-            Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n\n", MaxDeploymentTime, SpareCrewQuarters);
+            Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n", MaxDeploymentTime, SpareCrewQuarters);
 
             Summary = String.Format("{0}{1}",Summary,Entry);
+
+            if (ShipMagazineDef.Count != 0)
+            {
+                Entry = String.Format("Magazine {0}\n", TotalMagazineCapacity);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+            }
+
+            Summary = String.Format("{0}\n",Summary);
 
             if (ShipEngineDef != null)
             {
@@ -2205,6 +2214,7 @@ namespace Pulsar4X.Entities
                                           (ShipBeamDef[loop].damage.Count - 1), ROF, DamageString);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);
+                control = true;
             }
 
             for (int loop = 0; loop < ShipBFCDef.Count; loop++)
@@ -2228,6 +2238,8 @@ namespace Pulsar4X.Entities
                                       ShipBFCDef[loop].tracking, AccString);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);
+
+                control = true;
             }
 
             for (int loop = 0; loop < ShipReactorDef.Count; loop++)
@@ -2245,10 +2257,87 @@ namespace Pulsar4X.Entities
                                           ShipReactorCount[loop], TPO, ShipReactorDef[loop].expRisk);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);
+
+                control = true;
             }
 
-            Entry = "\n";
-            Summary = String.Format("{0}{1}",Summary,Entry);
+            if (control == true)
+            {
+                Entry = "\n";
+                Summary = String.Format("{0}{1}", Summary, Entry);
+            }
+
+            control = false;
+
+            for (int loop = 0; loop < ShipMLaunchDef.Count; loop++)
+            {
+                Entry = String.Format("{0} ({1})    Missile Size {2}    Rate of Fire {3}\n",ShipMLaunchDef[loop].Name,ShipMLaunchCount[loop],ShipMLaunchDef[loop].launchMaxSize,
+                                                                                          ShipMLaunchDef[loop].rateOfFire);
+                Summary = String.Format("{0}{1}",Summary,Entry);
+                control = true;
+            }
+
+            for (int loop = 0; loop < ShipMFCDef.Count; loop++)
+            {
+                String RangeString = "-4.2m";
+
+                if (ShipMFCDef[loop].maxRange >= 100000)
+                {
+                    float RangeB = (float)Math.Floor((double)ShipMFCDef[loop].maxRange / 10000.0) / 10.0f;
+
+                    RangeString = String.Format("{0}B", RangeB);
+                }
+                else if (ShipMFCDef[loop].maxRange >= 100)
+                {
+                    float RangeM = (float)Math.Floor((double)ShipMFCDef[loop].maxRange / 10.0) / 10.0f;
+
+                    RangeString = String.Format("{0}M", RangeM);
+                }
+                else
+                {
+                    RangeString = String.Format("{0}K", ((float)Math.Floor((double)ShipMFCDef[loop].maxRange) * 10.0f));
+                }
+
+                String MCRString = " ";
+
+                if (ShipMFCDef[loop].resolution == 1)
+                {
+                    int minRange = ShipMFCDef[loop].lookUpMT[0];
+
+                    if (minRange >= 100000)
+                    {
+                        float RangeB = (float)Math.Floor((double)minRange / 10000.0) / 10.0f;
+                        MCRString = String.Format(" MCR {0}B km   ", RangeB);
+                    }
+                    else if (minRange >= 100)
+                    {
+                        float RangeM = (float)Math.Floor((double)minRange / 10.0) / 10.0f;
+                        MCRString = String.Format(" MCR {0}M km   ", RangeM);
+                    }
+                    else
+                    {
+                        MCRString = String.Format(" MCR {0}K km   ", ((float)Math.Floor((double)minRange) * 10.0f));
+                    }
+                }
+
+                Entry = String.Format("{0} ({1})     Range {2} km  {3}Resolution {4}\n", ShipMFCDef[loop].Name, ShipMFCCount[loop], RangeString, MCRString, ShipMFCDef[loop].resolution);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                control = true;
+            }
+
+            foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipClassOrdnance)
+            {
+                Entry = String.Format("{0} ({1})",pair.Key.Name,pair.Value);
+                control = true;
+            }
+
+            if (control == true)
+            {
+                Entry = "\n";
+                Summary = String.Format("{0}{1}", Summary, Entry);
+            }
+
+            control = false;
 
             for (int loop = 0; loop < ShipASensorDef.Count; loop++)
             {
@@ -2299,6 +2388,8 @@ namespace Pulsar4X.Entities
                                           ShipASensorDef[loop].resolution);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);
+
+                control = true;
             }
 
             for (int loop = 0; loop < ShipPSensorDef.Count; loop++)
@@ -2322,15 +2413,23 @@ namespace Pulsar4X.Entities
                                           ShipPSensorCount[loop], ShipPSensorDef[loop].rating, RangeString);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);
+
+                control = true;
+            }
+
+            if (control == true)
+            {
+                Entry = "\n";
+                Summary = String.Format("{0}{1}", Summary, Entry);
             }
 
             if (IsMilitary == true)
             {
-                Entry = "\nThis design is classed as a Military Vessel for maintenance purposes\n";
+                Entry = "This design is classed as a Military Vessel for maintenance purposes\n";
             }
             else
             {
-                Entry = "\nThis design is classed as a Commercial Vessel for maintenance purposes\n";
+                Entry = "This design is classed as a Commercial Vessel for maintenance purposes\n";
             }
 
             Summary = String.Format("{0}{1}",Summary,Entry);
