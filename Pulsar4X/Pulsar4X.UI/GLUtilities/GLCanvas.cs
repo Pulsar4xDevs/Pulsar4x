@@ -34,6 +34,11 @@ namespace Pulsar4X.UI.GLUtilities
         /// <summary> The shader program/Effect used by default.</summary>
         private GLEffect m_oEffect;
 
+        /// <summary>
+        /// used to track the current canvas 
+        /// </summary>
+        static private GLCanvas m_oCurrentCanvas = null;
+
         /// <summary>   Gets the default shader/Effect. </summary>
         /// <value> The default shader/Effect. </value>
         public GLEffect DefaultEffect
@@ -557,6 +562,18 @@ namespace Pulsar4X.UI.GLUtilities
             RecalculateViewMatrix();
             SceenToRender.ViewOffset = m_v3ViewOffset;
             this.Invalidate();
+        }
+
+        /// <summary>
+        /// Will make this OpenGL context current only if it is not already current.
+        /// </summary>
+        new public void MakeCurrent()
+        {
+            if (m_oCurrentCanvas != this)
+            {
+                base.MakeCurrent();
+                m_oCurrentCanvas = this;
+            }
         }
 
         /// <summary>
