@@ -28,10 +28,10 @@ namespace Pulsar4X.UI.SceenGraph
                 if (m_oSystemContect != value)
                 {
                     if (m_oSystemContect != null)
-                        m_oSystemContect.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                        m_oSystemContect.TaskGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
                     m_oSystemContect = value as SystemContact;
                     if (value != null)
-                        m_oSystemContect.PropertyChanged += m_oSystemContect_PropertyChanged;
+                        m_oSystemContect.TaskGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
                 }
             }
         }
@@ -43,11 +43,11 @@ namespace Pulsar4X.UI.SceenGraph
                 /// <summary>
                 /// Change Label here!
                 /// </summary>
-                Lable.Text = m_oSystemContect.Name;
+                Lable.Text = m_oSystemContect.TaskGroup.Name;
 
-                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
-                                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oSystemContect.Name);
-                Lable = oNameLable;
+                //GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
+                //                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oSystemContect.TaskGroup.Name);
+                //Lable = oNameLable;
 
                 ParentSceen.Refresh();
             }

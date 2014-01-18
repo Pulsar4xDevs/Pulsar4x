@@ -354,6 +354,7 @@ namespace Pulsar4X.UI.SceenGraph
                 oContactElement.AddPrimitive(oContactQuad);
                 oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
                 this.AddElement(oContactElement);
+                (oContactElement as ContactElement).ParentSceen = this;
             }
 
             // Set Sceen Size basd on Max Orbit:
