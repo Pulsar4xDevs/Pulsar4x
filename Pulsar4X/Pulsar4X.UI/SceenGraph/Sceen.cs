@@ -47,19 +47,6 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
-        /// <summary>
-        /// These are the markers for ship taskgroups
-        /// </summary>
-        private BindingList<MapMarker> m_lTempShipMarkers = new BindingList<MapMarker>();
-
-        public BindingList<MapMarker> ShipMarkers
-        {
-            get
-            {
-                return m_lTempShipMarkers;
-            }
-        }
-
         /// <summary> 
         /// The zoom scaler, make this smaller to zoom out, larger to zoom in.
         /// </summary>
@@ -388,11 +375,6 @@ namespace Pulsar4X.UI.SceenGraph
                 oElement.Render();
             }
 
-            foreach (SceenElement oElement in m_lTempShipMarkers)
-            {
-                oElement.Render();
-            }
-
             if (MeasureMode == true)
             {
                 m_oMeasurementElement.Render();
@@ -410,11 +392,6 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             foreach (SceenElement oElement in m_lMapMarkers)
-            {
-                oElement.Refresh(m_fZoomScaler);
-            }
-
-            foreach (SceenElement oElement in m_lTempShipMarkers)
             {
                 oElement.Refresh(m_fZoomScaler);
             }
@@ -488,42 +465,6 @@ namespace Pulsar4X.UI.SceenGraph
             m_lMapMarkers.Add(oMapMarker);
 
             Refresh();
-        }
-
-        /// <summary>
-        /// This Add map marker will let me place taskgroup markers, rather than the generic Waypoint marker above.
-        /// </summary>
-        /// <param name="a_v3Pos">Position of marker</param>
-        /// <param name="a_oDefaultEffect">I have no clue what this is. cargo culting it.</param>
-        /// <param name="MMColor">Color of marker</param>
-        /// <param name="name">Name of marker</param>
-        /// <returns>index of marker</returns>
-        public int AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect, Color MMColor, GameEntity entity)
-        {
-            MapMarker oMapMarker = new MapMarker(a_oDefaultEffect, MMColor);
-            oMapMarker.SceenEntity = entity;
-
-            GLUtilities.GLQuad oMarkerQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
-                                                                        a_v3Pos,
-                                                                        new Vector2(0.0001f, 0.0001f),
-                                                                        MMColor,
-                                                                        UIConstants.Textures.DEFAULT_PLANET_ICON);
-            // create name lable:
-            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, a_v3Pos,
-                UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, entity.Name);
-
-            oMapMarker.AddPrimitive(oMarkerQuad);
-            oMapMarker.PrimaryPrimitive = oMarkerQuad;
-            oMapMarker.Lable = oNameLable;
-
-            oMapMarker.ParentSceen = this;
-
-            m_lTempShipMarkers.Add(oMapMarker);
-
-
-            Refresh();
-
-            return m_lTempShipMarkers.Count;
         }
 
         /// <summary>

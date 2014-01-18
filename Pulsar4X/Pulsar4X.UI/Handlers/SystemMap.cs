@@ -442,15 +442,6 @@ namespace Pulsar4X.UI.Handlers
                         case 15: GameState.Instance.Factions[loop].FactionColor = Color.Olive;
                             break;
                     }
-
-                    for (int loop2 = GameState.SE.TGStart; loop2 <= GameState.SE.TGCount; loop2++)
-                    {
-                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-                        ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
-
-                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name + "-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString();
-                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, GameState.Instance.Factions[loop].TaskGroups[loop2]);
-                    }
                 }
 
                 GameState.SE.SimCreated = true;
