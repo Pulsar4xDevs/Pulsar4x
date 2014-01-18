@@ -142,7 +142,7 @@ namespace Pulsar4X.UI.GLUtilities
 
         public virtual void RecalculateModelMatrix()
         {
-            m_m4ModelMatrix = Matrix4.Scale(m_v2Size.X) * Matrix4.CreateTranslation(m_v3Position);
+            m_m4ModelMatrix = Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(m_v3Position);
         }
 
         public virtual void SetSize(Vector2 a_v2Size)

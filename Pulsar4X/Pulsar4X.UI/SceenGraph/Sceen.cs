@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.ComponentModel;
 using Pulsar4X;
 using Pulsar4X.UI;
@@ -45,19 +44,6 @@ namespace Pulsar4X.UI.SceenGraph
             get
             {
                 return m_lMapMarkers;
-            }
-        }
-
-        /// <summary>
-        /// These are the markers for ship taskgroups
-        /// </summary>
-        private BindingList<MapMarker> m_lTempShipMarkers = new BindingList<MapMarker>();
-
-        public BindingList<MapMarker> ShipMarkers
-        {
-            get
-            {
-                return m_lTempShipMarkers;
             }
         }
 
@@ -207,7 +193,7 @@ namespace Pulsar4X.UI.SceenGraph
             double dMoonOrbitRadius = 0;                                        // used for holding the orbit in Km for a Moon.
             float fMoonSize = 0;                                                // used to hold the Moons size.
             Vector3 v3MoonPos = Vector3.Zero;                                   // Used to store the Moons Position.
-
+            
             // start creating star branches in the sceen graph:
             SceenElement oRootStar;
             SceenElement oCurrStar;
@@ -222,7 +208,6 @@ namespace Pulsar4X.UI.SceenGraph
                 }
                 else
                 {
-
                     Random rnd = new Random();
                     //float fAngle = 0.0f; // rnd.Next(0, 360);
                     //fAngle = MathHelper.DegreesToRadians(fAngle);
@@ -347,6 +332,30 @@ namespace Pulsar4X.UI.SceenGraph
                 iStarCounter++;
             }
 
+            // create any system contacts:
+            foreach (Pulsar4X.Entities.SystemContact oContact in a_oStarSystem.SystemContactList)
+            {
+                SceenElement oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                oContactElement.EntityID = oContact.Id;
+
+                Vector3 v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+
+                GLUtilities.GLQuad oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                        v3ContactPos,
+                                                                        new Vector2(0.0001f, 0.0001f),                   // what size is a task groug anyway???
+                                                                        oContact.faction.FactionColor,
+                                                                        UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
+
+                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
+
+                oContactElement.Lable = oNameLable;
+                oContactElement.PrimaryPrimitive = oContactQuad;
+                oContactElement.AddPrimitive(oContactQuad);
+                oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                this.AddElement(oContactElement);
+            }
+
             // Set Sceen Size basd on Max Orbit:
             m_v2SceenSize = new Vector2d(dMaxOrbitDist * 2, dMaxOrbitDist * 2);
         }
@@ -362,11 +371,6 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             foreach (SceenElement oElement in m_lMapMarkers)
-            {
-                oElement.Render();
-            }
-
-            foreach (SceenElement oElement in m_lTempShipMarkers)
             {
                 oElement.Render();
             }
@@ -388,11 +392,6 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             foreach (SceenElement oElement in m_lMapMarkers)
-            {
-                oElement.Refresh(m_fZoomScaler);
-            }
-
-            foreach (SceenElement oElement in m_lTempShipMarkers)
             {
                 oElement.Refresh(m_fZoomScaler);
             }
@@ -466,42 +465,6 @@ namespace Pulsar4X.UI.SceenGraph
             m_lMapMarkers.Add(oMapMarker);
 
             Refresh();
-        }
-
-        /// <summary>
-        /// This Add map marker will let me place taskgroup markers, rather than the generic Waypoint marker above.
-        /// </summary>
-        /// <param name="a_v3Pos">Position of marker</param>
-        /// <param name="a_oDefaultEffect">I have no clue what this is. cargo culting it.</param>
-        /// <param name="MMColor">Color of marker</param>
-        /// <param name="name">Name of marker</param>
-        /// <returns>index of marker</returns>
-        public int AddMapMarker(Vector3 a_v3Pos, GLEffect a_oDefaultEffect, Color MMColor, GameEntity entity)
-        {
-            MapMarker oMapMarker = new MapMarker(a_oDefaultEffect, MMColor);
-            oMapMarker.SceenEntity = entity;
-
-            GLUtilities.GLQuad oMarkerQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
-                                                                        a_v3Pos,
-                                                                        new Vector2(0.0001f, 0.0001f),
-                                                                        MMColor,
-                                                                        UIConstants.Textures.DEFAULT_PLANET_ICON);
-            // create name lable:
-            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, a_v3Pos,
-                UIConstants.DEFAULT_TEXT_SIZE, Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, entity.Name);
-
-            oMapMarker.AddPrimitive(oMarkerQuad);
-            oMapMarker.PrimaryPrimitive = oMarkerQuad;
-            oMapMarker.Lable = oNameLable;
-
-            oMapMarker.ParentSceen = this;
-
-            m_lTempShipMarkers.Add(oMapMarker);
-
-
-            Refresh();
-
-            return m_lTempShipMarkers.Count;
         }
 
         /// <summary>

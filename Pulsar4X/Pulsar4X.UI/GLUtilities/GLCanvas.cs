@@ -34,6 +34,11 @@ namespace Pulsar4X.UI.GLUtilities
         /// <summary> The shader program/Effect used by default.</summary>
         private GLEffect m_oEffect;
 
+        /// <summary>
+        /// used to track the current canvas 
+        /// </summary>
+        static private GLCanvas m_oCurrentCanvas = null;
+
         /// <summary>   Gets the default shader/Effect. </summary>
         /// <value> The default shader/Effect. </value>
         public GLEffect DefaultEffect
@@ -458,7 +463,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_m4ProjectionMatrix = Matrix4.CreateOrthographic(a_iViewportWidth, a_iViewPortHeight, -10, 10);
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+            m_m4ViewMatrix = Matrix4.CreateScale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             if (m_bLoaded && m_oEffect != null)
             {
                 m_oEffect.SetProjectionMatrix(ref m_m4ProjectionMatrix);
@@ -560,6 +565,18 @@ namespace Pulsar4X.UI.GLUtilities
         }
 
         /// <summary>
+        /// Will make this OpenGL context current only if it is not already current.
+        /// </summary>
+        new public void MakeCurrent()
+        {
+            if (m_oCurrentCanvas != this)
+            {
+                base.MakeCurrent();
+                m_oCurrentCanvas = this;
+            }
+        }
+
+        /// <summary>
         /// Renders the current Sceen.
         /// </summary>
         public void Render()
@@ -611,7 +628,7 @@ namespace Pulsar4X.UI.GLUtilities
             }
 
             // create new view matrix and apply to shader (if loaded properly and shader is valid!)
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+            m_m4ViewMatrix = Matrix4.CreateScale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             if (m_bLoaded && m_oEffect != null)
             {
                 m_oEffect.SetViewMatrix(ref m_m4ViewMatrix);

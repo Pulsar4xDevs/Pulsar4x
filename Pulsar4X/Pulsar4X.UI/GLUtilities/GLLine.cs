@@ -135,7 +135,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render(ref Matrix4 a_m4View)
@@ -149,7 +149,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render()
@@ -165,7 +165,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
 }

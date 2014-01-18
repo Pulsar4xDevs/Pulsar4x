@@ -34,7 +34,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_oEffect = a_oEffect;
             m_m4ModelMatrix = Matrix4.Identity;
             ///< @todo make quads scale better, so it can scale on X or Y...
-            m_m4ModelMatrix = Matrix4.Scale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);  // x and y should be the same, so scale by X
+            m_m4ModelMatrix =  Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);  // x and y should be the same, so scale by X
 
             if (a_szTexture != "")
             {
@@ -128,7 +128,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render(ref Matrix4 a_m4View)
@@ -142,7 +142,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render()
@@ -158,7 +158,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.TriangleStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
 }

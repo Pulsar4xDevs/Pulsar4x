@@ -76,7 +76,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.BindFragDataLocation(m_iShaderProgramHandle, 0, "FragColor");    // Binds the Pixel (fragment) color Variable to the index 3.
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
-            GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
+            GL.GetProgram(m_iShaderProgramHandle, GetProgramParameterName.ValidateStatus, out iShaderError);
             GL.GetShaderInfoLog(iGLPixelShader, out szShaderError);
             if (iShaderError != 1)
             {
