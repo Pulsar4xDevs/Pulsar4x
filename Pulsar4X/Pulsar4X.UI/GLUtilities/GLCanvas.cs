@@ -463,7 +463,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_m4ProjectionMatrix = Matrix4.CreateOrthographic(a_iViewportWidth, a_iViewPortHeight, -10, 10);
 
             // Setup our Model View Matrix i.e. the position and faceing of our camera. We are setting it up to look at (0,0,0) from (0,3,5) with positive y being up.
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+            m_m4ViewMatrix = Matrix4.CreateScale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             if (m_bLoaded && m_oEffect != null)
             {
                 m_oEffect.SetProjectionMatrix(ref m_m4ProjectionMatrix);
@@ -628,7 +628,7 @@ namespace Pulsar4X.UI.GLUtilities
             }
 
             // create new view matrix and apply to shader (if loaded properly and shader is valid!)
-            m_m4ViewMatrix = Matrix4.Scale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
+            m_m4ViewMatrix = Matrix4.CreateScale(m_fZoomScaler) * Matrix4.CreateTranslation(m_v3ViewOffset);
             if (m_bLoaded && m_oEffect != null)
             {
                 m_oEffect.SetViewMatrix(ref m_m4ViewMatrix);

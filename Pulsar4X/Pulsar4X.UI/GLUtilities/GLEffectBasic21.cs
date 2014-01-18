@@ -75,7 +75,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.BindAttribLocation(m_iShaderProgramHandle, 2, "UVCord");         // Binds the vertex UC coords Variable in the shader program to the index 2.
             GL.LinkProgram(m_iShaderProgramHandle);                             // Compiles the Shader into a complete program ready to be run on the GPU. (think linker stage in normal compiling).
 
-            GL.GetProgram(m_iShaderProgramHandle, ProgramParameter.ValidateStatus, out iShaderError);
+            GL.GetProgram(m_iShaderProgramHandle, GetProgramParameterName.ValidateStatus, out iShaderError);
             GL.GetShaderInfoLog(iGLPixelShader, out szShaderError);
             if (iShaderError != 1)
             {

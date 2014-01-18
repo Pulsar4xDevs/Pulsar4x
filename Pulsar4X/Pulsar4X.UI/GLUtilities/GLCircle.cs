@@ -68,7 +68,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_auiIndicies[iNumOfVerts] = 0;
 
             // Setup Matrix:
-            m_m4ModelMatrix = Matrix4.Scale(a_fRadus * 2) * Matrix4.CreateTranslation(a_v3Pos);
+            m_m4ModelMatrix = Matrix4.CreateScale(a_fRadus * 2) * Matrix4.CreateTranslation(a_v3Pos);
             
             // Set our shader program:
             m_oEffect = a_oEffect;
@@ -159,7 +159,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_auiIndicies[iNumOfVerts] = 0;
 
             // Setup Matrix:
-            m_m4ModelMatrix = Matrix4.Scale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);
+            m_m4ModelMatrix = Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);
 
             // Set our shader program:
             m_oEffect = a_oEffect;
@@ -236,7 +236,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render(ref Matrix4 a_m4View)
@@ -250,7 +250,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
 
         public override void Render()
@@ -263,7 +263,7 @@ namespace Pulsar4X.UI.GLUtilities
 
             GL.BindTexture(TextureTarget.Texture2D, m_uiTextureID);
 
-            GL.DrawElements(BeginMode.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(PrimitiveType.LineStrip, m_auiIndicies.Length, DrawElementsType.UnsignedShort, IntPtr.Zero);
         }
     }
 }
