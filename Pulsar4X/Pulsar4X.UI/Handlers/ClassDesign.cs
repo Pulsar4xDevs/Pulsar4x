@@ -84,6 +84,12 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private int ComponentAmt { get; set; }
 
+
+        /// <summary>
+        /// Build Error box will set this appropriately.
+        /// </summary>
+        private bool IsDesignGood { get; set; }
+
         /// <summary>
         /// Component columns for the datagrid that displays components in the faction list.
         /// </summary>
@@ -1061,6 +1067,8 @@ namespace Pulsar4X.UI.Handlers
                     }
                     BuildDesignTab();
                 }
+
+                BuildErrorBox();
             }
         }
 
@@ -4243,6 +4251,30 @@ namespace Pulsar4X.UI.Handlers
                     break;
             }
             #endregion
+        }
+
+
+        /// <summary>
+        /// BuildErrorBox checks the design for errors and prints them:
+        /// Only 1 spinal mount laser(wMType = MountType.Spinal or MountType.AdvSpinal)
+        /// BFC needs beam weapons
+        /// Beam weapons need BFC
+        /// Power Generation must exceed power requirement
+        /// Crew quarters required(if not automatic)
+        /// bridge for ships over 1K(if not done automatically)
+        /// Engines/shields need fuel
+        /// atleast 1HS of ebay for commercial craft(not an error if none present, will just flag as military and print warning)
+        /// MFC needs launch tubs
+        /// launch tubes need MFC
+        /// ECCM needs FC of some type
+        /// Cloak must be rated for size
+        /// Jump engine must be rated for size and type
+        /// ship must not be 0HS total.
+        /// not enough MSP for largest component to repair(warning not error)
+        /// </summary>
+        private void BuildErrorBox()
+        {
+            IsDesignGood = true;
         }
         #endregion
     }

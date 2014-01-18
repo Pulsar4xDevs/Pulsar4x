@@ -128,6 +128,15 @@ namespace Pulsar4X.Entities.Components
             Count
         }
 
+        /// <summary>
+        /// What type of mount is this weapon.
+        /// </summary>
+        private MountType WMType;
+        public MountType wMType
+        {
+            get { return WMType; }
+        }
+
 
         /// <summary>
         /// Constructor for all beam weapon types.
@@ -155,6 +164,7 @@ namespace Pulsar4X.Entities.Components
             WeaponRangeTech = RangeTech;
             WeaponCapacitorTech = CapacitorTech;
             WeaponCapacitor = Constants.BeamWeaponTN.Capacitor[CapacitorTech];
+            WMType = MType;
 
             ShotCount = 1;
             BaseAccuracy = 1.0f;
