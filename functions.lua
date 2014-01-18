@@ -103,7 +103,7 @@ end
 -- Find the required OpenTK library
 function opentklib()
 	-- should work for mono and .net
-	return os.findlib("OpenTK") or "Pulsar4X/deps/OpenTK-1.0/bin/OpenTK.dll";
+	return os.findlib("OpenTK") or "Pulsar4X/deps/OpenTK-1.1/bin/OpenTK.dll";
 end
 
 -- Find the required OpenTK.GLControl library
