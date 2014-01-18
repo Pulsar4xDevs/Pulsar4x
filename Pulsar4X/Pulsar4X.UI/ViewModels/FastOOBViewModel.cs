@@ -107,6 +107,7 @@ namespace Pulsar4X.UI.ViewModels
                 {
                     _CurrnetTaskGroup = value;
                     OnPropertyChanged(() => CurrentTaskGroup);
+                    OnTaskGroupChanged();
                 }
             }
         }

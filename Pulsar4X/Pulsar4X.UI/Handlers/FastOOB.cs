@@ -39,11 +39,15 @@ namespace Pulsar4X.UI.Handlers
                     {
                         m_oCurrnetTaskGroup = m_oCurrnetFaction.TaskGroups[0];
                     }
+                    else
+                        m_oCurrnetShipClass = null;
 
                     if (m_oCurrnetFaction.ShipDesigns.Count != 0)
                     {
                         m_oCurrnetShipClass = m_oCurrnetFaction.ShipDesigns[0];
                     }
+                    else
+                        m_oCurrnetShipClass = null;
 
                     UpdateDisplay();
                 }
@@ -143,7 +147,6 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void EmpireComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -153,7 +156,6 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void TaskGroupComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -163,7 +165,6 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
