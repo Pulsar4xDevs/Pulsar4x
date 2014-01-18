@@ -222,19 +222,10 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="TickValue"></param>
         private void AdvanceTime(int TickValue)
         {
-            GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, TickValue);
-
-            /// <summary>
-            /// Kludge to draw the ships.
-            /// </summary>
-            //DrawTaskGroups();
-            
+            GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, TickValue);            
 
             TimeSpan TS = new TimeSpan(0,0,TickValue);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
-
-
-
 
             int Seconds = GameState.Instance.GameDateTime.Second + (GameState.Instance.GameDateTime.Minute * 60) + (GameState.Instance.GameDateTime.Hour * 3600) +
                            (GameState.Instance.GameDateTime.DayOfYear * 86400) - 86400;
@@ -589,12 +580,6 @@ namespace Pulsar4X.UI.Handlers
                 RefreshStarSystem();
                 m_oGLCanvas.Invalidate();
                 m_oControlsPanel.MapMarkersListBox.DataSource = m_oCurrentSceen.MapMarkers;
-
-                /// <summary>
-                /// Alpha Build:
-                /// Draw the faction ships.
-                /// </summary>
-                //DrawTaskGroups();
             }
         }
 
@@ -788,14 +773,6 @@ namespace Pulsar4X.UI.Handlers
             // Change cursor to wait
             Cursor.Current = Cursors.WaitCursor;
 
-            /// <summary>
-            /// Alpha Build:
-            /// Draw the faction ships.
-            /// </summary>
-            //DrawTaskGroups();
-
-
-
             // Do things like update orbits and taskgroups here.
             m_oCurrentSceen.Refresh();
 
@@ -917,50 +894,6 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oCurrentSceen = a_oSceen;
             m_oGLCanvas.SceenToRender = a_oSceen;
-        }
-
-        /// <summary>
-        /// Draw all the contacts for now, later only draw detected enemy contacts. this is called from advanceSim and SystemSelectBox
-        /// </summary>
-        private void DrawTaskGroups()
-        {
-            for (int loop = 0; loop < CurrentStarSystem.SystemContactList.Count; loop++)
-            {
-                if (CurrentStarSystem.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
-                {
-                    if (CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId != -1)
-                    {
-                        //m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[0].Verticies[0].m_v4Position.X = (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem;
-                        //m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[0].Verticies[0].m_v4Position.Y = (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem;
-
-                        Vector3 WC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem, 0.0f);
-                        m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Primitives[0].Position = WC;
-                        m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].Lable.Position = WC;
-
-                        Vector3 LC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.LastXSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.LastYSystem, 0.0f);
-
-                        if (CurrentStarSystem.SystemContactList[loop].TaskGroup.DrawTravelLine != 3)
-                        {
-                            m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].SetMeasurementStartPos(LC);
-                            m_oCurrentSceen.ShipMarkers[CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId].SetMeasurementEndPos(WC);
-                        }
-
-                        if (CurrentStarSystem.SystemContactList[loop].TaskGroup.DrawTravelLine == 2)
-                        {
-                            CurrentStarSystem.SystemContactList[loop].TaskGroup.DrawTravelLine = 3;
-                        }
-                    }
-                    else
-                    {
-                        Vector3 WC = new Vector3((float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.XSystem, (float)CurrentStarSystem.SystemContactList[loop].TaskGroup.Contact.YSystem, 0.0f);
-                        string name = CurrentStarSystem.SystemContactList[loop].TaskGroup.Name;
-
-                        int ID = (m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[CurrentStarSystem.SystemContactList[loop].TaskGroup.TaskGroupFaction.FactionID].FactionColor, CurrentStarSystem.SystemContactList[loop].TaskGroup) - 1);
-
-                        CurrentStarSystem.SystemContactList[loop].TaskGroup.MapMarkerId = ID;
-                    }
-                }
-            }
         }
 
         #endregion

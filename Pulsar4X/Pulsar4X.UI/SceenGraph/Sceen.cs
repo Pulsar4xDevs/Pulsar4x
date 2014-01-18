@@ -368,42 +368,6 @@ namespace Pulsar4X.UI.SceenGraph
                 oContactElement.AddPrimitive(oContactQuad);
                 oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
                 this.AddElement(oContactElement);
-
-                //if (oContact.SSEntity == StarSystemEntityType.TaskGroup)
-                //{
-                //    if (oContact.TaskGroup.MapMarkerId != -1)
-                //    {
-                        
-
-                        
-
-
-                //        m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].Primitives[0].Position = WC;
-                //        m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].Lable.Position = WC;
-
-                //        Vector3 LC = new Vector3((float)oContact.TaskGroup.Contact.LastXSystem, (float)oContact.TaskGroup.Contact.LastYSystem, 0.0f);
-
-                //        if (oContact.TaskGroup.DrawTravelLine != 3)
-                //        {
-                //            m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].SetMeasurementStartPos(LC);
-                //            m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].SetMeasurementEndPos(WC);
-                //        }
-
-                //        if (oContact.TaskGroup.DrawTravelLine == 2)
-                //        {
-                //            oContact.TaskGroup.DrawTravelLine = 3;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        Vector3 WC = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
-                //        string name = oContact.TaskGroup.Name;
-
-                //        int ID = (m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[oContact.TaskGroup.TaskGroupFaction.FactionID].FactionColor, oContact.TaskGroup) - 1);
-
-                //        oContact.TaskGroup.MapMarkerId = ID;
-                //    }
-                //}
             }
 
             // Set Sceen Size basd on Max Orbit:
