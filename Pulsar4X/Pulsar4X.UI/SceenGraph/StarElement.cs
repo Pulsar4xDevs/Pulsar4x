@@ -11,7 +11,7 @@ using Pulsar4X.Entities;
 namespace Pulsar4X.UI.SceenGraph
 {
     /// <summary>
-    /// A Star node/element in a sceen graph.
+    /// A Star node/element in a scene graph.
     /// </summary>
     class StarElement : SceenElement
     {

@@ -7,47 +7,46 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
-using log4net;
 
 namespace Pulsar4X.UI.SceenGraph
 {
-    public class MapMarker : SceenElement
+    /// <summary>
+    /// Sensor contact element in a scene graph.
+    /// </summary>
+    class ContactElement : SceenElement
     {
-
-        public static readonly ILog logger = LogManager.GetLogger(typeof(MapMarker));
-
-        private GameEntity m_oGameEntity;
+        private SystemContact m_oSystemContect;
 
         public override GameEntity SceenEntity
         {
             get
             {
-                return m_oGameEntity;
+                return m_oSystemContect;
             }
             set
             {
-                if (m_oGameEntity != value)
+                if (m_oSystemContect != value)
                 {
-                    if (m_oGameEntity != null)
-                        m_oGameEntity.PropertyChanged -= m_oGameEntity_PropertyChanged;
-                    m_oGameEntity = value;
+                    if (m_oSystemContect != null)
+                        m_oSystemContect.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                    m_oSystemContect = value as SystemContact;
                     if (value != null)
-                        m_oGameEntity.PropertyChanged += m_oGameEntity_PropertyChanged;
+                        m_oSystemContect.PropertyChanged += m_oSystemContect_PropertyChanged;
                 }
             }
         }
 
-        void m_oGameEntity_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        void m_oSystemContect_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             if (e.PropertyName == "Name")
             {
                 /// <summary>
                 /// Change Label here!
                 /// </summary>
-                Lable.Text = m_oGameEntity.Name;
+                Lable.Text = m_oSystemContect.Name;
 
                 GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
-                                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oGameEntity.Name);
+                                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oSystemContect.Name);
                 Lable = oNameLable;
 
                 ParentSceen.Refresh();
@@ -59,25 +58,25 @@ namespace Pulsar4X.UI.SceenGraph
         /// </summary>
         public Sceen ParentSceen { get; set; }
 
-
-
         /// <summary>
         /// Line from Last Position to Current Position for taskgroups.
         /// </summary>
         private MeasurementElement TravelLine { get; set; }
 
-
-        public MapMarker()
+        public ContactElement()
             : base()
-        { }
+        {
 
-        public MapMarker(GLEffect a_oDefaultEffect, System.Drawing.Color MMColor)
+        }
+
+        public ContactElement(GLEffect a_oDefaultEffect, SystemContact a_oContact)
+            : base(a_oContact)
         {
             // Create measurement element:
             TravelLine = new MeasurementElement();
-            TravelLine.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), MMColor, UIConstants.Textures.DEFAULT_TEXTURE);
+            TravelLine.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), a_oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_TEXTURE);
             TravelLine.AddPrimitive(TravelLine.PrimaryPrimitive);
-            TravelLine.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, MMColor, UIConstants.Textures.DEFAULT_GLFONT2, "");
+            TravelLine.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, a_oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, "");
         }
 
         public override void Render()
@@ -85,11 +84,11 @@ namespace Pulsar4X.UI.SceenGraph
             foreach (GLPrimitive oPrimitive in m_lPrimitives)
             {
                 oPrimitive.Render();
+            }
 
-                if (TravelLine != null)
-                {
-                    TravelLine.Render();
-                }
+            if (TravelLine != null)
+            {
+                TravelLine.Render();
             }
 
             if (RenderChildren == true)
@@ -100,6 +99,7 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
+            // render lable:
             if (m_oLable != null)
             {
                 m_oLable.Render();
@@ -133,10 +133,9 @@ namespace Pulsar4X.UI.SceenGraph
             return Guid.Empty;
         }
 
-
         public override void Refresh(float a_fZoomScaler)
         {
-            // Adjust the size of the Primary Sprite (the marker icon) if necessary.
+            // Adjust the size of the Primary Sprite (the TG icon) if necessary.
             if (MinimumSize.X > 0 && MinimumSize.Y > 0)
             {
                 // calc size in pixels given current zoom factor:
@@ -154,8 +153,26 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
+            // update position:
+            Vector3 pos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.XSystem, (float)m_oSystemContect.TaskGroup.Contact.YSystem, 0.0f);
+            Vector3 lastPos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.LastXSystem, (float)m_oSystemContect.TaskGroup.Contact.LastYSystem, 0.0f);
+
+            if (m_oSystemContect.TaskGroup.DrawTravelLine != 3)
+            {
+                SetMeasurementStartPos(lastPos);
+                SetMeasurementEndPos(pos);
+            }
+            if (m_oSystemContect.TaskGroup.DrawTravelLine == 2)
+            {
+                m_oSystemContect.TaskGroup.DrawTravelLine = 3;
+            }
+
+            PrimaryPrimitive.Position = pos;
+            Lable.Position = pos;
+
             // Adjust the size of the text so it is always 10 point:
             Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
+            Lable.Text = m_oSystemContect.TaskGroup.Name;
 
             if (TravelLine != null)
             {

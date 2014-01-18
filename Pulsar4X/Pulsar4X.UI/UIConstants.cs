@@ -63,6 +63,7 @@ namespace Pulsar4X.UI
         public class Textures
         {
             public const string DEFAULT_PLANET_ICON = "./Resources/Textures/DefaultIcon.png";
+            public const string DEFAULT_TASKGROUP_ICON = "./Resources/Textures/DefaultTGIcon.png";
             public const string DEFAULT_TEXTURE = "./Resources/Textures/DefaultTexture.png";
             public const string DEFAULT_GLFONT = "./Resources/Fonts/PulsarFont.xml";
             public const string DEFAULT_GLFONT2 = "./Resources/Fonts/DejaVuSansMonoBold.xml";

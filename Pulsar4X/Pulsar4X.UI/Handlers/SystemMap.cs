@@ -227,7 +227,7 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Kludge to draw the ships.
             /// </summary>
-            DrawTaskGroups();
+            //DrawTaskGroups();
             
 
             TimeSpan TS = new TimeSpan(0,0,TickValue);
@@ -594,7 +594,7 @@ namespace Pulsar4X.UI.Handlers
                 /// Alpha Build:
                 /// Draw the faction ships.
                 /// </summary>
-                DrawTaskGroups();
+                //DrawTaskGroups();
             }
         }
 
@@ -792,7 +792,7 @@ namespace Pulsar4X.UI.Handlers
             /// Alpha Build:
             /// Draw the faction ships.
             /// </summary>
-            DrawTaskGroups();
+            //DrawTaskGroups();
 
 
 

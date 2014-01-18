@@ -207,7 +207,7 @@ namespace Pulsar4X.UI.SceenGraph
             double dMoonOrbitRadius = 0;                                        // used for holding the orbit in Km for a Moon.
             float fMoonSize = 0;                                                // used to hold the Moons size.
             Vector3 v3MoonPos = Vector3.Zero;                                   // Used to store the Moons Position.
-
+            
             // start creating star branches in the sceen graph:
             SceenElement oRootStar;
             SceenElement oCurrStar;
@@ -222,7 +222,6 @@ namespace Pulsar4X.UI.SceenGraph
                 }
                 else
                 {
-
                     Random rnd = new Random();
                     //float fAngle = 0.0f; // rnd.Next(0, 360);
                     //fAngle = MathHelper.DegreesToRadians(fAngle);
@@ -345,6 +344,66 @@ namespace Pulsar4X.UI.SceenGraph
                 }
                 iPlanetCounter = 0;
                 iStarCounter++;
+            }
+
+            // create any system contacts:
+            foreach (Pulsar4X.Entities.SystemContact oContact in a_oStarSystem.SystemContactList)
+            {
+                SceenElement oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                oContactElement.EntityID = oContact.Id;
+
+                Vector3 v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+
+                GLUtilities.GLQuad oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                        v3ContactPos,
+                                                                        new Vector2(0.0001f, 0.0001f),                   // what size is a task groug anyway???
+                                                                        oContact.faction.FactionColor,
+                                                                        UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
+
+                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
+
+                oContactElement.Lable = oNameLable;
+                oContactElement.PrimaryPrimitive = oContactQuad;
+                oContactElement.AddPrimitive(oContactQuad);
+                oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                this.AddElement(oContactElement);
+
+                //if (oContact.SSEntity == StarSystemEntityType.TaskGroup)
+                //{
+                //    if (oContact.TaskGroup.MapMarkerId != -1)
+                //    {
+                        
+
+                        
+
+
+                //        m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].Primitives[0].Position = WC;
+                //        m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].Lable.Position = WC;
+
+                //        Vector3 LC = new Vector3((float)oContact.TaskGroup.Contact.LastXSystem, (float)oContact.TaskGroup.Contact.LastYSystem, 0.0f);
+
+                //        if (oContact.TaskGroup.DrawTravelLine != 3)
+                //        {
+                //            m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].SetMeasurementStartPos(LC);
+                //            m_oCurrentSceen.ShipMarkers[oContact.TaskGroup.MapMarkerId].SetMeasurementEndPos(WC);
+                //        }
+
+                //        if (oContact.TaskGroup.DrawTravelLine == 2)
+                //        {
+                //            oContact.TaskGroup.DrawTravelLine = 3;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        Vector3 WC = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+                //        string name = oContact.TaskGroup.Name;
+
+                //        int ID = (m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[oContact.TaskGroup.TaskGroupFaction.FactionID].FactionColor, oContact.TaskGroup) - 1);
+
+                //        oContact.TaskGroup.MapMarkerId = ID;
+                //    }
+                //}
             }
 
             // Set Sceen Size basd on Max Orbit:
