@@ -79,6 +79,7 @@ namespace Pulsar4X.UI.Handlers
         private BeamDefTN            BeamProject;
         private MissileLauncherDefTN LauncherProject;
         private MagazineDefTN        MagazineProject;
+        private MissileEngineDefTN   MissileEngineProject;
 
         private IntPtr eventMask;
 
@@ -145,6 +146,7 @@ namespace Pulsar4X.UI.Handlers
             BeamProject = null;
             LauncherProject = null;
             MagazineProject = null;
+            MissileEngineProject = null;
         }
 
         /// <summary>
@@ -392,6 +394,11 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Missile Engines
                 case ComponentsViewModel.Components.MissileEngine:
+
+                    if (MissileEngineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        MissileEngineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.MissileEngineDef.Add(MissileEngineProject);
+
                 break;
                 #endregion
 
@@ -1017,8 +1024,6 @@ namespace Pulsar4X.UI.Handlers
 
                             Count++;
                         }
-
-
                         #endregion
 
                         #region Fuel Consumption
@@ -1523,6 +1528,177 @@ namespace Pulsar4X.UI.Handlers
                         SetLabels("Engine Technology", "Power / Efficiency Modifier", "Fuel Consumption", "Missile Engine Size", "", "", "");
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Missiles are solid fueled. They have 2x max power modification and 5x max fuel consumption compared to ship based engines.";
+
+                        #region Engine Base
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech];
+                        if(TechLevel > 12)
+                            TechLevel = 12;
+
+                        for (int loop = TechLevel; loop >= 1; loop--)
+                        {
+                            switch (loop)
+                            {
+                                case 1 :
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Nuclear Thermal Engine Technology");
+                                break;
+                                case 2:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Nuclear Pulse Engine Technology");
+                                break;
+                                case 3:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Ion Drive Technology");
+                                break;
+                                case 4:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Magneto-Plasma Drive Technology");
+                                break;
+                                case 5:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Internal Confinement Fusion Drive Technology");
+                                break;
+                                case 6:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Magnetic Confinement Fusion Drive Technology");
+                                break;
+                                case 7:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Inertial Confinement Fusion Drive Technology");
+                                break;
+                                case 8:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Solid-Core Antimatter Drive Technology");
+                                break;
+                                case 9:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Gas-Core Antimatter Drive Technology");
+                                break;
+                                case 10:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Plasma-Core Antimatter Drive Technology");
+                                break;
+                                case 11:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Beam-Core Antimatter Drive Technology");
+                                break;
+                                case 12:
+                                    m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Photonic Drive Technology");
+                                break;
+
+                            }
+                            
+                        }
+
+                        m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Conventional Engine Technology");
+                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        #endregion
+
+                        #region engine power mod
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MinEnginePowerMod];
+
+                        if (TechLevel > 5)
+                            TechLevel = 5;
+
+                        MinPower = 50;
+                        switch (TechLevel)
+                        {
+                            case 0:
+                                MinPower = 40;
+                                break;
+                            case 1:
+                                MinPower = 30;
+                                break;
+                            case 2:
+                                MinPower = 25;
+                                break;
+                            case 3:
+                                MinPower = 20;
+                                break;
+                            case 4:
+                                MinPower = 15;
+                                break;
+                            case 5:
+                                MinPower = 10;
+                                break;
+                        }
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MaxEnginePowerMod];
+
+                        if (TechLevel > 5)
+                            TechLevel = 5;
+
+                        MaxPower = 100;
+                        switch (TechLevel)
+                        {
+                            case 0:
+                                MaxPower = 250;
+                                break;
+                            case 1:
+                                MaxPower = 300;
+                                break;
+                            case 2:
+                                MaxPower = 350;
+                                break;
+                            case 3:
+                                MaxPower = 400;
+                                break;
+                            case 4:
+                                MaxPower = 500;
+                                break;
+                            case 5:
+                                MaxPower = 600;
+                                break;
+                        }
+
+                        Count = 0;
+                        for (int loop = MinPower; loop <= MaxPower; loop += 5)
+                        {
+                            float EP = (float)loop/100.0f;
+                            float EPH = (float)Math.Pow(EP,2.5f);
+
+                            Entry = String.Format("Engine Power x{0:N2} Fuel Consumption Per EPH x{1:N2}", EP, EPH);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+
+                            if(loop == 100)
+                                m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = Count;
+
+                            Count++;
+                        }
+
+
+                        #endregion
+
+                        #region Fuel Consumption
+
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption];
+
+                        if (TechLevel > 12)
+                            TechLevel = 12;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Fuel Consumption: {0} Litres per Engine Power Hour", Constants.EngineTN.FuelConsumption[loop]);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        /// <summary>
+                        /// Should atleast be 1 level of fuel con even for conventional starts.
+                        /// </summary>
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+
+                        #endregion
+
+                        #region Size
+                        double size = 0.1;
+                        for (int loop = 0; loop <= 490; loop++)
+                        {
+
+                            /// <summary>
+                            /// Change this in OrdnanceTN later if it isn't 5.0
+                            /// Int ((Engine Size in MSP / 5) ^ (-0.683))
+                            /// Int ((Engine Size in MSP / 0.5) ^ (-0.683))??
+                            /// </summary>
+                            double FC = Math.Pow((size / 5.0f),(-0.683));
+
+                            Entry = String.Format("{0:N2} HS. Fuel Consumption x{1:N2}", size, FC);
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+
+                            size+=0.01;
+                        }
+                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        #endregion
 
                     break;
                     #endregion
@@ -3273,6 +3449,144 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Missile Engines
                 case ComponentsViewModel.Components.MissileEngine:
+                    /// <summary>
+                    /// Sanity Check:
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1)
+                    {
+                        #region Missile Engine Name / Tech Base
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech];
+
+                        if (FactTech > 12)
+                            FactTech = 12;
+
+                        int EngineBase = FactTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+
+                        switch (EngineBase)
+                        {
+                            case 0:
+                                Entry = "Conventional Engine";
+                                break;
+                            case 1:
+                                Entry = "Nuclear Thermal Engine";
+                                break;
+                            case 2:
+                                Entry = "Nuclear Pulse Engine";
+                                break;
+                            case 3:
+                                Entry = "Ion Drive";
+                                break;
+                            case 4:
+                                Entry = "Magneto-Plasma Drive";
+                                break;
+                            case 5:
+                                Entry = "Internal Fusion Drive";
+                                break;
+                            case 6:
+                                Entry = "Magnetic Fusion Drive";
+                                break;
+                            case 7:
+                                Entry = "Inertial Fusion Drive";
+                                break;
+                            case 8:
+                                Entry = "Solid-Core Antimatter Drive";
+                                break;
+                            case 9:
+                                Entry = "Gas-Core Antimatter Drive";
+                                break;
+                            case 10:
+                                Entry = "Plasma-Core Antimatter Drive";
+                                break;
+                            case 11:
+                                Entry = "Beam-Core Antimatter Drive";
+                                break;
+                            case 12:
+                                Entry = "Photonic Drive";
+                                break;
+                        }
+
+                        #endregion
+
+                        #region Power Mod
+                        int MinPowerTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MinEnginePowerMod];
+                        int MaxPowerTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MaxEnginePowerMod];
+
+                        if (MinPowerTech > 5)
+                            MinPowerTech = 5;
+                        if (MaxPowerTech > 5)
+                            MaxPowerTech = 5;
+
+                        int minPower = 50;
+                        switch (MinPowerTech)
+                        {
+                            case 0:
+                                minPower = 40;
+                                break;
+                            case 1:
+                                minPower = 30;
+                                break;
+                            case 2:
+                                minPower = 25;
+                                break;
+                            case 3:
+                                minPower = 20;
+                                break;
+                            case 4:
+                                minPower = 15;
+                                break;
+                            case 5:
+                                minPower = 10;
+                                break;
+                        }
+
+                        float Power = (float)(minPower + (5 * m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex)) / 100.0f;
+                        #endregion
+
+                        #region Fuel Consumption
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption];
+
+                        if (FactTech > 12)
+                            FactTech = 12;
+
+                        int FC = FactTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+
+                        #endregion
+
+                        float size = (10.0f + (float)(m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex))/100.0f;
+
+                        MissileEngineProject = new MissileEngineDefTN(Entry, Constants.EngineTN.EngineBase[EngineBase], Power, Constants.EngineTN.FuelConsumption[FC], size);
+
+                        Entry = String.Format("{0} EP {1}", MissileEngineProject.enginePower, Entry);
+                        MissileEngineProject.Name = Entry;
+
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        Entry = String.Format("Engine Power: {0:N3}      Fuel Use Per Hour: {1:N2} Litres\n", MissileEngineProject.enginePower, MissileEngineProject.fuelConsumption);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        float EPH = MissileEngineProject.fuelConsumption / MissileEngineProject.enginePower;
+                        Entry = String.Format("Fuel Consumption per Engine Power Hour: {0:N3} Litres\n", EPH);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Engine Size: {0:N2} Tons      Cost: {1}\n", (MissileEngineProject.size * 50.0f), MissileEngineProject.cost);
+                        else
+                            Entry = String.Format("Engine Size: {0:N2} MSP      Cost: {1}\n", (MissileEngineProject.size * 20.0f), MissileEngineProject.cost);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Thermal Signature: {0:N2}\n", MissileEngineProject.thermalSignature);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("\nDevelopment Cost for Project: {0:N0}RP\n", (MissileEngineProject.cost * 200));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                    }
                 break;
                 #endregion
 

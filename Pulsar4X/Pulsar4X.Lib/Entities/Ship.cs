@@ -1036,6 +1036,30 @@ namespace Pulsar4X.Entities
 
                 if (Type != DamageTypeTN.Microwave)
                 {
+                    /// <summary>
+                    /// Shock Damage:
+                    /// </summary>
+                    Random ShockRand = new Random((int)startDamage);
+                    float ShockChance = (float)Math.Floor(Math.Pow(startDamage, 1.3));
+                    int shockTest = ShockRand.Next(0, 100);
+
+                    /// <summary>
+                    /// There is a chance for shock damage to occur
+                    /// </summary>
+                    if (shockTest > ShockChance)
+                    {
+                        float sTest = (float)ShockRand.Next(0, 100) / 100.0f;
+                        internalDamage = (ushort)Math.Floor(((startDamage / 3.0f) * sTest));
+
+                        if (internalDamage != 0)
+                        {
+                            String DamageString = String.Format("{0} Shock Damage to {1}", (internalDamage), Name);
+                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact,
+                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), DamageString);
+
+                            ShipsFaction.MessageLog.Add(NMsg);
+                        }
+                    }
 
                     /// <summary>
                     /// Armor Penetration.

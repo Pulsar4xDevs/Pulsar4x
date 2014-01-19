@@ -47,8 +47,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Thermal Signature is EnginePower
         /// </summary>
-        private ushort ThermalSignature;
-        public ushort thermalSignature
+        private float ThermalSignature;
+        public float thermalSignature
         {
             get { return ThermalSignature; }
         }
@@ -86,23 +86,23 @@ namespace Pulsar4X.Entities.Components
 
 
             EnginePower = ((EngBase * size) * PowerMod);
-            ThermalSignature = (ushort)EnginePower;
-            if (ThermalSignature == 0)
-                ThermalSignature = 1;
+            ThermalSignature = EnginePower;
+            if (ThermalSignature == 0.0f)
+                ThermalSignature = 0.1f;
 
-            //Int ((Engine Size in MSP / 5) ^ (-0.683))
+            /// <summary>
+            /// Change this in Components later if it isn't 5.0
+            /// Int ((Engine Size in MSP / 5) ^ (-0.683))
+            /// Int ((Engine Size in MSP / 0.5) ^ (-0.683))??
+            /// </summary>
+            float SizeEPMod = (float)Math.Pow((msp / 5.0f), -0.683);
+            SizeEPMod = SizeEPMod * 100.0f;
+            SizeEPMod = (float)Math.Floor(SizeEPMod);
+            SizeEPMod = SizeEPMod / 100.0f;
 
-            float FuelEPMod = (float)Math.Pow((msp / 5.0f), -0.683);
-            FuelEPMod = FuelEPMod * 100.0f;
-            FuelEPMod = (float)Math.Floor(FuelEPMod);
-            FuelEPMod = FuelEPMod / 100.0f;
+            float FuelEPM = (float)Math.Pow(PowerMod, 2.5f);
 
-            FuelConsumption = (float)EnginePower * 5.0f * FuelEPMod * FuelConsumptionMod;
-
-            FuelConsumption = FuelConsumption * 100.0f;
-            FuelConsumption = (float)Math.Floor(fuelConsumption);
-            FuelConsumption = FuelConsumption / 100.0f;
-
+            FuelConsumption = (float)EnginePower * 5.0f * SizeEPMod * FuelConsumptionMod * FuelEPM;
 
             isObsolete = false;
             cost = (decimal)(EnginePower / 4.0f);
@@ -180,8 +180,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Total thermal signature of the missile.
         /// </summary>
-        private int TotalThermalSignature;
-        public int totalThermalSignature
+        private float TotalThermalSignature;
+        public float totalThermalSignature
         {
             get { return TotalThermalSignature; }
         }
@@ -508,7 +508,7 @@ namespace Pulsar4X.Entities.Components
             if (OrdnanceEngine != null)
             {
                 TotalEnginePower = (OrdnanceEngine.enginePower * (float)EngineCount);
-                TotalThermalSignature = (OrdnanceEngine.thermalSignature * EngineCount);
+                TotalThermalSignature = (OrdnanceEngine.thermalSignature * (float)EngineCount);
                 TotalFuelConsumption = (OrdnanceEngine.fuelConsumption * (float)EngineCount);
 
                 /// <summary>

@@ -2032,6 +2032,8 @@ namespace Pulsar4X.Entities
             bool control = false;
             Summary = "N/A";
 
+
+            #region Basic Info
             /// <summary>
             /// if (isFighter)
             ///    Tons = SizeTons;
@@ -2080,7 +2082,9 @@ namespace Pulsar4X.Entities
             }
 
             Summary = String.Format("{0}\n",Summary);
+            #endregion
 
+            #region Engine Info
             if (ShipEngineDef != null)
             {
                 float fuelCon = (float)Math.Floor(ShipEngineDef.fuelConsumptionMod * 100.0f);
@@ -2147,7 +2151,9 @@ namespace Pulsar4X.Entities
 
             Entry = "\n";
             Summary = String.Format("{0}{1}",Summary,Entry);
+            #endregion
 
+            #region Beam Weapon Info
             for (int loop = 0; loop < ShipBeamDef.Count; loop++)
             {
                 String Range = "N/A";
@@ -2266,7 +2272,9 @@ namespace Pulsar4X.Entities
                 Entry = "\n";
                 Summary = String.Format("{0}{1}", Summary, Entry);
             }
+            #endregion
 
+            #region Missile Weapon Info
             control = false;
 
             for (int loop = 0; loop < ShipMLaunchDef.Count; loop++)
@@ -2327,7 +2335,54 @@ namespace Pulsar4X.Entities
 
             foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipClassOrdnance)
             {
-                Entry = String.Format("{0} ({1})",pair.Key.Name,pair.Value);
+                String FormattedSpeed = pair.Key.maxSpeed.ToString("#,##0");
+
+                float Endurance = (pair.Key.fuel / pair.Key.totalFuelConsumption);
+                String EndString = "N/A";
+                
+                if(Endurance >= 8640.0f)
+                {
+                    float YE = Endurance / 8640.0f;
+                    EndString = String.Format("{0:N1}Y",YE);
+                }
+                if(Endurance >= 720.0f)
+                {
+                    float ME = Endurance / 720.0f;
+                    EndString = String.Format("{0:N1}M",ME);
+                }
+                if(Endurance >= 24.0f)
+                {
+                    float DE = Endurance / 24.0f;
+                    EndString = String.Format("{0:N1}D",DE);
+                }
+                else if(Endurance >= 1.0f)
+                {
+                    EndString = String.Format("{0:N1}h",Endurance);
+                }
+                else if((Endurance * 60.0f) >= 1.0f)
+                {
+                    EndString = String.Format("{0:N1}m",(Endurance * 60.0f));
+                }
+                else
+                {
+                    EndString = String.Format("0m");
+                }
+
+                float TimeOneBillionKM = (1000000000.0f / pair.Key.maxSpeed) / 3600.0f; 
+                float test = TimeOneBillionKM / Endurance;
+                String RangeString = "N/A";
+                if(test >= 1.0f)
+                {
+                    RangeString = String.Format("{0:N1}B km",test);
+                }
+                else
+                {
+                    float range = Endurance * (pair.Key.maxSpeed * 3600.0f);
+                    RangeString = String.Format("{0:N1}M km",range);
+                }
+
+                Entry = String.Format("{0} ({1})  Speed: {3} km/s   End: {4}    Range: {5} km   WH: {6}    Size: {7}    TH: {8}/{9}/{10}\n", pair.Key.Name, pair.Value, FormattedSpeed, EndString,
+                                      RangeString,pair.Key.warhead,pair.Key.size,pair.Key.ToHit(3000.0f),pair.Key.ToHit(5000.0f),pair.Key.ToHit(10000.0f));
                 control = true;
             }
 
@@ -2336,7 +2391,9 @@ namespace Pulsar4X.Entities
                 Entry = "\n";
                 Summary = String.Format("{0}{1}", Summary, Entry);
             }
+            #endregion
 
+            #region Sensor Info
             control = false;
 
             for (int loop = 0; loop < ShipASensorDef.Count; loop++)
@@ -2422,6 +2479,7 @@ namespace Pulsar4X.Entities
                 Entry = "\n";
                 Summary = String.Format("{0}{1}", Summary, Entry);
             }
+            #endregion
 
             if (IsMilitary == true)
             {

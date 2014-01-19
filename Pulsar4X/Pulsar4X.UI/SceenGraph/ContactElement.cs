@@ -41,9 +41,20 @@ namespace Pulsar4X.UI.SceenGraph
             if (e.PropertyName == "Name")
             {
                 /// <summary>
-                /// Change Label here!
+                /// Change Label here! If we are doing this by system contact, then we need to check what type of StarSystemEntity this contact is.
                 /// </summary>
-                Lable.Text = m_oSystemContect.TaskGroup.Name;
+                switch(m_oSystemContect.SSEntity)
+                {
+                    case StarSystemEntityType.TaskGroup:
+                        Lable.Text = m_oSystemContect.TaskGroup.Name;
+                    break;
+                    case StarSystemEntityType.Population:
+                        Lable.Text = m_oSystemContect.Pop.Name;
+                    break;
+                    case StarSystemEntityType.Missile:
+                        Lable.Text = m_oSystemContect.MissileGroup.Name;
+                    break;
+                }
 
                 //GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
                 //                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oSystemContect.TaskGroup.Name);
