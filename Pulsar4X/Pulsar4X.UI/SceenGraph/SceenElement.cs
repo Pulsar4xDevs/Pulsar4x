@@ -82,7 +82,7 @@ namespace Pulsar4X.UI.SceenGraph
         {
             get
             {
-                return Children;
+                return m_lChildren;
             }
         }
 
@@ -171,7 +171,7 @@ namespace Pulsar4X.UI.SceenGraph
         public abstract void Render();
 
         /// <summary>
-        /// Gets the Selected Entity at the Position specified (in world coords). if it is not this sprite then it will 
+        /// Gets the Selected Entity at the Position specified (in world coords). If it is not this sprite then it will 
         /// recurse down the Children until it finds it. it will return null if it cannot be found
         /// </summary>
         public abstract Guid GetSelected(Vector3 a_v3AtPos);
