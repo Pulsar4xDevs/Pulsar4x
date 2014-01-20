@@ -170,11 +170,6 @@ namespace Pulsar4X.Entities
         /// Missile groups spawned by this TG that have yet to launch out yet. look here to add missiles first before creating new ones.
         /// </summary>
         public BindingList<OrdnanceGroupTN> AttachedMissileGroups { get; set; }
-        
-        /// <summary>
-        /// UI map marker identifier.
-        /// </summary>
-        public int MapMarkerId { get; set; }
 
         /// <summary>
         /// Taskgroups with orders to this ship.
@@ -288,8 +283,6 @@ namespace Pulsar4X.Entities
             AttachedMissileGroups = new BindingList<OrdnanceGroupTN>();
 
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
-
-            MapMarkerId = -1;
 
         }
 
@@ -2440,7 +2433,7 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// This function returns the closest active contact to this taskgroup.
+        /// This function returns the closest active contact to this taskgroup. MAY BE DEPRECATED
         /// </summary>
         /// <returns>ShipTN targeted, null if no ship meets criteria.</returns>
         public ShipTN getNewTarget()
@@ -2455,29 +2448,32 @@ namespace Pulsar4X.Entities
 
             ShipTN min = null;
             float minDist = -1.0f;
-            foreach (KeyValuePair<ShipTN, FactionContact> pair in TaskGroupFaction.DetectedContacts)
+            if(TaskGroupFaction.DetectedContactLists.ContainsKey(Contact.CurrentSystem))
             {
-                /// <summary>
-                /// Only active targets are considered for this. Is this for BFC targeting, or general things to head for?
-                /// This should be commented out if I want to investigate rather than blow up.
-                /// </summary>
-                if (pair.Value.active == true) 
+                foreach (KeyValuePair<ShipTN, FactionContact> pair in TaskGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedContacts)
                 {
-                    int ID = pair.Key.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
-
                     /// <summary>
-                    /// No ship has been examined yet, so this one is the "closest".
+                    /// Only active targets are considered for this. Is this for BFC targeting, or general things to head for?
+                    /// This should be commented out if I want to investigate rather than blow up.
                     /// </summary>
-                    if (min == null || minDist == -1.0f) 
+                    if (pair.Value.active == true) 
                     {
+                        int ID = pair.Key.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
 
-                        min = pair.Key;
-                        minDist = Contact.DistanceTable[ID];
-                    }
-                    else if (Contact.DistanceTable[ID] < minDist)
-                    {
-                        min = pair.Key;
-                        minDist = Contact.DistanceTable[ID];
+                        /// <summary>
+                        /// No ship has been examined yet, so this one is the "closest".
+                        /// </summary>
+                        if (min == null || minDist == -1.0f) 
+                        {
+
+                            min = pair.Key;
+                            minDist = Contact.DistanceTable[ID];
+                        }
+                        else if (Contact.DistanceTable[ID] < minDist)
+                        {
+                            min = pair.Key;
+                            minDist = Contact.DistanceTable[ID];
+                        }
                     }
                 }
             }

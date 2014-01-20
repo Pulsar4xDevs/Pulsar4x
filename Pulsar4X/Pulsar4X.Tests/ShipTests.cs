@@ -1524,13 +1524,22 @@ namespace Pulsar4X.Tests
 
                             if (target != null)
                             {
-                                if (P[loop].DetectedContacts.ContainsKey(target))
+                                if (P[loop].DetectedContactLists.ContainsKey(target.ShipsTaskGroup.Contact.CurrentSystem))
                                 {
-                                    if (P[loop].DetectedContacts[target].active == true)
+                                    if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.ContainsKey(target))
                                     {
-                                        if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
+                                        if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts[target].active == true)
                                         {
-                                            P[loop].TaskGroups[loop2].Ships[loop3].ShipFireWeapons(tick, RNG);
+                                            if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
+                                            {
+                                                P[loop].TaskGroups[loop2].Ships[loop3].ShipFireWeapons(tick, RNG);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            P[loop].TaskGroups[loop2].clearAllOrders();
+                                            if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
+                                                P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                         }
                                     }
                                     else
@@ -1540,14 +1549,8 @@ namespace Pulsar4X.Tests
                                             P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                     }
                                 }
-                                else
-                                {
-                                    P[loop].TaskGroups[loop2].clearAllOrders();
-                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
-                                        P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
-                                }
+                                P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons(5);
                             }
-                            P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons(5);
                         }
                     }
                 }
@@ -1558,7 +1561,7 @@ namespace Pulsar4X.Tests
 
                 if (P[loop].TaskGroups.Count != 0)
                 {
-                    if (P[loop].DetectedContacts.Count == 0 && P[loop].TaskGroups[0].TaskGroupOrders.Count == 0)
+                    if (P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.CurrentSystem].DetectedContacts.Count == 0 && P[loop].TaskGroups[0].TaskGroupOrders.Count == 0)
                     {
                         if (loop == (factionCount - 1) && done == true)
                         {
@@ -1583,7 +1586,7 @@ namespace Pulsar4X.Tests
                 {
                     done = true;
                 }
-                Console.WriteLine("***{0} {1} {2}***", loop, done, P[loop].DetectedContacts.Count);
+                Console.WriteLine("***{0} {1} {2}***", loop, done, P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.CurrentSystem].DetectedContacts.Count);
             }
 
             return done;
@@ -1713,9 +1716,13 @@ namespace Pulsar4X.Tests
                             {
                                 for (int loop4 = 0; loop4 < factionCount; loop4++)
                                 {
-                                    if (P[loop4].DetectedContacts.ContainsKey(P[loop].TaskGroups[loop2].Ships[loop3]))
+                                    StarSystem CurSystem = P[loop].TaskGroups[loop2].Contact.CurrentSystem;
+                                    if (P[loop4].DetectedContactLists.ContainsKey(CurSystem))
                                     {
-                                        P[loop4].DetectedContacts.Remove(P[loop].TaskGroups[loop2].Ships[loop3]);
+                                        if (P[loop4].DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(P[loop].TaskGroups[loop2].Ships[loop3]))
+                                        {
+                                            P[loop4].DetectedContactLists[CurSystem].DetectedContacts.Remove(P[loop].TaskGroups[loop2].Ships[loop3]);
+                                        }
                                     }
                                 }
                                 bool nodeGone = P[loop].TaskGroups[loop2].Ships[loop3].OnDestroyed();
@@ -1741,7 +1748,7 @@ namespace Pulsar4X.Tests
                                     break;
                                 }
 
-                                P[loop].DetectedContacts.Clear();
+                                P[loop].DetectedContactLists[P[loop].TaskGroups[loop2].Contact.CurrentSystem].DetectedContacts.Clear();
                             }
                         }
                         if (P[loop].TaskGroups.Count == 0)

@@ -8,6 +8,10 @@ using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
+    /// <summary>
+    /// Most of this class is deprecated and can be removed.
+    /// I'll do that at some point in the future.
+    /// </summary>
     public class SimEntity
     {
         public int factionStart { get; set; }
@@ -223,13 +227,22 @@ namespace Pulsar4X.Entities
 
                             if (target != null)
                             {
-                                if (P[loop].DetectedContacts.ContainsKey(target))
+                                if (P[loop].DetectedContactLists.ContainsKey(target.ShipsTaskGroup.Contact.CurrentSystem))
                                 {
-                                    if (P[loop].DetectedContacts[target].active == true)
+                                    if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.ContainsKey(target))
                                     {
-                                        if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
+                                        if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts[target].active == true)
                                         {
-                                            P[loop].TaskGroups[loop2].Ships[loop3].ShipFireWeapons(tick, RNG);
+                                            if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
+                                            {
+                                                P[loop].TaskGroups[loop2].Ships[loop3].ShipFireWeapons(tick, RNG);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            P[loop].TaskGroups[loop2].clearAllOrders();
+                                            if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
+                                                P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                         }
                                     }
                                     else
@@ -238,12 +251,6 @@ namespace Pulsar4X.Entities
                                         if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
                                             P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                     }
-                                }
-                                else
-                                {
-                                    P[loop].TaskGroups[loop2].clearAllOrders();
-                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
-                                        P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                 }
                             }
                             P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons(5);
@@ -257,7 +264,7 @@ namespace Pulsar4X.Entities
 
                 if (P[loop].TaskGroups.Count != 0)
                 {
-                    if (P[loop].DetectedContacts.Count == 0 && P[loop].TaskGroups[0].TaskGroupOrders.Count == 0)
+                    if (P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.CurrentSystem].DetectedContacts.Count == 0 && P[loop].TaskGroups[0].TaskGroupOrders.Count == 0)
                     {
                         if (loop == (factionCount - 1) && done == true)
                         {
@@ -323,6 +330,10 @@ namespace Pulsar4X.Entities
         /// <param name="tickValue"></param>
         public void AdvanceSim(BindingList<Faction> P, Random RNG, int tickValue)
         {
+            if (CurrentTick > 1000000000)
+            {
+                CurrentTick = CurrentTick - 1000000000;
+            }
             lastTick = CurrentTick;
             CurrentTick += tickValue;
 
@@ -390,45 +401,48 @@ namespace Pulsar4X.Entities
                                 int MyID = CurSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
                                 int TargetID = CurSystem.SystemContactList.IndexOf(Target.ShipsTaskGroup.Contact);
 
-                                if (pair.Value.ShipsFaction.DetectedContacts.ContainsKey(Target) == true)
+                                if (pair.Value.ShipsFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
                                 {
-                                    /// <summary>
-                                    /// This tick active detection.
-                                    /// </summary>
-                                    if (pair.Value.ShipsFaction.DetectedContacts[Target].active == true)
+                                    if (pair.Value.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(Target) == true)
                                     {
-                                        bool WF = pair.Value.ShipFireWeapons(CurrentTick, RNG);
-
-                                        if (Target.IsDestroyed == true)
+                                        /// <summary>
+                                        /// This tick active detection.
+                                        /// </summary>
+                                        if (pair.Value.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts[Target].active == true)
                                         {
-                                            if (Target.ShipsFaction.RechargeList.ContainsKey(Target) == true)
-                                            {
-                                                Target.ShipsFaction.RechargeList[Target] = (int)Faction.RechargeStatus.Destroyed;
-                                            }
-                                            else
-                                            {
-                                                Target.ShipsFaction.RechargeList.Add(Target, (int)Faction.RechargeStatus.Destroyed);
-                                            }
-                                        }
+                                            bool WF = pair.Value.ShipFireWeapons(CurrentTick, RNG);
 
-                                        /*String Fire = String.Format("Weapons Fired: {0}", WF );
-                                        MessageEntry Entry = new MessageEntry(P[loop].TaskGroups[0].Contact.CurrentSystem, P[loop].TaskGroups[0].Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
-                                        P[loop].MessageLog.Add(Entry);*/
-
-                                        if (WF == true)
-                                        {
-                                            if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                            if (Target.IsDestroyed == true)
                                             {
-                                                int value = P[loop].RechargeList[pair.Value];
-
-                                                if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                                if (Target.ShipsFaction.RechargeList.ContainsKey(Target) == true)
                                                 {
-                                                    P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                                    Target.ShipsFaction.RechargeList[Target] = (int)Faction.RechargeStatus.Destroyed;
+                                                }
+                                                else
+                                                {
+                                                    Target.ShipsFaction.RechargeList.Add(Target, (int)Faction.RechargeStatus.Destroyed);
                                                 }
                                             }
-                                            else
+
+                                            /*String Fire = String.Format("Weapons Fired: {0}", WF );
+                                            MessageEntry Entry = new MessageEntry(P[loop].TaskGroups[0].Contact.CurrentSystem, P[loop].TaskGroups[0].Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                            P[loop].MessageLog.Add(Entry);*/
+
+                                            if (WF == true)
                                             {
-                                                P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                                if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                                {
+                                                    int value = P[loop].RechargeList[pair.Value];
+
+                                                    if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                                    {
+                                                        P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                                }
                                             }
                                         }
                                     }
@@ -516,9 +530,13 @@ namespace Pulsar4X.Entities
 
                         for (int loop4 = factionStart; loop4 < factionCount; loop4++)
                         {
-                            if (P[loop4].DetectedContacts.ContainsKey(pair.Key) == true)
+                            StarSystem CurSystem = pair.Key.ShipsTaskGroup.Contact.CurrentSystem;
+                            if(P[loop4].DetectedContactLists.ContainsKey(CurSystem) == true)
                             {
-                                P[loop4].DetectedContacts.Remove(pair.Key);
+                                if (P[loop4].DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(pair.Key) == true)
+                                {
+                                    P[loop4].DetectedContactLists[CurSystem].DetectedContacts.Remove(pair.Key);
+                                }
                             }
                         }
 
@@ -675,9 +693,13 @@ namespace Pulsar4X.Entities
                             {
                                 for (int loop4 = 0; loop4 < factionCount; loop4++)
                                 {
-                                    if (P[loop4].DetectedContacts.ContainsKey(P[loop].TaskGroups[loop2].Ships[loop3]))
+                                    StarSystem CurSystem = P[loop].TaskGroups[loop2].Contact.CurrentSystem;
+                                    if (P[loop4].DetectedContactLists.ContainsKey(CurSystem))
                                     {
-                                        P[loop4].DetectedContacts.Remove(P[loop].TaskGroups[loop2].Ships[loop3]);
+                                        if (P[loop4].DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(P[loop].TaskGroups[loop2].Ships[loop3]))
+                                        {
+                                            P[loop4].DetectedContactLists[CurSystem].DetectedContacts.Remove(P[loop].TaskGroups[loop2].Ships[loop3]);
+                                        }
                                     }
                                 }
                                 bool nodeGone = P[loop].TaskGroups[loop2].Ships[loop3].OnDestroyed();
@@ -703,7 +725,7 @@ namespace Pulsar4X.Entities
                                     break;
                                 }
 
-                                P[loop].DetectedContacts.Clear();
+                                P[loop].DetectedContactLists[P[loop].TaskGroups[loop2].Contact.CurrentSystem].DetectedContacts.Clear();
                             }
                         }
                         if (P[loop].TaskGroups.Count == 0)

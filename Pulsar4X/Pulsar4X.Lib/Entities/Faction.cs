@@ -182,8 +182,25 @@ namespace Pulsar4X.Entities
             EM = Em;
             active = Active;
         }
+    }
 
+    /// <summary>
+    /// I need a new class to store a detected contacts list for every system.
+    /// </summary>
+    public class DetectedContactsList
+    {
+        /// <summary>
+        /// This was the original faction detected contacts list, now moved to this class container so that I can put this in a dictionary with System.
+        /// </summary>
+        public Dictionary<ShipTN, FactionContact> DetectedContacts { get; set; }
 
+        /// <summary>
+        /// Constructor for this new list.
+        /// </summary>
+        public DetectedContactsList()
+        {
+            DetectedContacts = new Dictionary<ShipTN, FactionContact>();
+        }
     }
 
     public class FactionSystemDetection
@@ -398,15 +415,21 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// here is where only the specifically detected contacts are placed.
         /// </summary>
-        public Dictionary<ShipTN,FactionContact> DetectedContacts { get; set; }
+        public Dictionary<StarSystem,DetectedContactsList> DetectedContactLists { get; set; }
 
         /// <summary>
         /// Just a list of the available installation types for this faction.
         /// </summary>
         public BindingList<Installation> InstallationTypes { get; set; }
 
+        /// <summary>
+        /// List of messages this faction has
+        /// </summary>
         public BindingList<MessageEntry> MessageLog { get; set; }
 
+        /// <summary>
+        /// Color for this faction. eventually will be moved out of here.
+        /// </summary>
         public Color FactionColor { get; set; }
 
         /// <summary>
@@ -676,7 +699,7 @@ namespace Pulsar4X.Entities
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
-            DetectedContacts = new Dictionary<ShipTN, FactionContact>();
+            DetectedContactLists = new Dictionary<StarSystem, DetectedContactsList>();
 
             FactionID = ID;
 
@@ -751,7 +774,7 @@ namespace Pulsar4X.Entities
             ComponentList.AddInitialComponents();
 
             SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
-            DetectedContacts = new Dictionary<ShipTN, FactionContact>();
+            DetectedContactLists = new Dictionary<StarSystem, DetectedContactsList>();
 
             FactionID = ID;
 
@@ -1389,8 +1412,37 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 if (detectedShip.ShipsFaction != this)
                                 {
+                                    bool inDict = DetectedContactLists.ContainsKey(System);
 
-                                    bool inDict = DetectedContacts.ContainsKey(detectedShip);
+                                    if (inDict == false)
+                                    {
+                                        DetectedContactsList newDCL = new DetectedContactsList();
+                                        DetectedContactLists.Add(System, newDCL);
+                                    }
+
+                                    inDict = DetectedContactLists[System].DetectedContacts.ContainsKey(detectedShip);
+
+                                    bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
+                                    bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
+                                    bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
+
+                                    if (inDict == true)
+                                    {
+                                        DetectedContactLists[System].DetectedContacts[detectedShip].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
+
+                                        if (th == false && em == false && ac == false)
+                                        {
+                                            DetectedContactLists[System].DetectedContacts.Remove(detectedShip);
+                                        }
+                                    }
+                                    else if (inDict == false && (th == true || em == true || ac == true))
+                                    {
+                                        FactionContact newContact = new FactionContact(this, detectedShip, th, em, ac, (uint)YearTickValue);
+                                        DetectedContactLists[System].DetectedContacts.Add(detectedShip, newContact);
+                                    }
+
+
+                                    /*bool inDict = DetectedContacts.ContainsKey(detectedShip);
                                     bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
                                     bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
                                     bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
@@ -1408,7 +1460,7 @@ namespace Pulsar4X.Entities
                                     {
                                         FactionContact newContact = new FactionContact(this,detectedShip, th, em, ac, (uint)YearTickValue);
                                         DetectedContacts.Add(detectedShip, newContact);
-                                    }
+                                    }*/
                                 }
                             }
                         }

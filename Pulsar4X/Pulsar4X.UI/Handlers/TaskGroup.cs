@@ -495,9 +495,10 @@ namespace Pulsar4X.UI.Handlers
                                 /// This is Contacts
                                 /// </summary>
                                 Counter = 0;
-                                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+
+                                if(CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.CurrentSystem) == true)
                                 {
-                                    if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentTaskGroup.Contact.CurrentSystem)
+                                    foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.CurrentSystem].DetectedContacts)
                                     {
                                         if (Counter == newIndex)
                                         {
@@ -868,32 +869,31 @@ namespace Pulsar4X.UI.Handlers
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
             SystemLocationListTypes.Add(SystemLocationListType.Contacts);
 
-
-            foreach( KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContacts)
+            if (CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.CurrentSystem) == true)
             {
-                if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == CurrentTaskGroup.Contact.CurrentSystem)
+                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.CurrentSystem].DetectedContacts)
                 {
-                    String TH = "";
-                    if (pair.Value.thermal == true)
-                    {
-                        TH = String.Format("[Thermal {0}]", pair.Key.CurrentThermalSignature);
-                    }
+                        String TH = "";
+                        if (pair.Value.thermal == true)
+                        {
+                            TH = String.Format("[Thermal {0}]", pair.Key.CurrentThermalSignature);
+                        }
 
-                    String EM = "";
-                    if (pair.Value.EM == true)
-                    {
-                        EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
-                    }
+                        String EM = "";
+                        if (pair.Value.EM == true)
+                        {
+                            EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
+                        }
 
-                    String ACT = "";
-                    if (pair.Value.active == true)
-                    {
-                        ACT = String.Format("[ACT {0}]", pair.Key.TotalCrossSection);
-                    }
+                        String ACT = "";
+                        if (pair.Value.active == true)
+                        {
+                            ACT = String.Format("[ACT {0}]", pair.Key.TotalCrossSection);
+                        }
 
-                    String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+                        String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
 
-                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
+                        m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
                 }
             }
         }

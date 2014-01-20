@@ -531,9 +531,9 @@ namespace Pulsar4X.UI.Handlers
                 if (isBFC == true)
                 {
                     int count = 0;
-                    foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContacts)
+                    if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
                             if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                             {
@@ -541,7 +541,6 @@ namespace Pulsar4X.UI.Handlers
                                 pair.Key.ShipsTargetting.Add(_CurrnetShip);
                                 break;
                             }
-
                             count++;
                         }
                     }
@@ -552,9 +551,9 @@ namespace Pulsar4X.UI.Handlers
                 else
                 {
                     int count = 0;
-                    foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContacts)
+                    if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
                             StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
                             int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
@@ -1126,9 +1125,9 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// BFC range is so short that we'll just print all contacts and let the user sort em out.
                     /// </summary>
-                    foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContacts)
+                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem && pair.Value.active == true)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
                             String TH = "";
                             if (pair.Value.thermal == true)
@@ -1159,9 +1158,9 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Each MFC entry will be range checked, also there have been some tick errors, this may be the place to hunt them down.
                     /// </summary>
-                    foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContacts)
+                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        if (pair.Key.ShipsTaskGroup.Contact.CurrentSystem == _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
                             StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
                             int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
