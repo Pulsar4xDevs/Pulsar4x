@@ -28,7 +28,7 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// If canceled it will not be.
         /// </summary>
-        public Button CancelButton
+        public Button CancelRenameButton
         {
             get { return m_oCancelButton; }
         }

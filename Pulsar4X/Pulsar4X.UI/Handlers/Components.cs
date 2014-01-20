@@ -3568,6 +3568,9 @@ namespace Pulsar4X.UI.Handlers
 
                         float size = (10.0f + (float)(m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex))/100.0f;
 
+                        if (size < 0.1f)
+                            size = 0.1f;
+
                         MissileEngineProject = new MissileEngineDefTN(Entry, Constants.EngineTN.EngineBase[EngineBase], Power, Constants.EngineTN.FuelConsumption[FC], size);
 
                         Entry = String.Format("{0} EP {1}", MissileEngineProject.enginePower, Entry);

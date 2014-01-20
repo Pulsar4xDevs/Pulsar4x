@@ -11,7 +11,7 @@ using OpenTK;
 
 namespace Pulsar4X.UI.Panels
 {
-    public partial class MissileDesign : DockContent
+    public partial class MissileDesign : Form
     {
         /// <summary>
         /// Display for missile tech

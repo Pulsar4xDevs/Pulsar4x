@@ -11,7 +11,7 @@ using OpenTK;
 
 namespace Pulsar4X.UI.Panels
 {
-    partial class MissileDesign : DockContent
+    partial class MissileDesign
     {
         /// <summary>
         /// Required designer variable.
@@ -37,9 +37,105 @@ namespace Pulsar4X.UI.Panels
         /// <summary>
         /// missile design close button.
         /// </summary>
-        public Button CloseButton
+        public Button CloseMDButton
         {
             get { return m_oCloseButton; }
+        }
+
+        /// <summary>
+        /// player will enter the desired number of engines into this text box
+        /// </summary>
+        public TextBox NumEnginesTextBox
+        {
+            get { return m_oNumberEnginesTextBox; }
+        }
+
+        /// <summary>
+        /// Engine size based on number of engines will be printed here.
+        /// </summary>
+        public TextBox TotalEngineSizeTextBox
+        {
+            get { return m_oTotalEngineSizeTextBox; }
+        }
+
+        /// <summary>
+        /// Total cost of all engines will be printed here.
+        /// </summary>
+        public TextBox TotalEngineCostTextBox
+        {
+            get { return m_oTotalEngineCostTextBox; }
+        }
+
+        /// <summary>
+        /// Total EP of all engines will be printed here.
+        /// </summary>
+        public TextBox TotalEPTextBox
+        {
+            get { return m_oTotalEPTextBox; }
+        }
+
+        /// <summary>
+        /// player entered Warhead MSP value.
+        /// </summary>
+        public TextBox WHMSPTextBox
+        {
+            get { return m_oWHMSPTextBox; }
+        }
+
+        /// <summary>
+        /// Translation of WHMSP into WHValue
+        /// </summary>
+        public TextBox WHValueTextBox
+        {
+            get { return m_oWHValueTextBox; }
+        }
+
+        /// <summary>
+        /// Player entered fuel MSP value.
+        /// </summary>
+        public TextBox FuelMSPTextBox
+        {
+            get { return m_oFuelMSPTextBox; }
+        }
+
+        /// <summary>
+        /// Fuel value derived from MSP
+        /// </summary>
+        public TextBox FuelValueTextBox
+        {
+            get { return m_oFuelValueTextBox; }
+        }
+
+        /// <summary>
+        /// player agility MSP value
+        /// </summary>
+        public TextBox AgilityMSPTextBox
+        {
+            get { return m_oAgilityMSPTextBox; }
+        }
+
+        /// <summary>
+        /// Agility rating from player entry.
+        /// </summary>
+        public TextBox AgilityValueTextBox
+        {
+            get { return m_oAgilityValueTextBox; }
+        }
+
+        /// <summary>
+        /// Both the player entered name and the automatically generated name will go here.
+        /// </summary>
+        public TextBox MissileNameTextBox
+        {
+            get { return m_oMissileNameTextBox; }
+        }
+
+        /// <summary>
+        /// The overall missile summary will be printed to this box.
+        /// </summary>
+        public RichTextBox MissileSummaryTextBox
+        {
+            get { return m_oMissileSummaryTextBox; }
         }
 
         /// <summary>
@@ -66,13 +162,37 @@ namespace Pulsar4X.UI.Panels
             this.m_oEmpireGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oEmpireComboBox = new System.Windows.Forms.ComboBox();
             this.m_oCompSizeBox = new System.Windows.Forms.GroupBox();
+            this.m_oValueLabel = new System.Windows.Forms.Label();
+            this.m_oMSPLabel = new System.Windows.Forms.Label();
             this.m_oParametersGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oReactorLabel = new System.Windows.Forms.Label();
+            this.m_oAgilityLabel = new System.Windows.Forms.Label();
+            this.m_oFuelLabel = new System.Windows.Forms.Label();
+            this.m_oWarheadLabel = new System.Windows.Forms.Label();
+            this.m_oReactorMSPTextBox = new System.Windows.Forms.TextBox();
+            this.m_oAgilityMSPTextBox = new System.Windows.Forms.TextBox();
+            this.m_oFuelMSPTextBox = new System.Windows.Forms.TextBox();
+            this.m_oWHMSPTextBox = new System.Windows.Forms.TextBox();
+            this.m_oReactorValueTextBox = new System.Windows.Forms.TextBox();
+            this.m_oAgilityValueTextBox = new System.Windows.Forms.TextBox();
+            this.m_oFuelValueTextBox = new System.Windows.Forms.TextBox();
+            this.m_oWHValueTextBox = new System.Windows.Forms.TextBox();
             this.m_oSensorGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oDefenceGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oModGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oMissileSeriesGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oPreviousDesignGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oMissileEngineGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oTotalEngineSizeTextBox = new System.Windows.Forms.TextBox();
+            this.m_oNumberEnginesTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTotalEngineCostTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTotalEPTextBox = new System.Windows.Forms.TextBox();
+            this.m_oTotalCostLabel = new System.Windows.Forms.Label();
+            this.m_oTotalEPLabel = new System.Windows.Forms.Label();
+            this.m_oESizeLabel = new System.Windows.Forms.Label();
+            this.m_oNumberLabel = new System.Windows.Forms.Label();
+            this.m_oEngineLabel = new System.Windows.Forms.Label();
+            this.m_oMissileEngineComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSecondStageGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oSystemParametersGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oInfoGroupBox = new System.Windows.Forms.GroupBox();
@@ -83,19 +203,14 @@ namespace Pulsar4X.UI.Panels
             this.m_oDeleteSeriesButton = new System.Windows.Forms.Button();
             this.m_oSetSeriesButton = new System.Windows.Forms.Button();
             this.m_oReplaceAllButton = new System.Windows.Forms.Button();
-            this.m_oMissileEngineComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oEngineLabel = new System.Windows.Forms.Label();
-            this.m_oNumberLabel = new System.Windows.Forms.Label();
-            this.m_oESizeLabel = new System.Windows.Forms.Label();
-            this.m_oTotalEPLabel = new System.Windows.Forms.Label();
-            this.m_oTotalCostLabel = new System.Windows.Forms.Label();
-            this.m_oTotalEPTextBox = new System.Windows.Forms.TextBox();
-            this.m_oTotalCostTextBox = new System.Windows.Forms.TextBox();
-            this.m_oNumberEnginesTextBox = new System.Windows.Forms.TextBox();
-            this.m_oTotalSizeTextBox = new System.Windows.Forms.TextBox();
+            this.m_oMissileSummaryTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oMissileNameTextBox = new System.Windows.Forms.TextBox();
+            this.m_oCreateButton = new System.Windows.Forms.Button();
             this.m_oEmpireGroupBox.SuspendLayout();
             this.m_oCompSizeBox.SuspendLayout();
+            this.m_oParametersGroupBox.SuspendLayout();
             this.m_oMissileEngineGroupBox.SuspendLayout();
+            this.m_oSystemParametersGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oEmpireGroupBox
@@ -119,6 +234,8 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oCompSizeBox
             // 
+            this.m_oCompSizeBox.Controls.Add(this.m_oValueLabel);
+            this.m_oCompSizeBox.Controls.Add(this.m_oMSPLabel);
             this.m_oCompSizeBox.Controls.Add(this.m_oParametersGroupBox);
             this.m_oCompSizeBox.Controls.Add(this.m_oSensorGroupBox);
             this.m_oCompSizeBox.Controls.Add(this.m_oDefenceGroupBox);
@@ -130,8 +247,40 @@ namespace Pulsar4X.UI.Panels
             this.m_oCompSizeBox.TabStop = false;
             this.m_oCompSizeBox.Text = "Enter Component Sizes";
             // 
+            // m_oValueLabel
+            // 
+            this.m_oValueLabel.AutoSize = true;
+            this.m_oValueLabel.Location = new System.Drawing.Point(218, 27);
+            this.m_oValueLabel.Margin = new System.Windows.Forms.Padding(3);
+            this.m_oValueLabel.Name = "m_oValueLabel";
+            this.m_oValueLabel.Size = new System.Drawing.Size(34, 13);
+            this.m_oValueLabel.TabIndex = 23;
+            this.m_oValueLabel.Text = "Value";
+            // 
+            // m_oMSPLabel
+            // 
+            this.m_oMSPLabel.AutoSize = true;
+            this.m_oMSPLabel.Location = new System.Drawing.Point(162, 27);
+            this.m_oMSPLabel.Margin = new System.Windows.Forms.Padding(3);
+            this.m_oMSPLabel.Name = "m_oMSPLabel";
+            this.m_oMSPLabel.Size = new System.Drawing.Size(30, 13);
+            this.m_oMSPLabel.TabIndex = 22;
+            this.m_oMSPLabel.Text = "MSP";
+            // 
             // m_oParametersGroupBox
             // 
+            this.m_oParametersGroupBox.Controls.Add(this.m_oReactorLabel);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oAgilityLabel);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oFuelLabel);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oWarheadLabel);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oReactorMSPTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oAgilityMSPTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oFuelMSPTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oWHMSPTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oReactorValueTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oAgilityValueTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oFuelValueTextBox);
+            this.m_oParametersGroupBox.Controls.Add(this.m_oWHValueTextBox);
             this.m_oParametersGroupBox.Location = new System.Drawing.Point(8, 56);
             this.m_oParametersGroupBox.Margin = new System.Windows.Forms.Padding(5);
             this.m_oParametersGroupBox.Name = "m_oParametersGroupBox";
@@ -139,6 +288,131 @@ namespace Pulsar4X.UI.Panels
             this.m_oParametersGroupBox.TabIndex = 2;
             this.m_oParametersGroupBox.TabStop = false;
             this.m_oParametersGroupBox.Text = "Basic Missile Parameters";
+            // 
+            // m_oReactorLabel
+            // 
+            this.m_oReactorLabel.AutoSize = true;
+            this.m_oReactorLabel.Location = new System.Drawing.Point(13, 100);
+            this.m_oReactorLabel.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oReactorLabel.Name = "m_oReactorLabel";
+            this.m_oReactorLabel.Size = new System.Drawing.Size(45, 13);
+            this.m_oReactorLabel.TabIndex = 21;
+            this.m_oReactorLabel.Text = "Reactor";
+            // 
+            // m_oAgilityLabel
+            // 
+            this.m_oAgilityLabel.AutoSize = true;
+            this.m_oAgilityLabel.Location = new System.Drawing.Point(13, 74);
+            this.m_oAgilityLabel.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oAgilityLabel.Name = "m_oAgilityLabel";
+            this.m_oAgilityLabel.Size = new System.Drawing.Size(34, 13);
+            this.m_oAgilityLabel.TabIndex = 20;
+            this.m_oAgilityLabel.Text = "Agility";
+            // 
+            // m_oFuelLabel
+            // 
+            this.m_oFuelLabel.AutoSize = true;
+            this.m_oFuelLabel.Location = new System.Drawing.Point(13, 48);
+            this.m_oFuelLabel.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oFuelLabel.Name = "m_oFuelLabel";
+            this.m_oFuelLabel.Size = new System.Drawing.Size(71, 13);
+            this.m_oFuelLabel.TabIndex = 19;
+            this.m_oFuelLabel.Text = "Fuel Capacity";
+            // 
+            // m_oWarheadLabel
+            // 
+            this.m_oWarheadLabel.AutoSize = true;
+            this.m_oWarheadLabel.Location = new System.Drawing.Point(13, 22);
+            this.m_oWarheadLabel.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oWarheadLabel.Name = "m_oWarheadLabel";
+            this.m_oWarheadLabel.Size = new System.Drawing.Size(94, 13);
+            this.m_oWarheadLabel.TabIndex = 11;
+            this.m_oWarheadLabel.Text = "Warhead Strength";
+            // 
+            // m_oReactorMSPTextBox
+            // 
+            this.m_oReactorMSPTextBox.Location = new System.Drawing.Point(149, 98);
+            this.m_oReactorMSPTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oReactorMSPTextBox.Name = "m_oReactorMSPTextBox";
+            this.m_oReactorMSPTextBox.ReadOnly = true;
+            this.m_oReactorMSPTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oReactorMSPTextBox.TabIndex = 18;
+            this.m_oReactorMSPTextBox.Text = "0";
+            this.m_oReactorMSPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oAgilityMSPTextBox
+            // 
+            this.m_oAgilityMSPTextBox.Location = new System.Drawing.Point(149, 72);
+            this.m_oAgilityMSPTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oAgilityMSPTextBox.Name = "m_oAgilityMSPTextBox";
+            this.m_oAgilityMSPTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oAgilityMSPTextBox.TabIndex = 17;
+            this.m_oAgilityMSPTextBox.Text = "0";
+            this.m_oAgilityMSPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oFuelMSPTextBox
+            // 
+            this.m_oFuelMSPTextBox.Location = new System.Drawing.Point(149, 46);
+            this.m_oFuelMSPTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oFuelMSPTextBox.Name = "m_oFuelMSPTextBox";
+            this.m_oFuelMSPTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oFuelMSPTextBox.TabIndex = 16;
+            this.m_oFuelMSPTextBox.Text = "0";
+            this.m_oFuelMSPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oWHMSPTextBox
+            // 
+            this.m_oWHMSPTextBox.Location = new System.Drawing.Point(149, 20);
+            this.m_oWHMSPTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oWHMSPTextBox.Name = "m_oWHMSPTextBox";
+            this.m_oWHMSPTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oWHMSPTextBox.TabIndex = 15;
+            this.m_oWHMSPTextBox.Text = "0";
+            this.m_oWHMSPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oReactorValueTextBox
+            // 
+            this.m_oReactorValueTextBox.Location = new System.Drawing.Point(204, 97);
+            this.m_oReactorValueTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oReactorValueTextBox.Name = "m_oReactorValueTextBox";
+            this.m_oReactorValueTextBox.ReadOnly = true;
+            this.m_oReactorValueTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oReactorValueTextBox.TabIndex = 14;
+            this.m_oReactorValueTextBox.Text = "0";
+            this.m_oReactorValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oAgilityValueTextBox
+            // 
+            this.m_oAgilityValueTextBox.Location = new System.Drawing.Point(204, 71);
+            this.m_oAgilityValueTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oAgilityValueTextBox.Name = "m_oAgilityValueTextBox";
+            this.m_oAgilityValueTextBox.ReadOnly = true;
+            this.m_oAgilityValueTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oAgilityValueTextBox.TabIndex = 13;
+            this.m_oAgilityValueTextBox.Text = "0";
+            this.m_oAgilityValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oFuelValueTextBox
+            // 
+            this.m_oFuelValueTextBox.Location = new System.Drawing.Point(204, 45);
+            this.m_oFuelValueTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oFuelValueTextBox.Name = "m_oFuelValueTextBox";
+            this.m_oFuelValueTextBox.ReadOnly = true;
+            this.m_oFuelValueTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oFuelValueTextBox.TabIndex = 12;
+            this.m_oFuelValueTextBox.Text = "0";
+            this.m_oFuelValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oWHValueTextBox
+            // 
+            this.m_oWHValueTextBox.Location = new System.Drawing.Point(204, 19);
+            this.m_oWHValueTextBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oWHValueTextBox.Name = "m_oWHValueTextBox";
+            this.m_oWHValueTextBox.ReadOnly = true;
+            this.m_oWHValueTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oWHValueTextBox.TabIndex = 11;
+            this.m_oWHValueTextBox.Text = "0";
+            this.m_oWHValueTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSensorGroupBox
             // 
@@ -190,9 +464,9 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oMissileEngineGroupBox
             // 
-            this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalSizeTextBox);
+            this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalEngineSizeTextBox);
             this.m_oMissileEngineGroupBox.Controls.Add(this.m_oNumberEnginesTextBox);
-            this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalCostTextBox);
+            this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalEngineCostTextBox);
             this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalEPTextBox);
             this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalCostLabel);
             this.m_oMissileEngineGroupBox.Controls.Add(this.m_oTotalEPLabel);
@@ -207,6 +481,96 @@ namespace Pulsar4X.UI.Panels
             this.m_oMissileEngineGroupBox.TabStop = false;
             this.m_oMissileEngineGroupBox.Text = "Missile Engines";
             // 
+            // m_oTotalEngineSizeTextBox
+            // 
+            this.m_oTotalEngineSizeTextBox.Location = new System.Drawing.Point(87, 79);
+            this.m_oTotalEngineSizeTextBox.Name = "m_oTotalEngineSizeTextBox";
+            this.m_oTotalEngineSizeTextBox.ReadOnly = true;
+            this.m_oTotalEngineSizeTextBox.Size = new System.Drawing.Size(54, 20);
+            this.m_oTotalEngineSizeTextBox.TabIndex = 10;
+            this.m_oTotalEngineSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oNumberEnginesTextBox
+            // 
+            this.m_oNumberEnginesTextBox.Location = new System.Drawing.Point(87, 53);
+            this.m_oNumberEnginesTextBox.Name = "m_oNumberEnginesTextBox";
+            this.m_oNumberEnginesTextBox.Size = new System.Drawing.Size(54, 20);
+            this.m_oNumberEnginesTextBox.TabIndex = 9;
+            this.m_oNumberEnginesTextBox.Text = "1";
+            this.m_oNumberEnginesTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTotalEngineCostTextBox
+            // 
+            this.m_oTotalEngineCostTextBox.Location = new System.Drawing.Point(262, 79);
+            this.m_oTotalEngineCostTextBox.Name = "m_oTotalEngineCostTextBox";
+            this.m_oTotalEngineCostTextBox.ReadOnly = true;
+            this.m_oTotalEngineCostTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oTotalEngineCostTextBox.TabIndex = 8;
+            this.m_oTotalEngineCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTotalEPTextBox
+            // 
+            this.m_oTotalEPTextBox.Location = new System.Drawing.Point(262, 53);
+            this.m_oTotalEPTextBox.Name = "m_oTotalEPTextBox";
+            this.m_oTotalEPTextBox.ReadOnly = true;
+            this.m_oTotalEPTextBox.Size = new System.Drawing.Size(44, 20);
+            this.m_oTotalEPTextBox.TabIndex = 7;
+            this.m_oTotalEPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oTotalCostLabel
+            // 
+            this.m_oTotalCostLabel.AutoSize = true;
+            this.m_oTotalCostLabel.Location = new System.Drawing.Point(156, 82);
+            this.m_oTotalCostLabel.Name = "m_oTotalCostLabel";
+            this.m_oTotalCostLabel.Size = new System.Drawing.Size(55, 13);
+            this.m_oTotalCostLabel.TabIndex = 6;
+            this.m_oTotalCostLabel.Text = "Total Cost";
+            // 
+            // m_oTotalEPLabel
+            // 
+            this.m_oTotalEPLabel.AutoSize = true;
+            this.m_oTotalEPLabel.Location = new System.Drawing.Point(156, 56);
+            this.m_oTotalEPLabel.Name = "m_oTotalEPLabel";
+            this.m_oTotalEPLabel.Size = new System.Drawing.Size(100, 13);
+            this.m_oTotalEPLabel.TabIndex = 5;
+            this.m_oTotalEPLabel.Text = "Total Engine Power";
+            // 
+            // m_oESizeLabel
+            // 
+            this.m_oESizeLabel.AutoSize = true;
+            this.m_oESizeLabel.Location = new System.Drawing.Point(7, 83);
+            this.m_oESizeLabel.Name = "m_oESizeLabel";
+            this.m_oESizeLabel.Size = new System.Drawing.Size(54, 13);
+            this.m_oESizeLabel.TabIndex = 4;
+            this.m_oESizeLabel.Text = "Total Size";
+            // 
+            // m_oNumberLabel
+            // 
+            this.m_oNumberLabel.AutoSize = true;
+            this.m_oNumberLabel.Location = new System.Drawing.Point(7, 56);
+            this.m_oNumberLabel.Name = "m_oNumberLabel";
+            this.m_oNumberLabel.Size = new System.Drawing.Size(44, 13);
+            this.m_oNumberLabel.TabIndex = 3;
+            this.m_oNumberLabel.Text = "Number";
+            // 
+            // m_oEngineLabel
+            // 
+            this.m_oEngineLabel.AutoSize = true;
+            this.m_oEngineLabel.Location = new System.Drawing.Point(7, 26);
+            this.m_oEngineLabel.Name = "m_oEngineLabel";
+            this.m_oEngineLabel.Size = new System.Drawing.Size(67, 13);
+            this.m_oEngineLabel.TabIndex = 2;
+            this.m_oEngineLabel.Text = "Engine Type";
+            // 
+            // m_oMissileEngineComboBox
+            // 
+            this.m_oMissileEngineComboBox.FormattingEnabled = true;
+            this.m_oMissileEngineComboBox.Location = new System.Drawing.Point(87, 19);
+            this.m_oMissileEngineComboBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oMissileEngineComboBox.Name = "m_oMissileEngineComboBox";
+            this.m_oMissileEngineComboBox.Size = new System.Drawing.Size(219, 21);
+            this.m_oMissileEngineComboBox.TabIndex = 1;
+            // 
             // m_oSecondStageGroupBox
             // 
             this.m_oSecondStageGroupBox.Location = new System.Drawing.Point(295, 183);
@@ -218,6 +582,9 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oSystemParametersGroupBox
             // 
+            this.m_oSystemParametersGroupBox.Controls.Add(this.m_oCreateButton);
+            this.m_oSystemParametersGroupBox.Controls.Add(this.m_oMissileNameTextBox);
+            this.m_oSystemParametersGroupBox.Controls.Add(this.m_oMissileSummaryTextBox);
             this.m_oSystemParametersGroupBox.Location = new System.Drawing.Point(295, 398);
             this.m_oSystemParametersGroupBox.Name = "m_oSystemParametersGroupBox";
             this.m_oSystemParametersGroupBox.Size = new System.Drawing.Size(668, 314);
@@ -235,18 +602,18 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oInfoButton
             // 
-            this.m_oInfoButton.Location = new System.Drawing.Point(883, 30);
+            this.m_oInfoButton.Location = new System.Drawing.Point(881, 30);
             this.m_oInfoButton.Name = "m_oInfoButton";
-            this.m_oInfoButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oInfoButton.Size = new System.Drawing.Size(82, 23);
             this.m_oInfoButton.TabIndex = 3;
             this.m_oInfoButton.Text = "Toggle Info";
             this.m_oInfoButton.UseVisualStyleBackColor = true;
             // 
             // m_oCloseButton
             // 
-            this.m_oCloseButton.Location = new System.Drawing.Point(883, 724);
+            this.m_oCloseButton.Location = new System.Drawing.Point(881, 724);
             this.m_oCloseButton.Name = "m_oCloseButton";
-            this.m_oCloseButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oCloseButton.Size = new System.Drawing.Size(82, 23);
             this.m_oCloseButton.TabIndex = 4;
             this.m_oCloseButton.Text = "Close";
             this.m_oCloseButton.UseVisualStyleBackColor = true;
@@ -255,135 +622,73 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oClearDesignButton.Location = new System.Drawing.Point(12, 724);
             this.m_oClearDesignButton.Name = "m_oClearDesignButton";
-            this.m_oClearDesignButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oClearDesignButton.Size = new System.Drawing.Size(82, 23);
             this.m_oClearDesignButton.TabIndex = 5;
             this.m_oClearDesignButton.Text = "Clear Design";
             this.m_oClearDesignButton.UseVisualStyleBackColor = true;
             // 
             // m_oCreateSeriesButton
             // 
-            this.m_oCreateSeriesButton.Location = new System.Drawing.Point(98, 724);
+            this.m_oCreateSeriesButton.Location = new System.Drawing.Point(100, 724);
             this.m_oCreateSeriesButton.Name = "m_oCreateSeriesButton";
-            this.m_oCreateSeriesButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oCreateSeriesButton.Size = new System.Drawing.Size(82, 23);
             this.m_oCreateSeriesButton.TabIndex = 6;
             this.m_oCreateSeriesButton.Text = "Create Series";
             this.m_oCreateSeriesButton.UseVisualStyleBackColor = true;
             // 
             // m_oDeleteSeriesButton
             // 
-            this.m_oDeleteSeriesButton.Location = new System.Drawing.Point(184, 724);
+            this.m_oDeleteSeriesButton.Location = new System.Drawing.Point(188, 724);
             this.m_oDeleteSeriesButton.Name = "m_oDeleteSeriesButton";
-            this.m_oDeleteSeriesButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oDeleteSeriesButton.Size = new System.Drawing.Size(82, 23);
             this.m_oDeleteSeriesButton.TabIndex = 7;
             this.m_oDeleteSeriesButton.Text = "Delete Series";
             this.m_oDeleteSeriesButton.UseVisualStyleBackColor = true;
             // 
             // m_oSetSeriesButton
             // 
-            this.m_oSetSeriesButton.Location = new System.Drawing.Point(270, 724);
+            this.m_oSetSeriesButton.Location = new System.Drawing.Point(276, 724);
             this.m_oSetSeriesButton.Name = "m_oSetSeriesButton";
-            this.m_oSetSeriesButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oSetSeriesButton.Size = new System.Drawing.Size(82, 23);
             this.m_oSetSeriesButton.TabIndex = 8;
             this.m_oSetSeriesButton.Text = "Set Series";
             this.m_oSetSeriesButton.UseVisualStyleBackColor = true;
             // 
             // m_oReplaceAllButton
             // 
-            this.m_oReplaceAllButton.Location = new System.Drawing.Point(356, 724);
+            this.m_oReplaceAllButton.Location = new System.Drawing.Point(364, 724);
             this.m_oReplaceAllButton.Name = "m_oReplaceAllButton";
-            this.m_oReplaceAllButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oReplaceAllButton.Size = new System.Drawing.Size(82, 23);
             this.m_oReplaceAllButton.TabIndex = 9;
             this.m_oReplaceAllButton.Text = "Replace All";
             this.m_oReplaceAllButton.UseVisualStyleBackColor = true;
             // 
-            // m_oMissileEngineComboBox
+            // m_oMissileSummaryTextBox
             // 
-            this.m_oMissileEngineComboBox.FormattingEnabled = true;
-            this.m_oMissileEngineComboBox.Location = new System.Drawing.Point(87, 19);
-            this.m_oMissileEngineComboBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
-            this.m_oMissileEngineComboBox.Name = "m_oMissileEngineComboBox";
-            this.m_oMissileEngineComboBox.Size = new System.Drawing.Size(219, 21);
-            this.m_oMissileEngineComboBox.TabIndex = 1;
+            this.m_oMissileSummaryTextBox.Location = new System.Drawing.Point(13, 57);
+            this.m_oMissileSummaryTextBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oMissileSummaryTextBox.Name = "m_oMissileSummaryTextBox";
+            this.m_oMissileSummaryTextBox.Size = new System.Drawing.Size(642, 244);
+            this.m_oMissileSummaryTextBox.TabIndex = 0;
+            this.m_oMissileSummaryTextBox.Text = "";
             // 
-            // m_oEngineLabel
+            // m_oMissileNameTextBox
             // 
-            this.m_oEngineLabel.AutoSize = true;
-            this.m_oEngineLabel.Location = new System.Drawing.Point(7, 26);
-            this.m_oEngineLabel.Name = "m_oEngineLabel";
-            this.m_oEngineLabel.Size = new System.Drawing.Size(67, 13);
-            this.m_oEngineLabel.TabIndex = 2;
-            this.m_oEngineLabel.Text = "Engine Type";
+            this.m_oMissileNameTextBox.Location = new System.Drawing.Point(13, 28);
+            this.m_oMissileNameTextBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oMissileNameTextBox.Name = "m_oMissileNameTextBox";
+            this.m_oMissileNameTextBox.Size = new System.Drawing.Size(540, 20);
+            this.m_oMissileNameTextBox.TabIndex = 1;
             // 
-            // m_oNumberLabel
+            // m_oCreateButton
             // 
-            this.m_oNumberLabel.AutoSize = true;
-            this.m_oNumberLabel.Location = new System.Drawing.Point(7, 56);
-            this.m_oNumberLabel.Name = "m_oNumberLabel";
-            this.m_oNumberLabel.Size = new System.Drawing.Size(44, 13);
-            this.m_oNumberLabel.TabIndex = 3;
-            this.m_oNumberLabel.Text = "Number";
-            // 
-            // m_oESizeLabel
-            // 
-            this.m_oESizeLabel.AutoSize = true;
-            this.m_oESizeLabel.Location = new System.Drawing.Point(7, 83);
-            this.m_oESizeLabel.Name = "m_oESizeLabel";
-            this.m_oESizeLabel.Size = new System.Drawing.Size(54, 13);
-            this.m_oESizeLabel.TabIndex = 4;
-            this.m_oESizeLabel.Text = "Total Size";
-            // 
-            // m_oTotalEPLabel
-            // 
-            this.m_oTotalEPLabel.AutoSize = true;
-            this.m_oTotalEPLabel.Location = new System.Drawing.Point(156, 56);
-            this.m_oTotalEPLabel.Name = "m_oTotalEPLabel";
-            this.m_oTotalEPLabel.Size = new System.Drawing.Size(100, 13);
-            this.m_oTotalEPLabel.TabIndex = 5;
-            this.m_oTotalEPLabel.Text = "Total Engine Power";
-            // 
-            // m_oTotalCostLabel
-            // 
-            this.m_oTotalCostLabel.AutoSize = true;
-            this.m_oTotalCostLabel.Location = new System.Drawing.Point(156, 82);
-            this.m_oTotalCostLabel.Name = "m_oTotalCostLabel";
-            this.m_oTotalCostLabel.Size = new System.Drawing.Size(55, 13);
-            this.m_oTotalCostLabel.TabIndex = 6;
-            this.m_oTotalCostLabel.Text = "Total Cost";
-            // 
-            // m_oTotalEPTextBox
-            // 
-            this.m_oTotalEPTextBox.Location = new System.Drawing.Point(262, 53);
-            this.m_oTotalEPTextBox.Name = "m_oTotalEPTextBox";
-            this.m_oTotalEPTextBox.ReadOnly = true;
-            this.m_oTotalEPTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oTotalEPTextBox.TabIndex = 7;
-            this.m_oTotalEPTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oTotalCostTextBox
-            // 
-            this.m_oTotalCostTextBox.Location = new System.Drawing.Point(262, 79);
-            this.m_oTotalCostTextBox.Name = "m_oTotalCostTextBox";
-            this.m_oTotalCostTextBox.ReadOnly = true;
-            this.m_oTotalCostTextBox.Size = new System.Drawing.Size(44, 20);
-            this.m_oTotalCostTextBox.TabIndex = 8;
-            this.m_oTotalCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oNumberEnginesTextBox
-            // 
-            this.m_oNumberEnginesTextBox.Location = new System.Drawing.Point(87, 53);
-            this.m_oNumberEnginesTextBox.Name = "m_oNumberEnginesTextBox";
-            this.m_oNumberEnginesTextBox.Size = new System.Drawing.Size(54, 20);
-            this.m_oNumberEnginesTextBox.TabIndex = 9;
-            this.m_oNumberEnginesTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oTotalSizeTextBox
-            // 
-            this.m_oTotalSizeTextBox.Location = new System.Drawing.Point(87, 79);
-            this.m_oTotalSizeTextBox.Name = "m_oTotalSizeTextBox";
-            this.m_oTotalSizeTextBox.ReadOnly = true;
-            this.m_oTotalSizeTextBox.Size = new System.Drawing.Size(54, 20);
-            this.m_oTotalSizeTextBox.TabIndex = 10;
-            this.m_oTotalSizeTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.m_oCreateButton.Location = new System.Drawing.Point(573, 26);
+            this.m_oCreateButton.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oCreateButton.Name = "m_oCreateButton";
+            this.m_oCreateButton.Size = new System.Drawing.Size(82, 23);
+            this.m_oCreateButton.TabIndex = 2;
+            this.m_oCreateButton.Text = "Create";
+            this.m_oCreateButton.UseVisualStyleBackColor = true;
             // 
             // MissileDesign
             // 
@@ -410,8 +715,13 @@ namespace Pulsar4X.UI.Panels
             this.Text = "MissileDesign";
             this.m_oEmpireGroupBox.ResumeLayout(false);
             this.m_oCompSizeBox.ResumeLayout(false);
+            this.m_oCompSizeBox.PerformLayout();
+            this.m_oParametersGroupBox.ResumeLayout(false);
+            this.m_oParametersGroupBox.PerformLayout();
             this.m_oMissileEngineGroupBox.ResumeLayout(false);
             this.m_oMissileEngineGroupBox.PerformLayout();
+            this.m_oSystemParametersGroupBox.ResumeLayout(false);
+            this.m_oSystemParametersGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -438,9 +748,9 @@ namespace Pulsar4X.UI.Panels
         private Button m_oDeleteSeriesButton;
         private Button m_oSetSeriesButton;
         private Button m_oReplaceAllButton;
-        private TextBox m_oTotalSizeTextBox;
+        private TextBox m_oTotalEngineSizeTextBox;
         private TextBox m_oNumberEnginesTextBox;
-        private TextBox m_oTotalCostTextBox;
+        private TextBox m_oTotalEngineCostTextBox;
         private TextBox m_oTotalEPTextBox;
         private Label m_oTotalCostLabel;
         private Label m_oTotalEPLabel;
@@ -448,5 +758,22 @@ namespace Pulsar4X.UI.Panels
         private Label m_oNumberLabel;
         private Label m_oEngineLabel;
         private ComboBox m_oMissileEngineComboBox;
+        private Label m_oValueLabel;
+        private Label m_oMSPLabel;
+        private Label m_oReactorLabel;
+        private Label m_oAgilityLabel;
+        private Label m_oFuelLabel;
+        private Label m_oWarheadLabel;
+        private TextBox m_oReactorMSPTextBox;
+        private TextBox m_oAgilityMSPTextBox;
+        private TextBox m_oFuelMSPTextBox;
+        private TextBox m_oWHMSPTextBox;
+        private TextBox m_oReactorValueTextBox;
+        private TextBox m_oAgilityValueTextBox;
+        private TextBox m_oFuelValueTextBox;
+        private TextBox m_oWHValueTextBox;
+        private Button m_oCreateButton;
+        private TextBox m_oMissileNameTextBox;
+        private RichTextBox m_oMissileSummaryTextBox;
     }
 }

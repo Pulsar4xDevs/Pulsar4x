@@ -241,7 +241,7 @@ namespace Pulsar4X.UI.Handlers
             /// Rename Class Button Handlers:
             /// </summary>
             m_oRenameClassPanel.OKButton.Click +=new EventHandler(OKButton_Click);
-            m_oRenameClassPanel.CancelButton.Click += new EventHandler(CancelButton_Click);
+            m_oRenameClassPanel.CancelRenameButton.Click += new EventHandler(CancelRenameButton_Click);
             m_oRenameClassPanel.RenameClassTextBox.KeyPress += new KeyPressEventHandler(RenameClassTextBox_KeyPress);
 
             m_oOptionsPanel.DeploymentTimeTextBox.TextChanged += new EventHandler(DeploymentTimeTextBox_TextChanged);
@@ -538,7 +538,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CancelButton_Click(object sender, EventArgs e)
+        private void CancelRenameButton_Click(object sender, EventArgs e)
         {
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oRenameClassPanel.Hide();

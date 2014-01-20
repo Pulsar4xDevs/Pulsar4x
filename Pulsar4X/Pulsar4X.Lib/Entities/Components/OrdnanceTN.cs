@@ -69,7 +69,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="EngBase">Base technology.</param>
         /// <param name="EngPowMod">power modification to engine base. also affects fuel consumption. 0.1 to 6.0</param>
         /// <param name="FuelCon">Fuel consumption mod. 1.0 to 0.1</param>
-        /// <param name="hs">size of engine, 0.01 to 5.0 if 6.3, 0.1 to 5.0 if 6.21. for the purposes of this function it doesn't care.</param>
+        /// <param name="hs">size of engine, 0.1 to 5.0 if 6.3, 0.1 to 5.0 if 6.21. for the purposes of this function it doesn't care.</param>
         public MissileEngineDefTN(string EngName, float EngBase, float EngPowMod, float FuelCon, float msp)
         {
             Name = EngName;
@@ -223,7 +223,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// MSPs worth of fuel this missile carries. 1 MPS = 2500 fuel.
+        /// MSPs worth of fuel this missile carries. 1 MSP = 2500 fuel.
         /// </summary>
         private float Fuel;
         public float fuel
@@ -495,7 +495,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Fuel handling Section.
             /// </summary>
-            Fuel = fuelMSP;
+            Fuel = fuelMSP * 2500.0f;
             size = size + fuelMSP;
 
 
@@ -602,8 +602,11 @@ namespace Pulsar4X.Entities.Components
             }
 
             cost = cost + (decimal)((float)Warhead / 4.0f);
-            cost = cost + (OrdnanceEngine.cost * EngineCount);
-            cost = cost + (decimal)((Agility - 10) / 40.0f);
+            if (OrdnanceEngine != null)
+            {
+                cost = cost + (OrdnanceEngine.cost * EngineCount);
+            }
+            cost = cost + (decimal)((Agility) / 50.0f);
             cost = cost + (decimal)(ReactorValue * 3.0f);
             cost = cost + (decimal)(ThermalStr);
             cost = cost + (decimal)(EMStr);
@@ -620,6 +623,11 @@ namespace Pulsar4X.Entities.Components
             isObsolete = false;
 
             MaxSpeed = (float)TotalEnginePower * (1000.0f / (size * 0.05f));
+
+            if (MaxSpeed > 290000.0f)
+            {
+                MaxSpeed = 290000.0f;
+            }
             
             /// <summary>
             /// Bombs dropped directly on target, or otherwise things I really don't want to move, but don't want to screw up TimeReq for.
