@@ -5,7 +5,9 @@ using System.Text;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
-
+using System.Drawing;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 namespace Pulsar4X.Entities
 {
     /// <summary>
@@ -622,6 +624,19 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
+
+            /// <summary>
+            /// eventually move every planet/moon/star/asteroid
+            /// </summary>
+            //foreach(StarSystem System in GameState.Instance.StarSystems)
+            //{
+                //foreach (Planet oPlanet in System.Stars[0].Planets)
+                //{
+                    //Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oPlanet, tickValue);
+                    //oPlanet.XSystem = oPlanet.XSystem + 1.0;
+                    //oPlanet.YSystem = oPlanet.YSystem + 1.0;
+                //}
+            //}
               
         }
 

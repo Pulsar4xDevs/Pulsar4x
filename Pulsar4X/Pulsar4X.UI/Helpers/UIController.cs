@@ -126,6 +126,16 @@ namespace Pulsar4X.UI.Helpers
             get { return m_oFastOOB; }
         }
 
+        Handlers.MissileDesignHandler m_oMissileDesign;
+
+        /// <summary>
+        /// Missile Design handler.
+        /// </summary>
+        public Handlers.MissileDesignHandler MissileDesign
+        {
+            get { return m_oMissileDesign; }
+        }
+
         public bool SuspendAutoPanelDisplay { get; set; }
 
         /// <summary>
@@ -160,6 +170,7 @@ namespace Pulsar4X.UI.Helpers
             m_oTaskGroup = new Handlers.TaskGroup();
             m_oComponentRP = new Handlers.Components();
             m_oFastOOB = new Handlers.FastOOB();
+            m_oMissileDesign = new Handlers.MissileDesignHandler();
         }
 
         #region PublicMethods
@@ -199,7 +210,7 @@ namespace Pulsar4X.UI.Helpers
 
             if (a_oDockPanel == null || m_oSystemGenAndDisplay == null || m_oSystemMap == null
                 || m_oEconomics == null || m_oShips == null || m_oClassDesign == null || m_oTaskGroup == null
-                || m_oComponentRP == null || m_oFastOOB == null)
+                || m_oComponentRP == null || m_oFastOOB == null || m_oMissileDesign == null)
             {
                 return; // do nothing if we dont have the full UI!!
             }

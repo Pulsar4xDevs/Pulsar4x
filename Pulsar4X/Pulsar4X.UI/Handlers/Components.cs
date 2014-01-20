@@ -133,6 +133,7 @@ namespace Pulsar4X.UI.Handlers
 
             m_oComponentDesignPanel.InstantButton.Click += new EventHandler(InstantButton_Click);
 
+            m_oComponentDesignPanel.MissileButton.Click += new EventHandler(MissileButton_Click);
 
             //m_oComponentDesignPanel.ResizeBegin +=new EventHandler(ResizeBegin);
             //m_oComponentDesignPanel.ResizeEnd += new EventHandler(ResizeEnd);
@@ -489,6 +490,15 @@ namespace Pulsar4X.UI.Handlers
             _CurrnetFaction.ComponentList.TotalComponents = _CurrnetFaction.ComponentList.TotalComponents + 1;
         }
 
+        /// <summary>
+        /// Brings up the missile design popup
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MissileButton_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.MissileDesign.Popup();
+        }
 
         /// <summary>
         /// Builds the display for the background technology group box. Sanity checking is done here as the all techs function sets every tech level to 100 rather than its respective max.

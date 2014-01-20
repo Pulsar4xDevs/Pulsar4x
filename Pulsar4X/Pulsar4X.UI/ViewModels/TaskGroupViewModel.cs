@@ -65,7 +65,9 @@ namespace Pulsar4X.UI.ViewModels
             _CurrentFaction = GameState.Instance.Factions[0];
             Factions = GameState.Instance.Factions;
 
-            _CurrentTaskGroup = GameState.Instance.Factions[0].TaskGroups[0];
+            if(GameState.Instance.Factions[0].TaskGroups.Count != 0)
+                _CurrentTaskGroup = GameState.Instance.Factions[0].TaskGroups[0];
+
             TaskGroups = GameState.Instance.Factions[0].TaskGroups;
         }
 
@@ -73,7 +75,9 @@ namespace Pulsar4X.UI.ViewModels
         private void OnFactionChanged()
         {
             TaskGroups = GameState.Instance.Factions[_CurrentFaction.FactionID].TaskGroups;
-            _CurrentTaskGroup = TaskGroups[0];
+
+            if(TaskGroups.Count != 0)
+                _CurrentTaskGroup = TaskGroups[0];
 
 
             if (FactionChanged != null)
