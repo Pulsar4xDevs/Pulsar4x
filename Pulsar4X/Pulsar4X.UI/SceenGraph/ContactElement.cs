@@ -40,9 +40,7 @@ namespace Pulsar4X.UI.SceenGraph
         {
             if (e.PropertyName == "Name")
             {
-                /// <summary>
-                /// Change Label here! If we are doing this by system contact, then we need to check what type of StarSystemEntity this contact is.
-                /// </summary>
+                // Change Label here! If we are doing this by system contact, then we need to check what type of StarSystemEntity this contact is.
                 switch(m_oSystemContect.SSEntity)
                 {
                     case StarSystemEntityType.TaskGroup:
@@ -56,10 +54,6 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
                 }
 
-                //GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(ParentSceen.ParentSystemMap.oGLCanvas.DefaultEffect, Lable.Position,
-                //                                                               Lable.Size, System.Drawing.Color.Tan, UIConstants.Textures.DEFAULT_GLFONT2, m_oSystemContect.TaskGroup.Name);
-                //Lable = oNameLable;
-
                 ParentSceen.Refresh();
             }
         }
@@ -72,7 +66,7 @@ namespace Pulsar4X.UI.SceenGraph
         /// <summary>
         /// Line from Last Position to Current Position for taskgroups.
         /// </summary>
-        private MeasurementElement TravelLine { get; set; }
+        private TravelLine m_oTravelLine;
 
         public ContactElement()
             : base()
@@ -83,11 +77,9 @@ namespace Pulsar4X.UI.SceenGraph
         public ContactElement(GLEffect a_oDefaultEffect, SystemContact a_oContact)
             : base(a_oContact)
         {
-            // Create measurement element:
-            TravelLine = new MeasurementElement();
-            TravelLine.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), a_oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_TEXTURE);
-            TravelLine.AddPrimitive(TravelLine.PrimaryPrimitive);
-            TravelLine.Lable = new GLUtilities.GLFont(a_oDefaultEffect, Vector3.Zero, UIConstants.DEFAULT_TEXT_SIZE, a_oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, "");
+            // Create travel Line element:
+            m_oTravelLine = new TravelLine(a_oDefaultEffect, a_oContact.faction.FactionColor);
+            this.Children.Add(m_oTravelLine);
         }
 
         public override void Render()
@@ -95,11 +87,6 @@ namespace Pulsar4X.UI.SceenGraph
             foreach (GLPrimitive oPrimitive in m_lPrimitives)
             {
                 oPrimitive.Render();
-            }
-
-            if (TravelLine != null)
-            {
-                TravelLine.Render();
             }
 
             if (RenderChildren == true)
@@ -170,8 +157,8 @@ namespace Pulsar4X.UI.SceenGraph
 
             if (m_oSystemContect.TaskGroup.DrawTravelLine != 3)
             {
-                SetMeasurementStartPos(lastPos);
-                SetMeasurementEndPos(pos);
+                m_oTravelLine.StartPos = lastPos;
+                m_oTravelLine.EndPos = pos;
             }
             if (m_oSystemContect.TaskGroup.DrawTravelLine == 2)
             {
@@ -185,11 +172,6 @@ namespace Pulsar4X.UI.SceenGraph
             Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
             Lable.Text = m_oSystemContect.TaskGroup.Name;
 
-            if (TravelLine != null)
-            {
-                TravelLine.Refresh(a_fZoomScaler);
-            }
-
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)
             {
@@ -200,40 +182,6 @@ namespace Pulsar4X.UI.SceenGraph
         public override string ToString()
         {
             return Lable.Text;
-        }
-
-        public void SetMeasurementStartPos(Vector3 a_v3Pos)
-        {
-            GLLine temp = TravelLine.PrimaryPrimitive as GLLine;
-
-            a_v3Pos.X = a_v3Pos.X / 2;
-            a_v3Pos.Y = a_v3Pos.Y / 2;
-
-            if (temp != null)
-            {
-                temp.Position = a_v3Pos;
-                temp.Verticies[0].m_v4Position = new Vector4(a_v3Pos.X, a_v3Pos.Y, a_v3Pos.Z, 1.0f);
-                temp.UpdateVBOs();
-            }
-        }
-
-        public void SetMeasurementEndPos(Vector3 a_v3Pos)
-        {
-            GLLine temp = TravelLine.PrimaryPrimitive as GLLine;
-
-            a_v3Pos.X = a_v3Pos.X / 2;
-            a_v3Pos.Y = a_v3Pos.Y / 2;
-
-            float XAdjust = a_v3Pos.X - TravelLine.Primitives[0].Verticies[0].m_v4Position.X;
-            float YAdjust = a_v3Pos.Y - TravelLine.Primitives[0].Verticies[0].m_v4Position.Y;
-
-            a_v3Pos.X = a_v3Pos.X + XAdjust;
-            a_v3Pos.Y = a_v3Pos.Y + YAdjust;
-
-            if (temp != null)
-            {
-                temp.PosEnd = a_v3Pos;
-            }
         }
     }
 }
