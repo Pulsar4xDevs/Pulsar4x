@@ -64,6 +64,52 @@ namespace Pulsar4X.UI.ViewModels
         }
 
         /// <summary>
+        /// List of all this factions missile series.
+        /// </summary>
+        public BindingList<OrdnanceSeriesTN> MissileSeries { get; set; }
+
+
+        /// <summary>
+        /// Currently selected missile series.
+        /// </summary>
+        private OrdnanceSeriesTN _CurrnetMissileSeries;
+        public OrdnanceSeriesTN CurrentMissileSeries
+        {
+            get { return _CurrnetMissileSeries; }
+            set
+            {
+                
+                if (_CurrnetMissileSeries != value)
+                {
+                    _CurrnetMissileSeries = value;
+                    OnMissileSeriesChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// List of all this factions ordnance definitions
+        /// </summary>
+        public BindingList<OrdnanceDefTN> Missiles { get; set; }
+
+        /// <summary>
+        /// Previous missile design that will control the MSP allocation if changed. Also for changing series.
+        /// </summary>
+        private OrdnanceDefTN _CurrnetMissile;
+        public OrdnanceDefTN CurrentMissile
+        {
+            get { return _CurrnetMissile; }
+            set
+            {
+                if (_CurrnetMissile != value)
+                {
+                    _CurrnetMissile = value;
+                    OnMissileChanged();
+                }
+            }
+        }
+        
+        /// <summary>
         /// Constructor for this view model.
         /// </summary>
         public MissileDesignViewModel()
@@ -75,6 +121,18 @@ namespace Pulsar4X.UI.ViewModels
 
             if (MissileEngines.Count != 0)
                 CurrentMissileEngine = MissileEngines[0];
+
+            MissileSeries = _CurrnetFaction.OrdnanceSeries;
+
+            if (MissileSeries.Count != 0)
+                CurrentMissileSeries = MissileSeries[0];
+
+            Missiles = _CurrnetFaction.ComponentList.MissileDef;
+
+            if (Missiles.Count != 0)
+            {
+                CurrentMissile = Missiles[0];
+            }
         }
 
         /// <summary>
@@ -82,10 +140,25 @@ namespace Pulsar4X.UI.ViewModels
         /// </summary>
         private void OnFactionChanged()
         {
+            MissileSeries = _CurrnetFaction.OrdnanceSeries;
+
+            /// <summary>
+            /// The 1st missile series should always be present, and cannot be deleted. it is the "No Missile Series" Series. Ain't I a stinker?
+            /// </summary.
+            if (MissileSeries.Count != 0)
+                CurrentMissileSeries = MissileSeries[0];
+
             MissileEngines = _CurrnetFaction.ComponentList.MissileEngineDef;
 
             if(MissileEngines.Count != 0)
                 CurrentMissileEngine = MissileEngines[0];
+
+            Missiles = _CurrnetFaction.ComponentList.MissileDef;
+
+            if (Missiles.Count != 0)
+            {
+                CurrentMissile = Missiles[0];
+            }
 
             if (FactionChanged != null)
             {
@@ -101,6 +174,39 @@ namespace Pulsar4X.UI.ViewModels
             if (MissileEngineChanged != null)
             {
                 MissileEngineChanged(this, new EventArgs());
+            }
+        }
+
+        /// <summary>
+        /// need this as well.
+        /// </summary>
+        private void OnMissileSeriesChanged()
+        {
+            if (MissileSeriesChanged != null)
+            {
+                MissileSeriesChanged(this, new EventArgs());
+            }
+        }
+
+        /// <summary>
+        /// just copy pasting these now.
+        /// </summary>
+        private void OnMissileChanged()
+        {
+            if (MissileChanged != null)
+            {
+                MissileChanged(this, new EventArgs());
+            }
+        }
+
+        /// <summary>
+        /// just copy pasting these now.
+        /// </summary>
+        private void OnSubMissileChanged()
+        {
+            if (SubMissileChanged != null)
+            {
+                SubMissileChanged(this, new EventArgs());
             }
         }
 
@@ -121,6 +227,9 @@ namespace Pulsar4X.UI.ViewModels
 
         public event EventHandler FactionChanged;
         public event EventHandler MissileEngineChanged;
+        public event EventHandler MissileSeriesChanged;
+        public event EventHandler MissileChanged;
+        public event EventHandler SubMissileChanged;
 
     }
 }

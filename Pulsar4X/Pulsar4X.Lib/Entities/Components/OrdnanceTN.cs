@@ -119,7 +119,7 @@ namespace Pulsar4X.Entities.Components
         }
     }
 
-    public class OrdnanceSeries
+    public class OrdnanceSeriesTN : GameEntity
     {
         /// <summary>
         /// Just a list of all the missiles in this series. ships reloading use this as a hint for which missile to load.
@@ -133,8 +133,9 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Constructor for series.
         /// </summary>
-        public OrdnanceSeries()
+        public OrdnanceSeriesTN(String Title)
         {
+            Name = Title;
             MissilesInSeries = new BindingList<OrdnanceDefTN>();
         }
 
@@ -248,15 +249,6 @@ namespace Pulsar4X.Entities.Components
         {
             get { return ActiveStr; }
         }
-
-        /// <summary>
-        /// Active sensor resolution.
-        /// </summary>
-        private int Res;
-        public int res
-        {
-            get { return Res; }
-        }
         
         /// <summary>
         /// Ship active detection table.
@@ -342,8 +334,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Armor represents the chance that a missile won't die to a particular weaponstrike. works the same as HTK.
         /// </summary>
-        private int Armor;
-        public int armor
+        private float Armor;
+        public float armor
         {
             get { return Armor; }
         }
@@ -387,10 +379,11 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Series of this missile.
         /// </summary>
-        private OrdnanceSeries OrdSeries;
-        public OrdnanceSeries ordSeries
+        private OrdnanceSeriesTN OrdSeries;
+        public OrdnanceSeriesTN ordSeries
         {
             get { return OrdSeries; }
+            set { OrdSeries = value; }
         }
 
         /// <summary>
@@ -410,6 +403,61 @@ namespace Pulsar4X.Entities.Components
         {
             get { return Manuever; }
         }
+
+        /// <summary>
+        /// Warhead MSP value for the design page.
+        /// </summary>
+        private float WMSP;
+        public float wMSP
+        {
+            get { return WMSP; }
+        }
+
+        /// <summary>
+        /// Agility MSP value for the design page
+        /// </summary>
+        private float AgMSP;
+        public float agMSP
+        {
+            get { return AgMSP; }
+        }
+
+        /// <summary>
+        /// Active MSP value for design page.
+        /// </summary>
+        private float AcMSP;
+        public float acMSP
+        {
+            get { return AcMSP; }
+        }
+
+        /// <summary>
+        /// Thermal MSP value for design page.
+        /// </summary>
+        private float TMSP;
+        public float tMSP
+        {
+            get { return TMSP; }
+        }
+
+        /// <summary>
+        /// EM MSP value for design page.
+        /// </summary>
+        private float EMSP;
+        public float eMSP
+        {
+            get { return EMSP; }
+        }
+
+        /// <summary>
+        /// Geo MSP value for the design page. everything else can be derived.
+        /// </summary>
+        private float GMSP;
+        public float gMSP
+        {
+            get { return GMSP; }
+        }
+        
 
         /// <summary>
         /// Ordnance Constructor.
@@ -443,10 +491,10 @@ namespace Pulsar4X.Entities.Components
         /// <param name="SeparationDist">release separation of secondary munition from target</param>
         /// <param name="Engine">Missile engine</param>
         /// <param name="missileEngineCount">number of missile engines</param>
-        public OrdnanceDefTN(string title, OrdnanceSeries Series, 
+        public OrdnanceDefTN(string title, OrdnanceSeriesTN Series, 
                              float whMSP, int whTech, float fuelMSP, float AgilityMSP, int agilTech, 
-                             float activeMSP, int activeTech, float thermalMSP, int thermalTech, float emMSP, int emTech, float geoMSP, int geoTech, int aRes, int reactorTech,
-                             int armor, bool ECM, int ecmTech, bool enhanced, int radTech, bool laser, int laserTech,MissileEngineDefTN Engine, int missileEngineCount,
+                             float activeMSP, int activeTech, float thermalMSP, int thermalTech, float emMSP, int emTech, float geoMSP, int geoTech, ushort aRes, int reactorTech,
+                             float armorMSP, float ECMMSP, int ecmTech, bool enhanced, int radTech, bool laser, int laserTech,MissileEngineDefTN Engine, int missileEngineCount,
                              OrdnanceDefTN SubMunition=null, int SubMunitionCount=0,int SeparationDist=-1)
         {
             /// <summary>
@@ -464,20 +512,24 @@ namespace Pulsar4X.Entities.Components
             size = 0;
             cost = 0;
 
-
-            OrdSeries = Series;
+            WMSP = whMSP;
+            AgMSP = AgilityMSP;
+            AcMSP = activeMSP;
+            TMSP = thermalMSP;
+            EMSP = emMSP;
+            GMSP = geoMSP;
 
             /// <summary>
             /// Warhead handling section.
             /// </summary>
             Warhead = (int)Math.Floor(whMSP * (float)Constants.OrdnanceTN.warheadTech[whTech]);
             RadValue = Warhead;
+
             if (enhanced == true)
             {
+                RadValue = Warhead * Constants.OrdnanceTN.radTech[radTech];
                 Warhead = Warhead / Constants.OrdnanceTN.radTech[radTech];
-                RadValue = RadValue * Constants.OrdnanceTN.radTech[radTech];
-
-                laser = false;
+                IsLaser = false;
             }
             else if (laser == true)
             {
@@ -487,6 +539,10 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
                 Warhead = (int)Math.Floor(whMSP * (float)Constants.OrdnanceTN.laserTech[laserTech]);
                 IsLaser = true;
+
+                /// <summary>
+                /// Laser warheads won't do radiation, but won't pierce atmosphere.
+                /// </summary>
                 RadValue = 0; 
 
             }
@@ -530,11 +586,10 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             ActiveStr = activeMSP * Constants.OrdnanceTN.activeTech[activeTech];
             size = size + activeMSP;
-            Res = aRes;
 
             if (ActiveStr != 0.0f)
             {
-                ASD = new ActiveSensorDefTN(ActiveStr, (byte)Math.Floor(Constants.OrdnanceTN.passiveTech[emTech] * 20.0f), Res);
+                ASD = new ActiveSensorDefTN(ActiveStr, (byte)Math.Floor(Constants.OrdnanceTN.passiveTech[emTech] * 20.0f), aRes);
             }
 
             ThermalStr = thermalMSP * Constants.OrdnanceTN.passiveTech[thermalTech];
@@ -560,10 +615,13 @@ namespace Pulsar4X.Entities.Components
             ReactorMSP = ReactorValue / Constants.OrdnanceTN.reactorTech[reactorTech];
             size = size + ReactorMSP;
 
-            if (ECM == true)
+            if (ECMMSP != 0.0f)
+            {
                 ECMValue = ecmTech * 10;
+                size = size + ECMMSP;
+            }
 
-            Armor = armor;
+            Armor = armorMSP;
             size = size + Armor;
 
             /// <summary>
@@ -617,6 +675,7 @@ namespace Pulsar4X.Entities.Components
 
             if (SubMunition != null)
             {
+                size = size + (SubMunition.size * SubMunitionCount);
                 cost = cost + (SubMunition.cost * SubMunitionCount);
             }
 
@@ -624,9 +683,9 @@ namespace Pulsar4X.Entities.Components
 
             MaxSpeed = (float)TotalEnginePower * (1000.0f / (size * 0.05f));
 
-            if (MaxSpeed > 290000.0f)
+            if (MaxSpeed > Constants.OrdnanceTN.MaximumSpeed)
             {
-                MaxSpeed = 290000.0f;
+                MaxSpeed = Constants.OrdnanceTN.MaximumSpeed;
             }
             
             /// <summary>
@@ -637,7 +696,11 @@ namespace Pulsar4X.Entities.Components
 
             Manuever = 10.0f + (Agility / size);
 
-            Series.AddMissileToSeries(this);
+            if (Series != null)
+            {
+                OrdSeries = Series;
+                Series.AddMissileToSeries(this);
+            }
         }
 
         /// <summary>

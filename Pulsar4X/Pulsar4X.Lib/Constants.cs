@@ -1180,6 +1180,16 @@ namespace Pulsar4X
             public static float[] reactorTech = { 0.1f, 0.15f, 0.225f, 0.3f, 0.4f, 0.5f, 0.6f, 0.8f, 1.0f, 1.2f, 1.6f, 2.0f };
             public static int[] radTech = { 2, 3, 4, 5 };
             public static int[] laserTech = { 2, 4, 6, 10 };
+
+            /// <summary>
+            /// Launchers are capped at this value so no missile greater than 100 makes any sense to be designed.
+            /// </summary>
+            public static double MaxSize = 100.0;
+
+            /// <summary>
+            /// Maximum missile speed which they may not exceed in km
+            /// </summary>
+            public static int MaximumSpeed = 299000;
         }
     }
 }

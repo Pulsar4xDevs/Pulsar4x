@@ -490,6 +490,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oRenameClassPanel.RenameClassTextBox.Text = _CurrnetShipClass.Name;
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
                 m_oRenameClassPanel.ShowDialog();
+                m_oRenameClassPanel.RenameClassTextBox.Focus();
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
             }
         }

@@ -117,4 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="m_oInfoLabel.Text" xml:space="preserve">
+    <value>Missiles with no fuel have an engine endurance 
+of 1 second. This allows the creation of Orbital 
+bombs.
+
+MSP = Missile Size Point. Each MSP is 1/20th, 
+or 5%, of a Hull Space(HS which in turn is 
+50 tons).
+
+Missile % Chance to Hit = (Missile Speed / 
+Target Speed)xManoeuvre Rating.
+
+Manoeuvre Rating for Missiles is equal to 10 + 
+(Agility/Size). Using the agility value for the 
+missile design. A missile design with no space 
+dedicated to Agility will therefore have an MR of 
+10. </value>
+  </data>
 </root>

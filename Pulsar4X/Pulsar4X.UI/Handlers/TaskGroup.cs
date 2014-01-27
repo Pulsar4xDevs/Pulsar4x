@@ -306,6 +306,7 @@ namespace Pulsar4X.UI.Handlers
 
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
                 m_oRenameTaskGroupPanel.ShowDialog();
+                m_oRenameTaskGroupPanel.RenameClassTextBox.Focus();
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
             } 
         }

@@ -25,6 +25,18 @@ namespace Pulsar4X.UI.Panels
         public MissileDesign()
         {
             InitializeComponent();
+
+            m_oTechDataGrid = new DataGridView();
+            m_oTechDataGrid.Dock = DockStyle.Fill;
+            m_oTechDataGrid.AllowUserToAddRows = false;
+            m_oTechDataGrid.AllowUserToDeleteRows = false;
+            m_oTechDataGrid.AllowUserToOrderColumns = false;
+            m_oTechDataGrid.AllowUserToResizeColumns = false;
+            m_oTechDataGrid.AllowUserToResizeRows = false;
+            m_oTechDataGrid.ReadOnly = true;
+            m_oTechDataGrid.Enabled = true;
+            m_oTechDataGrid.Font = m_oInfoLabel.Font;
+            this.m_oInfoGroupBox.Controls.Add(m_oTechDataGrid);
         }
     }
 }

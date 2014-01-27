@@ -1731,7 +1731,7 @@ namespace Pulsar4X.UI.Handlers
                         if (minTech > 5)
                             minTech = 5;
 
-                        for (int loop = 1; loop <= 100; loop++)
+                        for (int loop = 1; loop <= (int)Constants.OrdnanceTN.MaxSize; loop++)
                         {
                             Entry = String.Format("Missile Launcher Size {0}", loop);
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);

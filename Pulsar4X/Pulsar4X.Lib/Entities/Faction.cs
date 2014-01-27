@@ -433,9 +433,14 @@ namespace Pulsar4X.Entities
         public Color FactionColor { get; set; }
 
         /// <summary>
-        /// This may go away in future revisions.
+        /// Missilegroups belonging to this faction. This may go away in future revisions.
         /// </summary>
         public BindingList<OrdnanceGroupTN> MissileGroups { get; set; }
+
+        /// <summary>
+        /// Ordnance series that ordnance definitions can belong to.
+        /// </summary>
+        public BindingList<OrdnanceSeriesTN> OrdnanceSeries { get; set; }
 
         /// <summary>
         /// Faction base tracking that all ships will use. This may eventually get moved to the tech department
@@ -600,7 +605,7 @@ namespace Pulsar4X.Entities
             LauncherReloadRate,
             ReducedSizeLaunchers,
             OrdnanceProdRate,
-            MissileCount,
+            MissileKineticCount,
 
             /// <summary>
             /// Power and Propulsion Technologies, Engines, Jump Engines, and power plants.
@@ -714,6 +719,10 @@ namespace Pulsar4X.Entities
 
             MissileGroups = new BindingList<OrdnanceGroupTN>();
 
+            OrdnanceSeries = new BindingList<OrdnanceSeriesTN>();
+            OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
+            OrdnanceSeries.Add(NewOrd);
+
             BaseTracking = 1250;
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
@@ -790,6 +799,10 @@ namespace Pulsar4X.Entities
             MessageLog = new BindingList<MessageEntry>();
 
             MissileGroups = new BindingList<OrdnanceGroupTN>();
+
+            OrdnanceSeries = new BindingList<OrdnanceSeriesTN>();
+            OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
+            OrdnanceSeries.Add(NewOrd);
 
             BaseTracking = 1250;
 

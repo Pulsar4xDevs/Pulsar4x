@@ -2354,7 +2354,7 @@ namespace Pulsar4X.Entities
             {
                 foreach (KeyValuePair<OrdnanceDefTN, int> SCPair in ShipClass.ShipClassOrdnance)
                 {
-                    OrdnanceSeries Series = SCPair.Key.ordSeries;
+                    OrdnanceSeriesTN Series = SCPair.Key.ordSeries;
 
                     if (ContainsMissileOfSeries(Series) == 0)
                     {
@@ -2395,7 +2395,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Series">Series to test against.</param>
         /// <returns>Number of missiles of that series.</returns>
-        public int ContainsMissileOfSeries(OrdnanceSeries Series)
+        public int ContainsMissileOfSeries(OrdnanceSeriesTN Series)
         {
             if (ShipOrdnance.Count == 0)
             {
@@ -2422,7 +2422,7 @@ namespace Pulsar4X.Entities
         /// <param name="pop">Population stockpile.</param>
         /// <param name="SCValue">ShipClass Preferred Ordnance #</param>
         /// <param name="SOValue">Current Ship Ordnance #</param>
-        public void LoadMissileFromPopulation(OrdnanceSeries Series, Population pop, int SCValue, int SOValue)
+        public void LoadMissileFromPopulation(OrdnanceSeriesTN Series, Population pop, int SCValue, int SOValue)
         {
             for (int loop = (Series.missilesInSeries.Count - 1); loop >= 0; loop--)
             {

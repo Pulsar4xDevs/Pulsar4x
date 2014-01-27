@@ -104,7 +104,12 @@ namespace Pulsar4X.Entities.Components
         public BindingList<MissileEngineDefTN> MissileEngineDef { get; set; }
 
         /// <summary>
-        /// Number of the total components this faction has for ship building purposes. MissileEngineDef is obviously excluded.
+        /// Missiles themselves are placed here. Total components likewise does not apply to these.
+        /// </summary>
+        public BindingList<OrdnanceDefTN> MissileDef { get; set; }
+
+        /// <summary>
+        /// Number of the total components this faction has for ship building purposes. MissileEngineDef and MissileDef are excluded from this.
         /// </summary>
         public int TotalComponents { get; set; }
 
@@ -139,6 +144,8 @@ namespace Pulsar4X.Entities.Components
             MissileFireControlDef = new BindingList<ActiveSensorDefTN>();
 
             MissileEngineDef = new BindingList<MissileEngineDefTN>();
+
+            MissileDef = new BindingList<OrdnanceDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }

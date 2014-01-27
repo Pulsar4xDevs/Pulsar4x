@@ -1871,8 +1871,8 @@ namespace Pulsar4X.Tests
             PlayerFaction1.AddNewShipDesign("Blucher");
 
             MissileEngineDefTN TestMissileEngine = new MissileEngineDefTN("Testbed",5.0f,1.0f,1.0f,1.0f);
-            OrdnanceSeries Series = new OrdnanceSeries();
-            OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0, false, 0, false, 0, false, 0, TestMissileEngine,1);
+            OrdnanceSeriesTN Series = new OrdnanceSeriesTN("BLANK STANDIN");
+            OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0.0f, 0.0f, 0, false, 0, false, 0, TestMissileEngine,1);
 
             PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
             PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
@@ -1992,8 +1992,8 @@ namespace Pulsar4X.Tests
 
             MissileEngineDefTN TestMissileEngine = new MissileEngineDefTN("Testbed", 5.0f, 4.0f, 1.0f, 1.0f);
 
-            OrdnanceSeries Series = new OrdnanceSeries();
-            OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0, false, 0, false, 0, false, 0, TestMissileEngine, 1);
+            OrdnanceSeriesTN Series = new OrdnanceSeriesTN("BLANK STANDIN"); 
+            OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0.0f, 0.0f, 0, false, 0, false, 0, TestMissileEngine, 1);
 
             ActiveSensorDefTN Spotter = new ActiveSensorDefTN("Spotter", 5.0f, 10, 5, 18, false, 1.0f, 0);
 

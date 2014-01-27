@@ -224,11 +224,13 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ActiveStr">Active strength value in total.</param>
         /// <param name="EMS">EM sensitivity same as regular active sensors.</param>
         /// <param name="Resolution">Active sensor resolution.</param>
-        public ActiveSensorDefTN(float ActiveStr, byte EMS, int Resolution)
+        public ActiveSensorDefTN(float ActiveStr, byte EMS, ushort AResolution)
         {
             Id = Guid.NewGuid();
             componentType = ComponentTypeTN.TypeCount;
             EMRecv = EMS;
+
+            Resolution = AResolution;
 
             Name = "MissileActive";
 

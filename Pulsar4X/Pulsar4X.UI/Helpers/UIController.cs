@@ -184,6 +184,7 @@ namespace Pulsar4X.UI.Helpers
             m_oShips.SMOn();
             m_oClassDesign.SMOn();
             m_oComponentRP.SMOn();
+            m_oMissileDesign.SMOn();
         }
 
         /// <summary>
@@ -195,6 +196,7 @@ namespace Pulsar4X.UI.Helpers
             m_oShips.SMOff();
             m_oClassDesign.SMOff();
             m_oComponentRP.SMOff();
+            m_oMissileDesign.SMOff();
         }
 
         /// <summary>
