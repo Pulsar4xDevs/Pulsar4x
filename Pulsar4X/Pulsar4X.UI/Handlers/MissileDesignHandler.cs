@@ -1230,7 +1230,7 @@ namespace Pulsar4X.UI.Handlers
             else
                 m_oMissileDesignPanel.LaserWCheckBox.Enabled = true;
 
-            double TotalSize = WarheadMSP + FuelMSP + AgilityMSP + ActiveMSP + ThermalMSP + EMMSP + GeoMSP + ReactorMSP;
+            double TotalSize = WarheadMSP + FuelMSP + AgilityMSP + ActiveMSP + ThermalMSP + EMMSP + GeoMSP + ReactorMSP + ECMMSP + ArmourMSP;
             if(_CurrnetMissileEngine != null && EngineCount != 0)
             {
                 TotalSize = TotalSize + (EngineCount * _CurrnetMissileEngine.size * 20.0f);

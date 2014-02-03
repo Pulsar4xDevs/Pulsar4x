@@ -10,8 +10,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Maximum size missile that this launcher may load. Due to size reductions launcher size and LaunchMaxSize will not always be the same.
         /// </summary>
-        private float LaunchMaxSize;
-        public float launchMaxSize
+        private int LaunchMaxSize;
+        public int launchMaxSize
         {
             get { return LaunchMaxSize; }
         }
@@ -107,7 +107,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Missile Launcher Specific stats:
             /// </summary>
-            LaunchMaxSize = hs;
+            LaunchMaxSize = (int)Math.Floor(hs);
             ReloadRateTech = ReloadTech;
             IsPDCSilo = ShipOrPDC;
 

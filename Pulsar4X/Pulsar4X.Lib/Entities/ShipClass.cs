@@ -674,6 +674,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<MissileLauncherDefTN> ShipMLaunchDef { get; set; }
 
+        /// <summary>
+        /// Count of missile launch tubes
+        /// </summary>
         [DisplayName("Ship Missile Launcher Count"),
         Category("Component Counts"),
         Description("Count of missile launchers present on this class"),
@@ -681,6 +684,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ushort> ShipMLaunchCount { get; set; }
 
+        /// <summary>
+        /// List of magazine definitions
+        /// </summary>
         [DisplayName("Ship Magazines"),
         Category("Component Lists"),
         Description("List of Magazines present on this class"),
@@ -688,6 +694,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<MagazineDefTN> ShipMagazineDef { get; set; }
 
+        /// <summary>
+        /// Count of magazine definitions
+        /// </summary>
         [DisplayName("Ship Magazine Count"),
         Category("Component Counts"),
         Description("Count of Magazines present on this class"),
@@ -695,6 +704,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ushort> ShipMagazineCount { get; set; }
 
+        /// <summary>
+        /// List of missile fire control definitions
+        /// </summary>
         [DisplayName("Ship Missile Fire Controls"),
         Category("Component Lists"),
         Description("List of MFCs present on this class"),
@@ -702,6 +714,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ActiveSensorDefTN> ShipMFCDef { get; set; }
 
+        /// <summary>
+        /// Count of missile fire control definitions
+        /// </summary>
         [DisplayName("Ship MFC Count"),
         Category("Component Counts"),
         Description("Count of MFCs present on this class"),
@@ -709,6 +724,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public BindingList<ushort> ShipMFCCount { get; set; }
 
+        /// <summary>
+        /// Total capacity of all magazines.
+        /// </summary>
         [DisplayName("Total Magazine space"),
         Category("Detials"),
         Description("Total ordnance carrying capacity of this vessel, this is launch tubes + magazine space."),
@@ -716,6 +734,9 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public int TotalMagazineCapacity { get; set; }
 
+        /// <summary>
+        /// Dictionary containing the ordnance and amounts of each to be loaded onto this ship.
+        /// </summary>
         [DisplayName("Ship Class Ordnance"),
         Category("Detials"),
         Description("Preferred Ordnance loadout for this ship class."),
@@ -723,12 +744,35 @@ namespace Pulsar4X.Entities
         ReadOnly(true)]
         public Dictionary<OrdnanceDefTN, int> ShipClassOrdnance { get; set; }
 
+        /// <summary>
+        /// Total size of all ship class ordnance.
+        /// </summary>
         [DisplayName("Preferred Ordnance size"),
         Category("Detials"),
         Description("Preferred Ordnance loadout size for this ship class."),
         Browsable(true),
         ReadOnly(true)]
         public int PreferredOrdnanceSize { get; set; }
+
+        /// <summary>
+        /// Total cost of all ordnance that should be loaded to this shipclass.
+        /// </summary>
+        [DisplayName("Preferred Ordnance cost"),
+        Category("Detials"),
+        Description("Preferred Ordnance loadout cost for this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public decimal PreferredOrdnanceCost { get; set; }
+
+        /// <summary>
+        /// This is the largest launch tube on this shipclass, it could only be a byte for TN purposes, but who knows whether or not people will want absurd sized launchers(almost certainly not).
+        /// </summary>
+        [DisplayName("Largest Launch Tube"),
+        Category("Detials"),
+        Description("Biggest missile launcher on the ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int LargestLauncher { get; set; }
         #endregion
 
 
@@ -858,6 +902,8 @@ namespace Pulsar4X.Entities
             TotalMagazineCapacity = 0;
             ShipClassOrdnance = new Dictionary<OrdnanceDefTN, int>();
             PreferredOrdnanceSize = 0;
+            PreferredOrdnanceCost = 0.0m;
+            LargestLauncher = 0;
 
             ShipArmorDef = new ArmorDefTN("Conventional");
             NewArmor("Conventional", 2, 1);
@@ -1087,23 +1133,27 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Ordnance Section
             /// </summary>
-            if (TotalMagazineCapacity < PreferredOrdnanceSize)
+            while (TotalMagazineCapacity < PreferredOrdnanceSize)
             {
                 int overrun = PreferredOrdnanceSize - TotalMagazineCapacity;
                 foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipClassOrdnance)
                 {
-                    int SCOSize = ((int)pair.Key.size * pair.Value);
+                    int MissileSizeInMagazine = (int)Math.Ceiling(pair.Key.size);
+                    int SCOSize = (MissileSizeInMagazine * pair.Value);
                     if (SCOSize <= overrun)
                     {
                         ShipClassOrdnance.Remove(pair.Key);
                         overrun = overrun - SCOSize;
                         PreferredOrdnanceSize = PreferredOrdnanceSize - SCOSize;
+                        PreferredOrdnanceCost = PreferredOrdnanceCost - (pair.Value * pair.Key.cost);
+                        break;
                     }
                     else
                     {
-                        int reduction = (int)Math.Ceiling((float)(overrun) / pair.Key.size);
+                        int reduction = (int)Math.Ceiling((float)(overrun) / (float)MissileSizeInMagazine);
                         ShipClassOrdnance[pair.Key] = ShipClassOrdnance[pair.Key] - reduction;
-                        PreferredOrdnanceSize = PreferredOrdnanceSize - reduction;
+                        PreferredOrdnanceSize = PreferredOrdnanceSize - (reduction * MissileSizeInMagazine);
+                        PreferredOrdnanceCost = PreferredOrdnanceCost - (reduction * pair.Key.cost);
                         break;
                     }
                 }
@@ -1843,6 +1893,11 @@ namespace Pulsar4X.Entities
             
             if (TubeIndex == -1 && inc >= 1)
             {
+                if (Tube.launchMaxSize > LargestLauncher)
+                {
+                    LargestLauncher = Tube.launchMaxSize;
+                }
+
                 ShipMLaunchDef.Add(Tube);
                 ShipMLaunchCount.Add((ushort)inc);
             }
@@ -1852,8 +1907,29 @@ namespace Pulsar4X.Entities
                 {
                     if (ShipMLaunchCount[TubeIndex] <= 0)
                     {
+                        bool findNextLargest = false;
+                        if (ShipMLaunchDef[TubeIndex].launchMaxSize == LargestLauncher)
+                        {
+                            findNextLargest = true;
+                        }
+
                         ShipMLaunchCount.RemoveAt(TubeIndex);
                         ShipMLaunchDef.RemoveAt(TubeIndex);
+
+                        if (findNextLargest == true)
+                        {
+                            LargestLauncher = 0;
+
+                            /// <summary>
+                            /// unless launch tubes are sorted by size this sort of search will be necessary.
+                            /// Luckily this is not a frequent event, so it will not matter that it is done in a sub-optimal way.
+                            /// </summary>
+                            for (int loop = 0; loop < ShipMLaunchDef.Count; loop++)
+                            {
+                                if (ShipMLaunchDef[loop].launchMaxSize > LargestLauncher)
+                                    LargestLauncher = ShipMLaunchDef[loop].launchMaxSize;
+                            }
+                        }
                     }
                 }
                 else
@@ -1958,11 +2034,14 @@ namespace Pulsar4X.Entities
         /// <param name="inc">Amount to add/remove.</param>
         public void SetPreferredOrdnance(OrdnanceDefTN missile, int inc)
         {
-            int loadAmt = (int)missile.size * inc;
+            int MissileSizeInMagazine = (int)Math.Ceiling(missile.size);
+            int loadSize = MissileSizeInMagazine * inc;
+
+            int loadAmt = 0;
 
             if (inc > 0)
             {
-                if (PreferredOrdnanceSize + loadAmt <= TotalMagazineCapacity)
+                if (PreferredOrdnanceSize + loadSize <= TotalMagazineCapacity)
                 {
                     loadAmt = inc;
                 }
@@ -1975,19 +2054,25 @@ namespace Pulsar4X.Entities
                     else
                     {
                         int capRemaining = TotalMagazineCapacity - PreferredOrdnanceSize;
-                        loadAmt = (int)Math.Floor(((float)capRemaining / missile.size));
+                        loadAmt = (int)Math.Floor(((float)capRemaining / (float)MissileSizeInMagazine));
+
+                        loadSize = loadAmt * MissileSizeInMagazine;
                     }
                 }
 
                 if (ShipClassOrdnance.ContainsKey(missile))
                 {
                     ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + loadAmt;
-                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadAmt;
+                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
+
+                    PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt*missile.cost);
                 }
                 else
                 {
                     ShipClassOrdnance.Add(missile, loadAmt);
-                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadAmt;
+                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
+
+                    PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
                 }
             }
             else
@@ -2001,20 +2086,24 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Have to remember that inc is negative here.
                     /// </summary>
-                    ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + inc;
-                    PreferredOrdnanceSize = PreferredOrdnanceSize + loadAmt;
 
-                    if (ShipClassOrdnance[missile] == 0)
+                    if ((inc * -1) < ShipClassOrdnance[missile])
                     {
-                        ShipClassOrdnance.Remove(missile);
+                        loadAmt = inc;
+
+                        ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + inc;
+                        PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
+                        PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
                     }
-                    else if (ShipClassOrdnance[missile] < 0)
+                    else
                     {
-                        /// <summary>
-                        /// This can be bad.
-                        /// </summary>
-                        Console.WriteLine("ShipClassOrdnance underflow.");
-                        return;
+                        loadAmt = ShipClassOrdnance[missile] * -1;
+                        loadSize = loadAmt * MissileSizeInMagazine;
+
+                        PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
+                        PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
+                        ShipClassOrdnance[missile] = 0;
+                        ShipClassOrdnance.Remove(missile);
                     }
                 }
             }
@@ -2343,33 +2432,33 @@ namespace Pulsar4X.Entities
                 if(Endurance >= 8640.0f)
                 {
                     float YE = Endurance / 8640.0f;
-                    EndString = String.Format("{0:N1}Y",YE);
+                    EndString = String.Format("{0:N1} Years",YE);
                 }
-                if(Endurance >= 720.0f)
+                else if(Endurance >= 720.0f)
                 {
                     float ME = Endurance / 720.0f;
-                    EndString = String.Format("{0:N1}M",ME);
+                    EndString = String.Format("{0:N1} Months",ME);
                 }
-                if(Endurance >= 24.0f)
+                else if(Endurance >= 24.0f)
                 {
                     float DE = Endurance / 24.0f;
-                    EndString = String.Format("{0:N1}D",DE);
+                    EndString = String.Format("{0:N1} Days",DE);
                 }
                 else if(Endurance >= 1.0f)
                 {
-                    EndString = String.Format("{0:N1}h",Endurance);
+                    EndString = String.Format("{0:N1} hours",Endurance);
                 }
                 else if((Endurance * 60.0f) >= 1.0f)
                 {
-                    EndString = String.Format("{0:N1}m",(Endurance * 60.0f));
+                    EndString = String.Format("{0:N1} minutes",(Endurance * 60.0f));
                 }
                 else
                 {
                     EndString = String.Format("0m");
                 }
 
-                float TimeOneBillionKM = (1000000000.0f / pair.Key.maxSpeed) / 3600.0f; 
-                float test = TimeOneBillionKM / Endurance;
+                float TimeOneBillionKM = (1000000000.0f / (pair.Key.maxSpeed * 3600.0f)); 
+                float test = Endurance / TimeOneBillionKM;
                 String RangeString = "N/A";
                 if(test >= 1.0f)
                 {
@@ -2378,11 +2467,14 @@ namespace Pulsar4X.Entities
                 else
                 {
                     float range = Endurance * (pair.Key.maxSpeed * 3600.0f);
+                    range = range / 1000000.0f;
                     RangeString = String.Format("{0:N1}M km",range);
                 }
 
-                Entry = String.Format("{0} ({1})  Speed: {3} km/s   End: {4}    Range: {5} km   WH: {6}    Size: {7}    TH: {8}/{9}/{10}\n", pair.Key.Name, pair.Value, FormattedSpeed, EndString,
-                                      RangeString,pair.Key.warhead,pair.Key.size,pair.Key.ToHit(3000.0f),pair.Key.ToHit(5000.0f),pair.Key.ToHit(10000.0f));
+                Entry = String.Format("{0} ({1})  Speed: {2} km/s   End: {3}    Range: {4}   WH: {5}    Size: {6}    TH: {7}/{8}/{9}\n", pair.Key.Name, pair.Value, FormattedSpeed, EndString, 
+                                      RangeString, pair.Key.warhead, pair.Key.size,pair.Key.ToHit(3000.0f), pair.Key.ToHit(5000.0f),pair.Key.ToHit(10000.0f));
+                Summary = String.Format("{0}{1}", Summary, Entry);
+
                 control = true;
             }
 

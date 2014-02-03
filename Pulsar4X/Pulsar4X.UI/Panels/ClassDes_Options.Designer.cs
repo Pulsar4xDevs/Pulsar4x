@@ -297,6 +297,89 @@ namespace Pulsar4X.UI.Panels
         }
         #endregion
 
+        #region Ordnance / Fighters Tab
+
+        /// <summary>
+        /// Preferred Ordnance for shipclass will be set here.
+        /// </summary>
+        public ListBox PreferredOrdnanceListBox
+        {
+            get { return m_oPreferredOrdnanceListBox; }
+        }
+
+        /// <summary>
+        /// Preferred strikegroup of fighters / FACS(?) will go here.
+        /// </summary>
+        public ListBox PreferredStrikeGroupListBox
+        {
+            get { return m_oPreferredStrikeGroupListBox; }
+        }
+
+        /// <summary>
+        /// Marks selected missile as obsolete.
+        /// </summary>
+        public Button MslObsButton
+        {
+            get { return m_oMslObsButton; }
+        }
+
+        /// <summary>
+        /// if SM is enabled, load every ship with the selected preferred ordnance.
+        /// </summary>
+        public Button SMLoadShipsButton
+        {
+            get { return m_oSMLoadShipsButton; }
+        }
+
+        /// <summary>
+        /// removes selected strike fighter from preferred fighter list.
+        /// </summary>
+        public Button DeleteStrikeGroupButton
+        {
+            get { return m_oDeleteStrikeGroupButton; }
+        }
+
+        /// <summary>
+        /// Display missiles larger than largest launch size.
+        /// </summary>
+        public CheckBox IgnoreMslSizeCheckBox
+        {
+            get { return m_oIgnoreMslSizeCheckBox; }
+        }
+
+        /// <summary>
+        /// Display obsolete missiles in the missile list box.
+        /// </summary>
+        public CheckBox ShowObsMslCheckBox
+        {
+            get { return m_oShowObsMslCheckBox; }
+        }
+
+        /// <summary>
+        /// Radio buttons for missile addition/subtraction from ship class.
+        /// </summary>
+        public RadioButton OF1xRadioButton
+        {
+            get { return m_o1xOFRadioButton; }
+        }
+
+        public RadioButton OF10xRadioButton
+        {
+            get { return m_o10xOFRadioButton; }
+        }
+
+        public RadioButton OF100xRadioButton
+        {
+            get { return m_o100xOFRadioButton; }
+        }
+
+        public RadioButton OF1000xRadioButton
+        {
+            get { return m_o1000xOFRadioButton; }
+        }
+
+        #endregion
+
 
         /// <summary> 
         /// Clean up any resources being used.
@@ -412,6 +495,21 @@ namespace Pulsar4X.UI.Panels
             this.m_oRemoveButton = new System.Windows.Forms.Button();
             this.m_oAddButton = new System.Windows.Forms.Button();
             this.m_oOrdFightersTab = new System.Windows.Forms.TabPage();
+            this.m_o1000xOFRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oIgnoreMslSizeCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_o100xOFRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oShowObsMslCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_o10xOFRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oMslObsButton = new System.Windows.Forms.Button();
+            this.m_o1xOFRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oStrikeGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMissileGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oPreferredStrikeGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oDeleteStrikeGroupButton = new System.Windows.Forms.Button();
+            this.m_oPreferredStrikeGroupListBox = new System.Windows.Forms.ListBox();
+            this.m_oPreferredOrdnanceGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSMLoadShipsButton = new System.Windows.Forms.Button();
+            this.m_oPreferredOrdnanceListBox = new System.Windows.Forms.ListBox();
             this.m_oCompSummaryTab = new System.Windows.Forms.TabPage();
             this.m_oDACRankInfoTab = new System.Windows.Forms.TabPage();
             this.m_oShipsTab = new System.Windows.Forms.TabPage();
@@ -488,6 +586,9 @@ namespace Pulsar4X.UI.Panels
             this.m_oCompListGroupBox.SuspendLayout();
             this.m_oBriefSummaryGroupBox.SuspendLayout();
             this.m_oAvailCompGroupBox.SuspendLayout();
+            this.m_oOrdFightersTab.SuspendLayout();
+            this.m_oPreferredStrikeGroupBox.SuspendLayout();
+            this.m_oPreferredOrdnanceGroupBox.SuspendLayout();
             this.m_oGeneralInfoGroupBox.SuspendLayout();
             this.m_oBuildPointGroupBox.SuspendLayout();
             this.m_oBuildLoadGroupBox.SuspendLayout();
@@ -1494,12 +1595,179 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oOrdFightersTab
             // 
+            this.m_oOrdFightersTab.Controls.Add(this.m_o1000xOFRadioButton);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oIgnoreMslSizeCheckBox);
+            this.m_oOrdFightersTab.Controls.Add(this.m_o100xOFRadioButton);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oShowObsMslCheckBox);
+            this.m_oOrdFightersTab.Controls.Add(this.m_o10xOFRadioButton);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oMslObsButton);
+            this.m_oOrdFightersTab.Controls.Add(this.m_o1xOFRadioButton);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oStrikeGroupBox);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oMissileGroupBox);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oPreferredStrikeGroupBox);
+            this.m_oOrdFightersTab.Controls.Add(this.m_oPreferredOrdnanceGroupBox);
             this.m_oOrdFightersTab.Location = new System.Drawing.Point(4, 22);
             this.m_oOrdFightersTab.Name = "m_oOrdFightersTab";
             this.m_oOrdFightersTab.Size = new System.Drawing.Size(1026, 725);
             this.m_oOrdFightersTab.TabIndex = 3;
             this.m_oOrdFightersTab.Text = "Ordnance / Fighters";
             this.m_oOrdFightersTab.UseVisualStyleBackColor = true;
+            // 
+            // m_o1000xOFRadioButton
+            // 
+            this.m_o1000xOFRadioButton.AutoSize = true;
+            this.m_o1000xOFRadioButton.Location = new System.Drawing.Point(164, 267);
+            this.m_o1000xOFRadioButton.Name = "m_o1000xOFRadioButton";
+            this.m_o1000xOFRadioButton.Size = new System.Drawing.Size(54, 17);
+            this.m_o1000xOFRadioButton.TabIndex = 9;
+            this.m_o1000xOFRadioButton.Text = "x1000";
+            this.m_o1000xOFRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oIgnoreMslSizeCheckBox
+            // 
+            this.m_oIgnoreMslSizeCheckBox.AutoSize = true;
+            this.m_oIgnoreMslSizeCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oIgnoreMslSizeCheckBox.Location = new System.Drawing.Point(661, 268);
+            this.m_oIgnoreMslSizeCheckBox.Margin = new System.Windows.Forms.Padding(5, 3, 5, 3);
+            this.m_oIgnoreMslSizeCheckBox.Name = "m_oIgnoreMslSizeCheckBox";
+            this.m_oIgnoreMslSizeCheckBox.Size = new System.Drawing.Size(137, 17);
+            this.m_oIgnoreMslSizeCheckBox.TabIndex = 5;
+            this.m_oIgnoreMslSizeCheckBox.Text = "Ignore Size Restrictions";
+            this.m_oIgnoreMslSizeCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_o100xOFRadioButton
+            // 
+            this.m_o100xOFRadioButton.AutoSize = true;
+            this.m_o100xOFRadioButton.Location = new System.Drawing.Point(110, 267);
+            this.m_o100xOFRadioButton.Name = "m_o100xOFRadioButton";
+            this.m_o100xOFRadioButton.Size = new System.Drawing.Size(48, 17);
+            this.m_o100xOFRadioButton.TabIndex = 8;
+            this.m_o100xOFRadioButton.Text = "x100";
+            this.m_o100xOFRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oShowObsMslCheckBox
+            // 
+            this.m_oShowObsMslCheckBox.AutoSize = true;
+            this.m_oShowObsMslCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oShowObsMslCheckBox.Location = new System.Drawing.Point(808, 268);
+            this.m_oShowObsMslCheckBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oShowObsMslCheckBox.Name = "m_oShowObsMslCheckBox";
+            this.m_oShowObsMslCheckBox.Size = new System.Drawing.Size(98, 17);
+            this.m_oShowObsMslCheckBox.TabIndex = 4;
+            this.m_oShowObsMslCheckBox.Text = "Show Obsolete";
+            this.m_oShowObsMslCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_o10xOFRadioButton
+            // 
+            this.m_o10xOFRadioButton.AutoSize = true;
+            this.m_o10xOFRadioButton.Location = new System.Drawing.Point(62, 267);
+            this.m_o10xOFRadioButton.Name = "m_o10xOFRadioButton";
+            this.m_o10xOFRadioButton.Size = new System.Drawing.Size(42, 17);
+            this.m_o10xOFRadioButton.TabIndex = 7;
+            this.m_o10xOFRadioButton.Text = "x10";
+            this.m_o10xOFRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oMslObsButton
+            // 
+            this.m_oMslObsButton.Location = new System.Drawing.Point(919, 264);
+            this.m_oMslObsButton.Name = "m_oMslObsButton";
+            this.m_oMslObsButton.Size = new System.Drawing.Size(87, 23);
+            this.m_oMslObsButton.TabIndex = 3;
+            this.m_oMslObsButton.Text = "Msl Obsolete";
+            this.m_oMslObsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_o1xOFRadioButton
+            // 
+            this.m_o1xOFRadioButton.AutoSize = true;
+            this.m_o1xOFRadioButton.Checked = true;
+            this.m_o1xOFRadioButton.Location = new System.Drawing.Point(20, 267);
+            this.m_o1xOFRadioButton.Name = "m_o1xOFRadioButton";
+            this.m_o1xOFRadioButton.Size = new System.Drawing.Size(36, 17);
+            this.m_o1xOFRadioButton.TabIndex = 6;
+            this.m_o1xOFRadioButton.TabStop = true;
+            this.m_o1xOFRadioButton.Text = "x1";
+            this.m_o1xOFRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oStrikeGroupBox
+            // 
+            this.m_oStrikeGroupBox.Location = new System.Drawing.Point(20, 521);
+            this.m_oStrikeGroupBox.Margin = new System.Windows.Forms.Padding(20);
+            this.m_oStrikeGroupBox.Name = "m_oStrikeGroupBox";
+            this.m_oStrikeGroupBox.Size = new System.Drawing.Size(986, 184);
+            this.m_oStrikeGroupBox.TabIndex = 3;
+            this.m_oStrikeGroupBox.TabStop = false;
+            this.m_oStrikeGroupBox.Text = "Select Fighter Types - double-click to add to default class strike group";
+            // 
+            // m_oMissileGroupBox
+            // 
+            this.m_oMissileGroupBox.Location = new System.Drawing.Point(20, 293);
+            this.m_oMissileGroupBox.Margin = new System.Windows.Forms.Padding(20);
+            this.m_oMissileGroupBox.Name = "m_oMissileGroupBox";
+            this.m_oMissileGroupBox.Size = new System.Drawing.Size(986, 200);
+            this.m_oMissileGroupBox.TabIndex = 2;
+            this.m_oMissileGroupBox.TabStop = false;
+            this.m_oMissileGroupBox.Text = "Select Missile Types - double-click to add to default class loadout";
+            // 
+            // m_oPreferredStrikeGroupBox
+            // 
+            this.m_oPreferredStrikeGroupBox.Controls.Add(this.m_oDeleteStrikeGroupButton);
+            this.m_oPreferredStrikeGroupBox.Controls.Add(this.m_oPreferredStrikeGroupListBox);
+            this.m_oPreferredStrikeGroupBox.Location = new System.Drawing.Point(533, 20);
+            this.m_oPreferredStrikeGroupBox.Margin = new System.Windows.Forms.Padding(20);
+            this.m_oPreferredStrikeGroupBox.Name = "m_oPreferredStrikeGroupBox";
+            this.m_oPreferredStrikeGroupBox.Size = new System.Drawing.Size(473, 233);
+            this.m_oPreferredStrikeGroupBox.TabIndex = 1;
+            this.m_oPreferredStrikeGroupBox.TabStop = false;
+            this.m_oPreferredStrikeGroupBox.Text = "Preferred Strikegroup";
+            // 
+            // m_oDeleteStrikeGroupButton
+            // 
+            this.m_oDeleteStrikeGroupButton.Location = new System.Drawing.Point(193, 194);
+            this.m_oDeleteStrikeGroupButton.Name = "m_oDeleteStrikeGroupButton";
+            this.m_oDeleteStrikeGroupButton.Size = new System.Drawing.Size(87, 23);
+            this.m_oDeleteStrikeGroupButton.TabIndex = 2;
+            this.m_oDeleteStrikeGroupButton.Text = "Delete";
+            this.m_oDeleteStrikeGroupButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPreferredStrikeGroupListBox
+            // 
+            this.m_oPreferredStrikeGroupListBox.FormattingEnabled = true;
+            this.m_oPreferredStrikeGroupListBox.Location = new System.Drawing.Point(13, 19);
+            this.m_oPreferredStrikeGroupListBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oPreferredStrikeGroupListBox.Name = "m_oPreferredStrikeGroupListBox";
+            this.m_oPreferredStrikeGroupListBox.Size = new System.Drawing.Size(447, 160);
+            this.m_oPreferredStrikeGroupListBox.TabIndex = 0;
+            // 
+            // m_oPreferredOrdnanceGroupBox
+            // 
+            this.m_oPreferredOrdnanceGroupBox.Controls.Add(this.m_oSMLoadShipsButton);
+            this.m_oPreferredOrdnanceGroupBox.Controls.Add(this.m_oPreferredOrdnanceListBox);
+            this.m_oPreferredOrdnanceGroupBox.Location = new System.Drawing.Point(20, 20);
+            this.m_oPreferredOrdnanceGroupBox.Margin = new System.Windows.Forms.Padding(20);
+            this.m_oPreferredOrdnanceGroupBox.Name = "m_oPreferredOrdnanceGroupBox";
+            this.m_oPreferredOrdnanceGroupBox.Size = new System.Drawing.Size(473, 233);
+            this.m_oPreferredOrdnanceGroupBox.TabIndex = 0;
+            this.m_oPreferredOrdnanceGroupBox.TabStop = false;
+            this.m_oPreferredOrdnanceGroupBox.Text = "Preferred Magazine Loadout";
+            // 
+            // m_oSMLoadShipsButton
+            // 
+            this.m_oSMLoadShipsButton.Enabled = false;
+            this.m_oSMLoadShipsButton.Location = new System.Drawing.Point(193, 194);
+            this.m_oSMLoadShipsButton.Name = "m_oSMLoadShipsButton";
+            this.m_oSMLoadShipsButton.Size = new System.Drawing.Size(87, 23);
+            this.m_oSMLoadShipsButton.TabIndex = 1;
+            this.m_oSMLoadShipsButton.Text = "Load Ships";
+            this.m_oSMLoadShipsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPreferredOrdnanceListBox
+            // 
+            this.m_oPreferredOrdnanceListBox.FormattingEnabled = true;
+            this.m_oPreferredOrdnanceListBox.Location = new System.Drawing.Point(13, 19);
+            this.m_oPreferredOrdnanceListBox.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oPreferredOrdnanceListBox.Name = "m_oPreferredOrdnanceListBox";
+            this.m_oPreferredOrdnanceListBox.Size = new System.Drawing.Size(447, 160);
+            this.m_oPreferredOrdnanceListBox.TabIndex = 0;
             // 
             // m_oCompSummaryTab
             // 
@@ -2138,6 +2406,10 @@ namespace Pulsar4X.UI.Panels
             this.m_oBriefSummaryGroupBox.ResumeLayout(false);
             this.m_oAvailCompGroupBox.ResumeLayout(false);
             this.m_oAvailCompGroupBox.PerformLayout();
+            this.m_oOrdFightersTab.ResumeLayout(false);
+            this.m_oOrdFightersTab.PerformLayout();
+            this.m_oPreferredStrikeGroupBox.ResumeLayout(false);
+            this.m_oPreferredOrdnanceGroupBox.ResumeLayout(false);
             this.m_oGeneralInfoGroupBox.ResumeLayout(false);
             this.m_oGeneralInfoGroupBox.PerformLayout();
             this.m_oBuildPointGroupBox.ResumeLayout(false);
@@ -2311,5 +2583,20 @@ namespace Pulsar4X.UI.Panels
         private CheckBox m_oObsTechCheckBox;
         private CheckBox m_oOwnTechCheckBox;
         private CheckBox m_oGroupCompCheckBox;
+        private GroupBox m_oStrikeGroupBox;
+        private GroupBox m_oMissileGroupBox;
+        private GroupBox m_oPreferredStrikeGroupBox;
+        private ListBox m_oPreferredStrikeGroupListBox;
+        private GroupBox m_oPreferredOrdnanceGroupBox;
+        private ListBox m_oPreferredOrdnanceListBox;
+        private RadioButton m_o1000xOFRadioButton;
+        private CheckBox m_oIgnoreMslSizeCheckBox;
+        private RadioButton m_o100xOFRadioButton;
+        private CheckBox m_oShowObsMslCheckBox;
+        private RadioButton m_o10xOFRadioButton;
+        private Button m_oMslObsButton;
+        private RadioButton m_o1xOFRadioButton;
+        private Button m_oDeleteStrikeGroupButton;
+        private Button m_oSMLoadShipsButton;
     }
 }

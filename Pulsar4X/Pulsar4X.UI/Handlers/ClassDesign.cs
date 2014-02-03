@@ -84,6 +84,10 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private int ComponentAmt { get; set; }
 
+        /// <summary>
+        /// Amount of missiles to add/subtract from preferred loadout. 
+        /// </summary>
+        private int MissileAmt { get; set; }
 
         /// <summary>
         /// Build Error box will set this appropriately.
@@ -139,6 +143,27 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// Each row for the missile data grid.
+        /// </summary>
+        public enum MissileCell
+        {
+            Name,
+            Size,
+            Cost,
+            Speed,
+            Endurance,
+            Range,
+            WH,
+            ManRating,
+            ECM,
+            Armour,
+            Radiation,
+            Sensor,
+            StageTwo,
+            TypeCount
+        }
+
+        /// <summary>
         /// ComponentListBox and ComponentDataGrid will mutually annihilate each other's selections without these control variables.
         /// SelectedIndexchanged is where they are called.
         /// </summary>
@@ -149,6 +174,7 @@ namespace Pulsar4X.UI.Handlers
         {
 
             ComponentAmt = 1;
+            MissileAmt = 1;
 
             TotalComponents = 0;
 
@@ -247,6 +273,20 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.DeploymentTimeTextBox.TextChanged += new EventHandler(DeploymentTimeTextBox_TextChanged);
 
 
+            /// <summary>
+            /// Ordnance and fighter tab:
+            /// </summary>
+            m_oOptionsPanel.OF1xRadioButton.CheckedChanged += new EventHandler(MslAMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.OF10xRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.OF100xRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.OF1000xRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.MissileDataGrid.DoubleClick += new EventHandler(MissileDataGrid_DoubleClick);
+            m_oOptionsPanel.PreferredOrdnanceListBox.DoubleClick += new EventHandler(PreferredOrdnanceListBox_DoubleClick);
+            m_oOptionsPanel.MslObsButton.Click += new EventHandler(MslObsButton_Click);
+            m_oOptionsPanel.ShowObsMslCheckBox.CheckedChanged += new EventHandler(ShowObsMslCheckBox_CheckedChanged);
+            m_oOptionsPanel.IgnoreMslSizeCheckBox.CheckedChanged += new EventHandler(IgnoreMslSizeCheckBox_CheckedChanged);
+            SetupMissileDataGrid();
+
             UpdateDisplay();
 
         }
@@ -263,7 +303,7 @@ namespace Pulsar4X.UI.Handlers
             BuildComponentDataGrid();
         }
 
-        #region Buttons and doubleclicks
+        #region Buttons and doubleclicks for design tab and main
         /// <summary>
         /// Refreshes the tech list in a slightly more optimal way than a total rebuild
         /// </summary>
@@ -272,6 +312,7 @@ namespace Pulsar4X.UI.Handlers
         private void RefreshTechButton_Click(object sender, EventArgs e)
         {
             BuildComponentDataGrid();
+            BuildMissileDataGrid();
         }
 
         /// <summary>
@@ -973,8 +1014,6 @@ namespace Pulsar4X.UI.Handlers
             else if (m_oOptionsPanel.HundredRadioButton.Checked == true)
                 ComponentAmt = 100;
         }
-
-
         #endregion
 
 
@@ -1068,6 +1107,8 @@ namespace Pulsar4X.UI.Handlers
                     }
                     BuildDesignTab();
                 }
+
+                BuildOrdnanceFighterTab();
 
                 BuildErrorBox();
             }
@@ -1627,17 +1668,17 @@ namespace Pulsar4X.UI.Handlers
             try
             {
                 Padding newPadding = new Padding(2, 0, 2, 0);
-                AddColumn("Name", newPadding);
-                AddColumn("Rating Type", newPadding);
-                AddColumn("Rating", newPadding);
-                AddColumn("Cost", newPadding);
-                AddColumn("Size", newPadding);
-                AddColumn("Crew", newPadding);
-                AddColumn("Materials (exc Duranium)", newPadding);
+                AddColumn("Name", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Rating Type", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Rating", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Cost", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Size", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Crew", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Materials (exc Duranium)", newPadding, m_oOptionsPanel.ComponentDataGrid);
 
-                AddColumn("CType", newPadding);
-                AddColumn("CIndex", newPadding);
-                AddColumn("Obsolete", newPadding);
+                AddColumn("CType", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("CIndex", newPadding, m_oOptionsPanel.ComponentDataGrid);
+                AddColumn("Obsolete", newPadding, m_oOptionsPanel.ComponentDataGrid);
 
                 m_oOptionsPanel.ComponentDataGrid.Columns[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
 
@@ -1665,7 +1706,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="Header">Text of column header.</param>
         /// <param name="newPadding">Padding in use, not sure what this is or why its necessary. Cargo culting it is.</param>
-        private void AddColumn(String Header, Padding newPadding)
+        private void AddColumn(String Header, Padding newPadding, DataGridView DG)
         {
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
@@ -1675,7 +1716,7 @@ namespace Pulsar4X.UI.Handlers
                 col.DefaultCellStyle.Padding = newPadding;
                 if (col != null)
                 {
-                    m_oOptionsPanel.ComponentDataGrid.Columns.Add(col);
+                    DG.Columns.Add(col);
                 }
             }
         }
@@ -4277,6 +4318,363 @@ namespace Pulsar4X.UI.Handlers
         {
             IsDesignGood = true;
         }
+
+
+
+        #region Ordnance / Fighter Tab Build functions
+
+        /// <summary>
+        /// radio buttons,Missile listbox and datagrid, fighter listbox and datagrid, 2 Checkboxes, 3 buttons
+        /// </summary>
+
+
+        #region Ordnance / Fighter Tab Event handlers
+        /// <summary>
+        /// Handle how many components the user wants to add or subtract from a design.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MslAMTRadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (m_oOptionsPanel.OF1xRadioButton.Checked == true)
+                MissileAmt = 1;
+            else if (m_oOptionsPanel.OF10xRadioButton.Checked == true)
+                MissileAmt = 10;
+            else if (m_oOptionsPanel.OF100xRadioButton.Checked == true)
+                MissileAmt = 100;
+            else if (m_oOptionsPanel.OF1000xRadioButton.Checked == true)
+                MissileAmt = 1000;
+        }
+
+        /// <summary>
+        /// Adds MissileAmt missiles to the current designs preferred ordnance loadout, this time based on double clicking the MDG.
+        /// SetPreferredOrdnance handleds completely all conditions, so no need for any error checking here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MissileDataGrid_DoubleClick(object sender, EventArgs e)
+        {
+            if (m_oOptionsPanel.MissileDataGrid.CurrentCell.RowIndex != -1)
+            {
+                _CurrnetShipClass.SetPreferredOrdnance(_CurrnetFaction.ComponentList.MissileDef[m_oOptionsPanel.MissileDataGrid.CurrentCell.RowIndex], MissileAmt);
+
+
+                _CurrnetShipClass.BuildClassSummary();
+                BuildMisc();
+                BuildDesignTab();
+            }
+
+            BuildMissileListBox();
+        }
+
+        /// <summary>
+        /// Subtracts MissileAmt missiles from the current designs preferred ordnance loadout.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PreferredOrdnanceListBox_DoubleClick(object sender, EventArgs e)
+        {
+            int index = m_oOptionsPanel.PreferredOrdnanceListBox.SelectedIndex;
+            int count = 0;
+            if (index != -1 && index < m_oOptionsPanel.PreferredOrdnanceListBox.Items.Count - 4)
+            {
+                foreach(KeyValuePair<OrdnanceDefTN,int> pair in _CurrnetShipClass.ShipClassOrdnance)
+                {
+                    if(count == index)
+                    {
+                        _CurrnetShipClass.SetPreferredOrdnance(pair.Key, (MissileAmt * -1));
+
+                        _CurrnetShipClass.BuildClassSummary();
+                        BuildMisc();
+                        BuildDesignTab();
+
+
+                        break;
+                    }
+
+                    count++;
+                }
+
+                BuildMissileListBox();
+            }
+        }
+
+        /// <summary>
+        /// Toggle this missile to obsolete or not.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MslObsButton_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// This happens if there are no entries in the list.
+            /// </summary>
+            if (m_oOptionsPanel.MissileDataGrid.CurrentCell != null)
+            {
+                if (m_oOptionsPanel.MissileDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    if (_CurrnetFaction.ComponentList.MissileDef[m_oOptionsPanel.MissileDataGrid.CurrentCell.RowIndex].isObsolete == false)
+                        _CurrnetFaction.ComponentList.MissileDef[m_oOptionsPanel.MissileDataGrid.CurrentCell.RowIndex].isObsolete = true;
+                    else
+                        _CurrnetFaction.ComponentList.MissileDef[m_oOptionsPanel.MissileDataGrid.CurrentCell.RowIndex].isObsolete = false;
+
+                    BuildMissileDataGrid();
+                }
+            }
+
+        }
+             
+        /// <summary>
+        /// show all the obsolete missiles if checked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ShowObsMslCheckBox_CheckedChanged(object sender, EventArgs e) 
+        {
+            BuildMissileDataGrid();
+        }
+             
+        /// <summary>
+        /// Ignore the largest launcher size requirement for displaying missiles.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void IgnoreMslSizeCheckBox_CheckedChanged(object sender, EventArgs e) 
+        {
+            BuildMissileDataGrid();
+        }
+
+        #endregion
+
+        #region Ordnance / Fighter tab display functions
+
+        /// <summary>
+        /// Builds the overall ordnance and fighters tab
+        /// </summary>
+        private void BuildOrdnanceFighterTab()
+        {
+            BuildMissileListBox();
+            BuildMissileDataGrid();
+        }
+
+        /// <summary>
+        /// Build the preferred ordnance listbox
+        /// </summary>
+        private void BuildMissileListBox()
+        {
+            String Entry = "N/A";
+            decimal TotalCost = 0.0m;
+
+            m_oOptionsPanel.PreferredOrdnanceListBox.Items.Clear();
+            foreach(KeyValuePair<OrdnanceDefTN,int> pair in _CurrnetShipClass.ShipClassOrdnance)
+            {
+                Entry = String.Format("{0}x {1}", pair.Value, pair.Key.Name);
+                m_oOptionsPanel.PreferredOrdnanceListBox.Items.Add(Entry);
+
+                TotalCost = TotalCost + (pair.Key.cost * pair.Value);
+            }
+
+            Entry = "----------------------------------------";
+            m_oOptionsPanel.PreferredOrdnanceListBox.Items.Add(Entry);
+
+            Entry = String.Format("Cost: {0} BP", _CurrnetShipClass.PreferredOrdnanceCost);
+            m_oOptionsPanel.PreferredOrdnanceListBox.Items.Add(Entry);
+
+            Entry = String.Format("Capacity Required: {0}", _CurrnetShipClass.PreferredOrdnanceSize);
+            m_oOptionsPanel.PreferredOrdnanceListBox.Items.Add(Entry);
+
+            Entry = String.Format("Capacity Available {0}", (_CurrnetShipClass.TotalMagazineCapacity - _CurrnetShipClass.PreferredOrdnanceSize));
+            m_oOptionsPanel.PreferredOrdnanceListBox.Items.Add(Entry);
+
+        }
+
+        /// <summary>
+        /// Creates the columns for the component data grid.
+        /// </summary>
+        private void SetupMissileDataGrid()
+        {
+            m_oOptionsPanel.MissileDataGrid.Columns.Clear();
+            try
+            {
+                Padding newPadding = new Padding(2, 0, 2, 0);
+                AddColumn("Name", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Size", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Cost", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Speed", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Endurance", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Range", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("WH", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Man Rating", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("ECM", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Armour", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Radiation", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Sensors", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("Second Stage", newPadding, m_oOptionsPanel.MissileDataGrid);
+                AddColumn("IsObsolete", newPadding, m_oOptionsPanel.MissileDataGrid);
+
+                m_oOptionsPanel.MissileDataGrid.Columns[0].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+
+                foreach (DataGridViewColumn Column in m_oOptionsPanel.MissileDataGrid.Columns)
+                {
+                    Column.SortMode = DataGridViewColumnSortMode.NotSortable;
+                }
+
+                m_oOptionsPanel.MissileDataGrid.Columns[m_oOptionsPanel.MissileDataGrid.Columns.Count - 1].Visible = false;
+
+
+            }
+            catch
+            {
+                logger.Error("Something went wrong Creating Columns for Class Design MissileGrid screen...");
+            }
+        }
+
+        /// <summary>
+        /// builds and populates the rows to the missile datagrid.
+        /// Size Restriction and IsObs need to be checked here?
+        /// </summary>
+        private void BuildMissileDataGrid()
+        {
+            m_oOptionsPanel.MissileDataGrid.Rows.Clear();
+
+            try
+            {
+                for (int loop = 0; loop < _CurrnetFaction.ComponentList.MissileDef.Count; loop++)
+                {
+
+                    using (DataGridViewRow NewRow = new DataGridViewRow())
+                    {
+                        /// <summary>
+                        /// setup row height. note that by default they are 22 pixels in height!
+                        /// </summary>
+                        NewRow.Height = 18;
+                        m_oOptionsPanel.MissileDataGrid.Rows.Add(NewRow);
+
+                        DataGridViewCellStyle style = new DataGridViewCellStyle();
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].DefaultCellStyle = style;
+
+
+
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Name].Value = _CurrnetFaction.ComponentList.MissileDef[loop].Name;
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Size].Value = _CurrnetFaction.ComponentList.MissileDef[loop].size.ToString();
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Cost].Value = _CurrnetFaction.ComponentList.MissileDef[loop].cost.ToString();
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Speed].Value = _CurrnetFaction.ComponentList.MissileDef[loop].maxSpeed.ToString();
+
+
+                        float Endurance;
+                        String EndString = "N/A";
+                        String Range = "N/A";
+                        if (_CurrnetFaction.ComponentList.MissileDef[loop].fuel != 0.0f && _CurrnetFaction.ComponentList.MissileDef[loop].totalFuelConsumption != 0.0f)
+                        {
+                            Endurance = (_CurrnetFaction.ComponentList.MissileDef[loop].fuel / _CurrnetFaction.ComponentList.MissileDef[loop].totalFuelConsumption);
+                        }
+                        else
+                            Endurance = 0.0f;
+
+                        if (Endurance >= 8640.0f)
+                        {
+                            float YE = Endurance / 8640.0f;
+                            EndString = String.Format("{0:N1} Years", YE);
+                        }
+                        else if (Endurance >= 720.0f)
+                        {
+                            float ME = Endurance / 720.0f;
+                            EndString = String.Format("{0:N1} Months", ME);
+                        }
+                        else if (Endurance >= 24.0f)
+                        {
+                            float DE = Endurance / 24.0f;
+                            EndString = String.Format("{0:N1} Days", DE);
+                        }
+                        else if (Endurance >= 1.0f)
+                        {
+                            EndString = String.Format("{0:N1} hours", Endurance);
+                        }
+                        else if ((Endurance * 60.0f) >= 1.0f)
+                        {
+                            EndString = String.Format("{0:N1} minutes", (Endurance * 60.0f));
+                        }
+                        else
+                        {
+                            EndString = String.Format("0 minutes");
+                        }
+
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Endurance].Value = EndString;
+
+                        if (Endurance != 0.0f)
+                        {
+                            float TimeOneBillionKM = (1000000000.0f / _CurrnetFaction.ComponentList.MissileDef[loop].maxSpeed) / 3600.0f;
+
+                            float test = Endurance / TimeOneBillionKM;
+
+
+                            if (test >= 1.0f)
+                            {
+                                Range = String.Format("{0:N1}B km", test);
+                            }
+                            else
+                            {
+                                float range = (Endurance * (_CurrnetFaction.ComponentList.MissileDef[loop].maxSpeed * 3600.0f)) / 1000000.0f;
+                                Range = String.Format("{0:N1}M km", range);
+                            }
+                        }
+                        else
+                            Range = "0 km";
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Range].Value = Range;
+
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.WH].Value = _CurrnetFaction.ComponentList.MissileDef[loop].warhead.ToString();
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.ManRating].Value = _CurrnetFaction.ComponentList.MissileDef[loop].manuever.ToString();
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.ECM].Value = _CurrnetFaction.ComponentList.MissileDef[loop].eCMValue;
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Armour].Value = _CurrnetFaction.ComponentList.MissileDef[loop].armor;
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Radiation].Value = _CurrnetFaction.ComponentList.MissileDef[loop].radValue;
+
+                        String SensorString = "";
+                        if (_CurrnetFaction.ComponentList.MissileDef[loop].thermalStr != 0.0f)
+                        {
+                            SensorString = String.Format("TH: {0:N3} ", _CurrnetFaction.ComponentList.MissileDef[loop].thermalStr);
+                        }
+                        if (_CurrnetFaction.ComponentList.MissileDef[loop].eMStr != 0.0f)
+                        {
+                            SensorString = String.Format("{0}EM: {1:N3} ",SensorString, _CurrnetFaction.ComponentList.MissileDef[loop].eMStr);
+                        }
+                        if (_CurrnetFaction.ComponentList.MissileDef[loop].activeStr != 0.0f)
+                        {
+                            SensorString = String.Format("{0}Active: {1:N3} ", SensorString, _CurrnetFaction.ComponentList.MissileDef[loop].activeStr);
+                        }
+                        if (_CurrnetFaction.ComponentList.MissileDef[loop].geoStr != 0.0f)
+                        {
+                            SensorString = String.Format("{0}Geo: {1:N3}", SensorString, _CurrnetFaction.ComponentList.MissileDef[loop].geoStr);
+                        }
+
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.Sensor].Value = SensorString;
+
+
+
+                        String StageTwo = "N/A";
+                        if(_CurrnetFaction.ComponentList.MissileDef[loop].subRelease != null && _CurrnetFaction.ComponentList.MissileDef[loop].subReleaseCount != 0)
+                            StageTwo = String.Format("{0}x{1}", _CurrnetFaction.ComponentList.MissileDef[loop].subReleaseCount, _CurrnetFaction.ComponentList.MissileDef[loop].subRelease.Name);
+                        m_oOptionsPanel.MissileDataGrid.Rows[loop].Cells[(int)MissileCell.StageTwo].Value = StageTwo;
+
+
+                        int MissileSizeAdjust = (int)Math.Ceiling(_CurrnetFaction.ComponentList.MissileDef[loop].size);
+                        if ( (m_oOptionsPanel.IgnoreMslSizeCheckBox.Checked == false && MissileSizeAdjust > _CurrnetShipClass.LargestLauncher )            ||
+                             (m_oOptionsPanel.ShowObsMslCheckBox.Checked == false    && _CurrnetFaction.ComponentList.MissileDef[loop].isObsolete == true) )
+                        {
+                            m_oOptionsPanel.MissileDataGrid.Rows[loop].Visible = false;
+                        }
+                    }
+
+                }
+            }
+            catch
+            {
+                logger.Error("Something went wrong Creating Rows for Class Design MissileGrid screen...");
+            }
+        }
+        #endregion
+
+        #endregion
+
         #endregion
     }
 }

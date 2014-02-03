@@ -346,9 +346,23 @@ namespace Pulsar4X.UI.Panels
             get { return m_oComponentDataGrid; }
         }
 
+        /// <summary>
+        /// Display for selecting ordnance loadouts on the ordnance/fighters page.
+        /// </summary>
+        private DataGridView m_oMissileDataGrid;
+        public DataGridView MissileDataGrid
+        {
+            get { return m_oMissileDataGrid; }
+        }
 
-            
-
+        /// <summary>
+        /// Preferred strikegroup selection display.
+        /// </summary>
+        private DataGridView m_oFighterDataGrid;
+        public DataGridView FighterDataGrid
+        {
+            get { return m_oFighterDataGrid; }
+        }
 
         public ClassDes_Options()
         {
@@ -380,6 +394,38 @@ namespace Pulsar4X.UI.Panels
             m_oComponentDataGrid.ReadOnly = true;
             m_oComponentDataGrid.Enabled = true;
             this.m_oAvailCompGroupBox.Controls.Add(m_oComponentDataGrid);
+
+            m_oMissileDataGrid = new DataGridView();
+            m_oMissileDataGrid.Dock = DockStyle.Top;
+            m_oMissileDataGrid.SetBounds(3, 3, 745, 350);
+            m_oMissileDataGrid.AllowUserToAddRows = false;
+            m_oMissileDataGrid.AllowUserToDeleteRows = false;
+            m_oMissileDataGrid.AllowUserToOrderColumns = false;
+            m_oMissileDataGrid.AllowUserToResizeColumns = false;
+            m_oMissileDataGrid.AllowUserToResizeRows = false;
+            m_oMissileDataGrid.MultiSelect = false;
+            m_oMissileDataGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            m_oMissileDataGrid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            m_oMissileDataGrid.RowHeadersVisible = false;
+            m_oMissileDataGrid.ReadOnly = true;
+            m_oMissileDataGrid.Enabled = true;
+            this.m_oMissileGroupBox.Controls.Add(m_oMissileDataGrid);
+
+            m_oFighterDataGrid = new DataGridView();
+            m_oFighterDataGrid.Dock = DockStyle.Top;
+            m_oFighterDataGrid.SetBounds(3, 3, 745, 350);
+            m_oFighterDataGrid.AllowUserToAddRows = false;
+            m_oFighterDataGrid.AllowUserToDeleteRows = false;
+            m_oFighterDataGrid.AllowUserToOrderColumns = false;
+            m_oFighterDataGrid.AllowUserToResizeColumns = false;
+            m_oFighterDataGrid.AllowUserToResizeRows = false;
+            m_oFighterDataGrid.MultiSelect = false;
+            m_oFighterDataGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            m_oFighterDataGrid.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+            m_oFighterDataGrid.RowHeadersVisible = false;
+            m_oFighterDataGrid.ReadOnly = true;
+            m_oFighterDataGrid.Enabled = true;
+            this.m_oStrikeGroupBox.Controls.Add(m_oFighterDataGrid);
         }
 
         #region Events

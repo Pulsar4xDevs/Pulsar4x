@@ -60,6 +60,24 @@ namespace Pulsar4X.Entities
 
             SSEntity = StarSystemEntityType.JumpPoint;
 
+
+            /// <summary>
+            /// Is this a closed JP that cannot be detected on its "destination" side? will this feature be implemented?
+            /// </summary>
+            IsClosed = false;
+
+            /// <summary>
+            /// Starsystems won't start off with explored jump points, which means that any attempt to transit them must create a new system.
+            /// </summary>
+            IsExplored = false;
+            Connect = null;
+
+            /// <summary>
+            /// How should gate at startup be decided?
+            /// </summary>
+            IsGated = false;
+            GateOwner = null;
+
             Name = System.Name + " #" + System.JumpPoints.Count.ToString();
         }
 
@@ -103,7 +121,7 @@ namespace Pulsar4X.Entities
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
 
-            TransitTG.Contact.UpdateLocationInSystem(XSystem, YSystem);
+            TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 
             /// <summary>
             /// Likewise, set Standard transit penalties for the TG
@@ -130,7 +148,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Add/subtract offset to X/Y for this.
             /// <summary>
-            TransitTG.Contact.UpdateLocationInSystem(XSystem, YSystem);
+            TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 
             /// <summary>
             /// Set Squadron Transit penalties here

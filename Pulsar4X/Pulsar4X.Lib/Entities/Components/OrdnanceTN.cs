@@ -500,6 +500,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Ignore these:
             /// </summary>
+            Name = title;
             crew = 0;
             isMilitary = true;
             isSalvaged = false;
@@ -617,7 +618,7 @@ namespace Pulsar4X.Entities.Components
 
             if (ECMMSP != 0.0f)
             {
-                ECMValue = ecmTech * 10;
+                ECMValue = (ecmTech+1) * 10;
                 size = size + ECMMSP;
             }
 
