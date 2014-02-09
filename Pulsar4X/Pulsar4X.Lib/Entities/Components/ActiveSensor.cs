@@ -395,7 +395,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
 
         /// <summary>
-        /// Weapons linked to this BFC.
+        /// Weapons linked to this MFC.
         /// </summary>
         private BindingList<MissileLauncherTN> LinkedWeapons;
         public BindingList<MissileLauncherTN> linkedWeapons

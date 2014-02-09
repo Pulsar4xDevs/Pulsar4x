@@ -179,21 +179,47 @@ namespace Pulsar4X.UI.Handlers
 
                 int Number = 0;
 
-                Int32.TryParse(m_oFastOOBPanel.NumberTextBox.Text, out Number);
+                bool res = Int32.TryParse(m_oFastOOBPanel.NumberTextBox.Text, out Number);
 
-                for(int loop = 0; loop < Number; loop++)
+                if (res == true && Number > 0)
                 {
+                    /// <summary>
+                    /// Ship designs have to be locked if they are not.
+                    /// </summary>
                     if (m_oCurrnetShipClass.IsLocked == false)
                         m_oCurrnetShipClass.IsLocked = true;
 
-                    m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass, GameState.Instance.YearTickValue);
-                    m_oCurrnetFaction.ShipBPTotal = m_oCurrnetFaction.ShipBPTotal - m_oCurrnetShipClass.BuildPointCost;
+                    for (int loop = 0; loop < Number; loop++)
+                    {
 
-                    m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].Name = m_oCurrnetShipClass.Name + " " + (m_oCurrnetShipClass.ShipsInClass.Count - 1).ToString();
-                    m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].Refuel(1000000.0f);
+                        /// <summary>
+                        /// Make the ship and subtract the appropriate amount from the faction Ship PB total.
+                        /// </summary>
+                        m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass, GameState.Instance.YearTickValue);
+                        m_oCurrnetFaction.ShipBPTotal = m_oCurrnetFaction.ShipBPTotal - m_oCurrnetShipClass.BuildPointCost;
+
+                        /// <summary>
+                        /// Name the ship properly
+                        /// </summary>
+                        m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].Name = m_oCurrnetShipClass.Name + " " + (m_oCurrnetShipClass.ShipsInClass.Count).ToString();
+
+                        /// <summary>
+                        /// Ship specific information that SMed ships will want to have, fuel, ordnance,etc.
+                        /// </summary>
+                        m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].Refuel(1000000.0f);
+                        if (m_oCurrnetShipClass.ShipClassOrdnance.Count != 0)
+                        {
+                            foreach (KeyValuePair<OrdnanceDefTN, int> pair in m_oCurrnetShipClass.ShipClassOrdnance)
+                            {
+                                m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].ShipOrdnance.Add(pair.Key, pair.Value);
+                            }
+
+                            m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].CurrentMagazineCapacity = m_oCurrnetShipClass.PreferredOrdnanceSize;
+                        }
+                    }
+
+                    UpdateDisplay();
                 }
-
-                UpdateDisplay();
             }
         }
 

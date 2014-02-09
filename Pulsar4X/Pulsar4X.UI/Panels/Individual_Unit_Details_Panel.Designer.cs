@@ -210,6 +210,185 @@ namespace Pulsar4X.UI.Panels
             get { return m_oMaxShieldTextBox; }
         }
 
+        #region Ordnance Management Tab
+        /// <summary>
+        /// Launch Tube listbox for assigning ordnance to each tube.
+        /// </summary>
+        public ListBox LaunchTubeListBox
+        {
+            get { return m_oLaunchTubeListBox; }
+        }
+
+        /// <summary>
+        /// Listbox of the current ships magazine.
+        /// </summary>
+        public ListBox CurrentMagazineListBox
+        {
+            get { return m_oCurrentMagazineListBox; }
+        }
+
+        /// <summary>
+        /// Listbox of the targets magazine, be it a planet, collier, mothership, or random other ship in same TG.
+        /// </summary>
+        public ListBox TargetMagazineListBox
+        {
+            get { return m_oTargetMagazineListBox; }
+        }
+
+        /// <summary>
+        /// Selection for the above planetary population, collier, mothership, or random ship in same tg
+        /// </summary>
+        public ComboBox SelectedReloadTargetTypeComboBox
+        {
+            get { return m_oSelectedReloadTargetTypeComboBox; }
+        }
+
+        /// <summary>
+        /// combobox of ships present at same location.
+        /// </summary>
+        public ComboBox SelectedReloadShipComboBox
+        {
+            get { return m_oSelectedReloadShipComboBox; }
+        }
+
+        /// <summary>
+        /// Magazine transfer amount radio button controller
+        /// </summary>
+        public RadioButton Reload1xRadioButton
+        {
+            get { return m_oReload1xRadioButton; }
+        }
+
+        /// <summary>
+        /// Magazine transfer amount radio button controller
+        /// </summary>
+        public RadioButton Reload10xRadioButton
+        {
+            get { return m_oReload10xRadioButton; }
+        }
+
+        /// <summary>
+        /// Magazine transfer amount radio button controller
+        /// </summary>
+        public RadioButton Reload100xRadioButton
+        {
+            get { return m_oReload100xRadioButton; }
+        }
+
+        /// <summary>
+        /// Magazine transfer amount radio button controller
+        /// </summary>
+        public RadioButton Reload1000xRadioButton
+        {
+            get { return m_oReload1000xRadioButton; }
+        }
+
+        /// <summary>
+        /// Fast reload from colliers in same TG
+        /// </summary>
+        public Button CollierReloadButton
+        {
+            get { return m_oCollierReloadButton; }
+        }
+
+        /// <summary>
+        /// Fast reload from population ship is at
+        /// </summary>
+        public Button PopulationReloadButton
+        {
+            get { return m_oPopulationReloadButton; }
+        }
+
+        /// <summary>
+        /// Fast reload from Mothership
+        /// </summary>
+        public Button MothershipReloadButton
+        {
+            get { return m_oMothershipReloadButton; }
+        }
+
+        /// <summary>
+        /// Fast reload from SM mode.
+        /// </summary>
+        public Button StandardReloadButton
+        {
+            get { return m_oStandardReloadButton; }
+        }
+
+        /// <summary>
+        /// Change individual unit display ship selection to currently selected ship in ship combobox, or mothership
+        /// </summary>
+        public Button OptionsSelectShipButton
+        {
+            get { return m_oOptionsSelectShipButton; }
+        }
+
+        /// <summary>
+        /// Assign all parasites of the same class on the same mothership to reload this selected ordnance from their mothership.
+        /// </summary>
+        public Button OptionsParaMSButton
+        {
+            get { return m_oOptionsParaMSButton; }
+        }
+
+        /// <summary>
+        /// Assign all parasites of the same class on the same mothership to reload this selected ordnance from TG Colliers.
+        /// </summary>
+        public Button OptionsParaCOButton
+        {
+            get { return m_oOptionsParaCOButton; }
+        }
+
+        /// <summary>
+        /// Assign all parasites of the same class on all motherships to reload this selected ordnance from their mothership.
+        /// </summary>
+        public Button OptionsAllParaMSButton
+        {
+            get { return m_oOptionsAllParaMSButton; }
+        }
+
+        /// <summary>
+        /// Assign all parasites of the same class on all motherships to reload this selected ordnance from TG Colliers.
+        /// </summary>
+        public Button OptionsAllParaCOButton
+        {
+            get { return m_oOptionsAllParaCOButton; }
+        }
+
+        /// <summary>
+        /// Opens the Ammunition Management screen(SM only)
+        /// </summary>
+        public Button OptionsAmmoMgmtButton
+        {
+            get { return m_oOptionsAmmoMgmtButton; }
+        }
+
+        /// <summary>
+        /// Assigns Selected ordnance to selected launchers
+        /// </summary>
+        public Button AssignTubeButton
+        {
+            get { return m_oAssignTubeButton; }
+        }
+
+        /// <summary>
+        /// Assigns selected ordnance to all tubes, if they can fire it.
+        /// </summary>
+        public Button AssignAllTubesButton
+        {
+            get { return m_oAssignAllTubesButton; }
+        }
+
+        /// <summary>
+        /// Clears all ordnance selection from launch tubes.
+        /// </summary>
+        public Button ClearAllTubesButton
+        {
+            get { return m_oClearAllTubesButton; }
+        }
+
+        #endregion
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -301,6 +480,20 @@ namespace Pulsar4X.UI.Panels
             this.m_oCombatSummaryGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oCombatSummaryRTBox = new System.Windows.Forms.RichTextBox();
             this.m_oOrdnanceManagementTab = new System.Windows.Forms.TabPage();
+            this.m_oAssignMissileGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMagContentsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oReloadOptionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oOptionsAmmoMgmtButton = new System.Windows.Forms.Button();
+            this.m_oOptionsAllParaCOButton = new System.Windows.Forms.Button();
+            this.m_oOptionsAllParaMSButton = new System.Windows.Forms.Button();
+            this.m_oOptionsParaCOButton = new System.Windows.Forms.Button();
+            this.m_oOptionsParaMSButton = new System.Windows.Forms.Button();
+            this.m_oOptionsSelectShipButton = new System.Windows.Forms.Button();
+            this.m_oFastReloadGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oStandardReloadButton = new System.Windows.Forms.Button();
+            this.m_oMothershipReloadButton = new System.Windows.Forms.Button();
+            this.m_oPopulationReloadButton = new System.Windows.Forms.Button();
+            this.m_oCollierReloadButton = new System.Windows.Forms.Button();
             this.m_oShipCommanderGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oBasicInformationGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oMotherShipGroupBox = new System.Windows.Forms.GroupBox();
@@ -314,6 +507,19 @@ namespace Pulsar4X.UI.Panels
             this.m_oParasiteGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oBlankGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oAssignedPopulationGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oLaunchTubeListBox = new System.Windows.Forms.ListBox();
+            this.m_oCurrentMagazineListBox = new System.Windows.Forms.ListBox();
+            this.m_oTargetMagazineListBox = new System.Windows.Forms.ListBox();
+            this.m_oAssignTubeButton = new System.Windows.Forms.Button();
+            this.m_oAssignAllTubesButton = new System.Windows.Forms.Button();
+            this.m_oClearAllTubesButton = new System.Windows.Forms.Button();
+            this.m_oReloadOrdnanceCountGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSelectedReloadTargetTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSelectedReloadShipComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oReload1xRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oReload10xRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oReload100xRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oReload1000xRadioButton = new System.Windows.Forms.RadioButton();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oArmourStatusTab.SuspendLayout();
             this.m_oDamageControlTab.SuspendLayout();
@@ -339,7 +545,13 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsGroupBox.SuspendLayout();
             this.m_oCombatSummaryTab.SuspendLayout();
             this.m_oCombatSummaryGroupBox.SuspendLayout();
+            this.m_oOrdnanceManagementTab.SuspendLayout();
+            this.m_oAssignMissileGroupBox.SuspendLayout();
+            this.m_oMagContentsGroupBox.SuspendLayout();
+            this.m_oReloadOptionsGroupBox.SuspendLayout();
+            this.m_oFastReloadGroupBox.SuspendLayout();
             this.m_oShieldCrewGroupBox.SuspendLayout();
+            this.m_oReloadOrdnanceCountGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupTabControl
@@ -1073,6 +1285,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oWeaponListBox.FormattingEnabled = true;
             this.m_oWeaponListBox.Location = new System.Drawing.Point(6, 19);
             this.m_oWeaponListBox.Name = "m_oWeaponListBox";
+            this.m_oWeaponListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.m_oWeaponListBox.Size = new System.Drawing.Size(440, 472);
             this.m_oWeaponListBox.TabIndex = 47;
             // 
@@ -1110,12 +1323,173 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oOrdnanceManagementTab
             // 
+            this.m_oOrdnanceManagementTab.Controls.Add(this.m_oAssignMissileGroupBox);
+            this.m_oOrdnanceManagementTab.Controls.Add(this.m_oMagContentsGroupBox);
+            this.m_oOrdnanceManagementTab.Controls.Add(this.m_oReloadOptionsGroupBox);
+            this.m_oOrdnanceManagementTab.Controls.Add(this.m_oFastReloadGroupBox);
             this.m_oOrdnanceManagementTab.Location = new System.Drawing.Point(4, 22);
             this.m_oOrdnanceManagementTab.Name = "m_oOrdnanceManagementTab";
             this.m_oOrdnanceManagementTab.Size = new System.Drawing.Size(1033, 540);
             this.m_oOrdnanceManagementTab.TabIndex = 10;
             this.m_oOrdnanceManagementTab.Text = "Ordnance Management";
             this.m_oOrdnanceManagementTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oAssignMissileGroupBox
+            // 
+            this.m_oAssignMissileGroupBox.Controls.Add(this.m_oClearAllTubesButton);
+            this.m_oAssignMissileGroupBox.Controls.Add(this.m_oAssignAllTubesButton);
+            this.m_oAssignMissileGroupBox.Controls.Add(this.m_oAssignTubeButton);
+            this.m_oAssignMissileGroupBox.Controls.Add(this.m_oLaunchTubeListBox);
+            this.m_oAssignMissileGroupBox.Location = new System.Drawing.Point(637, 93);
+            this.m_oAssignMissileGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oAssignMissileGroupBox.Name = "m_oAssignMissileGroupBox";
+            this.m_oAssignMissileGroupBox.Size = new System.Drawing.Size(386, 437);
+            this.m_oAssignMissileGroupBox.TabIndex = 3;
+            this.m_oAssignMissileGroupBox.TabStop = false;
+            this.m_oAssignMissileGroupBox.Text = "Assign Selected Missile to Launcher";
+            // 
+            // m_oMagContentsGroupBox
+            // 
+            this.m_oMagContentsGroupBox.Controls.Add(this.m_oSelectedReloadShipComboBox);
+            this.m_oMagContentsGroupBox.Controls.Add(this.m_oSelectedReloadTargetTypeComboBox);
+            this.m_oMagContentsGroupBox.Controls.Add(this.m_oReloadOrdnanceCountGroupBox);
+            this.m_oMagContentsGroupBox.Controls.Add(this.m_oTargetMagazineListBox);
+            this.m_oMagContentsGroupBox.Controls.Add(this.m_oCurrentMagazineListBox);
+            this.m_oMagContentsGroupBox.Location = new System.Drawing.Point(10, 93);
+            this.m_oMagContentsGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oMagContentsGroupBox.Name = "m_oMagContentsGroupBox";
+            this.m_oMagContentsGroupBox.Size = new System.Drawing.Size(607, 437);
+            this.m_oMagContentsGroupBox.TabIndex = 2;
+            this.m_oMagContentsGroupBox.TabStop = false;
+            this.m_oMagContentsGroupBox.Text = "Magazine Contents";
+            // 
+            // m_oReloadOptionsGroupBox
+            // 
+            this.m_oReloadOptionsGroupBox.Controls.Add(this.m_oOptionsAmmoMgmtButton);
+            this.m_oReloadOptionsGroupBox.Controls.Add(this.m_oOptionsAllParaCOButton);
+            this.m_oReloadOptionsGroupBox.Controls.Add(this.m_oOptionsAllParaMSButton);
+            this.m_oReloadOptionsGroupBox.Controls.Add(this.m_oOptionsParaCOButton);
+            this.m_oReloadOptionsGroupBox.Controls.Add(this.m_oOptionsParaMSButton);
+            this.m_oReloadOptionsGroupBox.Controls.Add(this.m_oOptionsSelectShipButton);
+            this.m_oReloadOptionsGroupBox.Location = new System.Drawing.Point(393, 10);
+            this.m_oReloadOptionsGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oReloadOptionsGroupBox.Name = "m_oReloadOptionsGroupBox";
+            this.m_oReloadOptionsGroupBox.Size = new System.Drawing.Size(630, 63);
+            this.m_oReloadOptionsGroupBox.TabIndex = 1;
+            this.m_oReloadOptionsGroupBox.TabStop = false;
+            this.m_oReloadOptionsGroupBox.Text = "Options";
+            // 
+            // m_oOptionsAmmoMgmtButton
+            // 
+            this.m_oOptionsAmmoMgmtButton.Enabled = false;
+            this.m_oOptionsAmmoMgmtButton.Location = new System.Drawing.Point(523, 20);
+            this.m_oOptionsAmmoMgmtButton.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oOptionsAmmoMgmtButton.Name = "m_oOptionsAmmoMgmtButton";
+            this.m_oOptionsAmmoMgmtButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oOptionsAmmoMgmtButton.TabIndex = 6;
+            this.m_oOptionsAmmoMgmtButton.Text = "Ammo Mgmt";
+            this.m_oOptionsAmmoMgmtButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOptionsAllParaCOButton
+            // 
+            this.m_oOptionsAllParaCOButton.Location = new System.Drawing.Point(423, 20);
+            this.m_oOptionsAllParaCOButton.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oOptionsAllParaCOButton.Name = "m_oOptionsAllParaCOButton";
+            this.m_oOptionsAllParaCOButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oOptionsAllParaCOButton.TabIndex = 5;
+            this.m_oOptionsAllParaCOButton.Text = "All Para - CO";
+            this.m_oOptionsAllParaCOButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOptionsAllParaMSButton
+            // 
+            this.m_oOptionsAllParaMSButton.Location = new System.Drawing.Point(323, 20);
+            this.m_oOptionsAllParaMSButton.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oOptionsAllParaMSButton.Name = "m_oOptionsAllParaMSButton";
+            this.m_oOptionsAllParaMSButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oOptionsAllParaMSButton.TabIndex = 4;
+            this.m_oOptionsAllParaMSButton.Text = "All Para - MS";
+            this.m_oOptionsAllParaMSButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOptionsParaCOButton
+            // 
+            this.m_oOptionsParaCOButton.Location = new System.Drawing.Point(223, 20);
+            this.m_oOptionsParaCOButton.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oOptionsParaCOButton.Name = "m_oOptionsParaCOButton";
+            this.m_oOptionsParaCOButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oOptionsParaCOButton.TabIndex = 3;
+            this.m_oOptionsParaCOButton.Text = "Para - CO";
+            this.m_oOptionsParaCOButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOptionsParaMSButton
+            // 
+            this.m_oOptionsParaMSButton.Location = new System.Drawing.Point(123, 20);
+            this.m_oOptionsParaMSButton.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oOptionsParaMSButton.Name = "m_oOptionsParaMSButton";
+            this.m_oOptionsParaMSButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oOptionsParaMSButton.TabIndex = 2;
+            this.m_oOptionsParaMSButton.Text = "Para - MS";
+            this.m_oOptionsParaMSButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOptionsSelectShipButton
+            // 
+            this.m_oOptionsSelectShipButton.Location = new System.Drawing.Point(23, 20);
+            this.m_oOptionsSelectShipButton.Margin = new System.Windows.Forms.Padding(10, 3, 10, 3);
+            this.m_oOptionsSelectShipButton.Name = "m_oOptionsSelectShipButton";
+            this.m_oOptionsSelectShipButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oOptionsSelectShipButton.TabIndex = 1;
+            this.m_oOptionsSelectShipButton.Text = "Select Ship";
+            this.m_oOptionsSelectShipButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oFastReloadGroupBox
+            // 
+            this.m_oFastReloadGroupBox.Controls.Add(this.m_oStandardReloadButton);
+            this.m_oFastReloadGroupBox.Controls.Add(this.m_oMothershipReloadButton);
+            this.m_oFastReloadGroupBox.Controls.Add(this.m_oPopulationReloadButton);
+            this.m_oFastReloadGroupBox.Controls.Add(this.m_oCollierReloadButton);
+            this.m_oFastReloadGroupBox.Location = new System.Drawing.Point(10, 10);
+            this.m_oFastReloadGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oFastReloadGroupBox.Name = "m_oFastReloadGroupBox";
+            this.m_oFastReloadGroupBox.Size = new System.Drawing.Size(363, 63);
+            this.m_oFastReloadGroupBox.TabIndex = 0;
+            this.m_oFastReloadGroupBox.TabStop = false;
+            this.m_oFastReloadGroupBox.Text = "Fast Reloads";
+            // 
+            // m_oStandardReloadButton
+            // 
+            this.m_oStandardReloadButton.Enabled = false;
+            this.m_oStandardReloadButton.Location = new System.Drawing.Point(268, 20);
+            this.m_oStandardReloadButton.Name = "m_oStandardReloadButton";
+            this.m_oStandardReloadButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oStandardReloadButton.TabIndex = 3;
+            this.m_oStandardReloadButton.Text = "Standard";
+            this.m_oStandardReloadButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oMothershipReloadButton
+            // 
+            this.m_oMothershipReloadButton.Location = new System.Drawing.Point(182, 20);
+            this.m_oMothershipReloadButton.Name = "m_oMothershipReloadButton";
+            this.m_oMothershipReloadButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oMothershipReloadButton.TabIndex = 2;
+            this.m_oMothershipReloadButton.Text = "Mothership";
+            this.m_oMothershipReloadButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPopulationReloadButton
+            // 
+            this.m_oPopulationReloadButton.Location = new System.Drawing.Point(96, 20);
+            this.m_oPopulationReloadButton.Name = "m_oPopulationReloadButton";
+            this.m_oPopulationReloadButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oPopulationReloadButton.TabIndex = 1;
+            this.m_oPopulationReloadButton.Text = "Population";
+            this.m_oPopulationReloadButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCollierReloadButton
+            // 
+            this.m_oCollierReloadButton.Location = new System.Drawing.Point(10, 20);
+            this.m_oCollierReloadButton.Name = "m_oCollierReloadButton";
+            this.m_oCollierReloadButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oCollierReloadButton.TabIndex = 0;
+            this.m_oCollierReloadButton.Text = "Colliers";
+            this.m_oCollierReloadButton.UseVisualStyleBackColor = true;
             // 
             // m_oShipCommanderGroupBox
             // 
@@ -1238,6 +1612,138 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignedPopulationGroupBox.TabStop = false;
             this.m_oAssignedPopulationGroupBox.Text = "Assigned Population";
             // 
+            // m_oLaunchTubeListBox
+            // 
+            this.m_oLaunchTubeListBox.FormattingEnabled = true;
+            this.m_oLaunchTubeListBox.Location = new System.Drawing.Point(13, 26);
+            this.m_oLaunchTubeListBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oLaunchTubeListBox.Name = "m_oLaunchTubeListBox";
+            this.m_oLaunchTubeListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.m_oLaunchTubeListBox.Size = new System.Drawing.Size(360, 355);
+            this.m_oLaunchTubeListBox.TabIndex = 0;
+            // 
+            // m_oCurrentMagazineListBox
+            // 
+            this.m_oCurrentMagazineListBox.FormattingEnabled = true;
+            this.m_oCurrentMagazineListBox.Location = new System.Drawing.Point(13, 95);
+            this.m_oCurrentMagazineListBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oCurrentMagazineListBox.Name = "m_oCurrentMagazineListBox";
+            this.m_oCurrentMagazineListBox.Size = new System.Drawing.Size(286, 329);
+            this.m_oCurrentMagazineListBox.TabIndex = 0;
+            // 
+            // m_oTargetMagazineListBox
+            // 
+            this.m_oTargetMagazineListBox.FormattingEnabled = true;
+            this.m_oTargetMagazineListBox.Location = new System.Drawing.Point(308, 95);
+            this.m_oTargetMagazineListBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oTargetMagazineListBox.Name = "m_oTargetMagazineListBox";
+            this.m_oTargetMagazineListBox.Size = new System.Drawing.Size(286, 329);
+            this.m_oTargetMagazineListBox.TabIndex = 1;
+            // 
+            // m_oAssignTubeButton
+            // 
+            this.m_oAssignTubeButton.Location = new System.Drawing.Point(13, 401);
+            this.m_oAssignTubeButton.Margin = new System.Windows.Forms.Padding(3, 10, 3, 10);
+            this.m_oAssignTubeButton.Name = "m_oAssignTubeButton";
+            this.m_oAssignTubeButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oAssignTubeButton.TabIndex = 7;
+            this.m_oAssignTubeButton.Text = "Assign";
+            this.m_oAssignTubeButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAssignAllTubesButton
+            // 
+            this.m_oAssignAllTubesButton.Location = new System.Drawing.Point(99, 401);
+            this.m_oAssignAllTubesButton.Margin = new System.Windows.Forms.Padding(3, 10, 3, 10);
+            this.m_oAssignAllTubesButton.Name = "m_oAssignAllTubesButton";
+            this.m_oAssignAllTubesButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oAssignAllTubesButton.TabIndex = 8;
+            this.m_oAssignAllTubesButton.Text = "Assign All";
+            this.m_oAssignAllTubesButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oClearAllTubesButton
+            // 
+            this.m_oClearAllTubesButton.Location = new System.Drawing.Point(293, 401);
+            this.m_oClearAllTubesButton.Margin = new System.Windows.Forms.Padding(3, 10, 3, 10);
+            this.m_oClearAllTubesButton.Name = "m_oClearAllTubesButton";
+            this.m_oClearAllTubesButton.Size = new System.Drawing.Size(80, 23);
+            this.m_oClearAllTubesButton.TabIndex = 9;
+            this.m_oClearAllTubesButton.Text = "Clear All";
+            this.m_oClearAllTubesButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReloadOrdnanceCountGroupBox
+            // 
+            this.m_oReloadOrdnanceCountGroupBox.Controls.Add(this.m_oReload1000xRadioButton);
+            this.m_oReloadOrdnanceCountGroupBox.Controls.Add(this.m_oReload100xRadioButton);
+            this.m_oReloadOrdnanceCountGroupBox.Controls.Add(this.m_oReload10xRadioButton);
+            this.m_oReloadOrdnanceCountGroupBox.Controls.Add(this.m_oReload1xRadioButton);
+            this.m_oReloadOrdnanceCountGroupBox.Location = new System.Drawing.Point(13, 20);
+            this.m_oReloadOrdnanceCountGroupBox.Name = "m_oReloadOrdnanceCountGroupBox";
+            this.m_oReloadOrdnanceCountGroupBox.Size = new System.Drawing.Size(283, 54);
+            this.m_oReloadOrdnanceCountGroupBox.TabIndex = 2;
+            this.m_oReloadOrdnanceCountGroupBox.TabStop = false;
+            // 
+            // m_oSelectedReloadTargetTypeComboBox
+            // 
+            this.m_oSelectedReloadTargetTypeComboBox.FormattingEnabled = true;
+            this.m_oSelectedReloadTargetTypeComboBox.Location = new System.Drawing.Point(308, 26);
+            this.m_oSelectedReloadTargetTypeComboBox.Name = "m_oSelectedReloadTargetTypeComboBox";
+            this.m_oSelectedReloadTargetTypeComboBox.Size = new System.Drawing.Size(286, 21);
+            this.m_oSelectedReloadTargetTypeComboBox.TabIndex = 3;
+            // 
+            // m_oSelectedReloadShipComboBox
+            // 
+            this.m_oSelectedReloadShipComboBox.FormattingEnabled = true;
+            this.m_oSelectedReloadShipComboBox.Location = new System.Drawing.Point(308, 53);
+            this.m_oSelectedReloadShipComboBox.Name = "m_oSelectedReloadShipComboBox";
+            this.m_oSelectedReloadShipComboBox.Size = new System.Drawing.Size(286, 21);
+            this.m_oSelectedReloadShipComboBox.TabIndex = 4;
+            // 
+            // m_oReload1xRadioButton
+            // 
+            this.m_oReload1xRadioButton.AutoSize = true;
+            this.m_oReload1xRadioButton.Checked = true;
+            this.m_oReload1xRadioButton.Location = new System.Drawing.Point(35, 22);
+            this.m_oReload1xRadioButton.Name = "m_oReload1xRadioButton";
+            this.m_oReload1xRadioButton.Size = new System.Drawing.Size(36, 17);
+            this.m_oReload1xRadioButton.TabIndex = 0;
+            this.m_oReload1xRadioButton.TabStop = true;
+            this.m_oReload1xRadioButton.Text = "x1";
+            this.m_oReload1xRadioButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oReload1xRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReload10xRadioButton
+            // 
+            this.m_oReload10xRadioButton.AutoSize = true;
+            this.m_oReload10xRadioButton.Location = new System.Drawing.Point(82, 22);
+            this.m_oReload10xRadioButton.Name = "m_oReload10xRadioButton";
+            this.m_oReload10xRadioButton.Size = new System.Drawing.Size(42, 17);
+            this.m_oReload10xRadioButton.TabIndex = 1;
+            this.m_oReload10xRadioButton.Text = "x10";
+            this.m_oReload10xRadioButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oReload10xRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReload100xRadioButton
+            // 
+            this.m_oReload100xRadioButton.AutoSize = true;
+            this.m_oReload100xRadioButton.Location = new System.Drawing.Point(135, 22);
+            this.m_oReload100xRadioButton.Name = "m_oReload100xRadioButton";
+            this.m_oReload100xRadioButton.Size = new System.Drawing.Size(48, 17);
+            this.m_oReload100xRadioButton.TabIndex = 2;
+            this.m_oReload100xRadioButton.Text = "x100";
+            this.m_oReload100xRadioButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oReload100xRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReload1000xRadioButton
+            // 
+            this.m_oReload1000xRadioButton.AutoSize = true;
+            this.m_oReload1000xRadioButton.Location = new System.Drawing.Point(194, 22);
+            this.m_oReload1000xRadioButton.Name = "m_oReload1000xRadioButton";
+            this.m_oReload1000xRadioButton.Size = new System.Drawing.Size(54, 17);
+            this.m_oReload1000xRadioButton.TabIndex = 3;
+            this.m_oReload1000xRadioButton.Text = "x1000";
+            this.m_oReload1000xRadioButton.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oReload1000xRadioButton.UseVisualStyleBackColor = true;
+            // 
             // Individual_Unit_Details_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1286,8 +1792,15 @@ namespace Pulsar4X.UI.Panels
             this.m_oAssignWeaponsGroupBox.ResumeLayout(false);
             this.m_oCombatSummaryTab.ResumeLayout(false);
             this.m_oCombatSummaryGroupBox.ResumeLayout(false);
+            this.m_oOrdnanceManagementTab.ResumeLayout(false);
+            this.m_oAssignMissileGroupBox.ResumeLayout(false);
+            this.m_oMagContentsGroupBox.ResumeLayout(false);
+            this.m_oReloadOptionsGroupBox.ResumeLayout(false);
+            this.m_oFastReloadGroupBox.ResumeLayout(false);
             this.m_oShieldCrewGroupBox.ResumeLayout(false);
             this.m_oShieldCrewGroupBox.PerformLayout();
+            this.m_oReloadOrdnanceCountGroupBox.ResumeLayout(false);
+            this.m_oReloadOrdnanceCountGroupBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1377,5 +1890,32 @@ namespace Pulsar4X.UI.Panels
         private TextBox m_oMaxShieldTextBox;
         private Label m_oCurrentShieldLabel;
         private Label m_oMaxShieldLabel;
+        private GroupBox m_oAssignMissileGroupBox;
+        private GroupBox m_oMagContentsGroupBox;
+        private GroupBox m_oReloadOptionsGroupBox;
+        private Button m_oOptionsAmmoMgmtButton;
+        private Button m_oOptionsAllParaCOButton;
+        private Button m_oOptionsAllParaMSButton;
+        private Button m_oOptionsParaCOButton;
+        private Button m_oOptionsParaMSButton;
+        private Button m_oOptionsSelectShipButton;
+        private GroupBox m_oFastReloadGroupBox;
+        private Button m_oStandardReloadButton;
+        private Button m_oMothershipReloadButton;
+        private Button m_oPopulationReloadButton;
+        private Button m_oCollierReloadButton;
+        private ListBox m_oLaunchTubeListBox;
+        private ListBox m_oTargetMagazineListBox;
+        private ListBox m_oCurrentMagazineListBox;
+        private Button m_oClearAllTubesButton;
+        private Button m_oAssignAllTubesButton;
+        private Button m_oAssignTubeButton;
+        private ComboBox m_oSelectedReloadShipComboBox;
+        private ComboBox m_oSelectedReloadTargetTypeComboBox;
+        private GroupBox m_oReloadOrdnanceCountGroupBox;
+        private RadioButton m_oReload1000xRadioButton;
+        private RadioButton m_oReload100xRadioButton;
+        private RadioButton m_oReload10xRadioButton;
+        private RadioButton m_oReload1xRadioButton;
     }
 }

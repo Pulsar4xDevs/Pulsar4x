@@ -2083,6 +2083,7 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oArmorRatingTextBox.Location = new System.Drawing.Point(108, 15);
             this.m_oArmorRatingTextBox.Name = "m_oArmorRatingTextBox";
+            this.m_oArmorRatingTextBox.ReadOnly = true;
             this.m_oArmorRatingTextBox.Size = new System.Drawing.Size(52, 20);
             this.m_oArmorRatingTextBox.TabIndex = 37;
             this.m_oArmorRatingTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;

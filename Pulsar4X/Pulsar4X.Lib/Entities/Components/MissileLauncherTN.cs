@@ -220,16 +220,10 @@ namespace Pulsar4X.Entities.Components
         public void AssignMFC(MissileFireControlTN mFCtrl)
         {
             MFC = mFCtrl;
-
-            if (MFC.linkedWeapons.Contains(this) == false)
-                MFC.assignLaunchTube(this);
         }
 
         public void ClearMFC()
         {
-            if (MFC.linkedWeapons.Contains(this) == true)
-               MFC.removeLaunchTube(this);
-
             MFC = null;
         }
 

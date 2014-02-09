@@ -414,29 +414,29 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oCloseButton
             // 
-            this.m_oCloseButton.Location = new System.Drawing.Point(499, 725);
+            this.m_oCloseButton.Location = new System.Drawing.Point(495, 725);
             this.m_oCloseButton.Name = "m_oCloseButton";
-            this.m_oCloseButton.Size = new System.Drawing.Size(75, 29);
+            this.m_oCloseButton.Size = new System.Drawing.Size(85, 29);
             this.m_oCloseButton.TabIndex = 4;
             this.m_oCloseButton.Text = "Close";
             this.m_oCloseButton.UseVisualStyleBackColor = true;
             // 
             // m_oMissileDesButton
             // 
-            this.m_oMissileDesButton.Location = new System.Drawing.Point(418, 725);
+            this.m_oMissileDesButton.Location = new System.Drawing.Point(404, 725);
             this.m_oMissileDesButton.Name = "m_oMissileDesButton";
-            this.m_oMissileDesButton.Size = new System.Drawing.Size(75, 29);
+            this.m_oMissileDesButton.Size = new System.Drawing.Size(85, 29);
             this.m_oMissileDesButton.TabIndex = 5;
-            this.m_oMissileDesButton.Text = "Missile";
+            this.m_oMissileDesButton.Text = "Missile Design";
             this.m_oMissileDesButton.UseVisualStyleBackColor = true;
             // 
             // m_oTurretDesButton
             // 
-            this.m_oTurretDesButton.Location = new System.Drawing.Point(337, 725);
+            this.m_oTurretDesButton.Location = new System.Drawing.Point(313, 725);
             this.m_oTurretDesButton.Name = "m_oTurretDesButton";
-            this.m_oTurretDesButton.Size = new System.Drawing.Size(75, 29);
+            this.m_oTurretDesButton.Size = new System.Drawing.Size(85, 29);
             this.m_oTurretDesButton.TabIndex = 6;
-            this.m_oTurretDesButton.Text = "Turret";
+            this.m_oTurretDesButton.Text = "Turret Design";
             this.m_oTurretDesButton.UseVisualStyleBackColor = true;
             // 
             // m_oSizeTonsCheckBox

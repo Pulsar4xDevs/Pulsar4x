@@ -183,6 +183,14 @@ namespace Pulsar4X.UI.Handlers
             m_oDetailsPanel.AssignWeaponButton.Click += new EventHandler(AssignWeaponButton_Click);
             m_oDetailsPanel.AssignAllWeaponsButton.Click += new EventHandler(AssignAllWeaponsButton_Click);
             m_oDetailsPanel.ClearWeaponsButton.Click += new EventHandler(ClearWeaponsButton_Click);
+
+            /// <summary>
+            /// Ordnance Tab:
+            /// </summary>
+            m_oDetailsPanel.StandardReloadButton.Click += new EventHandler(StandardReloadButton_Click);
+            m_oDetailsPanel.AssignTubeButton.Click += new EventHandler(AssignTubeButton_Click);
+            m_oDetailsPanel.AssignAllTubesButton.Click += new EventHandler(AssignAllTubesButton_Click);
+            m_oDetailsPanel.ClearAllTubesButton.Click += new EventHandler(ClearAllTubesButton_Click);
         }
 
 
@@ -239,14 +247,20 @@ namespace Pulsar4X.UI.Handlers
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
+        /// <summary>
+        /// not fully implemented.
+        /// </summary>
         public void SMOn()
         {
-            // todo
+            m_oDetailsPanel.StandardReloadButton.Enabled = true;
         }
 
+        /// <summary>
+        /// not fully implemented.
+        /// </summary>
         public void SMOff()
         {
-            // todo
+            m_oDetailsPanel.StandardReloadButton.Enabled = false;
         }
 
         #endregion
@@ -386,6 +400,7 @@ namespace Pulsar4X.UI.Handlers
                     _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].openFire = true;
                 }
                 BuildCombatSummary();
+                RefreshFCInfo();
             }
         }
 
@@ -413,6 +428,7 @@ namespace Pulsar4X.UI.Handlers
                     _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].openFire = false;
                 }
                 BuildCombatSummary();
+                RefreshFCInfo();
             }
         }
 
@@ -586,6 +602,7 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
             BuildCombatSummary();
+            RefreshFCInfo();
         }
 
         /// <summary>
@@ -611,19 +628,24 @@ namespace Pulsar4X.UI.Handlers
                 }
                 else
                 {
-                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].clearTarget();
 
-                    if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().targetType == StarSystemEntityType.TaskGroup)
+                    if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget() != null)
                     {
-                        ShipTN vessel = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().ship;
-                        if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
+                        if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().targetType == StarSystemEntityType.TaskGroup)
                         {
-                            vessel.ShipsTargetting.Remove(_CurrnetShip);
+                            ShipTN vessel = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().ship;
+                            if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
+                            {
+                                vessel.ShipsTargetting.Remove(_CurrnetShip);
+                            }
                         }
+
+                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].clearTarget();
                     }
                 }
             }
             BuildCombatSummary();
+            RefreshFCInfo();
         }
 
         /// <summary>
@@ -637,29 +659,36 @@ namespace Pulsar4X.UI.Handlers
             {
                 if (isBFC == true)
                 {
-                    BeamTN SelectedBeam = _CurrnetShip.ShipBeam[m_oDetailsPanel.WeaponListBox.SelectedIndex];
-                    if (SelectedBeam.fireController != null)
+                    foreach (int Index in m_oDetailsPanel.WeaponListBox.SelectedIndices)
                     {
-                        BeamFireControlTN BFC = SelectedBeam.fireController;
-                        BFC.unlinkWeapon(SelectedBeam);
+                        BeamTN SelectedBeam = _CurrnetShip.ShipBeam[Index];
+                        if (SelectedBeam.fireController != null)
+                        {
+                            BeamFireControlTN BFC = SelectedBeam.fireController;
+                            BFC.unlinkWeapon(SelectedBeam);
+                        }
+                        _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedBeam);
                     }
-                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedBeam);
                 }
                 else
                 {
-                    MissileLauncherTN SelectedTube = _CurrnetShip.ShipMLaunchers[m_oDetailsPanel.WeaponListBox.SelectedIndex];
-
-                    if (SelectedTube.mFC != null)
+                    foreach (int Index in m_oDetailsPanel.WeaponListBox.SelectedIndices)
                     {
-                        MissileFireControlTN MFC = SelectedTube.mFC;
+                        MissileLauncherTN SelectedTube = _CurrnetShip.ShipMLaunchers[Index]; 
 
-                        MFC.removeLaunchTube(SelectedTube);
+                        if (SelectedTube.mFC != null)
+                        {
+                            MissileFireControlTN MFC = SelectedTube.mFC;
+
+                            MFC.removeLaunchTube(SelectedTube);
+                        }
+
+                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignLaunchTube(SelectedTube);
                     }
-
-                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignLaunchTube(SelectedTube);
                 }
             }
             BuildCombatSummary();
+            RefreshFCInfo();
         }
 
         /// <summary>
@@ -702,6 +731,7 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
             BuildCombatSummary();
+            RefreshFCInfo();
         }
 
         /// <summary>
@@ -721,6 +751,7 @@ namespace Pulsar4X.UI.Handlers
             }
 
             BuildCombatSummary();
+            RefreshFCInfo();
         }
 
         /// <summary>
@@ -966,7 +997,7 @@ namespace Pulsar4X.UI.Handlers
                     }
                     else
                     {
-                        if (_CurrnetShip.ShipBFC[loop].openFire == true)
+                        if (_CurrnetShip.ShipMFC[loop].openFire == true)
                             fireAuth = "Weapons Firing";
                         else
                             fireAuth = "Holding Fire";
@@ -977,27 +1008,27 @@ namespace Pulsar4X.UI.Handlers
                                 Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.ship.Name, fireAuth);
                                 break;
                         }
+                    }
+
+                    m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+
+                    for (int loop2 = 0; loop2 < _CurrnetShip.ShipMFC[loop].linkedWeapons.Count; loop2++)
+                    {
+                        Entry = String.Format("{0}", _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].Name);
+                        if (_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance != null)
+                        {
+                            Entry = String.Format("{0} - {1}:", Entry, _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name);
+                        }
+                        if (_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].ReadyToFire() == true)
+                        {
+                            Entry = String.Format("{0} (Ready to Fire)\n",Entry);
+                        }
+                        else
+                        {
+                            Entry = String.Format("{0} ({2} secs to reload)\n", Entry,_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
+                        }
 
                         m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
-
-                        for (int loop2 = 0; loop2 < _CurrnetShip.ShipMFC[loop].linkedWeapons.Count; loop2++)
-                        {
-                            if (_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].ReadyToFire() == true)
-                            {
-                                Entry = String.Format("{0} - {1}: (Ready to Fire)\n", _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].Name,
-                                                                                      _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name);
-
-                                m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
-                            }
-                            else
-                            {
-                                Entry = String.Format("{0} - {1}: ({2} secs to reload)\n", _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].Name,
-                                                                                      _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name,
-                                                                                      _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
-
-                                m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
-                            }
-                        }
                     }
                     m_oDetailsPanel.CombatSummaryTextBox.AppendText("\n");
                 }
@@ -1051,6 +1082,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildWeaponList()
         {
+            String Entry = "N/A";
             m_oDetailsPanel.WeaponListBox.Items.Clear();
 
             if (_CurrnetShip != null && _CurrnetFC != null)
@@ -1060,14 +1092,20 @@ namespace Pulsar4X.UI.Handlers
                 {
                     for (int loop = 0; loop < _CurrnetShip.ShipBeam.Count; loop++)
                     {
-                        m_oDetailsPanel.WeaponListBox.Items.Add(_CurrnetShip.ShipBeam[loop].Name);
+                        Entry = String.Format("{0}", _CurrnetShip.ShipBeam[loop].Name);
+                        if (_CurrnetShip.ShipBeam[loop].fireController != null)
+                            Entry = String.Format("{0} - {1}", Entry, _CurrnetShip.ShipBeam[loop].fireController.Name);
+                        m_oDetailsPanel.WeaponListBox.Items.Add(Entry);
                     }
                 }
                 else
                 {
                     for (int loop = 0; loop < _CurrnetShip.ShipMLaunchers.Count; loop++)
                     {
-                        m_oDetailsPanel.WeaponListBox.Items.Add(_CurrnetShip.ShipMLaunchers[loop].Name);
+                        Entry = String.Format("{0}", _CurrnetShip.ShipMLaunchers[loop].Name);
+                        if (_CurrnetShip.ShipMLaunchers[loop].mFC != null)
+                            Entry = String.Format("{0} - {1}", Entry, _CurrnetShip.ShipMLaunchers[loop].mFC.Name);
+                        m_oDetailsPanel.WeaponListBox.Items.Add(Entry);
                     }
                 }
             }
@@ -1259,6 +1297,11 @@ namespace Pulsar4X.UI.Handlers
             TEMPBuildMessageLog();
 
             RefreshFCInfo();
+
+            /// <summary>
+            /// Ordnance Tab:
+            /// </summary>
+            BuildOrdnanceManagementTab();
         }
 
         /// <summary>
@@ -1274,6 +1317,165 @@ namespace Pulsar4X.UI.Handlers
             BuildPDComboBox();
             BuildContactsList();
         }
+
+        #region Ordnance Management
+
+        /// <summary>
+        /// Handle button clicks and such
+        /// </summary>
+
+        /// <summary>
+        /// Provide SM reload of current ship
+        /// </summary>
+        private void StandardReloadButton_Click(object sender, EventArgs e)
+        {
+           if (_CurrnetShip.ShipClass.ShipClassOrdnance.Count != 0)
+           {
+                _CurrnetShip.ShipOrdnance.Clear();
+                foreach (KeyValuePair<OrdnanceDefTN, int> pair in _CurrnetShip.ShipClass.ShipClassOrdnance)
+                {
+                    _CurrnetShip.ShipOrdnance.Add(pair.Key, pair.Value);
+                }
+
+                _CurrnetShip.CurrentMagazineCapacity = _CurrnetShip.ShipClass.PreferredOrdnanceSize;
+
+                BuildOrdnanceManagementTab();
+            }     
+        }
+
+        /// <summary>
+        /// Assign Selected ordnance to selected launch tubes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AssignTubeButton_Click(object sender, EventArgs e)
+        {
+            if (m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex != -1 && m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex < (m_oDetailsPanel.CurrentMagazineListBox.Items.Count - 1))
+            {
+                int count = 0;
+                OrdnanceDefTN SelectedOrdnance = null;
+                foreach(KeyValuePair<OrdnanceDefTN,int> pair in _CurrnetShip.ShipOrdnance)
+                {
+                    if(count == m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex)
+                    {
+                        SelectedOrdnance = pair.Key;
+                        break;
+                    }
+                    count++;
+                }
+                foreach (int Index in m_oDetailsPanel.LaunchTubeListBox.SelectedIndices)
+                {
+                    if (_CurrnetShip.ShipMLaunchers[Index].missileLauncherDef.launchMaxSize >= (int)Math.Ceiling(SelectedOrdnance.size))
+                        _CurrnetShip.ShipMLaunchers[Index].loadedOrdnance = SelectedOrdnance;
+                }
+
+                BuildOrdnanceManagementTab();
+                BuildCombatSummary();
+            }
+        }
+
+        /// <summary>
+        /// Assign Selected ordnance to all launch tubes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AssignAllTubesButton_Click(object sender, EventArgs e)
+        {
+            if (m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex != -1 && m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex < (m_oDetailsPanel.CurrentMagazineListBox.Items.Count - 1))
+            {
+                int count = 0;
+                OrdnanceDefTN SelectedOrdnance = null;
+                foreach (KeyValuePair<OrdnanceDefTN, int> pair in _CurrnetShip.ShipOrdnance)
+                {
+                    if (count == m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex)
+                    {
+                        SelectedOrdnance = pair.Key;
+                        break;
+                    }
+                    count++;
+                }
+                for(int loop = 0; loop < _CurrnetShip.ShipMLaunchers.Count; loop++)
+                {
+                    if(_CurrnetShip.ShipMLaunchers[loop].missileLauncherDef.launchMaxSize >= (int)Math.Ceiling(SelectedOrdnance.size))
+                        _CurrnetShip.ShipMLaunchers[loop].loadedOrdnance = SelectedOrdnance;
+                }
+
+                BuildOrdnanceManagementTab();
+                BuildCombatSummary();
+            }
+        }
+
+        /// <summary>
+        /// Clears all launch tubes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearAllTubesButton_Click(object sender, EventArgs e)
+        {
+            for (int loop = 0; loop < _CurrnetShip.ShipMLaunchers.Count; loop++)
+            {
+                _CurrnetShip.ShipMLaunchers[loop].loadedOrdnance = null;
+            }
+
+            BuildOrdnanceManagementTab();
+            BuildCombatSummary();
+        }
+            
+        /// <summary>
+        /// Build the Ordnance Tab
+        /// </summary>
+        private void BuildOrdnanceManagementTab()
+        {
+            BuildCurrentMagazine();
+            BuildTargetMagazine();
+            BuildLaunchTubeList();
+        }
+
+        /// <summary>
+        /// Prints out the contents of the current ship magazine.
+        /// </summary>
+        private void BuildCurrentMagazine()
+        {
+            String Entry = "N/A";
+            m_oDetailsPanel.CurrentMagazineListBox.Items.Clear();
+            foreach (KeyValuePair<OrdnanceDefTN, int> pair in _CurrnetShip.ShipOrdnance)
+            {
+                Entry = String.Format("{0}x {1}", pair.Value, pair.Key.Name);
+                m_oDetailsPanel.CurrentMagazineListBox.Items.Add(Entry);
+            }
+
+            Entry = String.Format("Mg Capacity Used: {0}/{1}", _CurrnetShip.CurrentMagazineCapacity, _CurrnetShip.CurrentMagazineCapacityMax);
+            m_oDetailsPanel.CurrentMagazineListBox.Items.Add(Entry);
+        }
+
+        /// <summary>
+        /// Not Yet Implemented
+        /// </summary>
+        private void BuildTargetMagazine()
+        {
+
+        }
+
+        /// <summary>
+        /// Prints out all launch tubes and their selected ordnance loads.
+        /// </summary>
+        private void BuildLaunchTubeList()
+        {
+            String Entry = "N/A";
+            m_oDetailsPanel.LaunchTubeListBox.Items.Clear();
+            foreach (MissileLauncherTN Tube in _CurrnetShip.ShipMLaunchers)
+            {
+                Entry = String.Format("{0}", Tube.Name);
+
+                if (Tube.loadedOrdnance != null)
+                {
+                    Entry = String.Format("{0} - {1}", Entry, Tube.loadedOrdnance.Name);
+                }
+
+                m_oDetailsPanel.LaunchTubeListBox.Items.Add(Entry);
+            }
+        }
+        #endregion
         #endregion
     }
 }

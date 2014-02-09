@@ -277,9 +277,9 @@ namespace Pulsar4X.UI.Handlers
             /// Ordnance and fighter tab:
             /// </summary>
             m_oOptionsPanel.OF1xRadioButton.CheckedChanged += new EventHandler(MslAMTRadioButton_CheckedChanged);
-            m_oOptionsPanel.OF10xRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
-            m_oOptionsPanel.OF100xRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
-            m_oOptionsPanel.OF1000xRadioButton.CheckedChanged += new EventHandler(AMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.OF10xRadioButton.CheckedChanged += new EventHandler(MslAMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.OF100xRadioButton.CheckedChanged += new EventHandler(MslAMTRadioButton_CheckedChanged);
+            m_oOptionsPanel.OF1000xRadioButton.CheckedChanged += new EventHandler(MslAMTRadioButton_CheckedChanged);
             m_oOptionsPanel.MissileDataGrid.DoubleClick += new EventHandler(MissileDataGrid_DoubleClick);
             m_oOptionsPanel.PreferredOrdnanceListBox.DoubleClick += new EventHandler(PreferredOrdnanceListBox_DoubleClick);
             m_oOptionsPanel.MslObsButton.Click += new EventHandler(MslObsButton_Click);

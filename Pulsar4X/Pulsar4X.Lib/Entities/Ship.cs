@@ -2429,7 +2429,7 @@ namespace Pulsar4X.Entities
                 if (pop.MissileStockpile.ContainsKey(Series.missilesInSeries[loop]))
                 {
                     int SpaceAvailable = CurrentMagazineCapacityMax - CurrentMagazineCapacity;
-                    int MissileReq = (int)((float)(SCValue - SOValue) * Series.missilesInSeries[loop].size);
+                    int MissileReq = ((SCValue - SOValue) * (int)Math.Ceiling(Series.missilesInSeries[loop].size));
 
 
                     if (MissileReq <= SpaceAvailable)
