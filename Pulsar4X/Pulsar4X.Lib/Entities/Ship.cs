@@ -5,7 +5,8 @@ using System.Text;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
-
+using log4net.Config;
+using log4net;
 
 
 namespace Pulsar4X.Entities
@@ -22,6 +23,11 @@ namespace Pulsar4X.Entities
             SolidState,
             Count
         }
+
+        /// <summary>
+        /// The logger for this class
+        /// </summary>
+        public static readonly ILog logger = LogManager.GetLogger(typeof(ShipTN));
 
 
         /// <summary>
@@ -373,6 +379,16 @@ namespace Pulsar4X.Entities
         /// Current Max ordnance carrying capacity of this Ship.
         /// </summary>
         public int CurrentMagazineCapacityMax { get; set; }
+
+        /// <summary>
+        /// Breakdown of current magazine capacity due to launch tubes
+        /// </summary>
+        public int CurrentLauncherMagCapacityMax { get; set; }
+
+        /// <summary>
+        /// All current magazine capacity due to magazines.
+        /// </summary>
+        public int CurrentMagazineMagCapacityMax { get; set; }
         #endregion
 
 
@@ -797,6 +813,8 @@ namespace Pulsar4X.Entities
 
             CurrentMagazineCapacity = 0;
             CurrentMagazineCapacityMax = ClassDefinition.TotalMagazineCapacity;
+            CurrentLauncherMagCapacityMax = ClassDefinition.LauncherMagSpace;
+            CurrentMagazineMagCapacityMax = ClassDefinition.MagazineMagSpace;
 
             IsDestroyed = false;
 
@@ -1403,7 +1421,7 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// This is an error condition obviously.
                                 /// </summary>
-                                Console.WriteLine("Unidentified electronic component in onDamaged().");
+                                logger.Debug("Unidentified electronic component in onDamaged().");
                             }
                             else
                             {
@@ -1624,6 +1642,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// *** Do secondary damage here. ***
                         /// </summary>
+                        /// SecondaryExplosion(SecondaryType.Engine,ShipEngine[0].engineDef.enginePower);
                     }
                 break;
 
@@ -1756,6 +1775,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// *** Do secondary damage here. ***
                         /// </summary>
+                        /// SecondaryExplosion(SecondaryType.Reactor,ShipReactor[ShipComponents[ID].componentIndex].reactorDef.powerGen);
                     }
                 break;
 
@@ -1795,21 +1815,165 @@ namespace Pulsar4X.Entities
                 break;
 
                 case ComponentTypeTN.MissileLauncher:
-                    ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance = null;
+
+                    /// <summary>
+                    /// If the ship has loaded ordnance then figuring out which one to destroy is simple:
+                    /// </summary>
+                    if (ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance != null)
+                    {
+                        if (ShipOrdnance.ContainsKey(ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance) == true)
+                        {
+
+                            ShipOrdnance[ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance] = ShipOrdnance[ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance] - 1;
+
+                            if (ShipOrdnance[ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance] == 0)
+                            {
+                                ShipOrdnance.Remove(ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance);
+                            }
+                            else if (ShipOrdnance[ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance] < 0)
+                            {
+                                String Entry = String.Format("Ship ordnance subtraction below 0 on ship {0} due to launcher destruction.", this.Name);
+                                logger.Debug(Entry);
+                            }
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// This condition could arise because all such missiles have been fired. Check the total ship ordnance vs magazine capacity to decide if another missile should be destroyed.
+                            /// </summary>
+                            
+                            if(CurrentMagazineCapacity > CurrentMagazineMagCapacityMax)
+                            {
+                                foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipOrdnance)
+                                {
+                                    if (ShipOrdnance[pair.Key] > 0)
+                                    {
+                                        ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - 1;
+
+                                        if (ShipOrdnance[pair.Key] == 0)
+                                        {
+                                            ShipOrdnance.Remove(pair.Key);
+                                        }
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        String Entry = String.Format("Ship {0} has ship ordnance in quantities of zero from somewhere.",this.Name);
+                                        logger.Debug(Entry);
+                                    }
+                                }
+                            }
+                        }
+
+                        ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance = null;
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// This condition could arise because all such missiles have been fired. Check the total ship ordnance vs magazine capacity to decide if another missile should be destroyed.
+                        /// This else is included twice due to paranoia over the possibility that loadedOrdnance = null
+                        /// </summary>
+
+                        if (CurrentMagazineCapacity > CurrentMagazineMagCapacityMax)
+                        {
+                            foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipOrdnance)
+                            {
+                                if (ShipOrdnance[pair.Key] > 0)
+                                {
+                                    ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - 1;
+
+                                    if (ShipOrdnance[pair.Key] == 0)
+                                    {
+                                        ShipOrdnance.Remove(pair.Key);
+                                    }
+                                    break;
+                                }
+                                else
+                                {
+                                    String Entry = String.Format("Ship {0} has ship ordnance in quantities of zero from somewhere.", this.Name);
+                                    logger.Debug(Entry);
+                                }
+                            }
+                        }
+                    }
+                    
+                    CurrentLauncherMagCapacityMax = CurrentLauncherMagCapacityMax - ShipMLaunchers[ShipComponents[ID].componentIndex].missileLauncherDef.launchMaxSize;
+                    CurrentMagazineCapacityMax = CurrentMagazineCapacityMax - ShipMLaunchers[ShipComponents[ID].componentIndex].missileLauncherDef.launchMaxSize;
+                    CurrentMagazineCapacity = CurrentMagazineCapacity - (int)Math.Ceiling(ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance.size);
                     ShipMLaunchers[ShipComponents[ID].componentIndex].ClearMFC();
                 break;
 
                 case ComponentTypeTN.Magazine:
                     /// <summary>
-                    /// Get rid of the missiles in this magazine, both on the ship and in the mag itself.
+                    /// There must be missiles in the magazines rather than all of them being in the launch tubes, or the mags could be totally empty
                     /// </summary>
-                    foreach (KeyValuePair<OrdnanceDefTN, int> missile in ShipMagazines[ShipComponents[ID].componentIndex].magOrdnance)
+                    int WarheadTotal = 0;
+                    if (CurrentMagazineCapacity > CurrentLauncherMagCapacityMax)
                     {
-                        ShipOrdnance[missile.Key] = ShipOrdnance[missile.Key] - missile.Value;
+                        /// <summary>
+                        /// Total percentage of all magazine space divided by all space total on the ship for missiles(includes launch tubes).
+                        /// </summary>
+                        float MagPercentage = (CurrentMagazineMagCapacityMax / CurrentMagazineCapacityMax);
+
+                        /// <summary>
+                        /// Percentage of total magazine space this one magazine represents.
+                        /// </summary>
+                        float ThisMagPercentage = (ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity / CurrentMagazineMagCapacityMax) * MagPercentage;
+
+                        /// <summary>
+                        /// Counter for missiles destroyed.
+                        /// </summary>
+                        int TempCapTotal = 0;
+
+
+
+                        /// <summary>
+                        /// Temporary key list, will be removing these from shipordnance when done.
+                        /// </summary>
+                        BindingList<OrdnanceDefTN> TempKeyList = new BindingList<OrdnanceDefTN>();
+
+                        /// <summary>
+                        /// loop through all ordnance and determine the loadbalanced count of missiles that would be in this magazine.
+                        /// </summary>
+                        foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipOrdnance)
+                        {
+                            int Total = (int)Math.Ceiling(pair.Key.size) * pair.Value;
+                            int AmtInThisMag = (int)Math.Ceiling(ThisMagPercentage * Total);
+                            TempCapTotal = TempCapTotal + AmtInThisMag;
+                            ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - AmtInThisMag;
+                            WarheadTotal = WarheadTotal + pair.Key.warhead;
+
+                            if (ShipOrdnance[pair.Key] == 0)
+                            {
+                                TempKeyList.Add(pair.Key);
+                            }
+                            else if (ShipOrdnance[pair.Key] < 0)
+                            {
+                                TempKeyList.Add(pair.Key);
+                                logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction."); 
+                            }
+
+                            /// <summary>
+                            /// Some mags will have a little more than total cap, and some will have a little less than total cap because of how this could work out.
+                            /// </summary>
+                            if (TempCapTotal >= ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity)
+                                break;
+                        }
+
+                        /// <summary>
+                        /// Remove any keys that are empty.
+                        /// </summary>
+                        if (TempKeyList.Count != 0)
+                        {
+                            foreach (OrdnanceDefTN key in TempKeyList)
+                            {
+                                ShipOrdnance.Remove(key);
+                            }
+                        }
                     }
-                    ShipMagazines[ShipComponents[ID].componentIndex].ClearMagazine();
                     
                     CurrentMagazineCapacityMax = CurrentMagazineCapacityMax - ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity;
+                    CurrentMagazineMagCapacityMax = CurrentMagazineMagCapacityMax - ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity;
 
                     ExpTest = DacRNG.Next(1, 100);
 
@@ -1818,6 +1982,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// *** Do secondary damage here. ***
                         /// </summary>
+                        /// SecondaryExplosion(SecondaryType.Magazine,WarheadTotal);
                     }       
                 break;
 
@@ -1892,7 +2057,7 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         CurrentMaxSpeed = 1;
                         CurrentMaxThermalSignature = 1;
-                        Console.WriteLine("CurrentMaxEnginePower was 0 AFTER engine repair. oops. see Ship.cs RepairComponent()");
+                        logger.Debug("CurrentMaxEnginePower was 0 AFTER engine repair. oops. see Ship.cs RepairComponent()");
                     }
                     else
                         CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
@@ -2010,9 +2175,12 @@ namespace Pulsar4X.Entities
                 break;
 
                 case ComponentTypeTN.MissileLauncher:
+                    CurrentLauncherMagCapacityMax = CurrentLauncherMagCapacityMax + ShipMLaunchers[ShipComponents[ComponentIndex].componentIndex].missileLauncherDef.launchMaxSize;
+                    CurrentMagazineCapacityMax = CurrentMagazineCapacityMax + ShipMLaunchers[ShipComponents[ComponentIndex].componentIndex].missileLauncherDef.launchMaxSize;
                 break;
 
                 case ComponentTypeTN.Magazine:
+                    CurrentMagazineMagCapacityMax = CurrentMagazineMagCapacityMax + ShipMagazines[ShipComponents[ComponentIndex].componentIndex].magazineDef.capacity;
                     CurrentMagazineCapacityMax = CurrentMagazineCapacityMax + ShipMagazines[ShipComponents[ComponentIndex].componentIndex].magazineDef.capacity;
                 break;
 
@@ -2436,46 +2604,33 @@ namespace Pulsar4X.Entities
                     {
                         /// <summary>
                         /// Unload missiles from Stockpile. MissilesAvailable will be less than or equal to MissileReq.
+                        /// MissilesAvailable is the number of missiles.
+                        /// AvailableSizeTotal is the total size of the available missiles.
+                        /// missileSpaceReq is the number of missiles that will fit in the remaining space available.
                         /// </summary>
                         int MissilesAvailable = pop.LoadMissileToStockpile(Series.missilesInSeries[loop], (MissileReq * -1));
+                        int missileSpaceReq = (int)Math.Floor((double)SpaceAvailable / Math.Ceiling(Series.missilesInSeries[loop].size));
+                        int load = 0;
+                        if (missileSpaceReq >= MissilesAvailable)
+                            load = MissilesAvailable;
+                        else
+                            load = missileSpaceReq;
 
                         /// <summary>
-                        /// Now load them to the appropriate magazine and shipOrdnance.
+                        /// Now load them to shipOrdnance.
                         /// </summary>
-
-                        for (int loop2 = 0; loop2 < ShipMagazines.Count; loop2++)
+                        if (ShipOrdnance.ContainsKey(Series.missilesInSeries[loop]) == true)
                         {
-                            if ((ShipMagazines[loop2].curCapacity < ShipMagazines[loop2].magazineDef.capacity) && ShipMagazines[loop2].isDestroyed == false)
-                            {
-                                int SpaceInMag = ShipMagazines[loop2].magazineDef.capacity - ShipMagazines[loop2].curCapacity;
-
-                                int missileSpaceReq = (int)Math.Floor(SpaceInMag / Series.missilesInSeries[loop].size);
-
-                                int load = 0;
-                                if (missileSpaceReq >= MissilesAvailable)
-                                {
-                                    load = MissilesAvailable;
-                                }
-                                else
-                                {
-                                    load = missileSpaceReq;
-                                }
-
-                                int loadedToMagazine = ShipMagazines[loop2].LoadMagazine(Series.missilesInSeries[loop], load);
-
-                                if (ShipOrdnance.ContainsKey(Series.missilesInSeries[loop]) == true)
-                                {
-                                    ShipOrdnance[Series.missilesInSeries[loop]] = ShipOrdnance[Series.missilesInSeries[loop]] + loadedToMagazine;
-                                }
-                                else
-                                {
-                                    ShipOrdnance.Add(Series.missilesInSeries[loop], loadedToMagazine);
-                                }
-                                CurrentMagazineCapacity = CurrentMagazineCapacity + loadedToMagazine;
-
-                                MissilesAvailable = MissilesAvailable - loadedToMagazine;
-                            }
+                            ShipOrdnance[Series.missilesInSeries[loop]] = ShipOrdnance[Series.missilesInSeries[loop]] + load;
                         }
+                        else
+                        {
+                            ShipOrdnance.Add(Series.missilesInSeries[loop], load);
+                        }
+
+                        CurrentMagazineCapacity = CurrentMagazineCapacity + load;
+
+                        MissilesAvailable = MissilesAvailable - load;
 
                         if (MissilesAvailable > 0)
                         {
@@ -2502,11 +2657,6 @@ namespace Pulsar4X.Entities
             }
 
             ShipOrdnance.Clear();
-
-            for (int loop = 0; loop < ShipMagazines.Count; loop++)
-            {
-                ShipMagazines[loop].ClearMagazine();
-            }
         }
 
         #endregion

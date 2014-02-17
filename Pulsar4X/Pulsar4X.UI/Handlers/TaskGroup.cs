@@ -733,9 +733,19 @@ namespace Pulsar4X.UI.Handlers
                 {
                     Ammo = "N/A";
                 }
-                else
+                else if (m_oCurrnetTaskGroup.Ships[row].ShipClass.ShipMagazineDef.Count != 0)
                 {
                     float AmmoPercent = (m_oCurrnetTaskGroup.Ships[row].CurrentMagazineCapacity / m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity) * 100.0f;
+                    Ammo = AmmoPercent.ToString();
+                }
+                else
+                {
+                    int missileCount = 0;
+                    foreach (KeyValuePair<Pulsar4X.Entities.Components.OrdnanceDefTN, int> pair in m_oCurrnetTaskGroup.Ships[row].ShipOrdnance)
+                    {
+                        missileCount = missileCount + pair.Value;
+                    }
+                    float AmmoPercent = missileCount / m_oCurrnetTaskGroup.Ships[row].ShipClass.LauncherCount;
                     Ammo = AmmoPercent.ToString();
                 }
                 m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Ammo].Value = Ammo;

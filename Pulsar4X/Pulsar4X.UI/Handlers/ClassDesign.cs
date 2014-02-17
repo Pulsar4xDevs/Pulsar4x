@@ -1146,7 +1146,7 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.ArmorRatingTextBox.Text = CurrentShipClass.ShipArmorDef.depth.ToString();
 
             if(m_oOptionsPanel.SizeInTonsCheckBox.Checked == true)
-               m_oOptionsPanel.ExactClassSizeTextBox.Text = CurrentShipClass.SizeTons.ToString();
+               m_oOptionsPanel.ExactClassSizeTextBox.Text = Math.Round(CurrentShipClass.SizeTons).ToString();
             else
                m_oOptionsPanel.ExactClassSizeTextBox.Text = CurrentShipClass.SizeHS.ToString();
 

@@ -170,24 +170,6 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Missiles stored by this magazine.
-        /// </summary>
-        private Dictionary<OrdnanceDefTN, int> MagOrdnance;
-        public Dictionary<OrdnanceDefTN, int> magOrdnance
-        {
-            get { return MagOrdnance; }
-        }
-
-        /// <summary>
-        /// Current missiles stored.
-        /// </summary>
-        private int CurCapacity;
-        public int curCapacity
-        {
-            get { return CurCapacity; }
-        }
-
-        /// <summary>
         /// Constructor for this particular component.
         /// </summary>
         /// <param name="definition">definition of magazine.</param>
@@ -197,83 +179,11 @@ namespace Pulsar4X.Entities.Components
 
             Name = definition.Name;
 
-            MagOrdnance = new Dictionary<OrdnanceDefTN, int>();
+            //MagOrdnance = new Dictionary<OrdnanceDefTN, int>();
 
-            CurCapacity = 0;
+            //CurCapacity = 0;
 
             isDestroyed = false;
         }
-
-        /// <summary>
-        /// In the event of magazine destruction, or unload events.
-        /// </summary>
-        public void ClearMagazine()
-        {
-            MagOrdnance.Clear();
-        }
-
-        /// <summary>
-        /// Load Missiles to this magazine. can also unload missiles if amt is negative.
-        /// </summary>
-        /// <param name="Missile">Missile to be loaded.</param>
-        /// <param name="amt">number of missiles to load.</param>
-        /// <returns>Number of missiles actually loaded.</returns>
-        public int LoadMagazine(OrdnanceDefTN Missile, int amt)
-        {
-            int MissileTonnage = (int)Missile.size * amt;
-            int loadAmt = 0;
-
-            if (amt > 0)
-            {
-                if (CurCapacity + MissileTonnage <= MagazineDef.capacity)
-                {
-                    loadAmt = amt;
-                }
-                else
-                {
-                    if (CurCapacity == MagazineDef.capacity)
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        int capRemaining = MagazineDef.capacity - CurCapacity;
-                        loadAmt = (int)Math.Floor(((float)capRemaining / Missile.size));
-                    }
-                }
-
-                if (MagOrdnance.ContainsKey(Missile))
-                {
-                    MagOrdnance[Missile] = MagOrdnance[Missile] + loadAmt;
-                }
-                else
-                {
-                    MagOrdnance.Add(Missile, loadAmt);
-                }
-
-                return loadAmt;
-            }
-            else
-            {
-                if (MagOrdnance.ContainsKey(Missile) == false)
-                {
-                    return 0;
-                }
-                else
-                {
-                    /// <summary>
-                    /// amt is negative here.
-                    /// </summary>
-                    MagOrdnance[Missile] = MagOrdnance[Missile] + amt;
-
-                    if (MagOrdnance[Missile] <= 0)
-                    {
-                        MagOrdnance.Remove(Missile);
-                    }
-                }
-                return amt;
-            }
-        }
-
     }
 }

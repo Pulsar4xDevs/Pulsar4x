@@ -663,7 +663,7 @@ namespace Pulsar4X.Entities
         public float TotalShieldFuelCostPerTick { get; set; }
         #endregion
 
-        #region Missile Components
+        #region Missile Components. Thinking of rolling this(and all such sections) into a Ship_Overall_Missiles_Component_Definitions
         /// <summary>
         /// Ships need magazines(though launchers have some innate magazine capacity), launch tubes, and missile fire controls to fire missiles at targets.
         /// </summary>
@@ -765,6 +765,16 @@ namespace Pulsar4X.Entities
         public decimal PreferredOrdnanceCost { get; set; }
 
         /// <summary>
+        /// Total number of missiles 
+        /// </summary>
+        [DisplayName("Preferred Ordnance count"),
+        Category("Detials"),
+        Description("Preferred Ordnance loadout count, number of missiles for this ship class."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int PreferredOrdnanceCount { get; set; }
+
+        /// <summary>
         /// This is the largest launch tube on this shipclass, it could only be a byte for TN purposes, but who knows whether or not people will want absurd sized launchers(almost certainly not).
         /// </summary>
         [DisplayName("Largest Launch Tube"),
@@ -773,8 +783,38 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public int LargestLauncher { get; set; }
-        #endregion
 
+        /// <summary>
+        /// Magazine space due to launch tubes.
+        /// </summary>
+        [DisplayName("Launcher Magazine Space"),
+        Category("Detials"),
+        Description("Magazine space on this ship class from the launch tubes."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int LauncherMagSpace { get; set; }
+
+        /// <summary>
+        /// Magazine space due to Magazines
+        /// </summary>
+        [DisplayName("Magazine Magazine Space"),
+        Category("Detials"),
+        Description("Magazine space on this ship class from Magazines."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int MagazineMagSpace { get; set; }
+
+        /// <summary>
+        /// If a ship has no magazines then this will be the missile maximum.
+        /// </summary>
+        [DisplayName("Launcher Count"),
+        Category("Detials"),
+        Description("Number of launch tubes."),
+        Browsable(true),
+        ReadOnly(true)]
+        public int LauncherCount { get; set; }
+
+        #endregion
 
         #endregion
 
@@ -904,6 +944,10 @@ namespace Pulsar4X.Entities
             PreferredOrdnanceSize = 0;
             PreferredOrdnanceCost = 0.0m;
             LargestLauncher = 0;
+            LauncherMagSpace = 0;
+            MagazineMagSpace = 0;
+            LauncherCount = 0;
+            PreferredOrdnanceCount = 0;
 
             ShipArmorDef = new ArmorDefTN("Conventional");
             NewArmor("Conventional", 2, 1);
@@ -989,7 +1033,7 @@ namespace Pulsar4X.Entities
             /// Size of the craft has to be adjusted
             /// </summary>
             SizeHS = SizeHS + (Component.size * (float)increment);
-            SizeTons = (float)Math.Ceiling(SizeHS) * 50.0f;
+            SizeTons = SizeHS * 50.0f;
 
             /// <summary>
             /// The ship has a new total required crew now.
@@ -1941,6 +1985,8 @@ namespace Pulsar4X.Entities
                 }
             }
 
+            LauncherCount = LauncherCount + inc;
+            LauncherMagSpace = LauncherMagSpace + ((int)Tube.launchMaxSize * inc);
             TotalMagazineCapacity = TotalMagazineCapacity + ((int)Tube.launchMaxSize * inc);
             UpdateClass(Tube, inc);
         }
@@ -1982,6 +2028,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
+            MagazineMagSpace = MagazineMagSpace + ((int)Mag.capacity * inc);
             TotalMagazineCapacity = TotalMagazineCapacity + ((int)Mag.capacity * inc);
             UpdateClass(Mag, inc);
         }
@@ -2034,6 +2081,30 @@ namespace Pulsar4X.Entities
         /// <param name="inc">Amount to add/remove.</param>
         public void SetPreferredOrdnance(OrdnanceDefTN missile, int inc)
         {
+            /// <summary>
+            /// Handle the condition of no magazines for PDC silos or ships with all box launchers.
+            /// </summary
+            if (ShipMagazineDef.Count == 0 && inc > 0)
+            {
+                /// <summary>
+                /// Is this missile smaller than or equal to the size of the largest launcher?
+                /// </summary>
+                if (Math.Ceiling(missile.size) <= LargestLauncher)
+                {
+                    /// <summary>
+                    /// Do we want to add more missiles than we have launchers for?
+                    /// </summary>
+                    if (PreferredOrdnanceCount + inc > LauncherCount)
+                    {
+                        /// <summary>
+                        /// Change increment to the remainder of LauncherCount minus PreferredOrdnanceCount
+                        /// </summary>
+                        inc = LauncherCount - PreferredOrdnanceCount;
+                    }
+                }
+            }
+
+
             int MissileSizeInMagazine = (int)Math.Ceiling(missile.size);
             int loadSize = MissileSizeInMagazine * inc;
 
@@ -2066,6 +2137,8 @@ namespace Pulsar4X.Entities
                     PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
 
                     PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt*missile.cost);
+
+                    PreferredOrdnanceCount = PreferredOrdnanceCount + loadAmt;
                 }
                 else
                 {
@@ -2073,6 +2146,8 @@ namespace Pulsar4X.Entities
                     PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
 
                     PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
+
+                    PreferredOrdnanceCount = PreferredOrdnanceCount + loadAmt;
                 }
             }
             else
@@ -2094,6 +2169,7 @@ namespace Pulsar4X.Entities
                         ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + inc;
                         PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
                         PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
+                        PreferredOrdnanceCount = PreferredOrdnanceCount + loadAmt;
                     }
                     else
                     {
@@ -2102,6 +2178,7 @@ namespace Pulsar4X.Entities
 
                         PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
                         PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
+                        PreferredOrdnanceCount = PreferredOrdnanceCount + loadAmt;
                         ShipClassOrdnance[missile] = 0;
                         ShipClassOrdnance.Remove(missile);
                     }
