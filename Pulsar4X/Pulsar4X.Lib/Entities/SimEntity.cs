@@ -340,7 +340,22 @@ namespace Pulsar4X.Entities
             CurrentTick += tickValue;
 
             /// <summary>
-            /// Follow orders here.
+            /// Missiles should check to see if they have a target, move towards it, and hit it. If they have no target then they should check their sensor and either move to new target,
+            /// or more towards last known firing location. ProcessOrder should handle all of these.
+            /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                for (int loop2 = 0; loop2 < P[loop].MissileGroups.Count; loop2++)
+                {
+                    P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
+                }
+            }
+
+
+
+
+            /// <summary>
+            /// Taskgroup Follow orders here.
             /// </summary>
             for (int loop = factionStart; loop < factionCount; loop++)
             {
@@ -364,7 +379,7 @@ namespace Pulsar4X.Entities
             }
 
             /// <summary>
-            /// Do sensor sweeps here. Sensors must be done after movement, not before.
+            /// Do sensor sweeps here. Sensors must be done after movement, not before. Missile sensors should also be here, but they need an individual check if they have no target early on.
             /// </summary>
             for (int loop = factionStart; loop < factionCount; loop++)
             {
@@ -454,7 +469,18 @@ namespace Pulsar4X.Entities
                     }
                     else
                     {
-                        //pair.Value.ShipMFC[pair.Key.componentIndex]
+                        /// <summary>
+                        /// Missile fire controls should be fairly simple, the missile itself does most of the lifting.
+                        /// </summary>
+                        if (pair.Value.ShipMFC[pair.Key.componentIndex].openFire == true && pair.Value.ShipMFC[pair.Key.componentIndex].isDestroyed == false &&
+                            pair.Value.ShipMFC[pair.Key.componentIndex].target != null)
+                        {
+                            bool WF = pair.Value.ShipMFC[pair.Key.componentIndex].FireWeapons(pair.Value.ShipsTaskGroup, pair.Value);
+
+                            /// <summary>
+                            /// Todo: recharge list checking, ship destruction checking.
+                            /// </summary>
+                        }
                     }
                 }
             }
@@ -619,6 +645,7 @@ namespace Pulsar4X.Entities
 
                         /// <summary>
                         /// Have to re-run loop since a ship was removed from all kinds of things.
+                        /// </summary>
                         loop--;
                         break;
                     }

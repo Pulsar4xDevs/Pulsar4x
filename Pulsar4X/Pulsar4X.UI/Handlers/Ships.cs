@@ -1025,7 +1025,7 @@ namespace Pulsar4X.UI.Handlers
                         }
                         else
                         {
-                            Entry = String.Format("{0} ({2} secs to reload)\n", Entry,_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
+                            Entry = String.Format("{0} ({1} secs to reload)\n", Entry,_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
                         }
 
                         m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);

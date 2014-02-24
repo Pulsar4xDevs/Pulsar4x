@@ -2052,8 +2052,6 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.TaskGroups[0].Ships[0].ShipFireWeapons(5, RNG);
 
-            PlayerFaction1.MissileGroups[0].attached = null;
-
             uint tick = 10;
 
             bool done = false;

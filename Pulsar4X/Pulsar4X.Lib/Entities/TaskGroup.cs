@@ -167,11 +167,6 @@ namespace Pulsar4X.Entities
         public int CurrentCryoStorage { get; set; }
 
         /// <summary>
-        /// Missile groups spawned by this TG that have yet to launch out yet. look here to add missiles first before creating new ones.
-        /// </summary>
-        public BindingList<OrdnanceGroupTN> AttachedMissileGroups { get; set; }
-
-        /// <summary>
         /// Taskgroups with orders to this ship.
         /// </summary>
         public BindingList<TaskGroupTN> TaskGroupsOrdered { get; set; }
@@ -180,7 +175,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Controls whether or not the travel line will be set. 0 means draw the line, 1 means set last position to current position. 2 means that last position has been set to current position.
         /// 3 means that the line has been updated on the system map as being not drawn, so do not display it again.
-        /// This is referenced in SimEntity and SystemMap as well as here.
+        /// This is referenced in ContactElement and maybe simentity,SystemMap as well as here.
         /// </summary>
         public byte DrawTravelLine { get; set; }
 
@@ -279,8 +274,6 @@ namespace Pulsar4X.Entities
 
             TotalCryoCapacity = 0;
             CurrentCryoStorage = 0;
-
-            AttachedMissileGroups = new BindingList<OrdnanceGroupTN>();
 
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
 

@@ -300,6 +300,7 @@ namespace Pulsar4X.Entities
             FiringMissed,
             FiringRecharging,
             FiringZeroHitChance,
+            FiringNoLoadedOrdnance,
 
             OrdersCompleted,
             OrdersNotCompleted,

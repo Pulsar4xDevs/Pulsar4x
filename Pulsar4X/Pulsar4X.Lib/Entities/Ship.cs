@@ -2413,7 +2413,7 @@ namespace Pulsar4X.Entities
             /// Missile Fire Control Section
             for (int loop = 0; loop < ShipMFC.Count; loop++)
             {
-                if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false)
+                if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false && ShipMFC[loop].target != null)
                 {
                     if (ShipMFC[loop].target.targetType == StarSystemEntityType.TaskGroup)
                     {

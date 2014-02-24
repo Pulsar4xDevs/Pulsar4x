@@ -954,16 +954,6 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Taskgroup this missilegroup launched from, and will be connected to for house keeping purposes for atleast the current tick
-        /// </summary>
-        private TaskGroupTN Attached;
-        public TaskGroupTN attached
-        {
-            get { return Attached; }
-            set { Attached = value; }
-        }
-
-        /// <summary>
         /// The contact for this missile.
         /// </summary>
         private SystemContact Contact;
@@ -1025,6 +1015,15 @@ namespace Pulsar4X.Entities.Components
         {
             get { return TimeReq; }
         }
+
+        /// <summary>
+        /// The faction these missiles belong to.
+        /// </summary>
+        private Faction OrdnanceGroupFaction;
+        public Faction ordnanceGroupFaction
+        {
+            get { return OrdnanceGroupFaction; }
+        }
         
         /// <summary>
         /// Constructor for missile groups.
@@ -1038,13 +1037,13 @@ namespace Pulsar4X.Entities.Components
             YSystem = LaunchedFrom.YSystem;
             Contact = new SystemContact(LaunchedFrom.TaskGroupFaction, this);
 
-            Attached = LaunchedFrom;
-
             Missiles = new BindingList<OrdnanceTN>();
             Missiles.Add(Missile);
             Missile.ordGroup = this;
 
             SSEntity = StarSystemEntityType.Missile;
+
+            OrdnanceGroupFaction = LaunchedFrom.TaskGroupFaction;
 
             Contact.CurrentSystem = LaunchedFrom.Contact.CurrentSystem;
             LaunchedFrom.Contact.CurrentSystem.AddContact(Contact);
@@ -1134,7 +1133,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// I need to move everyone to their target in this function. Any event that would cause a missile to self destruct can be handled elsewhere.
+        /// I need to move everyone to their target in this function.
         /// </summary>
         public void ProcessOrder(uint TimeSlice, Random RNG)
         {
@@ -1199,8 +1198,13 @@ namespace Pulsar4X.Entities.Components
                                 /// </summary>
                             }
                         }
-
                         Missiles.Clear();
+
+                        if (OrdnanceGroupFaction.MissileGroups.Contains(this))
+                        {
+                            OrdnanceGroupFaction.MissileGroups.Remove(this);
+                        }
+                        
                     break;
                 }
                 
