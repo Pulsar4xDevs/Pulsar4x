@@ -2269,7 +2269,8 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Reloads missile tubes, function is based on time alone for the most part.
+        /// Reloads missile tubes, function is based on time alone for the most part. Launch tubes with no ordnance selected will "reload" as well. not going to demand absolutely meticulous 
+        /// ordnance management from the player.
         /// </summary>
         /// <param name="tick">time increment that the sim is advanced by. 1 day = 86400 seconds, smallest practical value is 5.</param>
         /// <returns> Whether all tubes have been loaded or not.</returns>
@@ -2286,6 +2287,51 @@ namespace Pulsar4X.Entities
                     if (ShipMLaunchers[loop].loadTime < 0)
                     {
                         ShipMLaunchers[loop].loadTime = 0;
+                    }
+
+                    if (ShipMLaunchers[loop].loadedOrdnance != null)
+                    {
+                        if (ShipOrdnance.ContainsKey(ShipMLaunchers[loop].loadedOrdnance) == false)
+                        {
+                            String NoOrdnance = String.Format("No ordnance of type {0} remains on {1}. This will adversely affect turn processing(very slightly) if left unfixed.", ShipMLaunchers[loop].loadedOrdnance.Name, Name);
+                            MessageEntry NewMessage = new MessageEntry(MessageEntry.MessageType.LaunchTubeNoOrdnanceToReload,
+                                                                                        ShipsTaskGroup.Contact.CurrentSystem,
+                                                                                                      ShipsTaskGroup.Contact,
+                                                                                             GameState.Instance.GameDateTime,
+                                                                          (GameState.SE.CurrentTick - GameState.SE.lastTick),
+                                                                                                                  NoOrdnance);
+                            ShipsFaction.MessageLog.Add(NewMessage);
+                            ShipMLaunchers[loop].loadTime = -1;
+                        }
+                    }
+                }
+                /// <summary>
+                /// Ships with no loaded ordnance will remain in the weapon recharge list due to this, either the AI or the player should fix this.
+                /// </summary>
+                else if (ShipMLaunchers[loop].loadTime == -1)
+                {
+                    allTubesLoaded = false;
+                    if (ShipMLaunchers[loop].loadedOrdnance == null)
+                    {
+                        ShipMLaunchers[loop].loadTime = 0;
+                    }
+                    else
+                    {
+                        if (ShipOrdnance.ContainsKey(ShipMLaunchers[loop].loadedOrdnance) == false && ShipMLaunchers[loop].mFC.openFire == true)
+                        {
+                            String NoOrdnance = String.Format("No ordnance of type {0} remains on {1}, cannot fire. This will adversely affect turn processing(very slightly) if left unfixed.", ShipMLaunchers[loop].loadedOrdnance.Name, Name);
+                            MessageEntry NewMessage = new MessageEntry(MessageEntry.MessageType.LaunchTubeNoOrdnanceToReload,
+                                                                                        ShipsTaskGroup.Contact.CurrentSystem,
+                                                                                                      ShipsTaskGroup.Contact,
+                                                                                             GameState.Instance.GameDateTime,
+                                                                          (GameState.SE.CurrentTick - GameState.SE.lastTick),
+                                                                                                                  NoOrdnance);
+                            ShipsFaction.MessageLog.Add(NewMessage);
+                        }
+                        else if (ShipOrdnance.ContainsKey(ShipMLaunchers[loop].loadedOrdnance) == true)
+                        {
+                            ShipMLaunchers[loop].loadTime = 0;
+                        }
                     }
                 }
             }

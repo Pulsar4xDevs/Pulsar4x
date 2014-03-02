@@ -28,10 +28,38 @@ namespace Pulsar4X.UI.SceenGraph
                 if (m_oSystemContect != value)
                 {
                     if (m_oSystemContect != null)
-                        m_oSystemContect.TaskGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                    {
+                        switch (m_oSystemContect.SSEntity)
+                        {
+                            case StarSystemEntityType.TaskGroup:
+                                m_oSystemContect.TaskGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                                break;
+                            case StarSystemEntityType.Population:
+                                m_oSystemContect.Pop.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                                break;
+                            case StarSystemEntityType.Missile:
+                                m_oSystemContect.MissileGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                                break;
+                        }
+                        
+                    }
                     m_oSystemContect = value as SystemContact;
                     if (value != null)
-                        m_oSystemContect.TaskGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
+                    {
+                        switch (m_oSystemContect.SSEntity)
+                        {
+                            case StarSystemEntityType.TaskGroup:
+                                m_oSystemContect.TaskGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
+                                break;
+                            case StarSystemEntityType.Population:
+                                m_oSystemContect.Pop.PropertyChanged += m_oSystemContect_PropertyChanged;
+                                break;
+                            case StarSystemEntityType.Missile:
+                                m_oSystemContect.MissileGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
+                                break;
+                        }
+                        
+                    }
                 }
             }
         }
@@ -151,19 +179,46 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
-            // update position:
-            Vector3 pos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.XSystem, (float)m_oSystemContect.TaskGroup.Contact.YSystem, 0.0f);
-            Vector3 lastPos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.LastXSystem, (float)m_oSystemContect.TaskGroup.Contact.LastYSystem, 0.0f);
+            /// <summary>
+            /// update position of the selected contact and its travelline:
+            /// </summary>
+            Vector3 pos = Vector3.Zero, lastPos = Vector3.Zero;
+            switch (m_oSystemContect.SSEntity)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    pos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.XSystem, (float)m_oSystemContect.TaskGroup.Contact.YSystem, 0.0f);
+                    lastPos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.LastXSystem, (float)m_oSystemContect.TaskGroup.Contact.LastYSystem, 0.0f);
 
-            if (m_oSystemContect.TaskGroup.DrawTravelLine != 3)
-            {
-                m_oTravelLine.StartPos = lastPos;
-                m_oTravelLine.EndPos = pos;
+                    if (m_oSystemContect.TaskGroup.DrawTravelLine != 3)
+                    {
+                        m_oTravelLine.StartPos = lastPos;
+                        m_oTravelLine.EndPos = pos;
+                    }
+                    if (m_oSystemContect.TaskGroup.DrawTravelLine == 2)
+                    {
+                        m_oSystemContect.TaskGroup.DrawTravelLine = 3;
+                    }
+                break;
+                case StarSystemEntityType.Population:
+                    break;
+                case StarSystemEntityType.Missile:
+                    pos = new Vector3((float)m_oSystemContect.MissileGroup.contact.XSystem, (float)m_oSystemContect.MissileGroup.contact.YSystem, 0.0f);
+                    lastPos = new Vector3((float)m_oSystemContect.MissileGroup.contact.LastXSystem, (float)m_oSystemContect.MissileGroup.contact.LastYSystem, 0.0f);
+
+                    if (m_oSystemContect.MissileGroup.DrawTravelLine != 3)
+                    {
+                        m_oTravelLine.StartPos = lastPos;
+                        m_oTravelLine.EndPos = pos;
+                    }
+                    if (m_oSystemContect.MissileGroup.DrawTravelLine == 2)
+                    {
+                        m_oSystemContect.MissileGroup.DrawTravelLine = 3;
+                    }
+                    break;
             }
-            if (m_oSystemContect.TaskGroup.DrawTravelLine == 2)
-            {
-                m_oSystemContect.TaskGroup.DrawTravelLine = 3;
-            }
+            
+
+            
 
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;

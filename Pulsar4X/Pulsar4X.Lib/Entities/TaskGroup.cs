@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 using Pulsar4X;
+using log4net.Config;
+using log4net;
 
 /// <summary>
 /// Need a unified component list and component definition list for
@@ -22,6 +24,11 @@ namespace Pulsar4X.Entities
 
     public class TaskGroupTN : StarSystemEntity
     {
+        /// <summary>
+        /// TG Logger:
+        /// </summary>
+        public static readonly ILog logger = LogManager.GetLogger(typeof(TaskGroupTN));
+
         /// <summary>
         /// Unused at the moment.
         /// </summary>
@@ -402,7 +409,7 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                int value = -1, Last = -1, First = -1, NewValue = -1;
+                int value = -1, Last = -1, First = -1, NewValue = -1, LastValue = -1;
                 switch (TEA)
                 {
                     case 0: value = Ships[Sort.Value].CurrentThermalSignature;
@@ -419,7 +426,7 @@ namespace Pulsar4X.Entities
                         break;
                 }
 
-                if (value > Last)
+                if (value >= Last)
                 {
                     SortList.AddLast(Sort);
                 }
@@ -430,12 +437,13 @@ namespace Pulsar4X.Entities
                 else
                 {
                     LinkedListNode<int> NextNode = SortList.First;
+                    LastValue = First;
+
+                    NextNode = NextNode.Next;
 
                     bool done = false;
                     while (done == false)
                     {
-                        NextNode = NextNode.Next;
-
                         switch (TEA)
                         {
                             case 0: NewValue = Ships[NextNode.Value].CurrentThermalSignature;
@@ -446,11 +454,26 @@ namespace Pulsar4X.Entities
                             break;
                         }
 
-                        if (value >= NewValue)
+                        if (value < LastValue)
                         {
-                            SortList.AddAfter(NextNode, Sort);
+                            String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}\n. Condition One with V < LV",Name,LastValue,NewValue,NextNode.Value);
+                            logger.Debug(MSG);
+                        }
+                        else if (value == LastValue && value > NewValue)
+                        {
+                            String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}. Condition Two with V = LV V > NV\n", Name, LastValue, NewValue, NextNode.Value);
+                            logger.Debug(MSG);
+                        }
+
+                        if (value <= NewValue && value >= LastValue)
+                        {
+                            SortList.AddBefore(NextNode, Sort);
                             done = true;
                         }
+
+                        NextNode = NextNode.Next;
+                        LastValue = NewValue;
+                        
                     }
                 }
             }
@@ -1098,7 +1121,7 @@ namespace Pulsar4X.Entities
                     else
                     {
                         /// <summary>
-                        /// even though TimeReq is a uint I'll treat it as a "signed" int except in this case.
+                        /// even though TimeReq is a uint I'll treat it as a "signed" int in this case.
                         /// </summary>
                         TimeRequirement = 2147483649;
                     }
@@ -1426,6 +1449,9 @@ namespace Pulsar4X.Entities
 
                 UseFuel(TimeSlice);
 
+                /// <summary>
+                /// This probably isn't needed since timeReqs are constantly recalculated.
+                /// </summary>
                 TimeRequirement = TimeRequirement - TimeSlice;
 
                 TimeSlice = 0;

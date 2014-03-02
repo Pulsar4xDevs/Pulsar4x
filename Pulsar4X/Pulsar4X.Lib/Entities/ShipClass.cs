@@ -2503,7 +2503,9 @@ namespace Pulsar4X.Entities
             {
                 String FormattedSpeed = pair.Key.maxSpeed.ToString("#,##0");
 
-                float Endurance = (pair.Key.fuel / pair.Key.totalFuelConsumption);
+                float Endurance = 0.0f;
+                if(pair.Key.fuel != 0 && pair.Key.totalFuelConsumption != 0)
+                    Endurance = (pair.Key.fuel / pair.Key.totalFuelConsumption);
                 String EndString = "N/A";
                 
                 if(Endurance >= 8640.0f)

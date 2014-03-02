@@ -296,11 +296,16 @@ namespace Pulsar4X.Entities
             ContactUpdate,
             ContactLost,
 
+            Firing,
             FiringHit,
             FiringMissed,
             FiringRecharging,
             FiringZeroHitChance,
+            FiringNoAvailableOrdnance,
             FiringNoLoadedOrdnance,
+
+            LaunchTubeReloaded,
+            LaunchTubeNoOrdnanceToReload,
 
             OrdersCompleted,
             OrdersNotCompleted,

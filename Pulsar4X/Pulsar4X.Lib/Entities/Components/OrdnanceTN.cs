@@ -1024,6 +1024,18 @@ namespace Pulsar4X.Entities.Components
         {
             get { return OrdnanceGroupFaction; }
         }
+
+        /// <summary>
+        /// Controls whether or not the travel line will be set. 0 means draw the line, 1 means set last position to current position. 2 means that last position has been set to current position.
+        /// 3 means that the line has been updated on the system map as being not drawn, so do not display it again.
+        /// This is referenced in ContactElement and maybe simentity,SystemMap as well as in OrdnanceTN(the TG version is referenced in Taskgroup).
+        /// </summary>
+        private byte _DrawTravelLine;
+        public byte DrawTravelLine 
+        {
+            get { return _DrawTravelLine; }
+            set { _DrawTravelLine = value; } 
+        }
         
         /// <summary>
         /// Constructor for missile groups.
@@ -1047,6 +1059,7 @@ namespace Pulsar4X.Entities.Components
 
             Contact.CurrentSystem = LaunchedFrom.Contact.CurrentSystem;
             LaunchedFrom.Contact.CurrentSystem.AddContact(Contact);
+            DrawTravelLine = 0;
         }
 
         /// <summary>
@@ -1106,6 +1119,7 @@ namespace Pulsar4X.Entities.Components
         public void GetTimeRequirement()
         {
             float dZ = (float)Math.Sqrt(((dX * dX) + (dY * dY)));
+            double MissileSpeedInAU = 0.0;
 
             if (dZ >= Constants.Units.MAX_KM_IN_AU)
             {
@@ -1116,24 +1130,28 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
                 if (Count < (double)Missiles[0].missileDef.maxSpeed)
                 {
-                    TimeReq = (uint)Math.Ceiling((dZ / (double)Missiles[0].missileDef.maxSpeed));
+                    MissileSpeedInAU = (double)Missiles[0].missileDef.maxSpeed / Constants.Units.KM_PER_AU;
+                    TimeReq = (uint)Math.Ceiling((dZ / MissileSpeedInAU));
                 }
                 else
                 {
                     /// <summary>
-                    /// even though TimeReq is a uint I'll treat it as a "signed" int except in this case.
+                    /// even though TimeReq is a uint I'll treat it as a "signed" int in this case.
                     /// </summary>
                     TimeReq = 2147483649;
+                    MissileSpeedInAU = (double)Missiles[0].missileDef.maxSpeed / Constants.Units.KM_PER_AU;
                 }
             }
             else
             {
-                TimeReq = (uint)Math.Ceiling((dZ / (double)Missiles[0].missileDef.maxSpeed));
+                MissileSpeedInAU = (double)Missiles[0].missileDef.maxSpeed / Constants.Units.KM_PER_AU;
+                TimeReq = (uint)Math.Ceiling((dZ / MissileSpeedInAU));
             }
         }
 
         /// <summary>
         /// I need to move everyone to their target in this function.
+        /// TODO:Upon missiles reaching a waypoint, or geo survey target travelline must be set to 1.
         /// </summary>
         public void ProcessOrder(uint TimeSlice, Random RNG)
         {
@@ -1234,6 +1252,9 @@ namespace Pulsar4X.Entities.Components
                     }
                 }
 
+                /// <summary>
+                /// This probably isn't needed since timeReqs are constantly recalculated.
+                /// </summary>
                 TimeReq = TimeReq - TimeSlice;
 
                 TimeSlice = 0;

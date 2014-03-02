@@ -735,8 +735,8 @@ namespace Pulsar4X.UI.Handlers
                 }
                 else if (m_oCurrnetTaskGroup.Ships[row].ShipClass.ShipMagazineDef.Count != 0)
                 {
-                    float AmmoPercent = (m_oCurrnetTaskGroup.Ships[row].CurrentMagazineCapacity / m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity) * 100.0f;
-                    Ammo = AmmoPercent.ToString();
+                    float AmmoPercent = (float)Math.Round(((float)m_oCurrnetTaskGroup.Ships[row].CurrentMagazineCapacity / (float)m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity) * 100.0f);
+                    Ammo = String.Format("{0}%", AmmoPercent);
                 }
                 else
                 {
@@ -745,8 +745,8 @@ namespace Pulsar4X.UI.Handlers
                     {
                         missileCount = missileCount + pair.Value;
                     }
-                    float AmmoPercent = missileCount / m_oCurrnetTaskGroup.Ships[row].ShipClass.LauncherCount;
-                    Ammo = AmmoPercent.ToString();
+                    float AmmoPercent = (float)Math.Round(((float)missileCount / (float)m_oCurrnetTaskGroup.Ships[row].ShipClass.LauncherCount) * 100.0f);
+                    Ammo = String.Format("{0}%",AmmoPercent);
                 }
                 m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Ammo].Value = Ammo;
 

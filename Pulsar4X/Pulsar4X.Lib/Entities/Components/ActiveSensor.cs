@@ -600,54 +600,72 @@ namespace Pulsar4X.Entities.Components
                 {
                     if (LinkedWeapons[loop].isDestroyed == false && LinkedWeapons[loop].loadTime == 0 && LinkedWeapons[loop].loadedOrdnance != null)
                     {
-                        OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance, FiredFrom);
-
-                        /// <summary>
-                        /// Create a new missile group
-                        /// </summary>
-                        if (LocalMissileGroups.Count == 0)
+                        if (FiredFrom.ShipOrdnance.ContainsKey(LinkedWeapons[loop].loadedOrdnance) == true)
                         {
-                            OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
-                            LocalMissileGroups.Add(newMissileGroup);
-                            TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
-                        }
-                        /// <summary>
-                        /// An existing missile group may be useable.
-                        /// </summary>
-                        else
-                        {
-                            bool foundGroup = false;
-                            float LOSpeed = LinkedWeapons[loop].loadedOrdnance.maxSpeed;
-                            foreach (OrdnanceGroupTN OrdGroup in LocalMissileGroups)
-                            {
-                                if (OrdGroup.missiles[0].missileDef.maxSpeed == LOSpeed)
-                                {
-                                    OrdGroup.missiles.Add(newMissile);
-                                    foundGroup = true;
-                                    break;
-                                }
-                            }
+                            OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance, FiredFrom);
 
                             /// <summary>
-                            /// Have to create a new missile group after all.
+                            /// Create a new missile group
                             /// </summary>
-                            if (foundGroup == false)
+                            if (LocalMissileGroups.Count == 0)
                             {
                                 OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                                 LocalMissileGroups.Add(newMissileGroup);
                                 TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
                             }
+                            /// <summary>
+                            /// An existing missile group may be useable.
+                            /// </summary>
+                            else
+                            {
+                                bool foundGroup = false;
+                                float LOSpeed = LinkedWeapons[loop].loadedOrdnance.maxSpeed;
+                                foreach (OrdnanceGroupTN OrdGroup in LocalMissileGroups)
+                                {
+                                    if (OrdGroup.missiles[0].missileDef.maxSpeed == LOSpeed)
+                                    {
+                                        OrdGroup.missiles.Add(newMissile);
+                                        foundGroup = true;
+                                        break;
+                                    }
+                                }
+
+                                /// <summary>
+                                /// Have to create a new missile group after all.
+                                /// </summary>
+                                if (foundGroup == false)
+                                {
+                                    OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
+                                    LocalMissileGroups.Add(newMissileGroup);
+                                    TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
+                                }
+                            }
+                            /// <summary>
+                            /// Decrement the loaded ordnance count, and remove the type entirely if this was the last one.
+                            /// </summary>
+                            FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] = FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] - 1;
+                            if (FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] == 0)
+                            {
+                                FiredFrom.ShipOrdnance.Remove(LinkedWeapons[loop].loadedOrdnance);
+                            }
+
+                            /// <summary>
+                            /// Set the launch tube cooldown time as a missile was just fired from it.
+                            /// </summary>
+                            LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
+
+                            /// <summary>
+                            /// return that a missile was launched.
+                            /// </summary>
+                            retv = true;
                         }
-
-                        /// <summary>
-                        /// Set the launch tube cooldown time as a missile was just fired from it.
-                        /// </summary>
-                        LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
-
-                        /// <summary>
-                        /// return that a missile was launched.
-                        /// </summary>
-                        retv = true;
+                        else
+                        {
+                            String Msg = String.Format("No ordnance {0} on ship {1} is available for Launch Tube {2}", LinkedWeapons[loop].Name, FiredFrom.Name, LinkedWeapons[loop].Name);
+                            MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoAvailableOrdnance, TG.Contact.CurrentSystem, TG.Contact,
+                                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
+                            TG.TaskGroupFaction.MessageLog.Add(newMessage);
+                        }
 
                     }
                     else if (LinkedWeapons[loop].isDestroyed == true)
