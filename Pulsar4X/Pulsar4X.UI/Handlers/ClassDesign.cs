@@ -3150,7 +3150,7 @@ namespace Pulsar4X.UI.Handlers
                         int AddedRows = List.MLauncherDef.Count - MLauncherCount;
 
                         /// <summary>
-                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// Increment all the component locations past the current one(Magazine) by added rows count.
                         /// </summary>
                         for (int loop = (int)ComponentGroup.Magazines; loop <= (int)ComponentGroup.TypeCount; loop++)
                         {
@@ -3194,9 +3194,9 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// An engine was added to the component list.
                     /// </summary>
-                    if (CompLocation[(int)ComponentGroup.Ground] != (List.MLauncherDef.Count + CompLocation[(int)ComponentGroup.Magazines] + 1))
+                    if (CompLocation[(int)ComponentGroup.Ground] != (List.MagazineDef.Count + CompLocation[(int)ComponentGroup.Magazines] + 1))
                     {
-                        int rowLine = CompLocation[(int)ComponentGroup.Missiles] + 1;
+                        int rowLine = CompLocation[(int)ComponentGroup.Magazines] + 1;
                         int MagazineCount = 0;
 
                         /// <summary>

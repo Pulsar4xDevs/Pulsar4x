@@ -2272,15 +2272,24 @@ namespace Pulsar4X.Entities
         /// Reloads missile tubes, function is based on time alone for the most part.
         /// </summary>
         /// <param name="tick">time increment that the sim is advanced by. 1 day = 86400 seconds, smallest practical value is 5.</param>
-        public void ReloadLaunchTubes(uint tick)
+        /// <returns> Whether all tubes have been loaded or not.</returns>
+        public bool ReloadLaunchTubes(uint tick)
         {
+            bool allTubesLoaded = true;
             for (int loop = 0; loop < ShipMLaunchers.Count; loop++)
             {
-                ShipMLaunchers[loop].loadTime = ShipMLaunchers[loop].loadTime - (int)tick;
+                if (ShipMLaunchers[loop].loadTime > 0)
+                {
+                    allTubesLoaded = false;
+                    ShipMLaunchers[loop].loadTime = ShipMLaunchers[loop].loadTime - (int)tick;
 
-                if (ShipMLaunchers[loop].loadTime < 0)
-                    ShipMLaunchers[loop].loadTime = 0;
+                    if (ShipMLaunchers[loop].loadTime < 0)
+                    {
+                        ShipMLaunchers[loop].loadTime = 0;
+                    }
+                }
             }
+            return allTubesLoaded;
         }
 
         /// <summary>
@@ -2294,65 +2303,69 @@ namespace Pulsar4X.Entities
 
             float PowerRecharge = CurrentPowerGen * amt;
 
-            if (PowerRecharge > ShipClass.TotalPowerRequirement)
+            if (ShipClass.TotalPowerRequirement != 0)
             {
-                for (int loop = 0; loop < ShipBeam.Count; loop++)
+                if (PowerRecharge > ShipClass.TotalPowerRequirement)
                 {
-                    ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
-                    if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
+                    for (int loop = 0; loop < ShipBeam.Count; loop++)
                     {
-                        ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
-
-                        PowerRecharge = PowerRecharge - ((float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
-                    }
-                    else
-                    {
-                        ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + beamCap);
-                        PowerRecharge = PowerRecharge - beamCap;
-                    }
-                }
-
-                return (int)PowerRecharge;
-            }
-            else
-            {
-                float AvailablePower = PowerRecharge;
-
-                for (int loop = 0; loop < ShipBeam.Count; loop++)
-                {
-                    float WeaponPowerRequirement = (float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
-                    ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
-
-                    if (AvailablePower > beamCap)
-                    {
+                        ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
                         if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
                         {
-                            AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
                             ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
-                        }
-                        else
-                        {
-                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)beamCap);
-                            AvailablePower = AvailablePower - beamCap;
-                        }
-                    }
-                    else
-                    {
-                        if (ShipBeam[loop].currentCapacitor + AvailablePower > ShipBeam[loop].beamDef.powerRequirement)
-                        {
-                            AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
-                            ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
-                        }
-                        else
-                        {
-                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)AvailablePower);
-                            AvailablePower = 0;
-                        }
-                    }
-                }
 
-                return (int)AvailablePower;
+                            PowerRecharge = PowerRecharge - ((float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
+                        }
+                        else
+                        {
+                            ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + beamCap);
+                            PowerRecharge = PowerRecharge - beamCap;
+                        }
+                    }
+
+                    return (int)PowerRecharge;
+                }
+                else
+                {
+                    float AvailablePower = PowerRecharge;
+
+                    for (int loop = 0; loop < ShipBeam.Count; loop++)
+                    {
+                        float WeaponPowerRequirement = (float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
+                        ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
+
+                        if (AvailablePower > beamCap)
+                        {
+                            if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
+                            {
+                                AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
+                                ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
+                            }
+                            else
+                            {
+                                ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)beamCap);
+                                AvailablePower = AvailablePower - beamCap;
+                            }
+                        }
+                        else
+                        {
+                            if (ShipBeam[loop].currentCapacitor + AvailablePower > ShipBeam[loop].beamDef.powerRequirement)
+                            {
+                                AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
+                                ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
+                            }
+                            else
+                            {
+                                ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)AvailablePower);
+                                AvailablePower = 0;
+                            }
+                        }
+                    }
+
+                    return (int)AvailablePower;
+                }  
             }
+            return (int)PowerRecharge;
         }
 
         /// <summary>

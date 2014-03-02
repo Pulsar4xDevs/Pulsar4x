@@ -88,7 +88,7 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function.
+        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function. Perhaps there should be.
         /// </summary>
         /// <param name="XSystemAU">X Location in AU of JP.</param>
         /// <param name="YSystemAU">Y Location in AU of JP.</param>

@@ -478,8 +478,24 @@ namespace Pulsar4X.Entities
                             bool WF = pair.Value.ShipMFC[pair.Key.componentIndex].FireWeapons(pair.Value.ShipsTaskGroup, pair.Value);
 
                             /// <summary>
-                            /// Todo: recharge list checking, ship destruction checking.
+                            /// Since this ship has fired its missile launch tubes, they will need to be reloaded, put this ship in the recharge list.
                             /// </summary>
+                            if (WF == true)
+                            {
+                                if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                {
+                                    int value = P[loop].RechargeList[pair.Value];
+
+                                    if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                    {
+                                        P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                    }
+                                }
+                                else
+                                {
+                                    P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                }
+                            }
                         }
                     }
                 }
@@ -508,7 +524,14 @@ namespace Pulsar4X.Entities
                         ushort amt = (ushort)(Math.Floor((float)TimeValue / 5.0f));
                         int PowerComp = pair.Key.CurrentPowerGen * amt;
 
-                        if (ret == PowerComp)
+                        bool allTubesLoaded = pair.Key.ReloadLaunchTubes(TimeValue);
+
+                        /// <summary>
+                        /// When all tubes are loaded and have remained loaded for atleast 1 tick reloadLaunchTubes should return true. 
+                        /// Likewise when no beam weapon recharging is to be done power will sit at full for at least one tick.
+                        /// This should keep continuously firing weapons in this list even if they are considered recharged for a single sliver of time.
+                        /// </summary>
+                        if (ret == PowerComp && allTubesLoaded == true)
                         {
                             P[loop].RechargeList[pair.Key] = P[loop].RechargeList[pair.Key] - (int)Faction.RechargeStatus.Weapons;
 

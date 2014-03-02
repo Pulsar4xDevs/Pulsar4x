@@ -1218,7 +1218,26 @@ namespace Pulsar4X.UI.Handlers
 
                             if (det == true)
                             {
-                                m_oDetailsPanel.ContactListBox.Items.Add(pair.Key);
+                                String TH = "";
+                                if (pair.Value.thermal == true)
+                                {
+                                    TH = String.Format("[Thermal {0}]", pair.Key.CurrentThermalSignature);
+                                }
+
+                                String EM = "";
+                                if (pair.Value.EM == true)
+                                {
+                                    EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
+                                }
+
+                                String ACT = "";
+                                if (pair.Value.active == true)
+                                {
+                                    ACT = String.Format("[ACT {0}]", pair.Key.TotalCrossSection);
+                                }
+                                String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+                                m_oDetailsPanel.ContactListBox.Items.Add(Entry);
+
                             }
                         }
                     }
