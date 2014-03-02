@@ -10,6 +10,8 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+using log4net.Config;
+using log4net;
 
 namespace Pulsar4X.UI.SceenGraph
 {
@@ -18,6 +20,11 @@ namespace Pulsar4X.UI.SceenGraph
     /// </summary>
     public class Sceen
     {
+        /// <summary>
+        /// TG Logger:
+        /// </summary>
+        public static readonly ILog logger = LogManager.GetLogger(typeof(Sceen));
+
         /// <summary>
         /// List of all top level Sprites That Make up the Sceen.
         /// </summary>
@@ -335,26 +342,60 @@ namespace Pulsar4X.UI.SceenGraph
             // create any system contacts:
             foreach (Pulsar4X.Entities.SystemContact oContact in a_oStarSystem.SystemContactList)
             {
-                SceenElement oContactElement = new ContactElement(a_oDefaultEffect, oContact);
-                oContactElement.EntityID = oContact.Id;
+                SceenElement oContactElement;
+                Vector3 v3ContactPos;
+                GLUtilities.GLFont oNameLable;
+                GLUtilities.GLQuad oContactQuad;
 
-                Vector3 v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+                switch(oContact.SSEntity)
+                {
+                    case StarSystemEntityType.TaskGroup:
+                        oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                        oContactElement.EntityID = oContact.Id;
 
-                GLUtilities.GLQuad oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                        v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+
+                        oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                         v3ContactPos,
                                                                         new Vector2(0.0001f, 0.0001f),                   // what size is a task groug anyway???
-                                                                        oContact.faction.FactionColor,
+                                                                        oContact.faction.FactionColor,                   
                                                                         UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
 
-                GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
+                        oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                        UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
 
-                oContactElement.Lable = oNameLable;
-                oContactElement.PrimaryPrimitive = oContactQuad;
-                oContactElement.AddPrimitive(oContactQuad);
-                oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
-                this.AddElement(oContactElement);
-                (oContactElement as ContactElement).ParentSceen = this;
+                        oContactElement.Lable = oNameLable;
+                        oContactElement.PrimaryPrimitive = oContactQuad;
+                        oContactElement.AddPrimitive(oContactQuad);
+                        oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                        this.AddElement(oContactElement);
+                        (oContactElement as ContactElement).ParentSceen = this;
+                    break;
+                    case StarSystemEntityType.Missile:
+                        oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                        oContactElement.EntityID = oContact.Id;
+
+                        v3ContactPos = new Vector3((float)oContact.MissileGroup.contact.XSystem, (float)oContact.MissileGroup.contact.YSystem, 0.0f);
+
+                        oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                    v3ContactPos,
+                                                                    new Vector2(0.0001f, 0.0001f),                   // what size is a missile?
+                                                                    oContact.faction.FactionColor,
+                                                                    UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
+
+                        oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                        UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.MissileGroup.Name);
+
+                        oContactElement.Lable = oNameLable;
+                        oContactElement.PrimaryPrimitive = oContactQuad;
+                        oContactElement.AddPrimitive(oContactQuad);
+                        oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                        this.AddElement(oContactElement);
+                        (oContactElement as ContactElement).ParentSceen = this;
+                    break;                     
+                }
+
+                oContact.ContactElementCreated = true;
             }
 
             // Set Sceen Size basd on Max Orbit:
@@ -466,6 +507,69 @@ namespace Pulsar4X.UI.SceenGraph
             m_lMapMarkers.Add(oMapMarker);
 
             Refresh();
+        }
+
+        /// <summary>
+        /// creates a new post sceen creation contact element.
+        /// </summary>
+        /// <param name="a_oDefaultEffect">default effect, I don't know what these are really.</param>
+        /// <param name="oContact">The system contact to be created.</param>
+        public void AddContactElement(GLEffect a_oDefaultEffect, SystemContact oContact)
+        {
+            SceenElement oContactElement;
+            Vector3 v3ContactPos;
+            GLUtilities.GLFont oNameLable;
+            GLUtilities.GLQuad oContactQuad;
+
+            switch (oContact.SSEntity)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                    oContactElement.EntityID = oContact.Id;
+
+                    v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+
+                    oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                    v3ContactPos,
+                                                                    new Vector2(0.0001f, 0.0001f),                   // what size is a task groug anyway???
+                                                                    oContact.faction.FactionColor,
+                                                                    UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
+
+                    oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
+
+                    oContactElement.Lable = oNameLable;
+                    oContactElement.PrimaryPrimitive = oContactQuad;
+                    oContactElement.AddPrimitive(oContactQuad);
+                    oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                    this.AddElement(oContactElement);
+                    (oContactElement as ContactElement).ParentSceen = this;
+                    break;
+                case StarSystemEntityType.Missile:
+                    oContactElement = new ContactElement(a_oDefaultEffect, oContact);
+                    oContactElement.EntityID = oContact.Id;
+
+                    v3ContactPos = new Vector3((float)oContact.MissileGroup.contact.XSystem, (float)oContact.MissileGroup.contact.YSystem, 0.0f);
+
+                    oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                v3ContactPos,
+                                                                new Vector2(0.0001f, 0.0001f),                   // what size is a missile?
+                                                                oContact.faction.FactionColor,
+                                                                UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
+
+                    oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.MissileGroup.Name);
+
+                    oContactElement.Lable = oNameLable;
+                    oContactElement.PrimaryPrimitive = oContactQuad;
+                    oContactElement.AddPrimitive(oContactQuad);
+                    oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                    this.AddElement(oContactElement);
+                    (oContactElement as ContactElement).ParentSceen = this;
+                    break;
+            }
+
+            oContact.ContactElementCreated = true;
         }
 
         /// <summary>

@@ -67,6 +67,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<int> DistanceUpdate { get; set; }
 
+        public bool ContactElementCreated { get; set; }
+
 
         /// <summary>
         /// Creates a new system contact.
@@ -86,6 +88,8 @@ namespace Pulsar4X.Entities
 
             DistanceTable = new BindingList<float>();
             DistanceUpdate = new BindingList<int>();
+
+            ContactElementCreated = false;
         }
 
         /// <summary>
@@ -105,6 +109,8 @@ namespace Pulsar4X.Entities
             SSEntity = StarSystemEntityType.TaskGroup;
             DistanceTable = new BindingList<float>();
             DistanceUpdate = new BindingList<int>();
+
+            ContactElementCreated = false;
         }
 
         /// <summary>
@@ -124,6 +130,8 @@ namespace Pulsar4X.Entities
             SSEntity = StarSystemEntityType.Missile;
             DistanceTable = new BindingList<float>();
             DistanceUpdate = new BindingList<int>();
+
+            ContactElementCreated = false;
         }
 
         /// <summary>

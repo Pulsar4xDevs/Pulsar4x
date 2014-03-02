@@ -1045,6 +1045,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="MissileTarget">The target this group is aimed at.</param>
         public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile)
         {
+            Name = String.Format("Ordnance Group #{0}", LaunchedFrom.TaskGroupFaction.MissileGroups.Count);
             XSystem = LaunchedFrom.XSystem;
             YSystem = LaunchedFrom.YSystem;
             Contact = new SystemContact(LaunchedFrom.TaskGroupFaction, this);

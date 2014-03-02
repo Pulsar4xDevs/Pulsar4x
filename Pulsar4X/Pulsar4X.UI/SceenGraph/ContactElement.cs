@@ -225,7 +225,19 @@ namespace Pulsar4X.UI.SceenGraph
 
             // Adjust the size of the text so it is always 10 point:
             Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
-            Lable.Text = m_oSystemContect.TaskGroup.Name;
+
+            switch (m_oSystemContect.SSEntity)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    Lable.Text = m_oSystemContect.TaskGroup.Name;
+                    break;
+                case StarSystemEntityType.Population:
+                    Lable.Text = m_oSystemContect.Pop.Name;
+                    break;
+                case StarSystemEntityType.Missile:
+                    Lable.Text = m_oSystemContect.MissileGroup.Name;
+                    break;
+            }
 
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)
