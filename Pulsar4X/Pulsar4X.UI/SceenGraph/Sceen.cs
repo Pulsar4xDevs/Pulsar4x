@@ -158,6 +158,11 @@ namespace Pulsar4X.UI.SceenGraph
         public Pulsar4X.UI.Handlers.SystemMap ParentSystemMap { get; set; }
 
         /// <summary>
+        /// Where is DefaultEffect coming from anyway? need this for contact element creation.
+        /// </summary>
+        public GLEffect SceenDefaultEffect { get; set; }
+
+        /// <summary>
         /// Default Constructor.
         /// </summary>
         public Sceen(Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -175,6 +180,7 @@ namespace Pulsar4X.UI.SceenGraph
             MeasureMode = false;
 
             ParentSystemMap = ParentSM;
+            SceenDefaultEffect = a_oDefaultEffect;
 
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;
@@ -395,7 +401,7 @@ namespace Pulsar4X.UI.SceenGraph
                     break;                     
                 }
 
-                oContact.ContactElementCreated = true;
+                oContact.ContactElementCreated = SystemContact.CEState.Created;
             }
 
             // Set Sceen Size basd on Max Orbit:
@@ -428,6 +434,23 @@ namespace Pulsar4X.UI.SceenGraph
         /// </summary>
         public void Refresh()
         {
+
+            /// <summary>
+            /// Kludge to create new contact elements to draw, or delete them as needed.
+            /// </summary>
+            StarSystem Sys = m_oSceenEntity as StarSystem;
+            foreach (SystemContact oContact in Sys.SystemContactList)
+            {
+                if (oContact.ContactElementCreated == SystemContact.CEState.NotCreated)
+                {
+                    AddContactElement(SceenDefaultEffect, oContact);
+                }
+                else if (oContact.ContactElementCreated == SystemContact.CEState.Delete)
+                {
+                    RemoveContactElement(SceenDefaultEffect, oContact);
+                }
+            }
+
             foreach (SceenElement oElement in m_lElements)
             {
                 oElement.Refresh(m_fZoomScaler);
@@ -569,7 +592,28 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
             }
 
-            oContact.ContactElementCreated = true;
+            oContact.ContactElementCreated = SystemContact.CEState.Created;
+        }
+
+        /// <summary>
+        /// Removes a contact element from the display. This is controlled by SystemContact.ContactElementCreated.
+        /// </summary>
+        /// <param name="a_oDefaultEffect"></param>
+        /// <param name="oContact"></param>
+        public void RemoveContactElement(GLEffect a_oDefaultEffect, SystemContact oContact)
+        {
+            foreach (SceenElement Ele in m_lElements)
+            {
+                /// <summary>
+                /// Have to use Guid to identify elements and get rid of the one we no longer want.
+                /// </summary>
+                if (Ele.EntityID == oContact.Id)
+                {
+                    m_lElements.Remove(Ele);
+                    oContact.ContactElementCreated = SystemContact.CEState.NotCreated;
+                    break;
+                }
+            }
         }
 
         /// <summary>

@@ -1046,8 +1046,15 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile)
         {
             Name = String.Format("Ordnance Group #{0}", LaunchedFrom.TaskGroupFaction.MissileGroups.Count);
-            XSystem = LaunchedFrom.XSystem;
-            YSystem = LaunchedFrom.YSystem;
+
+            if (LaunchedFrom.IsOrbiting == true)
+            {
+                LaunchedFrom.GetPositionFromOrbit();
+            }
+
+            XSystem = LaunchedFrom.Contact.XSystem;
+            YSystem = LaunchedFrom.Contact.YSystem;
+
             Contact = new SystemContact(LaunchedFrom.TaskGroupFaction, this);
 
             Missiles = new BindingList<OrdnanceTN>();
@@ -1221,6 +1228,7 @@ namespace Pulsar4X.Entities.Components
 
                         if (OrdnanceGroupFaction.MissileGroups.Contains(this))
                         {
+                            contact.ContactElementCreated = SystemContact.CEState.Delete;
                             OrdnanceGroupFaction.MissileGroups.Remove(this);
                         }
                         

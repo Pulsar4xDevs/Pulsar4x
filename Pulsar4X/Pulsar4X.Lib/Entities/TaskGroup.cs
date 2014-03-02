@@ -2070,6 +2070,7 @@ namespace Pulsar4X.Entities
             TimeRequirement = 0;
             TotalOrderDistance = 0;
         }
+
         #endregion
 
 
