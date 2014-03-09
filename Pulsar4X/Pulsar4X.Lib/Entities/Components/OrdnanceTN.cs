@@ -825,7 +825,7 @@ namespace Pulsar4X.Entities.Components
         }
     }
 
-    public class OrdnanceTN
+    public class OrdnanceTN : GameEntity
     {
         /// <summary>
         /// Definition for this missile.
@@ -912,6 +912,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="definition">definition of the missile.</param>
         public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition, ShipTN ShipFiredFrom)
         {
+            Name = definition.Name;
+            Id = Guid.NewGuid();
+
             MFC = mfCtrl;
 
             Target = MFC.target;
@@ -1161,8 +1164,9 @@ namespace Pulsar4X.Entities.Components
         /// I need to move everyone to their target in this function.
         /// TODO:Upon missiles reaching a waypoint, or geo survey target travelline must be set to 1.
         /// </summary>
-        public void ProcessOrder(uint TimeSlice, Random RNG)
+        public int ProcessOrder(uint TimeSlice, Random RNG)
         {
+            int MissilesToDestroy = -1;
             GetHeading();
             GetSpeed();
             GetTimeRequirement();
@@ -1181,21 +1185,14 @@ namespace Pulsar4X.Entities.Components
                         Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
                         Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
 
-                        for (int loop = 0; loop < Missiles.Count; loop++)
-                        {
-                            float hourPer = TimeSlice / 3600.0f;
-                            Missiles[loop].fuel = Missiles[loop].fuel - (Missiles[loop].missileDef.totalFuelConsumption * hourPer);
-
-                            if (Missiles[loop].fuel <= 0.0f)
-                            {
-                                Missiles.RemoveAt(loop);
-                                loop--;
-                            }
-                        }
+                        CheckFuel(TimeSlice);
 
                         /// <summary>
-                        /// Impact time.
+                        /// Impact time. Mark every missile for destruction now, but later if some missiles turn out to have survived, set MissilesToDestroy to the last missile responsible for the
+                        /// ship kill.
                         /// </summary>
+                        MissilesToDestroy = Missiles.Count - 1;
+                        
                         for (int loop = 0; loop < Missiles.Count; loop++)
                         {
                             ushort ToHit = 0;
@@ -1209,6 +1206,10 @@ namespace Pulsar4X.Entities.Components
 
                             if (ToHit > HitChance)
                             {
+                                String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit.", Missiles[loop].Name, loop, Name);
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                OrdnanceGroupFaction.MessageLog.Add(Msg);
 
                                 ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
 
@@ -1217,21 +1218,25 @@ namespace Pulsar4X.Entities.Components
                                 ///<summary>
                                 ///Missile damage type always? laser damage type if implemented will need to change this.
                                 ///</summary>
-                                bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location,Missiles[loop].firingShip);
+                                bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location, Missiles[loop].firingShip);
 
                                 /// <summary>
                                 /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.
                                 /// </summary>
+                                if (ShipDest == true)
+                                {
+                                    MissilesToDestroy = loop;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                OrdnanceGroupFaction.MessageLog.Add(Msg);
                             }
                         }
-                        Missiles.Clear();
-
-                        if (OrdnanceGroupFaction.MissileGroups.Contains(this))
-                        {
-                            contact.ContactElementCreated = SystemContact.CEState.Delete;
-                            OrdnanceGroupFaction.MissileGroups.Remove(this);
-                        }
-                        
                     break;
                 }
                 
@@ -1247,19 +1252,7 @@ namespace Pulsar4X.Entities.Components
                 Contact.XSystem = Contact.XSystem + ((double)(TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
                 Contact.YSystem = Contact.YSystem + ((double)(TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);
 
-                //UseFuel(TimeSlice);
-                for (int loop = 0; loop < Missiles.Count; loop++)
-                {
-                    float hourPer = TimeSlice / 3600.0f;
-
-                    Missiles[loop].fuel = Missiles[loop].fuel - (Missiles[loop].missileDef.totalFuelConsumption * hourPer);
-
-                    if (Missiles[loop].fuel <= 0.0f)
-                    {
-                        Missiles.RemoveAt(loop);
-                        loop--;
-                    }
-                }
+                CheckFuel(TimeSlice);
 
                 /// <summary>
                 /// This probably isn't needed since timeReqs are constantly recalculated.
@@ -1268,6 +1261,37 @@ namespace Pulsar4X.Entities.Components
 
                 TimeSlice = 0;
             }
+
+            return MissilesToDestroy;
+        }
+
+
+        /// <summary>
+        /// Missiles which have used up their fuel should be destroyed if they run out under the right circumstances.
+        /// </summary>
+        /// <param name="TimeSlice">Time advancement to check for missile fuel usage.</param>
+        public void CheckFuel(uint TimeSlice)
+        {
+            for (int loop = 0; loop < Missiles.Count; loop++)
+            {
+                float hourPer = TimeSlice / 3600.0f;
+
+                Missiles[loop].fuel = Missiles[loop].fuel - (Missiles[loop].missileDef.totalFuelConsumption * hourPer);
+
+                if (Missiles[loop].fuel <= 0.0f)
+                {
+                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} has run out of fuel.", Missiles[loop].Name, loop, Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileOutOfFuel, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+                    Missiles.RemoveAt(loop);
+                    /// <summary>
+                    /// Since Missiles.Count just got decremented, decrement the loop as well.
+                    /// </summary>
+                    loop--;
+                }
+            }        
         }
     }
 }

@@ -347,12 +347,53 @@ namespace Pulsar4X.Entities
             {
                 for (int loop2 = 0; loop2 < P[loop].MissileGroups.Count; loop2++)
                 {
-                    P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
+                    int MissilesToRemove = P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
+                    
+
+                    /// <summary>
+                    /// This necessarily indicates ship destruction.
+                    /// </summary>
+                    if (MissilesToRemove != 0)
+                    {
+                        if (P[loop].MissileGroups[loop2].missiles[0].target.targetType == StarSystemEntityType.TaskGroup)
+                        {
+                            ShipTN MissileTarget = P[loop].MissileGroups[loop2].missiles[0].target.ship;
+                            if (MissileTarget != null)
+                            {
+                                if (MissileTarget.IsDestroyed == true)
+                                {
+
+                                    if (MissileTarget.ShipsFaction.RechargeList.ContainsKey(MissileTarget) == true)
+                                    {
+                                        MissileTarget.ShipsFaction.RechargeList[MissileTarget] = (int)Faction.RechargeStatus.Destroyed;
+                                    }
+                                    else
+                                    {
+                                        MissileTarget.ShipsFaction.RechargeList.Add(MissileTarget, (int)Faction.RechargeStatus.Destroyed);
+                                    }
+                                }
+                            }
+                        }
+
+                        /// <summary>
+                        /// Test this, I think it should return MissileCount-1 if all missiles are destroyed.
+                        /// </summary>
+                        for (int loop3 = 0; loop3 <= MissilesToRemove; loop3++)
+                        {
+                            P[loop].MissileGroups[loop2].missiles.RemoveAt(loop3);
+                        }
+                    }
+
+                    /// <summary>
+                    /// Either through running out of fuel, or hitting their target, all the missiles in this ordnance group are gone.
+                    /// </summary>
+                    if (P[loop].MissileGroups[loop2].missiles.Count == 0)
+                    {
+                        P[loop].MissileGroups[loop2].contact.ContactElementCreated = SystemContact.CEState.Delete;
+                        P[loop].MissileGroups.Remove(P[loop].MissileGroups[loop2]);
+                    }
                 }
             }
-
-
-
 
             /// <summary>
             /// Taskgroup Follow orders here.

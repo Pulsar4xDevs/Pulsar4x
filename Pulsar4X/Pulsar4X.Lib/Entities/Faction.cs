@@ -307,6 +307,11 @@ namespace Pulsar4X.Entities
             LaunchTubeReloaded,
             LaunchTubeNoOrdnanceToReload,
 
+            MissileHit,
+            MissileMissed,
+            MissileLostFireControl,
+            MissileOutOfFuel,
+
             OrdersCompleted,
             OrdersNotCompleted,
 

@@ -156,9 +156,9 @@ namespace Pulsar4X.Entities.Components
         public void AddInitialComponents()
         {
             /// <summary>
-            /// If components are removed here reduce this.
+            /// Watch total component count when adding or subtracting from this function
             /// </summary>
-            TotalComponents = 39;
+            TotalComponents = 0;
 
             GeneralComponentDefTN CrewQ = new GeneralComponentDefTN("Crew Quarters", 1.0f, 0, 10.0m, ComponentTypeTN.Crew);
             GeneralComponentDefTN CrewQS = new GeneralComponentDefTN("Crew Quarters - Small", 0.2f, 0, 2.0m, ComponentTypeTN.Crew);
@@ -166,6 +166,7 @@ namespace Pulsar4X.Entities.Components
             GeneralComponentDefTN FuelTS = new GeneralComponentDefTN("Fuel Storage - Small", 0.2f, 0, 3.0m, ComponentTypeTN.Fuel);
             GeneralComponentDefTN EBay = new GeneralComponentDefTN("Engineering Spaces", 1.0f, 5, 10.0m, ComponentTypeTN.Engineering);
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, ComponentTypeTN.Bridge);
+            TotalComponents = TotalComponents + 6;
 
             CrewQuarters.Add(CrewQ);
             CrewQuarters.Add(CrewQS);
@@ -175,7 +176,7 @@ namespace Pulsar4X.Entities.Components
             OtherComponents.Add(Bridge);
 
             /// <summary>
-            /// These components aren't really basic, but I'll put them in anyway for the time being.
+            /// These components aren't really basic, but I'll put them in anyway for the time being. Count 6 to 17
             /// </summary>
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5.0f, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
             ActiveSensorDefTN ActDef = new ActiveSensorDefTN("Search 5M - 5000", 1.0f, 10, 5, 100, false, 1.0f, 1);
@@ -188,6 +189,7 @@ namespace Pulsar4X.Entities.Components
             MissileLauncherDefTN TubeDef = new MissileLauncherDefTN("Size 1 Launcher", 1.0f, 1, false, 0);
             MagazineDefTN MagDef = new MagazineDefTN("Mag S1", 1.0f, 1, 0, 0, 1);
             ActiveSensorDefTN MFCDef = new ActiveSensorDefTN("Wasp I FC", 1.0f, 10, 5, 100, true, 1.0f, 1);
+            TotalComponents = TotalComponents + 11;
 
 
             Engines.Add(EngDef);
@@ -207,20 +209,22 @@ namespace Pulsar4X.Entities.Components
 
 
             /// <summary>
-            /// Everyone starts with cargoholds.
+            /// Everyone starts with cargoholds. Count 17 to 19
             /// </summary>
             CargoDefTN CargoStandard = new CargoDefTN("Cargo Hold - Standard", 500.0f, 50.0m, 5);
             CargoDefTN CargoSmall = new CargoDefTN("Cargo Hold - Small", 100.0f, 12.5m, 2);
+            TotalComponents = TotalComponents + 2;
 
             CargoHoldDef.Add(CargoStandard);
             CargoHoldDef.Add(CargoSmall);
 
             /// <summary>
-            /// Cryostorage is a TN only starting option. otherwise it must be researched.
+            /// Cryostorage is a TN only starting option. otherwise it must be researched. Count, 19 to 22
             /// </summary>
             ColonyDefTN ColonyStandard = new ColonyDefTN("Cryogenic Transport", 50.0f, 100.0m, 10);
             ColonyDefTN ColonySmall = new ColonyDefTN("Cryogenic Transport - Small", 5.0f, 20.0m, 2);
             ColonyDefTN ColonyEmergency = new ColonyDefTN("Cryogenic Transport - Emergency", 1.0f, 5.0m, 0);
+            TotalComponents = TotalComponents + 3;
 
             ColonyBayDef.Add(ColonyStandard);
             ColonyBayDef.Add(ColonySmall);
@@ -228,14 +232,14 @@ namespace Pulsar4X.Entities.Components
 
 
             /// <summary>
-            /// Only TN starts begin with this component for now. the improved,advanced, and grav-assisted variants have to be researched.
+            /// Only TN starts begin with this component for now. the improved,advanced, and grav-assisted variants have to be researched. Count 22, to 23
             /// </summary>
             CargoHandlingDefTN CHS = new CargoHandlingDefTN("Cargo Handling System", 5);
             CargoHandleSystemDef.Add(CHS);
-
+            TotalComponents = TotalComponents + 1;
 
             /// <summary>
-            /// Alpha build components:
+            /// Alpha build components: Count 23, to 39
             /// </summary>
 
             EngineDefTN AlphaEngine = new EngineDefTN("Ion Engine 120", 12.0f, 1.0f, 0.7f, 1.0f, 1, 10.0f, -1.0f);
@@ -257,6 +261,7 @@ namespace Pulsar4X.Entities.Components
             ReactorDefTN AlphaReactor = new ReactorDefTN("GCFR S1 P4.5", 2, 1.0f, 1.0f);
 
             ShieldDefTN AlphaShield = new ShieldDefTN("Gamma R300/336 Shields", 2, 2, 0.7f, 1.0f, ComponentTypeTN.Shield);
+            TotalComponents = TotalComponents + 16;
 
             Engines.Add(AlphaEngine);
 
@@ -280,6 +285,30 @@ namespace Pulsar4X.Entities.Components
             ReactorDef.Add(AlphaReactor);
 
             ShieldDef.Add(AlphaShield);
+
+            /// <summary>
+            /// Missile Combat Alpha Components: Count at 44 from 39 OrdnanceDefTN and MissileEngineDefTN are _NOT_ included in the total count.
+            /// </summary>
+            EngineDefTN AlphaMCEngine = new EngineDefTN("Military 5000 EP Photonic Drive", 100.0f, 1.0f, 0.1f, 1.0f, 1, 50.0f, -1.0f);
+            ActiveSensorDefTN AlphaMCSensor = new ActiveSensorDefTN("Active Search Sensor MR13500-R100", 10.0f, 180, 75, 100, false, 1.0f, 0);
+            ActiveSensorDefTN AlphaMCMissileFireControl = new ActiveSensorDefTN("Missile Fire Control FC40500-R100", 10.0f, 180, 75, 100, true, 1.0f, 0);
+            MagazineDefTN MagazineMCDef = new MagazineDefTN("Capacity 587 Magazine: Exp 1%  HTK4", 30.0f, 4, 8, 8, 12);
+            MissileLauncherDefTN TubeMCDef = new MissileLauncherDefTN("Size 4 Launcher", 4.0f, 11, false, 0);
+            MissileEngineDefTN MissileEngineMCDef = new MissileEngineDefTN("Photonic Missile Drive", 100.0f, 1.0f, 0.1f, 1.5f);
+            OrdnanceDefTN MissileMCDef = new OrdnanceDefTN("Size 4 Missile", null, 0.5f, 11, 1.0f, 1.0f, 11, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 100, 0, 0.0f, 0.0f, 0, false, 0, false, 0,
+                                                           MissileEngineMCDef, 1);
+            TotalComponents = TotalComponents + 5;
+
+            Engines.Add(AlphaMCEngine);
+            ActiveSensorDef.Add(AlphaMCSensor);
+            MissileFireControlDef.Add(AlphaMCMissileFireControl);
+            MagazineDef.Add(MagazineMCDef);
+            MLauncherDef.Add(TubeMCDef);
+            MissileEngineDef.Add(MissileEngineMCDef);
+            MissileDef.Add(MissileMCDef);
+            
+
+
         }
 
         /// <summary>
