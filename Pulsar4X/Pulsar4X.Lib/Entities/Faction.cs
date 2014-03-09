@@ -310,6 +310,7 @@ namespace Pulsar4X.Entities
             MissileHit,
             MissileMissed,
             MissileLostFireControl,
+            MissileLostTracking,
             MissileOutOfFuel,
 
             OrdersCompleted,

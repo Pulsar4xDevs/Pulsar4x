@@ -716,115 +716,6 @@ namespace Pulsar4X.Entities.Components
         }
     }
 
-    public class OrdnanceTargetTN
-    {
-        /// <summary>
-        /// Missiles can be fired at many potential targets, hence falling back to the SSE
-        /// </summary>
-        private StarSystemEntityType TargetType;
-        public StarSystemEntityType targetType
-        {
-            get { return TargetType; }
-            set { TargetType = value; }
-        }
-
-        /// <summary>
-        /// Ship killer ordnance usually.
-        /// </summary>
-        private ShipTN Ship;
-        public ShipTN ship
-        {
-            get { return Ship; }
-        }
-
-        /// <summary>
-        /// Survey typically.
-        /// </summary>
-        private Planet Body;
-        public Planet body
-        {
-            get { return body; }
-        }
-
-        /// <summary>
-        /// Planetary bombardment typically.
-        /// </summary>
-        private Population Pop;
-        public Population pop
-        {
-            get { return Pop; }
-        }
-
-        /// <summary>
-        /// Waypoint target, Drones, sensor missiles, and mines will make use of this for now.
-        /// specialized minelaying code may be put in later.
-        /// </summary>
-        private Waypoint WP;
-        public Waypoint wp
-        {
-            get { return WP; }
-        }
-
-        /// <summary>
-        /// The target for this ordnance group is another ordnance group.
-        /// </summary>
-        private OrdnanceGroupTN MissileGroup;
-        public OrdnanceGroupTN missileGroup
-        {
-            get { return MissileGroup; }
-        }
-
-        /// <summary>
-        /// Constructor for ship targets.
-        /// </summary>
-        /// <param name="ShipTarget">Ship that will be the target</param>
-        public OrdnanceTargetTN(ShipTN ShipTarget)
-        {
-            TargetType = ShipTarget.ShipsTaskGroup.SSEntity;
-            Ship = ShipTarget;
-        }
-
-        /// <summary>
-        /// Constructor for planetary targets.
-        /// </summary>
-        /// <param name="BodyTarget">Body which is the target</param>
-        public OrdnanceTargetTN(Planet BodyTarget)
-        {
-            TargetType = BodyTarget.SSEntity;
-            Body = BodyTarget;
-        }
-
-        /// <summary>
-        /// Constructor for population targets.
-        /// </summary>
-        /// <param name="PopTarget">Population that is targeted.</param>
-        public OrdnanceTargetTN(Population PopTarget)
-        {
-            TargetType = StarSystemEntityType.Population;
-            Pop = PopTarget;
-        }
-
-        /// <summary>
-        /// Constructor for Waypoint targets.
-        /// </summary>
-        /// <param name="WPTarget">waypoint to be targeted.</param>
-        public OrdnanceTargetTN(Waypoint WPTarget)
-        {
-            TargetType = WPTarget.SSEntity;
-            WP = WPTarget;
-        }
-
-        /// <summary>
-        /// Constructor for Missile group targets.
-        /// </summary>
-        /// <param name="OGTarget">missile group that this group is targeted on.</param>
-        public OrdnanceTargetTN(OrdnanceGroupTN OGTarget)
-        {
-            TargetType = OGTarget.SSEntity;
-            MissileGroup = OGTarget;
-        }
-    }
-
     public class OrdnanceTN : GameEntity
     {
         /// <summary>
@@ -868,8 +759,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Target this missile is headed for.
         /// </summary>
-        private OrdnanceTargetTN Target;
-        public OrdnanceTargetTN target
+        private TargetTN Target;
+        public TargetTN target
         {
             get { return Target; }
             set { Target = value; }
@@ -906,6 +797,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// If this missile has a sensor of its own, is it using it to track targets, IE has MFC tracking been lost?
+        /// </summary>
+        private bool OnOwnSensors;
+        public bool onOwnSensors
+        {
+            get { return OnOwnSensors; }
+        }
+
+        /// <summary>
         /// Constructor for missiles.
         /// </summary>
         /// <param name="mfCtrl">MFC directing this missile.</param>
@@ -929,11 +829,106 @@ namespace Pulsar4X.Entities.Components
             Fuel = definition.fuel * 2500.0f;
 
             Separated = false;
+
+            OnOwnSensors = false;
         }
 
         /// <summary>
         /// Need functions to check various things such as whether a missile is destroyed by incoming fire, if it hits, damage used, and so on.
         /// </summary>
+
+
+        /// <summary>
+        /// Is this missile still getting targetting information from an FC?
+        /// </summary>
+        /// <returns> Whether the missile should be destroyed(or alternatively switched over to OnOwnSensors). </returns>
+        public bool HasMFCTracking()
+        {
+            /// <summary>
+            /// is the MFC intact or not?
+            /// </summary>
+            if (MFC.isDestroyed == true)
+            {
+                return false;
+            }
+
+            /// <summary>
+            /// Did the target get switched?
+            /// </summary>
+            if (MFC.target != Target)
+            {
+                return false;
+            }
+
+            /// <summary>
+            /// Range check the target.
+            /// </summary>
+            switch (MFC.target.targetType)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    StarSystem Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
+                    int targetIndex = Sys.SystemContactList.IndexOf(MFC.target.ship.ShipsTaskGroup.Contact);
+
+                    /// <summary>
+                    /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
+                    /// </summary>
+                    float Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
+
+                    int sig = MFC.target.ship.TotalCrossSection - 1;
+                    if (sig > Constants.ShipTN.ResolutionMax - 1)
+                        sig = Constants.ShipTN.ResolutionMax - 1;
+
+                    int TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(sig, -1);
+
+                    /// <summary>
+                    /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
+                    /// </summary>
+                    bool Detected = ordGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
+
+                    if (Detected == false)
+                        return false;
+                break;
+
+                case StarSystemEntityType.Missile:
+                    Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
+                    targetIndex = Sys.SystemContactList.IndexOf(MFC.target.missile.ordGroup.contact);
+
+                    /// <summary>
+                    /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
+                    /// </summary>
+                    Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
+
+                    sig = (int)Math.Ceiling(MFC.target.missile.missileDef.size);
+
+                    TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(-1, sig);
+
+                    /// <summary>
+                    /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
+                    /// </summary>
+                    Detected = ordGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
+
+                    if (Detected == false)
+                        return false;
+                break;
+                case StarSystemEntityType.Population:
+                break;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Mark this missile as either being on its own sensors, or tell the caller that we don't have one of those.
+        /// </summary>
+        /// <returns>Does this missile have its own active sensor with which to track?</returns>
+        public bool SetOwnSensors()
+        {
+            if (missileDef.activeStr != 0.0f)
+            {
+                OnOwnSensors = true;
+            }
+
+            return OnOwnSensors;
+        }
     }
 
     public class OrdnanceGroupTN : StarSystemEntity
@@ -1171,6 +1166,12 @@ namespace Pulsar4X.Entities.Components
             GetSpeed();
             GetTimeRequirement();
 
+            CheckTracking();
+
+            /// <summary>
+            /// Need an on own sensors check here to look for a new target.
+            /// </summary>
+
             if (TimeReq < TimeSlice)
             {
                 /// <summary>
@@ -1238,11 +1239,32 @@ namespace Pulsar4X.Entities.Components
                             }
                         }
                     break;
+                    case StarSystemEntityType.Population:
+                    break;
+                    case StarSystemEntityType.Missile:
+                    break;
+                    case StarSystemEntityType.Waypoint:
+                        /// <summary>
+                        /// If missiles are targetted on a waypoint, and are set to OnOwnSensors = true, that means they are looking for a target.
+                        /// </summary>
+                    break;
                 }
                 
             }
             else if(Missiles[0].missileDef.ordnanceEngine != null)
             {
+                if (Missiles[0].onOwnSensors == true)
+                {
+                    /// <summary>
+                    /// Need to scan for a new target here.
+                    /// Check the detectedContacts list for said target, also verify that said target is still in range.
+                    /// </summary>
+                    /*for (int loop = 0; loop < Missiles.Count; loop++)
+                    {
+                        
+                    }*/
+                }
+
                 /// <summary>
                 /// Move missile closer to its target. provided of course that it has an engine.
                 /// </summary>
@@ -1292,6 +1314,70 @@ namespace Pulsar4X.Entities.Components
                     loop--;
                 }
             }        
+        }
+
+        /// <summary>
+        /// Do all the missiles in this group still have MFC tracking?
+        /// </summary>
+        public void CheckTracking()
+        {
+            /// <summary>
+            /// Tracking has already been lost, and all survivors here are on their own already.
+            /// </summary>
+            if (Missiles[0].onOwnSensors == true)
+            {
+                return;
+            }
+
+            if (Missiles[0].HasMFCTracking() == false)
+            {
+                for (int loop = 0; loop < Missiles.Count; loop++)
+                {
+                    if (!missiles[loop].SetOwnSensors())
+                    {
+                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} lost tracking,has no onboard sensor and will self destruct.", Missiles[loop].Name, loop, Name);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+                        Missiles.RemoveAt(loop);
+                        /// <summary>
+                        /// Since Missiles.Count just got decremented, decrement the loop as well.
+                        /// </summary>
+                        loop--;
+                    }
+                    else
+                    {
+                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} lost tracking and will switch to onboard sensors.", Missiles[loop].Name, loop, Name);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+
+                        /// <summary>
+                        /// Create new WP Target Here:
+                        /// </summary>
+                        double X = 0.0,Y = 0.0;
+                        switch(missiles[loop].target.targetType)
+                        {
+                            case StarSystemEntityType.TaskGroup:
+                                X =  missiles[loop].target.ship.ShipsTaskGroup.Contact.XSystem;
+                                Y =  missiles[loop].target.ship.ShipsTaskGroup.Contact.YSystem;
+                            break;
+
+                            case StarSystemEntityType.Missile:
+                                X =  missiles[loop].target.missile.ordGroup.Contact.XSystem;
+                                Y =  missiles[loop].target.missile.ordGroup.Contact.YSystem;
+                            break;
+
+                            case StarSystemEntityType.Population:
+                            break;
+                        }
+                        Waypoint NewTarget = new Waypoint("Internal Missile Target, Do Not Display", Contact.CurrentSystem, X, Y, OrdnanceGroupFaction.FactionID);
+                        missiles[loop].target = new TargetTN(NewTarget);
+                    }
+                }
+            }
         }
     }
 }

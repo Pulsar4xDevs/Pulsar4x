@@ -406,8 +406,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Target Assigned to this MFC
         /// </summary>
-        private OrdnanceTargetTN Target;
-        public OrdnanceTargetTN target
+        private TargetTN Target;
+        public TargetTN target
         {
             get { return Target; }
         }
@@ -478,7 +478,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ShipTarget">Ship to be targeted.</param>
         public void assignTarget(ShipTN ShipTarget)
         {
-            Target = new OrdnanceTargetTN(ShipTarget);
+            Target = new TargetTN(ShipTarget);
         }
 
         /// <summary>
@@ -487,7 +487,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="PlanetTarget">planet</param>
         public void assignTarget(Planet PlanetTarget)
         {
-            Target = new OrdnanceTargetTN(PlanetTarget);
+            Target = new TargetTN(PlanetTarget);
         }
 
         /// <summary>
@@ -496,7 +496,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="PopTarget">Population</param>
         public void assignTarget(Population PopTarget)
         {
-            Target = new OrdnanceTargetTN(PopTarget);
+            Target = new TargetTN(PopTarget);
         }
 
         /// <summary>
@@ -505,7 +505,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="WPTarget">Waypoint</param>
         public void assignTarget(Waypoint WPTarget)
         {
-            Target = new OrdnanceTargetTN(WPTarget);
+            Target = new TargetTN(WPTarget);
         }
 
         /// <summary>
@@ -576,7 +576,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Simple return of the target of this MFC.
         /// </summary>
-        public OrdnanceTargetTN getTarget()
+        public TargetTN getTarget()
         {
             return Target;
         }

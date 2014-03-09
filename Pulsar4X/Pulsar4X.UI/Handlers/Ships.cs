@@ -989,7 +989,7 @@ namespace Pulsar4X.UI.Handlers
 
                 for (int loop = 0; loop < _CurrnetShip.ShipMFC.Count; loop++)
                 {
-                    OrdnanceTargetTN Target = _CurrnetShip.ShipMFC[loop].getTarget();
+                    TargetTN Target = _CurrnetShip.ShipMFC[loop].getTarget();
 
                     if (Target == null)
                     {
