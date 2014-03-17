@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using log4net.Config;
+using log4net;
 
 namespace Pulsar4X.Entities.Components
 {
@@ -806,6 +808,24 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Copypasted from Ship.cs:
+        /// These lists will store timestamps for whenever this ship is detected. Example:
+        /// Faction 0 detects this craft via thermal on tick 102, so ThermalDetection[0] = 102.
+        /// On tick 103, the craft is still detected, so ThermalDetection[0] is updated to 103.
+        /// on 104, the ship is no longer detected so no update is made.
+        /// What this all means is that on any given tick it is possible to quickly determine whether or not a ship has been detected by a faction.
+        /// I am thinking that ticks will be counted in 5 second intervals, there should not be any issue with this for my code.
+        /// </summary>
+        public BindingList<int> ThermalDetection { get; set; }
+        public BindingList<int> EMDetection { get; set; }
+        public BindingList<int> ActiveDetection { get; set; }
+
+
+        /// <summary>
+        /// End Copy Paste from Ship.cs
+        /// </summary>
+
+        /// <summary>
         /// Constructor for missiles.
         /// </summary>
         /// <param name="mfCtrl">MFC directing this missile.</param>
@@ -829,7 +849,6 @@ namespace Pulsar4X.Entities.Components
             Fuel = definition.fuel * 2500.0f;
 
             Separated = false;
-
             OnOwnSensors = false;
         }
 
@@ -839,7 +858,7 @@ namespace Pulsar4X.Entities.Components
 
 
         /// <summary>
-        /// Is this missile still getting targetting information from an FC?
+        /// Is this missile still getting targetting information from an FC and an active sensor somewhere?
         /// </summary>
         /// <returns> Whether the missile should be destroyed(or alternatively switched over to OnOwnSensors). </returns>
         public bool HasMFCTracking()
@@ -861,12 +880,36 @@ namespace Pulsar4X.Entities.Components
             }
 
             /// <summary>
+            /// If there are no contacts in this system, then obviously we don't have a target.
+            /// </summary>
+            if (ordGroup.ordnanceGroupFaction.DetectedContactLists.ContainsKey(ordGroup.contact.CurrentSystem) == false)
+            {
+                return false;
+            }
+
+            /// <summary>
             /// Range check the target.
             /// </summary>
             switch (MFC.target.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
                     StarSystem Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
+
+                    /// <summary>
+                    /// is the specified ship in the detected contacts list? and is it detected by an active?
+                    /// </summary>
+                    if (ordGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts.ContainsKey(MFC.target.ship))
+                    {
+                        if (ordGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts[MFC.target.ship].active == false)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+
                     int targetIndex = Sys.SystemContactList.IndexOf(MFC.target.ship.ShipsTaskGroup.Contact);
 
                     /// <summary>
@@ -933,6 +976,13 @@ namespace Pulsar4X.Entities.Components
 
     public class OrdnanceGroupTN : StarSystemEntity
     {
+
+        /// <summary>
+        /// MG Logger:
+        /// </summary>
+        public static readonly ILog logger = LogManager.GetLogger(typeof(OrdnanceGroupTN));
+
+
         /// <summary>
         /// Missiles in this "group" of missiles.
         /// </summary>
@@ -1056,8 +1106,23 @@ namespace Pulsar4X.Entities.Components
             Contact = new SystemContact(LaunchedFrom.TaskGroupFaction, this);
 
             Missiles = new BindingList<OrdnanceTN>();
-            Missiles.Add(Missile);
-            Missile.ordGroup = this;
+
+            /// <summary>
+            /// Missile Detection Statistics:
+            /// This is the first missile so created, so it is in spot 0.
+            /// </summary>
+            Missile.ThermalDetection = new BindingList<int>();
+            Missile.EMDetection = new BindingList<int>();
+            Missile.ActiveDetection = new BindingList<int>();
+
+            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
+            {
+                Missile.ThermalDetection.Add(GameState.SE.CurrentTick);
+                Missile.EMDetection.Add(GameState.SE.CurrentTick);
+                Missile.ActiveDetection.Add(GameState.SE.CurrentTick);
+            }
+
+
 
             SSEntity = StarSystemEntityType.Missile;
 
@@ -1066,6 +1131,11 @@ namespace Pulsar4X.Entities.Components
             Contact.CurrentSystem = LaunchedFrom.Contact.CurrentSystem;
             LaunchedFrom.Contact.CurrentSystem.AddContact(Contact);
             DrawTravelLine = 0;
+
+
+            Missiles.Add(Missile);
+            Missile.ordGroup = this;
+
         }
 
         /// <summary>
@@ -1074,12 +1144,36 @@ namespace Pulsar4X.Entities.Components
         /// <param name="Missile">Missile to add, think of this as the ShipTN to OrdnanceGroupTN's TaskGroupTN</param>
         public void AddMissile(OrdnanceTN Missile)
         {
-            Missiles.Add(Missile);
-
             /// <summary>
-            /// When missile detection stats are revisited, they'll have to be updated here and in the constructor.
+            /// Missile Detection Statistics:
+            /// This is the first missile so created, so it is in spot 0.
             /// </summary>
+            Missile.ThermalDetection = new BindingList<int>();
+            Missile.EMDetection = new BindingList<int>();
+            Missile.ActiveDetection = new BindingList<int>();
+
+            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
+            {
+                Missile.ThermalDetection.Add(GameState.SE.CurrentTick);
+                Missile.EMDetection.Add(GameState.SE.CurrentTick);
+                Missile.ActiveDetection.Add(GameState.SE.CurrentTick);
+            }
+
+            Missiles.Add(Missile);
+            Missile.ordGroup = this;
+
         }
+
+        /// <summary>
+        /// Any special functionality needed for removing missiles.
+        /// </summary>
+        /// <param name="Missile">Missile to be removed</param>
+        public void RemoveMissile(OrdnanceTN Missile)
+        {
+            Missiles.Remove(Missile);
+        }
+
+        #region Travelling and following orders
 
         /// <summary>
         /// Direction this missile is headed.
@@ -1307,7 +1401,7 @@ namespace Pulsar4X.Entities.Components
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
 
-                    Missiles.RemoveAt(loop);
+                    RemoveMissile(Missiles[loop]);
                     /// <summary>
                     /// Since Missiles.Count just got decremented, decrement the loop as well.
                     /// </summary>
@@ -1340,7 +1434,7 @@ namespace Pulsar4X.Entities.Components
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
 
-                        Missiles.RemoveAt(loop);
+                        RemoveMissile(Missiles[loop]);
                         /// <summary>
                         /// Since Missiles.Count just got decremented, decrement the loop as well.
                         /// </summary>
@@ -1379,5 +1473,9 @@ namespace Pulsar4X.Entities.Components
                 }
             }
         }
+
+        #endregion
+
+        
     }
 }

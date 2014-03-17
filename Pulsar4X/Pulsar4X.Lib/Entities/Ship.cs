@@ -669,6 +669,9 @@ namespace Pulsar4X.Entities
             TotalCrossSection = ClassDefinition.TotalCrossSection;
             CurrentEMSignature = 0;
 
+            /// <summary>
+            /// Detection Statistics initialization:
+            /// </summary>
             ThermalList = new LinkedListNode<int>(ShipIndex);
             EMList = new LinkedListNode<int>(ShipIndex);
             ActiveList = new LinkedListNode<int>(ShipIndex);

@@ -264,23 +264,23 @@ namespace Pulsar4X.Entities.Components
             ///Initialize the missile lookup Table.
             ///Missile size is in MSP, and no missile may be a fractional MSP in size. Each MSP is 0.05 HS in size.
             ///</summary>
-            for (int loop = 0; loop < 15; loop++)
+            for (int loop = 0; loop < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); loop++)
             {
                 ///<summary>
                 ///Missile size never drops below 0.33, and missiles above 1 HS are atleast 1 HS. if I have to deal with 2HS missiles I can go to LookUpST
                 ///</summary>
-                if (loop == 0)
+                if (loop == Constants.OrdnanceTN.MissileResolutionMinimum)
                 {
                     int NewRange = (int)((float)MaxRange * (float)Math.Pow((0.33 / (float)Resolution), 2.0f));
                     LookUpMT.Add(NewRange);
                 }
-                else if (loop != 14)
+                else if (loop != Constants.OrdnanceTN.MissileResolutionMaximum)
                 {
                     float msp = ((float)loop + 6.0f) * 0.05f;
                     int NewRange = (int)((float)MaxRange * Math.Pow((msp / (float)Resolution), 2.0f));
                     LookUpMT.Add(NewRange);
                 }
-                else if (loop == 14)
+                else if (loop == Constants.OrdnanceTN.MissileResolutionMaximum)
                 {
                     lookUpMT.Add(LookUpST[0]);//size 1 is size 1
                 }
@@ -312,7 +312,7 @@ namespace Pulsar4X.Entities.Components
             ///<summary>
             ///limits of the arrays
             ///</summary>
-            if ( (TCS > (Constants.ShipTN.ResolutionMax - 1) || TCS < 0) || (MSP > 14 || MSP < -1 ) )
+            if ((TCS > (Constants.ShipTN.ResolutionMax - 1) || TCS < 0) || (MSP > Constants.OrdnanceTN.MissileResolutionMaximum || MSP < -1))
             {
                 return -1;
             }
@@ -624,7 +624,7 @@ namespace Pulsar4X.Entities.Components
                                 {
                                     if (OrdGroup.missiles[0].missileDef.maxSpeed == LOSpeed)
                                     {
-                                        OrdGroup.missiles.Add(newMissile);
+                                        OrdGroup.AddMissile(newMissile);
                                         foundGroup = true;
                                         break;
                                     }

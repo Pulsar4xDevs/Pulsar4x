@@ -1184,12 +1184,23 @@ namespace Pulsar4X
             /// <summary>
             /// Launchers are capped at this value so no missile greater than 100 makes any sense to be designed.
             /// </summary>
-            public static double MaxSize = 100.0;
+            public const double MaxSize = 100.0;
 
             /// <summary>
             /// Maximum missile speed which they may not exceed in km
             /// </summary>
-            public static int MaximumSpeed = 299000;
+            public const int MaximumSpeed = 299000;
+
+            /// <summary>
+            /// No missile will be smaller than size 6 for sensor purposes. This works out to 0.33 HS, not 0.3 HS however. This is subtracted from 6(6-6=0) for the activeSensor LookUpMT array.
+            /// </summary>
+            public const int MissileResolutionMinimum = 0;
+
+            /// <summary>
+            /// 1 HS, or 20 MSP is the maximum size for missile resolution. This is subtracted from 6(20-6=14) for the activeSensor LookUpMT array.
+            /// Missiles can be larger than this, but they will just use LookUpST.
+            /// </summary>
+            public const int MissileResolutionMaximum = 14;
         }
     }
 }

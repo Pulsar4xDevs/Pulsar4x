@@ -380,7 +380,7 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         for (int loop3 = 0; loop3 <= MissilesToRemove; loop3++)
                         {
-                            P[loop].MissileGroups[loop2].missiles.RemoveAt(loop3);
+                            P[loop].MissileGroups[loop2].RemoveMissile(P[loop].MissileGroups[loop2].missiles[loop3]);
                         }
                     }
 
