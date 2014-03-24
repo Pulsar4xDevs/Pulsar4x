@@ -618,7 +618,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     if (_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget() != null)
                     {
-                        ShipTN vessel = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget();
+                        ShipTN vessel = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget().ship;
                         if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
                         {
                             vessel.ShipsTargetting.Remove(_CurrnetShip);
@@ -952,7 +952,7 @@ namespace Pulsar4X.UI.Handlers
 
                 for (int loop = 0; loop < _CurrnetShip.ShipBFC.Count; loop++)
                 {
-                    ShipTN Target = _CurrnetShip.ShipBFC[loop].getTarget();
+                    ShipTN Target = _CurrnetShip.ShipBFC[loop].getTarget().ship;
 
                     if (Target == null)
                     {

@@ -286,8 +286,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Target Assigned to this BFC
         /// </summary>
-        private ShipTN Target;
-        public ShipTN target
+        private TargetTN Target;
+        public TargetTN target
         {
             get { return Target; }
             set { Target = value; }
@@ -350,7 +350,28 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ShipTarget">Ship to be targeted.</param>
         public void assignTarget(ShipTN ShipTarget)
         {
-            Target = ShipTarget;
+            TargetTN NewShipTarget = new TargetTN(ShipTarget);
+            Target = NewShipTarget;
+        }
+
+        /// <summary>
+        /// Assignment of a missile group as a target.
+        /// </summary>
+        /// <param name="OrdGroupTarget">ordnance group to be targetted</param>
+        public void assignTarget(OrdnanceGroupTN OrdGroupTarget)
+        {
+            TargetTN NewOrdTarget = new TargetTN(OrdGroupTarget);
+            Target = NewOrdTarget;
+        }
+
+        /// <summary>
+        /// assignment of a population as the target
+        /// </summary>
+        /// <param name="PopTarget">Population to be targetted</param>
+        public void assignTarget(Population PopTarget)
+        {
+            TargetTN NewPopTarget = new TargetTN(PopTarget);
+            Target = NewPopTarget;
         }
 
         /// <summary>
@@ -364,7 +385,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Simple return of the target of this BFC.
         /// </summary>
-        public ShipTN getTarget()
+        public TargetTN getTarget()
         {
             return Target;
         }
@@ -437,80 +458,7 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
 
                 int RangeIncrement = (int)Math.Floor(DistanceToTarget / 5000.0f);
-                float FireAccuracy = BeamFireControlDef.rangeAccuracyTable[RangeIncrement];
-                /// <summary>
-                /// 100% accuracy due to tracking at this speed.
-                /// </summary>
-                if (Target.CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[99])
-                {
-                    if (Target.CurrentSpeed >= BeamFireControlDef.trackingAccuracyTable[0])
-                    {
-                        FireAccuracy = FireAccuracy * 0.01f;
-                    }
-                    else
-                    {
-                        bool done = false;
-                        int Base = 50;
-                        int Cur = 50;
-                        /// <summary>
-                        /// Binary search through the tracking accuracy table.
-                        /// </summary>
-                        
-                        while (!done)
-                        {
-                            Cur = Cur / 2;
-                            if (Target.CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[Base])
-                            {
-                                if (Cur == 1)
-                                {
-                                    float t1 = Target.CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base];
-                                    float t2 = Target.CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base - 1];
-                                    if (t1 <= t2)
-                                    {
-                                        FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
-                                        done = true;
-                                    }
-                                    else
-                                    {
-                                        FireAccuracy = FireAccuracy * ((float)(Base - 1) / 100.0f);
-                                        done = true;
-                                    }
-                                }
-                                Base = Base - Cur;
-                            }
-                            else if (Target.CurrentSpeed < BeamFireControlDef.trackingAccuracyTable[Base])
-                            {
-                                if (Cur == 1)
-                                {
-                                    float t1 = BeamFireControlDef.trackingAccuracyTable[Base] - Target.CurrentSpeed;
-                                    float t2 = BeamFireControlDef.trackingAccuracyTable[Base + 1] - Target.CurrentSpeed;
-                                    if (t1 <= t2)
-                                    {
-                                        FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
-                                        done = true;
-                                    }
-                                    else
-                                    {
-                                        FireAccuracy = FireAccuracy * ((float)(Base + 1) / 100.0f);
-                                        done = true;
-                                    }
-                                }
-                                Base = Base + Cur;
-                            }
-                            else
-                            {
-                                FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
-                                done = true;
-                            }
-                        }
-                    }
-                }
-                if (track < BeamFireControlDef.tracking)
-                {
-                    float fireAccMod = (float)track / BeamFireControlDef.tracking;
-
-                    FireAccuracy = FireAccuracy * fireAccMod;
-                }
+                float FireAccuracy = GetFiringAccuracy(RangeIncrement,track);
 
                 
                 /// <summary>
@@ -519,70 +467,286 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
                 bool weaponFired = false;
 
-                int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
-                ushort Columns = Target.ShipArmor.armorDef.cNum;
-
-                for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+                if (Target.targetType == StarSystemEntityType.TaskGroup)
                 {
-                    if (LinkedWeapons[loop].beamDef.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
+
+                    int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
+                    ushort Columns = Target.ship.ShipArmor.armorDef.cNum;
+
+                    for (int loop = 0; loop < LinkedWeapons.Count; loop++)
                     {
-                        RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
-
-                        weaponFired = LinkedWeapons[loop].Fire();
-
-                        if (weaponFired == true)
+                        if (LinkedWeapons[loop].beamDef.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
                         {
-                            for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
+                            RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                            weaponFired = LinkedWeapons[loop].Fire();
+
+                            if (weaponFired == true)
                             {
-
-                                int Hit = RNG.Next(1, 100);
-
-                                if (toHit >= Hit)
+                                for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
                                 {
 
-                                    String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedWeapons[loop].Name, LinkedWeapons[loop].beamDef.damage[RangeIncrement],toHit);
+                                    int Hit = RNG.Next(1, 100);
 
-                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
-                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
-
-                                    FiringShip.ShipsFaction.MessageLog.Add(NMsg);
-
-
-                                    ushort location = (ushort)RNG.Next(0, Columns);
-                                    bool ShipDest = Target.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location, FiringShip);
-
-                                    if (ShipDest == true)
+                                    if (toHit >= Hit)
                                     {
-                                        Target = null;
-                                        OpenFire = false;
-                                        return weaponFired;
+
+                                        String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedWeapons[loop].Name, LinkedWeapons[loop].beamDef.damage[RangeIncrement], toHit);
+
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                        FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+
+
+                                        ushort location = (ushort)RNG.Next(0, Columns);
+                                        bool ShipDest = Target.ship.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location, FiringShip);
+
+                                        if (ShipDest == true)
+                                        {
+                                            Target = null;
+                                            OpenFire = false;
+                                            return weaponFired;
+                                        }
                                     }
+                                    else
+                                    {
+                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                        FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                    }
+                                }
+                            }
+                            else if (LinkedWeapons[loop].isDestroyed == false)
+                            {
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapons[loop].Name, LinkedWeapons[loop].currentCapacitor, LinkedWeapons[loop].beamDef.weaponCapacitor);
+
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                     GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                            }
+                        }
+                    }
+
+                    return weaponFired;
+                }
+                else if (Target.targetType == StarSystemEntityType.Missile)
+                {
+                    /// <summary>
+                    /// this is for beam targetting on missiles.
+                    /// </summary>
+                    int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
+
+                    /// <summary>
+                    /// For all weapons linked to this BFC
+                    /// </summary>
+                    for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+                    {
+                        /// <summary>
+                        /// if range > distance and the weapon is ready to fire.
+                        /// </summary>
+                        if (LinkedWeapons[loop].beamDef.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
+                        {
+                            RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                            weaponFired = LinkedWeapons[loop].Fire();
+
+                            if (weaponFired == true)
+                            {
+                                /// <summary>
+                                /// Some weapons have multiple shots, but most will have just 1.
+                                /// </summary>
+                                for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
+                                {
+                                    int Hit = RNG.Next(1, 100);
+
+                                    /// <summary>
+                                    /// Did the weapon hit?
+                                    /// </summary>
+                                    if (toHit >= Hit)
+                                    {
+                                        ushort ToDestroy;
+                                        if (Target.missileGroup.missiles[0].missileDef.armor == 0)
+                                            ToDestroy = 100;
+                                        else
+                                            ToDestroy = (ushort)(Math.Round((LinkedWeapons[loop].beamDef.damage[RangeIncrement] / (Target.missileGroup.missiles[0].missileDef.armor + LinkedWeapons[loop].beamDef.damage[RangeIncrement]))) * 100.0f);
+                                        ushort DestChance = (ushort)RNG.Next(1, 100);
+
+
+                                        /// <summary>
+                                        /// Does the weapon have the power to make a kill?
+                                        /// </summary>
+                                        if (ToDestroy >= DestChance)
+                                        {
+                                            String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+
+                                            Target.missileGroup.RemoveMissile(Target.missileGroup.missiles[0]);
+
+                                            if (Target.missileGroup.missiles.Count == 0)
+                                            {
+                                                break;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                        FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                    }
+                                }
+                            }
+                            else if (LinkedWeapons[loop].isDestroyed == false)
+                            {
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapons[loop].Name, LinkedWeapons[loop].currentCapacitor, LinkedWeapons[loop].beamDef.weaponCapacitor);
+
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                     GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                            }
+                        }//end if in range and weapon can fire
+
+                        if (Target.missileGroup.missiles.Count == 0)
+                        {
+                            break;
+                        }
+
+                    }// end for linked weapons
+
+                    
+                    return weaponFired;
+                }
+                else
+                {
+                    /// <summary>
+                    /// Planet section eventually goes here.
+                    /// </summary>
+                    return weaponFired;
+                }
+            }       
+        }
+
+
+        /// <summary>
+        /// Get the accuracy at which this BFC can fire upon its target.
+        /// </summary>
+        /// <param name="RangeIncrement">Distance to target</param>
+        /// <returns>Firing accuracy.</returns>
+        private float GetFiringAccuracy(int RangeIncrement, int track)
+        {
+            float FireAccuracy = BeamFireControlDef.rangeAccuracyTable[RangeIncrement];
+
+            /// <summary>
+            /// Get Target_CurrentSpeed for accuracy calculations. Planets do not move so this can remain at 0 for that.
+            int Target_CurrentSpeed = 0;
+            switch (Target.targetType)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    Target_CurrentSpeed = Target.ship.CurrentSpeed;
+                    break;
+                case StarSystemEntityType.Missile:
+                    Target_CurrentSpeed = (int)Math.Round(Target.missileGroup.missiles[0].missileDef.maxSpeed);
+                    break;
+            }
+
+
+            /// <summary>
+            /// 100% accuracy due to tracking at this speed.
+            /// </summary>
+            if ((float)Target_CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[99])
+            {
+                if ((float)Target_CurrentSpeed >= BeamFireControlDef.trackingAccuracyTable[0])
+                {
+                    FireAccuracy = FireAccuracy * 0.01f;
+                }
+                else
+                {
+                    bool done = false;
+                    int Base = 50;
+                    int Cur = 50;
+                    /// <summary>
+                    /// Binary search through the tracking accuracy table.
+                    /// </summary>
+
+                    while (!done)
+                    {
+                        Cur = Cur / 2;
+                        if ((float)Target_CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[Base])
+                        {
+                            if (Cur == 1)
+                            {
+                                float t1 = (float)Target_CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base];
+                                float t2 = (float)Target_CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base - 1];
+                                if (t1 <= t2)
+                                {
+                                    FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
+                                    done = true;
                                 }
                                 else
                                 {
-                                    String WeaponFireS = String.Format("{0} missed at {2}% tohit", LinkedWeapons[loop].Name, LinkedWeapons[loop].beamDef.damage[RangeIncrement],toHit);
-
-                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
-                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
-
-                                    FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                    FireAccuracy = FireAccuracy * ((float)(Base - 1) / 100.0f);
+                                    done = true;
                                 }
                             }
+                            Base = Base - Cur;
                         }
-                        else if(LinkedWeapons[loop].isDestroyed == false)
+                        else if ((float)Target_CurrentSpeed < BeamFireControlDef.trackingAccuracyTable[Base])
                         {
-                            String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapons[loop].Name, LinkedWeapons[loop].currentCapacitor, LinkedWeapons[loop].beamDef.weaponCapacitor);
-
-                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
-                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
-
-                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                            if (Cur == 1)
+                            {
+                                float t1 = BeamFireControlDef.trackingAccuracyTable[Base] - (float)Target_CurrentSpeed;
+                                float t2 = BeamFireControlDef.trackingAccuracyTable[Base + 1] - (float)Target_CurrentSpeed;
+                                if (t1 <= t2)
+                                {
+                                    FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
+                                    done = true;
+                                }
+                                else
+                                {
+                                    FireAccuracy = FireAccuracy * ((float)(Base + 1) / 100.0f);
+                                    done = true;
+                                }
+                            }
+                            Base = Base + Cur;
+                        }
+                        else
+                        {
+                            FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
+                            done = true;
                         }
                     }
                 }
+            }
+            if (track < BeamFireControlDef.tracking)
+            {
+                float fireAccMod = (float)track / BeamFireControlDef.tracking;
 
-                return weaponFired;
-            }       
+                FireAccuracy = FireAccuracy * fireAccMod;
+            }
+
+            return FireAccuracy;
         }
     }
 }

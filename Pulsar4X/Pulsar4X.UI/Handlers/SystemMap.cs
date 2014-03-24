@@ -256,28 +256,6 @@ namespace Pulsar4X.UI.Handlers
             {
                 AdvanceTime((int)Constants.TimeInSeconds.FiveSeconds);
             }
-                /*
-                 * Section preserved in case someone wishes to ressurect RunSim for some reason. all other copies will be deleted.
-                //GameState.SE.RunSim(GameState.Instance.Factions, GameState.RNG, 5);
-                /// <summary>
-                /// Kludge to draw the ships.
-                /// </summary>
-                m_oCurrentSceen.ShipMarkers.Clear();
-                for (int loop = 0; loop < GameState.Instance.Factions.Count; loop++)
-                {
-                    for (int loop2 = 0; loop2 < GameState.Instance.Factions[loop].TaskGroups.Count; loop2++)
-                    {
-                        Vector3 WC = new Vector3((float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.XSystem, (float)GameState.Instance.Factions[loop].TaskGroups[loop2].Contact.YSystem, 0.0f);
-                        
-                        //ShipTN newTarget = GameState.Instance.Factions[loop].TaskGroups[loop2].getNewTarget();
-                        //string info = GameState.Instance.Factions[loop].TaskGroups[loop2].TimeRequirement.ToString();
-
-                        string name = GameState.Instance.Factions[loop].TaskGroups[loop2].Name;
-                        //+"-" + GameState.Instance.Factions[loop].TaskGroups[loop2].TaskGroupOrders.Count.ToString()+ ">>" + info;
-                        m_oCurrentSceen.AddMapMarker(WC, m_oGLCanvas.DefaultEffect, GameState.Instance.Factions[loop].FactionColor, name);
-                    }
-                }
-                 * */
         }
 
         private void AdvanceTime30S_Click(object sender, EventArgs e)
@@ -403,7 +381,6 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Start the simulation.
                 /// </summary>
-                GameState.SE.InitSim(m_oCurrnetSystem, GameState.Instance.Factions, GameState.RNG);
 
                 for (int loop = GameState.SE.factionStart; loop < GameState.SE.factionCount; loop++)
                 {

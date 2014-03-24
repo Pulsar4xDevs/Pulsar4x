@@ -57,10 +57,10 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// The target for this ordnance is another missile.
         /// </summary>
-        private OrdnanceTN Missile;
-        public OrdnanceTN missile
+        private OrdnanceGroupTN MissileGroup;
+        public OrdnanceGroupTN missileGroup
         {
-            get { return Missile; }
+            get { return MissileGroup; }
         }
 
         /// <summary>
@@ -111,11 +111,11 @@ namespace Pulsar4X.Entities.Components
         /// Constructor for Missile group targets.
         /// </summary>
         /// <param name="OGTarget">missile targeted on.</param>
-        public TargetTN(OrdnanceTN OGTarget)
+        public TargetTN(OrdnanceGroupTN OGTarget)
         {
             Id = Guid.NewGuid();
-            TargetType = OGTarget.ordGroup.SSEntity;
-            Missile = OGTarget;
+            TargetType = OGTarget.SSEntity;
+            MissileGroup = OGTarget;
         }
     }
 }

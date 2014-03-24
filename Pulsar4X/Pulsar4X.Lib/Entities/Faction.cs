@@ -21,7 +21,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Or it could be a detected missile.
         /// </summary>
-        public OrdnanceTN missile { get; set; }
+        public OrdnanceGroupTN missileGroup { get; set; }
 
         /// <summary>
         /// Detected via thermal.
@@ -66,7 +66,7 @@ namespace Pulsar4X.Entities
         public FactionContact(Faction CurrentFaction, ShipTN DetectedShip, bool Thermal, bool em, bool Active, uint tick)
         {
             ship = DetectedShip;
-            missile = null;
+            missileGroup = null;
             thermal = Thermal;
             EM = em;
             active = Active;
@@ -107,9 +107,9 @@ namespace Pulsar4X.Entities
         /// <param name="em">Detection via EM?</param>
         /// <param name="Active">Active detection?</param>
         /// <param name="tick">What tick did this detection event occur on?</param>
-        public FactionContact(Faction CurrentFaction, OrdnanceTN DetectedMissile, bool Thermal, bool em, bool Active, uint tick)
+        public FactionContact(Faction CurrentFaction, OrdnanceGroupTN DetectedMissileGroup, bool Thermal, bool em, bool Active, uint tick)
         {
-            missile = DetectedMissile;
+            missileGroup = DetectedMissileGroup;
             ship = null;
             thermal = Thermal;
             EM = em;
@@ -121,20 +121,20 @@ namespace Pulsar4X.Entities
             if (thermal == true)
             {
                 thermalTick = tick;
-                Contact = String.Format("{0} Thermal Signature {1}", Contact, (int)Math.Ceiling(DetectedMissile.missileDef.totalThermalSignature));
+                Contact = String.Format("{0} Thermal Signature {1} x{2}", Contact, (int)Math.Ceiling(DetectedMissileGroup.missiles[0].missileDef.totalThermalSignature), DetectedMissileGroup.missiles.Count);
             }
 
             if (EM == true)
             {
                 EMTick = tick;
-                if (DetectedMissile.missileDef.aSD != null)
+                if (DetectedMissileGroup.missiles[0].missileDef.aSD != null)
                 {
-                    Contact = String.Format("{0} EM Signature {1}", Contact, DetectedMissile.missileDef.aSD.gps);
+                    Contact = String.Format("{0} EM Signature {1} x{2}", Contact, DetectedMissileGroup.missiles[0].missileDef.aSD.gps, DetectedMissileGroup.missiles.Count);
                 }
                 else
                 {
                     Contact = String.Format("Error with {0} : has EM signature but no active sensor.", Contact);
-                    NMsg = new MessageEntry(MessageEntry.MessageType.Error, DetectedMissile.ordGroup.contact.CurrentSystem, DetectedMissile.ordGroup.contact,
+                    NMsg = new MessageEntry(MessageEntry.MessageType.Error, DetectedMissileGroup.contact.CurrentSystem, DetectedMissileGroup.contact,
                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
 
                     CurrentFaction.MessageLog.Add(NMsg);
@@ -145,10 +145,10 @@ namespace Pulsar4X.Entities
             if (active == true)
             {
                 activeTick = tick;
-                Contact = String.Format("{0} TCS {1}", Contact, (int)Math.Ceiling(DetectedMissile.missileDef.size));
+                Contact = String.Format("{0} TCS {1} x{2}", Contact, (int)Math.Ceiling(DetectedMissileGroup.missiles[0].missileDef.size), DetectedMissileGroup.missiles.Count);
             }
 
-            NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedMissile.ordGroup.contact.CurrentSystem, DetectedMissile.ordGroup.contact,
+            NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedMissileGroup.contact.CurrentSystem, DetectedMissileGroup.contact,
                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
@@ -193,8 +193,8 @@ namespace Pulsar4X.Entities
 
                     if (ship != null)
                         Contact = String.Format("{0} Thermal Signature {1}", Contact, ship.CurrentThermalSignature);
-                    else if (missile != null)
-                        Contact = String.Format("{0} Thermal Signature {1}", Contact, (int)Math.Ceiling(missile.missileDef.totalThermalSignature));
+                    else if (missileGroup != null)
+                        Contact = String.Format("{0} Thermal Signature {1} x{2}", Contact, (int)Math.Ceiling(missileGroup.missiles[0].missileDef.totalThermalSignature), missileGroup.missiles.Count);
                     else
                     {
                         type = MessageEntry.MessageType.Error;
@@ -219,11 +219,11 @@ namespace Pulsar4X.Entities
                     
                     if (ship != null)
                         Contact = String.Format("{0} EM Signature {1}", Contact, ship.CurrentEMSignature);
-                    else if (missile != null)
+                    else if (missileGroup != null)
                     {
-                        if (missile.missileDef.aSD != null)
+                        if (missileGroup.missiles[0].missileDef.aSD != null)
                         {
-                            Contact = String.Format("{0} EM Signature {1}", Contact, missile.missileDef.aSD.gps);
+                            Contact = String.Format("{0} EM Signature {1} x{2}", Contact, missileGroup.missiles[0].missileDef.aSD.gps, missileGroup.missiles.Count);
                         }
                         else
                         {
@@ -256,8 +256,8 @@ namespace Pulsar4X.Entities
 
                     if (ship != null)
                         Contact = String.Format("{0} TCS {1}", Contact, ship.TotalCrossSection);
-                    else if (missile != null)
-                        Contact = String.Format("{0} TCS_MSP {1}", Contact, (int)Math.Ceiling(missile.missileDef.size));
+                    else if (missileGroup != null)
+                        Contact = String.Format("{0} TCS_MSP {1} x{2}", Contact, (int)Math.Ceiling(missileGroup.missiles[0].missileDef.size), missileGroup.missiles.Count);
                     else
                     {
                         type = MessageEntry.MessageType.Error;
@@ -299,7 +299,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// A DetectionEntity subclass would have come in handy perhaps. This is the detected contact list that is specific to missiles.
         /// </summary>
-        public Dictionary<OrdnanceTN, FactionContact> DetectedMissileContacts { get; set; }
+        public Dictionary<OrdnanceGroupTN, FactionContact> DetectedMissileContacts { get; set; }
 
         /// <summary>
         /// Constructor for this new list.
@@ -307,7 +307,7 @@ namespace Pulsar4X.Entities
         public DetectedContactsList()
         {
             DetectedContacts = new Dictionary<ShipTN, FactionContact>();
-            DetectedMissileContacts = new Dictionary<OrdnanceTN, FactionContact>();
+            DetectedMissileContacts = new Dictionary<OrdnanceGroupTN, FactionContact>();
         }
     }
 
@@ -1739,7 +1739,7 @@ namespace Pulsar4X.Entities
                                     DetectedContactLists.Add(System, newDCL);
                                 }
 
-                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile);
+                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.ordGroup);
 
                                 bool th = (Missile.ThermalDetection[FactionID] == YearTickValue);
                                 bool em = (Missile.EMDetection[FactionID] == YearTickValue);
@@ -1747,17 +1747,17 @@ namespace Pulsar4X.Entities
 
                                 if (inDict == true)
                                 {
-                                    DetectedContactLists[System].DetectedMissileContacts[Missile].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
+                                    DetectedContactLists[System].DetectedMissileContacts[Missile.ordGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
 
                                     if (th == false && em == false && ac == false)
                                     {
-                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile);
+                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.ordGroup);
                                     }
                                 }
                                 else if (inDict == false && (th == true || em == true || ac == true))
                                 {
-                                    FactionContact newContact = new FactionContact(this, Missile, th, em, ac, (uint)YearTickValue);
-                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile, newContact);
+                                    FactionContact newContact = new FactionContact(this, Missile.ordGroup, th, em, ac, (uint)YearTickValue);
+                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.ordGroup, newContact);
                                 }
                             }
                         }
@@ -1853,6 +1853,7 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// ActiveLargeDetection handles potentially greater than MAX distance in KM detection for actives.
+        /// consider making this a static function, I am calling it from all over the place.
         /// </summary>
         /// <param name="System">Starsystem this takes place in</param>
         /// <param name="dist">distance in AU</param>

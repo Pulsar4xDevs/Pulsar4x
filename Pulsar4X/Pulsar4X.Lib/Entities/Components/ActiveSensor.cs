@@ -619,10 +619,11 @@ namespace Pulsar4X.Entities.Components
                             else
                             {
                                 bool foundGroup = false;
-                                float LOSpeed = LinkedWeapons[loop].loadedOrdnance.maxSpeed;
                                 foreach (OrdnanceGroupTN OrdGroup in LocalMissileGroups)
                                 {
-                                    if (OrdGroup.missiles[0].missileDef.maxSpeed == LOSpeed)
+                                    /// <summary>
+                                    /// All Missile groups should be composed of just 1 type of missile for convienence.
+                                    if (OrdGroup.missiles[0].missileDef.Id == LinkedWeapons[loop].loadedOrdnance.Id)
                                     {
                                         OrdGroup.AddMissile(newMissile);
                                         foundGroup = true;

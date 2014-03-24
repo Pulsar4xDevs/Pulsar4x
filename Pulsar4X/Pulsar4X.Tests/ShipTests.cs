@@ -1452,7 +1452,7 @@ namespace Pulsar4X.Tests
 
                         if (P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].target != null)
                         {
-                            if (P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].target.IsDestroyed == true)
+                            if (P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].target.ship.IsDestroyed == true)
                                 P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].target = null;
                         }
 
@@ -1509,7 +1509,7 @@ namespace Pulsar4X.Tests
                     {
                         if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
                         {
-                            ShipTN target = P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].getTarget();
+                            ShipTN target = P[loop].TaskGroups[loop2].Ships[loop3].ShipBFC[0].getTarget().ship;
 
                             if (target != null)
                             {

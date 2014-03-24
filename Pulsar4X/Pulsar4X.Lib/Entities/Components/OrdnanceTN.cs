@@ -75,6 +75,7 @@ namespace Pulsar4X.Entities.Components
         public MissileEngineDefTN(string EngName, float EngBase, float EngPowMod, float FuelCon, float msp)
         {
             Name = EngName;
+            Id = Guid.NewGuid();
 
             /// <summary>
             /// acceptable engine base numbers from conventional to photonic:
@@ -138,6 +139,7 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceSeriesTN(String Title)
         {
             Name = Title;
+            Id = Guid.NewGuid();
             MissilesInSeries = new BindingList<OrdnanceDefTN>();
         }
 
@@ -503,6 +505,7 @@ namespace Pulsar4X.Entities.Components
             /// Ignore these:
             /// </summary>
             Name = title;
+            Id = Guid.NewGuid();
             crew = 0;
             isMilitary = true;
             isSalvaged = false;
@@ -934,14 +937,14 @@ namespace Pulsar4X.Entities.Components
 
                 case StarSystemEntityType.Missile:
                     Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
-                    targetIndex = Sys.SystemContactList.IndexOf(MFC.target.missile.ordGroup.contact);
+                    targetIndex = Sys.SystemContactList.IndexOf(MFC.target.missileGroup.contact);
 
                     /// <summary>
                     /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
                     /// </summary>
                     Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
 
-                    sig = (int)Math.Ceiling(MFC.target.missile.missileDef.size);
+                    sig = (int)Math.Ceiling(MFC.target.missileGroup.missiles[0].missileDef.size);
 
                     TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(-1, sig);
 
@@ -981,6 +984,16 @@ namespace Pulsar4X.Entities.Components
         /// MG Logger:
         /// </summary>
         public static readonly ILog logger = LogManager.GetLogger(typeof(OrdnanceGroupTN));
+
+        /// <summary>
+        /// taskgroups which are targetted on this Ordnance group.
+        /// </summary>
+        private BindingList<ShipTN> ShipsTargetting;
+        public BindingList<ShipTN> shipsTargetting
+        {
+            get { return ShipsTargetting; }
+            set { shipsTargetting = value; }
+        }
 
 
         /// <summary>
@@ -1094,7 +1107,7 @@ namespace Pulsar4X.Entities.Components
         public OrdnanceGroupTN(TaskGroupTN LaunchedFrom, OrdnanceTN Missile)
         {
             Name = String.Format("Ordnance Group #{0}", LaunchedFrom.TaskGroupFaction.MissileGroups.Count);
-
+            Id = Guid.NewGuid();
             if (LaunchedFrom.IsOrbiting == true)
             {
                 LaunchedFrom.GetPositionFromOrbit();
@@ -1131,6 +1144,8 @@ namespace Pulsar4X.Entities.Components
             Contact.CurrentSystem = LaunchedFrom.Contact.CurrentSystem;
             LaunchedFrom.Contact.CurrentSystem.AddContact(Contact);
             DrawTravelLine = 0;
+
+            ShipsTargetting = new BindingList<ShipTN>();
 
 
             Missiles.Add(Missile);
@@ -1252,6 +1267,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// I need to move everyone to their target in this function.
         /// TODO:Upon missiles reaching a waypoint, or geo survey target travelline must be set to 1.
+        /// likewise I need to make sure that waypoints and population targeting are handled differently.
         /// </summary>
         public int ProcessOrder(uint TimeSlice, Random RNG)
         {
@@ -1262,12 +1278,14 @@ namespace Pulsar4X.Entities.Components
 
             CheckTracking();
 
-            /// <summary>
-            /// Need an on own sensors check here to look for a new target.
-            /// </summary>
-
             if (TimeReq < TimeSlice)
             {
+
+                if (TimeReq != 0)
+                {
+                    CheckFuel(TimeReq);
+                }
+
                 /// <summary>
                 /// Use fuel and either impact missile or bring missile to halt.
                 /// </summary>
@@ -1280,67 +1298,34 @@ namespace Pulsar4X.Entities.Components
                         Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
                         Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
 
-                        CheckFuel(TimeSlice);
-
                         /// <summary>
                         /// Impact time. Mark every missile for destruction now, but later if some missiles turn out to have survived, set MissilesToDestroy to the last missile responsible for the
                         /// ship kill.
                         /// </summary>
-                        MissilesToDestroy = Missiles.Count - 1;
-                        
-                        for (int loop = 0; loop < Missiles.Count; loop++)
-                        {
-                            ushort ToHit = 0;
+                        MissilesToDestroy = ProcessImpact(RNG);
 
-                            if (Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 1 || Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 0)
-                                ToHit = 100;
-                            else
-                               ToHit = (ushort)((Missiles[loop].missileDef.maxSpeed / (float)Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed) * Missiles[loop].missileDef.manuever);
-
-                            ushort HitChance = (ushort)RNG.Next(1, 100);
-
-                            if (ToHit > HitChance)
-                            {
-                                String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit.", Missiles[loop].Name, loop, Name);
-                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
-                                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                                OrdnanceGroupFaction.MessageLog.Add(Msg);
-
-                                ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
-
-                                ushort location = (ushort)RNG.Next(0, Columns);
-
-                                ///<summary>
-                                ///Missile damage type always? laser damage type if implemented will need to change this.
-                                ///</summary>
-                                bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location, Missiles[loop].firingShip);
-
-                                /// <summary>
-                                /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.
-                                /// </summary>
-                                if (ShipDest == true)
-                                {
-                                    MissilesToDestroy = loop;
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
-                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
-                                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                                OrdnanceGroupFaction.MessageLog.Add(Msg);
-                            }
-                        }
                     break;
                     case StarSystemEntityType.Population:
                     break;
                     case StarSystemEntityType.Missile:
+                        /// <summary>
+                        /// I want to attempt to destroy enemy missiles by hitting them.
+                        /// </summary>
+                        Contact.XSystem = Missiles[0].target.missileGroup.contact.XSystem;
+                        Contact.YSystem = Missiles[0].target.missileGroup.contact.YSystem;
+                        MissilesToDestroy = ProcessMissileImpact(RNG);
+
                     break;
                     case StarSystemEntityType.Waypoint:
                         /// <summary>
                         /// If missiles are targetted on a waypoint, and are set to OnOwnSensors = true, that means they are looking for a target.
+                        /// Do I want special handling for timeReq = 0 and waypoint/planet target?
                         /// </summary>
+                        Contact.XSystem = Missiles[0].target.wp.XSystem;
+                        Contact.YSystem = Missiles[0].target.wp.YSystem;
+
+                        if(Missiles[0].onOwnSensors == true)
+                            SearchForNewTarget();
                     break;
                 }
                 
@@ -1353,10 +1338,64 @@ namespace Pulsar4X.Entities.Components
                     /// Need to scan for a new target here.
                     /// Check the detectedContacts list for said target, also verify that said target is still in range.
                     /// </summary>
-                    /*for (int loop = 0; loop < Missiles.Count; loop++)
+                    if (Missiles[0].target.targetType == StarSystemEntityType.Waypoint)
                     {
+                        /// <summary>
+                        /// Search for Target
+                        /// </summary>
+                        SearchForNewTarget();
                         
-                    }*/
+                    }
+                    else if (Missiles[0].target.targetType == StarSystemEntityType.TaskGroup)
+                    {
+                        /// <summary>
+                        /// Check if TG is still in range.
+                        /// </summary>
+                        int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(Missiles[0].target.ship.ShipsTaskGroup.Contact);
+                        float dist = Contact.DistanceTable[TGID];
+                        
+                        if(missiles[0].missileDef.aSD == null)
+                        {
+                            logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
+                            return (missiles.Count - 1);
+                        }
+
+                        int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
+                        bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+
+                        if (det == false)
+                        {
+                            /// <summary>
+                            /// Create waypoint target to last known location.
+                            /// </summary>
+                            CreateWaypointTarget();
+                        }
+                    }
+                    else if (Missiles[0].target.targetType == StarSystemEntityType.Missile)
+                    {
+                        /// <summary>
+                        /// Check if missile is still in range.
+                        /// </summary>
+                        int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(Missiles[0].target.missileGroup.contact);
+                        float dist = Contact.DistanceTable[TGID];
+
+                        if(missiles[0].missileDef.aSD == null)
+                        {
+                            logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
+                            return (missiles.Count - 1);
+                        }
+
+                        int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(Missiles[0].target.missileGroup.missiles[0].missileDef.size));
+                        bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+
+                        if (det == false)
+                        {
+                            /// <summary>
+                            /// Create waypoint target to last known location.
+                            /// </summary>
+                            CreateWaypointTarget();
+                        }
+                    }
                 }
 
                 /// <summary>
@@ -1417,6 +1456,7 @@ namespace Pulsar4X.Entities.Components
         {
             /// <summary>
             /// Tracking has already been lost, and all survivors here are on their own already.
+            /// Update, all missiles in an ordnance group are the same. so if 0 is here and fine all are.
             /// </summary>
             if (Missiles[0].onOwnSensors == true)
             {
@@ -1446,33 +1486,247 @@ namespace Pulsar4X.Entities.Components
                         MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
+                    }
+                }
 
+                if(Missiles.Count != 0)
+                    CreateWaypointTarget(); 
+            }
+        }
+
+        #region Private methods
+
+        /// <summary>
+        /// Method to create a waypoint target for a missile that has lost tracking to its target.
+        /// </summary>
+        /// <param name="loop">index of missile that needs a waypoint target, they will all be called should this be needed however.</param>
+        private void CreateWaypointTarget()
+        {
+            /// <summary>
+            /// Create new WP Target Here:
+            /// </summary>
+            double X = 0.0, Y = 0.0;
+            switch (missiles[0].target.targetType)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    X = missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
+                    Y = missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
+                    break;
+
+                case StarSystemEntityType.Missile:
+                    X = missiles[0].target.missileGroup.contact.XSystem;
+                    Y = missiles[0].target.missileGroup.contact.YSystem;
+                    break;
+            }
+            Waypoint NewTarget = new Waypoint("Internal Missile Target, Do Not Display", Contact.CurrentSystem, X, Y, OrdnanceGroupFaction.FactionID);
+            TargetTN newTargetTN = new TargetTN(NewTarget);
+            for (int loop = 0; loop < Missiles.Count; loop++)
+                missiles[loop].target = newTargetTN;
+        }
+
+        /// <summary>
+        /// Moved this section to a private member function as processOrders is getting bloated.
+        /// </summary>
+        /// <param name="RNG">Random number generator needed for this function, usually the one from SimEntity.</param>
+        /// <returns>Missiles that either hit or missed the target ship. leftovers can survive to get another target if able.</returns>
+        private int ProcessImpact(Random RNG)
+        {
+            int MissilesToDestroy = Missiles.Count - 1;
+            for (int loop = 0; loop < Missiles.Count; loop++)
+            {
+                ushort ToHit = 0;
+
+                if (Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 1 || Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 0)
+                    ToHit = 100;
+                else
+                    ToHit = (ushort)((Missiles[loop].missileDef.maxSpeed / (float)Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed) * Missiles[loop].missileDef.manuever);
+
+                ushort HitChance = (ushort)RNG.Next(1, 100);
+
+                if (ToHit > HitChance)
+                {
+                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit {3} for {4} damage.", Missiles[loop].Name, loop, Name, Missiles[loop].target.ship.Name,Missiles[loop].missileDef.warhead);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+                    ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
+
+                    ushort location = (ushort)RNG.Next(0, Columns);
+
+                    ///<summary>
+                    ///Missile damage type always? laser damage type if implemented will need to change this.
+                    ///</summary>
+                    bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location, Missiles[loop].firingShip);
+
+                    /// <summary>
+                    /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.
+                    /// </summary>
+                    if (ShipDest == true)
+                    {
+                        MissilesToDestroy = loop;
+                        break;
+                    }
+                }
+                else
+                {
+                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+                }
+            }
+            return MissilesToDestroy;                                 
+        }
+
+        /// <summary>
+        /// Process missile impact determines what happens when an AMM hits any other missile.
+        /// Hits destroy the target missile on a one for one basis, unless armor is present.
+        /// Misses consume the amm.
+        /// left over amms can survive to acquire another target if so able.
+        /// </summary>
+        /// <param name="RNG">the random number generator, typically the one in SimEntity</param>
+        /// <returns>missiles to destroy</returns>
+        private int ProcessMissileImpact(Random RNG)
+        {
+            int MissilesToDestroy = Missiles.Count - 1;
+
+            for (int loop = 0; loop < Missiles.Count; loop++)
+            {
+                ushort ToHit = 0;
+
+                if (Missiles[loop].target.missileGroup.missiles[0].missileDef.maxSpeed == 1 || Missiles[loop].target.missileGroup.missiles[0].missileDef.maxSpeed == 0)
+                    ToHit = 100;
+                else
+                    ToHit = (ushort)((Missiles[loop].missileDef.maxSpeed / (float)Missiles[loop].target.missileGroup.missiles[0].missileDef.maxSpeed) * Missiles[loop].missileDef.manuever);
+
+                ushort HitChance = (ushort)RNG.Next(1, 100);
+
+                if (ToHit >= HitChance)
+                {
+                    /// <summary>
+                    /// Check armour, it could be zero, in which case destruction will always occur.
+                    /// Chance to Hit vs Armour = (Weapon Damage / (Missile Armour + Weapon Damage)) * 100%
+                    /// </summary>
+                    ushort ToDestroy;
+                    if (Missiles[loop].target.missileGroup.missiles[0].missileDef.armor == 0)
+                        ToDestroy = 100;
+                    else
+                        ToDestroy = (ushort)(Math.Round((Missiles[loop].missileDef.warhead / (Missiles[loop].target.missileGroup.missiles[0].missileDef.armor + Missiles[loop].missileDef.warhead))) * 100.0f); 
+                    ushort DestChance = (ushort)RNG.Next(1, 100);
+
+                    if (ToDestroy >= DestChance)
+                    {
+                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Intercepted an enemy missile and destroyed it.", Missiles[loop].Name, loop, Name);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        OrdnanceGroupFaction.MessageLog.Add(Msg);
 
                         /// <summary>
-                        /// Create new WP Target Here:
+                        /// Destroy a missile.
                         /// </summary>
-                        double X = 0.0,Y = 0.0;
-                        switch(missiles[loop].target.targetType)
+                        Missiles[loop].target.missileGroup.RemoveMissile(Missiles[loop].target.missileGroup.missiles[0]);
+                    }
+                    else
+                    {
+                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Intercepted an enemy missile and failed to destroyed it.", Missiles[loop].Name, loop, Name);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        OrdnanceGroupFaction.MessageLog.Add(Msg);
+                    }
+
+
+                    /// <summary>
+                    /// Handle ordnance group destruction somewhere.
+                    /// </summary>
+                    if (missiles[0].target.missileGroup.missiles.Count == 0)
+                    {
+                        MissilesToDestroy = loop;
+                        break;
+                    }
+                }
+                else
+                {
+                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+                }
+            }
+
+            return MissilesToDestroy;
+        }
+
+        /// <summary>
+        /// Searches for a new missile or ship target.
+        /// </summary>
+        private void SearchForNewTarget()
+        {
+            bool hasSystem = ordnanceGroupFaction.DetectedContactLists.ContainsKey(Contact.CurrentSystem);
+            if (hasSystem)
+            {
+
+                /// <summary>
+                /// Search for missile targets.
+                /// </summary>
+                if (Missiles[0].missileDef.aSD.resolution == 1)
+                {
+                    foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedMissileContacts)
+                    {
+                        if (pair.Value.active == true)
                         {
-                            case StarSystemEntityType.TaskGroup:
-                                X =  missiles[loop].target.ship.ShipsTaskGroup.Contact.XSystem;
-                                Y =  missiles[loop].target.ship.ShipsTaskGroup.Contact.YSystem;
-                            break;
+                            int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.contact);
+                            float dist = Contact.DistanceTable[TGID];
+                            int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size));
+                            bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
 
-                            case StarSystemEntityType.Missile:
-                                X =  missiles[loop].target.missile.ordGroup.Contact.XSystem;
-                                Y =  missiles[loop].target.missile.ordGroup.Contact.YSystem;
-                            break;
-
-                            case StarSystemEntityType.Population:
-                            break;
+                            if (det == true)
+                            {
+                                /// <summary>
+                                /// This is our new target.
+                                /// </summary>
+                                TargetTN newMissileTarget = new TargetTN(pair.Key);
+                                for (int loop = 0; loop < Missiles.Count; loop++)
+                                {
+                                    Missiles[loop].target = newMissileTarget;
+                                }
+                                break;
+                            }
                         }
-                        Waypoint NewTarget = new Waypoint("Internal Missile Target, Do Not Display", Contact.CurrentSystem, X, Y, OrdnanceGroupFaction.FactionID);
-                        missiles[loop].target = new TargetTN(NewTarget);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// search for ship targets.
+                    /// </summary>
+                    foreach (KeyValuePair<ShipTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedContacts)
+                    {
+                        if (pair.Value.active == true)
+                        {
+                            int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+                            float dist = Contact.DistanceTable[TGID];
+                            int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
+                            bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+
+                            if (det == true)
+                            {
+                                /// <summary>
+                                /// This is our new target.
+                                /// </summary>
+                                TargetTN newShipTarget = new TargetTN(pair.Key);
+                                for (int loop = 0; loop < Missiles.Count; loop++)
+                                {
+                                    Missiles[loop].target = newShipTarget;
+                                }
+                                break;
+                            }
+                        }
                     }
                 }
             }
         }
+        #endregion
 
         #endregion
 
