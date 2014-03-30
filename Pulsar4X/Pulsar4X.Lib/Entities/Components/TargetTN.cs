@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Pulsar4X.Entities.Components
 {
+    /// <summary>
+    /// I really should have rolled all of this into contact(along with perhaps a detectionEntity class) and used it as a parent class for both TaskGroupTN and OrdnanceGroupTN
+    /// </summary>
     public class TargetTN : GameEntity
     {
         /// <summary>

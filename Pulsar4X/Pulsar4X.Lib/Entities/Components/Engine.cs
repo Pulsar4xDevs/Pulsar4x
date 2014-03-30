@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
-using log4net;
 using System.ComponentModel;
 
 /// <summary>
@@ -195,6 +194,7 @@ namespace Pulsar4X.Entities.Components
             isObsolete = false;
             isSalvaged = false;
             isDivisible = false;
+            isElectronic = false;
         }
         /// <summary>
         /// End EngineDefTN()

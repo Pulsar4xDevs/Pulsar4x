@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 namespace Pulsar4X.Entities.Components
 {
@@ -983,7 +986,9 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// MG Logger:
         /// </summary>
+        #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(OrdnanceGroupTN));
+        #endif
 
         /// <summary>
         /// taskgroups which are targetted on this Ordnance group.
@@ -1356,7 +1361,9 @@ namespace Pulsar4X.Entities.Components
                         
                         if(missiles[0].missileDef.aSD == null)
                         {
+                            #if LOG4NET_ENABLED
                             logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
+                            #endif
                             return (missiles.Count - 1);
                         }
 
@@ -1381,7 +1388,9 @@ namespace Pulsar4X.Entities.Components
 
                         if(missiles[0].missileDef.aSD == null)
                         {
+                            #if LOG4NET_ENABLED
                             logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
+                            #endif
                             return (missiles.Count - 1);
                         }
 

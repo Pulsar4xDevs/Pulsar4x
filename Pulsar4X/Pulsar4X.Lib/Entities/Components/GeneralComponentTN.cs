@@ -52,6 +52,7 @@ namespace Pulsar4X.Entities.Components
             isMilitary = false;
             isObsolete = false;
             isSalvaged = false;
+            isElectronic = false;
         }
     }
 

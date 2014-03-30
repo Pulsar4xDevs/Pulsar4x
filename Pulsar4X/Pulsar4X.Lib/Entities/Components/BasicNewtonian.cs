@@ -1,7 +1,10 @@
 using System;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
+
+#if LOG4NET_ENABLED
 using log4net;
+#endif
 
 
 namespace Pulsar4X.Entities.Components
