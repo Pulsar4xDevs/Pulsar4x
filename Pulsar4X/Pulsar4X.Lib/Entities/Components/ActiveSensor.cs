@@ -482,6 +482,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Simple assignment of a missile group as the target of this MFC
+        /// </summary>
+        /// <param name="OrdnanceTarget">missile group to be targetted.</param>
+        public void assignTarget(OrdnanceGroupTN OrdnanceTarget)
+        {
+            Target = new TargetTN(OrdnanceTarget);
+        }
+
+        /// <summary>
         /// Target assignment of planets.
         /// </summary>
         /// <param name="PlanetTarget">planet</param>

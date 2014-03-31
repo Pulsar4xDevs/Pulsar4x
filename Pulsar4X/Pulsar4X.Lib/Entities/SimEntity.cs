@@ -96,7 +96,7 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         for (int loop3 = 0; loop3 <= MissilesToRemove; loop3++)
                         {
-                            P[loop].MissileGroups[loop2].RemoveMissile(P[loop].MissileGroups[loop2].missiles[loop3]);
+                            P[loop].MissileGroups[loop2].RemoveMissile(P[loop].MissileGroups[loop2].missiles[0]);
                         }
                     }
 
@@ -545,36 +545,47 @@ namespace Pulsar4X.Entities
                 ShipTN nextShip = OGRemove.shipsTargetting[loop];
                 for (int loop2 = 0; loop2 < nextShip.ShipBFC.Count; loop2++)
                 {
-                    if (nextShip.ShipBFC[loop2].getTarget().targetType == StarSystemEntityType.Missile && nextShip.ShipBFC[loop2].getTarget().missileGroup == OGRemove)
+                    TargetTN BFCTarget = nextShip.ShipBFC[loop2].getTarget();
+                    if (BFCTarget != null)
                     {
-                        nextShip.ShipBFC[loop2].clearTarget();
-                        nextShip.ShipBFC[loop2].openFire = false;
-                        nextShip.ShipsFaction.OpenFireFC.Remove(nextShip.ShipBFC[loop2]);
-                        nextShip.ShipsFaction.OpenFireFCType.Remove(nextShip.ShipBFC[loop2]);
+                        if (BFCTarget.targetType == StarSystemEntityType.Missile)
+                        {
+                            if (BFCTarget.missileGroup == OGRemove)
+                            {
+                                nextShip.ShipBFC[loop2].clearTarget();
+                                nextShip.ShipBFC[loop2].openFire = false;
+                                nextShip.ShipsFaction.OpenFireFC.Remove(nextShip.ShipBFC[loop2]);
+                                nextShip.ShipsFaction.OpenFireFCType.Remove(nextShip.ShipBFC[loop2]);
+                            }
+                        }
                     }
                 }
 
                 for (int loop2 = 0; loop2 < nextShip.ShipMFC.Count; loop2++)
                 {
-                    if (nextShip.ShipMFC[loop2].getTarget().targetType == StarSystemEntityType.Missile)
+                    TargetTN MFCTarget = nextShip.ShipMFC[loop2].getTarget();
+                    if (MFCTarget != null)
                     {
-                        if (nextShip.ShipMFC[loop2].getTarget().missileGroup == OGRemove)
+                        if (MFCTarget.targetType == StarSystemEntityType.Missile)
                         {
-                            /// <summary>
-                            /// Clear the target, set open fire to false, update the openFireFC list.
-                            /// </summary>
-                            nextShip.ShipMFC[loop2].clearTarget();
-                            nextShip.ShipMFC[loop2].openFire = false;
-                            nextShip.ShipsFaction.OpenFireFC.Remove(nextShip.ShipMFC[loop2]);
-                            nextShip.ShipsFaction.OpenFireFCType.Remove(nextShip.ShipMFC[loop2]);
-
-                            /// <summary>
-                            /// Set all missiles to their own sensors.
-                            /// </summary>
-                            for (int loop3 = 0; loop3 < nextShip.ShipMFC[loop2].missilesInFlight.Count; loop++)
+                            if (MFCTarget.missileGroup == OGRemove)
                             {
-                                nextShip.ShipMFC[loop2].missilesInFlight[loop3].CheckTracking();
-                            }  
+                                /// <summary>
+                                /// Clear the target, set open fire to false, update the openFireFC list.
+                                /// </summary>
+                                nextShip.ShipMFC[loop2].clearTarget();
+                                nextShip.ShipMFC[loop2].openFire = false;
+                                nextShip.ShipsFaction.OpenFireFC.Remove(nextShip.ShipMFC[loop2]);
+                                nextShip.ShipsFaction.OpenFireFCType.Remove(nextShip.ShipMFC[loop2]);
+
+                                /// <summary>
+                                /// Set all missiles to their own sensors.
+                                /// </summary>
+                                for (int loop3 = 0; loop3 < nextShip.ShipMFC[loop2].missilesInFlight.Count; loop++)
+                                {
+                                    nextShip.ShipMFC[loop2].missilesInFlight[loop3].CheckTracking();
+                                }
+                            }
                         }
                     }
                 }

@@ -9,6 +9,11 @@ using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.Drawing;
 
+#if LOG4NET_ENABLED
+using log4net.Config;
+using log4net;
+#endif
+
 namespace Pulsar4X.Entities
 {
     public class FactionContact
@@ -275,7 +280,14 @@ namespace Pulsar4X.Entities
 
             }
 
-            MessageEntry NMsg = new MessageEntry(type, ship.ShipsTaskGroup.Contact.CurrentSystem, ship.ShipsTaskGroup.Contact,
+            SystemContact SysCon = null;
+
+            if (ship == null)
+                SysCon = missileGroup.contact;
+            else if (missileGroup == null)
+                SysCon = ship.ShipsTaskGroup.Contact;
+
+            MessageEntry NMsg = new MessageEntry(type, SysCon.CurrentSystem, SysCon,
                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
@@ -433,6 +445,13 @@ namespace Pulsar4X.Entities
             Count
         }
 
+        #if LOG4NET_ENABLED
+        /// <summary>
+        /// Ship Logger:
+        /// </summary>
+        public static readonly ILog logger = LogManager.GetLogger(typeof(MessageEntry));
+        #endif
+
         /// <summary>
         /// What specific type of message is this?
         /// </summary>
@@ -479,6 +498,15 @@ namespace Pulsar4X.Entities
             TimeOfMessage = Time;
             TimeSlice = timeSlice;
             Text = text;
+
+
+            #if LOG4NET_ENABLED
+            if(TypeOf == MessageType.Error)
+            {
+                String Entry = String.Format("Faction Message Logging Error: Type:{0} | Time:{1} | Location:{2} - TimeSlice:{3}: Text:{4}\n", TypeOf, TimeOfMessage, Location, TimeSlice, Text);
+                logger.Debug(Entry);
+            }
+            #endif
         }
 
     }
@@ -1676,13 +1704,13 @@ namespace Pulsar4X.Entities
                                 sig = -1;
                                 detection = -1;
 
-                                if (TotalCrossSection_MSP < 21)
+                                if (TotalCrossSection_MSP < ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
                                 {
-                                    if (TotalCrossSection_MSP <= 6)
+                                    if (TotalCrossSection_MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
                                     {
                                         sig = Constants.OrdnanceTN.MissileResolutionMinimum;
                                     }
-                                    if (TotalCrossSection_MSP <= 20)
+                                    else if (TotalCrossSection_MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
                                     {
                                         sig = TotalCrossSection_MSP - 6;
                                     }
@@ -1725,7 +1753,7 @@ namespace Pulsar4X.Entities
                                     DetectedContactLists.Add(System, newDCL);
                                 }
 
-                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.ordGroup);
+                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.missileGroup);
 
                                 bool th = (Missile.ThermalDetection[FactionID] == YearTickValue);
                                 bool em = (Missile.EMDetection[FactionID] == YearTickValue);
@@ -1733,17 +1761,17 @@ namespace Pulsar4X.Entities
 
                                 if (inDict == true)
                                 {
-                                    DetectedContactLists[System].DetectedMissileContacts[Missile.ordGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
+                                    DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
 
                                     if (th == false && em == false && ac == false)
                                     {
-                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.ordGroup);
+                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.missileGroup);
                                     }
                                 }
                                 else if (inDict == false && (th == true || em == true || ac == true))
                                 {
-                                    FactionContact newContact = new FactionContact(this, Missile.ordGroup, th, em, ac, (uint)YearTickValue);
-                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.ordGroup, newContact);
+                                    FactionContact newContact = new FactionContact(this, Missile.missileGroup, th, em, ac, (uint)YearTickValue);
+                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.missileGroup, newContact);
                                 }
                             }
                         }
@@ -2390,7 +2418,7 @@ namespace Pulsar4X.Entities
                                     DetectedContactLists.Add(System, newDCL);
                                 }
 
-                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.ordGroup);
+                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.missileGroup);
 
                                 bool th = (Missile.ThermalDetection[FactionID] == YearTickValue);
                                 bool em = (Missile.EMDetection[FactionID] == YearTickValue);
@@ -2398,17 +2426,17 @@ namespace Pulsar4X.Entities
 
                                 if (inDict == true)
                                 {
-                                    DetectedContactLists[System].DetectedMissileContacts[Missile.ordGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
+                                    DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
 
                                     if (th == false && em == false && ac == false)
                                     {
-                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.ordGroup);
+                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.missileGroup);
                                     }
                                 }
                                 else if (inDict == false && (th == true || em == true || ac == true))
                                 {
-                                    FactionContact newContact = new FactionContact(this, Missile.ordGroup, th, em, ac, (uint)YearTickValue);
-                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.ordGroup, newContact);
+                                    FactionContact newContact = new FactionContact(this, Missile.missileGroup, th, em, ac, (uint)YearTickValue);
+                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.missileGroup, newContact);
                                 }
                             }
                         }//end else if SSE = missile && ordnance group has missiles in it

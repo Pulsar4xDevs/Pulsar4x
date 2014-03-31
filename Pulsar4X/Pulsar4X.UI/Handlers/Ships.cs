@@ -10,9 +10,8 @@ using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
 using Newtonsoft.Json;
-using log4net.Config;
-using log4net;
 using Pulsar4X.Entities.Components;
+
 
 namespace Pulsar4X.UI.Handlers
 {
@@ -25,11 +24,6 @@ namespace Pulsar4X.UI.Handlers
         Panels.Ships_ShipList m_oShipListPanel;
 
         Panels.Ships_Design m_oDesignPanel;
-
-        /// <summary>
-        /// Ship Logger:
-        /// </summary>
-        public static readonly ILog logger = LogManager.GetLogger(typeof(Ships));
 
         /// <summary>
         /// Currently selected ship.
@@ -542,22 +536,43 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void AssignTargetButton_Click(object sender, EventArgs e)
         {
+#warning Planetary targetting not yet implemented.
             if (m_oDetailsPanel.ContactListBox.SelectedIndex != -1 && _CurrnetFC != null)
             {
+                
+
                 if (isBFC == true)
                 {
                     int count = 0;
                     if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
+                        if (m_oDetailsPanel.ContactListBox.SelectedIndex < _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count)
                         {
-                            if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+
+                            foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                             {
-                                _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                pair.Key.ShipsTargetting.Add(_CurrnetShip);
-                                break;
+                                if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                {
+                                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                    pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                    break;
+                                }
+                                count++;
                             }
-                            count++;
+                        }
+                        else
+                        {
+                            count = _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count;
+                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
+                            {
+                                if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                {
+                                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                    pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                    break;
+                                }
+                                count++;
+                            }
                         }
                     }
 
@@ -569,33 +584,91 @@ namespace Pulsar4X.UI.Handlers
                     int count = 0;
                     if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
+                        if (m_oDetailsPanel.ContactListBox.SelectedIndex < _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count)
                         {
-                            StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
-                            int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
-                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
-
-                            /// <summary>
-                            /// Validate tick here?
-                            /// </summary>
-                            int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
-
-                            float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
-                            int TCS = pair.Key.TotalCrossSection;
-                            int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
-
-                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
-
-                            if (det == true)
+                            foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                             {
-                                if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+                                int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
+                                int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+
+                                /// <summary>
+                                /// Validate tick here?
+                                /// </summary>
+                                int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                                float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                                int TCS = pair.Key.TotalCrossSection;
+                                int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
+
+                                bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+
+                                if (det == true)
                                 {
-                                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                    pair.Key.ShipsTargetting.Add(_CurrnetShip);
-                                    break;
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                        pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                        break;
+                                    }
+                                    count++;
                                 }
-                                count++;
+                            }
+                        }
+                        else
+                        {
+                            count = _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count;
+                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
+                            {
+                                StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+                                int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
+                                int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.contact);
+
+                                /// <summary>
+                                /// Validate tick here?
+                                /// </summary>
+                                int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                                float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                                int MSP = (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size);
+                                int sig = -1;
+                                int detectFactor = -1;
+                                if (MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
+                                {
+                                    if (MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
+                                    {
+                                        sig = Constants.OrdnanceTN.MissileResolutionMinimum;
+                                    }
+                                    if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                                    {
+                                        sig = MSP - 6;
+                                    }
+                                    detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(0, sig);
+                                }
+                                else
+                                {
+                                    /// <summary>
+                                    /// Big missiles will be treated in HS terms: 21-40 MSP = 2 HS, 41-60 = 3 HS, 61-80 = 4 HS, 81-100 = 5 HS. The same should hold true for greater than 100 sized missiles.
+                                    /// but those are impossible to build.
+                                    /// </summary>
+                                    sig = (int)Math.Ceiling((float)MSP / 20.0f);
+                                    detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(sig, -1);
+                                }
+
+                                bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+
+                                if (det == true)
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                        pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                        break;
+                                    }
+                                    count++;
+                                }
                             }
                         }
                     }
@@ -616,21 +689,71 @@ namespace Pulsar4X.UI.Handlers
             {
                 if (isBFC == true)
                 {
-                    if (_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget() != null)
+                    TargetTN Target = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget();
+                    if (Target != null)
                     {
-                        ShipTN vessel = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget().ship;
-                        if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
+                        switch (Target.targetType)
                         {
-                            vessel.ShipsTargetting.Remove(_CurrnetShip);
+                            case StarSystemEntityType.Population:
+                                /// <summary>
+                                /// Populations are not yet implemented. I may have a shipsTargetting list for population as well, in which case remove that here.
+                                /// If I don't do that however, just delete this.
+                                /// </summary>
+                                #warning Pop Not Yet Implemented
+                                break;
+                            case StarSystemEntityType.TaskGroup:
+                                ShipTN vessel = Target.ship;
+                                if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
+                                {
+                                    vessel.ShipsTargetting.Remove(_CurrnetShip);
+                                }
+                                break;
+                            case StarSystemEntityType.Missile:
+                                OrdnanceGroupTN MissileGroup = Target.missileGroup;
+                                if (MissileGroup.shipsTargetting.Contains(_CurrnetShip) == true)
+                                {
+                                    MissileGroup.shipsTargetting.Remove(_CurrnetShip);
+                                }
+                                break;
                         }
                     }
                     _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].clearTarget();
                 }
                 else
                 {
-
-                    if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget() != null)
+                    TargetTN Target = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget();
+                    if (Target != null)
                     {
+                        switch (Target.targetType)
+                        {
+                            case StarSystemEntityType.Population:
+                                /// <summary>
+                                /// Populations are not yet implemented. I may have a shipsTargetting list for population as well, in which case remove that here.
+                                /// If I don't do that however, just delete this.
+                                /// </summary>
+                                #warning Pop Not Yet Implemented
+                                break;
+                            case StarSystemEntityType.TaskGroup:
+                                ShipTN vessel = Target.ship;
+                                if (vessel.ShipsTargetting.Contains(_CurrnetShip) == true)
+                                {
+                                    vessel.ShipsTargetting.Remove(_CurrnetShip);
+                                }
+                            break;
+                            case StarSystemEntityType.Missile:
+                                OrdnanceGroupTN MissileGroup = Target.missileGroup;
+                                if (MissileGroup.shipsTargetting.Contains(_CurrnetShip) == true)
+                                {
+                                    MissileGroup.shipsTargetting.Remove(_CurrnetShip);
+                                }
+                            break;
+                            case StarSystemEntityType.Waypoint:
+#warning Waypoint and Body may need additional work as well.
+                            break;
+                            case StarSystemEntityType.Body:
+                            break;
+                        }
+
                         if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().targetType == StarSystemEntityType.TaskGroup)
                         {
                             ShipTN vessel = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().ship;
@@ -952,7 +1075,7 @@ namespace Pulsar4X.UI.Handlers
 
                 for (int loop = 0; loop < _CurrnetShip.ShipBFC.Count; loop++)
                 {
-                    ShipTN Target = _CurrnetShip.ShipBFC[loop].getTarget().ship;
+                    TargetTN Target = _CurrnetShip.ShipBFC[loop].getTarget();
 
                     if (Target == null)
                     {
@@ -965,7 +1088,29 @@ namespace Pulsar4X.UI.Handlers
                         else
                             fireAuth = "Holding Fire";
 
-                        Entry = String.Format("{0}: Targeting {1} - {2}\n", _CurrnetShip.ShipBFC[loop].Name, Target.Name, fireAuth);
+                        String TargetName = "N/A";
+                        switch (Target.targetType)
+                        {
+                            case StarSystemEntityType.Population:
+                                TargetName = Target.pop.Name;
+                            break;
+                            case StarSystemEntityType.TaskGroup:
+                                TargetName = Target.ship.Name;
+                            break;
+                            case StarSystemEntityType.Missile:
+                                TargetName = Target.missileGroup.Name;
+                            break;
+
+                            /// <summary>
+                            /// BFCs can't target these.
+                            /// </summary>
+                            case StarSystemEntityType.Waypoint:
+                            break;
+                            case StarSystemEntityType.Body:
+                            break;
+                        }
+
+                        Entry = String.Format("{0}: Targeting {1} - {2}\n", _CurrnetShip.ShipBFC[loop].Name, TargetName, fireAuth);
                     }
 
                     m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
@@ -1004,9 +1149,21 @@ namespace Pulsar4X.UI.Handlers
 
                         switch (Target.targetType)
                         {
+                            case StarSystemEntityType.Population:
+                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.pop.Name, fireAuth);
+                            break;
                             case StarSystemEntityType.TaskGroup:
                                 Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.ship.Name, fireAuth);
-                                break;
+                            break;
+                            case StarSystemEntityType.Missile:
+                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.missileGroup.Name, fireAuth);
+                            break;
+                            case StarSystemEntityType.Waypoint:
+                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.wp.Name, fireAuth);
+                            break;
+                            case StarSystemEntityType.Body:
+                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.body.Name, fireAuth);
+                            break;
                         }
                     }
 
@@ -1165,6 +1322,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
+                        #region BFC contacts, All are printed.
                         foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
                             String TH = "";
@@ -1189,6 +1347,52 @@ namespace Pulsar4X.UI.Handlers
 
                             m_oDetailsPanel.ContactListBox.Items.Add(Entry);
                         }
+
+                        foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
+                        {
+                            if (pair.Key.missiles.Count == 0)
+                            {
+                                String Error = String.Format("BuildContactList has an empty missileGroup in detectedMissileContacts.");
+                                MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                _CurrnetFaction.MessageLog.Add(MessageEnter);
+                                continue;
+                            }
+
+                            String TH = "";
+                            if (pair.Value.thermal == true)
+                            {
+                                TH = String.Format("[Thermal {0}]", (int)Math.Ceiling(pair.Key.missiles[0].missileDef.totalThermalSignature));
+                            }
+
+                            String EM = "";
+                            if (pair.Value.EM == true)
+                            {
+                                if (pair.Key.missiles[0].missileDef.aSD != null)
+                                {
+                                    EM = String.Format("[EM {0}]", pair.Key.missiles[0].missileDef.aSD.gps);
+                                }
+                                else
+                                {
+                                    String Error = String.Format("BuildContactList has a missile detected via EM that has no Active sensor(which is the only way it can be detected via EM)");
+                                    MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact, 
+                                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                    _CurrnetFaction.MessageLog.Add(MessageEnter);
+                                }
+                                
+                            }
+
+                            String ACT = "";
+                            if (pair.Value.active == true)
+                            {
+                                ACT = String.Format("[ACT {0}]", (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size));
+                            }
+
+                            String Entry = String.Format("{0} {1}{2}{3} x{4}", pair.Key.Name, TH, EM, ACT, pair.Key.missiles.Count);
+
+                            m_oDetailsPanel.ContactListBox.Items.Add(Entry);
+                        }
+                        #endregion
                     }
                 }
                 else
@@ -1238,6 +1442,98 @@ namespace Pulsar4X.UI.Handlers
                                 String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
                                 m_oDetailsPanel.ContactListBox.Items.Add(Entry);
 
+                            }
+                        }
+
+                        foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
+                        {
+                            if (pair.Key.missiles.Count == 0)
+                            {
+                                String Error = String.Format("BuildContactList has an empty missileGroup in detectedMissileContacts.");
+                                MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                _CurrnetFaction.MessageLog.Add(MessageEnter);
+                                continue;
+                            }
+
+                            StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+                            int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
+                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.contact);
+
+                            /// <summary>
+                            /// Validate tick here?
+                            /// </summary>
+                            int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                            float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+
+                            int MSP = (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size);
+                            int sig = -1;
+                            int detectFactor = 0;
+
+                            /// <summary>
+                            /// Missile detection goes from 1-6 = minimum, 7-19 MSP specific, 20 and above treated as HS
+                            /// </summary>
+                            if(MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
+                            {
+                                if (MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
+                                {
+                                    sig = Constants.OrdnanceTN.MissileResolutionMinimum;
+                                }
+                                else if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                                {
+                                    sig = MSP - 6;
+                                }    
+                                detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(0, sig);
+                            }
+                            else
+                            {
+                                /// <summary>
+                                /// Big missiles will be treated in HS terms: 21-40 MSP = 2 HS, 41-60 = 3 HS, 61-80 = 4 HS, 81-100 = 5 HS. The same should hold true for greater than 100 sized missiles.
+                                /// but those are impossible to build.
+                                /// </summary>
+                                sig = (int)Math.Ceiling((float)MSP / 20.0f);
+                                detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(sig, -1);
+                            }
+
+                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+
+                            if (det == true)
+                            {
+
+                                String TH = "";
+                                if (pair.Value.thermal == true)
+                                {
+                                    TH = String.Format("[Thermal {0}]", (int)Math.Ceiling(pair.Key.missiles[0].missileDef.totalThermalSignature));
+                                }
+
+                                String EM = "";
+                                if (pair.Value.EM == true)
+                                {
+                                    if (pair.Key.missiles[0].missileDef.aSD != null)
+                                    {
+                                        EM = String.Format("[EM {0}]", pair.Key.missiles[0].missileDef.aSD.gps);
+                                    }
+                                    else
+                                    {
+                                        String Error = String.Format("BuildContactList has a missile detected via EM that has no Active sensor(which is the only way it can be detected via EM)");
+                                        MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                        _CurrnetFaction.MessageLog.Add(MessageEnter);
+                                    }
+
+                                }
+
+                                String ACT = "";
+                                if (pair.Value.active == true)
+                                {
+                                    ACT = String.Format("[ACT {0}]", (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size));
+                                }
+
+                                String Entry = String.Format("{0} {1}{2}{3} x{4}", pair.Key.Name, TH, EM, ACT, pair.Key.missiles.Count);
+
+                                m_oDetailsPanel.ContactListBox.Items.Add(Entry);
                             }
                         }
                     }

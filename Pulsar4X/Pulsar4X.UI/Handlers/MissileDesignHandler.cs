@@ -358,6 +358,20 @@ namespace Pulsar4X.UI.Handlers
                 _CurrnetMissileEngine = null;
             }
 
+            if (_CurrnetFaction.OrdnanceSeries.Count != 0)
+            {
+                _CurrnetMissileSeries = _CurrnetFaction.OrdnanceSeries[0];
+                m_oMissileDesignPanel.MSeriesComboBox.SelectedIndex = 0;
+            }
+            else
+            {
+                String Error = String.Format("Faction {0} somehow has no default missile series \"No Series Selected\".",_CurrnetFaction.Name);
+                MessageEntry MessageEntry = new MessageEntry(MessageEntry.MessageType.Error, null, null,
+                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                _CurrnetFaction.MessageLog.Add(MessageEntry);
+                _CurrnetMissileSeries = null;
+            }
+
             if (_CurrnetFaction.ComponentList.MissileDef.Count == 0)
             {
                 m_oMissileDesignPanel.WHMSPTextBox.Text = "0";

@@ -775,16 +775,6 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// which ordnance group is handling the movement for this missile(and others)
-        /// </summary>
-        private OrdnanceGroupTN OrdGroup;
-        public OrdnanceGroupTN ordGroup
-        {
-            get { return OrdGroup; }
-            set { OrdGroup = value; }
-        }
-
-        /// <summary>
         /// Fuel the missile has to use.
         /// </summary>
         private float Fuel;
@@ -888,7 +878,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// If there are no contacts in this system, then obviously we don't have a target.
             /// </summary>
-            if (ordGroup.ordnanceGroupFaction.DetectedContactLists.ContainsKey(ordGroup.contact.CurrentSystem) == false)
+            if (missileGroup.ordnanceGroupFaction.DetectedContactLists.ContainsKey(missileGroup.contact.CurrentSystem) == false)
             {
                 return false;
             }
@@ -904,9 +894,9 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// is the specified ship in the detected contacts list? and is it detected by an active?
                     /// </summary>
-                    if (ordGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts.ContainsKey(MFC.target.ship))
+                    if (missileGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts.ContainsKey(MFC.target.ship))
                     {
-                        if (ordGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts[MFC.target.ship].active == false)
+                        if (missileGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts[MFC.target.ship].active == false)
                         {
                             return false;
                         }
@@ -932,7 +922,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
                     /// </summary>
-                    bool Detected = ordGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
+                    bool Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
 
                     if (Detected == false)
                         return false;
@@ -954,7 +944,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
                     /// </summary>
-                    Detected = ordGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
+                    Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
 
                     if (Detected == false)
                         return false;
@@ -1154,7 +1144,7 @@ namespace Pulsar4X.Entities.Components
 
 
             Missiles.Add(Missile);
-            Missile.ordGroup = this;
+            Missile.missileGroup = this;
 
         }
 
@@ -1180,7 +1170,7 @@ namespace Pulsar4X.Entities.Components
             }
 
             Missiles.Add(Missile);
-            Missile.ordGroup = this;
+            Missile.missileGroup = this;
 
         }
 
