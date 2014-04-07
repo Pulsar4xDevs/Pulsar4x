@@ -51,62 +51,34 @@ namespace Pulsar4X.Entities
             {
                 for (int loop2 = 0; loop2 < P[loop].MissileGroups.Count; loop2++)
                 {
-                    int MissilesToRemove = P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
-                    
+                    P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
 
-                    /// <summary>
-                    /// This necessarily indicates ship destruction.
-                    /// </summary>
-                    if (MissilesToRemove != 0)
+                    if (P[loop].MissileGroups[loop2].missilesDestroyed != 0 && P[loop].MissileRemoveList.Contains(P[loop].MissileGroups[loop2]) == false )
                     {
-                        if (P[loop].MissileGroups[loop2].missiles[0].target.targetType == StarSystemEntityType.TaskGroup)
-                        {
-                            ShipTN MissileTarget = P[loop].MissileGroups[loop2].missiles[0].target.ship;
-                            if (MissileTarget != null)
-                            {
-                                if (MissileTarget.IsDestroyed == true)
-                                {
 
-                                    if (MissileTarget.ShipsFaction.RechargeList.ContainsKey(MissileTarget) == true)
+                        switch (P[loop].MissileGroups[loop2].missiles[0].target.targetType)
+                        {
+#warning should any planet/pop stuff be taken care of here?
+                            case StarSystemEntityType.TaskGroup:
+                                ShipTN MissileTarget = P[loop].MissileGroups[loop2].missiles[0].target.ship;
+                                if (MissileTarget != null)
+                                {
+                                    if (MissileTarget.IsDestroyed == true)
                                     {
-                                        MissileTarget.ShipsFaction.RechargeList[MissileTarget] = (int)Faction.RechargeStatus.Destroyed;
-                                    }
-                                    else
-                                    {
-                                        MissileTarget.ShipsFaction.RechargeList.Add(MissileTarget, (int)Faction.RechargeStatus.Destroyed);
+
+                                        if (MissileTarget.ShipsFaction.RechargeList.ContainsKey(MissileTarget) == true)
+                                        {
+                                            MissileTarget.ShipsFaction.RechargeList[MissileTarget] = (int)Faction.RechargeStatus.Destroyed;
+                                        }
+                                        else
+                                        {
+                                            MissileTarget.ShipsFaction.RechargeList.Add(MissileTarget, (int)Faction.RechargeStatus.Destroyed);
+                                        }
                                     }
                                 }
-                            }
+                            break;
                         }
-                        else if (P[loop].MissileGroups[loop2].missiles[0].target.targetType == StarSystemEntityType.Missile)
-                        {
-                            OrdnanceGroupTN MissilesTarget = P[loop].MissileGroups[loop2].missiles[0].target.missileGroup;
-
-                            if (MissilesTarget != null)
-                            {
-                                if (MissilesTarget.missiles.Count == 0)
-                                {
-                                    RemoveOrdnanceGroupFromSim(MissilesTarget.ordnanceGroupFaction, MissilesTarget);
-                                }
-                            }
-                        }
-
-                        /// <summary>
-                        /// Test this, I think it should return MissileCount-1 if all missiles are destroyed.
-                        /// </summary>
-                        for (int loop3 = 0; loop3 <= MissilesToRemove; loop3++)
-                        {
-                            P[loop].MissileGroups[loop2].RemoveMissile(P[loop].MissileGroups[loop2].missiles[0]);
-                        }
-                    }
-
-                    /// <summary>
-                    /// Either through running out of fuel, or hitting their target, all the missiles in this ordnance group are gone.
-                    /// </summary>
-                    if (P[loop].MissileGroups[loop2].missiles.Count == 0)
-                    {
-                        RemoveOrdnanceGroupFromSim(P[loop], P[loop].MissileGroups[loop2]);
-                        
+                        P[loop].MissileRemoveList.Add(P[loop].MissileGroups[loop2]);
                     }
                 }
             }
@@ -168,9 +140,9 @@ namespace Pulsar4X.Entities
                                 ShipTN Target = pair.Value.ShipBFC[pair.Key.componentIndex].target.ship;
 
                                 /// <summary>
-                                /// Same System as target.
+                                /// Same System as target and target exists.
                                 /// </summary>
-                                if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.ShipsTaskGroup.Contact.CurrentSystem)
+                                if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.ShipsTaskGroup.Contact.CurrentSystem && Target.IsDestroyed == false)
                                 {
 
                                     StarSystem CurSystem = pair.Value.ShipsTaskGroup.Contact.CurrentSystem;
@@ -228,7 +200,11 @@ namespace Pulsar4X.Entities
                             else if (pair.Value.ShipBFC[pair.Key.componentIndex].target.targetType == StarSystemEntityType.Missile)
                             {
                                 OrdnanceGroupTN Target = pair.Value.ShipBFC[pair.Key.componentIndex].target.missileGroup;
-                                if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.contact.CurrentSystem)
+
+                                /// <summary>
+                                /// Same system, and target has missiles to be destroyed.
+                                /// </summary>
+                                if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.contact.CurrentSystem &&( Target.missilesDestroyed != Target.missiles.Count))
                                 {
                                     StarSystem CurSystem = pair.Value.ShipsTaskGroup.Contact.CurrentSystem;
                                     int MyID = CurSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
@@ -245,9 +221,9 @@ namespace Pulsar4X.Entities
                                             {
                                                 bool WF = pair.Value.ShipFireWeapons(CurrentTick, RNG);
 
-                                                if (Target.missiles.Count == 0)
+                                                if (Target.missilesDestroyed != 0 && Target.ordnanceGroupFaction.MissileRemoveList.Contains(Target) == false)
                                                 {
-                                                    RemoveOrdnanceGroupFromSim(Target.ordnanceGroupFaction, Target);
+                                                    Target.ordnanceGroupFaction.MissileRemoveList.Add(Target);
                                                 }
 
                                                 if (WF == true)
@@ -311,6 +287,7 @@ namespace Pulsar4X.Entities
             /// Do simulation maintenance here, shields,reload,recharge,etc.
             /// </summary>
             uint TimeValue = (uint)(CurrentTick - lastTick);
+            bool loopBreak = false;
             for (int loop = factionStart; loop < factionCount; loop++)
             {
                 foreach (KeyValuePair<ShipTN, int> pair in P[loop].RechargeList)
@@ -345,6 +322,7 @@ namespace Pulsar4X.Entities
                             {
                                 P[loop].RechargeList.Remove(pair.Key);
                                 loop--;
+                                loopBreak = true;
                                 break;
                             }
                         }
@@ -390,8 +368,47 @@ namespace Pulsar4X.Entities
                         /// Have to re-run loop since a ship was removed from all kinds of things.
                         /// </summary>
                         loop--;
+                        loopBreak = true;
                         break;
                     }
+                }
+
+                /// <summary>
+                /// Skip this section of code if loop was broken. the loop will be reprocessed so everything will be done eventually.
+                /// </summary>
+                if (loopBreak == false)
+                {
+
+                    for (int loop2 = 0; loop2 < P[loop].MissileRemoveList.Count; loop2++)
+                    {
+                        String Entry = String.Format("Missile Group has {0} Missiles and {1} missilesDestroyed {2} targeters {3} {4} {5}", 
+                                                      P[loop].MissileRemoveList[loop2].missiles.Count, P[loop].MissileRemoveList[loop2].missilesDestroyed,
+                                                      P[loop].MissileRemoveList[loop2].shipsTargetting.Count, P[loop].MissileRemoveList[loop2].ordnanceGroupFaction.Name, P[loop].Name,
+                                                      P[loop].MissileGroups.Count);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, P[loop].MissileRemoveList[loop2].contact.CurrentSystem, P[loop].MissileRemoveList[loop2].contact, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        P[loop].MessageLog.Add(Msg);
+
+
+                        /// <summary>
+                        /// every missile in this list will either have missiles removed, or needs to be deleted as an ordnance group.
+                        /// </summary>
+                        if (P[loop].MissileRemoveList[loop2].missiles.Count > P[loop].MissileRemoveList[loop2].missilesDestroyed)
+                        {
+                            for (int loop3 = 0; loop3 < P[loop].MissileRemoveList[loop2].missilesDestroyed; loop3++)
+                            {
+                                P[loop].MissileRemoveList[loop2].missiles.RemoveAt(0);
+                            }
+
+                            P[loop].MissileRemoveList[loop2].missilesDestroyed = 0;
+                        }
+                        else
+                        {
+                            RemoveOrdnanceGroupFromSim(P[loop].MissileRemoveList[loop2],P);
+                        }
+                    }
+
+                    P[loop].MissileRemoveList.Clear();
                 }
             }
 
@@ -533,8 +550,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Owner">Owning faction</param>
         /// <param name="OGRemove">Ordnance group to remove</param>
-        private void RemoveOrdnanceGroupFromSim(Faction Owner, OrdnanceGroupTN OGRemove)
+        public void RemoveOrdnanceGroupFromSim(OrdnanceGroupTN OGRemove, BindingList<Faction> P)
         {
+#warning Point defense will need somewhat special handling, right now only manual control is handled.
             /// <summary>
             /// This ordnance group needs to be removed.
             /// Ships Can be targeted on this ordnance group, from these ships missiles in flight can be tracked and informed.
@@ -548,7 +566,7 @@ namespace Pulsar4X.Entities
                     TargetTN BFCTarget = nextShip.ShipBFC[loop2].getTarget();
                     if (BFCTarget != null)
                     {
-                        if (BFCTarget.targetType == StarSystemEntityType.Missile)
+                        if (BFCTarget.targetType == StarSystemEntityType.Missile && nextShip.ShipBFC[loop2].pDState == PointDefenseState.None)
                         {
                             if (BFCTarget.missileGroup == OGRemove)
                             {
@@ -566,7 +584,7 @@ namespace Pulsar4X.Entities
                     TargetTN MFCTarget = nextShip.ShipMFC[loop2].getTarget();
                     if (MFCTarget != null)
                     {
-                        if (MFCTarget.targetType == StarSystemEntityType.Missile)
+                        if (MFCTarget.targetType == StarSystemEntityType.Missile && nextShip.ShipMFC[loop2].pDState == PointDefenseState.None)
                         {
                             if (MFCTarget.missileGroup == OGRemove)
                             {
@@ -590,7 +608,29 @@ namespace Pulsar4X.Entities
                     }
                 }
             }
+            /// <summary>
+            /// Finally I need to remove the ordnance group from its faction list, all detection lists, from the system contact list, inform the Sceen to delete this contact, and clear the missile binding list.
+            /// Complicated stuff.
+            /// </summary>
+            for (int loop4 = factionStart; loop4 < factionCount; loop4++)
+            {
+                StarSystem CurSystem = OGRemove.contact.CurrentSystem;
+                if (P[loop4].DetectedContactLists.ContainsKey(CurSystem) == true)
+                {
+                    if (P[loop4].DetectedContactLists[CurSystem].DetectedMissileContacts.ContainsKey(OGRemove) == true)
+                    {
+                        P[loop4].DetectedContactLists[CurSystem].DetectedMissileContacts.Remove(OGRemove);
+                    }
+                }
+            }
+            OGRemove.missilesDestroyed = 0;
+            OGRemove.missiles.Clear();
             OGRemove.contact.ContactElementCreated = SystemContact.CEState.Delete;
+
+            Faction Owner = OGRemove.ordnanceGroupFaction;
+            StarSystem CurrentSystem = OGRemove.contact.CurrentSystem;
+
+            CurrentSystem.RemoveContact(OGRemove.contact);
             Owner.MissileGroups.Remove(OGRemove);
         }
         #endregion

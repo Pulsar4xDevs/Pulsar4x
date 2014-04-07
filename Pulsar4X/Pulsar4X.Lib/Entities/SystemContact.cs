@@ -91,6 +91,7 @@ namespace Pulsar4X.Entities
         /// <param name="body">Type of contact.</param>
         public SystemContact(Faction Fact, Population pop)
         {
+            Id = Guid.NewGuid();
             faction = Fact;
             XSystem = pop.Planet.XSystem;
             YSystem = pop.Planet.YSystem;
@@ -113,6 +114,7 @@ namespace Pulsar4X.Entities
         /// <param name="TG">Type of contact.</param>
         public SystemContact(Faction Fact, TaskGroupTN TG)
         {
+            Id = Guid.NewGuid();
             faction = Fact;
             XSystem = TG.XSystem;
             YSystem = TG.YSystem;
@@ -134,6 +136,7 @@ namespace Pulsar4X.Entities
         /// <param name="MG">Type of contact.</param>
         public SystemContact(Faction Fact, OrdnanceGroupTN MG)
         {
+            Id = Guid.NewGuid();
             faction = Fact;
             XSystem = MG.XSystem;
             YSystem = MG.YSystem;

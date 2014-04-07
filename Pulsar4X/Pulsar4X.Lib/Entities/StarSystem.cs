@@ -5,8 +5,10 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
-using log4net.Config;
-using log4net;
+
+
+//using log4net.Config;
+//using log4net;
 
 namespace Pulsar4X.Entities
 {
@@ -138,25 +140,35 @@ namespace Pulsar4X.Entities
         {
             int index = SystemContactList.IndexOf(Contact);
 
-            /// <summary>
-            /// Remove the contact from each of the faction contact lists as well as the System contact list.
-            /// </summary>
-            for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
-            {
-                FactionDetectionLists[loop].RemoveContact(index);
-            }
+           if (index != -1)
+           {
+               /// <summary>
+               /// Remove the contact from each of the faction contact lists as well as the System contact list.
+               /// </summary>
+               for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+               {
+                   FactionDetectionLists[loop].RemoveContact(index);
+               }
 
-            SystemContactList.Remove(Contact);
+               SystemContactList.Remove(Contact);
 
-            /// <summary>
-            /// Distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
-            /// causes no issues with distance calculations.
-            /// </summary>
-            for (int loop = 0; loop < SystemContactList.Count; loop++)
-            {
-                SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
-                SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
-            }
+               /// <summary>
+               /// Distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
+               /// causes no issues with distance calculations.
+               /// </summary>
+               for (int loop = 0; loop < SystemContactList.Count; loop++)
+               {
+                   SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
+                   SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
+               }
+           }
+           else
+           {
+               String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
+               MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.CurrentSystem, Contact,
+                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+               GameState.Instance.Factions[0].MessageLog.Add(Entry2);
+           }
         }
     }
 }

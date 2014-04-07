@@ -889,6 +889,13 @@ namespace Pulsar4X.Entities.Components
             switch (MFC.target.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
+
+                    /// <summary>
+                    /// Is this ship still in existence?
+                    /// </summary>
+                    if (MFC.target.ship.IsDestroyed == true)
+                        return false;
+
                     StarSystem Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
 
                     /// <summary>
@@ -929,6 +936,13 @@ namespace Pulsar4X.Entities.Components
                 break;
 
                 case StarSystemEntityType.Missile:
+
+                    /// <summary>
+                    /// No missiles remain in this missile group and it will be cleaned up at the end of the current tick.
+                    /// </summary>
+                    if (MFC.target.missileGroup.missilesDestroyed == MFC.target.missileGroup.missiles.Count)
+                        return false;
+
                     Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
                     targetIndex = Sys.SystemContactList.IndexOf(MFC.target.missileGroup.contact);
 
@@ -950,6 +964,7 @@ namespace Pulsar4X.Entities.Components
                         return false;
                 break;
                 case StarSystemEntityType.Population:
+#warning implement population MFC tracking here
                 break;
             }
             return true;
@@ -1082,6 +1097,16 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// How many missiles in this ordnance group should be marked as "destroyed", for removal later.
+        /// </summary>
+        private int MissilesDestroyed;
+        public int missilesDestroyed
+        {
+            get { return MissilesDestroyed; }
+            set { MissilesDestroyed = value; }
+        }
+
+        /// <summary>
         /// Controls whether or not the travel line will be set. 0 means draw the line, 1 means set last position to current position. 2 means that last position has been set to current position.
         /// 3 means that the line has been updated on the system map as being not drawn, so do not display it again.
         /// This is referenced in ContactElement and maybe simentity,SystemMap as well as in OrdnanceTN(the TG version is referenced in Taskgroup).
@@ -1145,6 +1170,8 @@ namespace Pulsar4X.Entities.Components
 
             Missiles.Add(Missile);
             Missile.missileGroup = this;
+
+            MissilesDestroyed = 0;
 
         }
 
@@ -1264,14 +1291,25 @@ namespace Pulsar4X.Entities.Components
         /// TODO:Upon missiles reaching a waypoint, or geo survey target travelline must be set to 1.
         /// likewise I need to make sure that waypoints and population targeting are handled differently.
         /// </summary>
-        public int ProcessOrder(uint TimeSlice, Random RNG)
+        public void ProcessOrder(uint TimeSlice, Random RNG)
         {
-            int MissilesToDestroy = -1;
+            /// <summary>
+            /// All missiles are destroyed, no point in bothering with orders.
+            /// </summary>
+            if (MissilesDestroyed == Missiles.Count)
+                return;
+
             GetHeading();
             GetSpeed();
             GetTimeRequirement();
 
             CheckTracking();
+
+            /// <summary>
+            /// All missiles are destroyed due to tracking loss, no point in bothering with orders.
+            /// </summary>
+            if (MissilesDestroyed == Missiles.Count)
+                return;
 
             if (TimeReq < TimeSlice)
             {
@@ -1279,6 +1317,11 @@ namespace Pulsar4X.Entities.Components
                 if (TimeReq != 0)
                 {
                     CheckFuel(TimeReq);
+                    /// <summary>
+                    /// All missiles are destroyed due to fuel exhaustion, no point in bothering with orders.
+                    /// </summary>
+                    if (MissilesDestroyed == Missiles.Count)
+                        return;
                 }
 
                 /// <summary>
@@ -1290,25 +1333,52 @@ namespace Pulsar4X.Entities.Components
                 switch(Missiles[0].target.targetType)
                 {
                     case StarSystemEntityType.TaskGroup:
-                        Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
-                        Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
+                        
 
                         /// <summary>
-                        /// Impact time. Mark every missile for destruction now, but later if some missiles turn out to have survived, set MissilesToDestroy to the last missile responsible for the
-                        /// ship kill.
+                        /// Impact time. If the ship is already destroyed.
                         /// </summary>
-                        MissilesToDestroy = ProcessImpact(RNG);
+                        if (Missiles[0].target.ship.IsDestroyed == true)
+                        {
+                            CheckTracking();
+                            if (Missiles[0].onOwnSensors == true)
+                                SearchForNewTarget();
+                        }
+                        else
+                        {
+
+                            /// <summary>
+                            /// I want to attempt to destroy enemy missiles by hitting them.
+                            /// </summary>
+                            Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
+                            Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
+                            ProcessImpact(RNG);
+                        }
 
                     break;
                     case StarSystemEntityType.Population:
                     break;
                     case StarSystemEntityType.Missile:
+
                         /// <summary>
-                        /// I want to attempt to destroy enemy missiles by hitting them.
+                        /// All of these target missiles are already gone.
                         /// </summary>
-                        Contact.XSystem = Missiles[0].target.missileGroup.contact.XSystem;
-                        Contact.YSystem = Missiles[0].target.missileGroup.contact.YSystem;
-                        MissilesToDestroy = ProcessMissileImpact(RNG);
+                        if (Missiles[0].target.missileGroup.missilesDestroyed == Missiles[0].target.missileGroup.missiles.Count)
+                        {
+                            CheckTracking();
+                            if (Missiles[0].onOwnSensors == true)
+                                SearchForNewTarget();
+                        }
+                        else
+                        {
+
+                            /// <summary>
+                            /// I want to attempt to destroy enemy missiles by hitting them.
+                            /// </summary>
+                            Contact.XSystem = Missiles[0].target.missileGroup.contact.XSystem;
+                            Contact.YSystem = Missiles[0].target.missileGroup.contact.YSystem;
+                            ProcessMissileImpact(RNG);
+                        }
 
                     break;
                     case StarSystemEntityType.Waypoint:
@@ -1354,7 +1424,7 @@ namespace Pulsar4X.Entities.Components
                             #if LOG4NET_ENABLED
                             logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
                             #endif
-                            return (missiles.Count - 1);
+                            MissilesDestroyed = Missiles.Count;
                         }
 
                         int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
@@ -1381,7 +1451,7 @@ namespace Pulsar4X.Entities.Components
                             #if LOG4NET_ENABLED
                             logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
                             #endif
-                            return (missiles.Count - 1);
+                            MissilesDestroyed = Missiles.Count;
                         }
 
                         int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(Missiles[0].target.missileGroup.missiles[0].missileDef.size));
@@ -1415,36 +1485,36 @@ namespace Pulsar4X.Entities.Components
 
                 TimeSlice = 0;
             }
-
-            return MissilesToDestroy;
         }
 
 
         /// <summary>
         /// Missiles which have used up their fuel should be destroyed if they run out under the right circumstances.
+        /// All missiles are the same, so no need to loop through them.
         /// </summary>
         /// <param name="TimeSlice">Time advancement to check for missile fuel usage.</param>
         public void CheckFuel(uint TimeSlice)
         {
-            for (int loop = 0; loop < Missiles.Count; loop++)
+            float hourPer = TimeSlice / 3600.0f;
+
+            Missiles[0].fuel = Missiles[0].fuel - (Missiles[0].missileDef.totalFuelConsumption * hourPer);
+
+            if (Missiles[0].fuel <= 0.0f)
             {
-                float hourPer = TimeSlice / 3600.0f;
+                String Entry = "N/A";
+                if(Missiles.Count > 1)
+                    Entry = String.Format("{0}x {1} Missiles in Missile Group {2} have run out of fuel.", Missiles.Count, Missiles[0].Name, Name);
+                else
+                    Entry = String.Format("1x {0} Missile in Missile Group {1} has run out of fuel.", Missiles[0].Name, Name);
 
-                Missiles[loop].fuel = Missiles[loop].fuel - (Missiles[loop].missileDef.totalFuelConsumption * hourPer);
+                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileOutOfFuel, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                OrdnanceGroupFaction.MessageLog.Add(Msg);
 
-                if (Missiles[loop].fuel <= 0.0f)
-                {
-                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} has run out of fuel.", Missiles[loop].Name, loop, Name);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileOutOfFuel, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                    OrdnanceGroupFaction.MessageLog.Add(Msg);
-
-                    RemoveMissile(Missiles[loop]);
-                    /// <summary>
-                    /// Since Missiles.Count just got decremented, decrement the loop as well.
-                    /// </summary>
-                    loop--;
-                }
+                /// <summary>
+                /// Mark all missiles for destruction, as they have all run out of fuel.
+                /// </summary>
+                MissilesDestroyed = Missiles.Count;
             }        
         }
 
@@ -1464,32 +1534,38 @@ namespace Pulsar4X.Entities.Components
 
             if (Missiles[0].HasMFCTracking() == false)
             {
-                for (int loop = 0; loop < Missiles.Count; loop++)
+                if (!Missiles[0].SetOwnSensors())
                 {
-                    if (!missiles[loop].SetOwnSensors())
-                    {
-                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} lost tracking,has no onboard sensor and will self destruct.", Missiles[loop].Name, loop, Name);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                        OrdnanceGroupFaction.MessageLog.Add(Msg);
 
-                        RemoveMissile(Missiles[loop]);
-                        /// <summary>
-                        /// Since Missiles.Count just got decremented, decrement the loop as well.
-                        /// </summary>
-                        loop--;
-                    }
+                    String Entry = "N/A";
+                    if (Missiles.Count > 1)
+                        Entry = String.Format("{0}x {1} Missiles in Missile Group {2} lost tracking,have no onboard sensors and will self destruct.", Missiles.Count,Missiles[0].Name, Name);
                     else
-                    {
-                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} lost tracking and will switch to onboard sensors.", Missiles[loop].Name, loop, Name);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                        Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking,has no onboard sensor and will self destruct.", Missiles[0].Name, Name);
+
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                        OrdnanceGroupFaction.MessageLog.Add(Msg);
-                    }
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+                    MissilesDestroyed = Missiles.Count;
+                }
+                else
+                {
+                    String Entry = "N/A";
+                    if (Missiles.Count > 1)
+                        Entry = String.Format("{0}x {1} Missiles in Missile Group {2} lost tracking and will switch to onboard sensors.", Missiles.Count, Missiles[0].Name, Name);
+                    else
+                        Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking and will switch to onboard sensors.", Missiles[0].Name, Name);
+
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
 
-                if(Missiles.Count != 0)
-                    CreateWaypointTarget(); 
+                if (MissilesDestroyed != Missiles.Count)
+                {
+                    CreateWaypointTarget();
+                }
             }
         }
 
@@ -1528,9 +1604,9 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="RNG">Random number generator needed for this function, usually the one from SimEntity.</param>
         /// <returns>Missiles that either hit or missed the target ship. leftovers can survive to get another target if able.</returns>
-        private int ProcessImpact(Random RNG)
+        private void ProcessImpact(Random RNG)
         {
-            int MissilesToDestroy = Missiles.Count - 1;
+            MissilesDestroyed = Missiles.Count;
             for (int loop = 0; loop < Missiles.Count; loop++)
             {
                 ushort ToHit = 0;
@@ -1556,6 +1632,7 @@ namespace Pulsar4X.Entities.Components
                     ///<summary>
                     ///Missile damage type always? laser damage type if implemented will need to change this.
                     ///</summary>
+#warning Implement Missile Laser damage here
                     bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location, Missiles[loop].firingShip);
 
                     /// <summary>
@@ -1563,7 +1640,7 @@ namespace Pulsar4X.Entities.Components
                     /// </summary>
                     if (ShipDest == true)
                     {
-                        MissilesToDestroy = loop;
+                        MissilesDestroyed = loop;
                         break;
                     }
                 }
@@ -1574,8 +1651,7 @@ namespace Pulsar4X.Entities.Components
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
-            }
-            return MissilesToDestroy;                                 
+            }                                
         }
 
         /// <summary>
@@ -1586,9 +1662,9 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="RNG">the random number generator, typically the one in SimEntity</param>
         /// <returns>missiles to destroy</returns>
-        private int ProcessMissileImpact(Random RNG)
+        private void ProcessMissileImpact(Random RNG)
         {
-            int MissilesToDestroy = Missiles.Count - 1;
+            MissilesDestroyed = Missiles.Count;
 
             for (int loop = 0; loop < Missiles.Count; loop++)
             {
@@ -1624,7 +1700,7 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Destroy a missile.
                         /// </summary>
-                        Missiles[loop].target.missileGroup.RemoveMissile(Missiles[loop].target.missileGroup.missiles[0]);
+                        Missiles[loop].target.missileGroup.missilesDestroyed = Missiles[loop].target.missileGroup.missilesDestroyed + 1;
                     }
                     else
                     {
@@ -1638,9 +1714,9 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// Handle ordnance group destruction somewhere.
                     /// </summary>
-                    if (missiles[0].target.missileGroup.missiles.Count == 0)
+                    if (Missiles[loop].target.missileGroup.missilesDestroyed == Missiles[0].target.missileGroup.missiles.Count)
                     {
-                        MissilesToDestroy = loop;
+                        MissilesDestroyed = loop;
                         break;
                     }
                 }
@@ -1652,8 +1728,6 @@ namespace Pulsar4X.Entities.Components
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
             }
-
-            return MissilesToDestroy;
         }
 
         /// <summary>
@@ -1672,7 +1746,10 @@ namespace Pulsar4X.Entities.Components
                 {
                     foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedMissileContacts)
                     {
-                        if (pair.Value.active == true)
+                        /// <summary>
+                        /// active detection exists for this missile group, and it hasn't been destroyed.
+                        /// </summary>
+                        if (pair.Value.active == true && pair.Key.missilesDestroyed != pair.Key.Missiles.Count)
                         {
                             int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.contact);
                             float dist = Contact.DistanceTable[TGID];
@@ -1701,7 +1778,10 @@ namespace Pulsar4X.Entities.Components
                     /// </summary>
                     foreach (KeyValuePair<ShipTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedContacts)
                     {
-                        if (pair.Value.active == true)
+                        /// <summary>
+                        /// Active tracking on this ship exists, and the ship itself hasn't been destroyed. If the ship is destroyed it will be cleaned up at the end of simEntity.
+                        /// </summary>
+                        if (pair.Value.active == true && pair.Key.IsDestroyed == false)
                         {
                             int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
                             float dist = Contact.DistanceTable[TGID];

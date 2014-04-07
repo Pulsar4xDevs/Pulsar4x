@@ -5,8 +5,11 @@ using System.Text;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
+
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 
 namespace Pulsar4X.Entities
@@ -24,10 +27,12 @@ namespace Pulsar4X.Entities
             Count
         }
 
+        #if LOG4NET_ENABLED
         /// <summary>
         /// The logger for this class
         /// </summary>
         public static readonly ILog logger = LogManager.GetLogger(typeof(ShipTN));
+        #endif
 
 
         /// <summary>
@@ -1424,7 +1429,10 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// This is an error condition obviously.
                                 /// </summary>
+#warning faction message log this?
+                                #if LOG4NET_ENABLED
                                 logger.Debug("Unidentified electronic component in onDamaged().");
+                                #endif
                             }
                             else
                             {
@@ -1835,8 +1843,11 @@ namespace Pulsar4X.Entities
                             }
                             else if (ShipOrdnance[ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance] < 0)
                             {
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
                                 String Entry = String.Format("Ship ordnance subtraction below 0 on ship {0} due to launcher destruction.", this.Name);
                                 logger.Debug(Entry);
+#endif
                             }
                         }
                         else
@@ -1861,8 +1872,11 @@ namespace Pulsar4X.Entities
                                     }
                                     else
                                     {
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
                                         String Entry = String.Format("Ship {0} has ship ordnance in quantities of zero from somewhere.",this.Name);
                                         logger.Debug(Entry);
+#endif
                                     }
                                 }
                             }
@@ -1893,8 +1907,11 @@ namespace Pulsar4X.Entities
                                 }
                                 else
                                 {
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
                                     String Entry = String.Format("Ship {0} has ship ordnance in quantities of zero from somewhere.", this.Name);
                                     logger.Debug(Entry);
+#endif
                                 }
                             }
                         }
@@ -1952,8 +1969,12 @@ namespace Pulsar4X.Entities
                             }
                             else if (ShipOrdnance[pair.Key] < 0)
                             {
+
                                 TempKeyList.Add(pair.Key);
-                                logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction."); 
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
+                                logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction.");
+#endif
                             }
 
                             /// <summary>
@@ -2060,7 +2081,10 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         CurrentMaxSpeed = 1;
                         CurrentMaxThermalSignature = 1;
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
                         logger.Debug("CurrentMaxEnginePower was 0 AFTER engine repair. oops. see Ship.cs RepairComponent()");
+#endif
                     }
                     else
                         CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);

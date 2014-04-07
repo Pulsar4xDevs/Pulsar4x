@@ -576,7 +576,7 @@ namespace Pulsar4X.Entities
         public BindingList<MessageEntry> MessageLog { get; set; }
 
         /// <summary>
-        /// Color for this faction. eventually will be moved out of here.
+        /// Color for this faction. may eventually be moved out of here.
         /// </summary>
         public Color FactionColor { get; set; }
 
@@ -600,6 +600,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Dictionary<ComponentTN,ShipTN> OpenFireFC { get; set; }
         public Dictionary<ComponentTN, bool> OpenFireFCType { get; set; }
+
+        /// <summary>
+        /// These missile groups belong to this faction, and either have some or all of their missiles removed.
+        /// </summary>
+        public BindingList<OrdnanceGroupTN> MissileRemoveList { get; set; }
 
         /// <summary>
         /// List of ships that need various combat related functionality. the int is a status word.
@@ -876,6 +881,8 @@ namespace Pulsar4X.Entities
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN,bool>();
 
+            MissileRemoveList = new BindingList<OrdnanceGroupTN>();
+
             RechargeList = new Dictionary<ShipTN,int>();
 
             FactionTechLevel = new BindingList<SByte>();
@@ -956,6 +963,8 @@ namespace Pulsar4X.Entities
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN, bool>();
+
+            MissileRemoveList = new BindingList<OrdnanceGroupTN>();
 
             RechargeList = new Dictionary<ShipTN, int>();
 
@@ -1698,7 +1707,7 @@ namespace Pulsar4X.Entities
                                 }
                             }
 
-                            if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue)
+                            if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue && TaskGroups[loop].ActiveSensorQue.Count > 0)
                             {
                                 int TotalCrossSection_MSP = (int)Math.Ceiling(Missile.missileDef.size);
                                 sig = -1;

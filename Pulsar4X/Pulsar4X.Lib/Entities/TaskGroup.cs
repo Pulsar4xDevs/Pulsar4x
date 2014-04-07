@@ -6,8 +6,11 @@ using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 using Pulsar4X;
+
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 /// <summary>
 /// Need a unified component list and component definition list for
@@ -24,10 +27,12 @@ namespace Pulsar4X.Entities
 
     public class TaskGroupTN : StarSystemEntity
     {
+#if LOG4NET_ENABLED
         /// <summary>
         /// TG Logger:
         /// </summary>
         public static readonly ILog logger = LogManager.GetLogger(typeof(TaskGroupTN));
+#endif
 
         /// <summary>
         /// Unused at the moment.
@@ -456,13 +461,19 @@ namespace Pulsar4X.Entities
 
                         if (value < LastValue)
                         {
+                            #if LOG4NET_ENABLED
+#warning faction messagelog this?
                             String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}\n. Condition One with V < LV",Name,LastValue,NewValue,NextNode.Value);
                             logger.Debug(MSG);
+#endif
                         }
                         else if (value == LastValue && value > NewValue)
                         {
+                            #if LOG4NET_ENABLED
+#warning faction messagelog this?
                             String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}. Condition Two with V = LV V > NV\n", Name, LastValue, NewValue, NextNode.Value);
                             logger.Debug(MSG);
+#endif
                         }
 
                         if (value <= NewValue && value >= LastValue)

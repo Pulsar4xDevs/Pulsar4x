@@ -588,9 +588,12 @@ namespace Pulsar4X.Entities.Components
 
                                             FiringShip.ShipsFaction.MessageLog.Add(NMsg);
 
-                                            Target.missileGroup.RemoveMissile(Target.missileGroup.missiles[0]);
+                                            /// <summary>
+                                            /// Set destruction of targeted missile here. This is used by sim entity to determine how to handle missile group cleanup.
+                                            /// </summary>
+                                            Target.missileGroup.missilesDestroyed = Target.missileGroup.missilesDestroyed + 1;
 
-                                            if (Target.missileGroup.missiles.Count == 0)
+                                            if (Target.missileGroup.missilesDestroyed  == Target.missileGroup.missiles.Count)
                                             {
                                                 break;
                                             }
@@ -614,7 +617,7 @@ namespace Pulsar4X.Entities.Components
 
                                         FiringShip.ShipsFaction.MessageLog.Add(NMsg);
                                     }
-                                }
+                                }//end for shot count
                             }
                             else if (LinkedWeapons[loop].isDestroyed == false)
                             {
@@ -627,7 +630,7 @@ namespace Pulsar4X.Entities.Components
                             }
                         }//end if in range and weapon can fire
 
-                        if (Target.missileGroup.missiles.Count == 0)
+                        if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
                         {
                             break;
                         }

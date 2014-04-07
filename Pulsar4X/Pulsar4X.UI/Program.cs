@@ -102,11 +102,15 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[1].AddEngineeringSpaces(CL.EngineeringSpaces[0], 10);
             oNewFaction.ShipDesigns[1].AddOtherComponent(CL.OtherComponents[0], 1);
             oNewFaction.ShipDesigns[1].AddActiveSensor(CL.ActiveSensorDef[4], 1);
+            oNewFaction.ShipDesigns[1].AddActiveSensor(CL.ActiveSensorDef[5], 1);
             oNewFaction.ShipDesigns[1].AddMFC(CL.MissileFireControlDef[1], 1);
+            oNewFaction.ShipDesigns[1].AddMFC(CL.MissileFireControlDef[2], 1);
             oNewFaction.ShipDesigns[1].AddMagazine(CL.MagazineDef[1], 1);
             oNewFaction.ShipDesigns[1].AddLauncher(CL.MLauncherDef[1], 4);
+            oNewFaction.ShipDesigns[1].AddLauncher(CL.MLauncherDef[2], 4);
             oNewFaction.ShipDesigns[1].NewArmor("Collapsium", 45, 5);
-            oNewFaction.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[0], 150);
+            oNewFaction.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[0], 100);
+            oNewFaction.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[1], 200);
             oNewFaction.ShipDesigns[1].IsLocked = true;
             oNewFaction.ShipDesigns[1].BuildClassSummary();
 
@@ -158,11 +162,15 @@ namespace Pulsar4X.UI
             oNewFaction2.ShipDesigns[1].AddEngineeringSpaces(CL.EngineeringSpaces[0], 10);
             oNewFaction2.ShipDesigns[1].AddOtherComponent(CL.OtherComponents[0], 1);
             oNewFaction2.ShipDesigns[1].AddActiveSensor(CL.ActiveSensorDef[4], 1);
+            oNewFaction2.ShipDesigns[1].AddActiveSensor(CL.ActiveSensorDef[5], 1);
             oNewFaction2.ShipDesigns[1].AddMFC(CL.MissileFireControlDef[1], 1);
+            oNewFaction2.ShipDesigns[1].AddMFC(CL.MissileFireControlDef[2], 1);
             oNewFaction2.ShipDesigns[1].AddMagazine(CL.MagazineDef[1], 1);
             oNewFaction2.ShipDesigns[1].AddLauncher(CL.MLauncherDef[1], 4);
+            oNewFaction2.ShipDesigns[1].AddLauncher(CL.MLauncherDef[2], 4);
             oNewFaction2.ShipDesigns[1].NewArmor("Collapsium", 45, 5);
-            oNewFaction2.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[0], 150);
+            oNewFaction2.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[0], 100);
+            oNewFaction2.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[1], 200);
             oNewFaction2.ShipDesigns[1].IsLocked = true;
             oNewFaction2.ShipDesigns[1].BuildClassSummary();
 

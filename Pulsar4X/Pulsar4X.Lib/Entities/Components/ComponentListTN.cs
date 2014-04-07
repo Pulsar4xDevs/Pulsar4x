@@ -306,6 +306,21 @@ namespace Pulsar4X.Entities.Components
             MLauncherDef.Add(TubeMCDef);
             MissileEngineDef.Add(MissileEngineMCDef);
             MissileDef.Add(MissileMCDef);
+
+            MissileLauncherDefTN TubeAMMDef = new MissileLauncherDefTN("Size 1 Launcher", 1.0f, 11, false, 0);
+            MissileEngineDefTN MissileEngineAMMDef = new MissileEngineDefTN("Small Photonic Missile Drive", 100.0f, 6.0f, 0.1f, 0.4f);
+            ActiveSensorDefTN AMMSensor = new ActiveSensorDefTN("AMM Sensor", 10.0f, 180, 75, 1, false, 1.0f, 0);
+            ActiveSensorDefTN AMMMFC = new ActiveSensorDefTN("AMM MFC", 10.0f, 180, 75, 1, true, 1.0f, 0);
+            OrdnanceDefTN MissileAMMDef = new OrdnanceDefTN("Size 1 Missile", null, 0.14f, 11, 0.23f, 0.23f, 11, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0.0f, 0.0f, 0, false, 0, false, 0,
+                                                            MissileEngineAMMDef, 1);
+
+            TotalComponents = TotalComponents + 3;
+
+            MLauncherDef.Add(TubeAMMDef);
+            MissileEngineDef.Add(MissileEngineAMMDef);
+            ActiveSensorDef.Add(AMMSensor);
+            MissileFireControlDef.Add(AMMMFC);
+            MissileDef.Add(MissileAMMDef);
             
 
 

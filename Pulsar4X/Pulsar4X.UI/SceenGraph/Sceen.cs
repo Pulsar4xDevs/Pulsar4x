@@ -605,7 +605,8 @@ namespace Pulsar4X.UI.SceenGraph
             foreach (SceenElement Ele in m_lElements)
             {
                 /// <summary>
-                /// Have to use Guid to identify elements and get rid of the one we no longer want.
+                /// Have to use Guid to identify elements and get rid of the one we no longer want. 
+                /// Update: as it turns out Id was not being declared anywhere.
                 /// </summary>
                 if (Ele.EntityID == oContact.Id)
                 {
