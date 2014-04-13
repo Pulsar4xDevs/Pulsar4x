@@ -381,15 +381,6 @@ namespace Pulsar4X.Entities
 
                     for (int loop2 = 0; loop2 < P[loop].MissileRemoveList.Count; loop2++)
                     {
-                        String Entry = String.Format("Missile Group has {0} Missiles and {1} missilesDestroyed {2} targeters {3} {4} {5}", 
-                                                      P[loop].MissileRemoveList[loop2].missiles.Count, P[loop].MissileRemoveList[loop2].missilesDestroyed,
-                                                      P[loop].MissileRemoveList[loop2].shipsTargetting.Count, P[loop].MissileRemoveList[loop2].ordnanceGroupFaction.Name, P[loop].Name,
-                                                      P[loop].MissileGroups.Count);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, P[loop].MissileRemoveList[loop2].contact.CurrentSystem, P[loop].MissileRemoveList[loop2].contact, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                        P[loop].MessageLog.Add(Msg);
-
-
                         /// <summary>
                         /// every missile in this list will either have missiles removed, or needs to be deleted as an ordnance group.
                         /// </summary>

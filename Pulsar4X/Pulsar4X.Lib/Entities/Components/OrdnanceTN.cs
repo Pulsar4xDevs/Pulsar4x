@@ -951,9 +951,29 @@ namespace Pulsar4X.Entities.Components
                     /// </summary>
                     Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
 
-                    sig = (int)Math.Ceiling(MFC.target.missileGroup.missiles[0].missileDef.size);
-
-                    TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(-1, sig);
+                    int MSP = (int)Math.Ceiling(MFC.target.missileGroup.missiles[0].missileDef.size);
+                    sig = -1;
+                    if (MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
+                    {
+                        if (MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
+                        {
+                            sig = Constants.OrdnanceTN.MissileResolutionMinimum;
+                        }
+                        else if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                        {
+                            sig = MSP - 6;
+                        }
+                        TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(0, sig);
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Big missiles will be treated in HS terms: 21-40 MSP = 2 HS, 41-60 = 3 HS, 61-80 = 4 HS, 81-100 = 5 HS. The same should hold true for greater than 100 sized missiles.
+                        /// but those are impossible to build.
+                        /// </summary>
+                        sig = (int)Math.Ceiling((float)MSP / 20.0f);
+                        TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(sig, -1);                
+                    }
 
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
@@ -1220,11 +1240,29 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Add others here for planets, populations, other missile groups
             /// </summary>
+#warning Population and body targetting may need to be looked at, specifically due to how body positions are relative.
             switch (Missiles[0].target.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
                     dX = (float)(Contact.XSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem);
                     dY = (float)(Contact.YSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem);
+                break;
+                case StarSystemEntityType.Missile:
+                    dX = (float)(Contact.XSystem - Missiles[0].target.missileGroup.contact.XSystem);
+                    dY = (float)(Contact.YSystem - Missiles[0].target.missileGroup.contact.YSystem);
+                break;
+
+                case StarSystemEntityType.Population:
+                    dX = (float)(Contact.XSystem - Missiles[0].target.pop.Contact.XSystem);
+                    dY = (float)(Contact.YSystem - Missiles[0].target.pop.Contact.YSystem);
+                break;
+                case StarSystemEntityType.Body:
+                    dX = (float)(Contact.XSystem - Missiles[0].target.body.XSystem + Missiles[0].target.body.Primary.XSystem);
+                    dX = (float)(Contact.XSystem - Missiles[0].target.body.YSystem + Missiles[0].target.body.Primary.YSystem);
+                break;
+                case StarSystemEntityType.Waypoint:
+                    dX = (float)(Contact.XSystem - Missiles[0].target.wp.XSystem);
+                    dY = (float)(Contact.YSystem - Missiles[0].target.wp.YSystem);
                 break;
             }
 
@@ -1330,6 +1368,7 @@ namespace Pulsar4X.Entities.Components
                 Contact.LastXSystem = Contact.XSystem;
                 Contact.LastYSystem = Contact.YSystem;
 
+#warning yet another place with body and pop missile targetting that needs to be looked at
                 switch(Missiles[0].target.targetType)
                 {
                     case StarSystemEntityType.TaskGroup:
@@ -1357,6 +1396,8 @@ namespace Pulsar4X.Entities.Components
 
                     break;
                     case StarSystemEntityType.Population:
+                    break;
+                    case StarSystemEntityType.Body:
                     break;
                     case StarSystemEntityType.Missile:
 
@@ -1445,6 +1486,7 @@ namespace Pulsar4X.Entities.Components
                         /// </summary>
                         int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(Missiles[0].target.missileGroup.contact);
                         float dist = Contact.DistanceTable[TGID];
+                        int detection = -1;
 
                         if(missiles[0].missileDef.aSD == null)
                         {
@@ -1454,7 +1496,30 @@ namespace Pulsar4X.Entities.Components
                             MissilesDestroyed = Missiles.Count;
                         }
 
-                        int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(Missiles[0].target.missileGroup.missiles[0].missileDef.size));
+                        int MSP = (int)Math.Ceiling(Missiles[0].target.missileGroup.missiles[0].missileDef.size);
+                        int sig = -1;
+                        if (MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
+                        {
+                            if (MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
+                            {
+                                sig = Constants.OrdnanceTN.MissileResolutionMinimum;
+                            }
+                            else if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                            {
+                                sig = MSP - 6;
+                            }
+                            detection = Missiles[0].missileDef.aSD.GetActiveDetectionRange(0, sig);
+                        }
+                        else
+                        {
+                            /// <summary>
+                            /// Big missiles will be treated in HS terms: 21-40 MSP = 2 HS, 41-60 = 3 HS, 61-80 = 4 HS, 81-100 = 5 HS. The same should hold true for greater than 100 sized missiles.
+                            /// but those are impossible to build.
+                            /// </summary>
+                            sig = (int)Math.Ceiling((float)MSP / 20.0f);
+                            detection = Missiles[0].missileDef.aSD.GetActiveDetectionRange(sig, -1);
+                        }
+
                         bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
 
                         if (det == false)
@@ -1464,6 +1529,15 @@ namespace Pulsar4X.Entities.Components
                             /// </summary>
                             CreateWaypointTarget();
                         }
+                    }
+#warning and another pop/body targetting place for missiles
+                    else if (Missiles[0].target.targetType == StarSystemEntityType.Population)
+                    {
+
+                    }
+                    else if (Missiles[0].target.targetType == StarSystemEntityType.Body)
+                    {
+
                     }
                 }
 
