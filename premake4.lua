@@ -50,12 +50,12 @@ solution "Pulsar4X"
 	--	
 	--	configuration "Debug"
 	--		targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
-	--		defines { "DEBUG", "OPENGL", "SPLASHSCREEN" }
+	--		defines { "DEBUG", "OPENGL", "SPLASHSCREEN", "LOG4NET_ENABLED" }
 	--		flags { "Symbols" }
 	--		
 	--	configuration "Release"
 	--		targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
-	--		defines { "OPENGL", "SPLASHSCREEN" }
+	--		defines { "OPENGL", "SPLASHSCREEN", "LOG4NET_ENABLED" }
 	--		flags { "Optimize" }
 
 if ((os.get() == "windows" and _OPTIONS.UI ~= "GTK") or _OPTIONS.UI == "winforms") then
@@ -94,12 +94,12 @@ if ((os.get() == "windows" and _OPTIONS.UI ~= "GTK") or _OPTIONS.UI == "winforms
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.UI/bin/Debug"
-			defines { "DEBUG", "OPENGL", "SPLASHSCREEN" }
+			defines { "DEBUG", "OPENGL", "SPLASHSCREEN", "LOG4NET_ENABLED" }
 			flags { "Symbols" }
 			
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.UI/bin/Release"
-			defines { "OPENGL", "SPLASHSCREEN" }
+			defines { "OPENGL", "SPLASHSCREEN", "LOG4NET_ENABLED" }
 			flags { "Optimize" }
 
 else
@@ -136,12 +136,12 @@ else
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Debug"
-			defines { "DEBUG", 'OPENGL', 'GTKFORM', "SPLASHSCREEN" }
+			defines { "DEBUG", 'OPENGL', 'GTKFORM', "SPLASHSCREEN", "LOG4NET_ENABLED" }
 			flags { "Symbols" }
 			
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.WinForms/bin/Release"
-			defines { "GTKFORM", 'OPENGL', "SPLASHSCREEN" }
+			defines { "GTKFORM", 'OPENGL', "SPLASHSCREEN", "LOG4NET_ENABLED" }
 			flags { "Optimize" }
 end
 
@@ -172,7 +172,7 @@ end
 			
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.Lib/bin/Debug"
-			defines { "DEBUG" }
+			defines { "DEBUG", "LOG4NET_ENABLED" }
 			flags { "Symbols" }
 			
 		configuration "Release"
@@ -198,11 +198,12 @@ end
 		
 		configuration "Debug"
 			targetdir "Pulsar4X/Pulsar4X.Tests/bin/Debug"
-			defines { "DEBUG" }
+			defines { "DEBUG", "LOG4NET_ENABLED" }
 			flags { "Symbols" }
 			
 		configuration "Release"
 			targetdir "Pulsar4X/Pulsar4X.Tests/bin/Release"
+                        defines { "LOG4NET_ENABLED" }
 			flags { "Optimize" }
 			
 defaultaction "vs2010"
