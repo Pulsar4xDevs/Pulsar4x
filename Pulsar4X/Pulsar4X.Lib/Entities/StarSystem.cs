@@ -32,6 +32,16 @@ namespace Pulsar4X.Entities
         public BindingList<SystemContact> SystemContactList { get; set; }
 
         /// <summary>
+        /// List of contacts that need to be created, this will be used by the system map/sceen display.
+        /// </summary>
+        public BindingList<SystemContact> ContactCreateList { get; set; }
+
+        /// <summary>
+        /// List of contacts that need to be deleted. this will be used by the system map/sceen display.
+        /// </summary>
+        public BindingList<SystemContact> ContactDeleteList { get; set; }
+
+        /// <summary>
         /// List of faction contact lists. Here is where context starts getting confusing. This is a list of the last time the SystemContactList was pinged.
         /// SystemContactList stores Location and pointers to Pop/TG signatures. These must be arrayed in order from Faction[0] to Faction[Max] Corresponding to
         /// FactionContactLists[0] - [max]
@@ -58,6 +68,9 @@ namespace Pulsar4X.Entities
             JumpPoints = new BindingList<JumpPoint>();
             SystemContactList = new BindingList<SystemContact>();
             FactionDetectionLists = new BindingList<FactionSystemDetection>();
+
+            ContactCreateList = new BindingList<SystemContact>();
+            ContactDeleteList = new BindingList<SystemContact>();
         }
 
         /// <summary>
@@ -128,6 +141,18 @@ namespace Pulsar4X.Entities
             {
                 FactionDetectionLists[loop].AddContact();
             }
+
+            /// <summary>
+            /// Inform the systemmap/sceen that a new contact needs to be created.
+            /// </summary>
+            ContactCreateList.Add(Contact);
+
+            /// <summary>
+            /// In the event that this contact is in the delete list, it probably means that this contact travelled through this system, left, and is back in the system, without being drawn.
+            /// If so put it in the contactCreateList and take it out of the contactDeleteList.
+            /// </summary>
+            if (ContactDeleteList.Contains(Contact) == true)
+                ContactDeleteList.Remove(Contact);
         }
 
 
@@ -161,6 +186,17 @@ namespace Pulsar4X.Entities
                    SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
                    SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
                }
+
+               /// <summary>
+               /// inform the display that this contact needs to be deleted.
+               /// </summary>
+               ContactDeleteList.Add(Contact);
+
+               /// <summary>
+               /// also clean up the contact create list if this contact hasn't been created yet by the display.
+               /// </summary>
+               if (ContactCreateList.Contains(Contact) == true)
+                   ContactCreateList.Remove(Contact);
            }
            else
            {

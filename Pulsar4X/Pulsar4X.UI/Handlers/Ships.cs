@@ -546,79 +546,124 @@ namespace Pulsar4X.UI.Handlers
                     int count = 0;
                     if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
-                        if (m_oDetailsPanel.ContactListBox.SelectedIndex < _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count)
-                        {
 
-                            foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
+                        {
+                            if (pair.Value.active == true)
                             {
                                 if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                 {
                                     _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
                                     pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                    count++;
                                     break;
                                 }
                                 count++;
                             }
-                        }
-                        else
-                        {
-                            count = _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count;
-                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
+                            else
                             {
                                 if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                 {
-                                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                    pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                    /// <summary>
+                                    /// not a valid assignment. just exit loop.
+                                    /// </summary>
+                                    count++;
                                     break;
                                 }
                                 count++;
                             }
                         }
-                    }
 
-
-
-                }
-                else
-                {
-                    int count = 0;
-                    if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
-                    {
-                        if (m_oDetailsPanel.ContactListBox.SelectedIndex < _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count)
+                        if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
                         {
-                            foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
+                            foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
                             {
-                                StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
-                                int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
-                                int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
-
-                                /// <summary>
-                                /// Validate tick here?
-                                /// </summary>
-                                int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
-
-                                float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
-                                int TCS = pair.Key.TotalCrossSection;
-                                int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
-
-                                bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
-
-                                if (det == true)
+                                if (pair.Value.active == true)
                                 {
                                     if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
                                     {
-                                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                        pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                        _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                        pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                        count++;
+                                        break;
+                                    }
+                                    count++;
+                                }
+                                else
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        /// <summary>
+                                        /// not a valid assignment. just exit loop.
+                                        /// </summary>
+                                        count++;
                                         break;
                                     }
                                     count++;
                                 }
                             }
                         }
-                        else
+                    }
+                }
+                else
+                {
+                    int count = 0;
+                    if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
+                    {
+                        foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
-                            count = _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.Count;
+                            StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+                            int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
+                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+
+                            /// <summary>
+                            /// Validate tick here?
+                            /// </summary>
+                            int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
+
+
+                            float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                            int TCS = pair.Key.TotalCrossSection;
+                            int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
+
+                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+
+                            /// <summary>
+                            /// if det is not true then this contact does not appear in the contact list.
+                            /// </summary>
+                            if (det == true)
+                            {
+                                /// <summary>
+                                /// Only active detection allows for tracking, EM and thermal contacts can't be targeted but will be displayed.
+                                /// </summary>
+                                if (pair.Value.active == true)
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                        pair.Key.ShipsTargetting.Add(_CurrnetShip);
+                                        count++;
+                                        break;
+                                    }
+                                    count++;
+                                }
+                                else
+                                {
+                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    {
+                                        /// <summary>
+                                        /// not a valid assignment. just exit loop.
+                                        /// </summary>
+                                        count++;
+                                        break;
+                                    }
+                                    count++;
+                                }
+                            }
+                        }  
+
+                        if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
+                        {
                             foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedMissileContacts)
                             {
                                 StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
@@ -641,7 +686,7 @@ namespace Pulsar4X.UI.Handlers
                                     {
                                         sig = Constants.OrdnanceTN.MissileResolutionMinimum;
                                     }
-                                    if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                                    else if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
                                     {
                                         sig = MSP - 6;
                                     }
@@ -659,21 +704,43 @@ namespace Pulsar4X.UI.Handlers
 
                                 bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
 
+                                /// <summary>
+                                /// if det is not true then this contact will not appear in the contact list.
+                                /// </summary>
                                 if (det == true)
                                 {
-                                    if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                    /// <summary>
+                                    /// Only active detection allows for tracking, EM and thermal contacts can't be targeted but will be displayed.
+                                    /// </summary>
+                                    if (pair.Value.active == true)
                                     {
-                                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
-                                        pair.Key.shipsTargetting.Add(_CurrnetShip);
-                                        break;
+                                        if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                        {
+                                            _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].assignTarget(pair.Key);
+                                            pair.Key.shipsTargetting.Add(_CurrnetShip);
+                                            count++;
+                                            break;
+                                        }
+                                        count++;
                                     }
-                                    count++;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                                    else
+                                    {
+                                        if (count == m_oDetailsPanel.ContactListBox.SelectedIndex)
+                                        {
+                                            /// <summary>
+                                            /// not a valid assignment. just exit loop.
+                                            /// </summary>
+                                            count++;
+                                            break;
+                                        }
+                                        count++;
+                                    }
+                                }          
+                            }//end foreach contact
+                        }//end if count < selection
+                    }//end if detectedlist contains system
+                }//end else if not BFC
+            }//end if FC and there is a selection.
             BuildCombatSummary();
             RefreshFCInfo();
         }

@@ -439,16 +439,32 @@ namespace Pulsar4X.UI.SceenGraph
             /// Kludge to create new contact elements to draw, or delete them as needed.
             /// </summary>
             StarSystem Sys = m_oSceenEntity as StarSystem;
-            foreach (SystemContact oContact in Sys.SystemContactList)
+
+            /// <summary>
+            /// The display needs to create these contacts. clean up the contact create list on completion.
+            /// Does SystemContact.CEState.NotCreated play a role here? I don't believe so because contacts can be already created and transiting jump points.
+            /// </summary>
+            if (Sys.ContactCreateList.Count != 0)
             {
-                if (oContact.ContactElementCreated == SystemContact.CEState.NotCreated)
+                foreach (SystemContact oContact in Sys.ContactCreateList)
                 {
                     AddContactElement(SceenDefaultEffect, oContact);
                 }
-                else if (oContact.ContactElementCreated == SystemContact.CEState.Delete)
+                Sys.ContactCreateList.Clear();
+            }
+
+            /// <summary>
+            /// The display needs to delete these contacts. clean up the contact delete list on completion.
+            /// Does SystemContact.CEState.Delete play a role here? I don't believe so, since contacts need to be deleted on jump transits in addition to destruction.
+            /// </summary>
+            if (Sys.ContactDeleteList.Count != 0)
+            {
+
+                foreach (SystemContact oContact in Sys.ContactDeleteList)
                 {
                     RemoveContactElement(SceenDefaultEffect, oContact);
                 }
+                Sys.ContactDeleteList.Clear();
             }
 
             foreach (SceenElement oElement in m_lElements)
