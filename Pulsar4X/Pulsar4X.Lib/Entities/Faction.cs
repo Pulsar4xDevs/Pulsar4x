@@ -911,6 +911,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.WarheadStrength] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.MissileAgility] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
 
 
             ShipBPTotal = 8000.0m;
@@ -993,6 +994,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.WarheadStrength] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.MissileAgility] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
 
             ShipBPTotal = 8000.0m;
             PDCBPTotal = 4000.0m;

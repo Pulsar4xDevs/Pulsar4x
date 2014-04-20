@@ -3,14 +3,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Pulsar4X.Entities;
+
+#if LOG4NET_ENABLED
 using log4net;
+#endif
+
 using System.ComponentModel;
 
 namespace Pulsar4X.Stargen
 {
     class Accrete
     {
+        #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Accrete));
+        #endif
 
         private readonly bool _generateMoons;
         private readonly double _minimumStellarAge;
@@ -119,11 +125,17 @@ namespace Pulsar4X.Stargen
                         }
                         else
                         {
+#if LOG4NET_ENABLED
                             logger.Debug("Planet at " + protoPlanet.SemiMajorAxis + " failed due to large neighbor!");
+#endif
                         }
                     }
                     if (counter == 10000)
+                    {
+#if LOG4NET_ENABLED
                         logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
+#endif
+                    }
                 } while (protoStar.DustAvailable && counter < 10000) ;
                 
                 //populate the Star from the protoStar
@@ -176,8 +188,9 @@ namespace Pulsar4X.Stargen
                         // New orbital distance
                         newA = (aPlanet.Mass + bPlanet.Mass) / ((aPlanet.Mass / aPlanet.SemiMajorAxis) + (bPlanet.Mass / bPlanet.SemiMajorAxis));
 
+//#if LOG4NET_ENABLED
                         //logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
-
+//#endif
                         // Compute new eccentricity
                         temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
                         temp = temp + (bPlanet.Mass * Math.Sqrt(bPlanet.SemiMajorAxis) * Math.Sqrt(Math.Sqrt(1.0 - Math.Pow(bPlanet.Eccentricity, 2.0))));
@@ -205,15 +218,21 @@ namespace Pulsar4X.Stargen
 
                         //double startmass = newP.Mass;
                         AccreteDust(Disc, newP);
-                        /*if (newP.Mass < startmass)
+
+                        /*
+                        #if LOG4NET_ENABLED
+                        if (newP.Mass < startmass)
                             logger.Debug("Accretion reduced mass, something is wrong!");
                         else if (newP.Mass > startmass)
                             logger.Debug("Accretion increased mass!");
                         else
-                            logger.Debug("Accretion did not change mass!");*/
+                            logger.Debug("Accretion did not change mass!");
+                        #endif
+                        */
 
-
+                        //#if LOG4NET_ENABLED
                         //logger.Debug(string.Format("New planet at {0:N4} AU with mass {1:N5}!", newP.SemiMajorAxis, newP.MassInEarthMasses));
+                        //#endif
 
                         Disc.Planets.Remove(aPlanet);
                         Disc.Planets.Remove(bPlanet);
@@ -352,12 +371,18 @@ namespace Pulsar4X.Stargen
                     }
                     else
                     {
+#if LOG4NET_ENABLED
                         logger.Debug("Moon at " + moon.SemiMajorAxis + " failed due to large neighbor!");
+#endif
                     }
                 }
 
                 if (counter == 10000)
+                {
+#if LOG4NET_ENABLED
                     logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
+#endif
+                }
             }while (planet.DustAvailable && counter < 10000);
 
             planet.Planets = new List<ProtoPlanet>(planet.Planets.OrderBy(x => x.SemiMajorAxis));
@@ -606,7 +631,9 @@ namespace Pulsar4X.Stargen
                                 planet.Moons.Remove(moon);
                                 pass = false;
                                 //return false;
+                                //#if LOG4NET_ENABLED
                                 //logger.Debug(string.Format("Moon of planet {0} inside Roche limit", planet.Name));
+                                //#endif
                             }
 
                             if (moon.SemiMajorAxis > hillSphere)
@@ -615,7 +642,9 @@ namespace Pulsar4X.Stargen
                                 planet.Moons.Remove(moon);
                                 pass = false;
                                 //return false;
+                                //#if LOG4NET_ENABLED
                                 //logger.Debug(string.Format("Moon of planet {0} outside hill radius", planet.Name));
+                                //#endif
                             }
 
                         }
@@ -625,7 +654,9 @@ namespace Pulsar4X.Stargen
                             planet.Moons.Remove(moon);
                             pass = false;
                             //return false;
+                            //#if LOG4NET_ENABLED
                             //logger.Debug(string.Format("Moon of planet {0} too small", planet.Name));
+                            //#endif
                         }
                         if (pass)
                             count++;

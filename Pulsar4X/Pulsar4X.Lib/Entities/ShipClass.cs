@@ -816,6 +816,28 @@ namespace Pulsar4X.Entities
 
         #endregion
 
+        #region CIWS & Turrets
+        /// <summary>
+        /// Close in weapon system definitions in this ship class
+        /// </summary>
+        [DisplayName("Ship Close in Weapon System"),
+        Category("Component Lists"),
+        Description("List of CIWS present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<CIWSDefTN> ShipCIWSDef { get; set; }
+
+        /// <summary>
+        /// Close in weapon system counts for this ship class.
+        /// </summary>
+        [DisplayName("Ship Close in Weapon System Count"),
+        Category("Component Counts"),
+        Description("Count of CIWS present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipCIWSCount { get; set; }
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -948,6 +970,9 @@ namespace Pulsar4X.Entities
             MagazineMagSpace = 0;
             LauncherCount = 0;
             PreferredOrdnanceCount = 0;
+
+            ShipCIWSDef = new BindingList<CIWSDefTN>();
+            ShipCIWSCount = new BindingList<ushort>();
 
             ShipArmorDef = new ArmorDefTN("Conventional");
             NewArmor("Conventional", 2, 1);
@@ -2075,6 +2100,47 @@ namespace Pulsar4X.Entities
 
 
         /// <summary>
+        /// Add a CIWS to this ship class
+        /// </summary>
+        /// <param name="MFC">CIWS to add</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddCIWS(CIWSDefTN CIWS, short inc)
+        {
+            int CIWSIndex = ShipCIWSDef.IndexOf(CIWS);
+            if (CIWSIndex != -1)
+            {
+                ShipCIWSCount[CIWSIndex] = (ushort)((short)ShipCIWSCount[CIWSIndex] + inc);
+            }
+
+            if (CIWSIndex == -1 && inc >= 1)
+            {
+                ShipCIWSDef.Add(CIWS);
+                ShipCIWSCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (CIWSIndex != -1)
+                {
+                    if (ShipCIWSCount[CIWSIndex] <= 0)
+                    {
+                        ShipCIWSCount.RemoveAt(CIWSIndex);
+                        ShipCIWSDef.RemoveAt(CIWSIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            UpdateClass(CIWS, inc);
+        }
+
+
+        /// <summary>
         /// Set preferred ordnance adds or subtracts missiles from the preferred ordnance list of this class.
         /// </summary>
         /// <param name="missile">Missile to be added or subtracted.</param>
@@ -2319,7 +2385,7 @@ namespace Pulsar4X.Entities
             Summary = String.Format("{0}{1}",Summary,Entry);
             #endregion
 
-            #region Beam Weapon Info
+            #region Beam Weapon Info CIWS and turrets
             for (int loop = 0; loop < ShipBeamDef.Count; loop++)
             {
                 String Range = "N/A";
@@ -2384,6 +2450,16 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})   {2}   {3}   Power {4}   RM {5}   ROF {6}   {7}\n",
                                           ShipBeamDef[loop].Name, ShipBeamCount[loop], Range, Tracking, Power,
                                           (ShipBeamDef[loop].damage.Count - 1), ROF, DamageString);
+
+                Summary = String.Format("{0}{1}",Summary,Entry);
+                control = true;
+            }
+
+            for (int loop = 0; loop < ShipCIWSDef.Count; loop++)
+            {
+
+                Entry = String.Format("{0} ({1}x{2})    Range 1000 km     TS: {3} km/s     ROF 5       Base 50% To Hit", ShipCIWSDef[loop].Name, ShipCIWSCount[loop], ShipCIWSDef[loop].rOF, 
+                                                                                                                         ShipCIWSDef[loop].tracking);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);
                 control = true;

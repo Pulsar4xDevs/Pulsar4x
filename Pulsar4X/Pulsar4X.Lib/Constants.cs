@@ -997,7 +997,14 @@ namespace Pulsar4X
         /// </summary>
         public static class BFCTN
         {
+            /// <summary>
+            /// Range modifier for the BFC, in 10k increments.
+            /// </summary>
             public static byte[] BeamFireControlRange = { 10, 16, 24, 32, 40, 48, 60, 75, 100, 125, 150, 175 };
+
+            /// <summary>
+            /// Tracking modifier for the BFC, has to be in km.
+            /// </summary>
             public static ushort[] BeamFireControlTracking = { 1250, 2000, 3000, 4000, 5000, 6250, 8000, 10000, 12500, 15000, 20000, 25000 };
         };
 

@@ -1,6 +1,9 @@
 ﻿using System;
 using Pulsar4X.Entities;
+
+#if LOG4NET_ENABLED
 using log4net;
+#endif
 
 
 namespace Pulsar4X.Stargen
@@ -10,7 +13,9 @@ namespace Pulsar4X.Stargen
         private const double MinAge = 1.0E9;
         private const double MaxAge = 6.0E9;
 
+        #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystemFactory));
+        #endif
 
         private readonly double _minimumStellarAge;
         private readonly double _maximumStellarAge;
@@ -45,6 +50,11 @@ namespace Pulsar4X.Stargen
 
             if (logger.IsDebugEnabled)
             {
+                /// <summary>
+                /// redundancy:
+                /// </summary>
+                #if LOG4NET_ENABLED
+
                 /*
                 logger.Debug("Star System Generated!");
                 for(int i = 0; i<ss.Stars.Count; i++)
@@ -65,6 +75,7 @@ namespace Pulsar4X.Stargen
                     }
                 }
                 */
+                #endif
             }
 
             return ss;

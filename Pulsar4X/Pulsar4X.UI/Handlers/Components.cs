@@ -2345,7 +2345,7 @@ namespace Pulsar4X.UI.Handlers
             m_oComponentDesignPanel.TechNameTextBox.Clear();
             m_oComponentDesignPanel.ParametersTextBox.Clear();
 
-            #region BuildSystemParamters Switch
+            #region BuildSystemParameters Switch
             switch ((ComponentsViewModel.Components)m_oComponentDesignPanel.ResearchComboBox.SelectedIndex)
             {
                 #region Active Sensors / MFC
@@ -3376,7 +3376,53 @@ namespace Pulsar4X.UI.Handlers
 
                         m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
 
-                        Entry = String.Format("Capacity: {0}     Internal Armour: {1} HS     Explosion Chance: {2}\n", MagazineProject.capacity, MagazineProject.armourFactor, Math.Round((1.0f - Constants.MagazineTN.Ejection[eject]) * 100.0f));
+                        switch (MagazineProject.armorTech)
+                        {
+                            case 0:
+                                Entry = "Conventional";
+                                break;
+                            case 1:
+                                Entry = "Duranium";
+                                break;
+                            case 2:
+                                Entry = "High Density Duranium";
+                                break;
+                            case 3:
+                                Entry = "Composite";
+                                break;
+                            case 4:
+                                Entry = "Ceramic Composite";
+                                break;
+                            case 5:
+                                Entry = "Laminate Composite";
+                                break;
+                            case 6:
+                                Entry = "Compressed Carbon";
+                                break;
+                            case 7:
+                                Entry = "Biphased Carbide";
+                                break;
+                            case 8:
+                                Entry = "Crystaline Composite";
+                                break;
+                            case 9:
+                                Entry = "Superdense";
+                                break;
+                            case 10:
+                                Entry = "Bonded Superdense";
+                                break;
+                            case 11:
+                                Entry = "Coherent Superdense";
+                                break;
+                            case 12:
+                                Entry = "Collapsium";
+                                break;
+                        }
+
+                        String ArmourString = String.Format("{0} Armour", Entry);
+
+                        Entry = String.Format("Capacity: {0}     Internal Armour: {1} HS     Explosion Chance: {2}\nArmour used: {3}\n", MagazineProject.capacity, MagazineProject.armourFactor,
+                                              Math.Round((1.0f - Constants.MagazineTN.Ejection[eject]) * 100.0f), ArmourString);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)

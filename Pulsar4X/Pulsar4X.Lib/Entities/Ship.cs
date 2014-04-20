@@ -396,6 +396,13 @@ namespace Pulsar4X.Entities
         public int CurrentMagazineMagCapacityMax { get; set; }
         #endregion
 
+        #region CIWS and Turrets
+        /// <summary>
+        /// Close in weapon systems on this ship.
+        /// </summary>
+        public BindingList<CIWSTN> ShipCIWS { get; set; }
+        #endregion
+
 
         /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
@@ -823,6 +830,24 @@ namespace Pulsar4X.Entities
             CurrentMagazineCapacityMax = ClassDefinition.TotalMagazineCapacity;
             CurrentLauncherMagCapacityMax = ClassDefinition.LauncherMagSpace;
             CurrentMagazineMagCapacityMax = ClassDefinition.MagazineMagSpace;
+
+            ShipCIWS = new BindingList<CIWSTN>();
+            for(int loop = 0; loop < ClassDefinition.ShipCIWSDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipCIWSDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipCIWSCount[loop]; loop2++)
+                {
+                    CIWSTN CIWS = new CIWSTN(ClassDefinition.ShipCIWSDef[loop]);
+                    CIWS.componentIndex = ShipCIWS.Count;
+
+                    int CIWSIndex = loop2 + 1;
+                    CIWS.Name = CIWS.cIWSDef.Name + " #" + CIWSIndex.ToString();
+
+                    ShipCIWS.Add(CIWS);
+                    ShipComponents.Add(CIWS);
+                }
+            }
 
             IsDestroyed = false;
 
@@ -2020,6 +2045,12 @@ namespace Pulsar4X.Entities
                         ShipsFaction.OpenFireFCType.Remove(ShipComponents[ID]);
                     }
                 break;
+
+                case ComponentTypeTN.CIWS:
+                /// <summary>
+                /// Do nothing for CIWS.
+                /// </summary>
+                break;
             }
             return DamageReturn;
         }
@@ -2212,6 +2243,9 @@ namespace Pulsar4X.Entities
                 break;
 
                 case ComponentTypeTN.MissileFireControl:
+                break;
+
+                case ComponentTypeTN.CIWS:
                 break;
             }
         }

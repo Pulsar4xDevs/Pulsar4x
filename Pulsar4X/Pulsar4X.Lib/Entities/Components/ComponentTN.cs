@@ -53,12 +53,12 @@ namespace Pulsar4X.Entities.Components
         Shield,
         AbsorptionShield,
 
-        /// <summary>
-        /// New components, no repair/damage
-        /// </summary>
         MissileLauncher,
         Magazine,
         MissileFireControl,
+
+#warning CIWS not implemented in class design or components, also no mechanics done for CIWS.
+        CIWS,
 
         TypeCount
     }

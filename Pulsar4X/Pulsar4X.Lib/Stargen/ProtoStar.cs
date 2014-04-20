@@ -2,13 +2,18 @@
 using Pulsar4X.Entities;
 using System.Linq;
 using System;
+
+#if LOG4NET_ENABLED
 using log4net;
+#endif
 
 namespace Pulsar4X.Stargen
 {
     public class ProtoStar : AccreteDisc
     {
+        #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystemFactory));
+        #endif
 
         public double Luminosity { get { return Star.Luminosity; } set { Star.Luminosity = value; } }
         public override double Mass { get { return Star.Mass; } }

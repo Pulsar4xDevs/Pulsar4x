@@ -109,6 +109,11 @@ namespace Pulsar4X.Entities.Components
         public BindingList<OrdnanceDefTN> MissileDef { get; set; }
 
         /// <summary>
+        /// Close in Weapons System definitions.
+        /// </summary>
+        public BindingList<CIWSDefTN> CIWSDef { get; set; }
+
+        /// <summary>
         /// Number of the total components this faction has for ship building purposes. MissileEngineDef and MissileDef are excluded from this.
         /// </summary>
         public int TotalComponents { get; set; }
@@ -146,6 +151,8 @@ namespace Pulsar4X.Entities.Components
             MissileEngineDef = new BindingList<MissileEngineDefTN>();
 
             MissileDef = new BindingList<OrdnanceDefTN>();
+
+            CIWSDef = new BindingList<CIWSDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
