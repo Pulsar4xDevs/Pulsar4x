@@ -82,8 +82,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// ECCM strength of this CIWS.
         /// </summary>
-        private int ECCM;
-        public int eCCM
+        private float ECCM;
+        public float eCCM
         {
             get { return ECCM; }
         }
@@ -142,7 +142,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Gear Size is 0.5.
             /// </summary>
-            size = (GearCount * 0.5f);
+            size = size + (GearCount * 0.5f);
 
             /// <summary>
             /// BFC size is 1 / FCfactor.
@@ -161,13 +161,16 @@ namespace Pulsar4X.Entities.Components
             if (ECCMTech != 0)
             {
                 size = size + 0.5f;
-                ECCM = ECCMTech * 10;
+                ECCM = (float)ECCMTech * 0.5f;
             }
             else
             {
-                ECCM = 0;
+                ECCM = 0.0f;
             }
 
+            size = size * 10.0f;
+            size = (float)Math.Floor(size);
+            size = size / 10.0f;
             /// <summary>
             /// Crew is size in HS rounded up.
             /// </summary>

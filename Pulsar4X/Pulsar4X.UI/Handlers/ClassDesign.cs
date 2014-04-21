@@ -409,6 +409,9 @@ namespace Pulsar4X.UI.Handlers
                             case ComponentTypeTN.MissileFireControl: 
                                 List.MissileFireControlDef[CIndex].isObsolete = true;
                                 break;
+                            case ComponentTypeTN.CIWS:
+                                List.CIWSDef[CIndex].isObsolete = true;
+                                break;
                         }
 #endregion
 
@@ -487,6 +490,9 @@ namespace Pulsar4X.UI.Handlers
                                 break;
                             case ComponentTypeTN.MissileFireControl:
                                 List.MissileFireControlDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.CIWS:
+                                List.CIWSDef[CIndex].isObsolete = false;
                                 break;
                         }
                         #endregion
@@ -1211,8 +1217,12 @@ namespace Pulsar4X.UI.Handlers
             if (m_oOptionsPanel.GroupComponentsCheckBox.Checked == true)
             {
 
+                /// <summary>
+                /// Add anything new, like turrets here. likewise further down other component count checks need to be added to their respective groups.
+                /// </summary>
                 if (CurrentShipClass.ShipBFCDef.Count != 0 || CurrentShipClass.ShipBeamDef.Count != 0 || CurrentShipClass.ShipReactorDef.Count != 0 ||
-                    CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0)
+                    CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0 ||
+                    CurrentShipClass.ShipCIWSDef.Count != 0)
                 {
                     Entry = "Weapons and Fire Control:";
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
@@ -1226,6 +1236,12 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < CurrentShipClass.ShipMLaunchDef.Count; loop++)
                     {
                         Entry = String.Format("{0}x {1}", CurrentShipClass.ShipMLaunchCount[loop], CurrentShipClass.ShipMLaunchDef[loop].Name);
+                        m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    }
+
+                    for (int loop = 0; loop < CurrentShipClass.ShipCIWSDef.Count; loop++)
+                    {
+                        Entry = String.Format("{0}x {1}", CurrentShipClass.ShipCIWSCount[loop], CurrentShipClass.ShipCIWSDef[loop].Name);
                         m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                     }
 
@@ -1389,7 +1405,8 @@ namespace Pulsar4X.UI.Handlers
             }
 
             if (CurrentShipClass.ShipBFCDef.Count != 0 || CurrentShipClass.ShipBeamDef.Count != 0 || CurrentShipClass.ShipReactorDef.Count != 0 ||
-                    CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0)
+                    CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0 || 
+                    CurrentShipClass.ShipCIWSDef.Count != 0)
             {
                 CurrentLine++;
 
@@ -1410,6 +1427,17 @@ namespace Pulsar4X.UI.Handlers
                     {
                         CType = (int)CurrentShipClass.ShipMLaunchDef[loop].componentType;
                         CIndex = CurrentShipClass.ShipMLaunchDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipCIWSDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipCIWSDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipCIWSDef[loop].Id;
                         return;
                     }
                     CurrentLine++;
@@ -2042,7 +2070,7 @@ namespace Pulsar4X.UI.Handlers
                         }
                     #endregion
 
-                    #region Energy Weapons / CIWS(not yet implemented) / Turrets(not yet implemented)
+                    #region Energy Weapons / CIWS / Turrets(not yet implemented)
                         using (DataGridViewRow NewRow = new DataGridViewRow())
                         {
                             /// <summary>
@@ -2120,6 +2148,37 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// CIWS is marked down as a gauss cannon for rating type and rating, but CIWS has 2x guns, so shotcount*2 is their rate of fire.
                         /// </summary>
+                        for (int loop = 0; loop < List.CIWSDef.Count; loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
+
+                                Entry = "Damage";
+                                Entry2 = List.CIWSDef[loop].rOF.ToString();
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.CIWSDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry2;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.CIWSDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CIWSDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CIWSDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CIWSDef[loop].isObsolete.ToString();
+
+                                row++;
+                                TotalComponents = TotalComponents + 1;
+                            }
+                        }
+                        
                     #endregion
 
                     #region Missile/Torpedo Launchers (Plasma torpedos not yet implemented)
@@ -3033,11 +3092,11 @@ namespace Pulsar4X.UI.Handlers
                     }
                     #endregion
 
-                    #region Energy Weapon Addition / CIWS,Turrets not implemented
+                    #region Energy Weapon Addition / CIWS / Turrets not implemented
                     /// <summary>
                     /// A Beam weapon was added.
                     /// </summary>
-                    if (CompLocation[(int)ComponentGroup.Missiles] != (List.BeamWeaponDef.Count + CompLocation[(int)ComponentGroup.Beam] + 1))
+                    if (CompLocation[(int)ComponentGroup.Missiles] != (List.BeamWeaponDef.Count + List.CIWSDef.Count + CompLocation[(int)ComponentGroup.Beam] + 1))
                     {
                         int rowLine = CompLocation[(int)ComponentGroup.Beam] + 1;
                         int BeamCount = 0;
@@ -3121,6 +3180,62 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.BeamWeaponDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+                        int BWEnd = rowLine;
+
+                        /// <summary>
+                        /// Advance through all the CIWS
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "34")
+                        {
+                            rowLine++;
+                        }
+
+                        int CIWSCount = rowLine - BWEnd;
+
+                        AddedRows = List.CIWSDef.Count - CIWSCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Missiles) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Missiles; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = CIWSCount; loop < List.CIWSDef.Count; loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                Entry = "Damage";
+                                Entry2 = List.CIWSDef[loop].rOF.ToString();
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CIWSDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CIWSDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CIWSDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CIWSDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CIWSDef[loop].isObsolete.ToString();
 
                                 TotalComponents = TotalComponents + 1;
                             }
@@ -4087,6 +4202,26 @@ namespace Pulsar4X.UI.Handlers
                         CurrentShipClass.AddMFC(List.MissileFireControlDef[CIndex], (short)CompAmt);
                     
                     break;
+                case ComponentTypeTN.CIWS:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipCIWSDef.IndexOf(List.CIWSDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipCIWSCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipCIWSCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddCIWS(List.CIWSDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddCIWS(List.CIWSDef[CIndex], (short)CompAmt);
+                    break;
             }
             #endregion
             
@@ -4285,6 +4420,16 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < List.MissileFireControlDef.Count; loop++)
                     {
                         if (List.MissileFireControlDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.CIWS:
+                    for (int loop = 0; loop < List.CIWSDef.Count; loop++)
+                    {
+                        if (List.CIWSDef[loop].Id == CID)
                         {
                             AddComponent(CT, loop, CAmt);
                             break;

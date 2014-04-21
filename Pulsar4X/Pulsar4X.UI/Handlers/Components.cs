@@ -80,6 +80,7 @@ namespace Pulsar4X.UI.Handlers
         private MissileLauncherDefTN LauncherProject;
         private MagazineDefTN        MagazineProject;
         private MissileEngineDefTN   MissileEngineProject;
+        private CIWSDefTN            CloseInProject;
 
         private IntPtr eventMask;
 
@@ -311,6 +312,10 @@ namespace Pulsar4X.UI.Handlers
 
                 #region CIWS
                 case ComponentsViewModel.Components.CIWS:
+                    
+                    if (CloseInProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        CloseInProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.CIWSDef.Add(CloseInProject);
                 break;
                 #endregion
 
@@ -699,7 +704,7 @@ namespace Pulsar4X.UI.Handlers
                                     TrackForm = Tracking.ToString("#,##0");
                                 else
                                     TrackForm = Tracking.ToString();
-                                Entry = String.Format("Beam Fire Control Range {0} km", TrackForm);
+                                Entry = String.Format("Fire Control Speed Rating {0} km/s", TrackForm);
                                 m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                             }
 
@@ -794,6 +799,124 @@ namespace Pulsar4X.UI.Handlers
 
                         m_oComponentDesignPanel.NotesLabel.Text = "Close in Weapons Systems are self contained and do not need support from other components to fully function. They also do not flag a vessel as military, but are only capable of protecting the ship that they are on.";
 
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonROF];
+
+                        if (TechLevel > 6)
+                            TechLevel = 6;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Gauss Cannon Rate of Fire {0}", Constants.BeamWeaponTN.GaussShots[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+
+                        /// <summary>
+                        /// Beam Fire Control Range Section.
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.BeamFireControlRange];
+
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 11)
+                                TechLevel = 11;
+
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                Entry = String.Format("Beam Fire Control Range {0},000 km", Constants.BFCTN.BeamFireControlRange[loop]);
+                                m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                            }
+
+                            if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                                m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// Beam Fire Control Tracking Section.
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.BeamFireControlTracking];
+
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 11)
+                                TechLevel = 11;
+
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                int Tracking = Constants.BFCTN.BeamFireControlTracking[loop];
+                                String TrackForm;
+                                if (Tracking >= 10000)
+                                    TrackForm = Tracking.ToString("#,##0");
+                                else
+                                    TrackForm = Tracking.ToString();
+                                Entry = String.Format("Fire Control Speed Rating {0} km/s", TrackForm);
+                                m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                            }
+
+                            if (m_oComponentDesignPanel.TechComboBoxThree.Items.Count != 0)
+                                m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// Active Sensor tech listing
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ActiveSensorStrength];
+                        if (TechLevel >= 0)
+                        {
+                            if (TechLevel > 11)
+                                TechLevel = 11;
+
+                            for (int loop = TechLevel; loop >= 0; loop--)
+                            {
+                                Entry = String.Format("Active Sensor Strength {0}", Constants.SensorTN.ActiveStrength[loop]);
+                                m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+                            }
+
+                            if (m_oComponentDesignPanel.TechComboBoxFour.Items.Count != 0)
+                                m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        }
+
+                        /// <summary>
+                        /// Turret Tracking
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking];
+                        if (TechLevel > 11)
+                            TechLevel = 11;
+
+                        for (int loop = TechLevel; loop >= 0; loop--)
+                        {
+                            int Tracking = Constants.BFCTN.BeamFireControlTracking[loop];
+                            String TrackForm;
+                            if (Tracking >= 10000)
+                                TrackForm = Tracking.ToString("#,##0");
+                            else
+                                TrackForm = Tracking.ToString();
+                            Entry = String.Format("Turret Tracking Speed(10% Gear) {0} km/s", TrackForm);
+                            m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
+                        }
+                        if (m_oComponentDesignPanel.TechComboBoxFive.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+
+                        /// <summary>
+                        /// ECCM
+                        /// </summary>
+                        TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ECCM];
+                        if (TechLevel > 10)
+                            TechLevel = 10;
+
+                        for (int loop = TechLevel; loop >= 1; loop--)
+                        {
+                            Entry = String.Format("Electronic Counter-counter Measures - {0}", loop);
+                            m_oComponentDesignPanel.TechComboBoxSix.Items.Add(Entry);
+                        }
+
+                        Entry = "No ECCM";
+                        m_oComponentDesignPanel.TechComboBoxSix.Items.Add(Entry);
+
+                        if (m_oComponentDesignPanel.TechComboBoxSix.Items.Count != 0)
+                            m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = 0;
 
                     break;
                     #endregion
@@ -2756,6 +2879,98 @@ namespace Pulsar4X.UI.Handlers
 
                 #region CIWS
                 case ComponentsViewModel.Components.CIWS:
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex != -1)
+                    {
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonROF];
+                        if (FactTech > 6)
+                            FactTech = 6;
+
+                        int GR = FactTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.BeamFireControlRange];
+
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int BR = FactTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.BeamFireControlTracking];
+
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int BT = FactTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ActiveSensorStrength];
+
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int AS = FactTech - m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex;
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking];
+
+                        if (FactTech > 11)
+                            FactTech = 11;
+
+                        int TT = FactTech - m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex;
+
+                        FactTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ECCM];
+
+                        if (FactTech > 10)
+                            FactTech = 10;
+
+                        int ECCM = FactTech - m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex;
+
+                        Entry = "CIWS";
+
+                        CloseInProject = new CIWSDefTN(Entry, GR, BR, BT, AS, TT, ECCM);
+
+                        Entry = String.Format("CIWS-{0}", (CloseInProject.tracking / 100)); ;
+                        CloseInProject.Name = Entry; 
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        Entry = String.Format("Rate of Fire: {0} shots every 5 seconds\n", CloseInProject.rOF);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        float GearCount = (float)CloseInProject.tracking / Constants.BFCTN.BeamFireControlTracking[CloseInProject.turretGearTech];
+                        float FCfactor = ((float)Constants.BFCTN.BeamFireControlRange[CloseInProject.beamFCRangeTech] * 1000.0f) / 20000.0f;
+                        float CIWS_ECCM = 0.0f;
+                        if(CloseInProject.eCCM != 0)
+                            CIWS_ECCM = 0.5f;
+
+                        String TurretSize = String.Format("{0:N2}", (GearCount * 0.5f));
+                        String FCSize = String.Format("{0:N4}", (1.0f / FCfactor));
+                        String SensorSize = String.Format("{0:N4}", (3.0f / (float)Constants.SensorTN.ActiveStrength[CloseInProject.activeStrengthTech]));
+                        String ECCMSize = String.Format("{0}", CIWS_ECCM);
+
+                        Entry = String.Format("Dual GC: 5HS Turret: {0} HS    Fire Control: {1} HS    Sensor {2} HS    ECCM: {3}\n", TurretSize, FCSize, SensorSize, ECCMSize);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Overall Size: {0:N1} Tons    HTK: {1}\n", (CloseInProject.size * 50.0f), CloseInProject.htk);
+                        else
+                            Entry = String.Format("Overall Size: {0:N1} HS    HTK: {1}\n", CloseInProject.size, CloseInProject.htk);
+
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Tracking Speed: {0} km/s     ECCM Level: {1}\n", CloseInProject.tracking, CloseInProject.eCCM);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n", CloseInProject.cost, CloseInProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required: Not Yet Implemented.\n");
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Base Chance to Hit: 50%\nDevelopment Cost for Project: {0}RP\n", CloseInProject.cost * 10);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+                    }
                 break;
                 #endregion
 
