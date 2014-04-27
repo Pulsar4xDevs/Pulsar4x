@@ -59,6 +59,9 @@ namespace Pulsar4X.Entities.Components
 
         CIWS,
 
+#warning nothing done for Turret. also update fire control, and all displays to not only use BeamTN, but also TurretTN.
+        Turret,
+
         TypeCount
     }
 
