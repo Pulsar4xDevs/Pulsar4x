@@ -836,6 +836,26 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public BindingList<ushort> ShipCIWSCount { get; set; }
+
+        /// <summary>
+        /// Turret definitions in this ship class
+        /// </summary>
+        [DisplayName("Ship Turrets"),
+        Category("Component Lists"),
+        Description("List of Turrets present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<TurretDefTN> ShipTurretDef { get; set; }
+
+        /// <summary>
+        /// Turret count for this ship class.
+        /// </summary>
+        [DisplayName("Ship Turret Count"),
+        Category("Component Counts"),
+        Description("Count of Turrets present on this class"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<ushort> ShipTurretCount { get; set; }
         #endregion
 
         #endregion
@@ -973,6 +993,9 @@ namespace Pulsar4X.Entities
 
             ShipCIWSDef = new BindingList<CIWSDefTN>();
             ShipCIWSCount = new BindingList<ushort>();
+
+            ShipTurretDef = new BindingList<TurretDefTN>();
+            ShipTurretCount = new BindingList<ushort>();
 
             ShipArmorDef = new ArmorDefTN("Conventional");
             NewArmor("Conventional", 2, 1);
@@ -2102,7 +2125,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Add a CIWS to this ship class
         /// </summary>
-        /// <param name="MFC">CIWS to add</param>
+        /// <param name="CIWS">CIWS to add</param>
         /// <param name="inc">number to add or subtract.</param>
         public void AddCIWS(CIWSDefTN CIWS, short inc)
         {
@@ -2137,6 +2160,47 @@ namespace Pulsar4X.Entities
             }
 
             UpdateClass(CIWS, inc);
+        }
+
+        /// <summary>
+        /// Add a Turret to this ship class
+        /// </summary>
+        /// <param name="Turret">Turret to add</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddTurret(TurretDefTN Turret, short inc)
+        {
+            int TurretIndex = ShipTurretDef.IndexOf(Turret);
+            if (TurretIndex != -1)
+            {
+                ShipTurretCount[TurretIndex] = (ushort)((short)ShipTurretCount[TurretIndex] + inc);
+            }
+
+            if (TurretIndex == -1 && inc >= 1)
+            {
+                ShipTurretDef.Add(Turret);
+                ShipTurretCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (TurretIndex != -1)
+                {
+                    if (ShipTurretCount[TurretIndex] <= 0)
+                    {
+                        ShipTurretCount.RemoveAt(TurretIndex);
+                        ShipTurretDef.RemoveAt(TurretIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            TotalPowerRequirement = TotalPowerRequirement + (int)(Turret.powerRequirement * inc);
+            UpdateClass(Turret, inc);
         }
 
 
@@ -2386,17 +2450,16 @@ namespace Pulsar4X.Entities
             #endregion
 
             #region Beam Weapon Info CIWS and turrets
+            float MaxRange = 0;
+            for (int loop2 = 0; loop2 < ShipBFCDef.Count; loop2++)
+            {
+                if (ShipBFCDef[loop2].range > MaxRange)
+                    MaxRange = ShipBFCDef[loop2].range;
+            }
+
             for (int loop = 0; loop < ShipBeamDef.Count; loop++)
             {
                 String Range = "N/A";
-
-                float MaxRange = 0;
-
-                for (int loop2 = 0; loop2 < ShipBFCDef.Count; loop2++)
-                {
-                    if (ShipBFCDef[loop2].range > MaxRange)
-                        MaxRange = ShipBFCDef[loop2].range;
-                }
 
                 if (MaxRange > ShipBeamDef[loop].range)
                 {
@@ -2455,10 +2518,71 @@ namespace Pulsar4X.Entities
                 control = true;
             }
 
+            for (int loop = 0; loop < ShipTurretDef.Count; loop++)
+            {
+                String Range = "N/A";
+
+                if (MaxRange > ShipTurretDef[loop].baseBeamWeapon.range)
+                {
+                    Range = String.Format("Range {0}km", ShipTurretDef[loop].baseBeamWeapon.range);
+                }
+                else
+                {
+                    Range = String.Format("Range {0}km", MaxRange);
+                }
+
+                String Tracking = "N/A";
+
+                if (MaxSpeed > ShipTurretDef[loop].tracking)
+                {
+                    Tracking = String.Format("TS: {0} km/s", MaxSpeed);
+                }
+                else
+                {
+                    Tracking = String.Format("TS: {0} km/s", ShipTurretDef[loop].tracking);
+                }
+
+                String Power = "N/A";
+
+                if (ShipTurretDef[loop].baseBeamWeapon.componentType == ComponentTypeTN.Gauss)
+                {
+                    Power = "0-0";
+                }
+                else
+                {
+                    Power = String.Format("{0}-{1}", ShipTurretDef[loop].powerRequirement, (ShipTurretDef[loop].baseBeamWeapon.weaponCapacitor * ShipTurretDef[loop].multiplier));
+                }
+
+                float ROF = (float)Math.Ceiling(ShipTurretDef[loop].powerRequirement / (ShipTurretDef[loop].baseBeamWeapon.weaponCapacitor * ShipTurretDef[loop].multiplier) ) * 5.0f;
+                if (ROF < 5)
+                    ROF = 5;
+
+                String DamageString = "N/A";
+
+                for (int loop2 = 1; loop2 < 10; loop2++)
+                {
+                    int value = -1;
+                    if (loop2 >= ShipTurretDef[loop].baseBeamWeapon.damage.Count)
+                    {
+                        value = 0;
+                    }
+                    else
+                    {
+                        value = ShipTurretDef[loop].baseBeamWeapon.damage[loop2];
+                    }
+                    DamageString = String.Format("{0} {1}", DamageString, value);
+                }
+
+                Entry = String.Format("{0} ({1}x{2})    {3}     {4}     {5}     RM {6}    ROF {7}        {8}\n",ShipTurretDef[loop].Name, ShipTurretCount[loop],
+                                      ShipTurretDef[loop].multiplier, Range, Tracking, Power, (ShipTurretDef[loop].baseBeamWeapon.damage.Count - 1), ROF.ToString(), DamageString);
+                Summary = String.Format("{0}{1}", Summary, Entry);
+                control = true;
+            }
+
             for (int loop = 0; loop < ShipCIWSDef.Count; loop++)
             {
 
-                Entry = String.Format("{0} ({1}x{2})    Range 1000 km     TS: {3} km/s     ROF 5       Base 50% To Hit", ShipCIWSDef[loop].Name, ShipCIWSCount[loop], ShipCIWSDef[loop].rOF, 
+                Entry = String.Format("{0} ({1}x{2})    Range 1000 km     TS: {3} km/s     ROF 5       Base 50% To Hit\n", ShipCIWSDef[loop].Name, ShipCIWSCount[loop], ShipCIWSDef[loop].rOF, 
                                                                                                                          ShipCIWSDef[loop].tracking);
 
                 Summary = String.Format("{0}{1}",Summary,Entry);

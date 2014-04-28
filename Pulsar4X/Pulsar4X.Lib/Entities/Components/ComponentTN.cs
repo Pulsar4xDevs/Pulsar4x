@@ -9,6 +9,7 @@ namespace Pulsar4X.Entities.Components
     /// List of Components:
     /// Be especially sure to update DestroyComponent and RepairComponent in Ship.cs when updating this list.
     /// in Ship.cs OnDamaged() new electronic components need to be handled as well for microwave damage.
+    /// in Shipclass.cs add the Add_Component() function, and update the class summary.
     /// when adding components in general do the declarations, at them to shipclass, add them to ship, work out their mechanics and place those appropriately.
     /// In Class Design.cs, and Components.cs any new components need to be filled in for just about every component type switch(lots of them). also BuildDesignTab and GetListBoxComponent
     /// </summary>
@@ -59,7 +60,7 @@ namespace Pulsar4X.Entities.Components
 
         CIWS,
 
-#warning nothing done for Turret. also update fire control, and all displays to not only use BeamTN, but also TurretTN.
+#warning Need all frontend work.
         Turret,
 
         TypeCount

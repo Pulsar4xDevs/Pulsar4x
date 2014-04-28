@@ -192,5 +192,40 @@ namespace Pulsar4X.Entities.Components
 
             isDestroyed = false;
         }
+
+        /// <summary>
+        /// ReadyToFire determines if the beam weapon has the ability to fire. Gauss may always fire, everything else needs to have capacitor charge equal to their power requirement.
+        /// </summary>
+        /// <returns>Whether the weapon can fire or not(true or false)</returns>
+        public bool readyToFire()
+        {
+            if (TurretDef.baseBeamWeapon.componentType == ComponentTypeTN.Gauss && isDestroyed == false)
+            {
+                return true;
+            }
+            else if (CurrentCapacitor == TurretDef.powerRequirement && isDestroyed == false)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// When this beamweapon is fired the capacitor is discharged completely.
+        /// </summary>
+        public bool Fire()
+        {
+            bool ready = readyToFire();
+
+            if (ready == true)
+            {
+                CurrentCapacitor = 0;
+            }
+
+            return ready;
+        }
     }
 }

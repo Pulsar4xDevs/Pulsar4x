@@ -401,6 +401,11 @@ namespace Pulsar4X.Entities
         /// Close in weapon systems on this ship.
         /// </summary>
         public BindingList<CIWSTN> ShipCIWS { get; set; }
+
+        /// <summary>
+        /// Turrets on this ship.
+        /// </summary>
+        public BindingList<TurretTN> ShipTurret { get; set; }
         #endregion
 
 
@@ -846,6 +851,24 @@ namespace Pulsar4X.Entities
 
                     ShipCIWS.Add(CIWS);
                     ShipComponents.Add(CIWS);
+                }
+            }
+
+            ShipTurret = new BindingList<TurretTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipTurretDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipTurretDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for(int loop2 = 0; loop2 < ClassDefinition.ShipTurretCount[loop]; loop2++)
+                {
+                    TurretTN Turret = new TurretTN(ClassDefinition.ShipTurretDef[loop]);
+                    Turret.componentIndex = ShipTurret.Count;
+
+                    int TurretIndex = loop2 + 1;
+                    Turret.Name = Turret.turretDef.Name + " #" + TurretIndex.ToString();
+
+                    ShipTurret.Add(Turret);
+                    ShipComponents.Add(Turret);
                 }
             }
 
@@ -2051,6 +2074,11 @@ namespace Pulsar4X.Entities
                 /// Do nothing for CIWS.
                 /// </summary>
                 break;
+
+                case ComponentTypeTN.Turret:
+                    UnlinkWeapon(ShipTurret[ShipComponents[ID].componentIndex]);
+                    ShipTurret[ShipComponents[ID].componentIndex].currentCapacitor = 0;
+                break;
             }
             return DamageReturn;
         }
@@ -2247,6 +2275,9 @@ namespace Pulsar4X.Entities
 
                 case ComponentTypeTN.CIWS:
                 break;
+
+                case ComponentTypeTN.Turret:
+                break;
             }
         }
         /// <summary>
@@ -2280,6 +2311,16 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Links specified weapon to the selected BFC. Sanity check to make sure both are on the same ship?
+        /// </summary>
+        /// <param name="BFC">Beam Fire Controller</param>
+        /// <param name="Weapon">Beam Weapon</param>
+        public void LinkWeaponToBeamFC(BeamFireControlTN BFC, TurretTN Weapon)
+        {
+            BFC.linkWeapon(Weapon);
+        }
+
+        /// <summary>
         /// Links specified Tube to MFC.
         /// </summary>
         /// <param name="MFC">missile fire control</param>
@@ -2303,6 +2344,19 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Weapon">beam weapon to be cleared.</param>
         public void UnlinkWeapon(BeamTN Weapon)
+        {
+            if (Weapon.fireController != null)
+            {
+                BeamFireControlTN BFC = Weapon.fireController;
+                BFC.unlinkWeapon(Weapon);
+            }
+        }
+
+        /// <summary>
+        /// Unlinks the specified beam weapon from its fire controller.
+        /// </summary>
+        /// <param name="Weapon">beam weapon to be cleared.</param>
+        public void UnlinkWeapon(TurretTN Weapon)
         {
             if (Weapon.fireController != null)
             {
@@ -2403,26 +2457,42 @@ namespace Pulsar4X.Entities
         /// Recharges energyweapons to currentPowerGeneration of the ship.
         /// </summary>
         /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
-        /// <returns>Power not used.</returns>
+        /// <returns>Power not used. if nonzero then this ship no longer needs to be in the recharge list.</returns>
         public int RechargeBeamWeapons(uint tick)
         {
             ushort amt = (ushort)(Math.Floor((float)tick / 5.0f));
 
             float PowerRecharge = CurrentPowerGen * amt;
 
+            /// <summary>
+            /// There are beam weapons that need to be recharged.
+            /// </summary>
             if (ShipClass.TotalPowerRequirement != 0)
             {
+                /// <summary>
+                /// All beam weapons can be recharged.
+                /// </summary>
                 if (PowerRecharge > ShipClass.TotalPowerRequirement)
                 {
+                    /// <summary>
+                    /// Recharge the regular beams.
+                    /// </summary>
                     for (int loop = 0; loop < ShipBeam.Count; loop++)
                     {
                         ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
+
+                        /// <summary>
+                        /// This beam can be totally recharged.
+                        /// </summary>
                         if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
                         {
                             ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
 
                             PowerRecharge = PowerRecharge - ((float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
                         }
+                        /// <summary>
+                        /// This beam can be partially recharged.
+                        /// </summary>
                         else
                         {
                             ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + beamCap);
@@ -2430,17 +2500,49 @@ namespace Pulsar4X.Entities
                         }
                     }
 
+                    /// <summary>
+                    /// Recharge the turrets.
+                    /// </summary>
+                    for (int loop = 0; loop < ShipTurret.Count; loop++)
+                    {
+                        ushort beamCap = (ushort)(ShipTurret[loop].turretDef.baseBeamWeapon.weaponCapacitor * ShipTurret[loop].turretDef.multiplier * amt);
+                        if (ShipTurret[loop].currentCapacitor + beamCap > ShipTurret[loop].turretDef.powerRequirement)
+                        {
+                            ShipTurret[loop].currentCapacitor = ShipTurret[loop].turretDef.powerRequirement;
+
+                            PowerRecharge = PowerRecharge - ((float)ShipTurret[loop].turretDef.powerRequirement - ShipTurret[loop].currentCapacitor);
+                        }
+                        else
+                        {
+                            ShipTurret[loop].currentCapacitor = ShipTurret[loop].currentCapacitor + beamCap;
+                            PowerRecharge = PowerRecharge - beamCap;
+                        }
+                    }
+
+                    /// <summary>
+                    /// return leftover power. leftover power means that all recharges are complete, which tells the simulation to remove this ship from the recharge list.
+                    /// </summary>
                     return (int)PowerRecharge;
                 }
+                /// <summary>
+                /// All beams may not be recharged.
+                /// </summary>
                 else
                 {
                     float AvailablePower = PowerRecharge;
 
+                    /// <summary>
+                    /// Regular beams are recharged 1st, not turrets. this is a tough decision, there are pros and cons to any recharge scheme, mainly though this is the easiest and
+                    /// least effort requiring way to do this.
+                    /// </summary>
                     for (int loop = 0; loop < ShipBeam.Count; loop++)
                     {
                         float WeaponPowerRequirement = (float)ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor;
                         ushort beamCap = (ushort)(ShipBeam[loop].beamDef.weaponCapacitor * amt);
 
+                        /// <summary>
+                        /// This weapon can be fully recharged.
+                        /// </summary>
                         if (AvailablePower > beamCap)
                         {
                             if (ShipBeam[loop].currentCapacitor + beamCap > ShipBeam[loop].beamDef.powerRequirement)
@@ -2454,17 +2556,90 @@ namespace Pulsar4X.Entities
                                 AvailablePower = AvailablePower - beamCap;
                             }
                         }
+                        /// <summary>
+                        /// This weapon can be partially recharged, and we're finished recharging weapons.
+                        /// </summary>
                         else
                         {
+                            /// <summary>
+                            /// This weapon was fully recharged as it had power in the capacitor, and didn't require a full beamCap.
+                            /// All power may be consumed here, that will be caught on the next go around of the loop.
+                            /// </summary>
                             if (ShipBeam[loop].currentCapacitor + AvailablePower > ShipBeam[loop].beamDef.powerRequirement)
                             {
                                 AvailablePower = AvailablePower - (ShipBeam[loop].beamDef.powerRequirement - ShipBeam[loop].currentCapacitor);
                                 ShipBeam[loop].currentCapacitor = ShipBeam[loop].beamDef.powerRequirement;
                             }
+                            /// <summary>
+                            /// All power consumed.
+                            /// </summary>
                             else
                             {
                                 ShipBeam[loop].currentCapacitor = (ushort)(ShipBeam[loop].currentCapacitor + (ushort)AvailablePower);
                                 AvailablePower = 0;
+
+                                /// <summary>
+                                /// No more beams will be recharged so return here. Turret recharge did not even run.
+                                /// </summary>
+                                return (int)AvailablePower;
+                            }
+                        }
+                    }
+
+                    /// <summary>
+                    /// recharge the turrets, not all of these will finish.
+                    for (int loop = 0; loop < ShipTurret.Count; loop++)
+                    {
+                        float WPR = (float)ShipTurret[loop].turretDef.powerRequirement - ShipTurret[loop].currentCapacitor;
+                        ushort beamCap = (ushort)(ShipTurret[loop].turretDef.baseBeamWeapon.weaponCapacitor * ShipTurret[loop].turretDef.multiplier * amt);
+
+                        /// <summary>
+                        /// Power is available to recharge this turret.
+                        /// </summary>
+                        if (AvailablePower > beamCap)
+                        {
+                            /// <summary>
+                            /// Completely
+                            /// </summary>
+                            if (ShipTurret[loop].currentCapacitor + beamCap > ShipTurret[loop].turretDef.powerRequirement)
+                            {
+                                AvailablePower = AvailablePower - (ShipTurret[loop].turretDef.powerRequirement - ShipTurret[loop].currentCapacitor);
+                                ShipTurret[loop].currentCapacitor = ShipTurret[loop].turretDef.powerRequirement;
+                            }
+                            /// <summary>
+                            /// Partially
+                            /// </summary>
+                            else
+                            {
+                                ShipTurret[loop].currentCapacitor = ShipTurret[loop].currentCapacitor + beamCap;
+                                AvailablePower = AvailablePower - beamCap;
+                            }
+                        }
+                        /// <summary>
+                        /// Power is not available to completely recharge this turret.
+                        /// </summary>
+                        else
+                        {
+                            /// <summary>
+                            /// Thanks to power in the cap, this turret does not require all AvailablePower to recharge. AP may be 0 now, but that will be caught next loop iteration.
+                            /// </summary>
+                            if (ShipTurret[loop].currentCapacitor + AvailablePower > ShipTurret[loop].turretDef.powerRequirement)
+                            {
+                                AvailablePower = AvailablePower - (ShipTurret[loop].turretDef.powerRequirement - ShipTurret[loop].currentCapacitor);
+                                ShipTurret[loop].currentCapacitor = ShipTurret[loop].turretDef.powerRequirement;
+                            }
+                            /// <summary>
+                            /// There is not enough power in the cap to add to AvailablePower to completely recharge this beam.
+                            /// </summary>
+                            else
+                            {
+                                ShipTurret[loop].currentCapacitor = ShipTurret[loop].currentCapacitor + AvailablePower;
+                                AvailablePower = 0;
+
+                                /// <summary>
+                                /// no more recharges can be done so return.
+                                /// </summary>
+                                return (int)AvailablePower;
                             }
                         }
                     }

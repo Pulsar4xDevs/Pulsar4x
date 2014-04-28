@@ -279,7 +279,15 @@ namespace Pulsar4X.Entities.Components
         public BindingList<BeamTN> linkedWeapons
         {
             get { return LinkedWeapons; }
-            set { LinkedWeapons = value; }
+        }
+
+        /// <summary>
+        /// Additional linked turrets to this BFC.
+        /// </summary>
+        private BindingList<TurretTN> LinkedTurrets;
+        public BindingList<TurretTN> linkedTurrets
+        {
+            get { return LinkedTurrets; }
         }
 
         /// <summary>
@@ -321,6 +329,7 @@ namespace Pulsar4X.Entities.Components
             isDestroyed = false;
 
             LinkedWeapons = new BindingList<BeamTN>();
+            LinkedTurrets = new BindingList<TurretTN>();
             
             Target = null;
             OpenFire = false;
@@ -399,6 +408,12 @@ namespace Pulsar4X.Entities.Components
                 LinkedWeapons[loop].fireController = null;
             }
             LinkedWeapons.Clear();
+
+            for (int loop = 0; loop < LinkedTurrets.Count; loop++)
+            {
+                LinkedTurrets[loop].fireController = null;
+            }
+            LinkedTurrets.Clear();
         }
 
         /// <summary>
@@ -416,6 +431,20 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Links a weapon to this fc
+        /// </summary>
+        /// <param name="beam">beam weapon to link</param>
+        public void linkWeapon(TurretTN beam)
+        {
+            if (linkedTurrets.Contains(beam) == false)
+            {
+                linkedTurrets.Add(beam);
+
+                beam.fireController = this;
+            }
+        }
+
+        /// <summary>
         /// removes a weapon from this FC
         /// </summary>
         /// <param name="beam">beamweapon to unlink</param>
@@ -424,6 +453,20 @@ namespace Pulsar4X.Entities.Components
             if (linkedWeapons.Contains(beam) == true)
             {
                 linkedWeapons.Remove(beam);
+
+                beam.fireController = null;
+            }
+        }
+
+        /// <summary>
+        /// removes a weapon from this FC
+        /// </summary>
+        /// <param name="beam">beamweapon to unlink</param>
+        public void unlinkWeapon(TurretTN beam)
+        {
+            if (linkedTurrets.Contains(beam) == true)
+            {
+                linkedTurrets.Remove(beam);
 
                 beam.fireController = null;
             }
@@ -531,6 +574,70 @@ namespace Pulsar4X.Entities.Components
                         }
                     }
 
+                    for (int loop = 0; loop < LinkedTurrets.Count; loop++)
+                    {
+                        /// <summary>
+                        /// turrets have changed tracking and therefore tohit from regular beams.
+                        /// </summary>
+                        FireAccuracy = GetFiringAccuracy(RangeIncrement, linkedTurrets[loop].turretDef.tracking);
+                        toHit = (int)Math.Floor(FireAccuracy * 100.0f);
+
+                        if (linkedTurrets[loop].turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurrets[loop].readyToFire() == true)
+                        {
+                            RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                            weaponFired = LinkedWeapons[loop].Fire();
+
+                            if (weaponFired == true)
+                            {
+                                for (int loop2 = 0; loop2 < LinkedTurrets[loop].turretDef.totalShotCount; loop2++)
+                                {
+                                    int Hit = RNG.Next(1, 100);
+
+                                    if (toHit >= Hit)
+                                    {
+                                        String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedTurrets[loop].Name, LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement], toHit);
+
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                        FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+
+
+                                        ushort location = (ushort)RNG.Next(0, Columns);
+                                        bool ShipDest = Target.ship.OnDamaged(LinkedTurrets[loop].turretDef.baseBeamWeapon.damageType, LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement], location, FiringShip);
+
+                                        if (ShipDest == true)
+                                        {
+                                            Target = null;
+                                            OpenFire = false;
+                                            return weaponFired;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                        FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                    }
+                                }
+                            }
+                            else if (LinkedTurrets[loop].isDestroyed == false)
+                            {
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedTurrets[loop].Name, LinkedTurrets[loop].currentCapacitor, 
+                                                                                                  (LinkedTurrets[loop].turretDef.baseBeamWeapon.weaponCapacitor * LinkedTurrets[loop].turretDef.multiplier));
+
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                     GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                            }
+                        }
+                    }
+
                     return weaponFired;
                 }
                 else if (Target.targetType == StarSystemEntityType.Missile)
@@ -539,6 +646,11 @@ namespace Pulsar4X.Entities.Components
                     /// this is for beam targetting on missiles.
                     /// </summary>
                     int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
+
+                    /// <summary>
+                    /// have all targeted missiles been destroyed.
+                    /// </summary>
+                    bool noMissilesLeft = false;
 
                     /// <summary>
                     /// For all weapons linked to this BFC
@@ -632,16 +744,113 @@ namespace Pulsar4X.Entities.Components
 
                         if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
                         {
+                            noMissilesLeft = true;
                             break;
                         }
 
                     }// end for linked weapons
+
+                    if (noMissilesLeft == true)
+                    {
+                        for (int loop = 0; loop < LinkedTurrets.Count; loop++)
+                        {
+                            FireAccuracy = GetFiringAccuracy(RangeIncrement, linkedTurrets[loop].turretDef.tracking);
+                            toHit = (int)Math.Floor(FireAccuracy * 100.0f);
+
+                            if (LinkedTurrets[loop].turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
+                            {
+                                RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
+
+                                weaponFired = LinkedTurrets[loop].Fire();
+
+                                if (weaponFired == true)
+                                {
+                                    /// <summary>
+                                    /// Some weapons have multiple shots, but most will have just 1.
+                                    /// </summary>
+                                    for (int loop2 = 0; loop2 < LinkedTurrets[loop].turretDef.totalShotCount; loop2++)
+                                    {
+                                        int Hit = RNG.Next(1, 100);
+
+                                        /// <summary>
+                                        /// Did the weapon hit?
+                                        /// </summary>
+                                        if (toHit >= Hit)
+                                        {
+                                            /// <summary>
+                                            /// Did the weapon destroy its target?
+                                            /// </summary>
+                                            ushort ToDestroy;
+                                            if (Target.missileGroup.missiles[0].missileDef.armor == 0)
+                                                ToDestroy = 100;
+                                            else
+                                                ToDestroy = (ushort)(Math.Round((LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement] / (Target.missileGroup.missiles[0].missileDef.armor + LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement]))) * 100.0f);
+                                            ushort DestChance = (ushort)RNG.Next(1, 100);
+
+                                            /// <summary>
+                                            /// Does the weapon have the power to make a kill?
+                                            /// </summary>
+                                            if (ToDestroy >= DestChance)
+                                            {
+                                                String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+
+                                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                                     GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                                FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+
+                                                /// <summary>
+                                                /// Set destruction of targeted missile here. This is used by sim entity to determine how to handle missile group cleanup.
+                                                /// </summary>
+                                                Target.missileGroup.missilesDestroyed = Target.missileGroup.missilesDestroyed + 1;
+
+                                                if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
+                                                {
+                                                    break;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+
+                                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                                     GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                                FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
+
+                                            FiringShip.ShipsFaction.MessageLog.Add(NMsg);
+                                        }
+
+                                    }
+                                }//end if weapon fired
+                            }//end if in range and can fire
+
+                            if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
+                            {
+                                /// <summary>
+                                /// This is cargo culting and this variable does not need to be set here, but for completeness sake I'll include it.
+                                /// </summary>
+                                noMissilesLeft = true;
+
+                                break;
+                            }
+                        }//end for linkedturrets.
+                    }//end if noMissilesLeft = true
 
                     
                     return weaponFired;
                 }
                 else
                 {
+#warning Beam Fire control on planet/population section not implemented.
                     /// <summary>
                     /// Planet section eventually goes here.
                     /// </summary>
@@ -655,6 +864,7 @@ namespace Pulsar4X.Entities.Components
         /// Get the accuracy at which this BFC can fire upon its target.
         /// </summary>
         /// <param name="RangeIncrement">Distance to target</param>
+        /// <param name="track">Tracking capability of beam weapon that accuracy is desired for.</param>
         /// <returns>Firing accuracy.</returns>
         private float GetFiringAccuracy(int RangeIncrement, int track)
         {
