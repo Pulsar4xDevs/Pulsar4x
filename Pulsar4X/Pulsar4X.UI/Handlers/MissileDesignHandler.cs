@@ -10,8 +10,12 @@ using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
 using Newtonsoft.Json;
+
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif 
+
 using Pulsar4X.Entities.Components;
 using System.Runtime.InteropServices;
 
@@ -19,8 +23,9 @@ namespace Pulsar4X.UI.Handlers
 {
     public class MissileDesignHandler
     {
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(MissileDesignHandler));
-
+#endif
         /// <summary>
         /// Display panel for missile design.
         /// </summary>
@@ -1580,7 +1585,9 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
+#if LOG4NET_ENABLED
                 logger.Error("Something went wrong Creating Columns for Missile design screen...");
+#endif
             }
         }
 

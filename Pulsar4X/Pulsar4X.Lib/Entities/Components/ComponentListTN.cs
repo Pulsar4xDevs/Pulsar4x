@@ -114,6 +114,15 @@ namespace Pulsar4X.Entities.Components
         public BindingList<CIWSDefTN> CIWSDef { get; set; }
 
         /// <summary>
+        /// subset of beamdefs that may be turreted.
+        /// </summary>
+        public BindingList<BeamDefTN> TurretableBeamDef { get; set; }
+        /// <summary>
+        /// Turret definitions.
+        /// </summary>
+        public BindingList<TurretDefTN> TurretDef { get; set; }
+
+        /// <summary>
         /// Number of the total components this faction has for ship building purposes. MissileEngineDef and MissileDef are excluded from this.
         /// </summary>
         public int TotalComponents { get; set; }
@@ -153,6 +162,10 @@ namespace Pulsar4X.Entities.Components
             MissileDef = new BindingList<OrdnanceDefTN>();
 
             CIWSDef = new BindingList<CIWSDefTN>();
+
+            TurretableBeamDef = new BindingList<BeamDefTN>();
+
+            TurretDef = new BindingList<TurretDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -214,6 +227,8 @@ namespace Pulsar4X.Entities.Components
             MagazineDef.Add(MagDef);
             MissileFireControlDef.Add(MFCDef);
 
+            TurretableBeamDef.Add(BeamDef);
+
 
             /// <summary>
             /// Everyone starts with cargoholds. Count 17 to 19
@@ -263,7 +278,7 @@ namespace Pulsar4X.Entities.Components
             BeamDefTN AlphaPlasma = new BeamDefTN("15cm C3 Plasma Beam", ComponentTypeTN.Plasma, 2, 2, 2, 1.0f);
             BeamDefTN AlphaMeson = new BeamDefTN("R9/C3 Meson Cannon", ComponentTypeTN.Meson, 2, 2, 2, 1.0f);
             BeamDefTN AlphaHPM = new BeamDefTN("R9/C3 Microwave", ComponentTypeTN.Microwave, 2, 2, 2, 1.0f);
-            BeamDefTN AlphaGauss = new BeamDefTN("Gauss R3-100", ComponentTypeTN.Gauss, 2, 2, 2, 1.0f);
+            BeamDefTN AlphaGauss = new BeamDefTN("Gauss R3-100", ComponentTypeTN.Gauss, 0, 2, 2, 1.0f);
 
             ReactorDefTN AlphaReactor = new ReactorDefTN("GCFR S1 P4.5", 2, 1.0f, 1.0f);
 
@@ -292,6 +307,10 @@ namespace Pulsar4X.Entities.Components
             ReactorDef.Add(AlphaReactor);
 
             ShieldDef.Add(AlphaShield);
+
+            TurretableBeamDef.Add(AlphaLaser);
+            TurretableBeamDef.Add(AlphaMeson);
+            TurretableBeamDef.Add(AlphaGauss);
 
             /// <summary>
             /// Missile Combat Alpha Components: Count at 44 from 39 OrdnanceDefTN and MissileEngineDefTN are _NOT_ included in the total count.
@@ -341,7 +360,7 @@ namespace Pulsar4X.Entities.Components
             TotalComponents = CrewQuarters.Count + FuelStorage.Count + EngineeringSpaces.Count + OtherComponents.Count + Engines.Count +
                               PassiveSensorDef.Count + ActiveSensorDef.Count + CargoHoldDef.Count + ColonyBayDef.Count + CargoHandleSystemDef.Count +
                               BeamFireControlDef.Count + BeamWeaponDef.Count + ReactorDef.Count + ShieldDef.Count + MLauncherDef.Count + MagazineDef.Count +
-                              MissileFireControlDef.Count;
+                              MissileFireControlDef.Count + CIWSDef.Count + TurretDef.Count;
 
         }
     }

@@ -136,6 +136,15 @@ namespace Pulsar4X.UI.Helpers
             get { return m_oMissileDesign; }
         }
 
+        Handlers.TurretDesignHandler m_oTurretDesign;
+        /// <summary>
+        /// Turret design handler.
+        /// </summary>
+        public Handlers.TurretDesignHandler TurretDesign
+        {
+            get { return m_oTurretDesign; }
+        }
+
         public bool SuspendAutoPanelDisplay { get; set; }
 
         /// <summary>
@@ -171,6 +180,7 @@ namespace Pulsar4X.UI.Helpers
             m_oComponentRP = new Handlers.Components();
             m_oFastOOB = new Handlers.FastOOB();
             m_oMissileDesign = new Handlers.MissileDesignHandler();
+            m_oTurretDesign = new Handlers.TurretDesignHandler();
         }
 
         #region PublicMethods
@@ -185,6 +195,7 @@ namespace Pulsar4X.UI.Helpers
             m_oClassDesign.SMOn();
             m_oComponentRP.SMOn();
             m_oMissileDesign.SMOn();
+            m_oTurretDesign.SMOn();
         }
 
         /// <summary>
@@ -197,6 +208,7 @@ namespace Pulsar4X.UI.Helpers
             m_oClassDesign.SMOff();
             m_oComponentRP.SMOff();
             m_oMissileDesign.SMOff();
+            m_oTurretDesign.SMOff();
         }
 
         /// <summary>
@@ -212,7 +224,7 @@ namespace Pulsar4X.UI.Helpers
 
             if (a_oDockPanel == null || m_oSystemGenAndDisplay == null || m_oSystemMap == null
                 || m_oEconomics == null || m_oShips == null || m_oClassDesign == null || m_oTaskGroup == null
-                || m_oComponentRP == null || m_oFastOOB == null || m_oMissileDesign == null)
+                || m_oComponentRP == null || m_oFastOOB == null || m_oMissileDesign == null || m_oTurretDesign == null)
             {
                 return; // do nothing if we dont have the full UI!!
             }

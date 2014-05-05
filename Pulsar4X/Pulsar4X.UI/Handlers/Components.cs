@@ -136,6 +136,8 @@ namespace Pulsar4X.UI.Handlers
 
             m_oComponentDesignPanel.MissileButton.Click += new EventHandler(MissileButton_Click);
 
+            m_oComponentDesignPanel.TurretButton.Click += new EventHandler(TurretButton_Click);
+
             //m_oComponentDesignPanel.ResizeBegin +=new EventHandler(ResizeBegin);
             //m_oComponentDesignPanel.ResizeEnd += new EventHandler(ResizeEnd);
 
@@ -349,6 +351,7 @@ namespace Pulsar4X.UI.Handlers
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+                    _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
 
                 break;
                 #endregion
@@ -374,6 +377,7 @@ namespace Pulsar4X.UI.Handlers
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+                    _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
 
                 break;
                 #endregion
@@ -394,6 +398,7 @@ namespace Pulsar4X.UI.Handlers
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+                    _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
 
                 break;
                 #endregion
@@ -503,6 +508,16 @@ namespace Pulsar4X.UI.Handlers
         private void MissileButton_Click(object sender, EventArgs e)
         {
             Helpers.UIController.Instance.MissileDesign.Popup();
+        }
+
+        /// <summary>
+        /// Brings up the missile design popup
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TurretButton_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.TurretDesign.Popup();
         }
 
         /// <summary>
