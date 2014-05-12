@@ -60,15 +60,43 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Gear size as percentage of total beam size
+        /// </summary>
+        private float GearPercent;
+        public float gearPercent
+        {
+            get { return GearPercent; }
+        }
+
+        /// <summary>
+        /// size of only the armour.
+        /// </summary>
+        private float ArmourSize;
+        public float armourSize
+        {
+            get { return ArmourSize; }
+        }
+
+        /// <summary>
+        /// Cost of only the armour.
+        /// </summary>
+        private decimal ArmourCost;
+        public decimal armourCost
+        {
+            get { return ArmourCost; }
+        }
+
+        /// <summary>
         /// Constructor for turret definitions
         /// </summary>
         /// <param name="Title">Name of the turret</param>
         /// <param name="BaseWeapon">The beam weapon that forms the barrels of this turret</param>
         /// <param name="Mult">How many barrels there will be.</param>
         /// <param name="Track">The tracking speed of this turret</param>
-        /// <param name="BaseTracking">The faction tracking tech.</param>
+        /// <param name="BaseTrackingTech">The faction tracking tech.</param>
         /// <param name="Armor">Desired armour coverage of this turret.</param>
-        public TurretDefTN(String Title, BeamDefTN BaseWeapon, int Mult, int Track, int BaseTracking, int Armor, int ArmourTech) 
+        /// <param name="ArmourTech">Armour Tech for this turret.</param>
+        public TurretDefTN(String Title, BeamDefTN BaseWeapon, int Mult, int Track, int BaseTrackingTech, int Armor, int ArmourTech) 
         {
             Name = Title;
             Id = Guid.NewGuid();
@@ -86,7 +114,7 @@ namespace Pulsar4X.Entities.Components
             Tracking = Track;
             Armour = Armor;
 
-            float GearCount = (float)Tracking / (float)BaseTracking;
+            float GearCount = (float)Tracking / (float)Constants.BFCTN.BeamFireControlTracking[BaseTrackingTech];
             float GearSize = BaseBeamWeapon.size;
 
             size = BaseBeamWeapon.size * Multiplier;
@@ -97,27 +125,11 @@ namespace Pulsar4X.Entities.Components
             TotalShotCount = BaseBeamWeapon.shotCount * Multiplier;
             PowerRequirement = BaseBeamWeapon.powerRequirement * Multiplier;
 
-            switch (Multiplier)
-            {
-                case 1:
-                    GearSize = GearSize * 0.1f;
-                break;
-                case 2:
-                    GearSize = GearSize * 0.095f;
-                    crew = (byte)Math.Round(crew * 0.95f);
-                    cost = (decimal)Math.Round((float)cost * 0.95f);
-                break;
-                case 3:
-                    GearSize = GearSize * 0.0925f;
-                    crew = (byte)Math.Round(crew * 0.925f);
-                    cost = (decimal)Math.Round((float)cost * 0.925f);
-                break;
-                case 4:
-                    GearSize = GearSize * 0.09f;
-                    crew = (byte)Math.Round(crew * 0.9f);
-                    cost = (decimal)Math.Round((float)cost * 0.9f);
-                break;
-            }
+            GearSize = GearSize * Constants.BeamWeaponTN.TurretGearFactor[(Multiplier - 1)];
+            GearPercent = GearCount * Constants.BeamWeaponTN.TurretGearFactor[(Multiplier - 1)];
+
+            crew = (byte)Math.Round(crew * (Constants.BeamWeaponTN.TurretGearFactor[(Multiplier - 1)] * 10.0f));
+            cost = (decimal)Math.Round((float)cost * (Constants.BeamWeaponTN.TurretGearFactor[(Multiplier - 1)] * 10.0f));
 
             size = size + (GearSize * GearCount);
 
@@ -133,11 +145,24 @@ namespace Pulsar4X.Entities.Components
                 double radius2 = Math.Pow(radius, 2.0);
                 double area = 4.0 * pi * radius2;
 
+                /// <summary>
+                /// This is about 89% as big as armour in aurora proper. do turretArmour = turretArmour * 1.12f; to "fix" this
+                /// </summary>
                 float turretArmour = (float)((area / (double)Constants.MagazineTN.MagArmor[ArmourTech]) * Armour);
                 size = size + turretArmour;
                 htk = (byte)(htk + (Armour * Multiplier));
-                cost = cost + (decimal)area;
+                cost = cost + (decimal)(area * Armour);
+
+                ArmourCost = (decimal)area;
+                ArmourSize = turretArmour;
             }
+            else
+            {
+                ArmourCost = 0.0m;
+                ArmourSize = 0.0f;
+            }
+
+            cost = Math.Round(cost);
 
             isMilitary = true;
             isObsolete = false;

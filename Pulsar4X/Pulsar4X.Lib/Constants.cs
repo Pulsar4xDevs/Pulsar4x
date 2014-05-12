@@ -1121,6 +1121,11 @@ namespace Pulsar4X
             /// How many shots this weapon takes every time it fires.
             /// </summary>
             public static byte[] GaussShots = { 1, 2, 3, 4, 5, 6, 8 };
+
+            /// <summary>
+            /// Gear size multipliers for multi-barreled turrets.
+            /// </summary>
+            public static float[] TurretGearFactor = { 0.1f, 0.095f, 0.0925f, 0.09f }; 
         }
 
         /// <summary>

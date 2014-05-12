@@ -56,6 +56,9 @@ namespace Pulsar4X.UI.Handlers
                 {
                     return;
                 }
+
+                if (_CurrnetFaction.ComponentList.TurretableBeamDef.Count != 0)
+                    _CurrnetBeam = _CurrnetFaction.ComponentList.TurretableBeamDef[0];
             }
         }
 
@@ -80,6 +83,21 @@ namespace Pulsar4X.UI.Handlers
         /// Turret barrel multiplier.
         /// </summary>
         private int Multiplier { get; set; }
+
+        /// <summary>
+        /// Desired Turret Tracking
+        /// </summary>
+        private int TurretProjTracking { get; set; }
+
+        /// <summary>
+        /// desired armour thickness
+        /// </summary>
+        private int TurretProjArmour { get; set; }
+
+        /// <summary>
+        /// The turret project that this design handler will use.
+        /// </summary>
+        private TurretDefTN TurretProject { get; set; }
 
 
         /// <summary>
@@ -119,12 +137,19 @@ namespace Pulsar4X.UI.Handlers
             m_oTurretDesignPanel.TripleRadioButton.CheckedChanged += new EventHandler(MultRadioButton_CheckedChanged);
             m_oTurretDesignPanel.QuadRadioButton.CheckedChanged += new EventHandler(MultRadioButton_CheckedChanged);
 
+            m_oTurretDesignPanel.TrackSpeedTextBox.TextChanged += new EventHandler(TrackSpeedTextBox_TextChanged);
+            m_oTurretDesignPanel.TurretArmourTextBox.TextChanged += new EventHandler(TurretArmourTextBox_TextChanged);
+
             Multiplier = 1;
+            TurretProjTracking = 10000;
+            TurretProjArmour = 0;
+
+            TurretProject = null;
         }
 
         #region Public methods
         /// <summary>
-        /// Opens as a popup the missile design page
+        /// Opens as a popup the turret design page
         /// </summary>
         public void Popup()
         {
@@ -161,6 +186,8 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void EmpireComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
+
+
             BuildTurretDesignPage();
         }
 
@@ -194,13 +221,62 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// if a new tracking speed is entered the turret design page should be reprinted to reflect this.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TrackSpeedTextBox_TextChanged(object sender, EventArgs e)
+        {
+            int TurretTrack;
+            bool result = Int32.TryParse(m_oTurretDesignPanel.TrackSpeedTextBox.Text, out TurretTrack);
+
+            if (result)
+            {
+                TurretProjTracking = TurretTrack;
+            }
+            BuildTurretDesignPage();
+        }
+
+        /// <summary>
+        /// if a new tracking speed is entered the turret design page should be reprinted to reflect this.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TurretArmourTextBox_TextChanged(object sender, EventArgs e)
+        {
+            int DesiredArmour;
+            bool result = Int32.TryParse(m_oTurretDesignPanel.TurretArmourTextBox.Text, out DesiredArmour);
+
+            if (result)
+            {
+                TurretProjArmour = DesiredArmour;
+            }
+            BuildTurretDesignPage();
+        }
+
+        /// <summary>
         /// overall display function
         /// </summary>
         private void BuildTurretDesignPage()
         {
+            #warning two occurences of magic number tech checking here.
+            int TrackTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking];
+
+            if(TrackTech > 11)
+                TrackTech = 11;
+
+            int ArmourTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
+
+            if(ArmourTech > 12)
+                ArmourTech = 12;
+
+            if(_CurrnetBeam != null)
+                TurretProject = new TurretDefTN("---Working Title---", _CurrnetBeam, Multiplier, TurretProjTracking, TrackTech, TurretProjArmour, ArmourTech); 
+
             BuildFactionInfo();
             BuildBeamInfo();
             BuildTurretInfo();
+            BuildSystemParamters();
         }
 
         /// <summary>
@@ -239,54 +315,68 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// build the armour/turret information related to size, cost, gear percentage.
+        /// </summary>
         private void BuildTurretInfo()
         {
-            int TurretTrack;
-            bool result = Int32.TryParse(m_oTurretDesignPanel.TrackSpeedTextBox.Text, out TurretTrack);
+            float GearSize = (float)Multiplier * _CurrnetBeam.size * TurretProject.gearPercent;
 
-            if (result)
+            m_oTurretDesignPanel.GearPercentTextBox.Text = (TurretProject.gearPercent * 100.0f).ToString();
+            m_oTurretDesignPanel.GearSizeTextBox.Text = GearSize.ToString();
+
+            m_oTurretDesignPanel.ArmourCostTextBox.Text = TurretProject.armourCost.ToString();
+            m_oTurretDesignPanel.ArmourSizeTextBox.Text = TurretProject.armourSize.ToString();
+
+        }
+
+        /// <summary>
+        /// build the System parameter text box and name.
+        /// </summary>
+        private void BuildSystemParamters()
+        {
+            switch (TurretProject.multiplier)
             {
-                int TrackTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking];
-
-                if (TrackTech > 11)
-                    TrackTech = 11;
-
-                float TrackFactor = (float)TurretTrack / (float)Constants.BFCTN.BeamFireControlTracking[TrackTech];
-                float GearSize = _CurrnetBeam.size;
-                float GearPer = 0.1f;
-                switch (Multiplier)
-                {
-                    case 1:
-                        GearSize = GearSize * GearPer;
-                        break;
-                    case 2:
-                        GearPer = 0.095f;
-                        GearSize = GearSize * GearPer * 2;
-                        break;
-                    case 3:
-                        GearPer = 0.0925f;
-                        GearSize = GearSize * GearPer * 3;
-                        break;
-                    case 4:
-                        GearPer = 0.09f;
-                        GearSize = GearSize * GearPer * 4;
-                        break;
-                }
-                String Entry = String.Format("{0}", (GearSize * TrackFactor));
-                m_oTurretDesignPanel.GearSizeTextBox.Text = Entry;
-
-                float TotalSize = (float)Multiplier * _CurrnetBeam.size;
-
-                m_oTurretDesignPanel.GearPercentTextBox.Text = GearPer.ToString();
+                case 1: m_oTurretDesignPanel.TurretNameTextBox.Text = String.Format("Single {0} Turret", TurretProject.baseBeamWeapon.Name);
+                    break;
+                case 2: m_oTurretDesignPanel.TurretNameTextBox.Text = String.Format("Twin {0} Turret", TurretProject.baseBeamWeapon.Name);
+                    break;
+                case 3: m_oTurretDesignPanel.TurretNameTextBox.Text = String.Format("Triple {0} Turret", TurretProject.baseBeamWeapon.Name);
+                    break;
+                case 4: m_oTurretDesignPanel.TurretNameTextBox.Text = String.Format("Quad {0} Turret", TurretProject.baseBeamWeapon.Name);
+                    break;
             }
 
-            int ArmourThick;
-            result = Int32.TryParse(m_oTurretDesignPanel.TurretArmourTextBox.Text, out ArmourThick);
+            m_oTurretDesignPanel.TurretParametersTextBox.Clear();
 
-            if (result && ArmourThick != 0)
-            {
+            float ROF = (float)Math.Ceiling(TurretProject.powerRequirement / (TurretProject.baseBeamWeapon.weaponCapacitor * TurretProject.multiplier)) * 5.0f;
+            if (ROF < 5)
+                ROF = 5;
+            String Entry = String.Format("Damage Output {0}x{1}      Rate of Fire: {2} seconds     Range Modifier: {3}\n", TurretProject.baseBeamWeapon.damage[0],TurretProject.multiplier,
+                                         ROF.ToString(), (TurretProject.baseBeamWeapon.damage.Count - 1));
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
-            }
+            String FormattedRange = TurretProject.baseBeamWeapon.range.ToString("#,###0");
+            String Range = String.Format("Range {0} km", FormattedRange);
+            float SpacePerWeapon = TurretProject.size / TurretProject.multiplier;
+
+            Entry = String.Format("Max {0}    Turret Size: {1:N2}    SPW: {2:N2}    Turret HTK: {3}\n", Range ,TurretProject.size, SpacePerWeapon, TurretProject.htk );
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
+
+            Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n", TurretProject.powerRequirement, (TurretProject.baseBeamWeapon.weaponCapacitor * TurretProject.multiplier) );
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
+
+            Entry = String.Format("Cost: {0}    Crew: {1}\n", TurretProject.cost, TurretProject.crew );
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
+
+            Entry = String.Format("Maximum Tracking Speed: {0} km/s\n", TurretProject.tracking);
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
+
+            Entry = String.Format("Materials Required: Not Yet Implemented\n");
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
+
+            Entry = String.Format("\nDevelopment Cost for Project: {0} RP\n", (TurretProject.cost * 4));
+            m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
         }
 
         #endregion

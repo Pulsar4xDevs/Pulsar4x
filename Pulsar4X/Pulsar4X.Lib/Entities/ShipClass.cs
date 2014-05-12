@@ -2521,15 +2521,16 @@ namespace Pulsar4X.Entities
             for (int loop = 0; loop < ShipTurretDef.Count; loop++)
             {
                 String Range = "N/A";
-
+                String FormattedRange;
                 if (MaxRange > ShipTurretDef[loop].baseBeamWeapon.range)
                 {
-                    Range = String.Format("Range {0}km", ShipTurretDef[loop].baseBeamWeapon.range);
+                    FormattedRange = ShipTurretDef[loop].baseBeamWeapon.range.ToString();
                 }
                 else
                 {
-                    Range = String.Format("Range {0}km", MaxRange);
+                    FormattedRange = MaxRange.ToString("#,###0");
                 }
+                Range = String.Format("Range {0} km", FormattedRange);
 
                 String Tracking = "N/A";
 
