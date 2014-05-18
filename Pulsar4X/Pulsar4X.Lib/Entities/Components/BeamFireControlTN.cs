@@ -481,7 +481,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Whether or not a weapon was able to fire.</returns>
         public bool FireWeapons(float DistanceToTarget, Random RNG, int track, ShipTN FiringShip)
         {
-            if (DistanceToTarget > BeamFireControlDef.range || LinkedWeapons.Count == 0 || isDestroyed == true)
+            if (DistanceToTarget > BeamFireControlDef.range || (LinkedWeapons.Count == 0 && LinkedTurrets.Count == 0) || isDestroyed == true)
             {
                 if (DistanceToTarget > BeamFireControlDef.range)
                 {
@@ -586,7 +586,7 @@ namespace Pulsar4X.Entities.Components
                         {
                             RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
-                            weaponFired = LinkedWeapons[loop].Fire();
+                            weaponFired = LinkedTurrets[loop].Fire();
 
                             if (weaponFired == true)
                             {
@@ -750,14 +750,14 @@ namespace Pulsar4X.Entities.Components
 
                     }// end for linked weapons
 
-                    if (noMissilesLeft == true)
+                    if (noMissilesLeft == false)
                     {
                         for (int loop = 0; loop < LinkedTurrets.Count; loop++)
                         {
                             FireAccuracy = GetFiringAccuracy(RangeIncrement, linkedTurrets[loop].turretDef.tracking);
                             toHit = (int)Math.Floor(FireAccuracy * 100.0f);
 
-                            if (LinkedTurrets[loop].turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
+                            if (LinkedTurrets[loop].turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurrets[loop].readyToFire() == true)
                             {
                                 RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
