@@ -851,13 +851,26 @@ namespace Pulsar4X.UI.Handlers
                 {
                     foreach (int Index in m_oDetailsPanel.WeaponListBox.SelectedIndices)
                     {
-                        BeamTN SelectedBeam = _CurrnetShip.ShipBeam[Index];
-                        if (SelectedBeam.fireController != null)
+                        if (Index < _CurrnetShip.ShipBeam.Count)
                         {
-                            BeamFireControlTN BFC = SelectedBeam.fireController;
-                            BFC.unlinkWeapon(SelectedBeam);
+                            BeamTN SelectedBeam = _CurrnetShip.ShipBeam[Index];
+                            if (SelectedBeam.fireController != null)
+                            {
+                                BeamFireControlTN BFC = SelectedBeam.fireController;
+                                BFC.unlinkWeapon(SelectedBeam);
+                            }
+                            _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedBeam);
                         }
-                        _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedBeam);
+                        else
+                        {
+                            TurretTN SelectedTurret = _CurrnetShip.ShipTurret[Index];
+                            if (SelectedTurret.fireController != null)
+                            {
+                                BeamFireControlTN BFC = SelectedTurret.fireController;
+                                BFC.unlinkWeapon(SelectedTurret);
+                            }
+                            _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedTurret);
+                        }
                     }
                 }
                 else
@@ -901,6 +914,17 @@ namespace Pulsar4X.UI.Handlers
                             BFC.unlinkWeapon(SelectedBeam);
                         }
                         _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedBeam);
+                    }
+
+                    for (int loop = 0; loop < _CurrnetShip.ShipTurret.Count; loop++)
+                    {
+                        TurretTN SelectedTurret = _CurrnetShip.ShipTurret[loop];
+                        if (SelectedTurret.fireController != null)
+                        {
+                            BeamFireControlTN BFC = SelectedTurret.fireController;
+                            BFC.unlinkWeapon(SelectedTurret);
+                        }
+                        _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].linkWeapon(SelectedTurret);
                     }
                 }
                 else
@@ -1196,6 +1220,20 @@ namespace Pulsar4X.UI.Handlers
                             m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
                         }
                     }
+                    for (int loop2 = 0; loop2 < _CurrnetShip.ShipBFC[loop].linkedTurrets.Count; loop2++)
+                    {
+                        if (_CurrnetShip.ShipBFC[loop].linkedTurrets[loop2].currentCapacitor == _CurrnetShip.ShipBFC[loop].linkedTurrets[loop2].turretDef.powerRequirement)
+                        {
+                            Entry = String.Format("{0}: (Ready to Fire)\n", _CurrnetShip.ShipBFC[loop].linkedTurrets[loop2].Name);
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        }
+                        else
+                        {
+                            Entry = String.Format("{0}: ({1} / {2} power recharged)\n", _CurrnetShip.ShipBFC[loop].linkedTurrets[loop2].Name,
+                                                                        _CurrnetShip.ShipBFC[loop].linkedTurrets[loop2].currentCapacitor.ToString(), _CurrnetShip.ShipBFC[loop].linkedTurrets[loop2].turretDef.powerRequirement.ToString());
+                            m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
+                        }
+                    }
                     m_oDetailsPanel.CombatSummaryTextBox.AppendText("\n");
                 }
 
@@ -1319,6 +1357,14 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0}", _CurrnetShip.ShipBeam[loop].Name);
                         if (_CurrnetShip.ShipBeam[loop].fireController != null)
                             Entry = String.Format("{0} - {1}", Entry, _CurrnetShip.ShipBeam[loop].fireController.Name);
+                        m_oDetailsPanel.WeaponListBox.Items.Add(Entry);
+                    }
+
+                    for (int loop = 0; loop < _CurrnetShip.ShipTurret.Count; loop++)
+                    {
+                        Entry = String.Format("{0}", _CurrnetShip.ShipTurret[loop].Name);
+                        if (_CurrnetShip.ShipTurret[loop].fireController != null)
+                            Entry = String.Format("{0} - {1}", Entry, _CurrnetShip.ShipTurret[loop].fireController.Name);
                         m_oDetailsPanel.WeaponListBox.Items.Add(Entry);
                     }
                 }
@@ -1835,7 +1881,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildTargetMagazine()
         {
-
+#warning build target magazine not yet implemented. this is for ordnance transfer purposes.
         }
 
         /// <summary>

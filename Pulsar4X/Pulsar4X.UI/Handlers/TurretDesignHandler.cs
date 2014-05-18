@@ -140,6 +140,10 @@ namespace Pulsar4X.UI.Handlers
             m_oTurretDesignPanel.TrackSpeedTextBox.TextChanged += new EventHandler(TrackSpeedTextBox_TextChanged);
             m_oTurretDesignPanel.TurretArmourTextBox.TextChanged += new EventHandler(TurretArmourTextBox_TextChanged);
 
+            m_oTurretDesignPanel.InstantButton.Click += new EventHandler(InstantButton_Click);
+
+            m_oTurretDesignPanel.CloseTDButton.Click += new EventHandler(CloseTDButton_Click);
+
             Multiplier = 1;
             TurretProjTracking = 10000;
             TurretProjArmour = 0;
@@ -149,7 +153,7 @@ namespace Pulsar4X.UI.Handlers
 
         #region Public methods
         /// <summary>
-        /// Opens as a popup the turret design page
+        /// Opens as a popup the turret design page.
         /// </summary>
         public void Popup()
         {
@@ -180,7 +184,7 @@ namespace Pulsar4X.UI.Handlers
 
         #region private methods
         /// <summary>
-        /// When a new empire/faction is selected this will be run
+        /// When a new empire/faction is selected this will be run.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -192,7 +196,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// if a new turretable beam is selected this will be run.
+        /// If a new turretable beam is selected this will be run.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -221,7 +225,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// if a new tracking speed is entered the turret design page should be reprinted to reflect this.
+        /// If a new tracking speed is entered the turret design page should be reprinted to reflect this.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -238,7 +242,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// if a new tracking speed is entered the turret design page should be reprinted to reflect this.
+        /// If a new armour thickness is entered the turret design page should be reprinted to reflect this.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -255,7 +259,36 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// overall display function
+        /// When the instant button is clicked, if there is a turret project, put that turret project into the current faction's component list.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void InstantButton_Click(object sender, EventArgs e)
+        {
+            if (TurretProject != null)
+            {
+                if (TurretProject.Name != m_oTurretDesignPanel.TurretNameTextBox.Text)
+                    TurretProject.Name = m_oTurretDesignPanel.TurretNameTextBox.Text;
+                _CurrnetFaction.ComponentList.TurretDef.Add(TurretProject);
+
+                _CurrnetFaction.ComponentList.TotalComponents = _CurrnetFaction.ComponentList.TotalComponents + 1;
+            }
+        }
+
+        /// <summary>
+        /// When the close button is clicked this dialog should disappear.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CloseTDButton_Click(object sender, EventArgs e)
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oTurretDesignPanel.Hide();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        /// <summary>
+        /// Overall display function.
         /// </summary>
         private void BuildTurretDesignPage()
         {
@@ -270,8 +303,12 @@ namespace Pulsar4X.UI.Handlers
             if(ArmourTech > 12)
                 ArmourTech = 12;
 
-            if(_CurrnetBeam != null)
-                TurretProject = new TurretDefTN("---Working Title---", _CurrnetBeam, Multiplier, TurretProjTracking, TrackTech, TurretProjArmour, ArmourTech); 
+            if (_CurrnetBeam != null)
+            {
+                TurretProject = new TurretDefTN("---Working Title---", _CurrnetBeam, Multiplier, TurretProjTracking, TrackTech, TurretProjArmour, ArmourTech);
+            }
+            else
+                TurretProject = null;
 
             BuildFactionInfo();
             BuildBeamInfo();

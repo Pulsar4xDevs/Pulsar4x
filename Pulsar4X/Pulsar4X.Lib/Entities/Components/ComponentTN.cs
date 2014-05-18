@@ -59,8 +59,6 @@ namespace Pulsar4X.Entities.Components
         MissileFireControl,
 
         CIWS,
-
-#warning Need all frontend work.
         Turret,
 
         TypeCount

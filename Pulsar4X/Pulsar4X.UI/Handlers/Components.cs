@@ -286,38 +286,53 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void InstantButton_Click(object sender, EventArgs e)
         {
+            bool set = false;
             #region InstantButton Switch
             switch ((ComponentsViewModel.Components)m_oComponentDesignPanel.ResearchComboBox.SelectedIndex)
             {
                 #region Active Sensors / MFC
                 case ComponentsViewModel.Components.ActiveMFC:
+                    if (ActiveSensorProject != null)
+                    {
 
-                    if(ActiveSensorProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
-                        ActiveSensorProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                        if (ActiveSensorProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                            ActiveSensorProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
 
-                    if (m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex == 0)
-                        _CurrnetFaction.ComponentList.ActiveSensorDef.Add(ActiveSensorProject);
-                    else
-                        _CurrnetFaction.ComponentList.MissileFireControlDef.Add(ActiveSensorProject);
+                        if (m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex == 0)
+                            _CurrnetFaction.ComponentList.ActiveSensorDef.Add(ActiveSensorProject);
+                        else
+                            _CurrnetFaction.ComponentList.MissileFireControlDef.Add(ActiveSensorProject);
+
+                        set = true;
+                    }
                 break;
                 #endregion
 
                 #region Beam Fire Control
                 case ComponentsViewModel.Components.BFC:
 
+                if (BeamFCProject != null)
+                {
                     if (BeamFCProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamFCProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamFireControlDef.Add(BeamFCProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region CIWS
                 case ComponentsViewModel.Components.CIWS:
-                    
+                if (CloseInProject != null)
+                {
                     if (CloseInProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         CloseInProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.CIWSDef.Add(CloseInProject);
+
+                    set = true;
+                }
                 break;
                 #endregion
 
@@ -328,40 +343,56 @@ namespace Pulsar4X.UI.Handlers
 
                 #region EM
                 case ComponentsViewModel.Components.EM:
-
+                if (PassiveSensorProject != null)
+                {
                     if (PassiveSensorProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         PassiveSensorProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.PassiveSensorDef.Add(PassiveSensorProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Engines
                 case ComponentsViewModel.Components.Engine:
+                if (EngineProject != null)
+                {
+                    if (EngineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                        EngineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                    _CurrnetFaction.ComponentList.Engines.Add(EngineProject);
 
-                if (EngineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
-                    EngineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
-                _CurrnetFaction.ComponentList.Engines.Add(EngineProject);
+                    set = true;
+                }
                 break;
                 #endregion
 
                 #region Gauss Cannon
                 case ComponentsViewModel.Components.Gauss:
+                    if (BeamProject != null && BeamProject.componentType == ComponentTypeTN.Gauss)
+                    {
+                        if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                            BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                        _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+                        _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
 
-                    if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
-                        BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
-                    _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
-                    _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
+                        set = true;
+                    }
 
                 break;
                 #endregion
 
                 #region High Power Microwave
                 case ComponentsViewModel.Components.Microwave:
-
+                if (BeamProject != null && BeamProject.componentType == ComponentTypeTN.Microwave)
+                {
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
@@ -373,52 +404,72 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Lasers
                 case ComponentsViewModel.Components.Laser:
-
+                if (BeamProject != null && (BeamProject.componentType == ComponentTypeTN.Laser || BeamProject.componentType == ComponentTypeTN.AdvLaser))
+                {
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
                     _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Magazines
                 case ComponentsViewModel.Components.Magazine:
-
+                if (MagazineProject != null)
+                {
                     if (MagazineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         MagazineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.MagazineDef.Add(MagazineProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Meson Cannons
                 case ComponentsViewModel.Components.Meson:
-
+                if (BeamProject != null && BeamProject.componentType == ComponentTypeTN.Meson)
+                {
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
                     _CurrnetFaction.ComponentList.TurretableBeamDef.Add(BeamProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Missile Engines
                 case ComponentsViewModel.Components.MissileEngine:
-
+                if (MissileEngineProject != null)
+                {
                     if (MissileEngineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         MissileEngineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.MissileEngineDef.Add(MissileEngineProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Missile Launcher
                 case ComponentsViewModel.Components.MissileLauncher:
-
+                if (LauncherProject != null)
+                {
                     if (LauncherProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         LauncherProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.MLauncherDef.Add(LauncherProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
@@ -430,20 +481,28 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Particle beams
                 case ComponentsViewModel.Components.Particle:
-
+                if (BeamProject != null && (BeamProject.componentType == ComponentTypeTN.Particle || BeamProject.componentType == ComponentTypeTN.AdvParticle))
+                {
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Plasma Carronades
                 case ComponentsViewModel.Components.Plasma:
-
+                if (BeamProject != null && (BeamProject.componentType == ComponentTypeTN.Plasma || BeamProject.componentType == ComponentTypeTN.AdvPlasma))
+                {
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
+                    set = true;
+                }
                 break;
                 #endregion
 
@@ -454,19 +513,28 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Power Plants
                 case ComponentsViewModel.Components.Reactor:
-
+                if (ReactorProject != null)
+                {
                     if (ReactorProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         ReactorProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.ReactorDef.Add(ReactorProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Railguns
                 case ComponentsViewModel.Components.Rail:
+                if (BeamProject != null && (BeamProject.componentType == ComponentTypeTN.Rail || BeamProject.componentType == ComponentTypeTN.AdvRail))
+                {
                     if (BeamProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         BeamProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.BeamWeaponDef.Add(BeamProject);
+
+                    set = true;
+                }
                 break;
                 #endregion
 
@@ -477,27 +545,36 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Standard Shields
                 case ComponentsViewModel.Components.ShieldStd:
-
+                if (ShieldProject != null)
+                {
                     if (ShieldProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         ShieldProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.ShieldDef.Add(ShieldProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
 
                 #region Thermal Sensors
                 case ComponentsViewModel.Components.Thermal:
-
+                if (PassiveSensorProject != null)
+                {
                     if (PassiveSensorProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
                         PassiveSensorProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
                     _CurrnetFaction.ComponentList.PassiveSensorDef.Add(PassiveSensorProject);
+
+                    set = true;
+                }
 
                 break;
                 #endregion
             }
             #endregion
 
-            _CurrnetFaction.ComponentList.TotalComponents = _CurrnetFaction.ComponentList.TotalComponents + 1;
+            if(set == true)
+                _CurrnetFaction.ComponentList.TotalComponents = _CurrnetFaction.ComponentList.TotalComponents + 1;
         }
 
         /// <summary>

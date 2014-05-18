@@ -412,6 +412,9 @@ namespace Pulsar4X.UI.Handlers
                             case ComponentTypeTN.CIWS:
                                 List.CIWSDef[CIndex].isObsolete = true;
                                 break;
+                            case ComponentTypeTN.Turret:
+                                List.TurretDef[CIndex].isObsolete = true;
+                                break;
                         }
 #endregion
 
@@ -493,6 +496,9 @@ namespace Pulsar4X.UI.Handlers
                                 break;
                             case ComponentTypeTN.CIWS:
                                 List.CIWSDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.Turret:
+                                List.TurretDef[CIndex].isObsolete = false;
                                 break;
                         }
                         #endregion
@@ -1205,7 +1211,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Builds the design tab. Really wishing I'd done these as a dictionary originally.
-        /// Not implemented: CIWS,ECCM,Turrets, ECM,Cloak, Jump Engines, Maintenance Storage Bays,Hangar,Boat Bay,Troop Bay,Drop Pod,Orbital Hab,Rec Facilities,
+        /// Not implemented: ECCM, ECM,Cloak, Jump Engines, Maintenance Storage Bays,Hangar,Boat Bay,Troop Bay,Drop Pod,Orbital Hab,Rec Facilities,
         /// Geo Sensors,Grav Sensors, 
         /// </summary>
         private void BuildDesignTab()
@@ -1222,7 +1228,7 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
                 if (CurrentShipClass.ShipBFCDef.Count != 0 || CurrentShipClass.ShipBeamDef.Count != 0 || CurrentShipClass.ShipReactorDef.Count != 0 ||
                     CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0 ||
-                    CurrentShipClass.ShipCIWSDef.Count != 0)
+                    CurrentShipClass.ShipCIWSDef.Count != 0 || CurrentShipClass.ShipTurretDef.Count != 0)
                 {
                     Entry = "Weapons and Fire Control:";
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
@@ -1230,6 +1236,12 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < CurrentShipClass.ShipBeamDef.Count; loop++)
                     {
                         Entry = String.Format("{0}x {1}", CurrentShipClass.ShipBeamCount[loop], CurrentShipClass.ShipBeamDef[loop].Name);
+                        m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    }
+
+                    for (int loop = 0; loop < CurrentShipClass.ShipTurretDef.Count; loop++)
+                    {
+                        Entry = String.Format("{0}x {1}", CurrentShipClass.ShipTurretCount[loop], CurrentShipClass.ShipTurretDef[loop].Name);
                         m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                     }
 
@@ -1406,7 +1418,7 @@ namespace Pulsar4X.UI.Handlers
 
             if (CurrentShipClass.ShipBFCDef.Count != 0 || CurrentShipClass.ShipBeamDef.Count != 0 || CurrentShipClass.ShipReactorDef.Count != 0 ||
                     CurrentShipClass.ShipMLaunchDef.Count != 0 || CurrentShipClass.ShipMagazineDef.Count != 0 || CurrentShipClass.ShipMFCDef.Count != 0 || 
-                    CurrentShipClass.ShipCIWSDef.Count != 0)
+                    CurrentShipClass.ShipCIWSDef.Count != 0 || CurrentShipClass.ShipTurretDef.Count != 0)
             {
                 CurrentLine++;
 
@@ -1416,6 +1428,17 @@ namespace Pulsar4X.UI.Handlers
                     {
                         CType = (int)CurrentShipClass.ShipBeamDef[loop].componentType;
                         CIndex = CurrentShipClass.ShipBeamDef[loop].Id;
+                        return;
+                    }
+                    CurrentLine++;
+                }
+
+                for (int loop = 0; loop < CurrentShipClass.ShipTurretDef.Count; loop++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipTurretDef[loop].componentType;
+                        CIndex = CurrentShipClass.ShipTurretDef[loop].Id;
                         return;
                     }
                     CurrentLine++;
@@ -2070,7 +2093,7 @@ namespace Pulsar4X.UI.Handlers
                         }
                     #endregion
 
-                    #region Energy Weapons / CIWS / Turrets(not yet implemented)
+                    #region Energy Weapons / CIWS / Turrets
                         using (DataGridViewRow NewRow = new DataGridViewRow())
                         {
                             /// <summary>
@@ -2173,6 +2196,53 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CIWSDef[loop].isObsolete.ToString();
+
+                                row++;
+                                TotalComponents = TotalComponents + 1;
+                            }
+                        }
+
+                        for (int loop = 0; loop < List.TurretDef.Count; loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
+
+                                switch (List.TurretDef[loop].baseBeamWeapon.componentType)
+                                {
+                                    case ComponentTypeTN.Laser:
+                                    case ComponentTypeTN.AdvLaser:
+                                        Entry = "Damage";
+                                        Entry2 = List.TurretDef[loop].baseBeamWeapon.damage[0].ToString();
+                                        break;
+
+                                    case ComponentTypeTN.Meson:
+                                        Entry = "Range";
+                                        Entry2 = (List.TurretDef[loop].baseBeamWeapon.range / 10000.0f).ToString();
+                                        break;
+
+                                    case ComponentTypeTN.Gauss:
+                                        Entry = "Rate of Fire";
+                                        Entry2 = List.TurretDef[loop].totalShotCount.ToString();
+                                        break;
+                                }
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.TurretDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry2;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.TurretDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.TurretDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.TurretDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.TurretDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.TurretDef[loop].isObsolete.ToString();
 
                                 row++;
                                 TotalComponents = TotalComponents + 1;
@@ -3092,11 +3162,11 @@ namespace Pulsar4X.UI.Handlers
                     }
                     #endregion
 
-                    #region Energy Weapon Addition / CIWS / Turrets not implemented
+                    #region Energy Weapon Addition / CIWS / Turrets
                     /// <summary>
-                    /// A Beam weapon was added.
+                    /// A Beam weapon/CIWS/Turret was added.
                     /// </summary>
-                    if (CompLocation[(int)ComponentGroup.Missiles] != (List.BeamWeaponDef.Count + List.CIWSDef.Count + CompLocation[(int)ComponentGroup.Beam] + 1))
+                    if (CompLocation[(int)ComponentGroup.Missiles] != (List.BeamWeaponDef.Count + List.CIWSDef.Count + List.TurretDef.Count + CompLocation[(int)ComponentGroup.Beam] + 1))
                     {
                         int rowLine = CompLocation[(int)ComponentGroup.Beam] + 1;
                         int BeamCount = 0;
@@ -3236,6 +3306,79 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CIWSDef[loop].isObsolete.ToString();
+
+                                TotalComponents = TotalComponents + 1;
+                            }
+                            rowLine++;
+                        }
+
+
+                        int CIWSEnd = rowLine;
+
+                        /// <summary>
+                        /// Advance through all the Turrets
+                        /// </summary>
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "35")
+                        {
+                            rowLine++;
+                        }
+
+                        int TurretCount = rowLine - CIWSEnd;
+
+                        AddedRows = List.TurretDef.Count - TurretCount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Missiles) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.Missiles; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        /// <summary>
+                        /// insert and fill in the rows where appropriate.
+                        /// </summary>
+                        for (int loop = TurretCount; loop < List.TurretDef.Count; loop++)
+                        {
+                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            {
+                                /// <summary>
+                                /// setup row height. note that by default they are 22 pixels in height!
+                                /// </summary>
+                                NewRow.Height = 18;
+                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+
+                                switch (List.TurretDef[loop].baseBeamWeapon.componentType)
+                                {
+                                    case ComponentTypeTN.Laser:
+                                    case ComponentTypeTN.AdvLaser:
+                                        Entry = "Damage";
+                                        Entry2 = List.TurretDef[loop].baseBeamWeapon.damage[0].ToString();
+                                        break;
+
+                                    case ComponentTypeTN.Meson:
+                                        Entry = "Range";
+                                        Entry2 = (List.TurretDef[loop].baseBeamWeapon.range / 10000.0f).ToString();
+                                        break;
+
+                                    case ComponentTypeTN.Gauss:
+                                        Entry = "Rate of Fire";
+                                        Entry2 = List.TurretDef[loop].totalShotCount.ToString();
+                                        break;
+                                }
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.TurretDef[loop].Name;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.TurretDef[loop].cost.ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.TurretDef[loop].size * 50.0f).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.TurretDef[loop].crew;
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.TurretDef[loop].componentType).ToString();
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.TurretDef[loop].isObsolete.ToString();
 
                                 TotalComponents = TotalComponents + 1;
                             }
@@ -4222,6 +4365,26 @@ namespace Pulsar4X.UI.Handlers
                     else
                         CurrentShipClass.AddCIWS(List.CIWSDef[CIndex], (short)CompAmt);
                     break;
+                case ComponentTypeTN.Turret:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipTurretDef.IndexOf(List.TurretDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipTurretCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipTurretCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddTurret(List.TurretDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddTurret(List.TurretDef[CIndex], (short)CompAmt);
+                    break;
             }
             #endregion
             
@@ -4430,6 +4593,16 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < List.CIWSDef.Count; loop++)
                     {
                         if (List.CIWSDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.Turret:
+                    for (int loop = 0; loop < List.TurretDef.Count; loop++)
+                    {
+                        if (List.TurretDef[loop].Id == CID)
                         {
                             AddComponent(CT, loop, CAmt);
                             break;
