@@ -1051,6 +1051,12 @@ namespace Pulsar4X.Entities
         public void SensorSweep(int YearTickValue)
         {
             /// <summary>
+            /// Ships and missiles are added to these two binding lists. this is for later to help the detected contact list.
+            /// </summary>
+            BindingList<ShipTN> DetShipList = new BindingList<ShipTN>();
+            BindingList<OrdnanceGroupTN> DetMissileList = new BindingList<OrdnanceGroupTN>();
+
+            /// <summary>
             /// Loop through all DSTS. ***
             /// </summary>
             
@@ -1233,8 +1239,15 @@ namespace Pulsar4X.Entities
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
                                             System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = YearTickValue;
+
+                                            if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
+                                            {
+                                                DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
+                                            }
                                         }
                                         System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
+
+
                                     }
                                     else if (noDetection == false && allDetection == false)
                                     {
@@ -1271,6 +1284,11 @@ namespace Pulsar4X.Entities
                                                     if (det == true)
                                                     {
                                                         scratch.ThermalDetection[FactionID] = YearTickValue;
+
+                                                        if (DetShipList.Contains(scratch) == false)
+                                                        {
+                                                            DetShipList.Add(scratch);
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -1371,6 +1389,11 @@ namespace Pulsar4X.Entities
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
                                             System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = YearTickValue;
+
+                                            if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
+                                            {
+                                                DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
+                                            }
                                         }
                                         System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                     }
@@ -1428,6 +1451,11 @@ namespace Pulsar4X.Entities
                                                     if (det == true)
                                                     {
                                                         scratch.EMDetection[FactionID] = YearTickValue;
+
+                                                        if (DetShipList.Contains(scratch) == false)
+                                                        {
+                                                            DetShipList.Add(scratch);
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -1514,10 +1542,16 @@ namespace Pulsar4X.Entities
                                         for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
                                             System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = YearTickValue;
+
+                                            if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
+                                            {
+                                                DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
+                                            }
                                         }
                                         /// <summary>
                                         /// FactionSystemDetection entry. I hope to deprecate this at some point.
                                         /// Be sure to erase the factionDetectionSystem entry first, to track down everywhere this overbloated thing is.
+                                        /// update, not happening. FactionDetectionList is too important.
                                         /// </summary>
                                         System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                     }
@@ -1551,6 +1585,11 @@ namespace Pulsar4X.Entities
                                                     if (det == true)
                                                     {
                                                         scratch.ActiveDetection[FactionID] = YearTickValue;
+
+                                                        if (DetShipList.Contains(scratch) == false)
+                                                        {
+                                                            DetShipList.Add(scratch);
+                                                        }
                                                     }
                                                     else
                                                     {
@@ -1581,53 +1620,6 @@ namespace Pulsar4X.Entities
                             }
                             #endregion
 
-                            /// <summary>
-                            /// Detected contacts logic. If a ship has been newly detected this tick, create a contact entry for it.
-                            /// Otherwise update the existing one. Messages to the message log should be handled there(at the top of this very file.
-                            /// if a ship is no longer detected this tick then remove it from the detected contacts list.
-                            /// 
-                            /// This can actually be improved by turning detectedContact into a linked list, and putting updated contacts in front.
-                            /// this way unupdated contacts would be at the end, and I would not have to loop through all ships here.
-                            /// </summary>
-                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
-                            {
-                                ShipTN detectedShip = System.SystemContactList[loop2].TaskGroup.Ships[loop3];
-
-                                /// <summary>
-                                /// Sanity check to keep allied ships out of the DetectedContacts list.
-                                /// </summary>
-                                if (detectedShip.ShipsFaction != this)
-                                {
-                                    bool inDict = DetectedContactLists.ContainsKey(System);
-
-                                    if (inDict == false)
-                                    {
-                                        DetectedContactsList newDCL = new DetectedContactsList();
-                                        DetectedContactLists.Add(System, newDCL);
-                                    }
-
-                                    inDict = DetectedContactLists[System].DetectedContacts.ContainsKey(detectedShip);
-
-                                    bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
-                                    bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
-                                    bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
-
-                                    if (inDict == true)
-                                    {
-                                        DetectedContactLists[System].DetectedContacts[detectedShip].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
-
-                                        if (th == false && em == false && ac == false)
-                                        {
-                                            DetectedContactLists[System].DetectedContacts.Remove(detectedShip);
-                                        }
-                                    }
-                                    else if (inDict == false && (th == true || em == true || ac == true))
-                                    {
-                                        FactionContact newContact = new FactionContact(this, detectedShip, th, em, ac, (uint)YearTickValue);
-                                        DetectedContactLists[System].DetectedContacts.Add(detectedShip, newContact);
-                                    }
-                                }
-                            }
                         }
                         else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.Missile && System.SystemContactList[loop2].MissileGroup.missiles.Count != 0)
                         {
@@ -1667,6 +1659,12 @@ namespace Pulsar4X.Entities
                                     {
                                         System.SystemContactList[loop2].MissileGroup.missiles[loop3].ThermalDetection[FactionID] = YearTickValue;
                                     }
+
+                                    if (DetMissileList.Contains(System.SystemContactList[loop2].MissileGroup) == false)
+                                    {
+                                        DetMissileList.Add(System.SystemContactList[loop2].MissileGroup);
+                                    }
+
                                     System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
                                 }
                             }
@@ -1705,6 +1703,13 @@ namespace Pulsar4X.Entities
                                         {
                                             System.SystemContactList[loop2].MissileGroup.missiles[loop3].EMDetection[FactionID] = YearTickValue;
                                         }
+
+                                        if (DetMissileList.Contains(System.SystemContactList[loop2].MissileGroup) == false)
+                                        {
+                                            DetMissileList.Add(System.SystemContactList[loop2].MissileGroup);
+                                        }
+
+
                                         System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                     }
                                 }
@@ -1747,45 +1752,16 @@ namespace Pulsar4X.Entities
                                     {
                                         System.SystemContactList[loop2].MissileGroup.missiles[loop3].ActiveDetection[FactionID] = YearTickValue;
                                     }
+
+                                    if (DetMissileList.Contains(System.SystemContactList[loop2].MissileGroup) == false)
+                                    {
+                                        DetMissileList.Add(System.SystemContactList[loop2].MissileGroup);
+                                    }
+
                                     System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                 }
                             }
                             #endregion
-
-                                /// <summary>
-                                /// Sanity check to keep allied missiles out of the DetectedContacts list.
-                                /// </summary>
-                            if (Missile.missileGroup.ordnanceGroupFaction != this)
-                            {
-                                bool inDict = DetectedContactLists.ContainsKey(System);
-
-                                if (inDict == false)
-                                {
-                                    DetectedContactsList newDCL = new DetectedContactsList();
-                                    DetectedContactLists.Add(System, newDCL);
-                                }
-
-                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.missileGroup);
-
-                                bool th = (Missile.ThermalDetection[FactionID] == YearTickValue);
-                                bool em = (Missile.EMDetection[FactionID] == YearTickValue);
-                                bool ac = (Missile.ActiveDetection[FactionID] == YearTickValue);
-
-                                if (inDict == true)
-                                {
-                                    DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
-
-                                    if (th == false && em == false && ac == false)
-                                    {
-                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.missileGroup);
-                                    }
-                                }
-                                else if (inDict == false && (th == true || em == true || ac == true))
-                                {
-                                    FactionContact newContact = new FactionContact(this, Missile.missileGroup, th, em, ac, (uint)YearTickValue);
-                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.missileGroup, newContact);
-                                }
-                            }
                         }
                         /// <summary>
                         /// End if planet,Task Group, or Missile
@@ -2000,6 +1976,11 @@ namespace Pulsar4X.Entities
                                             for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                             {
                                                 System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = YearTickValue;
+
+                                                if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
+                                                {
+                                                    DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
+                                                }
                                             }
                                             System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
                                         }
@@ -2030,6 +2011,11 @@ namespace Pulsar4X.Entities
                                                         if (det == true)
                                                         {
                                                             scratch.ThermalDetection[FactionID] = YearTickValue;
+
+                                                            if (DetShipList.Contains(scratch) == false)
+                                                            {
+                                                                DetShipList.Add(scratch);
+                                                            }
                                                         }
                                                         else
                                                         {
@@ -2104,6 +2090,11 @@ namespace Pulsar4X.Entities
                                             for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                             {
                                                 System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = YearTickValue;
+
+                                                if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
+                                                {
+                                                    DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
+                                                }
                                             }
                                             System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                         }
@@ -2124,6 +2115,30 @@ namespace Pulsar4X.Entities
                                                     if (scratch.EMDetection[FactionID] != YearTickValue)
                                                     {
                                                         sig = scratch.CurrentEMSignature;
+
+                                                        /// <summary>
+                                                        /// here is where EM detection differs from Thermal detection:
+                                                        /// If a ship has a signature of 0 by this point(and we didn't already hit noDetection above,
+                                                        /// it means that one ship is emitting a signature, but that no other ships are.
+                                                        /// Mark the group as totally detected, but not the ships, this serves to tell me that the ships are undetectable
+                                                        /// in this case.
+                                                        /// Also, sig will never be 0 for the first iteration of the loop, that has already been tested, so I don't need to worry about
+                                                        /// node.Next.Value blowing up on me.
+                                                        /// </summary>
+                                                        if (sig == 0)
+                                                        {
+                                                            /// <summary>
+                                                            /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
+                                                            /// Mark the entire group as "spotted" because no other detection will occur.
+                                                            /// </summary>
+                                                            if (System.SystemContactList[loop2].TaskGroup.Ships[node.Next.Value].EMDetection[FactionID] == YearTickValue)
+                                                            {
+                                                                System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
+                                                            }
+                                                            break;
+                                                        }
+
+
                                                         detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
 
                                                         /// <summary>
@@ -2134,6 +2149,11 @@ namespace Pulsar4X.Entities
                                                         if (det == true)
                                                         {
                                                             scratch.EMDetection[FactionID] = YearTickValue;
+
+                                                            if (DetShipList.Contains(scratch) == false)
+                                                            {
+                                                                DetShipList.Add(scratch);
+                                                            }
                                                         }
                                                         else
                                                         {
@@ -2208,6 +2228,11 @@ namespace Pulsar4X.Entities
                                             for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                             {
                                                 System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = YearTickValue;
+
+                                                if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
+                                                {
+                                                    DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
+                                                }
                                             }
                                             System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                         }
@@ -2238,6 +2263,11 @@ namespace Pulsar4X.Entities
                                                         if (det == true)
                                                         {
                                                             scratch.ActiveDetection[FactionID] = YearTickValue;
+
+                                                            if (DetShipList.Contains(scratch) == false)
+                                                            {
+                                                                DetShipList.Add(scratch);
+                                                            }
                                                         }
                                                         else
                                                         {
@@ -2263,56 +2293,6 @@ namespace Pulsar4X.Entities
                                         }//end else if (noDetection == false && allDetection == false)
                                     }//end if noDetection == false
                                 }//end if not detected and missile can detect TCS
-                                #endregion
-
-                                #region Update Detected Contacts List
-                                /// <summary>
-                                /// Detected contacts logic. If a ship has been newly detected this tick, create a contact entry for it.
-                                /// Otherwise update the existing one. Messages to the message log should be handled there(at the top of this very file.
-                                /// if a ship is no longer detected this tick then remove it from the detected contacts list.
-                                /// 
-                                /// This can actually be improved by turning detectedContact into a linked list, and putting updated contacts in front.
-                                /// this way unupdated contacts would be at the end, and I would not have to loop through all ships here.
-                                /// </summary>
-                                for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
-                                {
-                                    ShipTN detectedShip = System.SystemContactList[loop2].TaskGroup.Ships[loop3];
-
-                                    /// <summary>
-                                    /// Sanity check to keep allied ships out of the DetectedContacts list.
-                                    /// </summary>
-                                    if (detectedShip.ShipsFaction != this)
-                                    {
-                                        bool inDict = DetectedContactLists.ContainsKey(System);
-
-                                        if (inDict == false)
-                                        {
-                                            DetectedContactsList newDCL = new DetectedContactsList();
-                                            DetectedContactLists.Add(System, newDCL);
-                                        }
-
-                                        inDict = DetectedContactLists[System].DetectedContacts.ContainsKey(detectedShip);
-
-                                        bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
-                                        bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
-                                        bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
-
-                                        if (inDict == true)
-                                        {
-                                            DetectedContactLists[System].DetectedContacts[detectedShip].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
-
-                                            if (th == false && em == false && ac == false)
-                                            {
-                                                DetectedContactLists[System].DetectedContacts.Remove(detectedShip);
-                                            }
-                                        }
-                                        else if (inDict == false && (th == true || em == true || ac == true))
-                                        {
-                                            FactionContact newContact = new FactionContact(this, detectedShip, th, em, ac, (uint)YearTickValue);
-                                            DetectedContactLists[System].DetectedContacts.Add(detectedShip, newContact);
-                                        }
-                                    }
-                                }
                                 #endregion
                             #endregion
                         }
@@ -2344,6 +2324,12 @@ namespace Pulsar4X.Entities
                                     {
                                         System.SystemContactList[loop2].MissileGroup.missiles[loop3].ThermalDetection[FactionID] = YearTickValue;
                                     }
+
+                                    if (DetMissileList.Contains(System.SystemContactList[loop2].MissileGroup) == false)
+                                    {
+                                        DetMissileList.Add(System.SystemContactList[loop2].MissileGroup);
+                                    }
+
                                     System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
                                 }
                             }
@@ -2371,6 +2357,12 @@ namespace Pulsar4X.Entities
                                         {
                                             System.SystemContactList[loop2].MissileGroup.missiles[loop3].EMDetection[FactionID] = YearTickValue;
                                         }
+
+                                        if (DetMissileList.Contains(System.SystemContactList[loop2].MissileGroup) == false)
+                                        {
+                                            DetMissileList.Add(System.SystemContactList[loop2].MissileGroup);
+                                        }
+
                                         System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                     }
                                 }
@@ -2412,49 +2404,112 @@ namespace Pulsar4X.Entities
                                     {
                                         System.SystemContactList[loop2].MissileGroup.missiles[loop3].ActiveDetection[FactionID] = YearTickValue;
                                     }
+
+                                    if (DetMissileList.Contains(System.SystemContactList[loop2].MissileGroup) == false)
+                                    {
+                                        DetMissileList.Add(System.SystemContactList[loop2].MissileGroup);
+                                    }
+
                                     System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                 }
                             }
                             #endregion
-
-                            /// <summary>
-                            /// Sanity check to keep allied missiles out of the DetectedContacts list.
-                            /// </summary>
-                            if (Missile.missileGroup.ordnanceGroupFaction != this)
-                            {
-                                bool inDict = DetectedContactLists.ContainsKey(System);
-
-                                if (inDict == false)
-                                {
-                                    DetectedContactsList newDCL = new DetectedContactsList();
-                                    DetectedContactLists.Add(System, newDCL);
-                                }
-
-                                inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.missileGroup);
-
-                                bool th = (Missile.ThermalDetection[FactionID] == YearTickValue);
-                                bool em = (Missile.EMDetection[FactionID] == YearTickValue);
-                                bool ac = (Missile.ActiveDetection[FactionID] == YearTickValue);
-
-                                if (inDict == true)
-                                {
-                                    DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
-
-                                    if (th == false && em == false && ac == false)
-                                    {
-                                        DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.missileGroup);
-                                    }
-                                }
-                                else if (inDict == false && (th == true || em == true || ac == true))
-                                {
-                                    FactionContact newContact = new FactionContact(this, Missile.missileGroup, th, em, ac, (uint)YearTickValue);
-                                    DetectedContactLists[System].DetectedMissileContacts.Add(Missile.missileGroup, newContact);
-                                }
-                            }
                         }//end else if SSE = missile && ordnance group has missiles in it
                     }//end if contact not detected and can be detected
                 }//end for faction detection list contacts
             }//end for missile groups
+
+
+
+            /// <summary>
+            /// Detected contacts logic. If a ship has been newly detected this tick, create a contact entry for it.
+            /// Otherwise update the existing one. Messages to the message log should be handled there(at the top of this very file.
+            /// if a ship is no longer detected this tick then remove it from the detected contacts list.
+            /// 
+            /// This can actually be improved by turning detectedContact into a linked list, and putting updated contacts in front.
+            /// this way unupdated contacts would be at the end, and I would not have to loop through all ships here.
+            /// </summary>
+            for (int loop3 = 0; loop3 < DetShipList.Count; loop3++)
+            {
+                ShipTN detectedShip = DetShipList[loop3];
+                StarSystem System = detectedShip.ShipsTaskGroup.Contact.CurrentSystem;
+
+                /// <summary>
+                /// Sanity check to keep allied ships out of the DetectedContacts list.
+                /// </summary>
+                if (detectedShip.ShipsFaction != this)
+                {
+                    bool inDict = DetectedContactLists.ContainsKey(System);
+
+                    if (inDict == false)
+                    {
+                        DetectedContactsList newDCL = new DetectedContactsList();
+                        DetectedContactLists.Add(System, newDCL);
+                    }
+
+                    inDict = DetectedContactLists[System].DetectedContacts.ContainsKey(detectedShip);
+
+                    bool th = (detectedShip.ThermalDetection[FactionID] == YearTickValue);
+                    bool em = (detectedShip.EMDetection[FactionID] == YearTickValue);
+                    bool ac = (detectedShip.ActiveDetection[FactionID] == YearTickValue);
+
+                    if (inDict == true)
+                    {
+                        DetectedContactLists[System].DetectedContacts[detectedShip].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
+
+                        if (th == false && em == false && ac == false)
+                        {
+                            DetectedContactLists[System].DetectedContacts.Remove(detectedShip);
+                        }
+                    }
+                    else if (inDict == false && (th == true || em == true || ac == true))
+                    {
+                        FactionContact newContact = new FactionContact(this, detectedShip, th, em, ac, (uint)YearTickValue);
+                        DetectedContactLists[System].DetectedContacts.Add(detectedShip, newContact);
+                    }
+                }
+            }
+
+            for (int loop3 = 0; loop3 < DetMissileList.Count; loop3++)
+            {
+                OrdnanceTN Missile = DetMissileList[loop3].missiles[0];
+                StarSystem System = DetMissileList[loop3].contact.CurrentSystem;
+
+                /// <summary>
+                /// Sanity check to keep allied missiles out of the DetectedContacts list.
+                /// </summary>
+                if (Missile.missileGroup.ordnanceGroupFaction != this)
+                {
+                    bool inDict = DetectedContactLists.ContainsKey(System);
+
+                    if (inDict == false)
+                    {
+                        DetectedContactsList newDCL = new DetectedContactsList();
+                        DetectedContactLists.Add(System, newDCL);
+                    }
+
+                    inDict = DetectedContactLists[System].DetectedMissileContacts.ContainsKey(Missile.missileGroup);
+
+                    bool th = (Missile.ThermalDetection[FactionID] == YearTickValue);
+                    bool em = (Missile.EMDetection[FactionID] == YearTickValue);
+                    bool ac = (Missile.ActiveDetection[FactionID] == YearTickValue);
+
+                    if (inDict == true)
+                    {
+                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, ac, (uint)YearTickValue);
+
+                        if (th == false && em == false && ac == false)
+                        {
+                            DetectedContactLists[System].DetectedMissileContacts.Remove(Missile.missileGroup);
+                        }
+                    }
+                    else if (inDict == false && (th == true || em == true || ac == true))
+                    {
+                        FactionContact newContact = new FactionContact(this, Missile.missileGroup, th, em, ac, (uint)YearTickValue);
+                        DetectedContactLists[System].DetectedMissileContacts.Add(Missile.missileGroup, newContact);
+                    }
+                }
+            }
 
         }
         /// <summary>
