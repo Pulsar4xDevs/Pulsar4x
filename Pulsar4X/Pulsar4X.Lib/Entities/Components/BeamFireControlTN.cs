@@ -320,6 +320,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// range at which area defense will engage targets
+        /// </summary>
+        private float PDRange;
+        public float pDRange
+        {
+            get { return PDRange; }
+        }
+
+        /// <summary>
         /// Constructor for BFC components.
         /// </summary>
         /// <param name="definition">Definition of this component</param>
@@ -334,6 +343,7 @@ namespace Pulsar4X.Entities.Components
             Target = null;
             OpenFire = false;
             PDState = PointDefenseState.None;
+            PDRange = 0;
         }
 
         /// <summary>
@@ -350,6 +360,15 @@ namespace Pulsar4X.Entities.Components
                 /// Bad PDState for BFCs.
                 /// </summary>
             }
+        }
+
+        /// <summary>
+        /// Set the FC pd range that area defense will engage targets at.
+        /// </summary>
+        /// <param name="range">range to engage targets at.</param>
+        public void SetPointDefenseRange(float range)
+        {
+            PDRange = range;
         }
 
         /// <summary>

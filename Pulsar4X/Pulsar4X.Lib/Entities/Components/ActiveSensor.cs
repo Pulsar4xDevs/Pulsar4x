@@ -442,6 +442,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// range at which area defense will engage targets
+        /// </summary>
+        private float PDRange;
+        public float pDRange
+        {
+            get { return PDRange; }
+        }
+
+        /// <summary>
         /// ECCM needs to be handled eventually
         /// </summary>
 
@@ -461,6 +470,7 @@ namespace Pulsar4X.Entities.Components
             OpenFire = false;
             Target = null;
             PDState = PointDefenseState.None;
+            PDRange = 0;
         }
 
         /// <summary>
@@ -470,6 +480,15 @@ namespace Pulsar4X.Entities.Components
         public void SetPointDefenseMode(PointDefenseState State)
         {
             PDState = State;
+        }
+
+        /// <summary>
+        /// Set the FC pd range that area defense will engage targets at.
+        /// </summary>
+        /// <param name="range">range to engage targets at.</param>
+        public void SetPointDefenseRange(float range)
+        {
+            PDRange = range;
         }
 
         /// <summary>

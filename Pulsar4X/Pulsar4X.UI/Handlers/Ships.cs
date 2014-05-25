@@ -166,6 +166,13 @@ namespace Pulsar4X.UI.Handlers
 
             m_oShipListPanel.ShipsListBox.SelectedIndexChanged += new EventHandler(ShipListBox_SelectedIndexChanged);
 
+            /// <summary>
+            /// Point defense functionality.
+            /// </summary>
+            m_oDetailsPanel.PDComboBox.SelectedIndexChanged += new EventHandler(PDComboBox_SelectedIndexChanged);
+            m_oDetailsPanel.SetPDModeButton.Click += new EventHandler(SetPDModeButton_Click);
+            m_oDetailsPanel.PDRangeTextBox.TextChanged += new EventHandler(PDRangeTextBox_TextChanged);
+
             m_oDetailsPanel.OpenFireButton.Click += new EventHandler(OpenFireButton_Click);
             m_oDetailsPanel.CeaseFireButton.Click += new EventHandler(CeaseFireButton_Click);
             m_oDetailsPanel.RaiseShieldsButton.Click += new EventHandler(RaiseShieldsButton_Click);
@@ -357,6 +364,11 @@ namespace Pulsar4X.UI.Handlers
             RefreshFCInfo();
         }
 
+        /// <summary>
+        /// If a new active is selected that needs to be set as the _CurrnetSensor. also print whether this active is on or off.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SelectedActiveComboBox_SelectIndexChanged(object sender, EventArgs e)
         {
             if (_CurrnetShip != null && m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex != -1)
@@ -369,6 +381,75 @@ namespace Pulsar4X.UI.Handlers
                     m_oDetailsPanel.ActiveGroupBox.Text = "Selected Active(Off)";
             }
         }
+
+        #region Point defense
+        /// <summary>
+        /// if any change needs to be made to the FC on new PD selection do it here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PDComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            
+        }
+
+        /// <summary>
+        /// PD mode and range will be handled in this function
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SetPDModeButton_Click(object sender, EventArgs e)
+        {
+            int index = m_oDetailsPanel.PDComboBox.SelectedIndex;
+            float PointDefenseRange = 0.0f;
+            bool res = float.TryParse(m_oDetailsPanel.PDRangeTextBox.Text, out PointDefenseRange);
+            if (isBFC)
+            {
+                if (index <= (int)PointDefenseState.FinalDefensiveFireSelf)
+                {
+                    if (res)
+                        _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseRange(PointDefenseRange);
+                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
+                }
+                else
+                {
+                    String Error = String.Format("Improper point defense state {0} assigned to BFC {1} on {2}", (PointDefenseState)index, _CurrnetFC, _CurrnetShip);
+                    MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                    _CurrnetFaction.MessageLog.Add(MessageEnter);
+                }
+            }
+            else
+            {
+                if (index != 0)
+                    index = index + 3;
+                if (index == 0 || (index >= (int)PointDefenseState.AMM1v2 && index <= (int)PointDefenseState.AMM5v1))
+                {
+                    if (res)
+                        _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseRange(PointDefenseRange);
+                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
+                }
+                else
+                {
+                    String Error = String.Format("Improper point defense state {0} assigned to MFC {1} on {2}", (PointDefenseState)index, _CurrnetFC, _CurrnetShip);
+                    MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                    _CurrnetFaction.MessageLog.Add(MessageEnter);
+                }
+            }
+
+            BuildCombatSummary();
+        }
+
+        /// <summary>
+        /// On text range change if anything needs to be done do it here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PDRangeTextBox_TextChanged(object sender, EventArgs e)
+        {
+        }
+        #endregion
 
         /// <summary>
         /// Handle open fire button clicked. Faction stores a list of FCs with fire authorization, add this FC to that list if it isn't there already.
@@ -1168,9 +1249,13 @@ namespace Pulsar4X.UI.Handlers
                 {
                     TargetTN Target = _CurrnetShip.ShipBFC[loop].getTarget();
 
+                    String PD = "";
+                    if (_CurrnetShip.ShipBFC[loop].pDState != PointDefenseState.None)
+                        PD = String.Format(" ({0} {1:N1})", _CurrnetShip.ShipBFC[loop].pDState, _CurrnetShip.ShipBFC[loop].pDRange);
+
                     if (Target == null)
                     {
-                        Entry = String.Format("{0}: No Target Assignment\n", _CurrnetShip.ShipBFC[loop].Name);
+                        Entry = String.Format("{0}{1}: No Target Assignment\n", _CurrnetShip.ShipBFC[loop].Name,PD);
                     }
                     else
                     {
@@ -1201,7 +1286,7 @@ namespace Pulsar4X.UI.Handlers
                             break;
                         }
 
-                        Entry = String.Format("{0}: Targeting {1} - {2}\n", _CurrnetShip.ShipBFC[loop].Name, TargetName, fireAuth);
+                        Entry = String.Format("{0}{1}: Targeting {2} - {3}\n", _CurrnetShip.ShipBFC[loop].Name, PD,TargetName, fireAuth);
                     }
 
                     m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
@@ -1241,9 +1326,13 @@ namespace Pulsar4X.UI.Handlers
                 {
                     TargetTN Target = _CurrnetShip.ShipMFC[loop].getTarget();
 
+                    String PD = "";
+                    if (_CurrnetShip.ShipMFC[loop].pDState != PointDefenseState.None)
+                        PD = String.Format(" ({0} {1:N1})", _CurrnetShip.ShipMFC[loop].pDState, _CurrnetShip.ShipMFC[loop].pDRange);
+
                     if (Target == null)
                     {
-                        Entry = String.Format("{0}: No Target Assignment\n", _CurrnetShip.ShipMFC[loop].Name);
+                        Entry = String.Format("{0}{1}: No Target Assignment\n", _CurrnetShip.ShipMFC[loop].Name, PD);
                     }
                     else
                     {
@@ -1255,19 +1344,19 @@ namespace Pulsar4X.UI.Handlers
                         switch (Target.targetType)
                         {
                             case StarSystemEntityType.Population:
-                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.pop.Name, fireAuth);
+                                Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.pop.Name, fireAuth);
                             break;
                             case StarSystemEntityType.TaskGroup:
-                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.ship.Name, fireAuth);
+                                Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.ship.Name, fireAuth);
                             break;
                             case StarSystemEntityType.Missile:
-                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.missileGroup.Name, fireAuth);
+                                Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.missileGroup.Name, fireAuth);
                             break;
                             case StarSystemEntityType.Waypoint:
-                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.wp.Name, fireAuth);
+                                Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.wp.Name, fireAuth);
                             break;
                             case StarSystemEntityType.Body:
-                                Entry = String.Format("{0}: {1} - {2}\n", _CurrnetShip.ShipMFC[loop].Name, Target.body.Name, fireAuth);
+                                Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.body.Name, fireAuth);
                             break;
                         }
                     }
