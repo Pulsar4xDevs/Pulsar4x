@@ -410,6 +410,29 @@ namespace Pulsar4X.UI.Handlers
                     if (res)
                         _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseRange(PointDefenseRange);
                     _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
+
+                    if (index != 0)
+                    {
+                        /// <summary>
+                        /// Add the FC to the point defense FC list.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == false)
+                        {
+                            _CurrnetFaction.PointDefenseFC.Add(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip);
+                            _CurrnetFaction.PointDefenseFCType.Add(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], false);
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Remove the FC from the point defense FC list.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                        {
+                            _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                            _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                        }
+                    }
                 }
                 else
                 {
@@ -428,6 +451,29 @@ namespace Pulsar4X.UI.Handlers
                     if (res)
                         _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseRange(PointDefenseRange);
                     _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
+
+                    if (index != 0)
+                    {
+                        /// <summary>
+                        /// Add the FC to the point defense FC list.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == false)
+                        {
+                            _CurrnetFaction.PointDefenseFC.Add(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip);
+                            _CurrnetFaction.PointDefenseFCType.Add(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], true);
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Remove the FC from the point defense FC list.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                        {
+                            _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                            _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                        }
+                    }
                 }
                 else
                 {
@@ -827,7 +873,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// Clears the selected FC of its target.
+        /// Clears the selected FC of its target and any PD state.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -837,6 +883,17 @@ namespace Pulsar4X.UI.Handlers
             {
                 if (isBFC == true)
                 {
+                    /// <summary>
+                    /// Clear point defense.
+                    /// </summary>
+                    _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseMode(PointDefenseState.None);
+
+                    if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                    {
+                        _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                        _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                    }
+
                     TargetTN Target = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
                     {
@@ -869,6 +926,18 @@ namespace Pulsar4X.UI.Handlers
                 }
                 else
                 {
+                    /// <summary>
+                    /// Clear point defense.
+                    /// </summary>
+                    _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseMode(PointDefenseState.None);
+
+                    if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                    {
+                        _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                        _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                    }
+
+
                     TargetTN Target = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
                     {

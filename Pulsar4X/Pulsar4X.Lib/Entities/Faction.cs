@@ -602,6 +602,12 @@ namespace Pulsar4X.Entities
         public Dictionary<ComponentTN, bool> OpenFireFCType { get; set; }
 
         /// <summary>
+        /// These are fire controls set to point defense.
+        /// </summary>
+        public Dictionary<ComponentTN, ShipTN> PointDefenseFC { get; set; }
+        public Dictionary<ComponentTN, bool> PointDefenseFCType { get; set; }
+
+        /// <summary>
         /// These missile groups belong to this faction, and either have some or all of their missiles removed.
         /// </summary>
         public BindingList<OrdnanceGroupTN> MissileRemoveList { get; set; }
@@ -876,10 +882,14 @@ namespace Pulsar4X.Entities
             OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
             OrdnanceSeries.Add(NewOrd);
 
+#warning base tracking magic number
             BaseTracking = 1250;
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN,bool>();
+
+            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
+            PointDefenseFCType = new Dictionary<ComponentTN, bool>();
 
             MissileRemoveList = new BindingList<OrdnanceGroupTN>();
 
@@ -914,6 +924,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
 
+#warning FastOOB magic numbers
             ShipBPTotal = 8000.0m;
             PDCBPTotal = 4000.0m;
         }
@@ -960,10 +971,14 @@ namespace Pulsar4X.Entities
             OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
             OrdnanceSeries.Add(NewOrd);
 
+#warning base tracking magic number
             BaseTracking = 1250;
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN, bool>();
+
+            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
+            PointDefenseFCType = new Dictionary<ComponentTN, bool>();
 
             MissileRemoveList = new BindingList<OrdnanceGroupTN>();
 
@@ -997,6 +1012,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
 
+#warning FastOOB magic numbers
             ShipBPTotal = 8000.0m;
             PDCBPTotal = 4000.0m;
         }

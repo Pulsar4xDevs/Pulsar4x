@@ -116,6 +116,11 @@ namespace Pulsar4X.Entities
             }
 
             /// <summary>
+            /// Insert Area Defense/ AMM Defense here.
+            /// </summary>
+#warning Area Defense / AMM Defense
+
+            /// <summary>
             /// attempt to fire weapons at target here.
             /// Initiative will have to be implemented here for "fairness". right now lower P numbers have the advantage.
             /// Check for destroyed ships as well.

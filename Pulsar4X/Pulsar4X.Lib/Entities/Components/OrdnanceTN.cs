@@ -1683,6 +1683,11 @@ namespace Pulsar4X.Entities.Components
             MissilesDestroyed = Missiles.Count;
             for (int loop = 0; loop < Missiles.Count; loop++)
             {
+                /// <summary>
+                /// Personal Point defense(CIWS/FDF(Self)/FDF) here
+                /// </summary>
+#warning do CIWS/FDF/Self PD here.
+
                 ushort ToHit = 0;
 
                 if (Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 1 || Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 0)
