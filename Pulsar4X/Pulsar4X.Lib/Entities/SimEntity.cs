@@ -334,6 +334,34 @@ namespace Pulsar4X.Entities
                     }
 
                     /// <summary>
+                    /// recharge all CIWS on this ship.
+                    /// </summary>
+                    if( (value & (int)Faction.RechargeStatus.CIWS) == (int)Faction.RechargeStatus.CIWS)
+                    {
+                        int shots = pair.Key.RechargeCIWS();
+
+                        /// <summary>
+                        /// I've recharged this ship twice, but its CIWS have not fired on anything in the mean time. so remove it from the list.
+                        /// </summary>
+                        if (shots == 0)
+                        {
+                            P[loop].RechargeList[pair.Key] = P[loop].RechargeList[pair.Key] - (int)Faction.RechargeStatus.CIWS;
+
+                            /// <summary>
+                            /// If no flags are present at all for this ship, remove it entirely.
+                            /// </summary>
+
+                            if (P[loop].RechargeList[pair.Key] == 0)
+                            {
+                                P[loop].RechargeList.Remove(pair.Key);
+                                loop--;
+                                loopBreak = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    /// <summary>
                     /// Ship destruction, very involving.
                     /// All Taskgroups ordered to move to the destroyed ship have to have their orders canceled.
                     /// System detected contacts have to be updated. this includes both the detected list and the FactionSystemDetection map as a whole. 

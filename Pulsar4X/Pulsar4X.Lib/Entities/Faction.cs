@@ -419,18 +419,19 @@ namespace Pulsar4X.Entities
             Firing,
             FiringHit,
             FiringMissed,
-            FiringRecharging,
-            FiringZeroHitChance,
             FiringNoAvailableOrdnance,
             FiringNoLoadedOrdnance,
+            FiringRecharging,
+            FiringZeroHitChance,
 
             LaunchTubeReloaded,
             LaunchTubeNoOrdnanceToReload,
 
             MissileHit,
-            MissileMissed,
+            MissileIntercepted,
             MissileLostFireControl,
             MissileLostTracking,
+            MissileMissed,
             MissileOutOfFuel,
 
             OrdersCompleted,
@@ -625,7 +626,8 @@ namespace Pulsar4X.Entities
             Shields=1,
             Weapons=2,
             Destroyed=4,
-            Count=8
+            CIWS = 8,
+            Count=16
         }
 
         /// <summary>

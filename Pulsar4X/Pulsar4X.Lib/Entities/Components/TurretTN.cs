@@ -204,6 +204,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Has this Turret fired in defense, and if so how many of its shots were used.
+        /// </summary>
+        private int ShotsExpended;
+        public int shotsExpended
+        {
+            get { return ShotsExpended; }
+        }
+
+        /// <summary>
         /// Constructor for the turret component itself.
         /// </summary>
         /// <param name="definition">definition for this turret.</param>

@@ -211,6 +211,14 @@ namespace Pulsar4X.Entities.Components
             get { return CIWSDef; }
         }
 
+        /// <summary>
+        /// Has this CIWS fired in defense, and if so how many of its shots were used.
+        /// </summary>
+        private int ShotsExpended;
+        public int shotsExpended
+        {
+            get { return ShotsExpended; }
+        }
 
         /// <summary>
         /// Constructor for the close in weapon system component.
@@ -223,6 +231,86 @@ namespace Pulsar4X.Entities.Components
             Name = CIWSDef.Name;
 
             isDestroyed = false;
+
+            ShotsExpended = 0;
+        }
+
+        /// <summary>
+        /// on tick advancement the CIWS should have its shots recharged.
+        /// </summary>
+        public void RechargeCIWS()
+        {
+            ShotsExpended = 0;
+        }
+
+        /// <summary>
+        /// Can this CIWS fire?
+        /// </summary>
+        /// <returns>return true if CIWS fired, false if not.</returns>
+        public bool FireCIWS()
+        {
+            if (ShotsExpended < CIWSDef.rOF)
+            {
+                ShotsExpended++;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Intercept target calculates whether the current CIWS can hit this incoming missile, and how many shots that would take.
+        /// </summary>
+        /// <param name="RNG">RNG passed from caller, this should be the one in _SE_ ultimately.</param>
+        /// <param name="OrdnanceSpeed">Speed of incoming missile, this and tracking are the only determinants here</param>
+        /// <returns></returns>
+        public bool InterceptTarget(Random RNG, float OrdnanceSpeed, Faction ShipFaction, SystemContact Contact)
+        {
+            /// <summary>
+            /// Can this CIWS fire?
+            /// </summary>
+            bool CIWSFired = FireCIWS();
+            if (CIWSFired == false)
+                return false;
+
+            /// <summary>
+            /// Calculate the chance that this CIWS can intercept the given target.
+            /// </summary>
+            float InterceptChance = ((float)CIWSDef.tracking / OrdnanceSpeed);
+            if (InterceptChance >= 1.0f)
+            {
+                InterceptChance = 50.0f;
+            }
+            else
+            {
+                InterceptChance = InterceptChance * 50.0f; // 0.5f * 100.0f
+            }
+
+            /// <summary>
+            /// If this CIWS can fire this will be true, loop until either the hit is "made" or this CIWS runs out of shots.
+            /// </summary>
+            while (CIWSFired)
+            {
+                ushort Hit = (ushort)RNG.Next(1, 100);
+                if (InterceptChance > (float)Hit)
+                {
+                    String Entry = String.Format("CIWS {0} Fired at 10,000 km and hit.", Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    ShipFaction.MessageLog.Add(Msg);
+                    return true;
+                }
+                else
+                {
+                    String Entry = String.Format("CIWS {0} Fired at 10,000 km and missed.", Name);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    ShipFaction.MessageLog.Add(Msg);
+                }
+
+                CIWSFired = FireCIWS();
+            }
+            return false;
         }
     }
 }

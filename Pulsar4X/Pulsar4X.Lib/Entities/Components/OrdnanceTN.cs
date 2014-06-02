@@ -1683,11 +1683,6 @@ namespace Pulsar4X.Entities.Components
             MissilesDestroyed = Missiles.Count;
             for (int loop = 0; loop < Missiles.Count; loop++)
             {
-                /// <summary>
-                /// Personal Point defense(CIWS/FDF(Self)/FDF) here
-                /// </summary>
-#warning do CIWS/FDF/Self PD here.
-
                 ushort ToHit = 0;
 
                 if (Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 1 || Missiles[loop].target.ship.ShipsTaskGroup.CurrentSpeed == 0)
@@ -1699,28 +1694,46 @@ namespace Pulsar4X.Entities.Components
 
                 if (ToHit > HitChance)
                 {
-                    String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit {3} for {4} damage.", Missiles[loop].Name, loop, Name, Missiles[loop].target.ship.Name,Missiles[loop].missileDef.warhead);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                    OrdnanceGroupFaction.MessageLog.Add(Msg);
 
-                    ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
+                    bool Intercept = Missiles[loop].target.ship.InterceptMissile(RNG, Missiles[loop].missileDef.maxSpeed);
 
-                    ushort location = (ushort)RNG.Next(0, Columns);
-
-                    ///<summary>
-                    ///Missile damage type always? laser damage type if implemented will need to change this.
-                    ///</summary>
-#warning Implement Missile Laser damage here
-                    bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location, Missiles[loop].firingShip);
-
+#warning Need final defensive fire test somewhere
                     /// <summary>
-                    /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.
+                    /// if the missile was intercepted then it obviously did not go on to hit the ship.
                     /// </summary>
-                    if (ShipDest == true)
+                    if (Intercept == true)
                     {
-                        MissilesDestroyed = loop;
-                        break;
+                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} shot down by point blank defensive fire", Missiles[loop].Name, loop, Name);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        OrdnanceGroupFaction.MessageLog.Add(Msg);
+                    }
+                    else
+                    {
+
+                        String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit {3} for {4} damage.", Missiles[loop].Name, loop, Name, Missiles[loop].target.ship.Name, Missiles[loop].missileDef.warhead);
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        OrdnanceGroupFaction.MessageLog.Add(Msg);
+
+                        ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
+
+                        ushort location = (ushort)RNG.Next(0, Columns);
+
+                        ///<summary>
+                        ///Missile damage type always? laser damage type if implemented will need to change this.
+                        ///</summary>
+#warning Implement Missile Laser damage here
+                        bool ShipDest = Missiles[loop].target.ship.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, location, Missiles[loop].firingShip);
+
+                        /// <summary>
+                        /// Handle ship destruction at the ship level, to inform all incoming missiles that they need a new target.
+                        /// </summary>
+                        if (ShipDest == true)
+                        {
+                            MissilesDestroyed = loop;
+                            break;
+                        }
                     }
                 }
                 else

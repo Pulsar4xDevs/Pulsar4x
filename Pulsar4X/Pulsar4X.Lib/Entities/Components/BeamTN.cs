@@ -557,7 +557,16 @@ namespace Pulsar4X.Entities.Components
         {
             get { return CurrentCapacitor; }
             set { CurrentCapacitor = value; }
-        }   
+        }
+
+        /// <summary>
+        /// Has this Beam fired in defense, and if so how many of its shots were used. this will only be applicable to Gauss Cannons and Railguns, and only for PD.
+        /// </summary>
+        private int ShotsExpended;
+        public int shotsExpended
+        {
+            get { return ShotsExpended; }
+        }
 
         /// <summary>
         /// Constructor for beam weapons. FireController is null for the time being as no BFC is assigned by default, and CurrentCapacitor is set to filled and ready to fire.

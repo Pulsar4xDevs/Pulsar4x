@@ -403,6 +403,11 @@ namespace Pulsar4X.Entities
         public BindingList<CIWSTN> ShipCIWS { get; set; }
 
         /// <summary>
+        /// For point defense purposes, which CIWS is currently to be tested against?
+        /// </summary>
+        public int ShipCIWSIndex { get; set; }
+
+        /// <summary>
         /// Turrets on this ship.
         /// </summary>
         public BindingList<TurretTN> ShipTurret { get; set; }
@@ -853,6 +858,7 @@ namespace Pulsar4X.Entities
                     ShipComponents.Add(CIWS);
                 }
             }
+            ShipCIWSIndex = 0;
 
             ShipTurret = new BindingList<TurretTN>();
             for (int loop = 0; loop < ClassDefinition.ShipTurretDef.Count; loop++)
@@ -3021,6 +3027,91 @@ namespace Pulsar4X.Entities
             ShipOrdnance.Clear();
         }
 
+        #endregion
+
+        #region Point Defense and CIWS
+        /// <summary>
+        /// InterceptMissile tests to see whether a CIWS on this ship can shoot down an incoming missile or not.
+        /// </summary>
+        /// <param name="RNG">Should be a global RNG</param>
+        /// <param name="MissileSpeed">Speed of incoming missile.</param>
+        /// <returns>Whether or not intercept happened</returns>
+        public bool InterceptMissile(Random RNG, float MissileSpeed)
+        {
+            /// <summary>
+            /// Personal Point defense(CIWS/FDF(Self)/FDF) here
+            /// </summary>
+
+            /// <summary>
+            /// If this ship has CIWS, they are about to be fired, so add this ship to the faction recharge list.
+            /// </summary>
+            if (ShipCIWS.Count != 0)
+            {
+                if (ShipsFaction.RechargeList.ContainsKey(this) == true)
+                {
+                    /// <summary>
+                    /// If our recharge value does not have CIWS in it(bitflag 8 for now), then add it.
+                    /// </summary>
+                    if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.CIWS) != (int)Faction.RechargeStatus.CIWS)
+                    {
+                        ShipsFaction.RechargeList[this] = (ShipsFaction.RechargeList[this] + (int)Faction.RechargeStatus.CIWS);
+                    }
+                }
+                else
+                {
+                    ShipsFaction.RechargeList.Add(this, (int)Faction.RechargeStatus.CIWS);
+                }
+            }
+            bool Intercept = false;
+            for (int loop2 = ShipCIWSIndex; loop2 < ShipCIWS.Count; loop2++)
+            {
+                Intercept = ShipCIWS[loop2].InterceptTarget(RNG, MissileSpeed, ShipsFaction,
+                            ShipsTaskGroup.Contact);
+
+                if (Intercept == true)
+                {
+                    ShipCIWSIndex = loop2;
+                    return true;
+                }
+            }
+
+            if (Intercept == false)
+            {
+                for (int loop2 = 0; loop2 < ShipBFC.Count; loop2++)
+                {
+                    if (ShipBFC[loop2].pDState == PointDefenseState.FinalDefensiveFireSelf)
+                    {
+                        /// <summary>
+                        /// Now I need to know whether the beam weapons linked to this PD can fire. for regular beams that is simple enough.
+                        /// everything capable of multifire on the other hand is another matter. Gauss, railguns, and turrets will all have multiple shots, and they have to be
+                        /// given the opportunity to use those shots against different missiles.
+                        /// </summary>
+#warning do Self PD here.
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// reset all the CIWS to be able to fire again.
+        /// </summary>
+        /// <returns>How many shots were expended, this is important for removing this ship from the recharge list.</returns>
+        public int RechargeCIWS()
+        {
+            ShipCIWSIndex = 0;
+
+            int TotalExpendedShots = 0;
+
+            for (int loop = 0; loop < ShipCIWS.Count; loop++)
+            {
+                TotalExpendedShots = TotalExpendedShots + ShipCIWS[loop].shotsExpended;
+                ShipCIWS[loop].RechargeCIWS();
+            }
+
+            return TotalExpendedShots;
+        }
         #endregion
     }
     /// <summary>
