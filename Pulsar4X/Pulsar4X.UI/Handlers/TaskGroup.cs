@@ -410,7 +410,6 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
 
-
             int newIndex;
             int Counter;
             Orders NewOrder;
@@ -429,19 +428,24 @@ namespace Pulsar4X.UI.Handlers
                     {
                         if (PlaceIndex < SystemLocationListIndices[loop])
                         {
+                            SystemLocationListType Type = SystemLocationListType.Count;
                             if (loop == 0)
                             {
                                 newIndex = PlaceIndex;
+                                Type = SystemLocationListType.Planets;
+#warning special case zero here, if another SystemLocationListType is made to be loop = 0, then Planets here will have to change.
                             }
                             else
                             {
                                 newIndex = PlaceIndex - SystemLocationListIndices[loop-1];
+                                Type = SystemLocationListTypes[loop - 1];
                             }
+
 
                             /// <summary>
                             /// Which type is this? 
                             /// </summary>
-                            switch (SystemLocationListTypes[loop-1])
+                            switch (Type)
                             {
                                 #region Planets
                                 case SystemLocationListType.Planets :
