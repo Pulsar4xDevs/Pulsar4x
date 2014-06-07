@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +20,28 @@ using System.ComponentModel;
 
 namespace Pulsar4X.UI.Handlers
 {
+    public class SystemListObject
+    {
+        public enum SystemLocationListType
+        {
+            Planets,
+            Contacts,
+            TaskGroups,
+            Waypoints,
+            Count
+        }
+
+        public GameEntity Entity{ get; private set; }
+        public SystemLocationListType EntityType{ get; private set; }
+
+        public SystemListObject(SystemLocationListType entitytype, GameEntity entity)
+        {
+            Entity = entity;
+            EntityType = entitytype;
+        }
+
+    }
+
     public class TaskGroup
     {
         public enum StratCells
@@ -40,14 +62,14 @@ namespace Pulsar4X.UI.Handlers
 
         }
 
-        public enum SystemLocationListType
-        {
-            Planets,
-            Contacts,
-            TaskGroups,
-            Waypoints,
-            Count
-        }
+        //public enum SystemLocationListType
+        //{
+        //    Planets,
+        //    Contacts,
+        //    TaskGroups,
+        //    Waypoints,
+        //    Count
+        //}
 
         /// <summary>
         /// TG Logger:
@@ -109,7 +131,7 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// What those indices really mean
         /// </summary>
-        private BindingList<SystemLocationListType> SystemLocationListTypes { get; set; }
+        private BindingList<SystemListObject.SystemLocationListType> SystemLocationListTypes { get; set; }
 
 
         /// <summary>
@@ -117,6 +139,10 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         public Pulsar4X.UI.Handlers.SystemMap SystemMapReference { get; set; }
 
+        /// <summary>
+        /// Dictionary of interesting locations for the SystemLocationList
+        /// </summary>
+        private Dictionary<string, SystemListObject> SystemLocationDict { get; set; }
 
 
         /// <summary>
@@ -135,7 +161,7 @@ namespace Pulsar4X.UI.Handlers
             VM = new ViewModels.TaskGroupViewModel();
 
             SystemLocationListIndices = new BindingList<int>();
-            SystemLocationListTypes = new BindingList<SystemLocationListType>();
+            SystemLocationListTypes = new BindingList<SystemListObject.SystemLocationListType>();
 
             /// <summary>
             /// Set up the faction bindings. FactionSelectionComboBox is in the TaskGroup_Panel.designer.cs file.
@@ -409,6 +435,8 @@ namespace Pulsar4X.UI.Handlers
             /// Planets, Contacts, TG, WP
             /// </summary>
             int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
+            SystemListObject selected = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()];
+
 
             int newIndex;
             int Counter;
@@ -423,157 +451,181 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Now figure out what the hell order this would be.
                     /// </summary>
+                    var entity = selected.Entity;
 
-                    for (int loop = 0; loop < SystemLocationListIndices.Count; loop++)
+                    if (selected.EntityType == SystemListObject.SystemLocationListType.Planets)
                     {
-                        if (PlaceIndex < SystemLocationListIndices[loop])
-                        {
-                            SystemLocationListType Type = SystemLocationListType.Count;
-                            if (loop == 0)
-                            {
-                                newIndex = PlaceIndex;
-                                Type = SystemLocationListType.Planets;
-#warning special case zero here, if another SystemLocationListType is made to be loop = 0, then Planets here will have to change.
-                            }
-                            else
-                            {
-                                newIndex = PlaceIndex - SystemLocationListIndices[loop-1];
-                                Type = SystemLocationListTypes[loop - 1];
-                            }
-
-
-                            /// <summary>
-                            /// Which type is this? 
-                            /// </summary>
-                            switch (Type)
-                            {
-                                #region Planets
-                                case SystemLocationListType.Planets :
-                                    /// <summary>
-                                    /// This is currently the planets section.
-                                    /// </summary>
-                                    Counter = 0;
-                                    for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.Stars.Count; loop2++)
-                                    {
-                                        Counter = Counter + CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets.Count;
-
-                                        if (newIndex < Counter)
-                                        {
-                                            int PlanetIndex = newIndex - (Counter - CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets.Count);
-
-                                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets[PlanetIndex]);
-                                            CurrentTaskGroup.IssueOrder(NewOrder);
-                                            break;
-                                        }
-                                    }
-
-
-                                break;
-                                #endregion
-
-                                #region Contacts
-                                case SystemLocationListType.Contacts:
-                                /// <summary>
-                                /// This is Contacts
-                                /// </summary>
-                                Counter = 0;
-
-                                if(CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.CurrentSystem) == true)
-                                {
-                                    foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.CurrentSystem].DetectedContacts)
-                                    {
-                                        if (Counter == newIndex)
-                                        {
-                                            Counter = 0;
-                                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, pair.Key.ShipsTaskGroup);
-                                            CurrentTaskGroup.IssueOrder(NewOrder);
-                                            pair.Key.TaskGroupsOrdered.Add(CurrentTaskGroup);
-                                            break;
-                                        }
-
-                                        Counter++;
-                                    }
-                                }
-
-                                if (Counter != 0)
-                                {
-                                    logger.Error("Contact selected for AddMoveButton_Clicked was not in the contact list somehow. Taskgroup.cs under handlers.");
-                                }
-                                
-                                break;
-                                #endregion
-
-                                #region TaskGroups
-                                case SystemLocationListType.TaskGroups:
-                                /// <summary>
-                                /// This is Taskgroups.
-                                /// </summary>
-                                Counter = 0;
-                                TaskGroupTN TargetOfOrder = null;
-
-                                for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.SystemContactList.Count; loop2++)
-                                {
-                                    if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
-                                    {
-                                        if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup != CurrentTaskGroup &&
-                                            CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup.TaskGroupFaction == CurrentFaction)
-                                        {
-                                            if (Counter == newIndex)
-                                            {
-                                                TargetOfOrder = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup;
-                                                break;
-                                            }
-
-                                            Counter++;
-                                        }
-                                    }
-                                }
-
-                                if (TargetOfOrder != null)
-                                {
-                                    NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, TargetOfOrder);
-                                    CurrentTaskGroup.IssueOrder(NewOrder);
-                                    TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
-                                }
-                                else
-                                {
-                                    /// <summary>
-                                    /// Error condition here. How would this even happen? and yet I know that it will.
-                                    /// </summary>
-                                    logger.Error("Unknown taskgroup selected as order target in AddMoveButton_Clicked in TaskGroup.cs under Handlers.");
-                                }
-                                break;
-                                #endregion
-
-                                #region Waypoints
-                                case SystemLocationListType.Waypoints:
-                                /// <summary>
-                                /// This is waypoints.
-                                /// </summary>
-
-                                if (CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count <= newIndex)
-                                {
-                                    logger.Error("Index out of range Selection for waypoint order target int AddMoveButton_Clicked in TaskGroup.cs under Handlers.");
-                                }
-
-
-                                NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, CurrentTaskGroup.Contact.CurrentSystem.Waypoints[newIndex]);
-                                CurrentTaskGroup.IssueOrder(NewOrder);
-                                break;
-                                #endregion
-
-                                #region Count
-                                case SystemLocationListType.Count :
-                                /// <summary>
-                                /// Do nothing, this is here to mark the end of the list.
-                                /// </summary>
-                                break;
-                                #endregion
-                            }
-
-                            break;
-                        }
+                        Planet planet = (Planet)entity;
+                        NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, planet);
+                        CurrentTaskGroup.IssueOrder(NewOrder);
                     }
+                    else if (selected.EntityType == SystemListObject.SystemLocationListType.Contacts)
+                    {
+                        ShipTN shipcontact = (ShipTN)entity;//CurrentFaction.DetectedContactLists
+                        NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, shipcontact.ShipsTaskGroup); //the task group? what if the TG splits?
+                        CurrentTaskGroup.IssueOrder(NewOrder);
+                        shipcontact.TaskGroupsOrdered.Add(CurrentTaskGroup);
+                    }
+                    else if (selected.EntityType == SystemListObject.SystemLocationListType.TaskGroups)
+                    {
+                        TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
+                        NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, TargetOfOrder);
+                        CurrentTaskGroup.IssueOrder(NewOrder);
+                        TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
+                    }
+                    else if (selected.EntityType == SystemListObject.SystemLocationListType.Waypoints)
+                    {
+                        Waypoint waypoint = (Waypoint)entity;
+                        NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, waypoint);
+                        CurrentTaskGroup.IssueOrder(NewOrder);
+                    }
+                    #region oldcode
+                    //for (int loop = 0; loop < SystemLocationListIndices.Count; loop++)
+                    //{
+                    //    if (PlaceIndex < SystemLocationListIndices[loop])
+                    //    {
+                    //        if (loop == 0)
+                    //        {
+                    //            newIndex = PlaceIndex;
+                    //        }
+                    //        else
+                    //        {
+                    //            newIndex = PlaceIndex - SystemLocationListIndices[loop-1];
+                    //        }
+
+                    //        /// <summary>
+                    //        /// Which type is this? 
+                    //        /// </summary>
+                    //        switch (SystemLocationListTypes[loop-1])
+                    //        {
+                    //            #region Planets
+                    //            case SystemLocationListType.Planets :
+                    //                /// <summary>
+                    //                /// This is currently the planets section.
+                    //                /// </summary>
+                    //                Counter = 0;
+                    //                for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.Stars.Count; loop2++)
+                    //                {
+                    //                    Counter = Counter + CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets.Count;
+
+                    //                    if (newIndex < Counter)
+                    //                    {
+                    //                        int PlanetIndex = newIndex - (Counter - CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets.Count);
+
+                    //                        NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, CurrentTaskGroup.Contact.CurrentSystem.Stars[loop2].Planets[PlanetIndex]);
+                    //                        CurrentTaskGroup.IssueOrder(NewOrder);
+                    //                        break;
+                    //                    }
+                    //                }
+
+
+                    //            break;
+                    //            #endregion
+
+                    //            #region Contacts
+                    //            case SystemLocationListType.Contacts:
+                    //            /// <summary>
+                    //            /// This is Contacts
+                    //            /// </summary>
+                    //            Counter = 0;
+
+                    //            if(CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.CurrentSystem) == true)
+                    //            {
+                    //                foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.CurrentSystem].DetectedContacts)
+                    //                {
+                    //                    if (Counter == newIndex)
+                    //                    {
+                    //                        Counter = 0;
+                    //                        NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, pair.Key.ShipsTaskGroup);
+                    //                        CurrentTaskGroup.IssueOrder(NewOrder);
+                    //                        pair.Key.TaskGroupsOrdered.Add(CurrentTaskGroup);
+                    //                        break;
+                    //                    }
+
+                    //                    Counter++;
+                    //                }
+                    //            }
+
+                    //            if (Counter != 0)
+                    //            {
+                    //                logger.Error("Contact selected for AddMoveButton_Clicked was not in the contact list somehow. Taskgroup.cs under handlers.");
+                    //            }
+                                
+                    //            break;
+                    //            #endregion
+
+                    //            #region TaskGroups
+                    //            case SystemLocationListType.TaskGroups:
+                    //            /// <summary>
+                    //            /// This is Taskgroups.
+                    //            /// </summary>
+                    //            Counter = 0;
+                    //            TaskGroupTN TargetOfOrder = null;
+
+                    //            for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.SystemContactList.Count; loop2++)
+                    //            {
+                    //                if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
+                    //                {
+                    //                    if (CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup != CurrentTaskGroup &&
+                    //                        CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup.TaskGroupFaction == CurrentFaction)
+                    //                    {
+                    //                        if (Counter == newIndex)
+                    //                        {
+                    //                            TargetOfOrder = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop2].TaskGroup;
+                    //                            break;
+                    //                        }
+
+                    //                        Counter++;
+                    //                    }
+                    //                }
+                    //            }
+
+                    //            if (TargetOfOrder != null)
+                    //            {
+                    //                NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, TargetOfOrder);
+                    //                CurrentTaskGroup.IssueOrder(NewOrder);
+                    //                TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
+                    //            }
+                    //            else
+                    //            {
+                    //                /// <summary>
+                    //                /// Error condition here. How would this even happen? and yet I know that it will.
+                    //                /// </summary>
+                    //                logger.Error("Unknown taskgroup selected as order target in AddMoveButton_Clicked in TaskGroup.cs under Handlers.");
+                    //            }
+                    //            break;
+                    //            #endregion
+
+                    //            #region Waypoints
+                    //            case SystemLocationListType.Waypoints:
+                    //            /// <summary>
+                    //            /// This is waypoints.
+                    //            /// </summary>
+
+                    //            if (CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count <= newIndex)
+                    //            {
+                    //                logger.Error("Index out of range Selection for waypoint order target int AddMoveButton_Clicked in TaskGroup.cs under Handlers.");
+                    //            }
+
+
+                    //            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, CurrentTaskGroup.Contact.CurrentSystem.Waypoints[newIndex]);
+                    //            CurrentTaskGroup.IssueOrder(NewOrder);
+                    //            break;
+                    //            #endregion
+
+                    //            #region Count
+                    //            case SystemLocationListType.Count :
+                    //            /// <summary>
+                    //            /// Do nothing, this is here to mark the end of the list.
+                    //            /// </summary>
+                    //            break;
+                    //            #endregion
+                    //        }
+
+                    //        break;
+                    //    }
+                    //}
+                    #endregion
                 }
             }
 
@@ -784,10 +836,10 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildSystemLocationList()
         {
-            m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
-            SystemLocationListIndices.Clear();
-            SystemLocationListTypes.Clear();
-
+            //m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
+            //SystemLocationListIndices.Clear();
+            //SystemLocationListTypes.Clear();
+            SystemLocationDict = new Dictionary<string, SystemListObject>();
             AddPlanetsToList();
 
             if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
@@ -800,7 +852,10 @@ namespace Pulsar4X.UI.Handlers
                 AddWaypointsToList();
 
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemLocationListType.Count);
+            //SystemLocationListTypes.Add(SystemLocationListType.Count);
+            
+
+            m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationDict.Keys.ToList();
         }
 
         /// <summary>
@@ -809,7 +864,11 @@ namespace Pulsar4X.UI.Handlers
         private void BuildActionList()
         {
             ClearActionList();
+            GameEntity selectedEntity = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].Entity;
+            SystemListObject.SystemLocationListType entityType = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].EntityType;
             m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.MoveTo);
+            if (entityType == SystemListObject.SystemLocationListType.TaskGroups || entityType == SystemListObject.SystemLocationListType.Contacts)
+                m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.Follow);
         }
 
         /// <summary>
@@ -841,14 +900,19 @@ namespace Pulsar4X.UI.Handlers
         private void AddPlanetsToList()
         {
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemLocationListType.Planets);
+            SystemLocationListTypes.Add(SystemListObject.SystemLocationListType.Planets);
 
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Stars.Count; loop++)
             {
                 for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets.Count; loop2++)
                 {
-                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets[loop2]);
+                    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets[loop2]);
+                    string keyName = CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets[loop2].Name;
+                    GameEntity entObj = CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets[loop2];
+                    SystemListObject.SystemLocationListType entType = SystemListObject.SystemLocationListType.Planets;
+                    SystemListObject valueObj  = new SystemListObject(entType, entObj);
+                    SystemLocationDict.Add(keyName, valueObj);
                 }
             }
         }
@@ -859,7 +923,7 @@ namespace Pulsar4X.UI.Handlers
         private void AddContactsToList()
         {
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemLocationListType.Contacts);
+            SystemLocationListTypes.Add(SystemListObject.SystemLocationListType.Contacts);
 
             if (CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.CurrentSystem) == true)
             {
@@ -885,7 +949,8 @@ namespace Pulsar4X.UI.Handlers
 
                         String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
 
-                        m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
+                        //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
+                        SystemLocationDict.Add(Entry, new SystemListObject(SystemListObject.SystemLocationListType.Contacts, pair.Key)); //maybe this should be the value? though with the key I can *get* the value easly anyway.
                 }
             }
         }
@@ -896,7 +961,7 @@ namespace Pulsar4X.UI.Handlers
         private void AddTaskGroupsToList()
         {
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemLocationListType.TaskGroups);
+            SystemLocationListTypes.Add(SystemListObject.SystemLocationListType.TaskGroups);
 
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.SystemContactList.Count; loop++)
@@ -906,7 +971,10 @@ namespace Pulsar4X.UI.Handlers
                     if (CurrentTaskGroup != CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup &&
                         CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup.TaskGroupFaction == CurrentFaction)
                     {
-                        m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup);
+                        //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup);
+                        string keyName = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup.Name;
+                        GameEntity entObj = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup;
+                        SystemLocationDict.Add(keyName, new SystemListObject(SystemListObject.SystemLocationListType.TaskGroups, entObj));
                     }
                 }
             }
@@ -918,12 +986,16 @@ namespace Pulsar4X.UI.Handlers
         private void AddWaypointsToList()
         {
             SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemLocationListType.Waypoints);
+            SystemLocationListTypes.Add(SystemListObject.SystemLocationListType.Waypoints);
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count; loop++)
             {
                 if( CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop].FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
-                    m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop]);
+                {    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop]);
+                    string keyName = CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop].Name;
+                    GameEntity entObj = CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop];
+                    SystemLocationDict.Add(keyName, new SystemListObject(SystemListObject.SystemLocationListType.Waypoints, entObj));
+                }
             }
         }
 
