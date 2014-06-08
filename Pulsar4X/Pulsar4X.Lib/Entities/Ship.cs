@@ -2464,11 +2464,37 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="tick">Tick is the value in seconds the sim is being advanced by. 1 day = 86400 seconds. smallest practical value is 5.</param>
         /// <returns>Power not used. if nonzero then this ship no longer needs to be in the recharge list.</returns>
-        public int RechargeBeamWeapons(uint tick)
+        public int RechargeBeamWeapons(uint tick, out int ShotsExpended)
         {
             ushort amt = (ushort)(Math.Floor((float)tick / 5.0f));
-
             float PowerRecharge = CurrentPowerGen * amt;
+            ShotsExpended = 0;
+
+
+            for (int loop = 0; loop < ShipBeam.Count; loop++)
+            {
+                /// <summary>
+                /// Reset the shots expended for these beam weapons. the railguns still can't fire until they get power however.
+                /// </summary>
+                if (ShipBeam[loop].beamDef.componentType == ComponentTypeTN.Gauss || ShipBeam[loop].beamDef.componentType == ComponentTypeTN.Rail ||
+                    ShipBeam[loop].beamDef.componentType == ComponentTypeTN.AdvRail)
+                {
+                    ShotsExpended = ShotsExpended + ShipBeam[loop].shotsExpended;
+                    ShipBeam[loop].shotsExpended = 0;
+                }
+            }
+
+            for (int loop = 0; loop < ShipTurret.Count; loop++)
+            {
+                /// <summary>
+                /// Reset the shots expended for gauss turrets.
+                /// </summary>
+                if (ShipTurret[loop].turretDef.baseBeamWeapon.componentType == ComponentTypeTN.Gauss)
+                {
+                    ShotsExpended = ShotsExpended + ShipTurret[loop].shotsExpended;
+                    ShipTurret[loop].shotsExpended = 0;
+                }
+            }
 
             /// <summary>
             /// There are beam weapons that need to be recharged.
@@ -2594,6 +2620,7 @@ namespace Pulsar4X.Entities
 
                     /// <summary>
                     /// recharge the turrets, not all of these will finish.
+                    /// </summary>
                     for (int loop = 0; loop < ShipTurret.Count; loop++)
                     {
                         float WPR = (float)ShipTurret[loop].turretDef.powerRequirement - ShipTurret[loop].currentCapacitor;
@@ -2756,6 +2783,7 @@ namespace Pulsar4X.Entities
 
             /// <summary>
             /// Missile Fire Control Section
+            /// </summary>
             for (int loop = 0; loop < ShipMFC.Count; loop++)
             {
                 if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false && ShipMFC[loop].target != null)
@@ -3081,12 +3109,31 @@ namespace Pulsar4X.Entities
                 {
                     if (ShipBFC[loop2].pDState == PointDefenseState.FinalDefensiveFireSelf)
                     {
+                        if (ShipsFaction.RechargeList.ContainsKey(this) == true)
+                        {
+                            /// <summary>
+                            /// If our recharge value does not have Recharge beams in it(bitflag 2 for now), then add it.
+                            /// </summary>
+                            if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                            {
+                                ShipsFaction.RechargeList[this] = (ShipsFaction.RechargeList[this] + (int)Faction.RechargeStatus.Weapons);
+                            }
+                        }
+                        else
+                        {
+                            ShipsFaction.RechargeList.Add(this, (int)Faction.RechargeStatus.Weapons);
+                        }
                         /// <summary>
                         /// Now I need to know whether the beam weapons linked to this PD can fire. for regular beams that is simple enough.
                         /// everything capable of multifire on the other hand is another matter. Gauss, railguns, and turrets will all have multiple shots, and they have to be
-                        /// given the opportunity to use those shots against different missiles.
+                        /// given the opportunity to use those shots against different missiles. I could do a similar thing to ShipCIWSIndex for BFCs but will refrain from doing so for the moment.
                         /// </summary>
-#warning do Self PD here.
+                        Intercept = ShipBFC[loop2].InterceptTarget(RNG, 0, CurrentSpeed, MissileSpeed, ShipsFaction, ShipsTaskGroup.Contact);
+
+                        if (Intercept == true)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

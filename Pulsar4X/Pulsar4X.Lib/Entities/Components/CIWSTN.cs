@@ -292,7 +292,7 @@ namespace Pulsar4X.Entities.Components
             while (CIWSFired)
             {
                 ushort Hit = (ushort)RNG.Next(1, 100);
-                if (InterceptChance > (float)Hit)
+                if (InterceptChance >= (float)Hit)
                 {
                     String Entry = String.Format("CIWS {0} Fired at 10,000 km and hit.", Name);
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,

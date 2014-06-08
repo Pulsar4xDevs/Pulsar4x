@@ -1549,7 +1549,8 @@ namespace Pulsar4X.Tests
                                             P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                     }
                                 }
-                                P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons(5);
+                                int SC;
+                                P[loop].TaskGroups[loop2].Ships[loop3].RechargeBeamWeapons(5, out SC);
                             }
                         }
                     }

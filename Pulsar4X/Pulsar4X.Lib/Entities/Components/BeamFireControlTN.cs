@@ -979,5 +979,126 @@ namespace Pulsar4X.Entities.Components
 
             return FireAccuracy;
         }
+
+
+        /// <summary>
+        /// This function calculates whether a given BFC can intercept a missile
+        /// </summary>
+        /// <param name="RNG">RNG to use, should be the global one in _SE_</param>
+        /// <param name="IncrementDistance">Range to the target missile</param>
+        /// <param name="ShipSpeed">Speed of ship this BFC is on. </param>
+        /// <param name="OrdnanceSpeed">Speed of said missile.</param>
+        /// <param name="ShipFaction">Faction of the ship this BFC is on.</param>
+        /// <param name="Contact">Contact of the taskgroup this BFC is in.</param>
+        /// <returns>whether the missile was intercepted.</returns>
+        public bool InterceptTarget(Random RNG, int IncrementDistance, float ShipSpeed, float OrdnanceSpeed, Faction ShipFaction, SystemContact Contact)
+        {
+            float track = (float)ShipFaction.BaseTracking;
+            if (ShipSpeed > track)
+                track = ShipSpeed;
+            if (BeamFireControlDef.tracking < track)
+                track = BeamFireControlDef.tracking;
+            float Acc = GetFiringAccuracy(IncrementDistance, (int)track);
+            int toHit = (int)Math.Floor(Acc * 100.0f);
+            int range = (IncrementDistance + 1) * 10000;
+            String Range = range.ToString("#,###0");
+
+            for (int loop3 = 0; loop3 < linkedWeapons.Count; loop3++)
+            {
+                bool AcceptPartialFire = (linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Rail || linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.AdvRail ||
+                        linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Gauss) && (linkedWeapons[loop3].shotsExpended < linkedWeapons[loop3].beamDef.shotCount);
+
+                if (linkedWeapons[loop3].readyToFire() == true || AcceptPartialFire == true)
+                {
+                    if (linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Rail || linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.AdvRail ||
+                        linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Gauss)
+                    {
+
+                        linkedWeapons[loop3].Fire();
+                        int expended = linkedWeapons[loop3].shotsExpended;
+                        int ShotCount = linkedWeapons[loop3].beamDef.shotCount;
+
+                        for (int loop4 = expended; loop4 < ShotCount; loop4++)
+                        {
+                            ushort Hit = (ushort)RNG.Next(1, 100);
+                            linkedWeapons[loop3].shotsExpended++;
+
+                            if (toHit >= Hit)
+                            {
+                                String Entry = String.Format("{0} Fired at {1} km and hit.", linkedWeapons[loop3].Name, Range);
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                ShipFaction.MessageLog.Add(Msg);
+                                return true;
+                            }
+                            else
+                            {
+                                String Entry = String.Format("{0} Fired at {1} km and missed.", linkedWeapons[loop3].Name, Range);
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                ShipFaction.MessageLog.Add(Msg);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        ushort Hit = (ushort)RNG.Next(1, 100);
+                        linkedWeapons[loop3].Fire();
+                        
+                        if (toHit >= Hit)
+                        {
+                            String Entry = String.Format("{0} Fired at {1} km and hit.", linkedWeapons[loop3].Name, Range);
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                            ShipFaction.MessageLog.Add(Msg);
+                            return true;
+                        }
+                        else
+                        {
+                            String Entry = String.Format("{0} Fired at {1} km and missed.", linkedWeapons[loop3].Name, Range);
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                            ShipFaction.MessageLog.Add(Msg);
+                        }
+                    }
+                }            
+            }
+
+           for (int loop3 = 0; loop3 < linkedTurrets.Count; loop3++)
+           {
+               bool AcceptPartialFire = (linkedTurrets[loop3].shotsExpended < linkedTurrets[loop3].turretDef.totalShotCount);
+               if (linkedTurrets[loop3].readyToFire() == true || AcceptPartialFire == true)
+               {
+                   linkedTurrets[loop3].Fire();
+                   int expended = linkedTurrets[loop3].shotsExpended;
+                   int ShotCount = linkedTurrets[loop3].turretDef.totalShotCount;
+
+                   for (int loop4 = expended; loop4 < ShotCount; loop4++)
+                   {
+                       ushort Hit = (ushort)RNG.Next(1, 100);
+                       linkedTurrets[loop3].shotsExpended++;
+
+                       if (toHit >= Hit)
+                       {
+                           String Entry = String.Format("{0} Fired at {1} km and hit.", linkedTurrets[loop3].Name, Range);
+                           MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                              (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                           ShipFaction.MessageLog.Add(Msg);
+                           return true;
+                       }
+                       else
+                       {
+                           String Entry = String.Format("{0} Fired at {1} km and missed.", linkedTurrets[loop3].Name, Range);
+                           MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                                              (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                           ShipFaction.MessageLog.Add(Msg);
+                       }
+                   }
+               }
+           }             
+
+            return false;
+        }
     }
 }

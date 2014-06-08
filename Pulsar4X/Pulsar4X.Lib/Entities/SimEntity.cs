@@ -307,7 +307,8 @@ namespace Pulsar4X.Entities
 
                     if ((value & (int)Faction.RechargeStatus.Weapons) == (int)Faction.RechargeStatus.Weapons)
                     {
-                        int ret = pair.Key.RechargeBeamWeapons(TimeValue);
+                        int ShotsExp;
+                        int ret = pair.Key.RechargeBeamWeapons(TimeValue,out ShotsExp);
 
                         ushort amt = (ushort)(Math.Floor((float)TimeValue / 5.0f));
                         int PowerComp = pair.Key.CurrentPowerGen * amt;
@@ -318,8 +319,10 @@ namespace Pulsar4X.Entities
                         /// When all tubes are loaded and have remained loaded for atleast 1 tick reloadLaunchTubes should return true. 
                         /// Likewise when no beam weapon recharging is to be done power will sit at full for at least one tick.
                         /// This should keep continuously firing weapons in this list even if they are considered recharged for a single sliver of time.
+                        /// ShotsExp is to handle gauss cannon "reloading". Point defense imposes this requirement. A ShotsExp of zero means that no gauss cannon fired
+                        /// in point defense during the last tick. also will come up for multibarrel turrets.
                         /// </summary>
-                        if (ret == PowerComp && allTubesLoaded == true)
+                        if (ret == PowerComp && allTubesLoaded == true && ShotsExp == 0)
                         {
                             P[loop].RechargeList[pair.Key] = P[loop].RechargeList[pair.Key] - (int)Faction.RechargeStatus.Weapons;
 

@@ -210,6 +210,7 @@ namespace Pulsar4X.Entities.Components
         public int shotsExpended
         {
             get { return ShotsExpended; }
+            set { ShotsExpended = value; }
         }
 
         /// <summary>
