@@ -1702,10 +1702,13 @@ namespace Pulsar4X.Entities.Components
 
 #warning Make order of interception a configuration option?
 
-                    /// <summary>
-                    /// Then test other nearby FCs.
-                    /// </summary>
-                    Intercept = GameState.SE.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
+                    if (Intercept == false)
+                    {
+                        /// <summary>
+                        /// Then test other nearby FCs.
+                        /// </summary>
+                        Intercept = GameState.SE.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
+                    }
 
                     /// <summary>
                     /// if the missile was intercepted then it obviously did not go on to hit the ship.

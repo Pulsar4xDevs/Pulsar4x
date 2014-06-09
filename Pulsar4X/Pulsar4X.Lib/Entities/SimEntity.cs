@@ -717,9 +717,9 @@ namespace Pulsar4X.Entities
                             foreach (KeyValuePair<ComponentTN, ShipTN> pair in P[loop].PointDefenseFC)
                             {
                                 /// <summary>
-                                /// Only want BFCs for now.
+                                /// Only want BFCs in FDF mode for now.
                                 /// </summary>
-                                if (P[loop].PointDefenseFCType[pair.Key] == false)
+                                if (P[loop].PointDefenseFCType[pair.Key] == false && pair.Value.ShipBFC[pair.Key.componentIndex].pDState == PointDefenseState.FinalDefensiveFire)
                                 {
                                     /// <summary>
                                     /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
@@ -745,6 +745,10 @@ namespace Pulsar4X.Entities
                                         /// </summary>
                                         Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, 0, pair.Value.CurrentSpeed, Missile.missileDef.maxSpeed, pair.Value.ShipsFaction,
                                                                                                                 pair.Value.ShipsTaskGroup.Contact);
+
+                                        /// <summary>
+                                        /// break out of the first foreach loop.
+                                        /// </summary>
                                         if (Intercept == true)
                                             break;
                                     }
@@ -754,6 +758,9 @@ namespace Pulsar4X.Entities
                         }
                     }
                 }
+                /// <summary>
+                /// now break out of the faction loop as this missile has been shot down.
+                /// </summary>
                 if (Intercept == true)
                     break;
             }
