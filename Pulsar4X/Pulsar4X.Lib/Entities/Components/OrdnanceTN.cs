@@ -1695,9 +1695,24 @@ namespace Pulsar4X.Entities.Components
                 if (ToHit > HitChance)
                 {
 
+                    /// <summary>
+                    /// First test the ship itself for its ability to shoot down the missile.
+                    /// </summary>
                     bool Intercept = Missiles[loop].target.ship.InterceptMissile(RNG, Missiles[loop].missileDef.maxSpeed);
 
-#warning Need final defensive fire test somewhere
+#warning Make order of interception a configuration option?
+
+                    /// <summary>
+                    /// Then test other nearby FCs.
+                    /// </summary>
+                    Intercept = GameState.SE.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
+
+
+
+                    /// <summary>
+                    /// How do I handle FDF? final defensive fire will always be done, no matter what unless faction of pd ship = faction of missile.
+                    /// </summary>
+
                     /// <summary>
                     /// if the missile was intercepted then it obviously did not go on to hit the ship.
                     /// </summary>

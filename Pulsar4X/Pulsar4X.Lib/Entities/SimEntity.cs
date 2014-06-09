@@ -675,5 +675,89 @@ namespace Pulsar4X.Entities
             TGStart = 0;
             TGCount = 0;
         }
+
+        /// <summary>
+        /// Final defensive fire scans through all potential FCs that could fire defensively on the incoming missile to see if it is intercepeted.
+        /// All PD enabled FCs will attempt to shoot down this missile except ones from the same faction, as this missile is practically right on top of said FC.
+        /// In other words allied/neutral status isn't taken into account.
+        /// </summary>
+        /// <param name="P">Faction list</param>
+        /// <param name="Missile">Missile to try to intercept</param>
+        /// <param name="RNG">Random Number Generator</param>
+        /// <returns>Whether the missile has been intercepted</returns>
+        public bool FinalDefensiveFire(BindingList<Faction> P, OrdnanceTN Missile, Random RNG)
+        {
+            bool Intercept = false;
+            StarSystem CurrentSystem = Missile.missileGroup.contact.CurrentSystem;
+            float PointBlank = 10000.0f / (float)Constants.Units.KM_PER_AU;
+
+            /// <summary>
+            /// loop through every faction.
+            /// </summary>
+            for (int loop = 0; loop < P.Count; loop++)
+            {
+                /// <summary>
+                /// Is the current faction different from the missile group faction, and does the faction have a detected contacts list for the current system?
+                /// </summary>
+                if (P[loop] != Missile.missileGroup.ordnanceGroupFaction && P[loop].DetectedContactLists.ContainsKey(CurrentSystem) == true )
+                {
+                    /// <summary>
+                    /// Is the Missile group in this detected contact list?
+                    /// </summary>
+                    if (P[loop].DetectedContactLists[CurrentSystem].DetectedMissileContacts.ContainsKey(Missile.missileGroup) == true)
+                    {
+                        /// <summary>
+                        /// Is the detection an active detection?
+                        /// </summary>
+                        if (P[loop].DetectedContactLists[CurrentSystem].DetectedMissileContacts[Missile.missileGroup].active == true)
+                        {
+                            /// <summary>
+                            /// loop through all the possible PD enabled FC.
+                            /// </summary>
+                            foreach (KeyValuePair<ComponentTN, ShipTN> pair in P[loop].PointDefenseFC)
+                            {
+                                /// <summary>
+                                /// Only want BFCs for now.
+                                /// </summary>
+                                if (P[loop].PointDefenseFCType[pair.Key] == false)
+                                {
+                                    /// <summary>
+                                    /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
+                                    /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
+                                    /// </summary>
+                                    float dist = -1;
+
+                                    int MissileID = CurrentSystem.SystemContactList.IndexOf(Missile.missileGroup.contact);
+                                    int TGID = CurrentSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
+
+                                    /// <summary>
+                                    /// dist is in AU.
+                                    /// </summary>
+                                    dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
+
+                                    /// <summary>
+                                    /// if distance is less than the 10k km threshold attempt to intercept at Point blank range.
+                                    /// </summary>
+                                    if (dist < PointBlank)
+                                    {
+                                        /// <summary>
+                                        /// Finally intercept the target.
+                                        /// </summary>
+                                        Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, 0, pair.Value.CurrentSpeed, Missile.missileDef.maxSpeed, pair.Value.ShipsFaction,
+                                                                                                                pair.Value.ShipsTaskGroup.Contact);
+                                        if (Intercept == true)
+                                            break;
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                if (Intercept == true)
+                    break;
+            }
+            return Intercept;
+        }
     }
 }
