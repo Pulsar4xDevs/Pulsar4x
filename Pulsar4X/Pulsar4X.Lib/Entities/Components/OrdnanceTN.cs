@@ -1707,12 +1707,6 @@ namespace Pulsar4X.Entities.Components
                     /// </summary>
                     Intercept = GameState.SE.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
 
-
-
-                    /// <summary>
-                    /// How do I handle FDF? final defensive fire will always be done, no matter what unless faction of pd ship = faction of missile.
-                    /// </summary>
-
                     /// <summary>
                     /// if the missile was intercepted then it obviously did not go on to hit the ship.
                     /// </summary>
