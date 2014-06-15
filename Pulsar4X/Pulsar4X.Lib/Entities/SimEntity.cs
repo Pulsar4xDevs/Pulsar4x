@@ -115,14 +115,13 @@ namespace Pulsar4X.Entities
                 P[loop].SensorSweep(CurrentTick);
             }
 
-            /// <summary>
+            /*/// <summary>
             /// Insert Area Defense/ AMM Defense here.
             /// </summary>
             for (int loop = factionStart; loop < factionCount; loop++)
             {
                 AreaDefensiveFire(P[loop],RNG);
-            }
-#warning Area Defense / AMM Defense
+            }*/
 
             /// <summary>
             /// attempt to fire weapons at target here.
@@ -782,7 +781,165 @@ namespace Pulsar4X.Entities
         /// <param name="RNG">"global" rng from further up.</param>
         public void AreaDefensiveFire(Faction Fact, Random RNG)
         {
+            /// <summary>
+            /// No point defense set FCs, just return.
+            /// </summary>
+            if (Fact.PointDefenseFC.Count == 0)
+            {
+                return;
+            }
 
+            /// <summary>
+            /// now loop through each BF in point defense FC.
+            /// This could be further optimized by system.
+            /// </summary>
+            foreach (KeyValuePair<ComponentTN, ShipTN> pair in Fact.PointDefenseFC)
+            {
+                StarSystem CurrentSystem = pair.Value.ShipsTaskGroup.Contact.CurrentSystem;
+
+                /// <summary>
+                /// No detected contacts in this system.
+                /// </summary>
+                if (Fact.DetectedContactLists.ContainsKey(CurrentSystem) == false)
+                {
+                    break;
+                }
+
+                /// <summary>
+                /// No missile contacts in this system.
+                /// </summary>
+                if (Fact.DetectedContactLists[CurrentSystem].DetectedMissileContacts.Count == 0)
+                {
+                    break;
+                }
+
+                /// <summary>
+                /// BFC
+                /// </summary>
+                if (Fact.PointDefenseFCType[pair.Key] == false && pair.Value.ShipBFC[pair.Key.componentIndex].pDState == PointDefenseState.AreaDefense)
+                {
+                    /// <summary>
+                    /// loop through every missile contact. will have to do distance checks here.
+                    /// </summary>
+                    foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> MisPair in Fact.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
+                    {
+                        /// <summary>
+                        /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
+                        /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
+                        /// </summary>
+                        float dist = -1;
+
+                        int MissileID = CurrentSystem.SystemContactList.IndexOf(MisPair.Key.contact);
+                        int TGID = CurrentSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
+
+                        /// <summary>
+                        /// dist is in AU.
+                        /// </summary>
+                        dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
+
+                        /// <summary>
+                        /// Only bother with checks here that are within the maximum beam distance.
+                        /// </summary>
+                        if (dist <= Constants.Units.BEAM_AU_MAX)
+                        {
+                            float rangeAreaDefenseKm = pair.Value.ShipBFC[pair.Key.componentIndex].pDRange * 10.0f;
+                            float distKM = dist * (float)Constants.Units.KM_PER_AU;
+
+                            /// <summary>
+                            /// Additional paranoia check of range, I need to fix Area defense PD range values to ship bfc range in any event, that hasn't been done yet.
+                            /// </summary>
+                            float TotalRange = pair.Value.ShipBFC[pair.Key.componentIndex].beamFireControlDef.range * 2.0f;
+
+                            float range = rangeAreaDefenseKm;
+                            if (TotalRange < rangeAreaDefenseKm)
+                            {
+                                range = TotalRange;
+                            }
+
+                            /// <summary>
+                            /// the BFC is set for range defense and is in range of this missile.
+                            /// </summary>
+                            if (distKM <= range)
+                            {
+                                int increment = (int)Math.Floor((float)distKM / 1000.0f);
+
+                                /// <summary>
+                                /// Need to loop through until all missiles are shot down, or all the current BFC's linked weapons are expended
+                                //bool Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, increment, pair.Value.CurrentSpeed, Missile, pair.Value.ShipsFaction,
+                                //                                                                                pair.Value.ShipsTaskGroup.Contact);
+#warning BFC Area Defense here
+                            }
+                        }
+                    }
+                }
+                /// <summary>
+                /// MFC
+                /// </summary>
+                else if (Fact.PointDefenseFCType[pair.Key] == true && pair.Value.ShipBFC[pair.Key.componentIndex].pDState >= PointDefenseState.AMM1v2 &&
+                    pair.Value.ShipBFC[pair.Key.componentIndex].pDState <= PointDefenseState.AMM5v1)
+                {
+                    foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> MisPair in Fact.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
+                    {
+                        /// <summary>
+                        /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
+                        /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
+                        /// </summary>
+                        float dist = -1;
+
+                        int MissileID = CurrentSystem.SystemContactList.IndexOf(MisPair.Key.contact);
+                        int TGID = CurrentSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
+
+                        /// <summary>
+                        /// dist is in AU.
+                        /// </summary>
+                        dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
+
+                        float MFCEngageDistKm = pair.Value.ShipMFC[pair.Key.componentIndex].mFCSensorDef.maxRange;
+                        float rangeAreaDefenseKm = pair.Value.ShipMFC[pair.Key.componentIndex].pDRange * 10.0f;
+
+                        float range = rangeAreaDefenseKm;
+                        if (MFCEngageDistKm < rangeAreaDefenseKm)
+                        {
+                            range = MFCEngageDistKm;
+                        }
+
+                        int MSize = 0;
+                        int AltMSize = 0;
+                        if ((int)Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
+                        {
+                            MSize = Constants.OrdnanceTN.MissileResolutionMinimum;
+                            AltMSize = 0;
+                        }
+                        else if ((int)Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                        {
+                            MSize = (int)Math.Ceiling(MisPair.Key.missiles[0].missileDef.size);
+                            AltMSize = 0;
+                        }
+                        else if ((int)Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) > (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
+                        {
+                            MSize = -1;
+                            AltMSize = (int)Math.Ceiling(Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) / 20.0);
+                        }
+
+                        int MFCRange = pair.Value.ShipMFC[pair.Key.componentIndex].mFCSensorDef.GetActiveDetectionRange(AltMSize, MSize);
+
+                        bool CanDetect = Fact.LargeDetection(CurrentSystem, dist, MFCRange);
+
+                        /// <summary>
+                        /// Can this MFC fire on the targetted missile?
+                        /// </summary>
+                        if (CanDetect == true && dist <= range)
+                        {
+                            /// <summary>
+                            /// Do AMM defense here. Check to see how many amms are targeted on this missile, if less than defense setting fire more.
+                            /// How do I handle 1v2 mode?
+                            /// </summary>
+#warning AMM Area Defense Here
+                        }
+
+                    }
+                }
+            }
         }
     }
 }
