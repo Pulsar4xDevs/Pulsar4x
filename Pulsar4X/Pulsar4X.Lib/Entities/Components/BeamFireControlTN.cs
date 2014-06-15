@@ -884,21 +884,29 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="RangeIncrement">Distance to target</param>
         /// <param name="track">Tracking capability of beam weapon that accuracy is desired for.</param>
+        /// <param name="Override">For FCs in PD mode, there will be no target, they should use override instead.</param>
         /// <returns>Firing accuracy.</returns>
-        private float GetFiringAccuracy(int RangeIncrement, int track)
+        private float GetFiringAccuracy(int RangeIncrement, int track, TargetTN Override = null)
         {
             float FireAccuracy = BeamFireControlDef.rangeAccuracyTable[RangeIncrement];
+
+            TargetTN MyTarget = Target;
+
+            if (MyTarget == null && Override != null)
+            {
+                MyTarget = Override;
+            }
 
             /// <summary>
             /// Get Target_CurrentSpeed for accuracy calculations. Planets do not move so this can remain at 0 for that.
             int Target_CurrentSpeed = 0;
-            switch (Target.targetType)
+            switch (MyTarget.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
-                    Target_CurrentSpeed = Target.ship.CurrentSpeed;
+                    Target_CurrentSpeed = MyTarget.ship.CurrentSpeed;
                     break;
                 case StarSystemEntityType.Missile:
-                    Target_CurrentSpeed = (int)Math.Round(Target.missileGroup.missiles[0].missileDef.maxSpeed);
+                    Target_CurrentSpeed = (int)Math.Round(MyTarget.missileGroup.missiles[0].missileDef.maxSpeed);
                     break;
             }
 
@@ -991,14 +999,20 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ShipFaction">Faction of the ship this BFC is on.</param>
         /// <param name="Contact">Contact of the taskgroup this BFC is in.</param>
         /// <returns>whether the missile was intercepted.</returns>
-        public bool InterceptTarget(Random RNG, int IncrementDistance, float ShipSpeed, float OrdnanceSpeed, Faction ShipFaction, SystemContact Contact)
+        public bool InterceptTarget(Random RNG, int IncrementDistance, float ShipSpeed, OrdnanceTN Ordnance, Faction ShipFaction, SystemContact Contact)
         {
             float track = (float)ShipFaction.BaseTracking;
             if (ShipSpeed > track)
                 track = ShipSpeed;
             if (BeamFireControlDef.tracking < track)
                 track = BeamFireControlDef.tracking;
-            float Acc = GetFiringAccuracy(IncrementDistance, (int)track);
+
+            /// <summary>
+            /// Throwaway target for point defense purposes.
+            /// </summary>
+            TargetTN OverrideTarget = new TargetTN(Ordnance.missileGroup);
+
+            float Acc = GetFiringAccuracy(IncrementDistance, (int)track, OverrideTarget);
             int toHit = (int)Math.Floor(Acc * 100.0f);
             int range = (IncrementDistance + 1) * 10000;
             String Range = range.ToString("#,###0");

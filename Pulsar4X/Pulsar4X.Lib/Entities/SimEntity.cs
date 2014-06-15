@@ -118,6 +118,10 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Insert Area Defense/ AMM Defense here.
             /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                AreaDefensiveFire(P[loop],RNG);
+            }
 #warning Area Defense / AMM Defense
 
             /// <summary>
@@ -125,6 +129,7 @@ namespace Pulsar4X.Entities
             /// Initiative will have to be implemented here for "fairness". right now lower P numbers have the advantage.
             /// Check for destroyed ships as well.
             /// </summary>
+            #region Fire Weapons
             for (int loop = factionStart; loop < factionCount; loop++)
             {
                 foreach (KeyValuePair<ComponentTN, ShipTN> pair in P[loop].OpenFireFC)
@@ -287,10 +292,12 @@ namespace Pulsar4X.Entities
                     }//end if isBFC or isMFC
                 }//end foreach component,ship in OpenFireFC
             }// end for each faction
+            #endregion
 
             /// <summary>
             /// Do simulation maintenance here, shields,reload,recharge,etc.
             /// </summary>
+            #region Simulation Maintenance
             uint TimeValue = (uint)(CurrentTick - lastTick);
             bool loopBreak = false;
             for (int loop = factionStart; loop < factionCount; loop++)
@@ -438,6 +445,7 @@ namespace Pulsar4X.Entities
                     P[loop].MissileRemoveList.Clear();
                 }
             }
+            #endregion
 
             /// <summary>
             /// eventually move every planet/moon/star/asteroid
@@ -743,7 +751,7 @@ namespace Pulsar4X.Entities
                                         /// <summary>
                                         /// Finally intercept the target.
                                         /// </summary>
-                                        Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, 0, pair.Value.CurrentSpeed, Missile.missileDef.maxSpeed, pair.Value.ShipsFaction,
+                                        Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, 0, pair.Value.CurrentSpeed, Missile, pair.Value.ShipsFaction,
                                                                                                                 pair.Value.ShipsTaskGroup.Contact);
 
                                         /// <summary>
@@ -765,6 +773,16 @@ namespace Pulsar4X.Entities
                     break;
             }
             return Intercept;
+        }
+
+        /// <summary>
+        /// Area defensive fire will sweep through a faction's list of BFCs and MFCs to fire at detected ordnance in range.
+        /// </summary>
+        /// <param name="Fact">Faction to search for fire controls of</param>
+        /// <param name="RNG">"global" rng from further up.</param>
+        public void AreaDefensiveFire(Faction Fact, Random RNG)
+        {
+
         }
     }
 }

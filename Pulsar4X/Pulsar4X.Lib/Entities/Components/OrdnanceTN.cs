@@ -1698,7 +1698,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// First test the ship itself for its ability to shoot down the missile.
                     /// </summary>
-                    bool Intercept = Missiles[loop].target.ship.InterceptMissile(RNG, Missiles[loop].missileDef.maxSpeed);
+                    bool Intercept = Missiles[loop].target.ship.InterceptMissile(RNG, Missiles[loop]);
 
 #warning Make order of interception a configuration option?
 

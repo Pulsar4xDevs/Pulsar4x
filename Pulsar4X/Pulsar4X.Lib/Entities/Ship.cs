@@ -3064,7 +3064,7 @@ namespace Pulsar4X.Entities
         /// <param name="RNG">Should be a global RNG</param>
         /// <param name="MissileSpeed">Speed of incoming missile.</param>
         /// <returns>Whether or not intercept happened</returns>
-        public bool InterceptMissile(Random RNG, float MissileSpeed)
+        public bool InterceptMissile(Random RNG, OrdnanceTN Ordnance)
         {
             /// <summary>
             /// Personal Point defense(CIWS/FDF(Self)/FDF) here
@@ -3093,7 +3093,7 @@ namespace Pulsar4X.Entities
             bool Intercept = false;
             for (int loop2 = ShipCIWSIndex; loop2 < ShipCIWS.Count; loop2++)
             {
-                Intercept = ShipCIWS[loop2].InterceptTarget(RNG, MissileSpeed, ShipsFaction,
+                Intercept = ShipCIWS[loop2].InterceptTarget(RNG, Ordnance.missileDef.maxSpeed, ShipsFaction,
                             ShipsTaskGroup.Contact);
 
                 if (Intercept == true)
@@ -3128,7 +3128,7 @@ namespace Pulsar4X.Entities
                         /// everything capable of multifire on the other hand is another matter. Gauss, railguns, and turrets will all have multiple shots, and they have to be
                         /// given the opportunity to use those shots against different missiles. I could do a similar thing to ShipCIWSIndex for BFCs but will refrain from doing so for the moment.
                         /// </summary>
-                        Intercept = ShipBFC[loop2].InterceptTarget(RNG, 0, CurrentSpeed, MissileSpeed, ShipsFaction, ShipsTaskGroup.Contact);
+                        Intercept = ShipBFC[loop2].InterceptTarget(RNG, 0, CurrentSpeed, Ordnance, ShipsFaction, ShipsTaskGroup.Contact);
 
                         if (Intercept == true)
                         {
