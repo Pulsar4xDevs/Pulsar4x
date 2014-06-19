@@ -4853,15 +4853,21 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildMissileDataGrid()
         {
+            if (m_oOptionsPanel.MissileDataGrid.Columns.Count == 0)
+                return;
+
             m_oOptionsPanel.MissileDataGrid.Rows.Clear();
+
+            if (_CurrnetFaction == null)
+                return;
 
             try
             {
                 for (int loop = 0; loop < _CurrnetFaction.ComponentList.MissileDef.Count; loop++)
                 {
-
                     using (DataGridViewRow NewRow = new DataGridViewRow())
                     {
+                        
                         /// <summary>
                         /// setup row height. note that by default they are 22 pixels in height!
                         /// </summary>
@@ -4986,7 +4992,7 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
-                logger.Error("Something went wrong Creating Rows for Class Design MissileGrid screen...");
+                logger.Error("Something went wrong Creating Rows for Class Design MissileGrid screen..");
             }
         }
         #endregion
