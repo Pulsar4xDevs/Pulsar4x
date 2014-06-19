@@ -255,6 +255,10 @@ namespace Pulsar4X.UI.Helpers
                 {
                     szTextureFile = oXMLReader.GetAttribute("texture");
                 }
+                else
+                {
+                    logger.Error("Couldn't find texture path for " + a_szFontDataFile);
+                }
 
                 // Move to first Charecter element
                 oXMLReader.ReadToDescendant("Character");
@@ -267,11 +271,11 @@ namespace Pulsar4X.UI.Helpers
                     szBuffer = oXMLReader.GetAttribute("Umin");
                     float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
 
-                    szBuffer = oXMLReader.GetAttribute("Vmin");
-                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
-
                     szBuffer = oXMLReader.GetAttribute("Umax");
                     float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
+
+                    szBuffer = oXMLReader.GetAttribute("Vmin");
+                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
 
                     szBuffer = oXMLReader.GetAttribute("Vmax");
                     float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
@@ -282,6 +286,8 @@ namespace Pulsar4X.UI.Helpers
                         cBuffer = c;
                     }
                     oFontData.m_dicCharMap.Add(cBuffer, oUVCoords);
+
+                    logger.Info("Loaded char: " + cBuffer);
 
                 } while (oXMLReader.ReadToNextSibling("Character"));  // Move to Next Charcter Element
 
