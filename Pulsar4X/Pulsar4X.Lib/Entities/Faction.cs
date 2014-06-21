@@ -509,7 +509,73 @@ namespace Pulsar4X.Entities
             }
             #endif
         }
+    }
 
+    /// <summary>
+    /// This is intended to be part of a larger dictionary that separates these by system. Component and Ship data is stored for every Point defense enabled FC here.
+    /// </summary>
+    public class PointDefenseList
+    {        
+        /// <summary>
+        /// The component and which ship it is on.
+        /// </summary>
+        public Dictionary<ComponentTN, ShipTN> PointDefenseFC{ get; set; }
+
+        /// <summary>
+        /// FCType of the base component, again, no pointer exists to the component def so this must be stored.
+        /// as always, false = MFC, true = BFC.
+        /// </summary>
+        public Dictionary<ComponentTN, bool> PointDefenseType { get; set; } 
+
+        /// <summary>
+        /// Constructor for PDList.
+        /// </summary>
+        public PointDefenseList()
+        {
+            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
+            PointDefenseType = new Dictionary<ComponentTN, bool>();
+        }
+
+
+#warning When jump transits are fully implemented, PointDefenseFC listings will have to be moved as appropriate, be sure to handle that.
+
+        /// <summary>
+        /// Handles adding a new FC to the list.
+        /// </summary>
+        /// <param name="Comp">Fire control component to add</param>
+        /// <param name="Ship">Ship the FC is on.</param>
+        /// <param name="Type">Type of FC.</param>
+        public void AddComponent(ComponentTN Comp, ShipTN Ship, bool Type)
+        {
+            if (PointDefenseFC.ContainsKey(Comp) == false)
+            {
+                PointDefenseFC.Add(Comp, Ship);
+            }
+
+            if (PointDefenseType.ContainsKey(Comp) == false)
+            {
+                PointDefenseType.Add(Comp, Type);
+            }
+        }
+
+        /// <summary>
+        /// Handles removing an existing FC from the list.
+        /// </summary>
+        /// <param name="Comp">Fire control component to remove</param>
+        /// <param name="Ship">Ship the FC is on.</param>
+        /// <param name="Type">Type of FC.</param>
+        public void RemoveComponent(ComponentTN Comp)
+        {
+            if (PointDefenseFC.ContainsKey(Comp) == true)
+            {
+                PointDefenseFC.Remove(Comp);
+            }
+
+            if (PointDefenseType.ContainsKey(Comp) == true)
+            {
+                PointDefenseType.Remove(Comp);
+            }
+        }
     }
 
 
@@ -605,8 +671,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// These are fire controls set to point defense.
         /// </summary>
-        public Dictionary<ComponentTN, ShipTN> PointDefenseFC { get; set; }
-        public Dictionary<ComponentTN, bool> PointDefenseFCType { get; set; }
+        public Dictionary<StarSystem, PointDefenseList> PointDefense { get; set; }
 
         /// <summary>
         /// These missile groups belong to this faction, and either have some or all of their missiles removed.
@@ -890,8 +955,7 @@ namespace Pulsar4X.Entities
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN,bool>();
 
-            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
-            PointDefenseFCType = new Dictionary<ComponentTN, bool>();
+            PointDefense = new Dictionary<StarSystem, PointDefenseList>();
 
             MissileRemoveList = new BindingList<OrdnanceGroupTN>();
 
@@ -979,8 +1043,7 @@ namespace Pulsar4X.Entities
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN, bool>();
 
-            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
-            PointDefenseFCType = new Dictionary<ComponentTN, bool>();
+            PointDefense = new Dictionary<StarSystem, PointDefenseList>();
 
             MissileRemoveList = new BindingList<OrdnanceGroupTN>();
 

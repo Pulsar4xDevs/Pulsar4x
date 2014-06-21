@@ -411,26 +411,55 @@ namespace Pulsar4X.UI.Handlers
                         _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseRange(PointDefenseRange);
                     _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
 
+
+                    StarSystem CurrentSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+
                     if (index != 0)
                     {
                         /// <summary>
-                        /// Add the FC to the point defense FC list.
+                        /// Add the star system list if one does not exist.
                         /// </summary>
-                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == false)
+                        if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == false)
                         {
-                            _CurrnetFaction.PointDefenseFC.Add(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip);
-                            _CurrnetFaction.PointDefenseFCType.Add(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], false);
+                            PointDefenseList PDL = new PointDefenseList();
+                            _CurrnetFaction.PointDefense.Add(CurrentSystem, PDL);
+                        }
+
+                        /// <summary>
+                        /// Add the FC to the point defense FC list.  BFC is ALWAYS false.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == false)
+                        {
+                            _CurrnetFaction.PointDefense[CurrentSystem].AddComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip, false);
                         }
                     }
                     else
                     {
                         /// <summary>
+                        /// This bug will pop up if a ship gets transported to another star system and it isn't handled properly.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == false)
+                        {
+                            String Error = String.Format("Star System {0} not found in point defense listing for {1} on {2}.", CurrentSystem, _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip);
+                            MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                            _CurrnetFaction.MessageLog.Add(MessageEnter);
+                        } 
+
+                        /// <summary>
                         /// Remove the FC from the point defense FC list.
                         /// </summary>
-                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
                         {
-                            _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
-                            _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                            _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                        }
+
+                        /// <summary>
+                        /// cleanup the starsystem so that the point defense list isn't cluttered.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                        {
+                            _CurrnetFaction.PointDefense.Remove(CurrentSystem);
                         }
                     }
                 }
@@ -452,26 +481,54 @@ namespace Pulsar4X.UI.Handlers
                         _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseRange(PointDefenseRange);
                     _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseMode((PointDefenseState)index);
 
+                    StarSystem CurrentSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+
                     if (index != 0)
                     {
                         /// <summary>
-                        /// Add the FC to the point defense FC list.
+                        /// Add the star system list if one does not exist.
                         /// </summary>
-                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == false)
+                        if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == false)
                         {
-                            _CurrnetFaction.PointDefenseFC.Add(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip);
-                            _CurrnetFaction.PointDefenseFCType.Add(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], true);
+                            PointDefenseList PDL = new PointDefenseList();
+                            _CurrnetFaction.PointDefense.Add(CurrentSystem, PDL);
+                        }
+
+                        /// <summary>
+                        /// Add the FC to the point defense FC list. MFC is ALWAYS true.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == false)
+                        {
+                            _CurrnetFaction.PointDefense[CurrentSystem].AddComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip, true);
                         }
                     }
                     else
                     {
                         /// <summary>
+                        /// This bug will pop up if a ship gets transported to another star system and it isn't handled properly.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == false)
+                        {
+                            String Error = String.Format("Star System {0} not found in point defense listing for {1} on {2}.", CurrentSystem, _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip);
+                            MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
+                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                            _CurrnetFaction.MessageLog.Add(MessageEnter);
+                        }
+
+                        /// <summary>
                         /// Remove the FC from the point defense FC list.
                         /// </summary>
-                        if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
                         {
-                            _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
-                            _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                            _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                        }
+
+                        /// <summary>
+                        /// cleanup the starsystem so that the point defense list isn't cluttered.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                        {
+                            _CurrnetFaction.PointDefense.Remove(CurrentSystem);
                         }
                     }
                 }
@@ -888,11 +945,31 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].SetPointDefenseMode(PointDefenseState.None);
 
-                    if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                    StarSystem CurrentSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
+
+                    /// <summary>
+                    /// This FC might not necessarily be in the point defense list at all, this is just a precautionary check.
+                    /// </summary>
+                    if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == true)
                     {
-                        _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
-                        _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                        /// <summary>
+                        /// Remove the FC from the point defense FC list.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                        {
+                            _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                        }
+
+                        /// <summary>
+                        /// cleanup the starsystem so that the point defense list isn't cluttered.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                        {
+                            _CurrnetFaction.PointDefense.Remove(CurrentSystem);
+                        }
                     }
+
+                    
 
                     TargetTN Target = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
@@ -931,12 +1008,29 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].SetPointDefenseMode(PointDefenseState.None);
 
-                    if (_CurrnetFaction.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
-                    {
-                        _CurrnetFaction.PointDefenseFC.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
-                        _CurrnetFaction.PointDefenseFCType.Remove(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
-                    }
+                    StarSystem CurrentSystem = _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem;
 
+                    /// <summary>
+                    /// This FC might not necessarily be in the point defense list at all, this is just a precautionary check.
+                    /// </summary>
+                    if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == true)
+                    {
+                        /// <summary>
+                        /// Remove the FC from the point defense FC list.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                        {
+                            _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                        }
+
+                        /// <summary>
+                        /// cleanup the starsystem so that the point defense list isn't cluttered.
+                        /// </summary>
+                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                        {
+                            _CurrnetFaction.PointDefense.Remove(CurrentSystem);
+                        }
+                    }
 
                     TargetTN Target = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
