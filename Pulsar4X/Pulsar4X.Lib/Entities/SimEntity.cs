@@ -430,7 +430,7 @@ namespace Pulsar4X.Entities
                         {
                             for (int loop3 = 0; loop3 < P[loop].MissileRemoveList[loop2].missilesDestroyed; loop3++)
                             {
-                                P[loop].MissileRemoveList[loop2].missiles.RemoveAt(0);
+                                P[loop].MissileRemoveList[loop2].RemoveMissile(P[loop].MissileRemoveList[loop2].missiles[0]);
                             }
 
                             P[loop].MissileRemoveList[loop2].missilesDestroyed = 0;
@@ -834,6 +834,11 @@ namespace Pulsar4X.Entities
                         foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> MisPair in Fact.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
                         {
                             /// <summary>
+                            /// This missile group is already destroyed and will be cleaned up by sim later.
+                            if (MisPair.Key.missilesDestroyed == MisPair.Key.missiles.Count)
+                                break;
+
+                            /// <summary>
                             /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
                             /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
                             /// </summary>
@@ -873,11 +878,49 @@ namespace Pulsar4X.Entities
                                 {
                                     int increment = (int)Math.Floor((float)distKM / 1000.0f);
 
+                                    bool Intercept = false;
+                                    int MissilesToDestroy = 0;
+                                    for (int loop = MisPair.Key.missilesDestroyed; loop < MisPair.Key.missiles.Count; loop++)
+                                    {
+                                        Intercept = pair2.Value.ShipBFC[pair2.Key.componentIndex].InterceptTarget(RNG, increment, pair2.Value.CurrentSpeed, MisPair.Key.missiles[loop], pair2.Value.ShipsFaction,
+                                                                                                                  pair2.Value.ShipsTaskGroup.Contact);
+                                        if (Intercept == true)
+                                        {
+                                            /// <summary>
+                                            /// Destroy the missile, check if the ordnance group should be removed, if its gone also remove it from the detected contacts list and break that loop.
+                                            /// </summary>
+                                            
+                                            MissilesToDestroy++;
+                                        }
+                                        else if (Intercept == false)
+                                        {
+                                            /// <summary>
+                                            /// This FC can't intercept any more missiles, advance to the next one.
+                                            /// </summary>
+                                            break;
+                                        }
+                                    }
+
                                     /// <summary>
-                                    /// Need to loop through until all missiles are shot down, or all the current BFC's linked weapons are expended
-                                    //bool Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, increment, pair.Value.CurrentSpeed, Missile, pair.Value.ShipsFaction,
-                                    //                                                                                pair.Value.ShipsTaskGroup.Contact);
-#warning BFC Area Defense here
+                                    /// Set the missiles destroyed count as appropriate.
+                                    /// </summary>
+                                    MisPair.Key.missilesDestroyed = MisPair.Key.missilesDestroyed + MissilesToDestroy;
+
+                                    if (MisPair.Key.missilesDestroyed != 0 && Fact.MissileRemoveList.Contains(MisPair.Key) == false)
+                                    {
+                                        /// <summary>
+                                        /// Tell sim to remove missiles from this group, or remove it entirely.
+                                        /// </summary>
+                                        Fact.MissileRemoveList.Add(MisPair.Key);
+                                    }
+
+                                    if (Intercept == false)
+                                    {
+                                        /// <summary>
+                                        /// This condition means advance to the next FC.
+                                        /// </summary>
+                                        break;
+                                    }
                                 }
                             }
                         }
