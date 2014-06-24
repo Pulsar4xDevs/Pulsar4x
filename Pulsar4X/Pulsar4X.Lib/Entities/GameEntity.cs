@@ -127,6 +127,7 @@ namespace Pulsar4X.Entities
             {
                 legalOrders.Add(Constants.ShipTN.OrderType.Follow);
                 legalOrders.Add(Constants.ShipTN.OrderType.Join);
+                legalOrders.Add(Constants.ShipTN.OrderType.Absorb);
                 legalOrders.Add(Constants.ShipTN.OrderType.RefuelTargetFleet);
                 legalOrders.Add(Constants.ShipTN.OrderType.ResupplyTargetFleet);
                 legalOrders.Add(Constants.ShipTN.OrderType.ReloadTargetFleet);
