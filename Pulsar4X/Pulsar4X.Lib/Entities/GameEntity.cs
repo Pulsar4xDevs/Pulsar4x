@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -41,7 +41,106 @@ namespace Pulsar4X.Entities
             return this.GetType().FullName;
         }
 
+        /// <summary>
+        /// list of legal orders a taskgroup or unit can use againsed this entity
+        /// </summary>
+        public List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
+        {
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
 
+            legalOrders.Add(Constants.ShipTN.OrderType.MoveTo);            
+            legalOrders.Add(Constants.ShipTN.OrderType.ExtendedOrbit);
+            legalOrders.Add(Constants.ShipTN.OrderType.Picket);
+            legalOrders.Add(Constants.ShipTN.OrderType.SendMessage);
+            legalOrders.Add(Constants.ShipTN.OrderType.EqualizeFuel);
+            legalOrders.Add(Constants.ShipTN.OrderType.EqualizeMSP);
+            legalOrders.Add(Constants.ShipTN.OrderType.ActivateTransponder);
+            legalOrders.Add(Constants.ShipTN.OrderType.DeactivateTransponder);
+            legalOrders.Add(Constants.ShipTN.OrderType.ActivateSensors);
+            legalOrders.Add(Constants.ShipTN.OrderType.DeactivateSensors);
+            legalOrders.Add(Constants.ShipTN.OrderType.ActivateShields);
+            legalOrders.Add(Constants.ShipTN.OrderType.DeactivateShields);
+            legalOrders.Add(Constants.ShipTN.OrderType.DivideFleetToSingleShips);
+            legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+            legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromOwnTankers);
+            legalOrders.Add(Constants.ShipTN.OrderType.DetachTankers);
+            legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips);
+            legalOrders.Add(Constants.ShipTN.OrderType.DetachSupplyShips);
+            legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromOwnColliers);
+            legalOrders.Add(Constants.ShipTN.OrderType.DetachColliers);
+            legalOrders.Add(Constants.ShipTN.OrderType.ReleaseAt);
+
+            if (this is JumpPoint)
+            {
+                JumpPoint thisjp = (JumpPoint)this;
+                legalOrders.Add(Constants.ShipTN.OrderType.StandardTransit);
+                legalOrders.Add(Constants.ShipTN.OrderType.TransitAndDivide);
+                legalOrders.Add(Constants.ShipTN.OrderType.SquadronTransit);
+                if (!thisjp.IsGated)
+                    legalOrders.Add(Constants.ShipTN.OrderType.BuildJumpGate);
+            }
+            if (this is Planet)
+            {
+                Planet planet = (Planet)this;
+                if(!planet.GeoSurveyList[faction])
+                    legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+            }
+            if (this is Population)
+            {
+                Population pop = (Population)this;
+                if (faction == pop.Faction)
+                {                    
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
+                    if (pop.FuelStockpile > 0)
+                        legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
+                    if (pop.MaintenanceSupplies > 0)
+                        legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);                               
+                    if (Array.Exists(pop.Installations, x => x.Type == Installation.InstallationType.MaintenanceFacility))
+                        legalOrders.Add(Constants.ShipTN.OrderType.BeginOverhaul);
+                    if (pop.Installations.Count() > 0)
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadInstallation);
+                    if (pop.ComponentStockpile.Count() > 0)
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadShipComponent);
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);
+                    if (pop.CivilianPopulation > 0)
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadColonists);
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadColonists);
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadFuelToPlanet);
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet);
+                    if (Array.Exists(pop.Installations, x => x.Type == Installation.InstallationType.OrdnanceFactory) || pop.MissileStockpile.Count > 0)                        
+                        legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);                 
+                }
+            }
+            if (this is SystemContact)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.Follow);
+            }
+            if (this is TaskGroupTN)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.Follow);
+                legalOrders.Add(Constants.ShipTN.OrderType.Join);
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.LandOnAssignedMothership);
+                legalOrders.Add(Constants.ShipTN.OrderType.LandOnMotherShipNoAssign);
+                legalOrders.Add(Constants.ShipTN.OrderType.LandOnMothershipAssign);
+                legalOrders.Add(Constants.ShipTN.OrderType.TractorSpecifiedShip);
+                legalOrders.Add(Constants.ShipTN.OrderType.TractorSpecifiedShipyard);
+            }
+            return legalOrders;
+        }
         // The Below causes problems...
         //public static bool operator ==(GameEntity a_oLeft, GameEntity a_oRight)
         //{
