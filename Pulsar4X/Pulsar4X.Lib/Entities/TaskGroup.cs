@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -289,6 +289,67 @@ namespace Pulsar4X.Entities
 
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
 
+        }
+
+        /// <summary>
+        /// list of legal orders this TG can use againsed other entitys
+        /// </summary>
+        /// <returns></returns>
+        public List<Constants.ShipTN.OrderType> LegalOrdersTG()
+        {
+
+            ShipTN[] shipsArray = this.Ships.ToArray();
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.Add(Constants.ShipTN.OrderType.MoveTo);
+            legalOrders.Add(Constants.ShipTN.OrderType.Follow);
+            legalOrders.Add(Constants.ShipTN.OrderType.ExtendedOrbit);
+            legalOrders.Add(Constants.ShipTN.OrderType.Picket);
+            legalOrders.Add(Constants.ShipTN.OrderType.SendMessage);
+            
+            legalOrders.Add(Constants.ShipTN.OrderType.ActivateTransponder);
+            legalOrders.Add(Constants.ShipTN.OrderType.DeactivateTransponder);
+
+            if (this.Ships.Count() > 1)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.EqualizeFuel);
+                legalOrders.Add(Constants.ShipTN.OrderType.EqualizeMSP);
+                legalOrders.Add(Constants.ShipTN.OrderType.DivideFleetToSingleShips);
+            }
+            if (Array.Exists(shipsArray, x => x.ActiveList.List.Count > 0))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ActivateSensors);
+                legalOrders.Add(Constants.ShipTN.OrderType.DeactivateSensors);
+            }
+            if (Array.Exists(shipsArray, x => x.ShipShield.Count > 0))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ActivateShields);
+                legalOrders.Add(Constants.ShipTN.OrderType.DeactivateShields);
+            }
+            //if (hasgeo)
+            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            //if (hasGrav)
+            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+
+
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsTanker))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromOwnTankers);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachTankers);
+            }
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsSupply))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachSupplyShips);
+            }
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsCollier))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromOwnColliers);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachColliers);
+            }
+            //if (Array.Exists(shipsArray, x=> x.
+            //legalOrders.Add(Constants.ShipTN.OrderType.ReleaseAt);
+
+            return legalOrders;
         }
 
         #region Add Ship To TaskGroup
