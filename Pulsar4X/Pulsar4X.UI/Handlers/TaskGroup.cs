@@ -118,17 +118,6 @@ namespace Pulsar4X.UI.Handlers
         public ViewModels.TaskGroupViewModel VM { get; set; }
 
         /// <summary>
-        /// Index of interesting locations for the SystemLocationList
-        /// </summary>
-        private BindingList<int> SystemLocationListIndices { get; set; }
-
-        /// <summary>
-        /// What those indices really mean
-        /// </summary>
-        private BindingList<SystemListObject.ListEntityType> SystemLocationListTypes { get; set; }
-
-
-        /// <summary>
         /// This reference I need to taskgroup renames to appear on the systemmap.
         /// </summary>
         public Pulsar4X.UI.Handlers.SystemMap SystemMapReference { get; set; }
@@ -153,9 +142,6 @@ namespace Pulsar4X.UI.Handlers
             /// Bind faction Selection as well.
             /// </summary>
             VM = new ViewModels.TaskGroupViewModel();
-
-            SystemLocationListIndices = new BindingList<int>();
-            SystemLocationListTypes = new BindingList<SystemListObject.ListEntityType>();
 
             /// <summary>
             /// Set up the faction bindings. FactionSelectionComboBox is in the TaskGroup_Panel.designer.cs file.
@@ -682,8 +668,7 @@ namespace Pulsar4X.UI.Handlers
         private void BuildSystemLocationList()
         {
             //m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
-            //SystemLocationListIndices.Clear();
-            //SystemLocationListTypes.Clear();
+
             SystemLocationDict = new Dictionary<string, SystemListObject>();
             AddPlanetsToList();
 
@@ -696,10 +681,6 @@ namespace Pulsar4X.UI.Handlers
             if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
                 AddWaypointsToList();
 
-            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            //SystemLocationListTypes.Add(SystemLocationListType.Count);
-
-
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationDict.Keys.ToList();
         }
 
@@ -711,10 +692,22 @@ namespace Pulsar4X.UI.Handlers
             ClearActionList();
             GameEntity selectedEntity = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].Entity;
             SystemListObject.ListEntityType entityType = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].EntityType;
-            m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.MoveTo);
-            if (entityType == SystemListObject.ListEntityType.TaskGroups || entityType == SystemListObject.ListEntityType.Contacts)
-                m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.Follow);
+            //m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.MoveTo);
+            //if (entityType == SystemListObject.ListEntityType.TaskGroups || entityType == SystemListObject.ListEntityType.Contacts)
+            //    m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.Follow);
+            foreach (var item in legalOrders(CurrentTaskGroup, selectedEntity))
+            {
+                m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(item);
+            }
         }
+
+        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity)
+        {
+            List<Constants.ShipTN.OrderType> thisTGLegalOrders = thisTG.LegalOrdersTG();
+            List<Constants.ShipTN.OrderType> targetEntityLegalOrders = targetEntity.LegalOrders(CurrentTaskGroup.TaskGroupFaction);
+            return thisTGLegalOrders.Intersect(targetEntityLegalOrders).ToList();
+        }
+
 
         /// <summary>
         /// Clears the action list.
@@ -744,9 +737,6 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void AddPlanetsToList()
         {
-            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemListObject.ListEntityType.Planets);
-
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Stars.Count; loop++)
             {
@@ -767,8 +757,6 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void AddContactsToList()
         {
-            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemListObject.ListEntityType.Contacts);
 
             if (CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.CurrentSystem) == true)
             {
@@ -805,9 +793,6 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void AddTaskGroupsToList()
         {
-            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemListObject.ListEntityType.TaskGroups);
-
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.SystemContactList.Count; loop++)
             {
@@ -830,8 +815,6 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void AddWaypointsToList()
         {
-            SystemLocationListIndices.Add(m_oTaskGroupPanel.SystemLocationsListBox.Items.Count);
-            SystemLocationListTypes.Add(SystemListObject.ListEntityType.Waypoints);
 
             for (int loop = 0; loop < CurrentTaskGroup.Contact.CurrentSystem.Waypoints.Count; loop++)
             {
