@@ -867,13 +867,14 @@ namespace Pulsar4X.Entities.Components
                 return false;
             }
 
-            /// <summary>
-            /// Did the target get switched?
+#warning Aurora does not do this check, consider removing it for simplicity? Removed. warning left in for now.
+            /*/// <summary>
+            /// Did the target get switched? 
             /// </summary>
             if (MFC.target != Target)
             {
                 return false;
-            }
+            }*/
 
             /// <summary>
             /// If there are no contacts in this system, then obviously we don't have a target.
@@ -1025,6 +1026,14 @@ namespace Pulsar4X.Entities.Components
             set { shipsTargetting = value; }
         }
 
+        /// <summary>
+        /// Ordnance groups that are headed towards this ordnance group. pd missiles in other words. This is strictly for point defense purposes.
+        /// </summary>
+        private BindingList<OrdnanceGroupTN> OrdGroupsTargetting;
+        public BindingList<OrdnanceGroupTN> ordGroupsTargetting
+        {
+            get { return OrdGroupsTargetting; }
+        }
 
         /// <summary>
         /// Missiles in this "group" of missiles.
@@ -1193,6 +1202,7 @@ namespace Pulsar4X.Entities.Components
 
             MissilesDestroyed = 0;
 
+            OrdGroupsTargetting = new BindingList<OrdnanceGroupTN>();
         }
 
         /// <summary>
@@ -1228,6 +1238,28 @@ namespace Pulsar4X.Entities.Components
         public void RemoveMissile(OrdnanceTN Missile)
         {
             Missiles.Remove(Missile);
+        }
+
+        /// <summary>
+        /// Adds a missile group that is targetting this ordnance group. typically PD
+        /// </summary>
+        /// <param name="MPD">Point defense missile group that is now targeted on this group.</param>
+        public void AddTargettingMissile(OrdnanceGroupTN MPD)
+        {
+            OrdGroupsTargetting.Add(MPD);
+        }
+
+        /// <summary>
+        /// when a targetting missile group needs to be removed(it has been intercepted or otherwise destroyed) this function handles that.
+        /// </summary>
+        /// <param name="MPD">Point defense missile Group</param>
+        public void RemoveTargettingMissile(OrdnanceGroupTN MPD)
+        {
+            if (OrdGroupsTargetting.Contains(MPD) == true)
+            {
+                OrdGroupsTargetting.Remove(MPD);
+            }
+
         }
 
         #region Travelling and following orders

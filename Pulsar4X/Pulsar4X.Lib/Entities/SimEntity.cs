@@ -586,12 +586,14 @@ namespace Pulsar4X.Entities
         /// <param name="OGRemove">Ordnance group to remove</param>
         public void RemoveOrdnanceGroupFromSim(OrdnanceGroupTN OGRemove, BindingList<Faction> P)
         {
-#warning Point defense will need somewhat special handling, right now only manual control is handled.
             /// <summary>
             /// This ordnance group needs to be removed.
             /// Ships Can be targeted on this ordnance group, from these ships missiles in flight can be tracked and informed.
             /// </summary>
            
+            /// <summary>
+            /// Clear manually targetted Beam fire controls. neither area, nor final defense need to be cleared here.
+            /// </summary>
             for (int loop = 0; loop < OGRemove.shipsTargetting.Count; loop++)
             {
                 ShipTN nextShip = OGRemove.shipsTargetting[loop];
@@ -613,6 +615,9 @@ namespace Pulsar4X.Entities
                     }
                 }
 
+                /// <summary>
+                /// Clear manually targeted missile fire controls.
+                /// </summary>
                 for (int loop2 = 0; loop2 < nextShip.ShipMFC.Count; loop2++)
                 {
                     TargetTN MFCTarget = nextShip.ShipMFC[loop2].getTarget();
@@ -640,6 +645,14 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
+                }
+
+                /// <summary>
+                /// Clear the point defense missiles.
+                /// </summary>
+                for (int loop2 = 0; loop2 < OGRemove.ordGroupsTargetting.Count; loop2++)
+                {
+                    OGRemove.ordGroupsTargetting[loop2].CheckTracking();
                 }
             }
             /// <summary>
@@ -928,9 +941,11 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// MFC set to any pd mode that can be applied: 1v2 up to 5v1.
                     /// </summary>
-                    else if (pair.Value.PointDefenseType[pair2.Key] == true && pair2.Value.ShipBFC[pair2.Key.componentIndex].pDState >= PointDefenseState.AMM1v2 &&
-                        pair2.Value.ShipBFC[pair2.Key.componentIndex].pDState <= PointDefenseState.AMM5v1)
+                    else if (pair.Value.PointDefenseType[pair2.Key] == true && pair2.Value.ShipMFC[pair2.Key.componentIndex].pDState >= PointDefenseState.AMM1v2 &&
+                        pair2.Value.ShipMFC[pair2.Key.componentIndex].pDState <= PointDefenseState.AMM5v1)
                     {
+                        int MissilesLaunched = 0;
+                        int MissilesToLaunch = 0;
                         foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> MisPair in Fact.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
                         {
                             /// <summary>
@@ -986,8 +1001,90 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// Do AMM defense here. Check to see how many amms are targeted on this missile, if less than defense setting fire more.
                                 /// How do I handle 1v2 mode? rounding obviously. if more than 1 missile in group send half, send atleast 1 for 1, and round for odd missile amounts.
+                                /// missiles won't be destroyed here, as they were in beam fire mode, this will just launch amms at missile groups.
                                 /// </summary>
-#warning AMM Area Defense Here
+                                
+                                /// <summary>
+                                /// Get total missiles currently targetted on this group. Keeping track of a total missiles incoming variable would mean handling a lot of interactions where
+                                /// missiles can be destroyed, run out of fuel, etc. so I'll just loop through this for now.
+                                /// </summary>
+                                int TotalCount = 0;
+                                for (int loopMP = 0; loopMP < MisPair.Key.ordGroupsTargetting.Count; loopMP++)
+                                {
+                                    TotalCount = TotalCount + MisPair.Key.ordGroupsTargetting[loopMP].missiles.Count;
+                                }
+
+                                float Value = TotalCount / MisPair.Key.missiles.Count;
+
+                                switch (pair2.Value.ShipMFC[pair2.Key.componentIndex].pDState)
+                                {
+                                    case PointDefenseState.AMM1v2:
+                                        if (Value < 0.5f)
+                                        {
+                                            int Max = (int)Math.Ceiling((float)MisPair.Key.missiles.Count / 2.0f);
+                                            MissilesToLaunch = Max - TotalCount;
+                                        }
+                                    break;
+                                    case PointDefenseState.AMM1v1:
+                                        if (Value < 1.0f)
+                                        {
+                                            int Max = MisPair.Key.missiles.Count;
+                                            MissilesToLaunch = Max - TotalCount;
+                                        }
+                                    break;
+                                    case PointDefenseState.AMM2v1:
+                                        if (Value < 2.0f)
+                                        {
+                                            int Max = MisPair.Key.missiles.Count * 2;
+                                            MissilesToLaunch = Max - TotalCount;
+                                        }
+                                    break;
+                                    case PointDefenseState.AMM3v1:
+                                        if (Value < 3.0f)
+                                        {
+                                            int Max = MisPair.Key.missiles.Count * 3;
+                                            MissilesToLaunch = Max - TotalCount;
+                                        }
+                                    break;
+                                    case PointDefenseState.AMM4v1:
+                                        if (Value < 4.0f)
+                                        {
+                                            int Max = MisPair.Key.missiles.Count * 4;
+                                            MissilesToLaunch = Max - TotalCount;
+                                        }
+                                    break;
+                                    case PointDefenseState.AMM5v1:
+                                        if (Value < 5.0f)
+                                        {
+                                            int Max = MisPair.Key.missiles.Count * 5;
+                                            MissilesToLaunch = Max - TotalCount;
+                                        }
+                                    break;
+                                }
+
+                                if (MissilesToLaunch != 0)
+                                {
+                                    /// <summary>
+                                    /// launch up to MissilesToLaunch amms in a new ord group at the target.
+                                    /// <summary>
+                                    MissilesLaunched = pair2.Value.ShipMFC[pair2.Key.componentIndex].FireWeaponsPD(pair2.Value.ShipsTaskGroup, pair2.Value, MisPair.Key, MissilesToLaunch);
+
+                                    /// <summary>
+                                    /// This FC can no longer fire at ordnance groups in range.
+                                    /// </summary>
+                                    if (MissilesLaunched != MissilesToLaunch)
+                                    {
+                                        break;
+                                    }
+                                }
+                            }
+
+                            /// <summary>
+                            /// advance to the next FC.
+                            /// </summary>
+                            if (MissilesLaunched != MissilesToLaunch && MissilesToLaunch != 0)
+                            {
+                                break;
                             }
 
                         }

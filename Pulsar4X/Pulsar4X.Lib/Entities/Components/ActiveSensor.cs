@@ -613,6 +613,7 @@ namespace Pulsar4X.Entities.Components
         /// Fire Weapons spawns new missiles groups or adds missiles to existing ones.
         /// </summary>
         /// <param name="TG">Taskgroup this MFC is in.</param>
+        /// <param name="FiredFrom">Ship these missiles were fired from.</param>
         /// <returns>If missiles were fired at all from this MFC. true = atleast 1 missile(and therefore missile group, false = no missiles.</returns>
         public bool FireWeapons(TaskGroupTN TG, ShipTN FiredFrom)
         {
@@ -719,6 +720,126 @@ namespace Pulsar4X.Entities.Components
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Fire this MFC in point defense mode.
+        /// </summary>
+        /// <param name="TG">Taskgroup the MFC is in</param>
+        /// <param name="FiredFrom">Ship the MFC is on</param>
+        /// <param name="Target">Target of point defense fire.</param>
+        /// <param name="MissilesToFire">Number of missiles to fire at it</param>
+        /// <returns></returns>
+        public int FireWeaponsPD(TaskGroupTN TG, ShipTN FiredFrom, OrdnanceGroupTN Target, int MissilesToFire)
+        {
+            /// <summary>
+            /// simple stupid sanity check.
+            if(MissilesToFire == 0)
+            {
+                return 0;
+            }
+
+            int LaunchCount = 0;
+            /// <summary>
+            /// Just a temporary variable for this function.
+            /// </summary>
+            BindingList<OrdnanceGroupTN> LocalMissileGroups = new BindingList<OrdnanceGroupTN>();
+
+            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            {
+                if (LinkedWeapons[loop].isDestroyed == false && LinkedWeapons[loop].loadTime == 0 && LinkedWeapons[loop].loadedOrdnance != null)
+                {
+                    if (FiredFrom.ShipOrdnance.ContainsKey(LinkedWeapons[loop].loadedOrdnance) == true)
+                    {
+                        OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance, FiredFrom);
+
+                        /// <summary>
+                        /// Point defense does not go by MFC targetting. have to add target here.
+                        /// </summary>
+                        newMissile.target = new TargetTN(Target);
+
+                        LaunchCount++;
+
+                        /// <summary>
+                        /// Create a new missile group
+                        /// </summary>
+                        if (LocalMissileGroups.Count == 0)
+                        {
+                            OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
+                            LocalMissileGroups.Add(newMissileGroup);
+                            TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
+                        }
+                        /// <summary>
+                        /// An existing missile group may be useable.
+                        /// </summary>
+                        else
+                        {
+                            bool foundGroup = false;
+                            foreach (OrdnanceGroupTN OrdGroup in LocalMissileGroups)
+                            {
+                                /// <summary>
+                                /// All Missile groups should be composed of just 1 type of missile for convienence.
+                                if (OrdGroup.missiles[0].missileDef.Id == LinkedWeapons[loop].loadedOrdnance.Id)
+                                {
+                                    OrdGroup.AddMissile(newMissile);
+                                    foundGroup = true;
+                                    break;
+                                }
+                            }
+
+                            /// <summary>
+                            /// Have to create a new missile group after all.
+                            /// </summary>
+                            if (foundGroup == false)
+                            {
+                                OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
+                                LocalMissileGroups.Add(newMissileGroup);
+                                TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
+                            }
+                        }
+                        /// <summary>
+                        /// Decrement the loaded ordnance count, and remove the type entirely if this was the last one.
+                        /// </summary>
+                        FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] = FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] - 1;
+                        if (FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] == 0)
+                        {
+                            FiredFrom.ShipOrdnance.Remove(LinkedWeapons[loop].loadedOrdnance);
+                        }
+
+                        /// <summary>
+                        /// Set the launch tube cooldown time as a missile was just fired from it.
+                        /// </summary>
+                        LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
+
+                        if (LaunchCount == MissilesToFire)
+                            break;
+                    }
+                    else
+                    {
+                        String Msg = String.Format("No ordnance {0} on ship {1} is available for Launch Tube {2} in PD Mode", LinkedWeapons[loop].Name, FiredFrom.Name, LinkedWeapons[loop].Name);
+                        MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoAvailableOrdnance, TG.Contact.CurrentSystem, TG.Contact,
+                                                                   GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
+                        TG.TaskGroupFaction.MessageLog.Add(newMessage);
+                    }
+
+                }
+                else if (LinkedWeapons[loop].isDestroyed == true)
+                {
+                    String Msg = String.Format("Destroyed launch tube {0} is still attached to {1}'s MFC in PD Mode", LinkedWeapons[loop].Name, FiredFrom.Name);
+                    MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.Error, TG.Contact.CurrentSystem, TG.Contact,
+                                                               GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
+                    TG.TaskGroupFaction.MessageLog.Add(newMessage);
+                }
+                else if (LinkedWeapons[loop].loadedOrdnance == null)
+                {
+                    String Msg = String.Format("No loaded ordnance for launch tube {0} on ship {1} in PD Mode", LinkedWeapons[loop].Name, FiredFrom.Name);
+                    MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoLoadedOrdnance, TG.Contact.CurrentSystem, TG.Contact,
+                                                               GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
+                    TG.TaskGroupFaction.MessageLog.Add(newMessage);
+                }
+            }
+
+            return LaunchCount;
         }
     }
 
