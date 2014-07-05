@@ -2082,6 +2082,51 @@ namespace Pulsar4X.Entities
             TotalOrderDistance = 0;
         }
 
+        /// <summary>
+        /// Does this taskgroup have a tanker in it?
+        /// </summary>
+        /// <returns>is there a tanker true/false</returns>
+        bool ContainsTanker()
+        {
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipClass.IsTanker == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Does this taskgroup have a supply in it?
+        /// </summary>
+        /// <returns>is there a supply ship true/false</returns>
+        bool ContainsSupply()
+        {
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipClass.IsSupply == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Does this taskgroup have a collier in it?
+        /// </summary>
+        /// <returns>is there a collier true/false</returns>
+        bool ContainsCollier()
+        {
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                if (Ships[loop].ShipClass.IsCollier == true)
+                    return true;
+            }
+
+            return false;
+        }
+
         #endregion
 
 
