@@ -115,13 +115,13 @@ namespace Pulsar4X.Entities
                 P[loop].SensorSweep(CurrentTick);
             }
 
-            /*/// <summary>
+            /// <summary>
             /// Insert Area Defense/ AMM Defense here.
             /// </summary>
             for (int loop = factionStart; loop < factionCount; loop++)
             {
                 AreaDefensiveFire(P[loop],RNG);
-            }*/
+            }
 
             /// <summary>
             /// attempt to fire weapons at target here.
@@ -768,8 +768,29 @@ namespace Pulsar4X.Entities
                                             /// <summary>
                                             /// Finally intercept the target.
                                             /// </summary>
-                                            Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, 0, pair.Value.CurrentSpeed, Missile, pair.Value.ShipsFaction,
-                                                                                                                    pair.Value.ShipsTaskGroup.Contact);
+                                            bool WF = false;
+                                            Intercept = pair.Value.ShipBFC[pair.Key.componentIndex].InterceptTarget(RNG, 0, Missile, pair.Value.ShipsFaction,
+                                                                                                                    pair.Value.ShipsTaskGroup.Contact, pair.Value, out WF);
+                                            /// <summary>
+                                            /// Add this ship to the weapon recharge list since it has fired. This is done here in Sim, or for FDF_Self in Ship.cs
+                                            /// </summary>
+                                            if (WF == true)
+                                            {
+                                                if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                                {
+                                                    /// <summary>
+                                                    /// If our recharge value does not have Recharge beams in it(bitflag 2 for now), then add it.
+                                                    /// </summary>
+                                                    if ((P[loop].RechargeList[pair.Value] & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                                    {
+                                                        P[loop].RechargeList[pair.Value] = (P[loop].RechargeList[pair.Value] + (int)Faction.RechargeStatus.Weapons);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                                }
+                                            }
 
                                             /// <summary>
                                             /// break out of the first foreach loop.
@@ -870,33 +891,77 @@ namespace Pulsar4X.Entities
                             /// </summary>
                             if (dist <= Constants.Units.BEAM_AU_MAX)
                             {
-                                float rangeAreaDefenseKm = pair2.Value.ShipBFC[pair2.Key.componentIndex].pDRange * 10.0f;
+                                /// <summary>
+                                /// Value is in units of 10k km
+                                /// </summary>
+                                float rangeAreaDefenseKm;
+
+                                /// <summary>
+                                /// The user put in an absurdly large value.
+                                /// </summary>
+
+                                if (pair2.Value.ShipBFC[pair2.Key.componentIndex].pDRange > (float)Constants.Units.TEN_KM_MAX)
+                                {
+                                    /// <summary>
+                                    /// Max possible beam range in KM.
+                                    /// </summary>
+                                    rangeAreaDefenseKm = (float)Constants.Units.BEAM_KM_MAX;
+                                }
+                                else
+                                {
+                                    rangeAreaDefenseKm = pair2.Value.ShipBFC[pair2.Key.componentIndex].pDRange * 10000.0f;
+                                } 
+
                                 float distKM = dist * (float)Constants.Units.KM_PER_AU;
 
                                 /// <summary>
                                 /// Additional paranoia check of range, I need to fix Area defense PD range values to ship bfc range in any event, that hasn't been done yet.
                                 /// </summary>
-                                float TotalRange = pair2.Value.ShipBFC[pair2.Key.componentIndex].beamFireControlDef.range * 2.0f;
+#warning magic number for total bfc range.
+                                float totalRange = pair2.Value.ShipBFC[pair2.Key.componentIndex].beamFireControlDef.range * 2.0f;
 
-                                float range = rangeAreaDefenseKm;
-                                if (TotalRange < rangeAreaDefenseKm)
-                                {
-                                    range = TotalRange;
-                                }
+                                float range = Math.Min(totalRange, rangeAreaDefenseKm);
 
                                 /// <summary>
                                 /// the BFC is set for range defense and is in range of this missile.
                                 /// </summary>
                                 if (distKM <= range)
                                 {
-                                    int increment = (int)Math.Floor((float)distKM / 1000.0f);
+#warning magic number related to 10k km increments.
+                                    /// <summary>
+                                    /// Increment is a 10k km unit, so distance must be divided by 10000 to yield the appropriate number.
+                                    /// </summary>
+                                    int increment = (int)Math.Floor((float)distKM / 10000.0f);
 
                                     bool Intercept = false;
                                     int MissilesToDestroy = 0;
                                     for (int loop = MisPair.Key.missilesDestroyed; loop < MisPair.Key.missiles.Count; loop++)
                                     {
-                                        Intercept = pair2.Value.ShipBFC[pair2.Key.componentIndex].InterceptTarget(RNG, increment, pair2.Value.CurrentSpeed, MisPair.Key.missiles[loop], pair2.Value.ShipsFaction,
-                                                                                                                  pair2.Value.ShipsTaskGroup.Contact);
+                                        bool WF = false;
+                                        Intercept = pair2.Value.ShipBFC[pair2.Key.componentIndex].InterceptTarget(RNG, increment, MisPair.Key.missiles[loop], pair2.Value.ShipsFaction,
+                                                                                                                  pair2.Value.ShipsTaskGroup.Contact, pair2.Value, out WF);
+
+                                        /// <summary>
+                                        /// Add this ship to the weapon recharge list since it has fired. This is done here in Sim, or for FDF_Self in Ship.cs
+                                        /// </summary>
+                                        if (WF == true)
+                                        {
+                                            if (Fact.RechargeList.ContainsKey(pair2.Value) == true)
+                                            {
+                                                /// <summary>
+                                                /// If our recharge value does not have Recharge beams in it(bitflag 2 for now), then add it.
+                                                /// </summary>
+                                                if ((Fact.RechargeList[pair2.Value] & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                                {
+                                                    Fact.RechargeList[pair2.Value] = (Fact.RechargeList[pair2.Value] + (int)Faction.RechargeStatus.Weapons);
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Fact.RechargeList.Add(pair2.Value, (int)Faction.RechargeStatus.Weapons);
+                                            }
+                                        }
+
                                         if (Intercept == true)
                                         {
                                             /// <summary>
@@ -962,17 +1027,21 @@ namespace Pulsar4X.Entities
                             /// </summary>
                             dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
 
-                            float MFCEngageDistKm = pair2.Value.ShipMFC[pair2.Key.componentIndex].mFCSensorDef.maxRange;
-                            float rangeAreaDefenseKm = pair2.Value.ShipMFC[pair2.Key.componentIndex].pDRange * 10.0f;
 
-                            float range = rangeAreaDefenseKm;
-                            if (MFCEngageDistKm < rangeAreaDefenseKm)
-                            {
-                                range = MFCEngageDistKm;
-                            }
+                            float MFCEngageDistKm = pair2.Value.ShipMFC[pair2.Key.componentIndex].mFCSensorDef.maxRange;
+                            float rangeAreaDefenseKm = pair2.Value.ShipMFC[pair2.Key.componentIndex].pDRange;
+
+                            /// <summary>
+                            /// Range is in 10K units so it has to be adjusted to AU for later down.
+                            /// </summary>
+#warning magic 10k number here
+                            float range = (Math.Min(MFCEngageDistKm, rangeAreaDefenseKm) / (float)Constants.Units.KM_PER_AU) ;
+                            range = range * 10000.0f;
 
                             int MSize = 0;
                             int AltMSize = 0;
+
+#warning the +6 is another magic number.
                             if ((int)Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
                             {
                                 MSize = Constants.OrdnanceTN.MissileResolutionMinimum;
@@ -986,7 +1055,7 @@ namespace Pulsar4X.Entities
                             else if ((int)Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) > (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
                             {
                                 MSize = -1;
-                                AltMSize = (int)Math.Ceiling(Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) / 20.0);
+                                AltMSize = (int)Math.Ceiling(Math.Ceiling(MisPair.Key.missiles[0].missileDef.size) / (Constants.OrdnanceTN.MissileResolutionMaximum + 6));
                             }
 
                             int MFCRange = pair2.Value.ShipMFC[pair2.Key.componentIndex].mFCSensorDef.GetActiveDetectionRange(AltMSize, MSize);
@@ -1008,6 +1077,7 @@ namespace Pulsar4X.Entities
                                 /// Get total missiles currently targetted on this group. Keeping track of a total missiles incoming variable would mean handling a lot of interactions where
                                 /// missiles can be destroyed, run out of fuel, etc. so I'll just loop through this for now.
                                 /// </summary>
+#warning this missile count can be optimized, but it would be difficult to do so.
                                 int TotalCount = 0;
                                 for (int loopMP = 0; loopMP < MisPair.Key.ordGroupsTargetting.Count; loopMP++)
                                 {
@@ -1018,6 +1088,7 @@ namespace Pulsar4X.Entities
 
                                 switch (pair2.Value.ShipMFC[pair2.Key.componentIndex].pDState)
                                 {
+#warning more magic numbers in how point defense states are handled.
                                     case PointDefenseState.AMM1v2:
                                         if (Value < 0.5f)
                                         {

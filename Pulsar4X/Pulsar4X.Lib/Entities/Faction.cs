@@ -2607,10 +2607,11 @@ namespace Pulsar4X.Entities
         /// <returns>Whether or not detection has occured.</returns>
         public bool LargeDetection(StarSystem System, float dist, int detection)
         {
+#warning 10,000 here is a magic number related to the 10K km unit that AuroraTN uses.
             /// <summary>
             /// Then I need to use the large distance detection model.
             /// </summary>
-            if (detection > 214748)
+            if (detection > (int)Constants.Units.TEN_KM_MAX)
             {
                 double factor = Constants.Units.KM_PER_AU / 10000.0;
                 double AUDetection = (double)detection / factor;
@@ -2657,7 +2658,7 @@ namespace Pulsar4X.Entities
             {
                 FactionTechLevel[loop] = 100;
             }
-
+#warning baseTracking is a magic number here.
             BaseTracking = 25000;
         }
 

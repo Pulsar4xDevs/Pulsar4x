@@ -3109,26 +3109,31 @@ namespace Pulsar4X.Entities
                 {
                     if (ShipBFC[loop2].pDState == PointDefenseState.FinalDefensiveFireSelf)
                     {
-                        if (ShipsFaction.RechargeList.ContainsKey(this) == true)
-                        {
-                            /// <summary>
-                            /// If our recharge value does not have Recharge beams in it(bitflag 2 for now), then add it.
-                            /// </summary>
-                            if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
-                            {
-                                ShipsFaction.RechargeList[this] = (ShipsFaction.RechargeList[this] + (int)Faction.RechargeStatus.Weapons);
-                            }
-                        }
-                        else
-                        {
-                            ShipsFaction.RechargeList.Add(this, (int)Faction.RechargeStatus.Weapons);
-                        }
                         /// <summary>
                         /// Now I need to know whether the beam weapons linked to this PD can fire. for regular beams that is simple enough.
                         /// everything capable of multifire on the other hand is another matter. Gauss, railguns, and turrets will all have multiple shots, and they have to be
                         /// given the opportunity to use those shots against different missiles. I could do a similar thing to ShipCIWSIndex for BFCs but will refrain from doing so for the moment.
                         /// </summary>
-                        Intercept = ShipBFC[loop2].InterceptTarget(RNG, 0, CurrentSpeed, Ordnance, ShipsFaction, ShipsTaskGroup.Contact);
+                        bool WF = false;
+                        Intercept = ShipBFC[loop2].InterceptTarget(RNG, 0, Ordnance, ShipsFaction, ShipsTaskGroup.Contact, this, out WF);
+
+                        if (WF == true)
+                        {
+                            if (ShipsFaction.RechargeList.ContainsKey(this) == true)
+                            {
+                                /// <summary>
+                                /// If our recharge value does not have Recharge beams in it(bitflag 2 for now), then add it.
+                                /// </summary>
+                                if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                {
+                                    ShipsFaction.RechargeList[this] = (ShipsFaction.RechargeList[this] + (int)Faction.RechargeStatus.Weapons);
+                                }
+                            }
+                            else
+                            {
+                                ShipsFaction.RechargeList.Add(this, (int)Faction.RechargeStatus.Weapons);
+                            }
+                        }
 
                         if (Intercept == true)
                         {

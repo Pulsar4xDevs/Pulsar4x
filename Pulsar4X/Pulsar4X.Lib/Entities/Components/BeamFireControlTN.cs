@@ -994,13 +994,18 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="RNG">RNG to use, should be the global one in _SE_</param>
         /// <param name="IncrementDistance">Range to the target missile</param>
-        /// <param name="ShipSpeed">Speed of ship this BFC is on. </param>
-        /// <param name="OrdnanceSpeed">Speed of said missile.</param>
+        /// <param name="Ordnance">Ordnance we want to shoot at.</param>
         /// <param name="ShipFaction">Faction of the ship this BFC is on.</param>
         /// <param name="Contact">Contact of the taskgroup this BFC is in.</param>
+        /// <param name="ShipOn">Ship this BFC is on.</param>
+        /// <param name="WeaponsFired">Whether or not a weapon was fired. this is for the recharge list further up</param>
         /// <returns>whether the missile was intercepted.</returns>
-        public bool InterceptTarget(Random RNG, int IncrementDistance, float ShipSpeed, OrdnanceTN Ordnance, Faction ShipFaction, SystemContact Contact)
+        public bool InterceptTarget(Random RNG, int IncrementDistance, OrdnanceTN Ordnance, Faction ShipFaction, SystemContact Contact, ShipTN ShipOn, out bool WeaponsFired)
         {
+            WeaponsFired = false;
+
+            float ShipSpeed = ShipOn.CurrentSpeed;
+
             float track = (float)ShipFaction.BaseTracking;
             if (ShipSpeed > track)
                 track = ShipSpeed;
@@ -1028,7 +1033,15 @@ namespace Pulsar4X.Entities.Components
                         linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Gauss)
                     {
 
-                        linkedWeapons[loop3].Fire();
+                        WeaponsFired = linkedWeapons[loop3].Fire();
+
+                        /// <summary>
+                        /// multi-hit weapons will be a little wierd as far as PD goes.
+                        /// </summary>
+                        if (WeaponsFired == false && AcceptPartialFire == true)
+                            WeaponsFired = true;
+
+
                         int expended = linkedWeapons[loop3].shotsExpended;
                         int ShotCount = linkedWeapons[loop3].beamDef.shotCount;
 
@@ -1058,7 +1071,8 @@ namespace Pulsar4X.Entities.Components
                     else
                     {
                         ushort Hit = (ushort)RNG.Next(1, 100);
-                        linkedWeapons[loop3].Fire();
+
+                        WeaponsFired = linkedWeapons[loop3].Fire();
                         
                         if (toHit >= Hit)
                         {
@@ -1084,7 +1098,14 @@ namespace Pulsar4X.Entities.Components
                bool AcceptPartialFire = (linkedTurrets[loop3].shotsExpended < linkedTurrets[loop3].turretDef.totalShotCount);
                if (linkedTurrets[loop3].readyToFire() == true || AcceptPartialFire == true)
                {
-                   linkedTurrets[loop3].Fire();
+                   WeaponsFired = linkedTurrets[loop3].Fire();
+
+                   /// <summary>
+                   /// multi-hit weapons will be a little wierd as far as PD goes.
+                   /// </summary>
+                   if (WeaponsFired == false && AcceptPartialFire == true)
+                       WeaponsFired = true;
+
                    int expended = linkedTurrets[loop3].shotsExpended;
                    int ShotCount = linkedTurrets[loop3].turretDef.totalShotCount;
 

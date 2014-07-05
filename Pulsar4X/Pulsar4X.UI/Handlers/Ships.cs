@@ -444,22 +444,24 @@ namespace Pulsar4X.UI.Handlers
                             MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
                                                                   GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
                             _CurrnetFaction.MessageLog.Add(MessageEnter);
-                        } 
-
-                        /// <summary>
-                        /// Remove the FC from the point defense FC list.
-                        /// </summary>
-                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
-                        {
-                            _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
                         }
-
-                        /// <summary>
-                        /// cleanup the starsystem so that the point defense list isn't cluttered.
-                        /// </summary>
-                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                        else
                         {
-                            _CurrnetFaction.PointDefense.Remove(CurrentSystem);
+                            /// <summary>
+                            /// Remove the FC from the point defense FC list.
+                            /// </summary>
+                            if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
+                            {
+                                _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+                            }
+
+                            /// <summary>
+                            /// cleanup the starsystem so that the point defense list isn't cluttered.
+                            /// </summary>
+                            if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                            {
+                                _CurrnetFaction.PointDefense.Remove(CurrentSystem);
+                            }
                         }
                     }
                 }

@@ -40,15 +40,30 @@ namespace Pulsar4X
 
             public const double KM_PER_AU = CM_PER_AU / CM_PER_KM; //149597870.7
 
+
+            /// <summary>
+            /// For anyone worried, these are only to check to see if the large distance model needs to be used or not, we aren't constrained to 32 bit limitations with regards to distances.
+            /// </summary>
+
             /// <summary>
             /// 32 bit limitation number for distances in KM. //14.35504154
             /// </summary>
             public const double MAX_KM_IN_AU = 2147483648.0 / KM_PER_AU;
 
             /// <summary>
-            /// speed of light limitation for beam weapons.
+            /// 5 second speed of light limitation for beam weapons.
             /// </summary>
-            public const double BEAM_AU_MAX = 300000.0 / KM_PER_AU; //0.002005376
+            public const double BEAM_AU_MAX = 1500000.0 / KM_PER_AU; //~0.01002 AU
+
+            /// <summary>
+            /// Speed of light limitation, this time in KM.
+            /// </summary>
+            public const double BEAM_KM_MAX = Constants.Units.BEAM_AU_MAX * Constants.Units.KM_PER_AU;
+
+            /// <summary>
+            /// 32 bit limitation for the 10KM unit system used by auroraTN.
+            /// </summary>
+            public const double TEN_KM_MAX = 214748.0;
 
             /// <summary>
             /// Plus or Minus 65Km
