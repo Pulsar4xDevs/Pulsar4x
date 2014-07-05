@@ -309,6 +309,8 @@ namespace Pulsar4X.UI.Helpers
             // load font texture.
             oFontData.m_uiTextureID = Helpers.ResourceManager.Instance.LoadTexture(szTextureFile);
 
+            logger.Info("Loaded Texture ID: " + oFontData.m_uiTextureID);
+
             // Add to list of loaded fonts:
             m_dicGLFonts.Add(oFontData.m_szDataFile, oFontData);
 
