@@ -304,15 +304,13 @@ namespace Pulsar4X.Entities
             legalOrders.Add(Constants.ShipTN.OrderType.ExtendedOrbit);
             legalOrders.Add(Constants.ShipTN.OrderType.Picket);
             legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
+            legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromTargetFleet);
             legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);
+            legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromTargetFleet);
             legalOrders.Add(Constants.ShipTN.OrderType.SendMessage);
-
-
 
             if (Array.Exists(shipsArray, x => x.CurrentCrew < x.ShipClass.TotalRequiredCrew))
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
-
-
 
             legalOrders.Add(Constants.ShipTN.OrderType.ActivateTransponder);
             legalOrders.Add(Constants.ShipTN.OrderType.DeactivateTransponder);
