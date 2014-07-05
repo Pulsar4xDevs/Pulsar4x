@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -116,54 +116,41 @@ namespace Pulsar4X.UI.Panels
             {
                 return m_oHideObsoleteCheckBox;
             }
+
         }
 
         public bool Tanker
         {
-            get
-            {
-                return m_oTankerCheckBox.Checked;
-            }
-            set
-            {
-                m_oTankerCheckBox.Checked = value;
-            }
+            get { return m_oTankerCheckBox.Checked; }
+            set { m_oTankerCheckBox.Checked = value; }
         }
-
+        public CheckBox TankerCheckBox
+        {
+            get { return m_oTankerCheckBox; }
+        }
         public bool Collier
         {
-            get
-            {
-                return m_oCollierCheckBox.Checked;
-            }
-            set
-            {
-                m_oCollierCheckBox.Checked = value;
-            }
+            get{ return m_oCollierCheckBox.Checked; }
+            set{ m_oCollierCheckBox.Checked = value; }
         }
-
+        public CheckBox CollierCheckBox
+        {
+            get { return m_oCollierCheckBox; }
+        }
         public bool Conscript
         {
-            get
-            {
-                return m_oConscriptCheckBox.Checked;
-            }
-            set
-            {
-                m_oConscriptCheckBox.Checked = value;
-            }
+            get { return m_oConscriptCheckBox.Checked; }
+            set { m_oConscriptCheckBox.Checked = value; }
         }
 
         public bool SupplyShip
         {
-            get
-            {
-                return m_oSupplyShipCheckBox.Checked;
-            }
-            set
-            {
-                m_oSupplyShipCheckBox.Checked = value;
-            }
+            get { return m_oSupplyShipCheckBox.Checked; }
+            set { m_oSupplyShipCheckBox.Checked = value; }
+        }
+        public CheckBox SupplyShipCheckBox
+        {
+            get { return m_oSupplyShipCheckBox; }
         }
 
         public CheckBox SizeInTonsCheckBox
@@ -471,5 +458,6 @@ namespace Pulsar4X.UI.Panels
         }
 
         #endregion
+
     }
 }
