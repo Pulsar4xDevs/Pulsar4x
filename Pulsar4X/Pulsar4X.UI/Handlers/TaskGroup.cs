@@ -422,6 +422,7 @@ namespace Pulsar4X.UI.Handlers
             if (PlaceIndex != -1)
             {
                 int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
+                Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
 
                 if (ActionIndex != -1)
                 {
@@ -430,30 +431,30 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     var entity = selected.Entity;
                     var etype = selected.EntityType;
-
+                    
                     switch (etype)
                     {
 
                         case SystemListObject.ListEntityType.Contacts:
                             ShipTN shipcontact = (ShipTN)entity;//CurrentFaction.DetectedContactLists
-                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, shipcontact.ShipsTaskGroup); //the task group? what if the TG splits?
+                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, shipcontact.ShipsTaskGroup); //the task group? what if the TG splits?
                             CurrentTaskGroup.IssueOrder(NewOrder);
                             shipcontact.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Planets:
                             Planet planet = (Planet)entity;
-                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, planet);
+                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, planet);
                             CurrentTaskGroup.IssueOrder(NewOrder);
                             break;
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
-                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, TargetOfOrder);
+                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, TargetOfOrder);
                             CurrentTaskGroup.IssueOrder(NewOrder);
                             TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Waypoints:
                             Waypoint waypoint = (Waypoint)entity;
-                            NewOrder = new Orders((Constants.ShipTN.OrderType)ActionIndex, -1, -1, 0, waypoint);
+                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, waypoint);
                             CurrentTaskGroup.IssueOrder(NewOrder);
                             break;
                     }
