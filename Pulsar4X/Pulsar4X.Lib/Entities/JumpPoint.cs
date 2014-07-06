@@ -61,7 +61,6 @@ namespace Pulsar4X.Entities
             SSEntity = StarSystemEntityType.JumpPoint;
 
 
-            
             /// <summary>
             /// Is this a closed JP that cannot be detected on its "destination" side? will this feature be implemented?
             /// </summary>

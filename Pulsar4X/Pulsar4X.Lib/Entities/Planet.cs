@@ -159,9 +159,6 @@ namespace Pulsar4X.Entities
 
             SSEntity = StarSystemEntityType.Body;
 
-
-
-
             Primary = primary;
         }
     }

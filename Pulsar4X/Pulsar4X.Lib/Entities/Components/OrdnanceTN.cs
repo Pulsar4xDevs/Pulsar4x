@@ -1695,21 +1695,9 @@ namespace Pulsar4X.Entities.Components
                 if (ToHit > HitChance)
                 {
 
-                    /// <summary>
-                    /// First test the ship itself for its ability to shoot down the missile.
-                    /// </summary>
-                    bool Intercept = Missiles[loop].target.ship.InterceptMissile(RNG, Missiles[loop]);
+                    bool Intercept = Missiles[loop].target.ship.InterceptMissile(RNG, Missiles[loop].missileDef.maxSpeed);
 
-#warning Make order of interception a configuration option?
-
-                    if (Intercept == false)
-                    {
-                        /// <summary>
-                        /// Then test other nearby FCs.
-                        /// </summary>
-                        Intercept = GameState.SE.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
-                    }
-
+#warning Need final defensive fire test somewhere
                     /// <summary>
                     /// if the missile was intercepted then it obviously did not go on to hit the ship.
                     /// </summary>

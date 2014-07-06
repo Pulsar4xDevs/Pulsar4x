@@ -18,7 +18,6 @@ namespace Pulsar4X.Entities
 
     public abstract class StarSystemEntity : GameEntity
     {
-
         /// <summary>
         /// System X coordinante in AU
         /// </summary>

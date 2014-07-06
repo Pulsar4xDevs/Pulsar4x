@@ -109,16 +109,6 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Orders to specific ship contacts.
-        /// </summary>
-        private ShipTN ShipOrder { get; set; }
-        public ShipTN shipOrder
-        {
-            get { return ShipOrder; }
-            set { ShipOrder = value; }
-        }
-
-        /// <summary>
         /// Constructor for TaskGroup related orders
         /// </summary>
         /// <param name="TypeOrder">Type</param>
@@ -229,29 +219,6 @@ namespace Pulsar4X.Entities
             OrderTimeRequirement = -1;
 
             Name = TypeOrder.ToString() + " " + WPOrder.Name.ToString();
-        }
-
-        /// <summary>
-        /// Constructor for detected contact related order.
-        /// </summary>
-        /// <param name="TypeOrder">Type</param>
-        /// <param name="SecondaryOrder">Secondary</param>
-        /// <param name="TertiaryOrder">Tertiary</param>
-        /// <param name="Delay">Order delay</param>
-        /// <param name="ShipsOrder">Ship target of order</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, ShipTN ShipsOrder)
-        {
-            TypeOf = TypeOrder;
-            Target = ShipsOrder.ShipsTaskGroup.Contact;
-            Secondary = SecondaryOrder;
-            Tertiary = TertiaryOrder;
-            ShipOrder = ShipsOrder;
-            TaskGroup = ShipsOrder.ShipsTaskGroup;
-            OrderDelay = Delay;
-
-            OrderTimeRequirement = -1;
-            
-            Name = TypeOrder.ToString() + " " + ShipOrder.Name.ToString();
         }
     }
 

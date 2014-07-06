@@ -566,7 +566,6 @@ namespace Pulsar4X.Entities.Components
         public int shotsExpended
         {
             get { return ShotsExpended; }
-            set { ShotsExpended = value; }
         }
 
         /// <summary>
@@ -592,10 +591,7 @@ namespace Pulsar4X.Entities.Components
         {
             if (BeamDef.componentType == ComponentTypeTN.Gauss && isDestroyed == false)
             {
-                if (ShotsExpended == 0)
-                    return true;
-                else
-                    return false;
+                return true;
             }
             else if (CurrentCapacitor == BeamDef.powerRequirement && isDestroyed == false)
             {
