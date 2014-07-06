@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Font texture="./Resources/Fonts/PulsarFont.png">
+  <Character Umin="0.485781991" Umax="0.504739336" Vmin="0.323834197" Vmax="0.344559585" Char=" " />
+  <Character Umin="0.018957346" Umax="0.037914692" Vmin="0.323834197" Vmax="0.344559585" Char="A" />
+  <Character Umin="0.037914692" Umax="0.059241706" Vmin="0.323834197" Vmax="0.344559585" Char="B" />
+  <Character Umin="0.059241706" Umax="0.078199052" Vmin="0.323834197" Vmax="0.344559585" Char="C" />
+  <Character Umin="0.078199052" Umax="0.097156398" Vmin="0.323834197" Vmax="0.344559585" Char="D" />
+  <Character Umin="0.097156398" Umax="0.112559242" Vmin="0.323834197" Vmax="0.344559585" Char="E" />
+  <Character Umin="0.112559242" Umax="0.130331754" Vmin="0.323834197" Vmax="0.344559585" Char="F" />
+  <Character Umin="0.130331754" Umax="0.1492891" Vmin="0.323834197" Vmax="0.344559585" Char="G" />
+  <Character Umin="0.1492891" Umax="0.167061611" Vmin="0.323834197" Vmax="0.344559585" Char="H" />
+  <Character Umin="0.167061611" Umax="0.174170616" Vmin="0.323834197" Vmax="0.344559585" Char="I" />
+  <Character Umin="0.174170616" Umax="0.187203791" Vmin="0.323834197" Vmax="0.344559585" Char="J" />
+  <Character Umin="0.187203791" Umax="0.204976303" Vmin="0.323834197" Vmax="0.344559585" Char="K" />
+  <Character Umin="0.204976303" Umax="0.221563981" Vmin="0.323834197" Vmax="0.344559585" Char="L" />
+  <Character Umin="0.222748815" Umax="0.239336493" Vmin="0.323834197" Vmax="0.344559585" Char="M" />
+  <Character Umin="0.239336493" Umax="0.255924171" Vmin="0.323834197" Vmax="0.344559585" Char="N" />
+  <Character Umin="0.255924171" Umax="0.276066351" Vmin="0.323834197" Vmax="0.344559585" Char="O" />
+  <Character Umin="0.276066351" Umax="0.295023697" Vmin="0.323834197" Vmax="0.344559585" Char="P" />
+  <Character Umin="0.295023697" Umax="0.315165877" Vmin="0.323834197" Vmax="0.344559585" Char="Q" />
+  <Character Umin="0.315165877" Umax="0.332938389" Vmin="0.323834197" Vmax="0.344559585" Char="R" />
+  <Character Umin="0.332938389" Umax="0.351895735" Vmin="0.323834197" Vmax="0.344559585" Char="S" />
+  <Character Umin="0.351895735" Umax="0.370853081" Vmin="0.323834197" Vmax="0.344559585" Char="T" />
+  <Character Umin="0.370853081" Umax="0.389810427" Vmin="0.323834197" Vmax="0.344559585" Char="U" />
+  <Character Umin="0.389810427" Umax="0.406398104" Vmin="0.323834197" Vmax="0.344559585" Char="V" />
+  <Character Umin="0.406398104" Umax="0.42535545" Vmin="0.323834197" Vmax="0.344559585" Char="W" />
+  <Character Umin="0.42535545" Umax="0.441943128" Vmin="0.323834197" Vmax="0.344559585" Char="X" />
+  <Character Umin="0.441943128" Umax="0.45971564" Vmin="0.323834197" Vmax="0.344559585" Char="Y" />
+  <Character Umin="0.45971564" Umax="0.47985782" Vmin="0.323834197" Vmax="0.344559585" Char="Z" />
+  <Character Umin="0.018957346" Umax="0.037914692" Vmin="0.323834197" Vmax="0.344559585" Char="a" />
+  <Character Umin="0.037914692" Umax="0.059241706" Vmin="0.323834197" Vmax="0.344559585" Char="b" />
+  <Character Umin="0.059241706" Umax="0.078199052" Vmin="0.323834197" Vmax="0.344559585" Char="c" />
+  <Character Umin="0.078199052" Umax="0.097156398" Vmin="0.323834197" Vmax="0.344559585" Char="d" />
+  <Character Umin="0.097156398" Umax="0.112559242" Vmin="0.323834197" Vmax="0.344559585" Char="e" />
+  <Character Umin="0.112559242" Umax="0.130331754" Vmin="0.323834197" Vmax="0.344559585" Char="f" />
+  <Character Umin="0.130331754" Umax="0.1492891" Vmin="0.323834197" Vmax="0.344559585" Char="g" />
+  <Character Umin="0.1492891" Umax="0.167061611" Vmin="0.323834197" Vmax="0.344559585" Char="h" />
+  <Character Umin="0.167061611" Umax="0.174170616" Vmin="0.323834197" Vmax="0.344559585" Char="i" />
+  <Character Umin="0.174170616" Umax="0.187203791" Vmin="0.323834197" Vmax="0.344559585" Char="j" />
+  <Character Umin="0.187203791" Umax="0.204976303" Vmin="0.323834197" Vmax="0.344559585" Char="k" />
+  <Character Umin="0.204976303" Umax="0.221563981" Vmin="0.323834197" Vmax="0.344559585" Char="l" />
+  <Character Umin="0.222748815" Umax="0.239336493" Vmin="0.323834197" Vmax="0.344559585" Char="m" />
+  <Character Umin="0.239336493" Umax="0.255924171" Vmin="0.323834197" Vmax="0.344559585" Char="n" />
+  <Character Umin="0.255924171" Umax="0.276066351" Vmin="0.323834197" Vmax="0.344559585" Char="o" />
+  <Character Umin="0.276066351" Umax="0.295023697" Vmin="0.323834197" Vmax="0.344559585" Char="p" />
+  <Character Umin="0.295023697" Umax="00.315165877" Vmin="0.323834197" Vmax="0.344559585" Char="q" />
+  <Character Umin="0.315165877" Umax="0.332938389" Vmin="0.323834197" Vmax="0.344559585" Char="r" />
+  <Character Umin="0.332938389" Umax="0.351895735" Vmin="0.323834197" Vmax="0.344559585" Char="s" />
+  <Character Umin="0.351895735" Umax="0.370853081" Vmin="0.323834197" Vmax="0.344559585" Char="t" />
+  <Character Umin="0.370853081" Umax="0.389810427" Vmin="0.323834197" Vmax="0.344559585" Char="u" />
+  <Character Umin="0.389810427" Umax="0.406398104" Vmin="0.323834197" Vmax="0.344559585" Char="v" />
+  <Character Umin="0.406398104" Umax="0.42535545" Vmin="0.323834197" Vmax="0.344559585" Char="w" />
+  <Character Umin="0.42535545" Umax="0.441943128" Vmin="0.323834197" Vmax="0.344559585" Char="x" />
+  <Character Umin="0.441943128" Umax="0.45971564" Vmin="0.323834197" Vmax="0.344559585" Char="y" />
+  <Character Umin="0.45971564" Umax="0.47985782" Vmin="0.323834197" Vmax="0.344559585" Char="z" />
+</Font>

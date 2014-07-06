@@ -1,0 +1,47 @@
+# Pulsar Specific Folders
+Pulsar4X/Pulsar4X.Lib/obj
+Pulsar4X/Pulsar4X.Lib/bin
+Pulsar4X/Pulsar4X.WinForms/obj
+Pulsar4X/Pulsar4X.WinForms/bin
+Pulsar4X/Pulsar4X.UI/obj
+Pulsar4X/Pulsar4X.UI/bin
+Pulsar4X/Pulsar4X.Tests/bin
+Pulsar4X/Pulsar4X.Tests/obj
+Pulsar4x/Pulsar4X.UI/bin
+Pulsar4x/Pulsar4X.UI/obj
+Pulsar4x/Pulsar4X.GTKForms/obj
+Pulsar4x/Pulsar4X.GTKForms/bin
+
+#C# Temp Files:
+*.db
+*.suo
+*.user
+_ReSharper.Pulsar4X
+_ReSharper.AuroraExtract
+*.sln
+*.csproj
+
+# Build results
+*_i.c
+*_p.c
+*.ilk
+*.meta
+*.obj
+*.pch
+*.pdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.log
+*.vspscc
+*.vssscc
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
