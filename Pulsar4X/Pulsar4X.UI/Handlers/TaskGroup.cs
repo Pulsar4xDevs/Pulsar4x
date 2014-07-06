@@ -714,13 +714,6 @@ namespace Pulsar4X.UI.Handlers
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = thisTG.LegalOrdersTG();
             List<Constants.ShipTN.OrderType> targetEntityLegalOrders = targetEntity.LegalOrders(CurrentTaskGroup.TaskGroupFaction);
 
-
-            String Entry5 = String.Format("Legal orders was run with {0} and {1} yielding {2} and {3}", thisTG, targetEntity, thisTGLegalOrders.Count, targetEntityLegalOrders.Count);
-            MessageEntry Msg6 = new MessageEntry(MessageEntry.MessageType.Error, null, null, GameState.Instance.GameDateTime,
-                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry5);
-
-            m_oCurrnetFaction.MessageLog.Add(Msg6);
-
             return thisTGLegalOrders.Intersect(targetEntityLegalOrders).ToList();
         }
 
