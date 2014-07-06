@@ -419,13 +419,20 @@ namespace Pulsar4X.UI.Handlers
 
             Orders NewOrder;
 
+            /// <summary>
+            /// If AddMove is clicked with no system location it will bomb.
+            /// </summary>
             if (PlaceIndex != -1)
             {
                 int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
-                Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
-
+                
+                /// <summary>
+                /// if AddMove is clicked with no selection action it will bomb.
+                /// </summary>
                 if (ActionIndex != -1)
                 {
+                    Constants.ShipTN.OrderType selected_ordertype = (Constants.ShipTN.OrderType)m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
+
                     /// <summary>
                     /// Now figure out what the hell order this would be.
                     /// </summary>
@@ -706,6 +713,14 @@ namespace Pulsar4X.UI.Handlers
         {
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = thisTG.LegalOrdersTG();
             List<Constants.ShipTN.OrderType> targetEntityLegalOrders = targetEntity.LegalOrders(CurrentTaskGroup.TaskGroupFaction);
+
+
+            String Entry5 = String.Format("Legal orders was run with {0} and {1} yielding {2} and {3}", thisTG, targetEntity, thisTGLegalOrders.Count, targetEntityLegalOrders.Count);
+            MessageEntry Msg6 = new MessageEntry(MessageEntry.MessageType.Error, null, null, GameState.Instance.GameDateTime,
+                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry5);
+
+            m_oCurrnetFaction.MessageLog.Add(Msg6);
+
             return thisTGLegalOrders.Intersect(targetEntityLegalOrders).ToList();
         }
 

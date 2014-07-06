@@ -83,8 +83,11 @@ namespace Pulsar4X.Entities
             if (this is Planet)
             {
                 Planet planet = (Planet)this;
-                if(!planet.GeoSurveyList[faction])
-                    legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+                if (planet.GeoSurveyList.ContainsKey(faction) == true)
+                {
+                    if(planet.GeoSurveyList[faction] == false)
+                        legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+                }
             }
             if (this is Population)
             {

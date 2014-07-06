@@ -442,13 +442,20 @@ namespace Pulsar4X.Entities
             }
 
             /// <summary>
-            /// Any ship with a magazine:
+            /// Any ship with a magazine or launch tube:
             /// </summary>
             if (Array.Exists(shipsArray, x => x.CurrentMagazineCapacityMax > 0))
             {
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
-                legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
-                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);               
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);               
+            }
+
+            /// <summary>
+            /// Only want to have ships with magazines to have this order. box launch setups have to reload from planets.
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.CurrentMagazineMagCapacityMax > 0))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);
             }
 
             /// <summary>
@@ -2258,6 +2265,8 @@ namespace Pulsar4X.Entities
             TotalOrderDistance = 0;
         }
 
+        
+#warning potentially unused 3 functions here, ContainsTanker,ContainsSupply, ContainsCollier
         /// <summary>
         /// Does this taskgroup have a tanker in it?
         /// </summary>
