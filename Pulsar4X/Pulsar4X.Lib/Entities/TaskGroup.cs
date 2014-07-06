@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -289,6 +289,182 @@ namespace Pulsar4X.Entities
 
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
 
+        }
+
+        /// <summary>
+        /// list of legal orders this TG can use againsed other entitys
+        /// </summary>
+        /// <returns></returns>
+        public List<Constants.ShipTN.OrderType> LegalOrdersTG()
+        {
+
+            ShipTN[] shipsArray = this.Ships.ToArray();
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.Add(Constants.ShipTN.OrderType.MoveTo);
+            legalOrders.Add(Constants.ShipTN.OrderType.ExtendedOrbit);
+            legalOrders.Add(Constants.ShipTN.OrderType.Picket);
+            legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
+            legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromTargetFleet);
+            legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);
+            legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromTargetFleet);
+            legalOrders.Add(Constants.ShipTN.OrderType.SendMessage);
+
+            if (Array.Exists(shipsArray, x => x.CurrentCrew < x.ShipClass.TotalRequiredCrew))
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
+
+            legalOrders.Add(Constants.ShipTN.OrderType.ActivateTransponder);
+            legalOrders.Add(Constants.ShipTN.OrderType.DeactivateTransponder);
+
+            /// <summary>
+            /// TaskGroups with active sensors:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.ActiveList.List.Count > 0))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ActivateSensors);
+                legalOrders.Add(Constants.ShipTN.OrderType.DeactivateSensors);
+            }
+            /// <summary>
+            /// Taskgroups with shield equipped ships:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.ShipShield.Count > 0))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ActivateShields);
+                legalOrders.Add(Constants.ShipTN.OrderType.DeactivateShields);
+            }
+            /// <summary>
+            /// Any Taskgroup of more than one vessel.
+            /// </summary>
+            if (this.Ships.Count() > 1)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.EqualizeFuel);
+                legalOrders.Add(Constants.ShipTN.OrderType.EqualizeMSP);
+                legalOrders.Add(Constants.ShipTN.OrderType.DivideFleetToSingleShips);
+            }
+
+            /// <summary>
+            /// Any taskgroup that has sub task groups created from it, such as by a divide order.
+            /// </summary>
+            //IncorporateSubfleet,
+
+            /// <summary>
+            /// Military Ship Specific orders:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsMilitary))
+                legalOrders.Add(Constants.ShipTN.OrderType.BeginOverhaul);
+
+            /// <summary>
+            /// Targeted on taskforce specific orders:
+            /// </summary>
+            legalOrders.Add(Constants.ShipTN.OrderType.Follow);
+            legalOrders.Add(Constants.ShipTN.OrderType.Join);
+            legalOrders.Add(Constants.ShipTN.OrderType.Absorb);
+            /// <summary>
+            /// JumpPoint Capable orders only:
+            /// </summary>
+            legalOrders.Add(Constants.ShipTN.OrderType.StandardTransit);
+            legalOrders.Add(Constants.ShipTN.OrderType.SquadronTransit);
+            legalOrders.Add(Constants.ShipTN.OrderType.TransitAndDivide);
+
+
+            /// <summary>
+            /// Cargo Hold specific orders when targeted on population/planet:
+            /// </summary>
+            if (this.TotalCargoTonnage > 0)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadInstallation);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadShipComponent);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadInstallation);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadShipComponent);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAll);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);                
+            }
+
+            /// <summary>
+            /// Colony ship specific orders:
+            /// </summary>
+            if (this.TotalCryoCapacity > 0)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadColonists);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadColonists);
+
+            }
+
+            /// <summary>
+            /// GeoSurvey specific orders:
+            /// </summary>
+            //if (hasgeo)
+            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGeoSurvey);
+            /// <summary>
+            /// Grav survey specific orders:
+            /// </summary>
+            //if (hasGrav)
+            //    legalOrders.Add(Constants.ShipTN.OrderType.DetachNonGravSurvey);
+
+
+            /// <summary>
+            /// Jump Gate Construction Module specific orders:
+            /// </summary>
+            //if (Array.Exists(shipsArray, x=> x.
+            //
+            //legalOrders.Add(Constants.ShipTN.OrderType.BuildJumpGate);
+
+            /// <summary>
+            /// Tanker Specific:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsTanker))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromOwnTankers);
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachTankers);
+            }
+            /// <summary>
+            /// Supply Ship specific:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsSupply))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips);
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachSupplyShips);
+            }
+            /// <summary>
+            /// Collier Specific:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsCollier))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromOwnColliers);
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.DetachColliers);
+            }
+
+            /// <summary>
+            /// Any ship with a magazine:
+            /// </summary>
+            if (Array.Exists(shipsArray, x => x.CurrentMagazineCapacityMax > 0))
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);               
+            }
+
+            /// <summary>
+            /// Any taskgroup, but target must have hangar bays, perhaps check to see if capacity is available.
+            /// </summary>
+            //if (Array.Exists(shipsArray, x => x.
+            //legalOrders.Add(Constants.ShipTN.OrderType.LandOnAssignedMothership);
+            //legalOrders.Add(Constants.ShipTN.OrderType.LandOnMotherShipNoAssign);
+            //legalOrders.Add(Constants.ShipTN.OrderType.LandOnMothershipAssign);
+
+            //if (Array.Exists(shipsArray, x=> x.
+            //legalOrders.Add(Constants.ShipTN.OrderType.TractorSpecifiedShip);
+            //legalOrders.Add(Constants.ShipTN.OrderType.TractorSpecifiedShipyard);
+            //legalOrders.Add(Constants.ShipTN.OrderType.ReleaseAt);
+
+            return legalOrders;
         }
 
         #region Add Ship To TaskGroup

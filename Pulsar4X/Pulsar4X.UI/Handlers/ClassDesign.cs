@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -250,6 +250,12 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.ComponentsListBox.SelectedIndexChanged += new EventHandler(ComponentsListBox_SelectedIndexChanged);
             m_oOptionsPanel.ComponentsListBox.DoubleClick += new EventHandler(ComponentsListBox_DoubleClick);
 
+            /// <summary>
+            /// options checkbox handlers:
+            /// </summary>
+            m_oOptionsPanel.TankerCheckBox.CheckedChanged += new System.EventHandler(this.TankerCheckbox_Changed);
+            m_oOptionsPanel.CollierCheckBox.CheckedChanged += new System.EventHandler(this.CollierCheckbox_Changed);
+            m_oOptionsPanel.SupplyShipCheckBox.CheckedChanged += new System.EventHandler(this.SupplyCheckbox_Changed);
 
             /// <summary>
             /// Button click handlers:
@@ -1101,7 +1107,7 @@ namespace Pulsar4X.UI.Handlers
                 BuildPowerSystems();
                 BuildPassiveDefences();
                 BuildCrewAccomPanel();
-
+                BuildOptionsPanel();
                 if (CurrentShipClass.IsLocked == true)
                 {
                     int TabId = m_oOptionsPanel.ClassDesignTabControl.TabPages.IndexOf(m_oOptionsPanel.DesignTabPage);
@@ -1207,6 +1213,17 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.CrewBerthsTextBox.Text = CurrentShipClass.TotalRequiredCrew.ToString();
             m_oOptionsPanel.SpareBerthsTextBox.Text = CurrentShipClass.SpareCrewQuarters.ToString();
             m_oOptionsPanel.CryoBerthsTextBox.Text = CurrentShipClass.SpareCryoBerths.ToString();
+        }
+
+
+        /// <summary>
+        /// checkboxes for tanker collier etc etc.
+        /// </summary>
+        private void BuildOptionsPanel()
+        {
+            m_oOptionsPanel.Tanker = CurrentShipClass.IsTanker;
+            m_oOptionsPanel.Collier = CurrentShipClass.IsCollier;
+            m_oOptionsPanel.SupplyShip = CurrentShipClass.IsSupply;
         }
 
         /// <summary>
@@ -4638,7 +4655,18 @@ namespace Pulsar4X.UI.Handlers
         }
 
 
-
+        private void TankerCheckbox_Changed(object sender, EventArgs e)
+        {
+            CurrentShipClass.IsTanker = m_oOptionsPanel.Tanker;
+        }
+        private void SupplyCheckbox_Changed(object sender, EventArgs e)
+        {
+            CurrentShipClass.IsSupply = m_oOptionsPanel.SupplyShip;
+        }
+        private void CollierCheckbox_Changed(object sender, EventArgs e)
+        {
+            CurrentShipClass.IsCollier = m_oOptionsPanel.Collier;
+        }
         #region Ordnance / Fighter Tab Build functions
 
         /// <summary>
