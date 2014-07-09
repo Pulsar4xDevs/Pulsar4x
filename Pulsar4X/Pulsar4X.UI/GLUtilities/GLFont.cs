@@ -17,6 +17,13 @@ namespace Pulsar4X.UI.GLUtilities
     /// </summary>
     public class GLFont
     {
+#if LOG4NET_ENABLED
+        /// <summary>
+        /// TG Logger:
+        /// </summary>
+        public static readonly ILog logger = LogManager.GetLogger(typeof(GLFont));
+#endif
+
         /// <summary> The text to render </summary>
         private string m_szText;
 
@@ -118,6 +125,10 @@ namespace Pulsar4X.UI.GLUtilities
 
         public void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
+#if LOG4NET_ENABLED
+            logger.Debug("GLFont.Render(Proj,View) | Text:" + m_szText + " ID: " + m_lQuads[0].TextureID); 
+#endif
+
             if (m_szText == null)
             {
                 // Do nothing if we have no valid text.
@@ -138,6 +149,9 @@ namespace Pulsar4X.UI.GLUtilities
 
         public void Render()
         {
+#if LOG4NET_ENABLED
+            logger.Debug("GLFont.Render() | Text:" + m_szText + " ID: " + m_lQuads[0].TextureID);
+#endif
             if (m_szText == null)
             {
                 // Do nothing if we have no valid text.

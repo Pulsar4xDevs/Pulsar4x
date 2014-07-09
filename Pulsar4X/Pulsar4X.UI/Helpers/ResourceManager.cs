@@ -287,7 +287,7 @@ namespace Pulsar4X.UI.Helpers
                     }
                     oFontData.m_dicCharMap.Add(cBuffer, oUVCoords);
 
-                    logger.Info("Loaded char: " + cBuffer);
+                    logger.Info("ResourceManager.cs Char: " + szBuffer + " Coordinates: " + oUVCoords.m_v2UVMin.X + "/" + oUVCoords.m_v2UVMin.Y + "," + oUVCoords.m_v2UVMax.X + "/" + oUVCoords.m_v2UVMax.Y);
 
                 } while (oXMLReader.ReadToNextSibling("Character"));  // Move to Next Charcter Element
 
