@@ -125,10 +125,6 @@ namespace Pulsar4X.UI.GLUtilities
 
         public void Render(ref Matrix4 a_m4Projection, ref Matrix4 a_m4View)
         {
-#if LOG4NET_ENABLED
-            logger.Debug("GLFont.Render(Proj,View) | Text:" + m_szText + " ID: " + m_lQuads[0].TextureID); 
-#endif
-
             if (m_szText == null)
             {
                 // Do nothing if we have no valid text.
@@ -149,9 +145,6 @@ namespace Pulsar4X.UI.GLUtilities
 
         public void Render()
         {
-#if LOG4NET_ENABLED
-            logger.Debug("GLFont.Render() | Text:" + m_szText + " ID: " + m_lQuads[0].TextureID);
-#endif
             if (m_szText == null)
             {
                 // Do nothing if we have no valid text.

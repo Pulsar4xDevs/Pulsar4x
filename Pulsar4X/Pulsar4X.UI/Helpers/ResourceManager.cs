@@ -269,16 +269,25 @@ namespace Pulsar4X.UI.Helpers
                     GLFontData.UVCoords oUVCoords = new GLFontData.UVCoords();
 
                     szBuffer = oXMLReader.GetAttribute("Umin");
-                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
+                    bool r1 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
+
+                    logger.Info("szBuffer: " + szBuffer + " " + r1);
 
                     szBuffer = oXMLReader.GetAttribute("Umax");
-                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
+                    bool r2 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
+
+                    logger.Info("szBuffer: " + szBuffer + " " + r2);
 
                     szBuffer = oXMLReader.GetAttribute("Vmin");
-                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
+                    bool r3 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
+
+                    logger.Info("szBuffer: " + szBuffer + " " + r3);
 
                     szBuffer = oXMLReader.GetAttribute("Vmax");
-                    float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
+                    bool r4 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
+
+                    logger.Info("szBuffer: " + szBuffer + " " + r4);
+
 
                     szBuffer = oXMLReader.GetAttribute("Char");
                     foreach (char c in szBuffer)
@@ -308,8 +317,6 @@ namespace Pulsar4X.UI.Helpers
 
             // load font texture.
             oFontData.m_uiTextureID = Helpers.ResourceManager.Instance.LoadTexture(szTextureFile);
-
-            logger.Info("Loaded Texture ID: " + oFontData.m_uiTextureID);
 
             // Add to list of loaded fonts:
             m_dicGLFonts.Add(oFontData.m_szDataFile, oFontData);
