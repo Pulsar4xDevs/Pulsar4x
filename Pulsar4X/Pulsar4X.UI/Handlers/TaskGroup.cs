@@ -127,7 +127,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private Dictionary<string, SystemListObject> SystemLocationDict { get; set; }
 
-
+        private int SelectedOrderIndex = -1;
         /// <summary>
         /// Constructor for this handler.
         /// </summary>
@@ -189,6 +189,9 @@ namespace Pulsar4X.UI.Handlers
 
             m_oTaskGroupPanel.CurrentTDRadioButton.CheckedChanged += new EventHandler(CurrentTDRadioButton_CheckChanged);
             m_oTaskGroupPanel.AllOrdersTDRadioButton.CheckedChanged += new EventHandler(AllOrdersTDRadioButton_CheckChanged);
+
+            m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndexChanged += new EventHandler(PlottedMovesListBox_SelectedIndexChanged);
+            SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
             /// <summary>
             /// Rename Class Button Handlers:
@@ -416,8 +419,8 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
             SystemListObject selected = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()];
-
-            Orders NewOrder;
+            
+            Orders NewOrder = null;
 
             /// <summary>
             /// If AddMove is clicked with no system location it will bomb.
@@ -445,26 +448,25 @@ namespace Pulsar4X.UI.Handlers
                         case SystemListObject.ListEntityType.Contacts:
                             ShipTN shipcontact = (ShipTN)entity;//CurrentFaction.DetectedContactLists
                             NewOrder = new Orders(selected_ordertype, -1, -1, 0, shipcontact.ShipsTaskGroup); //the task group? what if the TG splits?
-                            CurrentTaskGroup.IssueOrder(NewOrder);
                             shipcontact.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Planets:
                             Planet planet = (Planet)entity;
                             NewOrder = new Orders(selected_ordertype, -1, -1, 0, planet);
-                            CurrentTaskGroup.IssueOrder(NewOrder);
+                            
                             break;
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
                             NewOrder = new Orders(selected_ordertype, -1, -1, 0, TargetOfOrder);
-                            CurrentTaskGroup.IssueOrder(NewOrder);
                             TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Waypoints:
                             Waypoint waypoint = (Waypoint)entity;
                             NewOrder = new Orders(selected_ordertype, -1, -1, 0, waypoint);
-                            CurrentTaskGroup.IssueOrder(NewOrder);
                             break;
                     }
+                    if (NewOrder != null)
+                        CurrentTaskGroup.IssueOrder(NewOrder, SelectedOrderIndex);
                 }
             }
 
@@ -481,7 +483,10 @@ namespace Pulsar4X.UI.Handlers
         {
             if (CurrentTaskGroup.TaskGroupOrders.Count != 0)
             {
-                CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
+                if (SelectedOrderIndex == -1)
+                    CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
+                else
+                    CurrentTaskGroup.TaskGroupOrders.RemoveAt(SelectedOrderIndex);
                 ClearActionList();
                 BuildPlottedMoveList();
                 CalculateTimeDistance();
@@ -692,6 +697,18 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationDict.Keys.ToList();
         }
 
+        private void PlottedMovesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == SelectedOrderIndex)
+                m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
+            SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+            if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == -1)
+            {
+                m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
+            }
+            else
+                m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
+        }
         /// <summary>
         /// Builds available orders here. Right now, moveTo is the only one worthwhile. also want to replace this with a proper string at some point.
         /// </summary>
@@ -703,16 +720,29 @@ namespace Pulsar4X.UI.Handlers
             //m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.MoveTo);
             //if (entityType == SystemListObject.ListEntityType.TaskGroups || entityType == SystemListObject.ListEntityType.Contacts)
             //    m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.Follow);
-            foreach (var item in legalOrders(CurrentTaskGroup, selectedEntity))
+            List<Orders> previousOrders = new List<Orders>();
+            int olistindex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+            if (CurrentTaskGroup.TaskGroupOrders.Count > 0 && olistindex >= 0)
+            {
+                previousOrders = CurrentTaskGroup.TaskGroupOrders.ToList().GetRange(0, olistindex);
+            }
+            foreach (var item in legalOrders(CurrentTaskGroup, selectedEntity, previousOrders))
             {
                 m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(item);
             }
         }
 
-        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity)
+        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Orders> previousOrders)
         {
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = thisTG.LegalOrdersTG();
+            List<Constants.ShipTN.OrderType> additionalOrders = new List<Constants.ShipTN.OrderType>();
             List<Constants.ShipTN.OrderType> targetEntityLegalOrders = targetEntity.LegalOrders(CurrentTaskGroup.TaskGroupFaction);
+            
+            foreach (var order in previousOrders)
+            {
+                additionalOrders = additionalOrders.Union(order.EnablesTypeOf()).ToList();
+            }
+            thisTGLegalOrders = thisTGLegalOrders.Union(additionalOrders).ToList();
 
             return thisTGLegalOrders.Intersect(targetEntityLegalOrders).ToList();
         }

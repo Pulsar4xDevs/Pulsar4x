@@ -15,6 +15,44 @@ namespace Pulsar4X.Entities
         {
             get { return TypeOf; }
         }
+        public List<Constants.ShipTN.OrderType> EnablesTypeOf()
+        {
+            List<Constants.ShipTN.OrderType> enabledType = new List<Constants.ShipTN.OrderType>();
+            switch (this.TypeOf)
+            {
+                case Constants.ShipTN.OrderType.Absorb://add list of possible orders target fleet enables.
+                    TaskGroupTN targettg = (TaskGroupTN)Target;
+                    enabledType = targettg.LegalOrdersTG();
+                    break;
+                case Constants.ShipTN.OrderType.LoadAllMinerals:
+                case Constants.ShipTN.OrderType.LoadMineral:
+                case Constants.ShipTN.OrderType.LoadMineralWhenX:
+                case Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve:
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadMineral);
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadAll);
+                    enabledType.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);
+                    break;
+                case Constants.ShipTN.OrderType.LoadColonists:
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadColonists);
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadAll);
+                    break;
+                case Constants.ShipTN.OrderType.LoadInstallation:
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadInstallation);
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadAll);
+                    break;
+                case Constants.ShipTN.OrderType.LoadShipComponent:
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadShipComponent);
+                    enabledType.Add(Constants.ShipTN.OrderType.UnloadAll);
+                    break;
+                case Constants.ShipTN.OrderType.TractorSpecifiedShip:
+                case Constants.ShipTN.OrderType.TractorSpecifiedShipyard:
+                    enabledType.Add(Constants.ShipTN.OrderType.ReleaseAt);
+                    break;                                    
+            }
+
+            return enabledType;
+        }
 
         /// <summary>
         /// What entity are those orders pointed at?

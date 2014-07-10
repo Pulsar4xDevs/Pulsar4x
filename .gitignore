@@ -45,3 +45,4 @@ _ReSharper.AuroraExtract
 *.psess
 *.vsp
 *.vspx
+/Pulsar4X/Pulsar4X.UI/StyleCop.Cache
