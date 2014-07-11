@@ -754,7 +754,7 @@ namespace Pulsar4X.UI.Handlers
         private void ClearActionList()
         {
             m_oTaskGroupPanel.AvailableActionsListBox.Items.Clear();
-            m_oTaskGroupPanel.PlottedMovesListBox.ClearSelected();
+            //m_oTaskGroupPanel.PlottedMovesListBox.ClearSelected();
         }
 
         /// <summary>
@@ -768,6 +768,8 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(CurrentTaskGroup.TaskGroupOrders[loop].Name);
             }
+            if (SelectedOrderIndex != -1 && SelectedOrderIndex < CurrentTaskGroup.TaskGroupOrders.Count)
+                m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = SelectedOrderIndex +1;
         }
 
         /// <summary>
