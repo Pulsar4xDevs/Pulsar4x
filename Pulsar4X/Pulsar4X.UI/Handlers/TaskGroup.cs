@@ -475,7 +475,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// Removes the top order.
+        /// Removes the selected order.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -714,14 +714,13 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildActionList()
         {
+            var currentSelectedAction = m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
             ClearActionList();
             GameEntity selectedEntity = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].Entity;
             SystemListObject.ListEntityType entityType = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].EntityType;
-            //m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.MoveTo);
-            //if (entityType == SystemListObject.ListEntityType.TaskGroups || entityType == SystemListObject.ListEntityType.Contacts)
-            //    m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(Constants.ShipTN.OrderType.Follow);
             List<Orders> previousOrders = new List<Orders>();
             int olistindex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+
             if (CurrentTaskGroup.TaskGroupOrders.Count > 0 && olistindex >= 0)
             {
                 previousOrders = CurrentTaskGroup.TaskGroupOrders.ToList().GetRange(0, olistindex);
@@ -730,8 +729,20 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(item);
             }
+  
+            //set the selected action to be the previously selected action if it exsists.
+            if (currentSelectedAction != null && m_oTaskGroupPanel.AvailableActionsListBox.Items.Contains(currentSelectedAction))
+                m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem = currentSelectedAction;
         }
 
+
+        /// <summary>
+        /// creates a list of orders by creating a union and intersection of other lists.
+        /// </summary>
+        /// <param name="thisTG"></param>
+        /// <param name="targetEntity"></param>
+        /// <param name="previousOrders"></param>
+        /// <returns></returns>
         private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Orders> previousOrders)
         {
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = thisTG.LegalOrdersTG();
@@ -754,7 +765,6 @@ namespace Pulsar4X.UI.Handlers
         private void ClearActionList()
         {
             m_oTaskGroupPanel.AvailableActionsListBox.Items.Clear();
-            //m_oTaskGroupPanel.PlottedMovesListBox.ClearSelected();
         }
 
         /// <summary>
