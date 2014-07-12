@@ -178,6 +178,7 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.DisplayContactsCheckBox.CheckStateChanged += new EventHandler(DisplayContactsCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.CheckStateChanged += new EventHandler(DisplayTaskGroupsCheckBox_CheckChanged);
             m_oTaskGroupPanel.DisplayWaypointsCheckBox.CheckStateChanged += new EventHandler(DisplayWaypointsCheckBox_CheckChanged);
+            m_oTaskGroupPanel.OrderFilteringCheckBox.CheckStateChanged += new EventHandler(OrderFilteringCheckBox_CheckChanged);
 
             m_oTaskGroupPanel.NewTaskGroupButton.Click += new EventHandler(NewTaskGroupButton_Click);
             m_oTaskGroupPanel.RenameTaskGroupButton.Click += new EventHandler(RenameTaskGroupButton_Click);
@@ -255,6 +256,11 @@ namespace Pulsar4X.UI.Handlers
         {
             BuildSystemLocationList();
             ClearActionList();
+        }
+
+        private void OrderFilteringCheckBox_CheckChanged(object sender, EventArgs e)
+        {
+            BuildActionList();
         }
 
         /// <summary>
@@ -751,17 +757,28 @@ namespace Pulsar4X.UI.Handlers
         /// <returns></returns>
         private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Orders> previousOrders)
         {
-            List<Constants.ShipTN.OrderType> thisTGLegalOrders = thisTG.LegalOrdersTG();
+            List<Constants.ShipTN.OrderType> thisTGLegalOrders = new List<Constants.ShipTN.OrderType>();
             List<Constants.ShipTN.OrderType> additionalOrders = new List<Constants.ShipTN.OrderType>();
             List<Constants.ShipTN.OrderType> targetEntityLegalOrders = targetEntity.LegalOrders(CurrentTaskGroup.TaskGroupFaction);
-            
-            foreach (var order in previousOrders)
-            {
-                additionalOrders = additionalOrders.Union(order.EnablesTypeOf()).ToList();
-            }
-            thisTGLegalOrders = thisTGLegalOrders.Union(additionalOrders).ToList();
 
-            return thisTGLegalOrders.Intersect(targetEntityLegalOrders).ToList();
+            if (!m_oTaskGroupPanel.OrderFilteringCheckBox.Checked)
+            {
+                thisTGLegalOrders = Enum.GetValues(typeof(Constants.ShipTN.OrderType)).Cast<Constants.ShipTN.OrderType>().ToList();
+            }
+            else 
+            {
+                thisTGLegalOrders = thisTG.LegalOrdersTG();
+                foreach (var order in previousOrders)
+                {
+                    additionalOrders = additionalOrders.Union(order.EnablesTypeOf()).ToList();
+                }
+                thisTGLegalOrders = thisTGLegalOrders.Union(additionalOrders).ToList();
+            }
+
+            //it still needs to do an intersect with the targetEntityLegalOrders, regardless of filtering.
+            thisTGLegalOrders = thisTGLegalOrders.Intersect(targetEntityLegalOrders).ToList();
+
+            return thisTGLegalOrders;
         }
 
 

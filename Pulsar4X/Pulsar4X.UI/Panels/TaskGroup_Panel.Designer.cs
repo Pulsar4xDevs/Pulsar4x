@@ -113,6 +113,11 @@ namespace Pulsar4X.UI.Panels
             get { return m_oWaypointCheckBox; }
         }
 
+        public CheckBox OrderFilteringCheckBox
+        {
+            get { return m_oOrderFilteringCheckBox; }  
+        }
+
         /// <summary>
         /// creates a new task group.
         /// </summary>
