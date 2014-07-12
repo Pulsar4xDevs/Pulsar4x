@@ -1376,15 +1376,17 @@ namespace Pulsar4X.Entities
         /// <param name="Order">Order is the order to be carried out.</param>
         /// <param name="Destination">Destination of the waypoint/planet/TaskGroup we are moving towards.</param>
         /// <param name="Secondary">Secondary will be an enum ID for facility type,component,troop formation, or tractorable ship/shipyard. -1 if not present.</param>
-        public void IssueOrder(Orders OrderToTaskGroup)
+        public void IssueOrder(Orders OrderToTaskGroup, int index = -1)
         {
             if (TaskGroupOrders.Count == 0)
             {
                 NewOrders = true;
                 DrawTravelLine = 0;
             }
-
-            TaskGroupOrders.Add(OrderToTaskGroup);
+            if (index == -1)
+                TaskGroupOrders.Add(OrderToTaskGroup);
+            else
+                TaskGroupOrders.Insert(index, OrderToTaskGroup);
 
             int OrderCount = TaskGroupOrders.Count - 1;
             double dX = 0.0, dY = 0.0, dZ;
