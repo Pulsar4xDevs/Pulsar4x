@@ -469,7 +469,8 @@ namespace Pulsar4X.UI.Handlers
                         CurrentTaskGroup.IssueOrder(NewOrder, SelectedOrderIndex);
                 }
             }
-
+            if (SelectedOrderIndex != -1 && SelectedOrderIndex < CurrentTaskGroup.TaskGroupOrders.Count)
+                SelectedOrderIndex += 1;
             BuildPlottedMoveList();
             CalculateTimeDistance();
         }
@@ -486,7 +487,12 @@ namespace Pulsar4X.UI.Handlers
                 if (SelectedOrderIndex == -1)
                     CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
                 else
+                {
                     CurrentTaskGroup.TaskGroupOrders.RemoveAt(SelectedOrderIndex);
+                    //int prevIndex = SelectedOrderIndex;
+                    //SelectedOrderIndex = -1;
+                    //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
+                }
                 ClearActionList();
                 BuildPlottedMoveList();
                 CalculateTimeDistance();
@@ -772,14 +778,19 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildPlottedMoveList()
         {
-            m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
-
+            int prevIndex = SelectedOrderIndex;
+            SelectedOrderIndex = -1;
+            m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();            
             for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
             {
                 m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(CurrentTaskGroup.TaskGroupOrders[loop].Name);
             }
-            if (SelectedOrderIndex != -1 && SelectedOrderIndex < CurrentTaskGroup.TaskGroupOrders.Count)
-                m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = SelectedOrderIndex +1;
+
+            if (prevIndex < CurrentTaskGroup.TaskGroupOrders.Count)
+            {
+                
+                m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
+            }
         }
 
         /// <summary>
