@@ -191,11 +191,13 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.CurrentTDRadioButton.CheckedChanged += new EventHandler(CurrentTDRadioButton_CheckChanged);
             m_oTaskGroupPanel.AllOrdersTDRadioButton.CheckedChanged += new EventHandler(AllOrdersTDRadioButton_CheckChanged);
 
+            m_oTaskGroupPanel.AvailableActionsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
+            m_oTaskGroupPanel.SystemLocationsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
+            m_oTaskGroupPanel.PlottedMovesListBox.MouseDoubleClick += new MouseEventHandler(RemoveButton_Clicked);
+
             m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndexChanged += new EventHandler(PlottedMovesListBox_SelectedIndexChanged);
             SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
-            m_oTaskGroupPanel.AvailableActionsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
-            m_oTaskGroupPanel.SystemLocationsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
 
             /// <summary>
             /// Rename Class Button Handlers:
@@ -491,6 +493,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RemoveButton_Clicked(object sender, EventArgs e)
         {
+            
             if (CurrentTaskGroup.TaskGroupOrders.Count != 0)
             {
                 if (SelectedOrderIndex == -1)
@@ -503,8 +506,9 @@ namespace Pulsar4X.UI.Handlers
                     //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
                 }
                 ClearActionList();
-                BuildPlottedMoveList();
+                BuildPlottedMoveList();               
                 CalculateTimeDistance();
+                BuildActionList();
             }
         }
 
@@ -519,6 +523,7 @@ namespace Pulsar4X.UI.Handlers
             ClearActionList();
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
             CalculateTimeDistance();
+            BuildActionList();
         }
 
         /// <summary>
