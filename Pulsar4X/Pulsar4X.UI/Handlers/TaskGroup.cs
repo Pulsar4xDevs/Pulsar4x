@@ -194,6 +194,9 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndexChanged += new EventHandler(PlottedMovesListBox_SelectedIndexChanged);
             SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
+            m_oTaskGroupPanel.AvailableActionsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
+            m_oTaskGroupPanel.SystemLocationsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
+
             /// <summary>
             /// Rename Class Button Handlers:
             /// </summary>
