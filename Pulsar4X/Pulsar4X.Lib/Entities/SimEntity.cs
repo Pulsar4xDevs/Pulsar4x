@@ -909,6 +909,7 @@ namespace Pulsar4X.Entities
                                 }
                                 else
                                 {
+#warning magic number related to 10k
                                     rangeAreaDefenseKm = pair2.Value.ShipBFC[pair2.Key.componentIndex].pDRange * 10000.0f;
                                 } 
 
@@ -1013,6 +1014,14 @@ namespace Pulsar4X.Entities
                         int MissilesToLaunch = 0;
                         foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> MisPair in Fact.DetectedContactLists[CurrentSystem].DetectedMissileContacts)
                         {
+                            /// <summary>
+                            /// Advance to next missile group.
+                            /// </summary>
+                            if (MisPair.Key.missilesDestroyed == MisPair.Key.missiles.Count)
+                            {
+                                break;
+                            }
+
                             /// <summary>
                             /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
                             /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
@@ -1139,6 +1148,28 @@ namespace Pulsar4X.Entities
                                     /// launch up to MissilesToLaunch amms in a new ord group at the target.
                                     /// <summary>
                                     MissilesLaunched = pair2.Value.ShipMFC[pair2.Key.componentIndex].FireWeaponsPD(pair2.Value.ShipsTaskGroup, pair2.Value, MisPair.Key, MissilesToLaunch);
+
+
+                                    /// <summary>
+                                    /// Add this ship to the weapon recharge list since it has fired. This is done here in Sim, or for FDF_Self in Ship.cs
+                                    /// </summary>
+                                    if (MissilesLaunched != 0)
+                                    {
+                                        if (Fact.RechargeList.ContainsKey(pair2.Value) == true)
+                                        {
+                                            /// <summary>
+                                            /// If our recharge value does not have Recharge beams in it(bitflag 2 for now), then add it.
+                                            /// </summary>
+                                            if ((Fact.RechargeList[pair2.Value] & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
+                                            {
+                                                Fact.RechargeList[pair2.Value] = (Fact.RechargeList[pair2.Value] + (int)Faction.RechargeStatus.Weapons);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Fact.RechargeList.Add(pair2.Value, (int)Faction.RechargeStatus.Weapons);
+                                        }
+                                    }
 
                                     /// <summary>
                                     /// This FC can no longer fire at ordnance groups in range.

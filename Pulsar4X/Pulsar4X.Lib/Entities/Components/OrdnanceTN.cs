@@ -884,17 +884,28 @@ namespace Pulsar4X.Entities.Components
                 return false;
             }
 
+            TargetTN TGT = null;
+
+            if (MFC.target == null)
+            {
+                TGT = Target;
+            }
+            else
+            {
+                TGT = MFC.target;
+            }
+
             /// <summary>
             /// Range check the target.
             /// </summary>
-            switch (MFC.target.targetType)
+            switch (TGT.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
 
                     /// <summary>
                     /// Is this ship still in existence?
                     /// </summary>
-                    if (MFC.target.ship.IsDestroyed == true)
+                    if (TGT.ship.IsDestroyed == true)
                         return false;
 
                     StarSystem Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
@@ -902,9 +913,9 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// is the specified ship in the detected contacts list? and is it detected by an active?
                     /// </summary>
-                    if (missileGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts.ContainsKey(MFC.target.ship))
+                    if (missileGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts.ContainsKey(TGT.ship))
                     {
-                        if (missileGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts[MFC.target.ship].active == false)
+                        if (missileGroup.ordnanceGroupFaction.DetectedContactLists[Sys].DetectedContacts[TGT.ship].active == false)
                         {
                             return false;
                         }
@@ -914,14 +925,14 @@ namespace Pulsar4X.Entities.Components
                         return false;
                     }
 
-                    int targetIndex = Sys.SystemContactList.IndexOf(MFC.target.ship.ShipsTaskGroup.Contact);
+                    int targetIndex = Sys.SystemContactList.IndexOf(TGT.ship.ShipsTaskGroup.Contact);
 
                     /// <summary>
                     /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
                     /// </summary>
                     float Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
 
-                    int sig = MFC.target.ship.TotalCrossSection - 1;
+                    int sig = TGT.ship.TotalCrossSection - 1;
                     if (sig > Constants.ShipTN.ResolutionMax - 1)
                         sig = Constants.ShipTN.ResolutionMax - 1;
 
@@ -941,18 +952,18 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// No missiles remain in this missile group and it will be cleaned up at the end of the current tick.
                     /// </summary>
-                    if (MFC.target.missileGroup.missilesDestroyed == MFC.target.missileGroup.missiles.Count)
+                    if (TGT.missileGroup.missilesDestroyed == TGT.missileGroup.missiles.Count)
                         return false;
 
                     Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
-                    targetIndex = Sys.SystemContactList.IndexOf(MFC.target.missileGroup.contact);
+                    targetIndex = Sys.SystemContactList.IndexOf(TGT.missileGroup.contact);
 
                     /// <summary>
                     /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
                     /// </summary>
                     Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
 
-                    int MSP = (int)Math.Ceiling(MFC.target.missileGroup.missiles[0].missileDef.size);
+                    int MSP = (int)Math.Ceiling(TGT.missileGroup.missiles[0].missileDef.size);
                     sig = -1;
                     if (MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
                     {
@@ -1878,6 +1889,7 @@ namespace Pulsar4X.Entities.Components
                 /// <summary>
                 /// Search for missile targets.
                 /// </summary>
+#warning magic number related to missile sensor resolution and target checking. Only res 1 sensors will go after missiles.
                 if (Missiles[0].missileDef.aSD.resolution == 1)
                 {
                     foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedMissileContacts)
@@ -1902,6 +1914,11 @@ namespace Pulsar4X.Entities.Components
                                 {
                                     Missiles[loop].target = newMissileTarget;
                                 }
+
+                                /// <summary>
+                                /// sensor missiles may as well be treated like point defense missiles here, since they aren't connected to an MFC.
+                                /// </summary>
+                                pair.Key.ordGroupsTargetting.Add(this);
                                 break;
                             }
                         }

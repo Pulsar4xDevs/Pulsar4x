@@ -734,6 +734,7 @@ namespace Pulsar4X.Entities.Components
         {
             /// <summary>
             /// simple stupid sanity check.
+            /// </summary>
             if(MissilesToFire == 0)
             {
                 return 0;
@@ -768,6 +769,12 @@ namespace Pulsar4X.Entities.Components
                             OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                             LocalMissileGroups.Add(newMissileGroup);
                             TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
+
+                            /// <summary>
+                            /// Add this ordnance group to the ord groups targetting list for the intended target missile group.
+                            /// This is only necessary here as Manually fired MFC missiles are connected to their MFC.
+                            /// </summary>
+                            Target.ordGroupsTargetting.Add(newMissileGroup);
                         }
                         /// <summary>
                         /// An existing missile group may be useable.
@@ -795,6 +802,12 @@ namespace Pulsar4X.Entities.Components
                                 OrdnanceGroupTN newMissileGroup = new OrdnanceGroupTN(TG, newMissile);
                                 LocalMissileGroups.Add(newMissileGroup);
                                 TG.TaskGroupFaction.MissileGroups.Add(newMissileGroup);
+
+                                /// <summary>
+                                /// Add this ordnance group to the ord groups targetting list for the intended target missile group.
+                                /// This is only necessary here as Manually fired MFC missiles are connected to their MFC.
+                                /// </summary>
+                                Target.ordGroupsTargetting.Add(newMissileGroup);
                             }
                         }
                         /// <summary>
