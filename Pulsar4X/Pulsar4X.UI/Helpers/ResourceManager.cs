@@ -268,25 +268,26 @@ namespace Pulsar4X.UI.Helpers
                 {
                     GLFontData.UVCoords oUVCoords = new GLFontData.UVCoords();
 
-                    szBuffer = oXMLReader.GetAttribute("Umin");
-                    bool r1 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.X);
+                    float minX = 0.0f, minY = 0.0f, maxX = 0.0f, maxY = 0.0f;
 
-                    logger.Info("szBuffer: " + szBuffer + " " + r1);
+                    szBuffer = oXMLReader.GetAttribute("Umin");
+                    bool r1 = float.TryParse(szBuffer, out minX);
 
                     szBuffer = oXMLReader.GetAttribute("Umax");
-                    bool r2 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.X);
+                    bool r2 = float.TryParse(szBuffer, out maxX);
 
-                    logger.Info("szBuffer: " + szBuffer + " " + r2);
 
                     szBuffer = oXMLReader.GetAttribute("Vmin");
-                    bool r3 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMin.Y);
+                    bool r3 = float.TryParse(szBuffer, out minY);
 
-                    logger.Info("szBuffer: " + szBuffer + " " + r3);
 
                     szBuffer = oXMLReader.GetAttribute("Vmax");
-                    bool r4 = float.TryParse(szBuffer, out oUVCoords.m_v2UVMax.Y);
+                    bool r4 = float.TryParse(szBuffer, out maxY);
 
-                    logger.Info("szBuffer: " + szBuffer + " " + r4);
+                    oUVCoords.m_v2UVMin.X = minX;
+                    oUVCoords.m_v2UVMax.X = maxX;
+                    oUVCoords.m_v2UVMin.Y = minY;
+                    oUVCoords.m_v2UVMax.Y = maxY;
 
 
                     szBuffer = oXMLReader.GetAttribute("Char");
@@ -296,7 +297,11 @@ namespace Pulsar4X.UI.Helpers
                     }
                     oFontData.m_dicCharMap.Add(cBuffer, oUVCoords);
 
-                    logger.Info("ResourceManager.cs Char: " + szBuffer + " Coordinates: " + oUVCoords.m_v2UVMin.X + "/" + oUVCoords.m_v2UVMin.Y + "," + oUVCoords.m_v2UVMax.X + "/" + oUVCoords.m_v2UVMax.Y);
+                    if (r1 == false || r2 == false || r3 == false || r4 == false)
+                    {
+                        logger.Info("ResourceManager.cs Char: " + szBuffer + " Coordinates: " + oUVCoords.m_v2UVMin.X + "/" + oUVCoords.m_v2UVMin.Y + "," + oUVCoords.m_v2UVMax.X + "/" + oUVCoords.m_v2UVMax.Y + 
+                                    "|" + r1 + " " + r2 + " " + r3 + " " + r4);
+                    }
 
                 } while (oXMLReader.ReadToNextSibling("Character"));  // Move to Next Charcter Element
 
