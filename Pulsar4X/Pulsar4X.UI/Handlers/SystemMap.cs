@@ -222,7 +222,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="TickValue"></param>
         private void AdvanceTime(int TickValue)
         {
-            GameState.SE.AdvanceSim(GameState.Instance.Factions, GameState.RNG, TickValue);            
+            GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, TickValue);            
 
             TimeSpan TS = new TimeSpan(0,0,TickValue);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
@@ -235,6 +235,7 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Put the date time somewhere.
             /// </summary>
+#warning don't really need this debug info
             m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.SE.CurrentTick.ToString() + " " + GameState.SE.lastTick.ToString() ;
 
             MainFormReference.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
@@ -261,7 +262,7 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime30S_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 30 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -272,7 +273,7 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime2M_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 120 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -283,7 +284,7 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime5M_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 300 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -294,7 +295,7 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime20M_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 1200 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -305,7 +306,7 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime1H_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 3600 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -316,29 +317,29 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime3H_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 10800 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
-                AdvanceTime((int)(Constants.TimeInSeconds.Hour * 3));
+                AdvanceTime((int)Constants.TimeInSeconds.ThreeHours);
             }
         }
 
         private void AdvanceTime8H_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 28800 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
-                AdvanceTime((int)(Constants.TimeInSeconds.Hour * 8));
+                AdvanceTime((int)Constants.TimeInSeconds.EightHours);
             }
         }
 
         private void AdvanceTime1D_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 86400 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -349,17 +350,17 @@ namespace Pulsar4X.UI.Handlers
         private void AdvanceTime5D_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 432000 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
-                AdvanceTime((int)(Constants.TimeInSeconds.Day * 5));
+                AdvanceTime((int)Constants.TimeInSeconds.FiveDays);
             }
         }
         private void AdvanceTime30D_Click(object sender, EventArgs e)
         {
             /// <summary>
-            /// Advance simtime by 5 seconds.
+            /// Advance simtime by 2592000 seconds.
             /// </summary>
             if (GameState.SE.SimCreated == true)
             {
@@ -374,6 +375,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
+#warning this may be deprecated
         private void StartSim_Click(object sender, EventArgs e)
         {
             if (GameState.SE.SimCreated == false)

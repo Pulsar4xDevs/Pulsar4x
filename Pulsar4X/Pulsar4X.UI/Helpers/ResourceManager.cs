@@ -266,6 +266,10 @@ namespace Pulsar4X.UI.Helpers
                 // Loop through all Char elements and get out UV coords for each charcter, save them to the Dic.
                 do
                 {
+                    /// <summary>
+                    /// All of the System.Globalization stuff is due ot the fact that the default float.TryParse behaves differently on different computers. thanks microsoft.
+                    /// </summary>
+                    
                     GLFontData.UVCoords oUVCoords = new GLFontData.UVCoords();
 
                     System.Globalization.CultureInfo culture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");

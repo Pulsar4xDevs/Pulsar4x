@@ -24,7 +24,123 @@ namespace Pulsar4X.Entities
         public int lastTick { get; set; }
         public bool SimCreated { get; set; }
 
-        
+
+        /// <summary>
+        /// Subpulse handler will decide what the subpulse/time setting should be.
+        /// </summary>
+        /// <param name="P">List of factions that will be passed to advanceSim</param>
+        /// <param name="RNG">RNG that will be passed to advanceSim</param>
+        /// <param name="tickValue">user entered time value, may bear no resemblance to what actually happens however.</param>
+        public void SubpulseHandler(BindingList<Faction> P, Random RNG, int tickValue)
+        {
+#warning todo: Determine fleet interception, check fire controls, jump transits into new systems, completed orders.
+            /// <summary>
+            /// right now all subpulses are doing is giving multiple finer time slices rather than one large time slice. interruptions are not yet handled.
+            /// </summary>
+            switch ((uint)tickValue)
+            {
+                case Constants.TimeInSeconds.FiveSeconds:
+                    AdvanceSim(P, RNG, tickValue);
+                break;
+                case Constants.TimeInSeconds.ThirtySeconds:
+                    /// <summary>
+                    /// Six 5 second subpulses.
+                    /// </summary>
+                    for(int loop = 0; loop < 6; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveSeconds);
+                    }
+                break;
+                case Constants.TimeInSeconds.TwoMinutes:
+                    /// <summary>
+                    /// Four 30 second subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 4; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.ThirtySeconds);
+                    }
+                break;
+                case Constants.TimeInSeconds.FiveMinutes:
+                    /// <summary>
+                    /// Five 1 minute subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 5; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Minute);
+                    }
+                break;
+
+                case Constants.TimeInSeconds.TwentyMinutes:
+                    /// <summary>
+                    /// Four 5 minute subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 4; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveMinutes);
+                    }
+                break;
+
+                case Constants.TimeInSeconds.Hour:
+                    /// <summary>
+                    /// Three 20 minute subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 3; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.TwentyMinutes);
+                    }
+                break;
+
+                case Constants.TimeInSeconds.ThreeHours:
+                    /// <summary>
+                    /// Three 1 hour subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 3; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Hour);
+                    }
+                break;
+
+                case Constants.TimeInSeconds.EightHours:
+                    /// <summary>
+                    /// Four 2 hour subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 4; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)(Constants.TimeInSeconds.Hour * 2));
+                    }
+                break;
+
+                case Constants.TimeInSeconds.Day:
+                    /// <summary>
+                    /// Three 8 hour subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 3; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.EightHours);
+                    }
+                break;
+
+                case Constants.TimeInSeconds.FiveDays:
+                    /// <summary>
+                    /// Five 1 day subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 5; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Day);
+                    }
+                break;
+
+                case Constants.TimeInSeconds.Month:
+                    /// <summary>
+                    /// Six 5 day subpulses.
+                    /// </summary>
+                    for (int loop = 0; loop < 6; loop++)
+                    {
+                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveDays);
+                    }
+                break;
+            }
+        }
 
         
 
