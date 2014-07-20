@@ -268,21 +268,31 @@ namespace Pulsar4X.UI.Helpers
                 {
                     GLFontData.UVCoords oUVCoords = new GLFontData.UVCoords();
 
+                    System.Globalization.CultureInfo culture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
+
                     float minX = 0.0f, minY = 0.0f, maxX = 0.0f, maxY = 0.0f;
 
                     szBuffer = oXMLReader.GetAttribute("Umin");
-                    bool r1 = float.TryParse(szBuffer, out minX);
+                    bool r1 = float.TryParse(szBuffer, System.Globalization.NumberStyles.AllowDecimalPoint, culture, out minX);
+
+                    //bool r1 = float.TryParse(szBuffer, out minX);
 
                     szBuffer = oXMLReader.GetAttribute("Umax");
-                    bool r2 = float.TryParse(szBuffer, out maxX);
+                    bool r2 = float.TryParse(szBuffer, System.Globalization.NumberStyles.AllowDecimalPoint, culture, out maxX);
+
+                    //bool r2 = float.TryParse(szBuffer, out maxX);
 
 
                     szBuffer = oXMLReader.GetAttribute("Vmin");
-                    bool r3 = float.TryParse(szBuffer, out minY);
+                    bool r3 = float.TryParse(szBuffer, System.Globalization.NumberStyles.AllowDecimalPoint, culture, out minY);
+
+                    //bool r3 = float.TryParse(szBuffer, out minY);
 
 
                     szBuffer = oXMLReader.GetAttribute("Vmax");
-                    bool r4 = float.TryParse(szBuffer, out maxY);
+                    bool r4 = float.TryParse(szBuffer, System.Globalization.NumberStyles.AllowDecimalPoint, culture, out maxY);
+
+                    //bool r4 = float.TryParse(szBuffer, out maxY);
 
                     oUVCoords.m_v2UVMin.X = minX;
                     oUVCoords.m_v2UVMax.X = maxX;
