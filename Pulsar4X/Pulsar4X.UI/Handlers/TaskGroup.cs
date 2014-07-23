@@ -128,6 +128,7 @@ namespace Pulsar4X.UI.Handlers
         private Dictionary<string, SystemListObject> SystemLocationDict { get; set; }
 
         private int SelectedOrderIndex = -1;
+        private int PrevioslySelectedOrderIndex = -1;
         /// <summary>
         /// Constructor for this handler.
         /// </summary>
@@ -195,7 +196,8 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.SystemLocationsListBox.MouseDoubleClick += new MouseEventHandler(AddMoveButton_Clicked);
             m_oTaskGroupPanel.PlottedMovesListBox.MouseDoubleClick += new MouseEventHandler(RemoveButton_Clicked);
 
-            m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndexChanged += new EventHandler(PlottedMovesListBox_SelectedIndexChanged);
+            //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndexChanged += new EventHandler(PlottedMovesListBox_SelectedIndexChanged);
+            m_oTaskGroupPanel.PlottedMovesListBox.MouseDown += new MouseEventHandler(PlottedMovesListBox_MouseDown);
             SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
 
@@ -493,14 +495,28 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RemoveButton_Clicked(object sender, EventArgs e)
         {
-            
+            int removeindex = SelectedOrderIndex;
+
             if (CurrentTaskGroup.TaskGroupOrders.Count != 0)
             {
-                if (SelectedOrderIndex == -1)
+                if (!(sender is Button) && PrevioslySelectedOrderIndex < CurrentTaskGroup.TaskGroupOrders.Count)
+                {
+                    MouseEventArgs mea = (MouseEventArgs)e;
+                    var rect = m_oTaskGroupPanel.PlottedMovesListBox.GetItemRectangle(PrevioslySelectedOrderIndex);
+                    if (rect.Contains(mea.Location))
+                    {
+                        removeindex = PrevioslySelectedOrderIndex;
+                        SelectedOrderIndex = PrevioslySelectedOrderIndex;
+                        //m_oTaskGroupPanel.PlottedMovesListBox.SelectedItem = PrevioslySelectedOrderIndex + 1;
+                    }
+                    
+                }
+
+                if (removeindex == -1)
                     CurrentTaskGroup.TaskGroupOrders.Remove(CurrentTaskGroup.TaskGroupOrders.Last());
                 else
                 {
-                    CurrentTaskGroup.TaskGroupOrders.RemoveAt(SelectedOrderIndex);
+                    CurrentTaskGroup.TaskGroupOrders.RemoveAt(removeindex);
                     //int prevIndex = SelectedOrderIndex;
                     //SelectedOrderIndex = -1;
                     //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
@@ -717,18 +733,40 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationDict.Keys.ToList();
         }
 
-        private void PlottedMovesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        //private void PlottedMovesListBox_SelectedIndexChanged(object sender, EventArgs e)
+        //{
+        //    if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == SelectedOrderIndex)
+        //        m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
+        //    SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+        //    if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == -1)
+        //    {
+        //        m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
+        //    }
+        //    else
+        //        m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
+        //}
+
+        private void PlottedMovesListBox_MouseDown(object sender, MouseEventArgs e)
         {
-            if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == SelectedOrderIndex)
-                m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
-            SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
-            if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == -1)
+            
+            if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex != -1)
             {
-                m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
+                var rect = m_oTaskGroupPanel.PlottedMovesListBox.GetItemRectangle(m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex);
+                if (rect.Contains(e.Location) && m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex != SelectedOrderIndex)
+                {
+                        m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
+                        SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+                }
+                else
+                {
+                    PrevioslySelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+                    m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
+                    SelectedOrderIndex = -1;
+                    m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
+                }
             }
-            else
-                m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
         }
+
         /// <summary>
         /// Builds available orders here. Right now, moveTo is the only one worthwhile. also want to replace this with a proper string at some point.
         /// </summary>
@@ -815,6 +853,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 
                 m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
+                SelectedOrderIndex = prevIndex;
             }
         }
 
