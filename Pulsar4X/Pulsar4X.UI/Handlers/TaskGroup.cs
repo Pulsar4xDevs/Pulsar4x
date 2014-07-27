@@ -127,8 +127,14 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private Dictionary<string, SystemListObject> SystemLocationDict { get; set; }
 
+        
+        /// <summary>
+        /// PlottedMovesListbox orders vars. 
+        /// </summary>
         private int SelectedOrderIndex = -1;
         private int PrevioslySelectedOrderIndex = -1;
+
+
         /// <summary>
         /// Constructor for this handler.
         /// </summary>
@@ -733,19 +739,11 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationDict.Keys.ToList();
         }
 
-        //private void PlottedMovesListBox_SelectedIndexChanged(object sender, EventArgs e)
-        //{
-        //    if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == SelectedOrderIndex)
-        //        m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
-        //    SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
-        //    if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex == -1)
-        //    {
-        //        m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
-        //    }
-        //    else
-        //        m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
-        //}
-
+        /// <summary>
+        /// Handles the mousedown event for the PlottedMoves Listbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PlottedMovesListBox_MouseDown(object sender, MouseEventArgs e)
         {
             
