@@ -24,6 +24,8 @@ namespace Pulsar4X.Entities
         public int lastTick { get; set; }
         public bool SimCreated { get; set; }
 
+        public int FleetInterceptionPreemptTick { get; set; }
+
 
         /// <summary>
         /// Subpulse handler will decide what the subpulse/time setting should be.
@@ -36,11 +38,37 @@ namespace Pulsar4X.Entities
 #warning todo: Determine fleet interception, check fire controls, jump transits into new systems, completed orders.
             /// <summary>
             /// right now all subpulses are doing is giving multiple finer time slices rather than one large time slice. interruptions are not yet handled.
+            /// I want to interrupt not only the sub pulse timer, but also the loop when appropriate.
+            /// Jumps to unknown systems will have to be a list, probably here in SE.
+            /// fire controls I already have, I just need to check for recharged weapons here.
+            /// Completed orders should again be a list. how should order failure be handled?
+            /// Fleet interception, in the sensor model?
+            /// Fleet Interception Preempt: are fleets within 1 days travel time of each other.
+            /// Sensor detection preempt: try to find exact sensor detection time.
             /// </summary>
+
+
+            /// <summary>
+            /// Last game tick we found that a fleet was within 5 days travel time of another factions fleet.
+            /// </summary>
+            if (FleetInterceptionPreemptTick == CurrentTick)
+            {
+                if (tickValue >= Constants.TimeInSeconds.Day)
+                {
+                    tickValue = (int)Constants.TimeInSeconds.Day;
+
+#warning this goes in the SM Log.
+                    String Entry = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    GameState.Instance.Factions[0].MessageLog.Add(Msg);
+                }
+            }
+
             switch ((uint)tickValue)
             {
                 case Constants.TimeInSeconds.FiveSeconds:
-                    AdvanceSim(P, RNG, tickValue);
+                    AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveSeconds);
                 break;
                 case Constants.TimeInSeconds.ThirtySeconds:
                     /// <summary>
@@ -127,6 +155,19 @@ namespace Pulsar4X.Entities
                     for (int loop = 0; loop < 5; loop++)
                     {
                         AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Day);
+
+                        /// <summary>
+                        /// after running advance sim we find a potential fleet interception event occurred.
+                        /// </summary>
+                        if (FleetInterceptionPreemptTick == CurrentTick)
+                        {
+#warning this goes in the SM Log.
+                            String Entry = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
+                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                            GameState.Instance.Factions[0].MessageLog.Add(Msg);
+                            break;
+                        }
                     }
                 break;
 
@@ -137,6 +178,19 @@ namespace Pulsar4X.Entities
                     for (int loop = 0; loop < 6; loop++)
                     {
                         AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveDays);
+
+                        /// <summary>
+                        /// after running advance sim we find a potential fleet interception event occurred.
+                        /// </summary>
+                        if (FleetInterceptionPreemptTick == CurrentTick)
+                        {
+#warning this goes in the SM Log.
+                            String Entry = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
+                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                            GameState.Instance.Factions[0].MessageLog.Add(Msg);
+                            break;
+                        }
                     }
                 break;
             }
@@ -810,6 +864,8 @@ namespace Pulsar4X.Entities
             factionCount = factCount;
             TGStart = 0;
             TGCount = 0;
+
+            FleetInterceptionPreemptTick = 0;
         }
 
         /// <summary>

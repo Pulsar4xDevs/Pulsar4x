@@ -437,6 +437,8 @@ namespace Pulsar4X.Entities
             OrdersCompleted,
             OrdersNotCompleted,
 
+            PotentialFleetInterception,
+
             ShieldRecharge,
 
             ShipDamage,
@@ -1177,6 +1179,24 @@ namespace Pulsar4X.Entities
 
                             System.SystemContactList[loop2].DistanceTable[TGID] = dist;
                             System.SystemContactList[loop2].DistanceUpdate[TGID] = YearTickValue;
+
+
+                            /// <summary>
+                            /// Handle fleet interception check here.
+                            /// </summary>
+                            if (GameState.SE.FleetInterceptionPreemptTick != YearTickValue)
+                            {
+                                /// <summary>
+                                /// how far could this TG travel within a single day?
+                                /// </summary>
+                                float TaskGroupDistance = (TaskGroups[loop].CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;
+
+#warning fleet intercept preemption magic number here, if less than 5 days travel time currently.
+                                if (TaskGroupDistance >= (dist / 5.0))
+                                {
+                                    GameState.SE.FleetInterceptionPreemptTick = YearTickValue;
+                                }
+                            }
                         }
 
                         /// <summary>
