@@ -429,6 +429,7 @@ namespace Pulsar4X.Entities
 
             MissileHit,
             MissileIntercepted,
+            MissileInterceptEvent,
             MissileLostFireControl,
             MissileLostTracking,
             MissileMissed,
@@ -438,7 +439,7 @@ namespace Pulsar4X.Entities
             OrdersNotCompleted,
 
             PotentialFleetInterception,
-
+            
             ShieldRecharge,
 
             ShipDamage,

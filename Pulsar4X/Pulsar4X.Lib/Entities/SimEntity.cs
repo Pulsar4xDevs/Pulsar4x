@@ -11,9 +11,20 @@ using System.Collections.ObjectModel;
 namespace Pulsar4X.Entities
 {
     /// <summary>
-    /// Most of this class is deprecated and can be removed.
-    /// I'll do that at some point in the future.
+    /// Simple helper class for the sub pulse handler.
     /// </summary>
+    public class SubPulseTimeList
+    {
+        public int TimeInSeconds { get; set; }
+        public int SubPulses { get; set; }
+
+        public SubPulseTimeList(int Time, int Sub)
+        {
+            TimeInSeconds = Time;
+            SubPulses = Sub;
+        }
+    }
+
     public class SimEntity
     {
         public int factionStart { get; set; }
@@ -24,7 +35,25 @@ namespace Pulsar4X.Entities
         public int lastTick { get; set; }
         public bool SimCreated { get; set; }
 
+        /// <summary>
+        /// Does the potential for a fleet interception event exist this tick? if this is set to currentTick the answer is true
+        /// </summary>
         public int FleetInterceptionPreemptTick { get; set; }
+
+        /// <summary>
+        /// if this is set to current Tick, then missile time to hit is valid.
+        /// </summary>
+        public int MissileInterceptPreemptTick { get; set; }
+
+        /// <summary>
+        /// How long until the next missile hits? how far should simentity allow the game to progress?
+        /// </summary>
+        public int MissileTimeToHit { get; set; }
+
+        /// <summary>
+        /// List of standard times in seconds, paired with what the subpulse should be and how many of them there are.
+        /// </summary>
+        public Dictionary<int,SubPulseTimeList> SubPulse { get; set; }
 
 
         /// <summary>
@@ -47,9 +76,18 @@ namespace Pulsar4X.Entities
             /// Sensor detection preempt: try to find exact sensor detection time.
             /// </summary>
 
+            /// <summary>
+            /// How much time should pass? this can be modified by a missile event.
+            /// </summary>
+            int desiredTime = tickValue;
 
             /// <summary>
-            /// Last game tick we found that a fleet was within 5 days travel time of another factions fleet.
+            /// how much time has passed?
+            /// </summary>
+            int elapsedTime = 0;
+
+            /// <summary>
+            /// Last game tick I found that a fleet was within 5 days travel time of another factions fleet.
             /// </summary>
             if (FleetInterceptionPreemptTick == CurrentTick)
             {
@@ -65,135 +103,163 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            switch ((uint)tickValue)
+            /// <summary>
+            /// Default subpulse data, how many seconds should be advanced for each Pulses iteration of the loop.
+            /// </summary>
+            int AdvanceTime = SubPulse[tickValue].TimeInSeconds;
+            int Pulses = SubPulse[tickValue].SubPulses;
+
+            /// <summary>
+            /// A missile intercept preemption event has been detected.
+            /// </summary>
+            if (MissileInterceptPreemptTick == CurrentTick)
             {
-                case Constants.TimeInSeconds.FiveSeconds:
-                    AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveSeconds);
-                break;
-                case Constants.TimeInSeconds.ThirtySeconds:
+                if (MissileTimeToHit <= tickValue)
+                {
                     /// <summary>
-                    /// Six 5 second subpulses.
+                    /// How many 5 second ticks until this missile hits?
                     /// </summary>
-                    for(int loop = 0; loop < 6; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveSeconds);
-                    }
-                break;
-                case Constants.TimeInSeconds.TwoMinutes:
-                    /// <summary>
-                    /// Four 30 second subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 4; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.ThirtySeconds);
-                    }
-                break;
-                case Constants.TimeInSeconds.FiveMinutes:
-                    /// <summary>
-                    /// Five 1 minute subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 5; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Minute);
-                    }
-                break;
+                    int FiveSecondIncrements = (int)Math.Floor((float)MissileTimeToHit / 5.0f);
+                    desiredTime = FiveSecondIncrements * 5;
 
-                case Constants.TimeInSeconds.TwentyMinutes:
                     /// <summary>
-                    /// Four 5 minute subpulses.
+                    /// I want to pause right before the missile hits.
                     /// </summary>
-                    for (int loop = 0; loop < 4; loop++)
+                    if (desiredTime == MissileTimeToHit && desiredTime != (int)Constants.TimeInSeconds.FiveSeconds)
                     {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveMinutes);
+                        desiredTime = desiredTime - 5;
                     }
-                break;
-
-                case Constants.TimeInSeconds.Hour:
-                    /// <summary>
-                    /// Three 20 minute subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 3; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.TwentyMinutes);
-                    }
-                break;
-
-                case Constants.TimeInSeconds.ThreeHours:
-                    /// <summary>
-                    /// Three 1 hour subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 3; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Hour);
-                    }
-                break;
-
-                case Constants.TimeInSeconds.EightHours:
-                    /// <summary>
-                    /// Four 2 hour subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 4; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)(Constants.TimeInSeconds.Hour * 2));
-                    }
-                break;
-
-                case Constants.TimeInSeconds.Day:
-                    /// <summary>
-                    /// Three 8 hour subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 3; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.EightHours);
-                    }
-                break;
-
-                case Constants.TimeInSeconds.FiveDays:
-                    /// <summary>
-                    /// Five 1 day subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 5; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.Day);
-
-                        /// <summary>
-                        /// after running advance sim we find a potential fleet interception event occurred.
-                        /// </summary>
-                        if (FleetInterceptionPreemptTick == CurrentTick)
-                        {
-#warning this goes in the SM Log.
-                            String Entry = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
-                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                            GameState.Instance.Factions[0].MessageLog.Add(Msg);
-                            break;
-                        }
-                    }
-                break;
-
-                case Constants.TimeInSeconds.Month:
-                    /// <summary>
-                    /// Six 5 day subpulses.
-                    /// </summary>
-                    for (int loop = 0; loop < 6; loop++)
-                    {
-                        AdvanceSim(P, RNG, (int)Constants.TimeInSeconds.FiveDays);
-
-                        /// <summary>
-                        /// after running advance sim we find a potential fleet interception event occurred.
-                        /// </summary>
-                        if (FleetInterceptionPreemptTick == CurrentTick)
-                        {
-#warning this goes in the SM Log.
-                            String Entry = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
-                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                            GameState.Instance.Factions[0].MessageLog.Add(Msg);
-                            break;
-                        }
-                    }
-                break;
+                }
             }
+
+            /// <summary>
+            /// missile intercepts need a way of stepping down the sub pulse and advance time values, hence this loop.
+            /// </summary>
+            while (elapsedTime != desiredTime)
+            {
+                for (int loop = 0; loop < Pulses; loop++)
+                {
+                    AdvanceSim(P, RNG, AdvanceTime);
+
+                    elapsedTime = elapsedTime + AdvanceTime;
+
+                    /// <summary>
+                    /// after advance sim is a missile intercept still in progress?
+                    if (MissileInterceptPreemptTick == CurrentTick)
+                    {
+                        bool test = MissilePreemptCheck((desiredTime - elapsedTime), out AdvanceTime, out Pulses);
+
+                        /// <summary>
+                        /// better just get out of here if this is ever false.
+                        /// </summary>
+                        if (test == false)
+                        {
+                            return;
+                        }
+                    }
+                    /// <summary>
+                    /// after running advance sim we find a potential fleet interception event occurred.
+                    /// </summary>
+                    else if (FleetInterceptionPreemptTick == CurrentTick)
+                    {
+#warning this goes in the SM Log.
+                        String Entry2 = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
+                        MessageEntry Msg2 = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry2);
+                        GameState.Instance.Factions[0].MessageLog.Add(Msg2);
+
+                        return;
+                    }
+                }
+            }
+            
+        }
+
+
+        /// <summary>
+        /// What sub pulse time slice best serves the DesiredTime requirement?
+        /// </summary>
+        /// <param name="DesiredTime">Time I want to advance. This should be in seconds, but will always be divisible by 5. It should already be slightly less than missile impact time.</param>
+        /// <param name="Advance">subpulse length</param>
+        /// <param name="Pulse">subpulses</param>
+        /// <returns>If we handled DesiredTime correctly or not.</returns>
+        public bool MissilePreemptCheck(int DesiredTime, out int Advance, out int Pulse)
+        {
+            int FiveSecondIncrements = DesiredTime / 5;
+
+            if (DesiredTime == Constants.TimeInSeconds.FiveSeconds)
+            {
+                Advance = (int)Constants.TimeInSeconds.FiveSeconds;
+                Pulse = FiveSecondIncrements;
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.ThirtySeconds)
+            {
+                Advance = (int)Constants.TimeInSeconds.FiveSeconds;
+                Pulse = FiveSecondIncrements;
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.TwoMinutes)
+            {
+                Advance = (int)Constants.TimeInSeconds.ThirtySeconds;
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.ThirtySeconds);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.FiveMinutes)
+            {
+                Advance = (int)Constants.TimeInSeconds.Minute;
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.Minute);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.TwentyMinutes)
+            {
+                Advance = (int)Constants.TimeInSeconds.FiveMinutes;
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.FiveMinutes);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.Hour)
+            {
+                Advance = (int)Constants.TimeInSeconds.TwentyMinutes;
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.TwentyMinutes);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.ThreeHours)
+            {
+                Advance = (int)Constants.TimeInSeconds.Hour;
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.Hour);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.EightHours)
+            {
+                Advance = (int)(Constants.TimeInSeconds.Hour * 2);
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)(Constants.TimeInSeconds.Hour * 2));
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.Day)
+            {
+                Advance = (int)(Constants.TimeInSeconds.EightHours);
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.EightHours);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.FiveDays)
+            {
+                Advance = (int)(Constants.TimeInSeconds.Day);
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.Day);
+            }
+            else if (DesiredTime <= Constants.TimeInSeconds.Month)
+            {
+                Advance = (int)(Constants.TimeInSeconds.FiveDays);
+                Pulse = (int)Math.Floor((float)DesiredTime / (int)Constants.TimeInSeconds.FiveDays);
+            }
+            else
+            {
+                /// <summary>
+                /// this should not happen.
+                /// </summary>
+#warning SM log this
+                String Entry = String.Format("Subpulse Error with desiredTime {0}, sub pulse set to 5 seconds. This should go in the SM log eventually.",DesiredTime);
+                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Error, null, null, GameState.Instance.GameDateTime,
+                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                GameState.Instance.Factions[0].MessageLog.Add(Msg);
+
+                Advance = (int)Constants.TimeInSeconds.FiveSeconds;
+                Pulse = 1;
+
+                return false;
+            }
+
+            return true;
         }
 
         
@@ -222,6 +288,20 @@ namespace Pulsar4X.Entities
                 for (int loop2 = 0; loop2 < P[loop].MissileGroups.Count; loop2++)
                 {
                     P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
+
+                    /// <summary>
+                    /// Handle missile interception sub pulse preemption here.
+                    /// </summary>
+                    if (MissileInterceptPreemptTick != CurrentTick)
+                    {
+                        MissileInterceptPreemptTick = CurrentTick;
+                        MissileTimeToHit = (int)P[loop].MissileGroups[loop2].timeReq;
+                    }
+                    else if (MissileInterceptPreemptTick == CurrentTick && P[loop].MissileGroups[loop2].timeReq < MissileTimeToHit)
+                    {
+                        MissileTimeToHit = (int)P[loop].MissileGroups[loop2].timeReq;
+                    }
+
 
                     if (P[loop].MissileGroups[loop2].missilesDestroyed != 0 && P[loop].MissileRemoveList.Contains(P[loop].MissileGroups[loop2]) == false )
                     {
@@ -857,6 +937,11 @@ namespace Pulsar4X.Entities
             SimCreated = false;
         }
 
+        /// <summary>
+        /// Constructor for sim entity. as with all constructors, lots of initialization happens here.
+        /// </summary>
+        /// <param name="factCount"></param>
+        /// <param name="factStart"></param>
         public SimEntity(int factCount, int factStart)
         {
             SimCreated = true;
@@ -864,8 +949,24 @@ namespace Pulsar4X.Entities
             factionCount = factCount;
             TGStart = 0;
             TGCount = 0;
+            FleetInterceptionPreemptTick = -1;
 
-            FleetInterceptionPreemptTick = 0;
+            MissileInterceptPreemptTick = -1;
+            MissileTimeToHit = 0;
+
+#warning subpulse related magic numbers
+            SubPulse = new Dictionary<int, SubPulseTimeList>();
+            SubPulse.Add((int)Constants.TimeInSeconds.FiveSeconds, new SubPulseTimeList((int)Constants.TimeInSeconds.FiveSeconds, 1));
+            SubPulse.Add((int)Constants.TimeInSeconds.ThirtySeconds, new SubPulseTimeList((int)Constants.TimeInSeconds.FiveSeconds, 6));
+            SubPulse.Add((int)Constants.TimeInSeconds.TwoMinutes, new SubPulseTimeList((int)Constants.TimeInSeconds.ThirtySeconds, 4));
+            SubPulse.Add((int)Constants.TimeInSeconds.FiveMinutes, new SubPulseTimeList((int)Constants.TimeInSeconds.Minute, 5));
+            SubPulse.Add((int)Constants.TimeInSeconds.TwentyMinutes, new SubPulseTimeList((int)Constants.TimeInSeconds.FiveMinutes, 4));
+            SubPulse.Add((int)Constants.TimeInSeconds.Hour, new SubPulseTimeList((int)Constants.TimeInSeconds.TwentyMinutes, 3));
+            SubPulse.Add((int)Constants.TimeInSeconds.ThreeHours, new SubPulseTimeList((int)Constants.TimeInSeconds.Hour, 3));
+            SubPulse.Add((int)Constants.TimeInSeconds.EightHours, new SubPulseTimeList((int)(Constants.TimeInSeconds.Hour * 2), 4));
+            SubPulse.Add((int)Constants.TimeInSeconds.Day, new SubPulseTimeList((int)Constants.TimeInSeconds.EightHours, 3));
+            SubPulse.Add((int)Constants.TimeInSeconds.FiveDays, new SubPulseTimeList((int)Constants.TimeInSeconds.Day, 5));
+            SubPulse.Add((int)Constants.TimeInSeconds.Month, new SubPulseTimeList((int)Constants.TimeInSeconds.FiveDays, 6));
         }
 
         /// <summary>
