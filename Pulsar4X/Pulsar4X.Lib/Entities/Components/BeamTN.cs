@@ -621,5 +621,17 @@ namespace Pulsar4X.Entities.Components
 
             return ready;
         }
+        
+        /// <summary>
+        /// timeToFire calculates how many seconds until this beam weapon is charged.
+        /// </summary>
+        /// <returns>number of seconds(not ticks) until this gun is recharged. the smallest unit of time is the 5 second increment for recharging, so round up.</returns>
+        public int timeToFire()
+        {
+            int SecondsToCharge = (int)Math.Ceiling((((float)BeamDef.powerRequirement - CurrentCapacitor) / BeamDef.weaponCapacitor));
+            SecondsToCharge = SecondsToCharge * (int)Constants.TimeInSeconds.FiveSeconds;
+            return SecondsToCharge;
+
+        }
     }
 }

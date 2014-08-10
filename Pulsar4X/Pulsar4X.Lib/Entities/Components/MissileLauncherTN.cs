@@ -231,7 +231,7 @@ namespace Pulsar4X.Entities.Components
         /// Is this launcher ready to fire its loaded missile?
         /// </summary>
         /// <returns>True = yes, false = no.</returns>
-        public bool ReadyToFire()
+        public bool readyToFire()
         {
             if (LoadTime == 0)
                 return true;
@@ -265,6 +265,16 @@ namespace Pulsar4X.Entities.Components
                     LoadTime = MissileLauncherDef.rateOfFire;
                 }
             }
+        }
+
+        /// <summary>
+        /// timeToFire calculates how many seconds until this missile launcher is charged.
+        /// </summary>
+        /// <returns>launchers already store load time, so return that.</returns>
+        public int timeToFire()
+        {
+            return LoadTime;
+
         }
     }
 }

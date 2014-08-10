@@ -1535,7 +1535,7 @@ namespace Pulsar4X.UI.Handlers
                         {
                             Entry = String.Format("{0} - {1}:", Entry, _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadedOrdnance.Name);
                         }
-                        if (_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].ReadyToFire() == true)
+                        if (_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].readyToFire() == true)
                         {
                             Entry = String.Format("{0} (Ready to Fire)\n",Entry);
                         }
@@ -1563,7 +1563,7 @@ namespace Pulsar4X.UI.Handlers
                             hasPrinted = true;
                         }
 
-                        if (_CurrnetShip.ShipMLaunchers[loop].ReadyToFire() == true)
+                        if (_CurrnetShip.ShipMLaunchers[loop].readyToFire() == true)
                         {
                             Entry = String.Format("{0} - {1}: (Ready to Fire)\n", _CurrnetShip.ShipMLaunchers[loop].Name, _CurrnetShip.ShipMLaunchers[loop].loadedOrdnance.Name);
                             m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);

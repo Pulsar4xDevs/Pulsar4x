@@ -62,7 +62,8 @@ namespace Pulsar4X.Entities
         /// <param name="P">List of factions that will be passed to advanceSim</param>
         /// <param name="RNG">RNG that will be passed to advanceSim</param>
         /// <param name="tickValue">user entered time value, may bear no resemblance to what actually happens however.</param>
-        public void SubpulseHandler(BindingList<Faction> P, Random RNG, int tickValue)
+        /// <returns>time in seconds that the subpulse handler processes.</returns>
+        public int SubpulseHandler(BindingList<Faction> P, Random RNG, int tickValue)
         {
 #warning todo: Determine fleet interception, check fire controls, jump transits into new systems, completed orders.
             /// <summary>
@@ -129,6 +130,97 @@ namespace Pulsar4X.Entities
                     {
                         desiredTime = desiredTime - 5;
                     }
+
+                    PreemptCheck(desiredTime, out AdvanceTime, out Pulses);
+                }
+            }
+
+            int FCInterruptTime = -1;
+            bool done = false;
+
+            /// <summary>
+            /// no point in calculating the subpulse if we're at 5 seconds.
+            /// </summary>
+            if (desiredTime != (int)Constants.TimeInSeconds.FiveSeconds)
+            {
+                /// <summary>
+                /// Check if a weapon attached to a fire controller is about to be ready to fire.
+                /// </summary>
+                for (int loop = 0; loop < P.Count; loop++)
+                {
+                    foreach (KeyValuePair<ComponentTN, bool> pair in P[loop].OpenFireFCType)
+                    {
+                        /// <summary>
+                        /// BFC
+                        /// </summary>
+                        if (pair.Value == false)
+                        {
+                            for (int loop2 = 0; loop2 < P[loop].OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedWeapons.Count; loop2++)
+                            {
+                                if (P[loop].OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedWeapons[loop2].readyToFire() == true)
+                                {
+                                    FCInterruptTime = (int)Constants.TimeInSeconds.FiveSeconds;
+                                    done = true;
+                                    break;
+                                }
+                                else if (FCInterruptTime != ((int)Constants.TimeInSeconds.FiveSeconds * 2))
+                                {
+                                    FCInterruptTime = P[loop].OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedWeapons[loop2].timeToFire();
+                                }
+                            }
+
+                            if (done == true)
+                                break;
+
+                            for (int loop2 = 0; loop2 < P[loop].OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedTurrets.Count; loop2++)
+                            {
+                                if (P[loop].OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedTurrets[loop2].readyToFire() == true)
+                                {
+                                    FCInterruptTime = (int)Constants.TimeInSeconds.FiveSeconds;
+                                    done = true;
+                                    break;
+                                }
+                                else if (FCInterruptTime != ((int)Constants.TimeInSeconds.FiveSeconds * 2))
+                                {
+                                    FCInterruptTime = P[loop].OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedTurrets[loop2].timeToFire();
+                                }
+                            }
+
+                            if (done == true)
+                                break;
+                        }
+                        /// <summary>
+                        /// MFC
+                        /// </summary>
+                        else if (pair.Value == true)
+                        {
+                            for (int loop2 = 0; loop2 < P[loop].OpenFireFC[pair.Key].ShipMFC[pair.Key.componentIndex].linkedWeapons.Count; loop2++)
+                            {
+                                if (P[loop].OpenFireFC[pair.Key].ShipMFC[pair.Key.componentIndex].linkedWeapons[loop2].readyToFire() == true)
+                                {
+                                    FCInterruptTime = (int)Constants.TimeInSeconds.FiveSeconds;
+                                    done = true;
+                                    break;
+                                }
+                                else if (FCInterruptTime != ((int)Constants.TimeInSeconds.FiveSeconds * 2))
+                                {
+                                    FCInterruptTime = P[loop].OpenFireFC[pair.Key].ShipMFC[pair.Key.componentIndex].linkedWeapons[loop2].timeToFire();
+                                }
+                            }
+
+                            if (done == true)
+                                break;
+                        }
+                    }
+
+                    if (done == true)
+                        break;
+                }
+
+                if (FCInterruptTime != -1 && FCInterruptTime < desiredTime)
+                {
+                    desiredTime = FCInterruptTime;
+                    PreemptCheck(desiredTime, out AdvanceTime, out Pulses);
                 }
             }
 
@@ -147,14 +239,14 @@ namespace Pulsar4X.Entities
                     /// after advance sim is a missile intercept still in progress?
                     if (MissileInterceptPreemptTick == CurrentTick)
                     {
-                        bool test = MissilePreemptCheck((desiredTime - elapsedTime), out AdvanceTime, out Pulses);
+                        bool test = PreemptCheck((desiredTime - elapsedTime), out AdvanceTime, out Pulses);
 
                         /// <summary>
                         /// better just get out of here if this is ever false.
                         /// </summary>
                         if (test == false)
                         {
-                            return;
+                            return elapsedTime;
                         }
                     }
                     /// <summary>
@@ -168,11 +260,11 @@ namespace Pulsar4X.Entities
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry2);
                         GameState.Instance.Factions[0].MessageLog.Add(Msg2);
 
-                        return;
+                        return elapsedTime;
                     }
                 }
             }
-            
+            return elapsedTime;
         }
 
 
@@ -183,7 +275,7 @@ namespace Pulsar4X.Entities
         /// <param name="Advance">subpulse length</param>
         /// <param name="Pulse">subpulses</param>
         /// <returns>If we handled DesiredTime correctly or not.</returns>
-        public bool MissilePreemptCheck(int DesiredTime, out int Advance, out int Pulse)
+        public bool PreemptCheck(int DesiredTime, out int Advance, out int Pulse)
         {
             int FiveSecondIncrements = DesiredTime / 5;
 

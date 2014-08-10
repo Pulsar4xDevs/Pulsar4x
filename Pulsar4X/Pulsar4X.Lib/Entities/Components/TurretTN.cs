@@ -262,5 +262,17 @@ namespace Pulsar4X.Entities.Components
 
             return ready;
         }
+
+        /// <summary>
+        /// timeToFire calculates how many seconds until this turret is charged.
+        /// </summary>
+        /// <returns>number of seconds(not ticks) until this gun is recharged. the smallest unit of time is the 5 second increment for recharging, so round up.</returns>
+        public int timeToFire()
+        {
+            int SecondsToCharge = (int)Math.Ceiling((((float)TurretDef.powerRequirement - CurrentCapacitor) / (TurretDef.baseBeamWeapon.weaponCapacitor * TurretDef.multiplier)));
+            SecondsToCharge = SecondsToCharge * (int)Constants.TimeInSeconds.FiveSeconds;
+            return SecondsToCharge;
+
+        }
     }
 }

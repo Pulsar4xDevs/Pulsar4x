@@ -222,9 +222,9 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="TickValue"></param>
         private void AdvanceTime(int TickValue)
         {
-            GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, TickValue);            
+            int elapsed = GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, TickValue);
 
-            TimeSpan TS = new TimeSpan(0,0,TickValue);
+            TimeSpan TS = new TimeSpan(0, 0, elapsed);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
 
             int Seconds = GameState.Instance.GameDateTime.Second + (GameState.Instance.GameDateTime.Minute * 60) + (GameState.Instance.GameDateTime.Hour * 3600) +
