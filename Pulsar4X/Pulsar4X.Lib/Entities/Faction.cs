@@ -1134,6 +1134,11 @@ namespace Pulsar4X.Entities
         /// <param name="YearTickValue">The second count for the current year.</param>
         public void SensorSweep(int YearTickValue)
         {
+            /// <summary
+            /// clear the fleet preempt list.
+            /// </summary>
+            GameState.SE.ClearFleetPreemptList();
+
             /// <summary>
             /// Ships and missiles are added to these two binding lists. this is for later to help the detected contact list.
             /// </summary>
@@ -1192,10 +1197,20 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 float TaskGroupDistance = (TaskGroups[loop].CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;
 
+                                
+
 #warning fleet intercept preemption magic number here, if less than 5 days travel time currently.
                                 if (TaskGroupDistance >= (dist / 5.0))
                                 {
+#warning Update this fleet intercept list for planets/populations
                                     GameState.SE.FleetInterceptionPreemptTick = YearTickValue;
+
+                                    GameState.SE.AddFleetToPreemptList(TaskGroups[loop]);
+                                    if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
+                                    {
+
+                                        GameState.SE.AddFleetToPreemptList(System.SystemContactList[loop2].TaskGroup);
+                                    }
                                 }
                             }
                         }

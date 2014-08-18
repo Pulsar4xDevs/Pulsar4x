@@ -41,6 +41,11 @@ namespace Pulsar4X.Entities
         public int FleetInterceptionPreemptTick { get; set; }
 
         /// <summary>
+        /// this is the list of fleets that have caused a fleet intercept preempt this tick.
+        /// </summary>
+        public BindingList<TaskGroupTN> FleetInterceptPreemptList { get; set; }
+
+        /// <summary>
         /// if this is set to current Tick, then missile time to hit is valid.
         /// </summary>
         public int MissileInterceptPreemptTick { get; set; }
@@ -54,6 +59,23 @@ namespace Pulsar4X.Entities
         /// List of standard times in seconds, paired with what the subpulse should be and how many of them there are.
         /// </summary>
         public Dictionary<int,SubPulseTimeList> SubPulse { get; set; }
+
+        /// <summary>
+        /// Clears the fleet preempt list.
+        /// </summary>
+        public void ClearFleetPreemptList()
+        {
+            FleetInterceptPreemptList.Clear();
+        }
+
+        /// <summary>
+        /// Adds a TG to the fleet intercept preempt list.
+        /// </summary>
+        /// <param name="TG">taskgroup to be added</param>
+        public void AddFleetToPreemptList(TaskGroupTN TG)
+        {
+            FleetInterceptPreemptList.Add(TG);
+        }
 
 
         /// <summary>
@@ -109,6 +131,15 @@ namespace Pulsar4X.Entities
             /// </summary>
             int AdvanceTime = SubPulse[tickValue].TimeInSeconds;
             int Pulses = SubPulse[tickValue].SubPulses;
+
+
+            /// <summary>
+            /// Sensor pre-empt check.
+            /// I need to get the best range active(passives are already done. use sensor model code?
+            /// Need to calculate distance to traverse each others sensor bubble? or distance to sensor bubble edge?
+            /// also make sure already detected ships aren't here.
+            /// All detection methods have to be checked for: thermal, EM, and active.
+            /// </summary>
 
             /// <summary>
             /// A missile intercept preemption event has been detected.
@@ -1024,6 +1055,9 @@ namespace Pulsar4X.Entities
         }
         #endregion
 
+        /// <summary>
+        /// this is probably still deprecated.
+        /// </summary>
         public SimEntity()
         {
             SimCreated = false;
@@ -1059,6 +1093,8 @@ namespace Pulsar4X.Entities
             SubPulse.Add((int)Constants.TimeInSeconds.Day, new SubPulseTimeList((int)Constants.TimeInSeconds.EightHours, 3));
             SubPulse.Add((int)Constants.TimeInSeconds.FiveDays, new SubPulseTimeList((int)Constants.TimeInSeconds.Day, 5));
             SubPulse.Add((int)Constants.TimeInSeconds.Month, new SubPulseTimeList((int)Constants.TimeInSeconds.FiveDays, 6));
+
+            FleetInterceptPreemptList = new BindingList<TaskGroupTN>();
         }
 
         /// <summary>
