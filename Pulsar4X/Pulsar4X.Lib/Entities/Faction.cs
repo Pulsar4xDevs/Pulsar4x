@@ -1200,7 +1200,17 @@ namespace Pulsar4X.Entities
                                 
 
 #warning fleet intercept preemption magic number here, if less than 5 days travel time currently.
-                                if (TaskGroupDistance >= (dist / 5.0))
+#warning fleet intercept needs to only process for hostile or unknown taskgroups, not all taskgroups.
+
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last();
+                                ShipTN LargestContactTCS = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+
+                                /// <summary>
+                                /// If this Taskgroup isn't already detected, and the distance is short enough, put it in the fleet intercept preempt list.
+                                /// </summary>
+                                if (TaskGroupDistance >= (dist / 5.0) && ( DetectedContactLists.ContainsKey(System) == false ||
+                                    (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) || 
+                                     DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false ) ) ) )
                                 {
 #warning Update this fleet intercept list for planets/populations
                                     GameState.SE.FleetInterceptionPreemptTick = YearTickValue;

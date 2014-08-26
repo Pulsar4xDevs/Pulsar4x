@@ -138,8 +138,89 @@ namespace Pulsar4X.Entities
             /// I need to get the best range active(passives are already done. use sensor model code?
             /// Need to calculate distance to traverse each others sensor bubble? or distance to sensor bubble edge?
             /// also make sure already detected ships aren't here.
-            /// All detection methods have to be checked for: thermal, EM, and active.
+            /// just check active for now.
+            /// The idea here is that the time it would take a fleet to travel through the entire detection radius of the opposing fleet should be the subpulse value.
+            /// this should make sure a spot event happens for now. I'll likely have to revise this though.
             /// </summary>
+            
+            for (int loop = 0; loop < FleetInterceptPreemptList.Count; loop++)
+            {
+                /// <summary>
+                /// get the largest TCS ship ID from the active sort list.
+                /// </summary>
+                int ShipID1 = FleetInterceptPreemptList[loop].ActiveSortList.Last();
+                int ShipID2 = FleetInterceptPreemptList[loop+1].ActiveSortList.Last();
+
+                ShipTN Large1 = FleetInterceptPreemptList[loop].Ships[ShipID1];
+                ShipTN Large2 = FleetInterceptPreemptList[loop + 1].Ships[ShipID2];
+
+                /// <summary>
+                /// get the distance, which involves going to the distance table(as opposed to recalculating distance here).
+                /// </summary>
+                int TGID1 = FleetInterceptPreemptList[loop].Contact.CurrentSystem.SystemContactList.IndexOf(FleetInterceptPreemptList[loop].Contact);
+                int TGID2 = FleetInterceptPreemptList[loop].Contact.CurrentSystem.SystemContactList.IndexOf(FleetInterceptPreemptList[loop + 1].Contact);
+
+                float dist = FleetInterceptPreemptList[loop].Contact.CurrentSystem.SystemContactList[TGID1].DistanceTable[TGID2];
+
+                int sig1 = Large1.TotalCrossSection - 1;
+                int sig2 = Large2.TotalCrossSection - 1;
+
+                if (sig1 > Constants.ShipTN.ResolutionMax - 1)
+                    sig1 = Constants.ShipTN.ResolutionMax - 1;
+
+                if (sig2 > Constants.ShipTN.ResolutionMax - 1)
+                    sig2 = Constants.ShipTN.ResolutionMax - 1;
+
+                int detection1 = -1;
+                int detection2 = -1;
+
+                int TimeToCross1 = -1;
+                int TimeToCross2 = -1;
+
+                /// <summary>
+                /// here I want to find out what the detection factors are, and how much time each taskgroup requires to cross the detection factor of the opposing taskgroup.
+                /// </summary>
+                if (FleetInterceptPreemptList[loop].ActiveSensorQue.Count != 0)
+                {
+                    detection1 = FleetInterceptPreemptList[loop].ActiveSensorQue[FleetInterceptPreemptList[loop].TaskGroupLookUpST[sig2]].aSensorDef.GetActiveDetectionRange(sig2, -1);
+                    float speedAdj = FleetInterceptPreemptList[loop + 1].CurrentSpeed / 10000.0f;
+
+                    TimeToCross1 = detection1 / (int)Math.Floor(speedAdj);
+                }
+                if (FleetInterceptPreemptList[loop + 1].ActiveSensorQue.Count != 0)
+                {
+                    detection2 = FleetInterceptPreemptList[loop + 1].ActiveSensorQue[FleetInterceptPreemptList[loop + 1].TaskGroupLookUpST[sig1]].aSensorDef.GetActiveDetectionRange(sig1, -1);
+                    float speedAdj = FleetInterceptPreemptList[loop].CurrentSpeed / 10000.0f;
+
+                    TimeToCross2 = detection2 / (int)Math.Floor(speedAdj);
+                }
+
+                if (TimeToCross1 == -1 && TimeToCross2 == -1)
+                    continue;
+                else
+                {
+                    /// <summary>
+                    /// if lower than the current advance time, this should be set as the current advance time.
+                    /// </summary>
+                    int time = -1;
+                    if (TimeToCross1 == -1)
+                        time = TimeToCross2;
+                    else if (TimeToCross2 == -1)
+                        time = TimeToCross1;
+                    else
+                        time = Math.Min(TimeToCross1, TimeToCross2);
+
+                    if (time < AdvanceTime)
+                    {
+                        AdvanceTime = time;
+                        Pulses = (int)(Constants.TimeInSeconds.Day / AdvanceTime);
+                    }
+#warning now allow sensors to interrupt simentity.
+                }
+
+
+
+            }
 
             /// <summary>
             /// A missile intercept preemption event has been detected.
