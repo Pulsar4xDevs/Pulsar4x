@@ -1179,6 +1179,15 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Update last position, current position, order distance, fuel counter, Time requirement, and timeslice:
+        /// </summary>
+        public void UpdateLastPosition()
+        {
+            Contact.LastXSystem = Contact.XSystem;
+            Contact.LastYSystem = Contact.YSystem;
+        }
+
+        /// <summary>
         /// GetHeading determines the direction the ship should face to get to its current ordered target.
         /// </summary>
         public void GetHeading()
@@ -1632,11 +1641,6 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                /// <summary>
-                /// Update last position, current position, order distance, fuel counter, Time requirement, and timeslice:
-                /// </summary>
-                Contact.LastXSystem = Contact.XSystem;
-                Contact.LastYSystem = Contact.YSystem;
 
                 Contact.XSystem = Contact.XSystem + (((double)TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
                 Contact.YSystem = Contact.YSystem + (((double)TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);

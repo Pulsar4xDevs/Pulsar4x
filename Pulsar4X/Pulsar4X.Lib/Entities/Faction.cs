@@ -96,10 +96,18 @@ namespace Pulsar4X.Entities
                 Contact = String.Format("{0} TCS {1}", Contact, DetectedShip.TotalCrossSection);
             }
 
+            /// <summary>
+            /// Print to the message log.
+            /// </summary>
             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedShip.ShipsTaskGroup.Contact.CurrentSystem, DetectedShip.ShipsTaskGroup.Contact,
                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
+
+            /// <summary>
+            /// Inform SimEntity.
+            /// </summary>
+            GameState.SE.SetInterrupt(InterruptType.NewSensorContact);
 
         }
 
@@ -153,11 +161,18 @@ namespace Pulsar4X.Entities
                 Contact = String.Format("{0} TCS {1} x{2}", Contact, (int)Math.Ceiling(DetectedMissileGroup.missiles[0].missileDef.size), DetectedMissileGroup.missiles.Count);
             }
 
+            /// <summary>
+            /// print to the message log.
+            /// </summary>
             NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedMissileGroup.contact.CurrentSystem, DetectedMissileGroup.contact,
                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
 
+            /// <summary>
+            /// Inform SimEntity.
+            /// </summary>
+            GameState.SE.SetInterrupt(InterruptType.NewSensorContact);
         }
 
         

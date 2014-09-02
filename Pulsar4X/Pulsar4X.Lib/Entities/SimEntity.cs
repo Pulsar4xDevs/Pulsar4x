@@ -25,6 +25,12 @@ namespace Pulsar4X.Entities
         }
     }
 
+    public enum InterruptType
+    {
+        NewSensorContact,
+        Count
+    }
+
     public class SimEntity
     {
         public int factionStart { get; set; }
@@ -61,6 +67,16 @@ namespace Pulsar4X.Entities
         public Dictionary<int,SubPulseTimeList> SubPulse { get; set; }
 
         /// <summary>
+        /// Should subpulses be interrupted?
+        /// </summary>
+        public bool Interrupt { get; set; }
+
+        /// <summary>
+        /// What caused the interrupt?
+        /// </summary>
+        public InterruptType TypeOfInterrupt { get; set; }
+
+        /// <summary>
         /// Clears the fleet preempt list.
         /// </summary>
         public void ClearFleetPreemptList()
@@ -77,6 +93,16 @@ namespace Pulsar4X.Entities
             FleetInterceptPreemptList.Add(TG);
         }
 
+        /// <summary>
+        /// Allow other modules to inform simEntity that it should interrupt the sub pulse process, and why.
+        /// </summary>
+        /// <param name="Type"></param>
+        public void SetInterrupt(InterruptType Type)
+        {
+            Interrupt = true;
+            TypeOfInterrupt = Type;
+        }
+
 
         /// <summary>
         /// Subpulse handler will decide what the subpulse/time setting should be.
@@ -87,6 +113,19 @@ namespace Pulsar4X.Entities
         /// <returns>time in seconds that the subpulse handler processes.</returns>
         public int SubpulseHandler(BindingList<Faction> P, Random RNG, int tickValue)
         {
+            Interrupt = false;
+
+            /// <summary>
+            /// Update all last positions here, since this shouldn't be done mid subpulse.
+            /// </summary>
+            for (int loop = factionStart; loop < factionCount; loop++)
+            {
+                for (int loop2 = 0; loop2 < P[loop].TaskGroups.Count; loop2++)
+                {
+                    P[loop].TaskGroups[loop2].UpdateLastPosition();
+                }
+            }
+
 #warning todo: Determine fleet interception, check fire controls, jump transits into new systems, completed orders.
             /// <summary>
             /// right now all subpulses are doing is giving multiple finer time slices rather than one large time slice. interruptions are not yet handled.
@@ -215,7 +254,6 @@ namespace Pulsar4X.Entities
                         AdvanceTime = time;
                         Pulses = (int)(Constants.TimeInSeconds.Day / AdvanceTime);
                     }
-#warning now allow sensors to interrupt simentity.
                 }
 
 
@@ -372,6 +410,10 @@ namespace Pulsar4X.Entities
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry2);
                         GameState.Instance.Factions[0].MessageLog.Add(Msg2);
 
+                        return elapsedTime;
+                    }
+                    else if (Interrupt == true)
+                    {
                         return elapsedTime;
                     }
                 }
@@ -553,8 +595,7 @@ namespace Pulsar4X.Entities
                     }
                     else if(P[loop].TaskGroups[loop2].DrawTravelLine == 1)
                     {
-                        P[loop].TaskGroups[loop2].Contact.LastXSystem = P[loop].TaskGroups[loop2].Contact.XSystem;
-                        P[loop].TaskGroups[loop2].Contact.LastYSystem = P[loop].TaskGroups[loop2].Contact.YSystem;
+                        P[loop].TaskGroups[loop2].UpdateLastPosition();
 
                         P[loop].TaskGroups[loop2].DrawTravelLine = 2;
                     }
