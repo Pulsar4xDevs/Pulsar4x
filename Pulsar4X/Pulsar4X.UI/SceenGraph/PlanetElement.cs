@@ -143,10 +143,18 @@ namespace Pulsar4X.UI.SceenGraph
             /// <summary>
             /// Update the position of this element.
             /// </summary>
-            Vector3 pos = new Vector3((float)m_oPlanet.XSystem, (float)m_oPlanet.YSystem, 0.0f);
+            Vector3 pos = new Vector3((float)(m_oPlanet.XSystem), (float)(m_oPlanet.YSystem), 0.0f);
 
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;
+
+            /// <summary>
+            /// This is an orbit circle and it needs to be moved
+            /// </summary>
+//#warning this is a hack to move orbit circles around, it should be handled better than this if possible.
+            //Vector3 pos2 = new Vector3((float)m_oPlanet.Parent.XSystem,(float)m_oPlanet.Parent.YSystem, 0.0f);
+            //m_lPrimitives[1].Position = pos2;
+            
 
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)

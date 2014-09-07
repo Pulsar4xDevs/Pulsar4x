@@ -22,7 +22,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -127,7 +127,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -166,7 +166,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -212,7 +212,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -324,7 +324,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -394,7 +394,7 @@ namespace Pulsar4X.Tests
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
             Star S1 = new Star();
-            Planet planet = new Planet(S1);
+            Planet planet = new Planet(S1,S1);
 
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
@@ -482,7 +482,7 @@ namespace Pulsar4X.Tests
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
             Star S1 = new Star();
-            Planet planet = new Planet(S1);
+            Planet planet = new Planet(S1,S1);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
             for (int loop = 0; loop < 4; loop++)
@@ -530,7 +530,7 @@ namespace Pulsar4X.Tests
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
             Star S1 = new Star();
-            Planet planet = new Planet(S1);
+            Planet planet = new Planet(S1,S1);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet,System);
             for (int loop = 0; loop < 4; loop++)
@@ -608,7 +608,7 @@ namespace Pulsar4X.Tests
             Faction FID = new Faction(0);
             StarSystem System = new StarSystem();
             Star S1 = new Star();
-            Planet planet = new Planet(S1);
+            Planet planet = new Planet(S1,S1);
 
 
             Waypoint WP1 = new Waypoint("WP TG Orders",System,0.1,0.1,0);
@@ -659,12 +659,12 @@ namespace Pulsar4X.Tests
             Star S2 = new Star();
             System2.Stars.Add(S2);
 
-            Planet Start1 = new Planet(System1.Stars[0]);
+            Planet Start1 = new Planet(System1.Stars[0], System1.Stars[0]);
             Start1.XSystem = 1.0;
             Start1.YSystem = 1.0;
-            
 
-            Planet Start2 = new Planet(System2.Stars[0]);
+
+            Planet Start2 = new Planet(System2.Stars[0], System1.Stars[0]);
             Start2.XSystem = 1.0005;
             Start2.YSystem = 1.0005;
 
@@ -763,7 +763,7 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
@@ -815,8 +815,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -886,8 +886,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -949,9 +949,9 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
-            Planet pl3 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
+            Planet pl3 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1061,9 +1061,9 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
-            Planet pl3 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
+            Planet pl3 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1180,8 +1180,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1254,8 +1254,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1385,7 +1385,7 @@ namespace Pulsar4X.Tests
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    Planet Start = new Planet(Sol.Stars[0]);
+                    Planet Start = new Planet(Sol.Stars[0], Sol.Stars[0]);
                     Start.XSystem = wx;
                     Start.YSystem = wy;
 
@@ -1769,8 +1769,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1856,8 +1856,8 @@ namespace Pulsar4X.Tests
             StarSystem System1 = new StarSystem("Sol");
 
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
@@ -1972,8 +1972,8 @@ namespace Pulsar4X.Tests
             /// Planets and populations are needed for house keeping.
             /// </summary>
             Star S1 = new Star();
-            Planet pl1 = new Planet(S1);
-            Planet pl2 = new Planet(S1);
+            Planet pl1 = new Planet(S1,S1);
+            Planet pl2 = new Planet(S1,S1);
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1); 
             System1.Stars[0].Planets.Add(pl2);

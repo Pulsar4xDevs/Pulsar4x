@@ -103,7 +103,7 @@ namespace Pulsar4X.Stargen
                 while (protoStar.DustAvailable)
                 {
                     counter++;
-                    var protoPlanet = new ProtoPlanet(protoStar.Star)
+                    var protoPlanet = new ProtoPlanet(protoStar.Star, protoStar.Star)
                     {
                         Star = star,
                         SemiMajorAxis = rnd.NextDouble(protoStar.PlanetInnerBound, protoStar.PlanetOuterBound),
@@ -202,7 +202,7 @@ namespace Pulsar4X.Stargen
                         newE = Math.Sqrt(temp);
 
                         // Create a new Protoplanet to accrete additional material
-                        var newP = new ProtoPlanet(Disc.Star)
+                        var newP = new ProtoPlanet(Disc.Star, Disc.Star)
                         {
                             SemiMajorAxis = newA,
                             Eccentricity = newE,
@@ -349,7 +349,7 @@ namespace Pulsar4X.Stargen
             {
                 counter++;
 
-                ProtoPlanet moon = new ProtoPlanet(star.Star)
+                ProtoPlanet moon = new ProtoPlanet(star.Star,planet.Planet)
                 {
                     SemiMajorAxis = rnd.NextDouble(planet.PlanetInnerBound, planet.PlanetOuterBound),
                     Eccentricity = rnd.RandomEccentricity(),

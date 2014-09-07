@@ -47,7 +47,7 @@ namespace Pulsar4X.UI
             GameState.Instance.Factions.Add(oNewFaction);
             oNewFaction.AddNewContactList(otest);
 
-            Entities.Planet P1 = new Entities.Planet(otest.Stars[0]);
+            Entities.Planet P1 = new Entities.Planet(otest.Stars[0], otest.Stars[0]);
             P1.XSystem = 10.0;
             P1.YSystem = 10.0;
 
@@ -61,7 +61,7 @@ namespace Pulsar4X.UI
             GameState.Instance.Factions.Add(oNewFaction2);
             oNewFaction2.AddNewContactList(otest);
 
-            Entities.Planet P2 = new Entities.Planet(otest.Stars[0]);
+            Entities.Planet P2 = new Entities.Planet(otest.Stars[0], otest.Stars[0]);
             P2.XSystem = -10.0;
             P2.YSystem = -10.0;
 

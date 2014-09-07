@@ -48,13 +48,12 @@ namespace Pulsar4X.Stargen
             // save seed to star system:
             ss.Seed = seed;
 
+            /// <summary>
+            /// redundancy:
+            /// </summary>
+            #if LOG4NET_ENABLED
             if (logger.IsDebugEnabled)
             {
-                /// <summary>
-                /// redundancy:
-                /// </summary>
-                #if LOG4NET_ENABLED
-
                 /*
                 logger.Debug("Star System Generated!");
                 for(int i = 0; i<ss.Stars.Count; i++)
@@ -75,9 +74,8 @@ namespace Pulsar4X.Stargen
                     }
                 }
                 */
-                #endif
             }
-
+            #endif
             return ss;
         }
     }

@@ -273,6 +273,9 @@ namespace Pulsar4X.UI.SceenGraph
                     dPlanetOrbitRadius = oPlanet.SemiMajorAxis;
                     Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oPlanet, 0);
                     v3PlanetPos = new Vector3((float)(oPlanet.XSystem), (float)(oPlanet.YSystem), 0) + v3StarPos; // offset Pos by parent star pos
+                    oPlanet.XSystem = oPlanet.XSystem + v3StarPos.X;
+                    oPlanet.YSystem = oPlanet.YSystem + v3StarPos.Y;
+
                     fPlanetSize = (float)((oPlanet.Radius * 2.0) / Constants.Units.KM_PER_AU);
                     MaxOrbitDistTest(ref dMaxOrbitDist, dPlanetOrbitRadius);
 
@@ -315,6 +318,8 @@ namespace Pulsar4X.UI.SceenGraph
                         Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oMoon, 0);
                         fMoonSize = (float)((oMoon.Radius * 2.0) / Constants.Units.KM_PER_AU);
                         v3MoonPos = new Vector3((float)(oMoon.XSystem), (float)(oMoon.YSystem), 0) + v3PlanetPos;
+                        oMoon.XSystem = oMoon.XSystem + v3PlanetPos.X;
+                        oMoon.YSystem = oMoon.YSystem + v3PlanetPos.Y;
 
                         GLUtilities.GLQuad oMoonQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                             v3MoonPos,                                    // offset Pos by parent planet pos

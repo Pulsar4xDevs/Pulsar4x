@@ -149,7 +149,7 @@ namespace Pulsar4X.Entities
 
         
 
-        public Planet(Star primary) : base()
+        public Planet(Star primary, OrbitingEntity parent) : base()
         {
             Moons = new BindingList<Planet>();
             Gases = new BindingList<Gas>();
@@ -160,6 +160,7 @@ namespace Pulsar4X.Entities
             SSEntity = StarSystemEntityType.Body;
 
             Primary = primary;
+            Parent = parent;
         }
     }
 }
