@@ -119,7 +119,15 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             // Adjust the size of the text so it is always 10 point:
-            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler; 
+            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
+
+            /// <summary>
+            /// Update the position of this element.
+            /// </summary>
+            Vector3 pos = new Vector3((float)m_oStar.XSystem, (float)m_oStar.YSystem, 0.0f);
+
+            PrimaryPrimitive.Position = pos;
+            Lable.Position = pos;
 
 
             // loop through any children:

@@ -525,6 +525,28 @@ namespace Pulsar4X.Entities
             lastTick = CurrentTick;
             CurrentTick += tickValue;
 
+            for(int loop = 0; loop < GameState.Instance.StarSystems.Count; loop++)
+            {
+                StarSystem CurrentSystem = GameState.Instance.StarSystems[loop];
+                for (int loop2 = 0; loop2 < CurrentSystem.Stars.Count; loop2++)
+                {
+                    /// <summary>
+                    /// The system primary will cause a divide by zero error currently as it has no orbit.
+                    /// </summary>
+                    if (loop2 != 0)
+                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentSystem.Stars[loop2], tickValue);
+
+                    for (int loop3 = 0; loop3 < CurrentSystem.Stars[loop2].Planets.Count; loop3++)
+                    {
+                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentSystem.Stars[loop2].Planets[loop3], tickValue);
+
+                        CurrentSystem.Stars[loop2].Planets[loop3].XSystem = CurrentSystem.Stars[loop2].Planets[loop3].XSystem + CurrentSystem.Stars[loop2].XSystem;
+                        CurrentSystem.Stars[loop2].Planets[loop3].YSystem = CurrentSystem.Stars[loop2].Planets[loop3].YSystem + CurrentSystem.Stars[loop2].YSystem;
+                    }
+                    
+                }
+            }
+
             /// <summary>
             /// Missiles should check to see if they have a target, move towards it, and hit it. If they have no target then they should check their sensor and either move to new target,
             /// or more towards last known firing location. ProcessOrder should handle all of these.
