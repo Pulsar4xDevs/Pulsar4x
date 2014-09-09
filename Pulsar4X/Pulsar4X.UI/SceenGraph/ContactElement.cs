@@ -94,7 +94,7 @@ namespace Pulsar4X.UI.SceenGraph
         /// <summary>
         /// Line from Last Position to Current Position for taskgroups.
         /// </summary>
-        private TravelLine m_oTravelLine;
+        private TravelLine m_oTravelLine { get; set; }
 
         public ContactElement()
             : base()

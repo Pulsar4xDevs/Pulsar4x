@@ -525,23 +525,22 @@ namespace Pulsar4X.Entities
             lastTick = CurrentTick;
             CurrentTick += tickValue;
 
-            for(int loop = 0; loop < GameState.Instance.StarSystems.Count; loop++)
+            foreach(StarSystem CurrentSystem in GameState.Instance.StarSystems)
             {
-                StarSystem CurrentSystem = GameState.Instance.StarSystems[loop];
-                for (int loop2 = 0; loop2 < CurrentSystem.Stars.Count; loop2++)
+                foreach (Star CurrentStar in CurrentSystem.Stars) 
                 {
                     /// <summary>
                     /// The system primary will cause a divide by zero error currently as it has no orbit.
                     /// </summary>
-                    if (loop2 != 0)
-                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentSystem.Stars[loop2], tickValue);
+                    if (CurrentStar != CurrentSystem.Stars[0])
+                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentStar, tickValue);
 
-                    for (int loop3 = 0; loop3 < CurrentSystem.Stars[loop2].Planets.Count; loop3++)
+                    foreach (Planet CurrentPlanet in CurrentStar.Planets) //int loop3 = 0; loop3 < CurrentSystem.Stars[loop2].Planets.Count; loop3++)
                     {
-                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentSystem.Stars[loop2].Planets[loop3], tickValue);
+                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentPlanet, tickValue);
 
-                        CurrentSystem.Stars[loop2].Planets[loop3].XSystem = CurrentSystem.Stars[loop2].Planets[loop3].XSystem + CurrentSystem.Stars[loop2].XSystem;
-                        CurrentSystem.Stars[loop2].Planets[loop3].YSystem = CurrentSystem.Stars[loop2].Planets[loop3].YSystem + CurrentSystem.Stars[loop2].YSystem;
+                        CurrentPlanet.XSystem = CurrentPlanet.XSystem + CurrentStar.XSystem;
+                        CurrentPlanet.YSystem = CurrentPlanet.YSystem + CurrentStar.YSystem;
                     }
                     
                 }
