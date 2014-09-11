@@ -72,101 +72,101 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Crew requirement for the component, some components have a crew requirement of 0.
         /// </summary>
-        private byte Crew;
+        private byte m_oCrew;
         public byte crew
         {
-            get { return Crew; }
-            set { Crew = value; }
+            get { return m_oCrew; }
+            set { m_oCrew = value; }
         }
 
         /// <summary>
         /// Cost the component, each component has its own scheme to determine cost.
         /// </summary>
-        private decimal Cost;
+        private decimal m_oCost;
         public decimal cost
         {
-            get { return Cost; }
-            set { Cost = value; }
+            get { return m_oCost; }
+            set { m_oCost = value; }
         }
 
         /// <summary>
         /// Size of the component in question. 
         /// </summary>
-        private float Size;
+        private float m_oSize;
         public float size
         {
-            get { return Size; }
-            set { Size = value; }
+            get { return m_oSize; }
+            set { m_oSize = value; }
         }
 
         /// <summary>
         /// Likelyhood of destruction due to normal damage. Armor blocks have a uniform htk value, and this might be a way of handling that.
         /// </summary>
-        private byte HTK;
+        private byte m_oHTK;
         public byte htk
         {
-            get { return HTK; }
-            set { HTK = value; }
+            get { return m_oHTK; }
+            set { m_oHTK = value; }
         }
 
         /// <summary>
         /// Does this component incur maintenance failures?
         /// </summary>
-        private bool IsMilitary;
+        private bool m_oIsMilitary;
         public bool isMilitary
         {
-            get { return IsMilitary; }
-            set { IsMilitary = value; }
+            get { return m_oIsMilitary; }
+            set { m_oIsMilitary = value; }
         }
 
         /// <summary>
         /// Is this component marked obsolete by the player.
         /// </summary>
-        private bool IsObsolete;
+        private bool m_oIsObsolete;
         public bool isObsolete
         {
-            get { return IsObsolete; }
-            set { IsObsolete = value; }
+            get { return m_oIsObsolete; }
+            set { m_oIsObsolete = value; }
         }
 
         /// <summary>
         /// Components are salvageable, which means that they can be used even if the player has no idea how to build them.
         /// </summary>
-        private bool IsSalvaged;
+        private bool m_oIsSalvaged;
         public bool isSalvaged
         {
-            get { return IsSalvaged; }
-            set { IsSalvaged = value; }
+            get { return m_oIsSalvaged; }
+            set { m_oIsSalvaged = value; }
         }
 
         /// <summary>
         /// Can this component be divided into smaller pieces during a cargo load?
         /// </summary>
-        private bool IsDivisible;
+        private bool m_oIsDivisible;
         public bool isDivisible
         {
-            get { return IsDivisible; }
-            set { IsDivisible = value; }
+            get { return m_oIsDivisible; }
+            set { m_oIsDivisible = value; }
         }
 
         /// <summary>
         /// Is this an electronic component that belongs in the EDAC, and is vulnerable to microwave damage?
         /// </summary>
-        private bool IsElectronic;
+        private bool m_oIsElectronic;
         public bool isElectronic
         {
-            get { return IsElectronic; }
-            set { IsElectronic = value; }
+            get { return m_oIsElectronic; }
+            set { m_oIsElectronic = value; }
         }
 
         /// <summary>
         /// What type of component is this?
         /// </summary>
-        private ComponentTypeTN ComponentType;
+        private ComponentTypeTN m_oComponentType;
         public ComponentTypeTN componentType
         {
-            get { return ComponentType; }
-            set { ComponentType = value; }
+            get { return m_oComponentType; }
+            set { m_oComponentType = value; }
         }
     }
     /// <summary>
@@ -185,21 +185,21 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Is this component working, or has it suffered critical damage
         /// </summary>
-        private bool IsDestroyed;
+        private bool m_oIsDestroyed;
         public bool isDestroyed
         {
-            get { return IsDestroyed; }
-            set { IsDestroyed = value; }
+            get { return m_oIsDestroyed; }
+            set { m_oIsDestroyed = value; }
         }
 
         /// <summary>
         /// which component on the ship is this?
         /// </summary>
-        private int ComponentIndex;
+        private int m_oComponentIndex;
         public int componentIndex
         {
-            get { return ComponentIndex; }
-            set { ComponentIndex = value; }
+            get { return m_oComponentIndex; }
+            set { m_oComponentIndex = value; }
         }
     }
 }

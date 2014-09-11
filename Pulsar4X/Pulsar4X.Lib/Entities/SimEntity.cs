@@ -518,6 +518,7 @@ namespace Pulsar4X.Entities
         /// <param name="tickValue"></param>
         public void AdvanceSim(BindingList<Faction> P, Random RNG, int tickValue)
         {
+#warning magic number 1Billion overflow prevention kludge here.
             if (CurrentTick > 1000000000)
             {
                 CurrentTick = CurrentTick - 1000000000;
@@ -525,6 +526,9 @@ namespace Pulsar4X.Entities
             lastTick = CurrentTick;
             CurrentTick += tickValue;
 
+            /// <summary>
+            /// Update the position of all planets. This should probably be in something like the construction tick in Aurora.
+            /// </summary>
             foreach(StarSystem CurrentSystem in GameState.Instance.StarSystems)
             {
                 foreach (Star CurrentStar in CurrentSystem.Stars) 
@@ -535,10 +539,13 @@ namespace Pulsar4X.Entities
                     if (CurrentStar != CurrentSystem.Stars[0])
                         Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentStar, tickValue);
 
-                    foreach (Planet CurrentPlanet in CurrentStar.Planets) //int loop3 = 0; loop3 < CurrentSystem.Stars[loop2].Planets.Count; loop3++)
+                    foreach (Planet CurrentPlanet in CurrentStar.Planets) 
                     {
                         Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentPlanet, tickValue);
 
+                        /// <summary>
+                        /// Adjust planet position based on the primary. Right now XSystem and YSystem assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
+                        /// </summary>
                         CurrentPlanet.XSystem = CurrentPlanet.XSystem + CurrentStar.XSystem;
                         CurrentPlanet.YSystem = CurrentPlanet.YSystem + CurrentStar.YSystem;
                     }

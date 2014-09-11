@@ -12,82 +12,82 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Sensor Strength component of range.
         /// </summary>
-        private byte ActiveStrength;
+        private byte m_oActiveStrength;
         public byte activeStrength
         {
-            get { return ActiveStrength; }
+            get { return m_oActiveStrength; }
         }
 
         /// <summary>
         /// EM listening portion of sensor.
         /// </summary>
-        private byte EMRecv;
+        private byte m_oEMRecv;
         public byte eMRecv
         {
-            get { return EMRecv; }
+            get { return m_oEMRecv; }
         }
 
         /// <summary>
         /// Sensor wavelength resolution. What size of ship this sensor is best suited to detecting.
         /// </summary>
-        private ushort Resolution;
+        private ushort m_oResolution;
         public ushort resolution
         {
-            get { return Resolution; }
+            get { return m_oResolution; }
         }
 
         /// <summary>
         /// Grav Pulse Signature/Strength
         /// </summary>
-        private int GPS;
+        private int m_oGPS;
         public int gps
         {
-            get { return GPS; }
+            get { return m_oGPS; }
         }
         
         /// <summary>
         /// Range at which sensor can detect craft of same HS as resolution. multiply this by 10000 to get value in km.
         /// </summary>
-        private int MaxRange;
+        private int m_oMaxRange;
         public int maxRange
         {
-            get { return MaxRange; }
+            get { return m_oMaxRange; }
         }
 
         /// <summary>
         /// Lookup table for ship resolutions
         /// </summary>
-        private BindingList<int> LookUpST;
+        private BindingList<int> m_lLookUpST;
         public BindingList<int> lookUpST
         {
-            get { return LookUpST; }
+            get { return m_lLookUpST; }
         }
 
         /// <summary>
         /// Lookup table for missile resolutions
         /// </summary>
-        private BindingList<int> LookUpMT;
+        private BindingList<int> m_lLookUpMT;
         public BindingList<int> lookUpMT
         {
-            get { return LookUpMT; }
+            get { return m_lLookUpMT; }
         }
 
         /// <summary>
         /// Is this a Missile fire control or an active sensor? false = sensor, true = MFC. MFCs have 3x the range of search sensors.
         /// </summary>
-        private bool IsMFC;
+        private bool m_oIsMFC;
         public bool isMFC
         {
-            get { return IsMFC; }
+            get { return m_oIsMFC; }
         }
 
         /// <summary>
         /// Likelyhood of destruction from electronic(microwave) damage.
         /// </summary>
-        private float Hardening;
+        private float m_oHardening;
         public float hardening
         {
-            get { return Hardening; }
+            get { return m_oHardening; }
         }
 
         /// <summary>
@@ -115,17 +115,17 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             Name = desc;
             size = HS;
-            ActiveStrength = actStr;
-            EMRecv = EMR;
-            Resolution = Res;
-            IsMFC = MFC;
-            Hardening = hard;
+            m_oActiveStrength = actStr;
+            m_oEMRecv = EMR;
+            m_oResolution = Res;
+            m_oIsMFC = MFC;
+            m_oHardening = hard;
 
             /// <summary>
             /// Crew and cost are related to size, ActiveStrength, and hardening.
             /// </summary>
             crew = (byte)(size * 2.0);
-            cost = (decimal)((size * (float)ActiveStrength) + ((size * (float)ActiveStrength) * 0.25f * (float)(hardTech - 1)));
+            cost = (decimal)((size * (float)m_oActiveStrength) + ((size * (float)m_oActiveStrength) * 0.25f * (float)(hardTech - 1)));
 
 
             ///<summary>
@@ -147,38 +147,38 @@ namespace Pulsar4X.Entities.Components
             ///<summary>
             ///GPS is the value that a ship's EM signature will be increased by when this sensor is active.
             ///</summary>
-            GPS = (int)((float)ActiveStrength * size * (float)Resolution);
+            m_oGPS = (int)((float)m_oActiveStrength * size * (float)m_oResolution);
 
             /// <summary>
             /// MaxRange omits a 10,000 km adjustment factor due to integer limitations.
             /// </summary>
-            MaxRange = (int)((float)ActiveStrength * size * (float)Math.Sqrt((double)Resolution) * (float)EMRecv);
+            m_oMaxRange = (int)((float)m_oActiveStrength * size * (float)Math.Sqrt((double)m_oResolution) * (float)m_oEMRecv);
 
-            if (IsMFC == true)
+            if (m_oIsMFC == true)
             {
-                MaxRange = MaxRange * 3;
-                GPS = 0;
+                m_oMaxRange = m_oMaxRange * 3;
+                m_oGPS = 0;
             }
 
-            LookUpST = new BindingList<int>();
-            LookUpMT = new BindingList<int>();
+            m_lLookUpST = new BindingList<int>();
+            m_lLookUpMT = new BindingList<int>();
 
             ///<summary>
             ///Initialize the ship lookup Table.
             ///</summary>
-            for (int loop = 0; loop < Constants.ShipTN.ResolutionMax; loop++)
+            for (int ShipResolution = 0; ShipResolution < Constants.ShipTN.ResolutionMax; ShipResolution++)
             {
                 ///<summary>
                 ///Sensor Resolution can't resolve this target at its MaxRange due to the target's smaller size
                 ///</summary>
-                if ((loop + 1) < Resolution)
+                if ((ShipResolution + 1) < m_oResolution)
                 {
-                    int NewRange = (int)((float)MaxRange * (float)Math.Pow(((double)(loop + 1) / (float)Resolution), 2.0f));
-                    LookUpST.Add(NewRange);
+                    int NewRange = (int)((float)m_oMaxRange * (float)Math.Pow(((double)(ShipResolution + 1) / (float)m_oResolution), 2.0f));
+                    m_lLookUpST.Add(NewRange);
                 }
-                else if ((loop + 1) >= Resolution)
+                else if ((ShipResolution + 1) >= m_oResolution)
                 {
-                    LookUpST.Add(MaxRange);
+                    m_lLookUpST.Add(m_oMaxRange);
                 }
             }
 
@@ -186,25 +186,26 @@ namespace Pulsar4X.Entities.Components
             ///Initialize the missile lookup Table.
             ///Missile size is in MSP, and no missile may be a fractional MSP in size. Each MSP is 0.05 HS in size.
             ///</summary>
-            for (int loop = 0; loop < 15; loop++)
+            for (int MissileResolution = Constants.OrdnanceTN.MissileResolutionMinimum; MissileResolution < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); MissileResolution++)
             {
+#warning magic numbers related to missile resolution here
                 ///<summary>
                 ///Missile size never drops below 0.33, and missiles above 1 HS are atleast 1 HS. if I have to deal with 2HS missiles I can go to LookUpST
                 ///</summary>
-                if (loop == 0)
+                if (MissileResolution == Constants.OrdnanceTN.MissileResolutionMinimum)
                 {
-                    int NewRange = (int)((float)MaxRange * (float)Math.Pow( ( 0.33 / (float)Resolution ),2.0f));
-                    LookUpMT.Add(NewRange);
+                    int NewRange = (int)((float)m_oMaxRange * (float)Math.Pow((0.33 / (float)m_oResolution), 2.0f));
+                    m_lLookUpMT.Add(NewRange);
                 }
-                else if( loop != 14 )
+                else if (MissileResolution != Constants.OrdnanceTN.MissileResolutionMaximum)
                 {
-                    float msp = ((float)loop + 6.0f) * 0.05f;
-                    int NewRange = (int)((float)MaxRange * Math.Pow( ( msp / (float)Resolution ),2.0f ));
-                    LookUpMT.Add(NewRange);
+                    float msp = ((float)MissileResolution + 6.0f) * 0.05f;
+                    int NewRange = (int)((float)m_oMaxRange * Math.Pow((msp / (float)m_oResolution), 2.0f));
+                    m_lLookUpMT.Add(NewRange);
                 }
-                else if( loop == 14 )
+                else if( MissileResolution == 14 )
                 {
-                    lookUpMT.Add(LookUpST[0]);//size 1 is size 1
+                    lookUpMT.Add(m_lLookUpST[0]);//size 1 is size 1
                 }
             }
 
@@ -228,35 +229,35 @@ namespace Pulsar4X.Entities.Components
         {
             Id = Guid.NewGuid();
             componentType = ComponentTypeTN.TypeCount;
-            EMRecv = EMS;
+            m_oEMRecv = EMS;
 
-            Resolution = AResolution;
+            m_oResolution = AResolution;
 
             Name = "MissileActive";
 
-            GPS = (int)(ActiveStrength * Resolution);
+            m_oGPS = (int)(m_oActiveStrength * m_oResolution);
 
-            MaxRange = (int)((float)ActiveStr * EMS * (float)Math.Sqrt((double)Resolution));
+            m_oMaxRange = (int)((float)ActiveStr * EMS * (float)Math.Sqrt((double)m_oResolution));
 
-            LookUpST = new BindingList<int>();
-            LookUpMT = new BindingList<int>();
+            m_lLookUpST = new BindingList<int>();
+            m_lLookUpMT = new BindingList<int>();
 
             ///<summary>
             ///Initialize the ship lookup Table.
             ///</summary>
-            for (int loop = 0; loop < Constants.ShipTN.ResolutionMax; loop++)
+            for (int ShipResolution = 0; ShipResolution < Constants.ShipTN.ResolutionMax; ShipResolution++)
             {
                 ///<summary>
                 ///Sensor Resolution can't resolve this target at its MaxRange due to the target's smaller size
                 ///</summary>
-                if ((loop + 1) < Resolution)
+                if ((ShipResolution + 1) < m_oResolution)
                 {
-                    int NewRange = (int)((float)MaxRange * (float)Math.Pow(((double)(loop + 1) / (float)Resolution), 2.0f));
-                    LookUpST.Add(NewRange);
+                    int NewRange = (int)((float)m_oMaxRange * (float)Math.Pow(((double)(ShipResolution + 1) / (float)m_oResolution), 2.0f));
+                    m_lLookUpST.Add(NewRange);
                 }
-                else if ((loop + 1) >= Resolution)
+                else if ((ShipResolution + 1) >= m_oResolution)
                 {
-                    LookUpST.Add(MaxRange);
+                    m_lLookUpST.Add(m_oMaxRange);
                 }
             }
 
@@ -264,32 +265,32 @@ namespace Pulsar4X.Entities.Components
             ///Initialize the missile lookup Table.
             ///Missile size is in MSP, and no missile may be a fractional MSP in size. Each MSP is 0.05 HS in size.
             ///</summary>
-            for (int loop = 0; loop < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); loop++)
+            for (int MissileResolution = 0; MissileResolution < (Constants.OrdnanceTN.MissileResolutionMaximum + 1); MissileResolution++)
             {
                 ///<summary>
                 ///Missile size never drops below 0.33, and missiles above 1 HS are atleast 1 HS. if I have to deal with 2HS missiles I can go to LookUpST
                 ///</summary>
-                if (loop == Constants.OrdnanceTN.MissileResolutionMinimum)
+                if (MissileResolution == Constants.OrdnanceTN.MissileResolutionMinimum)
                 {
-                    int NewRange = (int)((float)MaxRange * (float)Math.Pow((0.33 / (float)Resolution), 2.0f));
-                    LookUpMT.Add(NewRange);
+                    int NewRange = (int)((float)m_oMaxRange * (float)Math.Pow((0.33 / (float)m_oResolution), 2.0f));
+                    m_lLookUpMT.Add(NewRange);
                 }
-                else if (loop != Constants.OrdnanceTN.MissileResolutionMaximum)
+                else if (MissileResolution != Constants.OrdnanceTN.MissileResolutionMaximum)
                 {
-                    float msp = ((float)loop + 6.0f) * 0.05f;
-                    int NewRange = (int)((float)MaxRange * Math.Pow((msp / (float)Resolution), 2.0f));
-                    LookUpMT.Add(NewRange);
+                    float msp = ((float)MissileResolution + 6.0f) * 0.05f;
+                    int NewRange = (int)((float)m_oMaxRange * Math.Pow((msp / (float)m_oResolution), 2.0f));
+                    m_lLookUpMT.Add(NewRange);
                 }
-                else if (loop == Constants.OrdnanceTN.MissileResolutionMaximum)
+                else if (MissileResolution == Constants.OrdnanceTN.MissileResolutionMaximum)
                 {
-                    lookUpMT.Add(LookUpST[0]);//size 1 is size 1
+                    lookUpMT.Add(m_lLookUpST[0]);//size 1 is size 1
                 }
             }
 
 
-            ActiveStrength = 0;
-            Hardening = 0;
-            IsMFC = false;
+            m_oActiveStrength = 0;
+            m_oHardening = 0;
+            m_oIsMFC = false;
             crew = 0;
             cost = 0;
             htk = 0;
@@ -321,11 +322,11 @@ namespace Pulsar4X.Entities.Components
             int DetRange;
             if (MSP == -1)
             {
-                DetRange = LookUpST[TCS];
+                DetRange = m_lLookUpST[TCS];
             }
             else
             {
-                DetRange = LookUpMT[MSP];
+                DetRange = m_lLookUpMT[MSP];
             }
             return DetRange;
         }
@@ -346,20 +347,20 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// What statistics define this sensor?
         /// </summary>
-        private ActiveSensorDefTN ASensorDef;
+        private ActiveSensorDefTN m_oASensorDef;
         public ActiveSensorDefTN aSensorDef
         {
-            get { return ASensorDef; }
+            get { return m_oASensorDef; }
         }
 
         /// <summary>
         /// Is this sensor active and thus both searching, and emitting an EM signature?
         /// </summary>
-        private bool IsActive;
+        private bool m_oIsActive;
         public bool isActive
         {
-            get { return IsActive; }
-            set { IsActive = value; }
+            get { return m_oIsActive; }
+            set { m_oIsActive = value; }
         }
 
 
@@ -369,9 +370,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="define">Definition for the sensor.</param>
         public ActiveSensorTN(ActiveSensorDefTN define)
         {
-            ASensorDef = define;
+            m_oASensorDef = define;
             isDestroyed = false;
-            IsActive = false;
+            m_oIsActive = false;
         }
     }
     /// <summary>
@@ -384,10 +385,10 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Missile Fire Controls are basically active sensors, this definition has the MFC range data for this sensor.
         /// </summary>
-        private ActiveSensorDefTN MFCSensorDef;
+        private ActiveSensorDefTN m_oMFCSensorDef;
         public ActiveSensorDefTN mFCSensorDef
         {
-            get { return MFCSensorDef; }
+            get { return m_oMFCSensorDef; }
         }
 
         /// <summary>
@@ -397,57 +398,57 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Weapons linked to this MFC.
         /// </summary>
-        private BindingList<MissileLauncherTN> LinkedWeapons;
+        private BindingList<MissileLauncherTN> m_lLinkedWeapons;
         public BindingList<MissileLauncherTN> linkedWeapons
         {
-            get { return LinkedWeapons; }
+            get { return m_lLinkedWeapons; }
         }
 
         /// <summary>
         /// Target Assigned to this MFC
         /// </summary>
-        private TargetTN Target;
+        private TargetTN m_oTarget;
         public TargetTN target
         {
-            get { return Target; }
+            get { return m_oTarget; }
         }
 
         /// <summary>
         /// Whether this FC is authorized to fire on its target.
         /// </summary>
-        private bool OpenFire;
+        private bool m_oOpenFire;
         public bool openFire
         {
-            get { return OpenFire; }
-            set { OpenFire = value; }
+            get { return m_oOpenFire; }
+            set { m_oOpenFire = value; }
         }
 
         /// <summary>
         /// Point defense state this BFC will fire to.
         /// </summary>
-        private PointDefenseState PDState;
+        private PointDefenseState m_oPDState;
         public PointDefenseState pDState
         {
-            get { return PDState; }
+            get { return m_oPDState; }
         }
 
 
         /// <summary>
         /// Ordnance in fly but still connected to this MFC.
         /// </summary>
-        private BindingList<OrdnanceGroupTN> MissilesInFlight;
+        private BindingList<OrdnanceGroupTN> m_lMissilesInFlight;
         public BindingList<OrdnanceGroupTN> missilesInFlight
         {
-            get { return MissilesInFlight; }
+            get { return m_lMissilesInFlight; }
         }
 
         /// <summary>
         /// range at which area defense will engage targets
         /// </summary>
-        private float PDRange;
+        private float m_oPDRange;
         public float pDRange
         {
-            get { return PDRange; }
+            get { return m_oPDRange; }
         }
 
         /// <summary>
@@ -460,17 +461,17 @@ namespace Pulsar4X.Entities.Components
         /// <param name="MFCDef">MFC definition.</param>
         public MissileFireControlTN(ActiveSensorDefTN MFCDef)
         {
-            MFCSensorDef = MFCDef;
+            m_oMFCSensorDef = MFCDef;
             isDestroyed = false;
 
-            LinkedWeapons = new BindingList<MissileLauncherTN>();
+            m_lLinkedWeapons = new BindingList<MissileLauncherTN>();
 
-            MissilesInFlight = new BindingList<OrdnanceGroupTN>();
+            m_lMissilesInFlight = new BindingList<OrdnanceGroupTN>();
 
-            OpenFire = false;
-            Target = null;
-            PDState = PointDefenseState.None;
-            PDRange = 0;
+            m_oOpenFire = false;
+            m_oTarget = null;
+            m_oPDState = PointDefenseState.None;
+            m_oPDRange = 0;
         }
 
         /// <summary>
@@ -479,7 +480,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="State">State the MFC is to be set to.</param>
         public void SetPointDefenseMode(PointDefenseState State)
         {
-            PDState = State;
+            m_oPDState = State;
         }
 
         /// <summary>
@@ -488,7 +489,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="range">range to engage targets at.</param>
         public void SetPointDefenseRange(float range)
         {
-            PDRange = range;
+            m_oPDRange = range;
         }
 
         /// <summary>
@@ -497,7 +498,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="ShipTarget">Ship to be targeted.</param>
         public void assignTarget(ShipTN ShipTarget)
         {
-            Target = new TargetTN(ShipTarget);
+            m_oTarget = new TargetTN(ShipTarget);
         }
 
         /// <summary>
@@ -506,7 +507,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="OrdnanceTarget">missile group to be targetted.</param>
         public void assignTarget(OrdnanceGroupTN OrdnanceTarget)
         {
-            Target = new TargetTN(OrdnanceTarget);
+            m_oTarget = new TargetTN(OrdnanceTarget);
         }
 
         /// <summary>
@@ -515,7 +516,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="PlanetTarget">planet</param>
         public void assignTarget(Planet PlanetTarget)
         {
-            Target = new TargetTN(PlanetTarget);
+            m_oTarget = new TargetTN(PlanetTarget);
         }
 
         /// <summary>
@@ -524,7 +525,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="PopTarget">Population</param>
         public void assignTarget(Population PopTarget)
         {
-            Target = new TargetTN(PopTarget);
+            m_oTarget = new TargetTN(PopTarget);
         }
 
         /// <summary>
@@ -533,7 +534,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="WPTarget">Waypoint</param>
         public void assignTarget(Waypoint WPTarget)
         {
-            Target = new TargetTN(WPTarget);
+            m_oTarget = new TargetTN(WPTarget);
         }
 
         /// <summary>
@@ -542,9 +543,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="tube">launch tube to be assigned.</param>
         public void assignLaunchTube(MissileLauncherTN tube)
         {
-            if (LinkedWeapons.Contains(tube) == false)
+            if (m_lLinkedWeapons.Contains(tube) == false)
             {
-                LinkedWeapons.Add(tube);
+                m_lLinkedWeapons.Add(tube);
 
                 if (tube.mFC != this)
                     tube.AssignMFC(this);
@@ -557,9 +558,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="tube">tube to be removed.</param>
         public void removeLaunchTube(MissileLauncherTN tube)
         {
-            if (LinkedWeapons.Contains(tube) == true)
+            if (m_lLinkedWeapons.Contains(tube) == true)
             {
-                LinkedWeapons.Remove(tube);
+                m_lLinkedWeapons.Remove(tube);
 
                 if (tube.mFC == this)
                     tube.ClearMFC();
@@ -572,11 +573,11 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void ClearAllWeapons()
         {
-            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            foreach (MissileLauncherTN LaunchTube in m_lLinkedWeapons) 
             {
-                LinkedWeapons[loop].ClearMFC();
+               LaunchTube.ClearMFC();
             }
-            LinkedWeapons.Clear();
+            m_lLinkedWeapons.Clear();
         }
 
         /// <summary>
@@ -584,11 +585,11 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void ClearAllMissiles()
         {
-            for (int loop = 0; loop < MissilesInFlight.Count; loop++)
+            foreach (OrdnanceGroupTN MissileGroup in m_lMissilesInFlight)
             {
-                for (int loop2 = 0; loop2 < MissilesInFlight[loop].missiles.Count; loop++)
+                foreach (OrdnanceTN Missile in MissileGroup.missiles)
                 {
-                    MissilesInFlight[loop].missiles[loop2].mFC = null;
+                    Missile.mFC = null;
                 }
             }
         }
@@ -598,7 +599,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void clearTarget()
         {
-            Target = null;
+            m_oTarget = null;
         }
 
         /// <summary>
@@ -606,7 +607,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public TargetTN getTarget()
         {
-            return Target;
+            return m_oTarget;
         }
 
         /// <summary>
@@ -618,20 +619,20 @@ namespace Pulsar4X.Entities.Components
         public bool FireWeapons(TaskGroupTN TG, ShipTN FiredFrom)
         {
             bool retv = false;
-            if (Target != null)
+            if (m_oTarget != null)
             {
                 /// <summary>
                 /// Just a temporary variable for this function.
                 /// </summary>
                 BindingList<OrdnanceGroupTN> LocalMissileGroups = new BindingList<OrdnanceGroupTN>();
 
-                for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+                foreach (MissileLauncherTN LaunchTube in m_lLinkedWeapons)
                 {
-                    if (LinkedWeapons[loop].isDestroyed == false && LinkedWeapons[loop].loadTime == 0 && LinkedWeapons[loop].loadedOrdnance != null)
+                    if (LaunchTube.isDestroyed == false && LaunchTube.loadTime == 0 && LaunchTube.loadedOrdnance != null)
                     {
-                        if (FiredFrom.ShipOrdnance.ContainsKey(LinkedWeapons[loop].loadedOrdnance) == true)
+                        if (FiredFrom.ShipOrdnance.ContainsKey(LaunchTube.loadedOrdnance) == true)
                         {
-                            OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance, FiredFrom);
+                            OrdnanceTN newMissile = new OrdnanceTN(this, LaunchTube.loadedOrdnance, FiredFrom);
 
                             /// <summary>
                             /// Create a new missile group
@@ -652,7 +653,7 @@ namespace Pulsar4X.Entities.Components
                                 {
                                     /// <summary>
                                     /// All Missile groups should be composed of just 1 type of missile for convienence.
-                                    if (OrdGroup.missiles[0].missileDef.Id == LinkedWeapons[loop].loadedOrdnance.Id)
+                                    if (OrdGroup.missiles[0].missileDef.Id == LaunchTube.loadedOrdnance.Id)
                                     {
                                         OrdGroup.AddMissile(newMissile);
                                         foundGroup = true;
@@ -673,16 +674,16 @@ namespace Pulsar4X.Entities.Components
                             /// <summary>
                             /// Decrement the loaded ordnance count, and remove the type entirely if this was the last one.
                             /// </summary>
-                            FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] = FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] - 1;
-                            if (FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] == 0)
+                            FiredFrom.ShipOrdnance[LaunchTube.loadedOrdnance] = FiredFrom.ShipOrdnance[LaunchTube.loadedOrdnance] - 1;
+                            if (FiredFrom.ShipOrdnance[LaunchTube.loadedOrdnance] == 0)
                             {
-                                FiredFrom.ShipOrdnance.Remove(LinkedWeapons[loop].loadedOrdnance);
+                                FiredFrom.ShipOrdnance.Remove(LaunchTube.loadedOrdnance);
                             }
 
                             /// <summary>
                             /// Set the launch tube cooldown time as a missile was just fired from it.
                             /// </summary>
-                            LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
+                            LaunchTube.loadTime = LaunchTube.missileLauncherDef.rateOfFire;
 
                             /// <summary>
                             /// return that a missile was launched.
@@ -691,23 +692,23 @@ namespace Pulsar4X.Entities.Components
                         }
                         else
                         {
-                            String Msg = String.Format("No ordnance {0} on ship {1} is available for Launch Tube {2}", LinkedWeapons[loop].Name, FiredFrom.Name, LinkedWeapons[loop].Name);
+                            String Msg = String.Format("No ordnance {0} on ship {1} is available for Launch Tube {2}", LaunchTube.Name, FiredFrom.Name, LaunchTube.Name);
                             MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoAvailableOrdnance, TG.Contact.CurrentSystem, TG.Contact,
                                                                        GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
                             TG.TaskGroupFaction.MessageLog.Add(newMessage);
                         }
 
                     }
-                    else if (LinkedWeapons[loop].isDestroyed == true)
+                    else if (LaunchTube.isDestroyed == true)
                     {
-                        String Msg = String.Format("Destroyed launch tube {0} is still attached to {1}'s MFC", LinkedWeapons[loop].Name, FiredFrom.Name);
+                        String Msg = String.Format("Destroyed launch tube {0} is still attached to {1}'s MFC", LaunchTube.Name, FiredFrom.Name);
                         MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.Error, TG.Contact.CurrentSystem, TG.Contact,
                                                                    GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
                         TG.TaskGroupFaction.MessageLog.Add(newMessage);
                     }
-                    else if (LinkedWeapons[loop].loadedOrdnance == null)
+                    else if (LaunchTube.loadedOrdnance == null)
                     {
-                        String Msg = String.Format("No loaded ordnance for launch tube {0} on ship {1}", LinkedWeapons[loop].Name, FiredFrom.Name);
+                        String Msg = String.Format("No loaded ordnance for launch tube {0} on ship {1}", LaunchTube.Name, FiredFrom.Name);
                         MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoLoadedOrdnance, TG.Contact.CurrentSystem, TG.Contact,
                                                                    GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
                         TG.TaskGroupFaction.MessageLog.Add(newMessage);
@@ -746,13 +747,13 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             BindingList<OrdnanceGroupTN> LocalMissileGroups = new BindingList<OrdnanceGroupTN>();
 
-            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            foreach (MissileLauncherTN LaunchTube in m_lLinkedWeapons) //int loop = 0; loop < LinkedWeapons.Count; loop++)
             {
-                if (LinkedWeapons[loop].isDestroyed == false && LinkedWeapons[loop].loadTime == 0 && LinkedWeapons[loop].loadedOrdnance != null)
+                if (LaunchTube.isDestroyed == false && LaunchTube.loadTime == 0 && LaunchTube.loadedOrdnance != null)
                 {
-                    if (FiredFrom.ShipOrdnance.ContainsKey(LinkedWeapons[loop].loadedOrdnance) == true)
+                    if (FiredFrom.ShipOrdnance.ContainsKey(LaunchTube.loadedOrdnance) == true)
                     {
-                        OrdnanceTN newMissile = new OrdnanceTN(this, LinkedWeapons[loop].loadedOrdnance, FiredFrom);
+                        OrdnanceTN newMissile = new OrdnanceTN(this, LaunchTube.loadedOrdnance, FiredFrom);
 
                         /// <summary>
                         /// Point defense does not go by MFC targetting. have to add target here.
@@ -786,7 +787,7 @@ namespace Pulsar4X.Entities.Components
                             {
                                 /// <summary>
                                 /// All Missile groups should be composed of just 1 type of missile for convienence.
-                                if (OrdGroup.missiles[0].missileDef.Id == LinkedWeapons[loop].loadedOrdnance.Id)
+                                if (OrdGroup.missiles[0].missileDef.Id == LaunchTube.loadedOrdnance.Id)
                                 {
                                     OrdGroup.AddMissile(newMissile);
                                     foundGroup = true;
@@ -813,47 +814,45 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Decrement the loaded ordnance count, and remove the type entirely if this was the last one.
                         /// </summary>
-                        FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] = FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] - 1;
-                        if (FiredFrom.ShipOrdnance[LinkedWeapons[loop].loadedOrdnance] == 0)
+                        FiredFrom.ShipOrdnance[LaunchTube.loadedOrdnance] = FiredFrom.ShipOrdnance[LaunchTube.loadedOrdnance] - 1;
+                        if (FiredFrom.ShipOrdnance[LaunchTube.loadedOrdnance] == 0)
                         {
-                            FiredFrom.ShipOrdnance.Remove(LinkedWeapons[loop].loadedOrdnance);
+                            FiredFrom.ShipOrdnance.Remove(LaunchTube.loadedOrdnance);
                         }
 
                         /// <summary>
                         /// Set the launch tube cooldown time as a missile was just fired from it.
                         /// </summary>
-                        LinkedWeapons[loop].loadTime = LinkedWeapons[loop].missileLauncherDef.rateOfFire;
+                        LaunchTube.loadTime = LaunchTube.missileLauncherDef.rateOfFire;
 
                         if (LaunchCount == MissilesToFire)
                             break;
                     }
                     else
                     {
-                        String Msg = String.Format("No ordnance {0} on ship {1} is available for Launch Tube {2} in PD Mode", LinkedWeapons[loop].Name, FiredFrom.Name, LinkedWeapons[loop].Name);
+                        String Msg = String.Format("No ordnance {0} on ship {1} is available for Launch Tube {2} in PD Mode", LaunchTube.Name, FiredFrom.Name, LaunchTube.Name);
                         MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoAvailableOrdnance, TG.Contact.CurrentSystem, TG.Contact,
                                                                    GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
                         TG.TaskGroupFaction.MessageLog.Add(newMessage);
                     }
 
                 }
-                else if (LinkedWeapons[loop].isDestroyed == true)
+                else if (LaunchTube.isDestroyed == true)
                 {
-                    String Msg = String.Format("Destroyed launch tube {0} is still attached to {1}'s MFC in PD Mode", LinkedWeapons[loop].Name, FiredFrom.Name);
+                    String Msg = String.Format("Destroyed launch tube {0} is still attached to {1}'s MFC in PD Mode", LaunchTube.Name, FiredFrom.Name);
                     MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.Error, TG.Contact.CurrentSystem, TG.Contact,
                                                                GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
                     TG.TaskGroupFaction.MessageLog.Add(newMessage);
                 }
-                else if (LinkedWeapons[loop].loadedOrdnance == null)
+                else if (LaunchTube.loadedOrdnance == null)
                 {
-                    String Msg = String.Format("No loaded ordnance for launch tube {0} on ship {1} in PD Mode", LinkedWeapons[loop].Name, FiredFrom.Name);
+                    String Msg = String.Format("No loaded ordnance for launch tube {0} on ship {1} in PD Mode", LaunchTube.Name, FiredFrom.Name);
                     MessageEntry newMessage = new MessageEntry(MessageEntry.MessageType.FiringNoLoadedOrdnance, TG.Contact.CurrentSystem, TG.Contact,
                                                                GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Msg);
                     TG.TaskGroupFaction.MessageLog.Add(newMessage);
                 }
             }
-
             return LaunchCount;
         }
     }
-
 }

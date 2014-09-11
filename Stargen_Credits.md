@@ -154,6 +154,16 @@ References
 ------------------------------------------------------------------------
 Ian Burrell / iburrell@znark.com
 
+        ===============================================================================
+                Avivah Yamani1, Taufiq Hidayat,Ratna Satyaningsih,Budi Dermawan
+        ===============================================================================
+
+They implemented the Gladman criterion for stable seperation between two planets, and also supplied us with the copy of the source that we used.
+
+
+
+Avivah Yamani et al. "A Monte Carlo Modeling of Planetary Formation: A Case of 47 Ursae Majoris System ". http://jms.fmipa.itb.ac.id/jms/article/viewFile/277/293
+
         ================================================================
                                   Done
         ================================================================

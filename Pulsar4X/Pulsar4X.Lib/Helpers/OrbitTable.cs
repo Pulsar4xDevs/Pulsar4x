@@ -24,7 +24,7 @@ namespace Pulsar4X.Lib
 
 		private static uint m_oNodes = 100;		//Each table point reprsents 1/(2n)th of an orbital period
 		private static int m_oOrbits = 40;	//Each each orbital excentricy has a different profile.
-        private static double[,] m_oTable = new double[m_oOrbits + 1, m_oNodes + 1];
+        private static double[,] m_lTable = new double[m_oOrbits + 1, m_oNodes + 1];
 
 		private OrbitTable ()
 		{
@@ -34,13 +34,13 @@ namespace Pulsar4X.Lib
             {
                 double excentricy = 1.0 * j / m_oOrbits;
 				double angle = 0;
-                m_oTable[j, 0] = 0;
+                m_lTable[j, 0] = 0;
 
 				int k;
                 for (k = 0; k < m_oNodes * 4; k++)
                 {
 					if (k % 4 == 0)	// the '4' reflects solving for 4x as many points as table elements to improve accuracy.
-                        m_oTable[j, (int)(k / 4)] = angle;
+                        m_lTable[j, (int)(k / 4)] = angle;
 
 					//Secant Predition-Correction Method. 
 					//Pretty good accuracy when excentricy is small. For accuracy with large excentricy smaller steps are required.
@@ -48,7 +48,7 @@ namespace Pulsar4X.Lib
                     double iAngle2 = angle + Math.PI * 2 / (2.0 * m_oNodes * 4) * Math.Pow(1 - excentricy * Math.Cos(iAngle1), 2.0) / Math.Pow(1 - excentricy * excentricy, 1.5);
 					angle = 0.5 * (iAngle1 + iAngle2);
 				}
-                m_oTable[j, m_oNodes] = angle;
+                m_lTable[j, m_oNodes] = angle;
 			}
 		}
 
@@ -71,8 +71,8 @@ namespace Pulsar4X.Lib
             int lowerE = (int)theOrbit.Eccentricity * m_oOrbits;
             int upperE = (int)Math.Ceiling(theOrbit.Eccentricity * m_oOrbits);
 
-            double lowEA = m_oTable[lowerE, lowerA] + (m_oTable[lowerE, upperA] - m_oTable[lowerE, lowerA]) * (orbitFraction * m_oNodes * 2.0 - lowerA);
-            double highEA = m_oTable[upperE, lowerA] + (m_oTable[upperE, upperA] - m_oTable[upperE, lowerA]) * (orbitFraction * m_oNodes * 2.0 - lowerA);
+            double lowEA = m_lTable[lowerE, lowerA] + (m_lTable[lowerE, upperA] - m_lTable[lowerE, lowerA]) * (orbitFraction * m_oNodes * 2.0 - lowerA);
+            double highEA = m_lTable[upperE, lowerA] + (m_lTable[upperE, upperA] - m_lTable[upperE, lowerA]) * (orbitFraction * m_oNodes * 2.0 - lowerA);
 
             angle = lowEA + (highEA - lowEA) * (theOrbit.Eccentricity * m_oOrbits - lowerE);
 
