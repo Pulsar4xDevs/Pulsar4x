@@ -557,11 +557,11 @@ namespace Pulsar4X.Entities
             /// Missiles should check to see if they have a target, move towards it, and hit it. If they have no target then they should check their sensor and either move to new target,
             /// or more towards last known firing location. ProcessOrder should handle all of these.
             /// </summary>
-            for (int loop = factionStart; loop < factionCount; loop++)
+            foreach(Faction faction in P) 
             {
-                for (int loop2 = 0; loop2 < P[loop].MissileGroups.Count; loop2++)
+                foreach(OrdnanceGroupTN OrdnanceGroup in faction.MissileGroups) 
                 {
-                    P[loop].MissileGroups[loop2].ProcessOrder((uint)(CurrentTick - lastTick), RNG);
+                    OrdnanceGroup.ProcessOrder((uint)(CurrentTick - lastTick), RNG);
 
                     /// <summary>
                     /// Handle missile interception sub pulse preemption here.
@@ -569,22 +569,26 @@ namespace Pulsar4X.Entities
                     if (MissileInterceptPreemptTick != CurrentTick)
                     {
                         MissileInterceptPreemptTick = CurrentTick;
-                        MissileTimeToHit = (int)P[loop].MissileGroups[loop2].timeReq;
+                        MissileTimeToHit = (int)OrdnanceGroup.timeReq;
                     }
-                    else if (MissileInterceptPreemptTick == CurrentTick && P[loop].MissileGroups[loop2].timeReq < MissileTimeToHit)
+                    else if (MissileInterceptPreemptTick == CurrentTick && OrdnanceGroup.timeReq < MissileTimeToHit)
                     {
-                        MissileTimeToHit = (int)P[loop].MissileGroups[loop2].timeReq;
+                        MissileTimeToHit = (int)OrdnanceGroup.timeReq;
                     }
 
 
-                    if (P[loop].MissileGroups[loop2].missilesDestroyed != 0 && P[loop].MissileRemoveList.Contains(P[loop].MissileGroups[loop2]) == false )
+                    /// <summary>
+                    /// If a missile destroyed its target, handle that here by informing the recharge list that said target must be removed from the sim.
+                    /// Also put this missile group in the missile remove list, which either removes missiles from the group, or deletes the entire group if it has no more misisles left.
+                    /// </summary>
+                    if (OrdnanceGroup.missilesDestroyed != 0 && faction.MissileRemoveList.Contains(OrdnanceGroup) == false)
                     {
 
-                        switch (P[loop].MissileGroups[loop2].missiles[0].target.targetType)
+                        switch (OrdnanceGroup.missiles[0].target.targetType)
                         {
 #warning should any planet/pop stuff be taken care of here?
                             case StarSystemEntityType.TaskGroup:
-                                ShipTN MissileTarget = P[loop].MissileGroups[loop2].missiles[0].target.ship;
+                                ShipTN MissileTarget = OrdnanceGroup.missiles[0].target.ship;
                                 if (MissileTarget != null)
                                 {
                                     if (MissileTarget.IsDestroyed == true)
@@ -602,30 +606,30 @@ namespace Pulsar4X.Entities
                                 }
                             break;
                         }
-                        P[loop].MissileRemoveList.Add(P[loop].MissileGroups[loop2]);
+                        faction.MissileRemoveList.Add(OrdnanceGroup);
                     }
                 }
             }
 
             /// <summary>
-            /// Taskgroup Follow orders here.
+            /// Taskgroup Follow orders here. perform orders, and update the travel line which tells the gui how to draw the line denoting where this tg has traveled.
             /// </summary>
-            for (int loop = factionStart; loop < factionCount; loop++)
+            foreach(Faction faction in P)  
             {
-                for (int loop2 = 0; loop2 < P[loop].TaskGroups.Count; loop2++)
+                foreach(TaskGroupTN TaskGroup in faction.TaskGroups) 
                 {
                     /// <summary>
                     /// Adding new taskgroups means adding a loop here to run through them all.
                     /// </summary>
-                    if (P[loop].TaskGroups[loop2].TaskGroupOrders.Count != 0)
+                    if (TaskGroup.TaskGroupOrders.Count != 0)
                     {
-                        P[loop].TaskGroups[loop2].FollowOrders((uint)(CurrentTick - lastTick));
+                        TaskGroup.FollowOrders((uint)(CurrentTick - lastTick));
                     }
-                    else if(P[loop].TaskGroups[loop2].DrawTravelLine == 1)
+                    else if (TaskGroup.DrawTravelLine == 1)
                     {
-                        P[loop].TaskGroups[loop2].UpdateLastPosition();
+                        TaskGroup.UpdateLastPosition();
 
-                        P[loop].TaskGroups[loop2].DrawTravelLine = 2;
+                        TaskGroup.DrawTravelLine = 2;
                     }
                 }
             }
@@ -633,17 +637,17 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Do sensor sweeps here. Sensors must be done after movement, not before. Missile sensors should also be here, but they need an individual check if they have no target early on.
             /// </summary>
-            for (int loop = factionStart; loop < factionCount; loop++)
+            foreach (Faction faction in P)
             {
-                P[loop].SensorSweep(CurrentTick);
+                faction.SensorSweep(CurrentTick);
             }
 
             /// <summary>
             /// Insert Area Defense/ AMM Defense here.
             /// </summary>
-            for (int loop = factionStart; loop < factionCount; loop++)
+            foreach (Faction faction in P)
             {
-                AreaDefensiveFire(P[loop],RNG);
+                AreaDefensiveFire(faction,RNG);
             }
 
             /// <summary>
@@ -651,47 +655,55 @@ namespace Pulsar4X.Entities
             /// Initiative will have to be implemented here for "fairness". right now lower P numbers have the advantage.
             /// Check for destroyed ships as well.
             /// </summary>
+#warning ships fire in order, initiative does not play a part
             #region Fire Weapons
-            for (int loop = factionStart; loop < factionCount; loop++)
+            foreach (Faction faction in P) //for (int loop = factionStart; loop < factionCount; loop++)
             {
-                foreach (KeyValuePair<ComponentTN, ShipTN> pair in P[loop].OpenFireFC)
+                foreach (KeyValuePair<ComponentTN, ShipTN> pair in faction.OpenFireFC)
                 {
+                    ShipTN ShipToFire = pair.Value;
+                    
                     /// <summary>
                     /// Is BFC
                     /// </summary>
-                    if (P[loop].OpenFireFCType[pair.Key] == true)
+                    if (faction.OpenFireFCType[pair.Key] == true)
                     {
+                        BeamFireControlTN ShipFireControl = pair.Value.ShipBFC[pair.Key.componentIndex];
+
                         /// <summary>
                         /// Open fire and not destroyed.
                         /// </summary>
-                        if (pair.Value.ShipBFC[pair.Key.componentIndex].openFire == true && pair.Value.ShipBFC[pair.Key.componentIndex].isDestroyed == false &&
-                            pair.Value.ShipBFC[pair.Key.componentIndex].target != null)
+                        if (ShipFireControl.openFire == true && ShipFireControl.isDestroyed == false &&
+                            ShipFireControl.target != null)
                         {
-                            if (pair.Value.ShipBFC[pair.Key.componentIndex].target.targetType == StarSystemEntityType.TaskGroup)
+                            if (ShipFireControl.target.targetType == StarSystemEntityType.TaskGroup)
                             {
-                                ShipTN Target = pair.Value.ShipBFC[pair.Key.componentIndex].target.ship;
+                                ShipTN Target = ShipFireControl.target.ship;
 
                                 /// <summary>
                                 /// Same System as target and target exists.
                                 /// </summary>
-                                if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.ShipsTaskGroup.Contact.CurrentSystem && Target.IsDestroyed == false)
+                                if (ShipToFire.ShipsTaskGroup.Contact.CurrentSystem == Target.ShipsTaskGroup.Contact.CurrentSystem && Target.IsDestroyed == false)
                                 {
 
-                                    StarSystem CurSystem = pair.Value.ShipsTaskGroup.Contact.CurrentSystem;
-                                    int MyID = CurSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
+                                    StarSystem CurSystem = ShipToFire.ShipsTaskGroup.Contact.CurrentSystem;
+                                    int MyID = CurSystem.SystemContactList.IndexOf(ShipToFire.ShipsTaskGroup.Contact);
                                     int TargetID = CurSystem.SystemContactList.IndexOf(Target.ShipsTaskGroup.Contact);
 
-                                    if (pair.Value.ShipsFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
+                                    if (ShipToFire.ShipsFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
                                     {
-                                        if (pair.Value.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(Target) == true)
+                                        if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(Target) == true)
                                         {
                                             /// <summary>
                                             /// This tick active detection.
                                             /// </summary>
-                                            if (pair.Value.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts[Target].active == true)
+                                            if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts[Target].active == true)
                                             {
-                                                bool WF = pair.Value.ShipFireWeapons(CurrentTick, RNG);
+                                                bool WF = ShipToFire.ShipFireWeapons(CurrentTick, RNG);
 
+                                                /// <summary>
+                                                /// Update the recharge list since the target must be destroyed.
+                                                /// </summary>
                                                 if (Target.IsDestroyed == true)
                                                 {
                                                     if (Target.ShipsFaction.RechargeList.ContainsKey(Target) == true)
@@ -710,18 +722,18 @@ namespace Pulsar4X.Entities
 
                                                 if (WF == true)
                                                 {
-                                                    if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                                    if (faction.RechargeList.ContainsKey(pair.Value) == true)
                                                     {
-                                                        int value = P[loop].RechargeList[pair.Value];
+                                                        int value = faction.RechargeList[pair.Value];
 
                                                         if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
                                                         {
-                                                            P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                                            faction.RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                                        faction.RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
                                                     }
                                                 }
                                             }//end if active detection
@@ -729,29 +741,29 @@ namespace Pulsar4X.Entities
                                     }//end if system has detected contacts
                                 }//end if in same system
                             }//end if targetType == TaskGroup
-                            else if (pair.Value.ShipBFC[pair.Key.componentIndex].target.targetType == StarSystemEntityType.Missile)
+                            else if (ShipFireControl.target.targetType == StarSystemEntityType.Missile)
                             {
-                                OrdnanceGroupTN Target = pair.Value.ShipBFC[pair.Key.componentIndex].target.missileGroup;
+                                OrdnanceGroupTN Target = ShipFireControl.target.missileGroup;
 
                                 /// <summary>
                                 /// Same system, and target has missiles to be destroyed.
                                 /// </summary>
-                                if (pair.Value.ShipsTaskGroup.Contact.CurrentSystem == Target.contact.CurrentSystem &&( Target.missilesDestroyed != Target.missiles.Count))
+                                if (ShipToFire.ShipsTaskGroup.Contact.CurrentSystem == Target.contact.CurrentSystem &&( Target.missilesDestroyed != Target.missiles.Count))
                                 {
-                                    StarSystem CurSystem = pair.Value.ShipsTaskGroup.Contact.CurrentSystem;
-                                    int MyID = CurSystem.SystemContactList.IndexOf(pair.Value.ShipsTaskGroup.Contact);
+                                    StarSystem CurSystem = ShipToFire.ShipsTaskGroup.Contact.CurrentSystem;
+                                    int MyID = CurSystem.SystemContactList.IndexOf(ShipToFire.ShipsTaskGroup.Contact);
                                     int TargetID = CurSystem.SystemContactList.IndexOf(Target.contact);
 
-                                    if (pair.Value.ShipsFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
+                                    if (ShipToFire.ShipsFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
                                     {
-                                        if (pair.Value.ShipsFaction.DetectedContactLists[CurSystem].DetectedMissileContacts.ContainsKey(Target) == true)
+                                        if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedMissileContacts.ContainsKey(Target) == true)
                                         {
                                             /// <summary>
                                             /// This tick active detection.
                                             /// </summary>
-                                            if (pair.Value.ShipsFaction.DetectedContactLists[CurSystem].DetectedMissileContacts[Target].active == true)
+                                            if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedMissileContacts[Target].active == true)
                                             {
-                                                bool WF = pair.Value.ShipFireWeapons(CurrentTick, RNG);
+                                                bool WF = ShipToFire.ShipFireWeapons(CurrentTick, RNG);
 
                                                 if (Target.missilesDestroyed != 0 && Target.ordnanceGroupFaction.MissileRemoveList.Contains(Target) == false)
                                                 {
@@ -760,18 +772,18 @@ namespace Pulsar4X.Entities
 
                                                 if (WF == true)
                                                 {
-                                                    if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                                    if (faction.RechargeList.ContainsKey(pair.Value) == true)
                                                     {
-                                                        int value = P[loop].RechargeList[pair.Value];
+                                                        int value = faction.RechargeList[pair.Value];
 
                                                         if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
                                                         {
-                                                            P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                                            faction.RechargeList[ShipToFire] = value + (int)Faction.RechargeStatus.Weapons;
                                                         }
                                                     }
                                                     else
                                                     {
-                                                        P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                                        faction.RechargeList.Add(ShipToFire, (int)Faction.RechargeStatus.Weapons);
                                                     }
                                                 }
                                             }
@@ -781,33 +793,38 @@ namespace Pulsar4X.Entities
                             }
                         }//end if isOpenFire isDestroyed=false, target!= null
                     }//end if isBFC = true
+                    /// <summary>
+                    /// Therefore this is a missile fire control.
+                    /// </summary>
                     else
                     {
+                        MissileFireControlTN ShipMFireControl = pair.Value.ShipMFC[pair.Key.componentIndex];
+
                         /// <summary>
                         /// Missile fire controls should be fairly simple, the missile itself does most of the lifting.
                         /// </summary>
-                        if (pair.Value.ShipMFC[pair.Key.componentIndex].openFire == true && pair.Value.ShipMFC[pair.Key.componentIndex].isDestroyed == false &&
-                            pair.Value.ShipMFC[pair.Key.componentIndex].target != null)
+                        if (ShipMFireControl.openFire == true && ShipMFireControl.isDestroyed == false &&
+                            ShipMFireControl.target != null)
                         {
-                            bool WF = pair.Value.ShipMFC[pair.Key.componentIndex].FireWeapons(pair.Value.ShipsTaskGroup, pair.Value);
+                            bool WF = ShipMFireControl.FireWeapons(ShipToFire.ShipsTaskGroup, pair.Value);
 
                             /// <summary>
                             /// Since this ship has fired its missile launch tubes, they will need to be reloaded, put this ship in the recharge list.
                             /// </summary>
                             if (WF == true)
                             {
-                                if (P[loop].RechargeList.ContainsKey(pair.Value) == true)
+                                if (faction.RechargeList.ContainsKey(pair.Value) == true)
                                 {
-                                    int value = P[loop].RechargeList[pair.Value];
+                                    int value = faction.RechargeList[pair.Value];
 
                                     if ((value & (int)Faction.RechargeStatus.Weapons) != (int)Faction.RechargeStatus.Weapons)
                                     {
-                                        P[loop].RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
+                                        faction.RechargeList[pair.Value] = value + (int)Faction.RechargeStatus.Weapons;
                                     }
                                 }
                                 else
                                 {
-                                    P[loop].RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
+                                    faction.RechargeList.Add(pair.Value, (int)Faction.RechargeStatus.Weapons);
                                 }
                             }
                         }
@@ -822,27 +839,38 @@ namespace Pulsar4X.Entities
             #region Simulation Maintenance
             uint TimeValue = (uint)(CurrentTick - lastTick);
             bool loopBreak = false;
-            for (int loop = factionStart; loop < factionCount; loop++)
+
+            /// <summary>
+            /// can't foreach this one, I do some horrible stuff here that relies on being able to manipulate factionIterator.
+            for(int factionIterator = factionStart; factionIterator < factionCount; factionIterator++)
             {
-                foreach (KeyValuePair<ShipTN, int> pair in P[loop].RechargeList)
+                Faction faction = P[factionIterator];
+                loopBreak = false;
+
+                foreach (KeyValuePair<ShipTN, int> pair in faction.RechargeList)
                 {
+                    ShipTN Ship = pair.Key;
+
+                    /// <summary>
+                    /// What does this ship need to have done to it this tick?
+                    /// </summary>
                     int value = pair.Value;
 
                     if ((value & (int)Faction.RechargeStatus.Shields) == (int)Faction.RechargeStatus.Shields)
                     {
-                        pair.Key.RechargeShields(TimeValue);
+                        Ship.RechargeShields(TimeValue);
                     }
 
 
                     if ((value & (int)Faction.RechargeStatus.Weapons) == (int)Faction.RechargeStatus.Weapons)
                     {
                         int ShotsExp;
-                        int ret = pair.Key.RechargeBeamWeapons(TimeValue,out ShotsExp);
+                        int ret = Ship.RechargeBeamWeapons(TimeValue, out ShotsExp);
 
                         ushort amt = (ushort)(Math.Floor((float)TimeValue / 5.0f));
-                        int PowerComp = pair.Key.CurrentPowerGen * amt;
+                        int PowerComp = Ship.CurrentPowerGen * amt;
 
-                        bool allTubesLoaded = pair.Key.ReloadLaunchTubes(TimeValue);
+                        bool allTubesLoaded = Ship.ReloadLaunchTubes(TimeValue);
 
                         /// <summary>
                         /// When all tubes are loaded and have remained loaded for atleast 1 tick reloadLaunchTubes should return true. 
@@ -853,12 +881,16 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         if (ret == PowerComp && allTubesLoaded == true && ShotsExp == 0)
                         {
-                            P[loop].RechargeList[pair.Key] = P[loop].RechargeList[pair.Key] - (int)Faction.RechargeStatus.Weapons;
+                            faction.RechargeList[Ship] = faction.RechargeList[pair.Key] - (int)Faction.RechargeStatus.Weapons;
 
-                            if (P[loop].RechargeList[pair.Key] == 0)
+                            if (faction.RechargeList[Ship] == 0)
                             {
-                                P[loop].RechargeList.Remove(pair.Key);
-                                loop--;
+                                faction.RechargeList.Remove(Ship);
+
+                                /// <summary>
+                                /// Specifically this horrible thing:
+                                /// </summary>
+                                factionIterator--;
                                 loopBreak = true;
                                 break;
                             }
@@ -870,23 +902,23 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if( (value & (int)Faction.RechargeStatus.CIWS) == (int)Faction.RechargeStatus.CIWS)
                     {
-                        int shots = pair.Key.RechargeCIWS();
+                        int shots = Ship.RechargeCIWS();
 
                         /// <summary>
                         /// I've recharged this ship twice, but its CIWS have not fired on anything in the mean time. so remove it from the list.
                         /// </summary>
                         if (shots == 0)
                         {
-                            P[loop].RechargeList[pair.Key] = P[loop].RechargeList[pair.Key] - (int)Faction.RechargeStatus.CIWS;
+                            faction.RechargeList[Ship] = faction.RechargeList[Ship] - (int)Faction.RechargeStatus.CIWS;
 
                             /// <summary>
                             /// If no flags are present at all for this ship, remove it entirely.
                             /// </summary>
 
-                            if (P[loop].RechargeList[pair.Key] == 0)
+                            if (faction.RechargeList[Ship] == 0)
                             {
-                                P[loop].RechargeList.Remove(pair.Key);
-                                loop--;
+                                faction.RechargeList.Remove(Ship);
+                                factionIterator--;
                                 loopBreak = true;
                                 break;
                             }
@@ -903,36 +935,36 @@ namespace Pulsar4X.Entities
                     {
                         RemoveTaskGroupsOrdered(pair);                        
 
-                        for (int loop4 = factionStart; loop4 < factionCount; loop4++)
+                        foreach(Faction CurrentFaction in P)
                         {
-                            StarSystem CurSystem = pair.Key.ShipsTaskGroup.Contact.CurrentSystem;
-                            if(P[loop4].DetectedContactLists.ContainsKey(CurSystem) == true)
+                            StarSystem CurSystem = Ship.ShipsTaskGroup.Contact.CurrentSystem;
+                            if(CurrentFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
                             {
-                                if (P[loop4].DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(pair.Key) == true)
+                                if (CurrentFaction.DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(Ship) == true)
                                 {
-                                    P[loop4].DetectedContactLists[CurSystem].DetectedContacts.Remove(pair.Key);
+                                    CurrentFaction.DetectedContactLists[CurSystem].DetectedContacts.Remove(Ship);
                                 }
                             }
                         }
 
-                        bool nodeGone = pair.Key.OnDestroyed();
-                        pair.Key.ShipClass.ShipsInClass.Remove(pair.Key);
-                        pair.Key.ShipsTaskGroup.Ships.Remove(pair.Key);
-                        pair.Key.ShipsFaction.Ships.Remove(pair.Key);
+                        bool nodeGone = Ship.OnDestroyed();
+                        Ship.ShipClass.ShipsInClass.Remove(pair.Key);
+                        Ship.ShipsTaskGroup.Ships.Remove(pair.Key);
+                        Ship.ShipsFaction.Ships.Remove(pair.Key);
 
-                        if (pair.Key.ShipsTaskGroup.Ships.Count == 0)
+                        if (Ship.ShipsTaskGroup.Ships.Count == 0)
                         {
                             RemoveFriendlyTaskGroupsOrdered(pair);
                         }
 
                         RemoveShipsTargetting(pair);
 
-                        P[loop].RechargeList.Remove(pair.Key);
+                        faction.RechargeList.Remove(pair.Key);
 
                         /// <summary>
                         /// Have to re-run loop since a ship was removed from all kinds of things.
                         /// </summary>
-                        loop--;
+                        factionIterator--;
                         loopBreak = true;
                         break;
                     }
@@ -944,43 +976,30 @@ namespace Pulsar4X.Entities
                 if (loopBreak == false)
                 {
 
-                    for (int loop2 = 0; loop2 < P[loop].MissileRemoveList.Count; loop2++)
+                    foreach(OrdnanceGroupTN MissileRemove in faction.MissileRemoveList)
                     {
                         /// <summary>
                         /// every missile in this list will either have missiles removed, or needs to be deleted as an ordnance group.
                         /// </summary>
-                        if (P[loop].MissileRemoveList[loop2].missiles.Count > P[loop].MissileRemoveList[loop2].missilesDestroyed)
+                        if (MissileRemove.missiles.Count > MissileRemove.missilesDestroyed)
                         {
-                            for (int loop3 = 0; loop3 < P[loop].MissileRemoveList[loop2].missilesDestroyed; loop3++)
+                            for (int missileIterator = 0; missileIterator < MissileRemove.missilesDestroyed; missileIterator++)
                             {
-                                P[loop].MissileRemoveList[loop2].RemoveMissile(P[loop].MissileRemoveList[loop2].missiles[0]);
+                                MissileRemove.RemoveMissile(MissileRemove.missiles[0]);
                             }
 
-                            P[loop].MissileRemoveList[loop2].missilesDestroyed = 0;
+                            MissileRemove.missilesDestroyed = 0;
                         }
                         else
                         {
-                            RemoveOrdnanceGroupFromSim(P[loop].MissileRemoveList[loop2],P);
+                            RemoveOrdnanceGroupFromSim(MissileRemove, P);
                         }
                     }
 
-                    P[loop].MissileRemoveList.Clear();
+                    faction.MissileRemoveList.Clear();
                 }
             }
             #endregion
-
-            /// <summary>
-            /// eventually move every planet/moon/star/asteroid
-            /// </summary>
-            //foreach(StarSystem System in GameState.Instance.StarSystems)
-            //{
-                //foreach (Planet oPlanet in System.Stars[0].Planets)
-                //{
-                    //Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oPlanet, tickValue);
-                    //oPlanet.XSystem = oPlanet.XSystem + 1.0;
-                    //oPlanet.YSystem = oPlanet.YSystem + 1.0;
-                //}
-            //}
               
         }
 
@@ -993,13 +1012,15 @@ namespace Pulsar4X.Entities
         /// <param name="pair">KeyValuePair of the ship involved</param>
         private void RemoveTaskGroupsOrdered(KeyValuePair<ShipTN, int> pair)
         {
-            for (int loop4 = 0; loop4 < pair.Key.TaskGroupsOrdered.Count; loop4++)
+            foreach(TaskGroupTN TaskGroupOrdered in pair.Key.TaskGroupsOrdered)
             {
-                for (int loop5 = 0; loop5 < pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.Count; loop5++)
+                for(int orderIterator = 0; orderIterator < TaskGroupOrdered.TaskGroupOrders.Count; orderIterator++) 
                 {
-                    if (pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders[loop5].target.SSEntity == StarSystemEntityType.TaskGroup)
+                    Orders TaskGroupOrder = TaskGroupOrdered.TaskGroupOrders[orderIterator];
+
+                    if (TaskGroupOrder.target.SSEntity == StarSystemEntityType.TaskGroup)
                     {
-                        if (pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders[loop5].taskGroup == pair.Key.ShipsTaskGroup)
+                        if (TaskGroupOrder.taskGroup == pair.Key.ShipsTaskGroup)
                         {
                             /// <summary>
                             /// At this point it has been established that the destroyed ship has TGs ordered to it some how(enemy contact ordering).
@@ -1007,15 +1028,15 @@ namespace Pulsar4X.Entities
                             /// That the current order target is a taskgroup, and in fact this taskgroup.
                             /// </summary>
 
-                            String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.", pair.Key.TaskGroupsOrdered[loop4].Name);
-                            MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.OrdersNotCompleted, pair.Key.TaskGroupsOrdered[loop4].Contact.CurrentSystem, pair.Key.TaskGroupsOrdered[loop4].Contact,
+                            String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.", TaskGroupOrdered.Name);
+                            MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.OrdersNotCompleted, TaskGroupOrdered.Contact.CurrentSystem, TaskGroupOrdered.Contact,
                                                                    GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                            pair.Key.TaskGroupsOrdered[loop4].TaskGroupFaction.MessageLog.Add(Entry2);
+                            TaskGroupOrdered.TaskGroupFaction.MessageLog.Add(Entry2);
 
-                            int lastOrder = pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.Count - 1;
-                            for (int loop6 = lastOrder; loop6 >= loop5; loop6--)
+                            int lastOrder = TaskGroupOrdered.TaskGroupOrders.Count - 1;
+                            for (int orderListIterator = lastOrder; orderListIterator >= orderIterator; orderListIterator--)
                             {
-                                pair.Key.TaskGroupsOrdered[loop4].TaskGroupOrders.RemoveAt(loop6);
+                                TaskGroupOrdered.TaskGroupOrders.RemoveAt(orderListIterator);
                             }
                             break;
                         }

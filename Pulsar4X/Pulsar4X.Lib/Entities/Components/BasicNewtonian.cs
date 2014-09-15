@@ -26,44 +26,42 @@ namespace Pulsar4X.Entities.Components
 	/// <summary>
 	/// A class with all methods and properties that all internal newtonian ship components will share
 	/// </summary>
-	public abstract class BasicNewtonian
+	public abstract class BasicNewtonian : GameEntity
 	{
-		public string name {get; set;}
-
-		public BuildCost unitCost;
+		public BuildCost m_ounitCost;
 
 		/// <summary>
 		/// Displacement in tons (meter cubed) for one component.
 		/// Typicaly equals 10x mass for storage compartments or 5x mass otherwise
 		/// </summary>
-		public long volumeUnit { get; set; }
+		public long m_oVolumeUnit { get; set; }
 
-		public long unitCrew { get; set; }
+		public long m_oUnitCrew { get; set; }
 
 		/// <summary>
 		/// Mass in tons for a single component.
 		/// </summary>
-		public long unitMass { get; set; }
+		public long m_oUnitMass { get; set; }
 
 		/// <summary>
 		/// MJ of energy required for a 100% destruction chance.
 		/// </summary>
-		public double integrity { get; set; }
+		public double m_oIntegrity { get; set; }
 
         /// <summary>
         /// user can mark components as obsolete
         /// </summary>
-        public bool IsObsolete { get; set; }
+        public bool m_oIsObsolete { get; set; }
 
         /// <summary>
         /// Components can be salvaged and used in designs, but not built natively.
         /// </summary>
-        public bool IsSalvaged { get; set; }
+        public bool m_oIsSalvaged { get; set; }
 
 		/// <summary>
 		/// NewtonianType of Component
 		/// </summary>
-		public NewtonianType Type { get; set; }
+		public NewtonianType m_oType { get; set; }
 
 		public BasicNewtonian ()
 		{

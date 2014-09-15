@@ -81,7 +81,7 @@ namespace Pulsar4X.Tests
 
             ArmorNA ArmorTestNA = new ArmorNA(ArmorTestDefNA);
 
-            Console.WriteLine("Size: {0}", ArmorTestDefNA.unitMass);
+            Console.WriteLine("Size: {0}", ArmorTestDefNA.m_oUnitMass);
             Console.WriteLine("Cost: {0}", ArmorTestDefNA.cost);
             Console.WriteLine("Area: {0}", ArmorTestDefNA.area);
             Console.WriteLine("Depth: {0}", ArmorTestDefNA.depth);
@@ -115,7 +115,7 @@ namespace Pulsar4X.Tests
 
             Console.WriteLine("isDamaged: {0}", ArmorTestNA.isDamaged);
 
-            Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ArmorTestNA.armorDef.cost, ArmorTestNA.armorDef.area, ArmorTestNA.armorDef.unitMass);
+            Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ArmorTestNA.armorDef.cost, ArmorTestNA.armorDef.area, ArmorTestNA.armorDef.m_oUnitMass);
         }
 
         [Test]

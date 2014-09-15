@@ -237,19 +237,19 @@ namespace Pulsar4X.Entities.Components
 
 	public class NewtonianEngine : BasicNewtonian
 	{
-		public double isReactionless;
+		public double m_oIsReactionless;
 
-		public double maxThrust;
+		public double m_oMaxThrust;
 
-		public double power;
+		public double m_oPower;
 
-		public double maxSpeed;
+		public double m_oMaxSpeed;
 
-		public double burnRate;
+		public double m_oBurnRate;
 
 		public NewtonianEngine () : base ()
 		{
-			Type = NewtonianType.Engine;
+			m_oType = NewtonianType.Engine;
 		}
 
 		//TODO: Impliment Engine mechanics

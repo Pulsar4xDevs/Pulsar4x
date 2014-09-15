@@ -408,14 +408,14 @@ namespace Pulsar4X.Entities.Components
         /// <param name="MJBox">Megajoules per armor box, how resistant to damage each part of the armor is</param>
         public ArmorDefNA(string Title,ushort MJBox)
         {
-            name = Title;
-            unitMass = 0;
+            Name = Title;
+            m_oUnitMass = 0;
             m_oArea = 0.0f;
             m_oCost = 0.0m;
 
 
-            integrity = MJBox;
-            Type = NewtonianType.Other;
+            m_oIntegrity = MJBox;
+            m_oType = NewtonianType.Other;
         }
 
         /// <summary>
@@ -424,7 +424,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="MJBox">New megajoules per box stat</param>
         public void UpdateArmorType(ushort MJBox)
         {
-            integrity = MJBox;
+            m_oIntegrity = MJBox;
         }
 
         /// <summary>
@@ -457,14 +457,14 @@ namespace Pulsar4X.Entities.Components
             /// Size must be initialized to 0.0 for this
             /// Armor is being totally recalculated every time this is run, the previous result is thrown out.
             /// </summary>
-            unitMass = 0;
+            m_oUnitMass = 0;
 
             /// <summary>
             /// For each layer of Depth.
             /// </summary>
             for (loop = 0; loop < m_oDepth; loop++)
             {
-                volume = Math.Ceiling((double)(SizeInTonsOfShip + unitMass));
+                volume = Math.Ceiling((double)(SizeInTonsOfShip + m_oUnitMass));
                 volume = volume * 10;
                 
                 radius3 = (3.0 * volume) / (4.0 * pi);
@@ -472,7 +472,7 @@ namespace Pulsar4X.Entities.Components
                 radius2 = Math.Pow(radius, 2.0);
                 area = (4.0 * pi) * radius2;
 
-                unitMass = unitMass + (int)Math.Round((double)(area / 100.0));
+                m_oUnitMass = m_oUnitMass + (int)Math.Round((double)(area / 100.0));
             }
 
             m_oArea = (float)area;
