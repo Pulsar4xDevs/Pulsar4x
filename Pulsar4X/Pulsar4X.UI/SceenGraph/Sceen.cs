@@ -262,7 +262,7 @@ namespace Pulsar4X.UI.SceenGraph
                 // now go though and add each planet to render list.
                 foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
                 {
-                    SceenElement oPlanetElement = new PlanetElement(oPlanet);
+                    SceenElement oPlanetElement = new PlanetElement(a_oDefaultEffect, v3StarPos, oPlanet, Color.FromArgb(255, 0, 205, 0));
                     oPlanetElement.EntityID = oPlanet.Id;
 
                     if (iPlanetCounter == 0)
@@ -284,18 +284,22 @@ namespace Pulsar4X.UI.SceenGraph
                         new Vector2(fPlanetSize, fPlanetSize),
                         Color.FromArgb(255, 0, 255, 0),  // lime green
                         UIConstants.Textures.DEFAULT_PLANET_ICON);
-                    GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
+
+                    /*GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
                         v3StarPos,                                                                      // base around parent star pos.
                         oPlanet, //(float)dPlanetOrbitRadius / 2,
                         Color.FromArgb(255, 0, 205, 0),  // lime green
-                        UIConstants.Textures.DEFAULT_TEXTURE);
+                        UIConstants.Textures.DEFAULT_TEXTURE);*/
+
                     // create name lable:
                     GLUtilities.GLFont oPlanetNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                         new Vector3((float)(v3PlanetPos.X), (float)(v3PlanetPos.Y - (oPlanet.Radius / Constants.Units.KM_PER_AU)), 0),
                         UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT, oPlanet.Name);
 
                     oPlanetElement.AddPrimitive(oPlanetQuad);
-                    oPlanetElement.AddPrimitive(oPlanetOrbitCirc);
+
+                    //oPlanetElement.AddPrimitive(oPlanetOrbitCirc);
+
                     oPlanetElement.Lable = oPlanetNameLable;
                     oPlanetElement.PrimaryPrimitive = oPlanetQuad;
                     oPlanetElement.RealSize = new Vector2(fPlanetSize, fPlanetSize);
@@ -306,7 +310,7 @@ namespace Pulsar4X.UI.SceenGraph
                     // now again for the moons:
                     foreach (Pulsar4X.Entities.Planet oMoon in oPlanet.Moons)
                     {
-                        SceenElement oMoonElement = new PlanetElement(oMoon);
+                        SceenElement oMoonElement = new PlanetElement(a_oDefaultEffect, v3PlanetPos, oMoon, Color.FromArgb(255, 0, 205, 0));
                         oMoonElement.EntityID = oMoon.Id;
 
                         if (iMoonCounter == 0)
@@ -326,17 +330,21 @@ namespace Pulsar4X.UI.SceenGraph
                             new Vector2(fMoonSize, fMoonSize),
                             Color.FromArgb(255, 0, 205, 0),  // lime green
                             UIConstants.Textures.DEFAULT_PLANET_ICON);
-                        GLUtilities.GLCircle oMoonOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
+
+                        /*GLUtilities.GLCircle oMoonOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
                             v3PlanetPos,                                                                      // base around parent planet pos.
                             oMoon, //(float)dMoonOrbitRadius / 2,
                             Color.FromArgb(255, 0, 205, 0),  // lime green
-                            UIConstants.Textures.DEFAULT_TEXTURE);
+                            UIConstants.Textures.DEFAULT_TEXTURE);*/
+
                         GLUtilities.GLFont oMoonNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                         new Vector3((float)(v3MoonPos.X), (float)(v3MoonPos.Y - (oMoon.Radius / Constants.Units.KM_PER_AU)), 0),
                         UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT, oMoon.Name);
 
                         oMoonElement.AddPrimitive(oMoonQuad);
-                        oMoonElement.AddPrimitive(oMoonOrbitCirc);
+
+                        //oMoonElement.AddPrimitive(oMoonOrbitCirc);
+
                         oMoonElement.Lable = oMoonNameLable;
                         oMoonElement.PrimaryPrimitive = oMoonQuad;
                         oMoonElement.RealSize = new Vector2(fMoonSize, fMoonSize);

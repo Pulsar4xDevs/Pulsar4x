@@ -18,6 +18,7 @@ namespace Pulsar4X.UI.SceenGraph
 
         private Planet m_oPlanet;
 
+
         public override GameEntity SceenEntity
         {
             get
@@ -30,16 +31,24 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
+        /// <summary>
+        /// This is the display element for the orbit this planet will make.
+        /// </summary>
+        private CircleElement m_oOrbitCircle { get; set; }
+
 
         public PlanetElement()
             : base()
         {
         }
 
-        public PlanetElement(Planet a_oPlanet)
+        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, Planet a_oPlanet,  System.Drawing.Color a_oColor)
             : base(a_oPlanet)
         {
+            m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oPlanet, a_oColor);
+#warning Cannot at m_oOrbitCircle to children for Planet Element
         }
+
 
         public override void Render()
         {
@@ -47,6 +56,11 @@ namespace Pulsar4X.UI.SceenGraph
             {
                 oPrimitive.Render();
             }
+
+            /// <summary>
+            /// Putting this as a child means that it runs afoul of the "don't render children" check.
+            /// </summary>
+            m_oOrbitCircle.Render();
 
             if (RenderChildren == true)
             {
@@ -148,28 +162,13 @@ namespace Pulsar4X.UI.SceenGraph
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;
 
+            Vector3 pos2 = new Vector3((float)m_oPlanet.Parent.XSystem, (float)m_oPlanet.Parent.YSystem, 0.0f);
+            m_oOrbitCircle.CurrentPosition = pos2;
+
             /// <summary>
-            /// This is an orbit circle and it needs to be moved
+            /// Putting this as a child means that it runs afoul of the "don't render children" check.
             /// </summary>
-//#warning this is a hack to move orbit circles around, it should be handled better than this if possible.
-            for (int loop = 0; loop < Primitives.Count; loop++)
-            {
-                String Entry = String.Format("{0} Primitive {1} Position {2} {3}", Lable.Text, loop, Primitives[loop].Position, PrimaryPrimitive.Position);
-                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
-                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                GameState.Instance.Factions[0].MessageLog.Add(Msg);
-            }
-
-            Vector3 pos2 = new Vector3((float)m_oPlanet.Parent.XSystem,(float)m_oPlanet.Parent.YSystem, 0.0f);
-            Primitives[1].Position = pos2;
-
-            for (int loop = 0; loop < Primitives.Count; loop++)
-            {
-                String Entry = String.Format("{0} Primitive {1} Position {2} {3}", Lable.Text, loop, Primitives[loop].Position, PrimaryPrimitive.Position);
-                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
-                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                GameState.Instance.Factions[0].MessageLog.Add(Msg);
-            }
+            m_oOrbitCircle.Refresh(a_fZoomScaler);
 
             // loop through any children:
             foreach (SceenElement oElement in m_lChildren)
