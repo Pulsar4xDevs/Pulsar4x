@@ -109,24 +109,12 @@ namespace Pulsar4X.UI.SceenGraph
 
                 Vector3 PositionChange = a_v3Pos - temp.Position;
 
-                if (PositionChange.X != 0.0 && PositionChange.Y != 0.0)
-                {
-                    String Entry = String.Format("Position:{0} Set:{1} Change:{2} {3} {4} {5} {6}", temp.Position, a_v3Pos, PositionChange, temp.Verticies[0].m_v4Position, temp.Verticies[90].m_v4Position, temp.Verticies[180].m_v4Position, temp.Verticies[270].m_v4Position);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-                    GameState.Instance.Factions[0].MessageLog.Add(Msg);
-                }
                 temp.Position = a_v3Pos;
 
-#warning how do I do translates? this shouldn't have to be a software thing.
-                for (int i = 0; i < temp.Verticies.Count(); ++i)
-                {
-                    temp.Verticies[i].m_v4Position.X = temp.Verticies[i].m_v4Position.X + PositionChange.X;
-                    temp.Verticies[i].m_v4Position.Y = temp.Verticies[i].m_v4Position.Y + PositionChange.Y;
-                }
-
-
-                temp.UpdateVBOs();
+                /// <summary>
+                /// Have to call this to get openGL to update temps position.
+                /// </summary>
+                temp.RecalculateModelMatrix();
             }
         }
     }
