@@ -26,9 +26,6 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
-        private OrbitingEntity m_oOrbitEntity;
-
-
         public CircleElement()
             : base()
         {
@@ -44,9 +41,6 @@ namespace Pulsar4X.UI.SceenGraph
                         a_oOrbitEntity,
                         a_oColor,
                         UIConstants.Textures.DEFAULT_TEXTURE);
-
-            m_oOrbitEntity = a_oOrbitEntity;
-
 
             m_lPrimitives.Add(m_oPrimaryPrimitive);
         }
@@ -101,14 +95,10 @@ namespace Pulsar4X.UI.SceenGraph
         /// <param name="a_v3Pos"></param>
         private void SetActualPosition(Vector3 a_v3Pos)
         {
-
             GLCircle temp = this.PrimaryPrimitive as GLCircle;
 
             if (temp != null)
             {
-
-                Vector3 PositionChange = a_v3Pos - temp.Position;
-
                 temp.Position = a_v3Pos;
 
                 /// <summary>
