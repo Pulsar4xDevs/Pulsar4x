@@ -547,6 +547,11 @@ namespace Pulsar4X.Entities
                     if (CurrentStar != CurrentSystem.Stars[0])
                         Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentStar, tickValue);
 
+                    String Entry = String.Format("Star:{0} Position:{1},{2},{3} AdvSim", CurrentStar.Name, CurrentStar.XSystem, CurrentStar.YSystem, CurrentStar.ZSystem);
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
+                                                       (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                    GameState.Instance.Factions[0].MessageLog.Add(Msg);
+
                     foreach (Planet CurrentPlanet in CurrentStar.Planets) 
                     {
                         Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentPlanet, tickValue);
@@ -556,6 +561,11 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         CurrentPlanet.XSystem = CurrentPlanet.XSystem + CurrentStar.XSystem;
                         CurrentPlanet.YSystem = CurrentPlanet.YSystem + CurrentStar.YSystem;
+
+                        Entry = String.Format("Star:{0} Position:{1},{2},{3} AdvSim", CurrentPlanet.Name, CurrentPlanet.XSystem, CurrentPlanet.YSystem, CurrentPlanet.ZSystem);
+                        Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
+                                                           (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                        GameState.Instance.Factions[0].MessageLog.Add(Msg);
                     }
                     
                 }

@@ -27,118 +27,118 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Range tech level.
         /// </summary>
-        private int RangeTech;
+        private int m_oRangeTech;
         public int rangeTech
         {
-            get { return RangeTech; }
+            get { return m_oRangeTech; }
         }
         /// <summary>
         /// Tracking tech level
         /// </summary>
-        private int TrackTech;
+        private int m_oTrackTech;
         private int trackTech
         {
-            get { return TrackTech; }
+            get { return m_oTrackTech; }
         }
 
         /// <summary>
         /// Base range tech this BFC is built with.
         /// </summary>
-        private float RangeBase;
+        private float m_oRangeBase;
         public float rangeBase
         {
-            get { return RangeBase; }
+            get { return m_oRangeBase; }
         }
 
         /// <summary>
         /// Base tracking tech this BFC is built with.
         /// </summary>
-        private float TrackBase;
+        private float m_oTrackBase;
         public float trackBase
         {
-            get { return TrackBase; }
+            get { return m_oTrackBase; }
         }
 
         /// <summary>
         /// Size and Range adjusting modification to RangeBase.
         /// </summary>
-        private float RangeMod;
+        private float m_oRangeMod;
         public float rangeMod
         {
-            get { return RangeMod; }
+            get { return m_oRangeMod; }
         }
 
         /// <summary>
         /// Size and Tracking adjustment modification to TrackBase.
         /// </summary>
-        private float TrackMod;
+        private float m_oTrackMod;
         public float trackMod
         {
-            get { return TrackMod; }
+            get { return m_oTrackMod; }
         }
 
         /// <summary>
         /// Overall range for 50% accuracy.
         /// </summary>
-        private float Range;
+        private float m_oRange;
         public float range
         {
-            get { return Range; }
+            get { return m_oRange; }
         }
 
         /// <summary>
         /// Overall Tracking for 100% accuracy.
         /// </summary>
-        private float Tracking;
+        private float m_oTracking;
         public float tracking
         {
-            get { return Tracking; }
+            get { return m_oTracking; }
         }
 
         /// <summary>
         /// Electronic hardening 1.0 to 0.1.
         /// </summary>
-        private float Hardening;
+        private float m_oHardening;
         public float hardening
         {
-            get { return Hardening; }
+            get { return m_oHardening; }
         }
 
         /// <summary>
         /// PDCs get 50% bonus to range. Mutually exclusive with IsFighter.
         /// </summary>
-        private bool IsPDC;
+        private bool m_oIsPDC;
         public bool isPDC
         {
-            get { return IsPDC; }
+            get { return m_oIsPDC; }
         }
 
         /// <summary>
         /// fighters get 200% bonus to tracking. mutually exclusive with IsPDC.
         /// </summary>
-        private bool IsFighter;
+        private bool m_oIsFighter;
         public bool isFighter
         {
-            get { return IsFighter; }
+            get { return m_oIsFighter; }
         }
 
         /// <summary>
         /// List of accuracy in 1KM increments. 0 = 100, Range = 50, 2xRange = 0.
         /// What is more, from 0-10k is point blank accuracy, it is not 100%, but 10k-MaxRange/MaxRange percent, the next is 10-20k, and so on.
         /// </summary>
-        private BindingList<float> RangeAccuracyTable;
+        private BindingList<float> m_lRangeAccuracyTable;
         public BindingList<float> rangeAccuracyTable
         {
-            get { return RangeAccuracyTable; }
+            get { return m_lRangeAccuracyTable; }
         }
 
         /// <summary>
         /// tracking accuracy lookup table, this one works a little differently from the range accuracy table, this one will be 0(1% accuracy) to 99(100% accuracy).
         /// </summary>
-        private BindingList<float> TrackingAccuracyTable;
+        private BindingList<float> m_lTrackingAccuracyTable;
         public BindingList<float> trackingAccuracyTable
         {
-            get { return TrackingAccuracyTable; }
+            get { return m_lTrackingAccuracyTable; }
         }
 
 
@@ -162,14 +162,14 @@ namespace Pulsar4X.Entities.Components
             Name = Title;
             size = 1.0f;
 
-            RangeTech = techRange;
-            TrackTech = techTrack;
+            m_oRangeTech = techRange;
+            m_oTrackTech = techTrack;
 
-            RangeBase = Constants.BFCTN.BeamFireControlRange[RangeTech] * 1000.0f;
-            TrackBase = Constants.BFCTN.BeamFireControlTracking[TrackTech];
+            m_oRangeBase = Constants.BFCTN.BeamFireControlRange[m_oRangeTech] * 1000.0f;
+            m_oTrackBase = Constants.BFCTN.BeamFireControlTracking[m_oTrackTech];
 
-            RangeMod = ModRange;
-            TrackMod = ModTracking;
+            m_oRangeMod = ModRange;
+            m_oTrackMod = ModTracking;
 
             size = size * ModRange * ModTracking;
 
@@ -178,28 +178,28 @@ namespace Pulsar4X.Entities.Components
             else
                 htk = 0;
 
-            IsPDC = PDC;
-            IsFighter = Fighter;
+            m_oIsPDC = PDC;
+            m_oIsFighter = Fighter;
 
-            Hardening = hard;
+            m_oHardening = hard;
 
-            if (IsPDC == true && IsFighter == true)
+            if (m_oIsPDC == true && m_oIsFighter == true)
             {
-                IsFighter = false;
+                m_oIsFighter = false;
             }
 
-            if (IsPDC == true)
+            if (m_oIsPDC == true)
             {
-                RangeBase = RangeBase * 1.5f;
+                m_oRangeBase = m_oRangeBase * 1.5f;
             }
 
-            if (IsFighter == true)
+            if (m_oIsFighter == true)
             {
-                TrackBase = TrackBase * 4.0f;
+                m_oTrackBase = m_oTrackBase * 4.0f;
             }
 
-            Range = RangeBase * RangeMod;
-            Tracking = TrackBase * TrackMod;
+            m_oRange = m_oRangeBase * m_oRangeMod;
+            m_oTracking = m_oTrackBase * m_oTrackMod;
 
             crew = (byte)(size * 2.0f);
 
@@ -207,12 +207,12 @@ namespace Pulsar4X.Entities.Components
             /// Not the exact cost calculation, or close for that matter. I think cost is just a data base entry.
             /// </summary>
 
-            float RTechAdjust = 10666.6667f / (float)(RangeTech+1);
-            float TTechAdjust = 1666.6667f / (float)(TrackTech+1);
+            float RTechAdjust = 10666.6667f / (float)(m_oRangeTech + 1);
+            float TTechAdjust = 1666.6667f / (float)(m_oTrackTech + 1);
 
 
-            float R = (RangeBase / RTechAdjust);
-            float T = (TrackBase / TTechAdjust);
+            float R = (m_oRangeBase / RTechAdjust);
+            float T = (m_oTrackBase / TTechAdjust);
             float res = (float)Math.Round((R + T) * size);
             res = (float)Math.Round(res + ((float)res * 0.25f * (float)(hardTech - 1)));
 
@@ -221,29 +221,35 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Range * 2 / 10000.0
             /// </summary>
-            int RangeIncrement = (int)Math.Floor(Range / 5000.0f);
+            int RangeIncrement = (int)Math.Floor(m_oRange / 5000.0f);
 
-            RangeAccuracyTable = new BindingList<float>();
+            m_lRangeAccuracyTable = new BindingList<float>();
 
-            for (int loop = 1; loop < RangeIncrement; loop++)
+            /// <summary>
+            /// range is in 10k increments.
+            /// </summary>
+            for (int RangeIncrementIterator = 1; RangeIncrementIterator < RangeIncrement; RangeIncrementIterator++)
             {
-                float MaxRange = Range * 2.0f;
-                float CurRange = loop * 10000.0f;
+                float MaxRange = RangeIncrementIterator * 2.0f;
+                float CurRange = RangeIncrementIterator * 10000.0f;
 
                 float Accuracy = (MaxRange - CurRange) / MaxRange;
-                RangeAccuracyTable.Add(Accuracy);
+                m_lRangeAccuracyTable.Add(Accuracy);
             }
 
-            RangeAccuracyTable.Add(0.0f);
+            m_lRangeAccuracyTable.Add(0.0f);
 
-            TrackingAccuracyTable = new BindingList<float>();
+            m_lTrackingAccuracyTable = new BindingList<float>();
 
-            for (int loop = 0; loop < 100; loop++)
+            /// <summary>
+            /// tracking is a percentage from 0 to 100.
+            /// </summary>
+            for (int TrackIncrementIterator = 0; TrackIncrementIterator < 100; TrackIncrementIterator++)
             {
 
-                float Factor = (float)((float)loop+1.0f) /100.0f;
-                float Accuracy = Tracking / Factor;
-                TrackingAccuracyTable.Add(Accuracy);
+                float Factor = (float)((float)TrackIncrementIterator + 1.0f) / 100.0f;
+                float Accuracy = m_oTracking / Factor;
+                m_lTrackingAccuracyTable.Add(Accuracy);
             }
 
             isMilitary = true;
@@ -262,10 +268,10 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// definition of BFC.
         /// </summary>
-        private BeamFireControlDefTN BeamFireControlDef;
+        private BeamFireControlDefTN m_oBeamFireControlDef;
         public BeamFireControlDefTN beamFireControlDef
         {
-            get { return BeamFireControlDef; }
+            get { return m_oBeamFireControlDef; }
         }
 
         /// <summary>
@@ -275,57 +281,57 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Weapons linked to this BFC.
         /// </summary>
-        private BindingList<BeamTN> LinkedWeapons;
+        private BindingList<BeamTN> m_lLinkedWeapons;
         public BindingList<BeamTN> linkedWeapons
         {
-            get { return LinkedWeapons; }
+            get { return m_lLinkedWeapons; }
         }
 
         /// <summary>
         /// Additional linked turrets to this BFC.
         /// </summary>
-        private BindingList<TurretTN> LinkedTurrets;
+        private BindingList<TurretTN> m_lLinkedTurrets;
         public BindingList<TurretTN> linkedTurrets
         {
-            get { return LinkedTurrets; }
+            get { return m_lLinkedTurrets; }
         }
 
         /// <summary>
         /// Target Assigned to this BFC
         /// </summary>
-        private TargetTN Target;
+        private TargetTN m_oTarget;
         public TargetTN target
         {
-            get { return Target; }
-            set { Target = value; }
+            get { return m_oTarget; }
+            set { m_oTarget = value; }
         }
 
         /// <summary>
         /// Whether this FC is authorized to fire on its target.
         /// </summary>
-        private bool OpenFire;
+        private bool m_oOpenFire;
         public bool openFire
         {
-            get { return OpenFire; }
-            set { OpenFire = value; }
+            get { return m_oOpenFire; }
+            set { m_oOpenFire = value; }
         }
 
         /// <summary>
         /// Point defense state this BFC will fire to.
         /// </summary>
-        private PointDefenseState PDState;
+        private PointDefenseState m_oPDState;
         public PointDefenseState pDState
         {
-            get { return PDState; }
+            get { return m_oPDState; }
         }
 
         /// <summary>
         /// range at which area defense will engage targets
         /// </summary>
-        private float PDRange;
+        private float m_oPDRange;
         public float pDRange
         {
-            get { return PDRange; }
+            get { return m_oPDRange; }
         }
 
         /// <summary>
@@ -334,16 +340,16 @@ namespace Pulsar4X.Entities.Components
         /// <param name="definition">Definition of this component</param>
         public BeamFireControlTN(BeamFireControlDefTN definition)
         {
-            BeamFireControlDef = definition;
+            m_oBeamFireControlDef = definition;
             isDestroyed = false;
 
-            LinkedWeapons = new BindingList<BeamTN>();
-            LinkedTurrets = new BindingList<TurretTN>();
-            
-            Target = null;
-            OpenFire = false;
-            PDState = PointDefenseState.None;
-            PDRange = 0;
+            m_lLinkedWeapons = new BindingList<BeamTN>();
+            m_lLinkedTurrets = new BindingList<TurretTN>();
+
+            m_oTarget = null;
+            m_oOpenFire = false;
+            m_oPDState = PointDefenseState.None;
+            m_oPDRange = 0;
         }
 
         /// <summary>
@@ -353,7 +359,7 @@ namespace Pulsar4X.Entities.Components
         public void SetPointDefenseMode(PointDefenseState State)
         {
             if (State <= PointDefenseState.FinalDefensiveFireSelf)
-                PDState = State;
+                m_oPDState = State;
             else
             {
                 /// <summary>
@@ -368,7 +374,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="range">range to engage targets at.</param>
         public void SetPointDefenseRange(float range)
         {
-            PDRange = range;
+            m_oPDRange = range;
         }
 
         /// <summary>
@@ -378,7 +384,7 @@ namespace Pulsar4X.Entities.Components
         public void assignTarget(ShipTN ShipTarget)
         {
             TargetTN NewShipTarget = new TargetTN(ShipTarget);
-            Target = NewShipTarget;
+            m_oTarget = NewShipTarget;
         }
 
         /// <summary>
@@ -388,7 +394,7 @@ namespace Pulsar4X.Entities.Components
         public void assignTarget(OrdnanceGroupTN OrdGroupTarget)
         {
             TargetTN NewOrdTarget = new TargetTN(OrdGroupTarget);
-            Target = NewOrdTarget;
+            m_oTarget = NewOrdTarget;
         }
 
         /// <summary>
@@ -398,7 +404,7 @@ namespace Pulsar4X.Entities.Components
         public void assignTarget(Population PopTarget)
         {
             TargetTN NewPopTarget = new TargetTN(PopTarget);
-            Target = NewPopTarget;
+            m_oTarget = NewPopTarget;
         }
 
         /// <summary>
@@ -406,7 +412,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void clearTarget()
         {
-            Target = null;
+            m_oTarget = null;
         }
 
         /// <summary>
@@ -414,7 +420,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public TargetTN getTarget()
         {
-            return Target;
+            return m_oTarget;
         }
 
         /// <summary>
@@ -422,17 +428,17 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void clearWeapons()
         {
-            for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+            foreach(BeamTN LinkedWeapon in m_lLinkedWeapons)
             {
-                LinkedWeapons[loop].fireController = null;
+                LinkedWeapon.fireController = null;
             }
-            LinkedWeapons.Clear();
+            m_lLinkedWeapons.Clear();
 
-            for (int loop = 0; loop < LinkedTurrets.Count; loop++)
+            foreach(TurretTN LinkedTurret in m_lLinkedTurrets)
             {
-                LinkedTurrets[loop].fireController = null;
+                LinkedTurret.fireController = null;
             }
-            LinkedTurrets.Clear();
+            m_lLinkedTurrets.Clear();
         }
 
         /// <summary>
@@ -441,9 +447,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="beam">beam weapon to link</param>
         public void linkWeapon(BeamTN beam)
         {
-            if (linkedWeapons.Contains(beam) == false)
+            if (m_lLinkedWeapons.Contains(beam) == false)
             {
-                linkedWeapons.Add(beam);
+                m_lLinkedWeapons.Add(beam);
 
                 beam.fireController = this;
             }
@@ -455,9 +461,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="beam">beam weapon to link</param>
         public void linkWeapon(TurretTN beam)
         {
-            if (linkedTurrets.Contains(beam) == false)
+            if (m_lLinkedTurrets.Contains(beam) == false)
             {
-                linkedTurrets.Add(beam);
+                m_lLinkedTurrets.Add(beam);
 
                 beam.fireController = this;
             }
@@ -469,9 +475,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="beam">beamweapon to unlink</param>
         public void unlinkWeapon(BeamTN beam)
         {
-            if (linkedWeapons.Contains(beam) == true)
+            if (m_lLinkedWeapons.Contains(beam) == true)
             {
-                linkedWeapons.Remove(beam);
+                m_lLinkedWeapons.Remove(beam);
 
                 beam.fireController = null;
             }
@@ -483,9 +489,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="beam">beamweapon to unlink</param>
         public void unlinkWeapon(TurretTN beam)
         {
-            if (linkedTurrets.Contains(beam) == true)
+            if (m_lLinkedTurrets.Contains(beam) == true)
             {
-                linkedTurrets.Remove(beam);
+                m_lLinkedTurrets.Remove(beam);
 
                 beam.fireController = null;
             }
@@ -500,9 +506,9 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Whether or not a weapon was able to fire.</returns>
         public bool FireWeapons(float DistanceToTarget, Random RNG, int track, ShipTN FiringShip)
         {
-            if (DistanceToTarget > BeamFireControlDef.range || (LinkedWeapons.Count == 0 && LinkedTurrets.Count == 0) || isDestroyed == true)
+            if (DistanceToTarget > m_oBeamFireControlDef.range || (m_lLinkedWeapons.Count == 0 && m_lLinkedTurrets.Count == 0) || isDestroyed == true)
             {
-                if (DistanceToTarget > BeamFireControlDef.range)
+                if (DistanceToTarget > m_oBeamFireControlDef.range)
                 {
                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringZeroHitChance, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), (this.Name + " Zero % chance to hit."));
@@ -528,31 +534,29 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
                 bool weaponFired = false;
 
-                if (Target.targetType == StarSystemEntityType.TaskGroup)
+                if (m_oTarget.targetType == StarSystemEntityType.TaskGroup)
                 {
 
                     int toHit = (int)Math.Floor(FireAccuracy * 100.0f);
-                    ushort Columns = Target.ship.ShipArmor.armorDef.cNum;
+                    ushort Columns = m_oTarget.ship.ShipArmor.armorDef.cNum;
 
-                    for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+                    foreach(BeamTN LinkedWeapon in m_lLinkedWeapons)
                     {
-                        if (LinkedWeapons[loop].beamDef.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
+                        if (LinkedWeapon.beamDef.range > DistanceToTarget && LinkedWeapon.readyToFire() == true)
                         {
                             RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
-                            weaponFired = LinkedWeapons[loop].Fire();
+                            weaponFired = LinkedWeapon.Fire();
 
                             if (weaponFired == true)
                             {
-                                for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
+                                for (int BeamShotIterator = 0; BeamShotIterator < LinkedWeapon.beamDef.shotCount; BeamShotIterator++)
                                 {
-
                                     int Hit = RNG.Next(1, 100);
 
                                     if (toHit >= Hit)
                                     {
-
-                                        String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedWeapons[loop].Name, LinkedWeapons[loop].beamDef.damage[RangeIncrement], toHit);
+                                        String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedWeapon.Name, LinkedWeapon.beamDef.damage[RangeIncrement], toHit);
 
                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -561,18 +565,18 @@ namespace Pulsar4X.Entities.Components
 
 
                                         ushort location = (ushort)RNG.Next(0, Columns);
-                                        bool ShipDest = Target.ship.OnDamaged(LinkedWeapons[loop].beamDef.damageType, LinkedWeapons[loop].beamDef.damage[RangeIncrement], location, FiringShip);
+                                        bool ShipDest = m_oTarget.ship.OnDamaged(LinkedWeapon.beamDef.damageType, LinkedWeapon.beamDef.damage[RangeIncrement], location, FiringShip);
 
                                         if (ShipDest == true)
                                         {
-                                            Target = null;
-                                            OpenFire = false;
+                                            m_oTarget = null;
+                                            m_oOpenFire = false;
                                             return weaponFired;
                                         }
                                     }
                                     else
                                     {
-                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapon.Name, toHit);
 
                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -581,9 +585,9 @@ namespace Pulsar4X.Entities.Components
                                     }
                                 }
                             }
-                            else if (LinkedWeapons[loop].isDestroyed == false)
+                            else if (LinkedWeapon.isDestroyed == false)
                             {
-                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapons[loop].Name, LinkedWeapons[loop].currentCapacitor, LinkedWeapons[loop].beamDef.weaponCapacitor);
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapon.Name, LinkedWeapon.currentCapacitor, LinkedWeapon.beamDef.weaponCapacitor);
 
                                 MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -593,29 +597,29 @@ namespace Pulsar4X.Entities.Components
                         }
                     }
 
-                    for (int loop = 0; loop < LinkedTurrets.Count; loop++)
+                    foreach(TurretTN LinkedTurret in m_lLinkedTurrets)
                     {
                         /// <summary>
                         /// turrets have changed tracking and therefore tohit from regular beams.
                         /// </summary>
-                        FireAccuracy = GetFiringAccuracy(RangeIncrement, linkedTurrets[loop].turretDef.tracking);
+                        FireAccuracy = GetFiringAccuracy(RangeIncrement, LinkedTurret.turretDef.tracking);
                         toHit = (int)Math.Floor(FireAccuracy * 100.0f);
 
-                        if (linkedTurrets[loop].turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurrets[loop].readyToFire() == true)
+                        if (LinkedTurret.turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurret.readyToFire() == true)
                         {
                             RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
-                            weaponFired = LinkedTurrets[loop].Fire();
+                            weaponFired = LinkedTurret.Fire();
 
                             if (weaponFired == true)
                             {
-                                for (int loop2 = 0; loop2 < LinkedTurrets[loop].turretDef.totalShotCount; loop2++)
+                                for (int TurretShotIterator = 0; TurretShotIterator < LinkedTurret.turretDef.totalShotCount; TurretShotIterator++)
                                 {
                                     int Hit = RNG.Next(1, 100);
 
                                     if (toHit >= Hit)
                                     {
-                                        String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedTurrets[loop].Name, LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement], toHit);
+                                        String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedTurret.Name, LinkedTurret.turretDef.baseBeamWeapon.damage[RangeIncrement], toHit);
 
                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -624,18 +628,18 @@ namespace Pulsar4X.Entities.Components
 
 
                                         ushort location = (ushort)RNG.Next(0, Columns);
-                                        bool ShipDest = Target.ship.OnDamaged(LinkedTurrets[loop].turretDef.baseBeamWeapon.damageType, LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement], location, FiringShip);
+                                        bool ShipDest = m_oTarget.ship.OnDamaged(LinkedTurret.turretDef.baseBeamWeapon.damageType, LinkedTurret.turretDef.baseBeamWeapon.damage[RangeIncrement], location, FiringShip);
 
                                         if (ShipDest == true)
                                         {
-                                            Target = null;
-                                            OpenFire = false;
+                                            m_oTarget = null;
+                                            m_oOpenFire = false;
                                             return weaponFired;
                                         }
                                     }
                                     else
                                     {
-                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurret.Name, toHit);
 
                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -644,10 +648,10 @@ namespace Pulsar4X.Entities.Components
                                     }
                                 }
                             }
-                            else if (LinkedTurrets[loop].isDestroyed == false)
+                            else if (LinkedTurret.isDestroyed == false)
                             {
-                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedTurrets[loop].Name, LinkedTurrets[loop].currentCapacitor, 
-                                                                                                  (LinkedTurrets[loop].turretDef.baseBeamWeapon.weaponCapacitor * LinkedTurrets[loop].turretDef.multiplier));
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedTurret.Name, LinkedTurret.currentCapacitor, 
+                                                                                                  (LinkedTurret.turretDef.baseBeamWeapon.weaponCapacitor * LinkedTurret.turretDef.multiplier));
 
                                 MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -659,7 +663,7 @@ namespace Pulsar4X.Entities.Components
 
                     return weaponFired;
                 }
-                else if (Target.targetType == StarSystemEntityType.Missile)
+                else if (m_oTarget.targetType == StarSystemEntityType.Missile)
                 {
                     /// <summary>
                     /// this is for beam targetting on missiles.
@@ -674,23 +678,23 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// For all weapons linked to this BFC
                     /// </summary>
-                    for (int loop = 0; loop < LinkedWeapons.Count; loop++)
+                    foreach(BeamTN LinkedWeapon in m_lLinkedWeapons)
                     {
                         /// <summary>
                         /// if range > distance and the weapon is ready to fire.
                         /// </summary>
-                        if (LinkedWeapons[loop].beamDef.range > DistanceToTarget && LinkedWeapons[loop].readyToFire() == true)
+                        if (LinkedWeapon.beamDef.range > DistanceToTarget && LinkedWeapon.readyToFire() == true)
                         {
                             RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
-                            weaponFired = LinkedWeapons[loop].Fire();
+                            weaponFired = LinkedWeapon.Fire();
 
                             if (weaponFired == true)
                             {
                                 /// <summary>
                                 /// Some weapons have multiple shots, but most will have just 1.
                                 /// </summary>
-                                for (int loop2 = 0; loop2 < LinkedWeapons[loop].beamDef.shotCount; loop2++)
+                                for (int BeamShotIterator = 0; BeamShotIterator < LinkedWeapon.beamDef.shotCount; BeamShotIterator++)
                                 {
                                     int Hit = RNG.Next(1, 100);
 
@@ -700,10 +704,10 @@ namespace Pulsar4X.Entities.Components
                                     if (toHit >= Hit)
                                     {
                                         ushort ToDestroy;
-                                        if (Target.missileGroup.missiles[0].missileDef.armor == 0)
+                                        if (m_oTarget.missileGroup.missiles[0].missileDef.armor == 0)
                                             ToDestroy = 100;
                                         else
-                                            ToDestroy = (ushort)(Math.Round((LinkedWeapons[loop].beamDef.damage[RangeIncrement] / (Target.missileGroup.missiles[0].missileDef.armor + LinkedWeapons[loop].beamDef.damage[RangeIncrement]))) * 100.0f);
+                                            ToDestroy = (ushort)(Math.Round((LinkedWeapon.beamDef.damage[RangeIncrement] / (m_oTarget.missileGroup.missiles[0].missileDef.armor + LinkedWeapon.beamDef.damage[RangeIncrement]))) * 100.0f);
                                         ushort DestChance = (ushort)RNG.Next(1, 100);
 
 
@@ -712,7 +716,7 @@ namespace Pulsar4X.Entities.Components
                                         /// </summary>
                                         if (ToDestroy >= DestChance)
                                         {
-                                            String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+                                            String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedWeapon.Name, toHit);
 
                                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -722,16 +726,16 @@ namespace Pulsar4X.Entities.Components
                                             /// <summary>
                                             /// Set destruction of targeted missile here. This is used by sim entity to determine how to handle missile group cleanup.
                                             /// </summary>
-                                            Target.missileGroup.missilesDestroyed = Target.missileGroup.missilesDestroyed + 1;
+                                            m_oTarget.missileGroup.missilesDestroyed = m_oTarget.missileGroup.missilesDestroyed + 1;
 
-                                            if (Target.missileGroup.missilesDestroyed  == Target.missileGroup.missiles.Count)
+                                            if (m_oTarget.missileGroup.missilesDestroyed  == m_oTarget.missileGroup.missiles.Count)
                                             {
                                                 break;
                                             }
                                         }
                                         else
                                         {
-                                            String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+                                            String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedWeapon.Name, toHit);
 
                                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -741,7 +745,7 @@ namespace Pulsar4X.Entities.Components
                                     }
                                     else
                                     {
-                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapons[loop].Name, toHit);
+                                        String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapon.Name, toHit);
 
                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -750,9 +754,9 @@ namespace Pulsar4X.Entities.Components
                                     }
                                 }//end for shot count
                             }
-                            else if (LinkedWeapons[loop].isDestroyed == false)
+                            else if (LinkedWeapon.isDestroyed == false)
                             {
-                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapons[loop].Name, LinkedWeapons[loop].currentCapacitor, LinkedWeapons[loop].beamDef.weaponCapacitor);
+                                String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapon.Name, LinkedWeapon.currentCapacitor, LinkedWeapon.beamDef.weaponCapacitor);
 
                                 MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -761,7 +765,7 @@ namespace Pulsar4X.Entities.Components
                             }
                         }//end if in range and weapon can fire
 
-                        if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
+                        if (m_oTarget.missileGroup.missilesDestroyed == m_oTarget.missileGroup.missiles.Count)
                         {
                             noMissilesLeft = true;
                             break;
@@ -771,23 +775,23 @@ namespace Pulsar4X.Entities.Components
 
                     if (noMissilesLeft == false)
                     {
-                        for (int loop = 0; loop < LinkedTurrets.Count; loop++)
+                        foreach(TurretTN LinkedTurret in m_lLinkedTurrets) //(int loop = 0; loop < LinkedTurrets.Count; loop++)
                         {
-                            FireAccuracy = GetFiringAccuracy(RangeIncrement, linkedTurrets[loop].turretDef.tracking);
+                            FireAccuracy = GetFiringAccuracy(RangeIncrement, LinkedTurret.turretDef.tracking);
                             toHit = (int)Math.Floor(FireAccuracy * 100.0f);
 
-                            if (LinkedTurrets[loop].turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurrets[loop].readyToFire() == true)
+                            if (LinkedTurret.turretDef.baseBeamWeapon.range > DistanceToTarget && LinkedTurret.readyToFire() == true)
                             {
                                 RangeIncrement = (int)Math.Floor(DistanceToTarget / 10000.0f);
 
-                                weaponFired = LinkedTurrets[loop].Fire();
+                                weaponFired = LinkedTurret.Fire();
 
                                 if (weaponFired == true)
                                 {
                                     /// <summary>
                                     /// Some weapons have multiple shots, but most will have just 1.
                                     /// </summary>
-                                    for (int loop2 = 0; loop2 < LinkedTurrets[loop].turretDef.totalShotCount; loop2++)
+                                    for (int TurretShotIterator = 0; TurretShotIterator < LinkedTurret.turretDef.totalShotCount; TurretShotIterator++)
                                     {
                                         int Hit = RNG.Next(1, 100);
 
@@ -800,10 +804,10 @@ namespace Pulsar4X.Entities.Components
                                             /// Did the weapon destroy its target?
                                             /// </summary>
                                             ushort ToDestroy;
-                                            if (Target.missileGroup.missiles[0].missileDef.armor == 0)
+                                            if (m_oTarget.missileGroup.missiles[0].missileDef.armor == 0)
                                                 ToDestroy = 100;
                                             else
-                                                ToDestroy = (ushort)(Math.Round((LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement] / (Target.missileGroup.missiles[0].missileDef.armor + LinkedTurrets[loop].turretDef.baseBeamWeapon.damage[RangeIncrement]))) * 100.0f);
+                                                ToDestroy = (ushort)(Math.Round((LinkedTurret.turretDef.baseBeamWeapon.damage[RangeIncrement] / (m_oTarget.missileGroup.missiles[0].missileDef.armor + LinkedTurret.turretDef.baseBeamWeapon.damage[RangeIncrement]))) * 100.0f);
                                             ushort DestChance = (ushort)RNG.Next(1, 100);
 
                                             /// <summary>
@@ -811,7 +815,7 @@ namespace Pulsar4X.Entities.Components
                                             /// </summary>
                                             if (ToDestroy >= DestChance)
                                             {
-                                                String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+                                                String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedTurret.Name, toHit);
 
                                                 MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -821,16 +825,16 @@ namespace Pulsar4X.Entities.Components
                                                 /// <summary>
                                                 /// Set destruction of targeted missile here. This is used by sim entity to determine how to handle missile group cleanup.
                                                 /// </summary>
-                                                Target.missileGroup.missilesDestroyed = Target.missileGroup.missilesDestroyed + 1;
+                                                m_oTarget.missileGroup.missilesDestroyed = m_oTarget.missileGroup.missilesDestroyed + 1;
 
-                                                if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
+                                                if (m_oTarget.missileGroup.missilesDestroyed == m_oTarget.missileGroup.missiles.Count)
                                                 {
                                                     break;
                                                 }
                                             }
                                             else
                                             {
-                                                String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+                                                String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedTurret.Name, toHit);
 
                                                 MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -840,7 +844,7 @@ namespace Pulsar4X.Entities.Components
                                         }
                                         else
                                         {
-                                            String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurrets[loop].Name, toHit);
+                                            String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurret.Name, toHit);
 
                                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
                                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
@@ -852,7 +856,7 @@ namespace Pulsar4X.Entities.Components
                                 }//end if weapon fired
                             }//end if in range and can fire
 
-                            if (Target.missileGroup.missilesDestroyed == Target.missileGroup.missiles.Count)
+                            if (m_oTarget.missileGroup.missilesDestroyed == m_oTarget.missileGroup.missiles.Count)
                             {
                                 /// <summary>
                                 /// This is cargo culting and this variable does not need to be set here, but for completeness sake I'll include it.
@@ -888,9 +892,9 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Firing accuracy.</returns>
         private float GetFiringAccuracy(int RangeIncrement, int track, TargetTN Override = null)
         {
-            float FireAccuracy = BeamFireControlDef.rangeAccuracyTable[RangeIncrement];
+            float FireAccuracy = m_oBeamFireControlDef.rangeAccuracyTable[RangeIncrement];
 
-            TargetTN MyTarget = Target;
+            TargetTN MyTarget = m_oTarget;
 
             if (MyTarget == null && Override != null)
             {
@@ -912,11 +916,14 @@ namespace Pulsar4X.Entities.Components
 
 
             /// <summary>
-            /// 100% accuracy due to tracking at this speed.
+            /// 100% accuracy due to tracking at this speed if this condition fails and target speed is less than or equal to tracking[99]
             /// </summary>
-            if ((float)Target_CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[99])
+            if ((float)Target_CurrentSpeed > m_oBeamFireControlDef.trackingAccuracyTable[99])
             {
-                if ((float)Target_CurrentSpeed >= BeamFireControlDef.trackingAccuracyTable[0])
+                /// <summary>
+                /// 1% chance to hit  thanks to tracking being totally out classed.
+                /// </summary>
+                if ((float)Target_CurrentSpeed >= m_oBeamFireControlDef.trackingAccuracyTable[0])
                 {
                     FireAccuracy = FireAccuracy * 0.01f;
                 }
@@ -926,18 +933,33 @@ namespace Pulsar4X.Entities.Components
                     int Base = 50;
                     int Cur = 50;
                     /// <summary>
-                    /// Binary search through the tracking accuracy table.
+                    /// Binary search through the tracking accuracy table. Base is base accuracy of 50, and Cur is where we are in the binary search.
+                    /// The tracking accuracy table has 100 entries.
                     /// </summary>
 
                     while (!done)
                     {
+                        /// <summary>
+                        /// divide Cur by 2 as per binary search.
+                        /// </summary>
                         Cur = Cur / 2;
-                        if ((float)Target_CurrentSpeed > BeamFireControlDef.trackingAccuracyTable[Base])
+
+                        /// <summary>
+                        /// if the targets speed is greater than tracking at base go to the next condition. basically these two advance base forward by cur until Cur is reduced to 1 which 
+                        /// indicates that there is no more granularity to be observed.
+                        /// </summary>
+                        if ((float)Target_CurrentSpeed > m_oBeamFireControlDef.trackingAccuracyTable[Base])
                         {
+                            /// <summary>
+                            /// If Cur is equal to one then either Base or Base - 1 is the accuracy we want. If its not one then it can be further subdivided.
+                            /// </summary>
                             if (Cur == 1)
                             {
-                                float t1 = (float)Target_CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base];
-                                float t2 = (float)Target_CurrentSpeed - BeamFireControlDef.trackingAccuracyTable[Base - 1];
+                                /// <summary>
+                                /// Is the speed of the target closer to tracking[base] or tracking[base-1]?
+                                /// </summary>
+                                float t1 = (float)Target_CurrentSpeed - m_oBeamFireControlDef.trackingAccuracyTable[Base];
+                                float t2 = (float)Target_CurrentSpeed - m_oBeamFireControlDef.trackingAccuracyTable[Base - 1];
                                 if (t1 <= t2)
                                 {
                                     FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
@@ -951,12 +973,12 @@ namespace Pulsar4X.Entities.Components
                             }
                             Base = Base - Cur;
                         }
-                        else if ((float)Target_CurrentSpeed < BeamFireControlDef.trackingAccuracyTable[Base])
+                        else if ((float)Target_CurrentSpeed < m_oBeamFireControlDef.trackingAccuracyTable[Base])
                         {
                             if (Cur == 1)
                             {
-                                float t1 = BeamFireControlDef.trackingAccuracyTable[Base] - (float)Target_CurrentSpeed;
-                                float t2 = BeamFireControlDef.trackingAccuracyTable[Base + 1] - (float)Target_CurrentSpeed;
+                                float t1 = m_oBeamFireControlDef.trackingAccuracyTable[Base] - (float)Target_CurrentSpeed;
+                                float t2 = m_oBeamFireControlDef.trackingAccuracyTable[Base + 1] - (float)Target_CurrentSpeed;
                                 if (t1 <= t2)
                                 {
                                     FireAccuracy = FireAccuracy * ((float)Base / 100.0f);
@@ -978,9 +1000,9 @@ namespace Pulsar4X.Entities.Components
                     }
                 }
             }
-            if (track < BeamFireControlDef.tracking)
+            if (track < m_oBeamFireControlDef.tracking)
             {
-                float fireAccMod = (float)track / BeamFireControlDef.tracking;
+                float fireAccMod = (float)track / m_oBeamFireControlDef.tracking;
 
                 FireAccuracy = FireAccuracy * fireAccMod;
             }
@@ -1009,8 +1031,8 @@ namespace Pulsar4X.Entities.Components
             float track = (float)ShipFaction.BaseTracking;
             if (ShipSpeed > track)
                 track = ShipSpeed;
-            if (BeamFireControlDef.tracking < track)
-                track = BeamFireControlDef.tracking;
+            if (m_oBeamFireControlDef.tracking < track)
+                track = m_oBeamFireControlDef.tracking;
 
             /// <summary>
             /// Throwaway target for point defense purposes.
@@ -1022,18 +1044,21 @@ namespace Pulsar4X.Entities.Components
             int range = (IncrementDistance + 1) * 10000;
             String Range = range.ToString("#,###0");
 
-            for (int loop3 = 0; loop3 < linkedWeapons.Count; loop3++)
+            foreach(BeamTN LinkedWeapon in m_lLinkedWeapons)
             {
-                bool AcceptPartialFire = (linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Rail || linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.AdvRail ||
-                        linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Gauss) && (linkedWeapons[loop3].shotsExpended < linkedWeapons[loop3].beamDef.shotCount);
+                /// <summary>
+                /// Certain weapons will have already fired one or more of their shots, but may still have more available.
+                /// </summary>
+                bool AcceptPartialFire = (LinkedWeapon.beamDef.componentType == ComponentTypeTN.Rail || LinkedWeapon.beamDef.componentType == ComponentTypeTN.AdvRail ||
+                        LinkedWeapon.beamDef.componentType == ComponentTypeTN.Gauss) && (LinkedWeapon.shotsExpended < LinkedWeapon.beamDef.shotCount);
 
-                if (linkedWeapons[loop3].readyToFire() == true || AcceptPartialFire == true)
+                if (LinkedWeapon.readyToFire() == true || AcceptPartialFire == true)
                 {
-                    if (linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Rail || linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.AdvRail ||
-                        linkedWeapons[loop3].beamDef.componentType == ComponentTypeTN.Gauss)
+                    if (LinkedWeapon.beamDef.componentType == ComponentTypeTN.Rail || LinkedWeapon.beamDef.componentType == ComponentTypeTN.AdvRail ||
+                        LinkedWeapon.beamDef.componentType == ComponentTypeTN.Gauss)
                     {
 
-                        WeaponsFired = linkedWeapons[loop3].Fire();
+                        WeaponsFired = LinkedWeapon.Fire();
 
                         /// <summary>
                         /// multi-hit weapons will be a little wierd as far as PD goes.
@@ -1042,17 +1067,17 @@ namespace Pulsar4X.Entities.Components
                             WeaponsFired = true;
 
 
-                        int expended = linkedWeapons[loop3].shotsExpended;
-                        int ShotCount = linkedWeapons[loop3].beamDef.shotCount;
+                        int expended = LinkedWeapon.shotsExpended;
+                        int ShotCount = LinkedWeapon.beamDef.shotCount;
 
-                        for (int loop4 = expended; loop4 < ShotCount; loop4++)
+                        for (int BeamShotIterator = expended; BeamShotIterator < ShotCount; BeamShotIterator++)
                         {
                             ushort Hit = (ushort)RNG.Next(1, 100);
-                            linkedWeapons[loop3].shotsExpended++;
+                            LinkedWeapon.shotsExpended++;
 
                             if (toHit >= Hit)
                             {
-                                String Entry = String.Format("{0} Fired at {1} km and hit.", linkedWeapons[loop3].Name, Range);
+                                String Entry = String.Format("{0} Fired at {1} km and hit.", LinkedWeapon.Name, Range);
                                 MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                                    (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                                 ShipFaction.MessageLog.Add(Msg);
@@ -1060,7 +1085,7 @@ namespace Pulsar4X.Entities.Components
                             }
                             else
                             {
-                                String Entry = String.Format("{0} Fired at {1} km and missed.", linkedWeapons[loop3].Name, Range);
+                                String Entry = String.Format("{0} Fired at {1} km and missed.", LinkedWeapon.Name, Range);
                                 MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                                    (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                                 ShipFaction.MessageLog.Add(Msg);
@@ -1072,11 +1097,11 @@ namespace Pulsar4X.Entities.Components
                     {
                         ushort Hit = (ushort)RNG.Next(1, 100);
 
-                        WeaponsFired = linkedWeapons[loop3].Fire();
+                        WeaponsFired = LinkedWeapon.Fire();
                         
                         if (toHit >= Hit)
                         {
-                            String Entry = String.Format("{0} Fired at {1} km and hit.", linkedWeapons[loop3].Name, Range);
+                            String Entry = String.Format("{0} Fired at {1} km and hit.", LinkedWeapon.Name, Range);
                             MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                                (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                             ShipFaction.MessageLog.Add(Msg);
@@ -1084,7 +1109,7 @@ namespace Pulsar4X.Entities.Components
                         }
                         else
                         {
-                            String Entry = String.Format("{0} Fired at {1} km and missed.", linkedWeapons[loop3].Name, Range);
+                            String Entry = String.Format("{0} Fired at {1} km and missed.", LinkedWeapon.Name, Range);
                             MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                                (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                             ShipFaction.MessageLog.Add(Msg);
@@ -1093,12 +1118,15 @@ namespace Pulsar4X.Entities.Components
                 }            
             }
 
-           for (int loop3 = 0; loop3 < linkedTurrets.Count; loop3++)
+           foreach(TurretTN LinkedTurret in m_lLinkedTurrets)
            {
-               bool AcceptPartialFire = (linkedTurrets[loop3].shotsExpended < linkedTurrets[loop3].turretDef.totalShotCount);
-               if (linkedTurrets[loop3].readyToFire() == true || AcceptPartialFire == true)
+               /// <summary>
+               /// Double, triple, and quad turrets have multiple shots.
+               /// </summary>
+               bool AcceptPartialFire = (LinkedTurret.shotsExpended < LinkedTurret.turretDef.totalShotCount);
+               if (LinkedTurret.readyToFire() == true || AcceptPartialFire == true)
                {
-                   WeaponsFired = linkedTurrets[loop3].Fire();
+                   WeaponsFired = LinkedTurret.Fire();
 
                    /// <summary>
                    /// multi-hit weapons will be a little wierd as far as PD goes.
@@ -1106,17 +1134,17 @@ namespace Pulsar4X.Entities.Components
                    if (WeaponsFired == false && AcceptPartialFire == true)
                        WeaponsFired = true;
 
-                   int expended = linkedTurrets[loop3].shotsExpended;
-                   int ShotCount = linkedTurrets[loop3].turretDef.totalShotCount;
+                   int expended = LinkedTurret.shotsExpended;
+                   int ShotCount = LinkedTurret.turretDef.totalShotCount;
 
-                   for (int loop4 = expended; loop4 < ShotCount; loop4++)
+                   for (int TurretShotIterator = expended; TurretShotIterator < ShotCount; TurretShotIterator++)
                    {
                        ushort Hit = (ushort)RNG.Next(1, 100);
-                       linkedTurrets[loop3].shotsExpended++;
+                       LinkedTurret.shotsExpended++;
 
                        if (toHit >= Hit)
                        {
-                           String Entry = String.Format("{0} Fired at {1} km and hit.", linkedTurrets[loop3].Name, Range);
+                           String Entry = String.Format("{0} Fired at {1} km and hit.", LinkedTurret.Name, Range);
                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                            ShipFaction.MessageLog.Add(Msg);
@@ -1124,7 +1152,7 @@ namespace Pulsar4X.Entities.Components
                        }
                        else
                        {
-                           String Entry = String.Format("{0} Fired at {1} km and missed.", linkedTurrets[loop3].Name, Range);
+                           String Entry = String.Format("{0} Fired at {1} km and missed.", LinkedTurret.Name, Range);
                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
                                                               (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                            ShipFaction.MessageLog.Add(Msg);
