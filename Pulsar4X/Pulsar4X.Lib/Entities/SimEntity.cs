@@ -545,28 +545,11 @@ namespace Pulsar4X.Entities
                     /// The system primary will cause a divide by zero error currently as it has no orbit.
                     /// </summary>
                     if (CurrentStar != CurrentSystem.Stars[0])
-                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentStar, tickValue);
+                        CurrentStar.UpdatePosition(tickValue); 
 
                     foreach (Planet CurrentPlanet in CurrentStar.Planets) 
                     {
-                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentPlanet, tickValue);
-
-                        /// <summary>
-                        /// Adjust planet position based on the primary. Right now XSystem and YSystem assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
-                        /// </summary>
-                        CurrentPlanet.XSystem = CurrentPlanet.XSystem + CurrentStar.XSystem;
-                        CurrentPlanet.YSystem = CurrentPlanet.YSystem + CurrentStar.YSystem;
-
-                        foreach (Planet CurrentMoon in CurrentPlanet.Moons)
-                        {
-                            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(CurrentMoon, tickValue);
-
-                            /// <summary>
-                            /// Adjust planet position based on the primary. Right now XSystem and YSystem assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
-                            /// </summary>
-                            CurrentMoon.XSystem = CurrentMoon.XSystem + CurrentPlanet.XSystem;
-                            CurrentMoon.YSystem = CurrentMoon.YSystem + CurrentPlanet.YSystem;
-                        }
+                        CurrentPlanet.UpdatePosition(tickValue);
                     }
                     
                 }

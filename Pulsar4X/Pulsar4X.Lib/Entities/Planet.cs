@@ -162,5 +162,34 @@ namespace Pulsar4X.Entities
             Primary = primary;
             Parent = parent;
         }
+
+
+        /// <summary>
+        /// Update the planet's position, Parent positions must be updated in sequence obviously.
+        /// </summary>
+        /// <param name="tickValue"></param>
+        public void UpdatePosition(int tickValue)
+        {
+            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, tickValue);
+
+            /// <summary>
+            /// Adjust planet position based on the primary. Right now XSystem and YSystem assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
+            /// </summary>
+            XSystem = XSystem + Parent.XSystem;
+            YSystem = YSystem + Parent.YSystem;
+
+            /// <summary>
+            /// Update all the moons.
+            /// </summary>
+            foreach (Planet CurrentMoon in Moons)
+            {
+                CurrentMoon.UpdatePosition(tickValue);
+            }
+
+            ///<summary>
+            ///Update taskgroup positions.
+            ///</summary>
+#warning task group position update based on orbit should be done here.
+        }
     }
 }

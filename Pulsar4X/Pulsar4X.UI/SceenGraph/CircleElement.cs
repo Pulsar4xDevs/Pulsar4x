@@ -90,9 +90,9 @@ namespace Pulsar4X.UI.SceenGraph
         }
 
         /// <summary>
-        /// Temporary as hell kludge just to see if it works.
+        /// SetActualPosition casts the primary primitive as a circle, tests to see if it exists, and moves it.
         /// </summary>
-        /// <param name="a_v3Pos"></param>
+        /// <param name="a_v3Pos">Position to move this circle element to.</param>
         private void SetActualPosition(Vector3 a_v3Pos)
         {
             GLCircle temp = this.PrimaryPrimitive as GLCircle;

@@ -48,5 +48,14 @@ namespace Pulsar4X.Entities
         {
             Planets = new BindingList<Planet>();
         }
+
+        /// <summary>
+        /// Update the star's position and do any other work here
+        /// </summary>
+        /// <param name="tickValue">Time to advance star position</param>
+        public void UpdatePosition(int tickValue)
+        {
+            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, tickValue);
+        }
     }
 }

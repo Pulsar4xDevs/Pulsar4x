@@ -46,7 +46,7 @@ namespace Pulsar4X.UI.SceenGraph
             : base(a_oPlanet)
         {
             m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oPlanet, a_oColor);
-#warning Cannot at m_oOrbitCircle to children for Planet Element
+#warning Cannot add m_oOrbitCircle to children for Planet Element
         }
 
 
