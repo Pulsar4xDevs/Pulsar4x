@@ -69,9 +69,8 @@ namespace Pulsar4X.Lib
 
 
 		public void FindPolarPosition(OrbitingEntity theOrbit, long secondsSinceEpoch, out double angle, out double radius)
-		{
-            // TODO: Use orbit entity's orbitperiod
-			long orbitPeriod = (long) (Math.PI * 2 * Math.Sqrt( theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis * theOrbit.SemiMajorAxis / (theOrbit.Mass*Constants.Units.GRAV_CONSTANT)));
+		{   
+            long orbitPeriod = (long)Math.Floor(theOrbit.OrbitalPeriod * Constants.TimeInSeconds.Day);
 
             double orbitFraction = 1.0 * ((secondsSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
 			bool mirrorSide = false;
@@ -107,9 +106,11 @@ namespace Pulsar4X.Lib
 
             /// <summary>
             /// This is radius from true anomoaly, found a bug in the / part, changed 1 - theOrbit.Eccentricity to 1 + theOrbit.Eccentricity
-            /// r = a(1 – e^2)/(1 + e cos (phi))
+            /// r = a(1 – e^2)/(1 + e cos (phi)) phi being true anomaly in this
+            /// If we had the eccentric anomaly the equation would be r = a * (1 - (e * cos E)) E being the eccentric anomaly and e being eccentricity
+            /// (angle+theOrbit.LongitudeOfApogee) appears to be true anomaly
             /// <summary>
-#warning did we mean / (1 - theOrbit.Eccentricity despite that being incorrect?
+#warning did we mean / (1 - theOrbit.Eccentricity despite that being incorrect? also corrected all the ones further down.
 			radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 
 		}
@@ -119,6 +120,16 @@ namespace Pulsar4X.Lib
             double x, y;
 #warning How can I tell when the apogee was, to safely prevent this from overflowing? does it matter?
             theOrbit.TimeSinceApogee+=delta;
+
+            /// <summary>
+            /// if timeSinceApogee is greater than the orbital period then the orbital period should be safe to subtract without changing anything about how the orbit works.
+            /// Orbital Period needs to be converted to seconds.
+            /// </summary>
+            if (theOrbit.TimeSinceApogee > (long)(theOrbit.OrbitalPeriod * Constants.TimeInSeconds.Day))
+            {
+                theOrbit.TimeSinceApogee = theOrbit.TimeSinceApogee - (long)(theOrbit.OrbitalPeriod * Constants.TimeInSeconds.Day);
+            }
+
             FindCartesianPosition(theOrbit, theOrbit.TimeSinceApogee, out x, out y);
             theOrbit.XSystem = x;
             theOrbit.YSystem = y;

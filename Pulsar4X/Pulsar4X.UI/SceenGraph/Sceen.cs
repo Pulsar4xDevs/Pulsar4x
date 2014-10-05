@@ -251,7 +251,7 @@ namespace Pulsar4X.UI.SceenGraph
                 // create name lable:
                 GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                     new Vector3((float)(v3StarPos.X), (float)(v3StarPos.Y - (oStar.Radius / Constants.Units.KM_PER_AU)), 0),
-                    UIConstants.DEFAULT_TEXT_SIZE, Color.White, UIConstants.Textures.DEFAULT_GLFONT, oStar.Name);
+                    UIConstants.DEFAULT_TEXT_SIZE, Color.White, UIConstants.Textures.DEFAULT_GLFONT2, oStar.Name);
 
                 oCurrStar.AddPrimitive(oStarQuad); // Add star icon to the Sceen element.
                 oCurrStar.Lable = oNameLable;
@@ -294,7 +294,7 @@ namespace Pulsar4X.UI.SceenGraph
                     // create name lable:
                     GLUtilities.GLFont oPlanetNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                         new Vector3((float)(v3PlanetPos.X), (float)(v3PlanetPos.Y - (oPlanet.Radius / Constants.Units.KM_PER_AU)), 0),
-                        UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT, oPlanet.Name);
+                        UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT2, oPlanet.Name);
 
                     oPlanetElement.AddPrimitive(oPlanetQuad);
 
@@ -339,7 +339,7 @@ namespace Pulsar4X.UI.SceenGraph
 
                         GLUtilities.GLFont oMoonNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                         new Vector3((float)(v3MoonPos.X), (float)(v3MoonPos.Y - (oMoon.Radius / Constants.Units.KM_PER_AU)), 0),
-                        UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT, oMoon.Name);
+                        UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT2, oMoon.Name);
 
                         oMoonElement.AddPrimitive(oMoonQuad);
 

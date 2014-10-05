@@ -670,7 +670,7 @@ namespace Pulsar4X.Stargen
         {
             if (entity.Parent != null)
             {
-                entity.OrbitalPeriod = EnviroUtilities.Period(entity.SemiMajorAxis, entity.Mass, entity.Parent.Mass);
+                entity.OrbitalPeriod = EnviroUtilities.Period(entity.SemiMajorAxis, entity.Mass);
                 entity.LongitudeOfApogee = rnd.NextDouble(0.0, 2 * Math.PI);
                 entity.TimeSinceApogee = Convert.ToInt64(rnd.NextDouble(0.0, entity.OrbitalPeriod * Constants.Units.SECONDS_PER_HOUR * 24.0));
             }

@@ -6,10 +6,18 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
 
+#if LOG4NET_ENABLED
+using log4net;
+#endif
+
 namespace Pulsar4X.Entities
 {
     public class Planet : OrbitingEntity
     {
+
+#if LOG4NET_ENABLED
+        public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
+#endif
 
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
         public BindingList<Gas> Gases { get; set; } //gases in atmosphere
@@ -162,7 +170,6 @@ namespace Pulsar4X.Entities
             Primary = primary;
             Parent = parent;
         }
-
 
         /// <summary>
         /// Update the planet's position, Parent positions must be updated in sequence obviously.

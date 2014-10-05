@@ -13,10 +13,22 @@ namespace Pulsar4X.Stargen
         /// <param name="smallMass"></param>
         /// <param name="largeMass"></param>
         /// <returns></returns>
-        public static double Period(double separation, double smallMass, double largeMass)
+        public static double Period(double separation, double Mass)
         {
-            double periodInYears = Math.Sqrt(Math.Pow(separation, 3.0) / (smallMass + largeMass));
-            return (periodInYears * Constants.Sol.Earth.DAYS_IN_A_YEAR);
+            /// <summary>
+            /// We are going with small mass around a center mass for now, the central star won't move.
+            /// so 2 * pi * sqrt( SemiMajorAxis^3 / Mass * Grav_Constant)
+            /// This returns the period in seconds(not years)
+            /// </summary>
+            double Period = (Math.PI * 2 * Math.Sqrt(separation * separation * separation / (Mass * Constants.Units.GRAV_CONSTANT)));
+            Period = Period / Constants.TimeInSeconds.Day;
+            return Period;
+            
+            /// <summary>
+            /// This code is for the Period of two objects that are effecting one another.
+            /// </summary>
+            //double periodInSeconds = Math.PI * 2 * Math.Sqrt(Math.Pow(separation, 3.0) / ((smallMass + largeMass) * Constants.Units.GRAV_CONSTANT ));
+            //return periodInSeconds;
         }
 
         /// <summary>
