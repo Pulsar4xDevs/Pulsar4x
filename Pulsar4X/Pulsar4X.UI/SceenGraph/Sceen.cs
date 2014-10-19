@@ -216,7 +216,7 @@ namespace Pulsar4X.UI.SceenGraph
                 if (iStarCounter <= 0)
                 {
                     // then we have a secondary, etc star give random position around its orbit!
-                    oRootStar = new StarElement(oStar, true);
+                    oRootStar = new StarElement(oStar, a_oDefaultEffect, Vector3.Zero, Pulsar4X.Constants.StarColor.LookupColor(oStar.Class), true);
                     oCurrStar = oRootStar;
                 }
                 else
@@ -229,15 +229,15 @@ namespace Pulsar4X.UI.SceenGraph
                     v3StarPos.X = (float)(oStar.XSystem); //(float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     v3StarPos.Y = (float)(oStar.YSystem);    //(float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis);
-                    oCurrStar = new StarElement(oStar, false);
+                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar.Class),  false);
 
                     // create orbit circle
-                    GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
+                    /*GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
                         Vector3.Zero,                                                                      // base around parent star pos.
                         oStar, //(float)(oStar.SemiMajorAxis * dKMperAUdevby10) / 2,
                         Pulsar4X.Constants.StarColor.LookupColor(oStar.Class),
                         UIConstants.Textures.DEFAULT_TEXTURE);
-                    oCurrStar.AddPrimitive(oStarOrbitCirc);
+                    oCurrStar.AddPrimitive(oStarOrbitCirc);*/
                 }
                 
 

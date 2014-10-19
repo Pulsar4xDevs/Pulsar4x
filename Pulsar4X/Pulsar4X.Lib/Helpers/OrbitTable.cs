@@ -93,6 +93,9 @@ namespace Pulsar4X.Lib
             if (theOrbit.Eccentricity < 0.8)
                 eccentricAnomaly = meanAnomaly;
 
+            /// <summary>
+            /// I don't know any more descriptive name for this than partial, I'm not sure what it represents.
+            /// </summary>
             double partial = eccentricAnomaly - theOrbit.Eccentricity * Math.Sin((meanAnomaly * radian)) - meanAnomaly;
 
             while( (Math.Abs(partial) > delta) && (iteration < maxIteration))
@@ -112,6 +115,9 @@ namespace Pulsar4X.Lib
             double SinV = Math.Sin(eccentricAnomaly);
             double CosV = Math.Cos(eccentricAnomaly);
 
+            /// <summary>
+            /// I called this Numerator because that is what this particular section is in many functions. Otherwise I'm not sure if it has a more descriptive name.
+            /// </summary>
             double Numerator = Math.Sqrt(1.0 - (theOrbit.Eccentricity * theOrbit.Eccentricity));
             double trueAnomaly = Math.Atan2((Numerator * SinV), (CosV - theOrbit.Eccentricity)) /*/ radian*/;
 
@@ -225,7 +231,7 @@ namespace Pulsar4X.Lib
 			
 			//double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 
-            double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle + theOrbit.TrueAnomaly));
+            double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle/* + theOrbit.TrueAnomaly*/));
 			return radius;
 		}
 
@@ -237,7 +243,7 @@ namespace Pulsar4X.Lib
 			
 			//double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 
-            double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle + theOrbit.TrueAnomaly));
+            double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle/* + theOrbit.TrueAnomaly*/));
 			x = -1 * radius * Math.Sin(angle);
 			y = radius * Math.Cos(angle);	
 		}

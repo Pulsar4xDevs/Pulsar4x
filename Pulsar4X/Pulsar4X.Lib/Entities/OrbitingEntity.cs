@@ -71,6 +71,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double LongitudeOfApogee { get; set; }
 
+        /// <summary>
+        /// precise angle of where this orbiting entity is.
+        /// </summary>
         public double TrueAnomaly { get; set; }
 
         public OrbitingEntity() : base()

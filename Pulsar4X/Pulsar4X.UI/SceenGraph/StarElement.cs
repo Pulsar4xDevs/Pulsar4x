@@ -30,19 +30,30 @@ namespace Pulsar4X.UI.SceenGraph
             }
         }
 
+        /// <summary>
+        /// This is the display element for the orbit this planet will make.
+        /// </summary>
+        private CircleElement m_oOrbitCircle { get; set; }
+
         public StarElement()
             : base()
         {
 
         }
 
-        public StarElement(Star a_oStar, bool a_bPrimary = true) : base(a_oStar)
+        public StarElement(Star a_oStar, GLEffect a_oDefaultEffect, Vector3 a_oPosition, System.Drawing.Color a_oColor, bool a_bPrimary = true)
+            : base(a_oStar)
         {
             if (!a_bPrimary)
             {
                 // Do Non Primary Star Stuff here (e.g. orbit circle).
                 // Todo...
+
+                m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oStar, a_oColor);
+#warning As with planet, m_oOrbitCircle will not be added as a child.
             }
+            else
+                m_oOrbitCircle = null;
             
 
         }
@@ -52,6 +63,14 @@ namespace Pulsar4X.UI.SceenGraph
             foreach (GLPrimitive oPrimitive in m_lPrimitives)
             {
                 oPrimitive.Render();
+            }
+
+            /// <summary>
+            /// Putting this as a child means that it runs afoul of the "don't render children" check.
+            /// </summary>
+            if (m_oOrbitCircle != null)
+            {
+                m_oOrbitCircle.Render();
             }
 
             if (RenderChildren == true)
@@ -128,6 +147,18 @@ namespace Pulsar4X.UI.SceenGraph
 
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;
+
+            if (m_oOrbitCircle != null)
+            {
+                /// <summary>
+                /// Parent star is always at 0.0,0.0,0.0
+                /// </summary>
+                m_oOrbitCircle.CurrentPosition = Vector3.Zero;
+                /// <summary>
+                /// Putting this as a child means that it runs afoul of the "don't render children" check.
+                /// </summary>
+                m_oOrbitCircle.Refresh(a_fZoomScaler);
+            }
 
 
             // loop through any children:
