@@ -66,6 +66,11 @@ namespace Pulsar4X
             public const double TEN_KM_MAX = 214748.0;
 
             /// <summary>
+            /// 32 bit limitation for orbit period days.
+            /// </summary>
+            public const double MAX_DAYS_IN_SECONDS = 2147483648.0 / Constants.TimeInSeconds.Day;
+
+            /// <summary>
             /// Plus or Minus 65Km
             /// </summary>
             public const double SOLAR_RADIUS_IN_KM = 696342.0;

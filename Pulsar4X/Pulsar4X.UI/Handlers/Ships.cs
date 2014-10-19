@@ -1915,6 +1915,7 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oDetailsPanel.TEMPPRINTTextBox.Clear();
 
+#warning Message log code here with a magic number
             if (_CurrnetFaction.MessageLog.Count > 200)
             {
                 while (_CurrnetFaction.MessageLog.Count > 200)

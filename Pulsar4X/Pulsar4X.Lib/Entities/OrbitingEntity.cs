@@ -56,15 +56,27 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool IsMoon { get; set; }
 
+        /// <summary>
+        /// Days since Apogee
+        /// </summary>
         public long TimeSinceApogee { get; set; }
+
+        /// <summary>
+        /// Seconds component of time Since Apogee. when this is greater than 86400 TimeSinceApogee should be incremented by 1.
+        /// </summary>
+        public long TimeSinceApogeeRemainder { get; set; }
 
         /// <summary>
         /// angle counterclockwise from system 'north' to SemiMajorAxis at Apogee
         /// </summary>
         public double LongitudeOfApogee { get; set; }
 
+        public double TrueAnomaly { get; set; }
+
         public OrbitingEntity() : base()
         {
+            TrueAnomaly = 0.0;
+            TimeSinceApogeeRemainder = 0;
         }
     }
 }
