@@ -75,6 +75,11 @@ namespace Pulsar4X.Entities
         public double CloudCover { get; set; } //percent of surface covered
         public double IceCover { get; set; } //percent of surface covered
 
+        /// <summary>
+        /// Are any taskgroups orbiting with this body?
+        /// </summary>
+        public BindingList<TaskGroupTN> TaskGroupsInOrbit { get; set; }
+
         // I'm not happy with this... This is View Code in the Model, but... easiest way to do it
         [JsonIgnore]
         public string SurfaceTemperatureView
@@ -169,6 +174,8 @@ namespace Pulsar4X.Entities
 
             Primary = primary;
             Parent = parent;
+
+            TaskGroupsInOrbit = new BindingList<TaskGroupTN>();
         }
 
         /// <summary>
@@ -196,7 +203,11 @@ namespace Pulsar4X.Entities
             ///<summary>
             ///Update taskgroup positions.
             ///</summary>
-#warning task group position update based on orbit should be done here.
+            foreach (TaskGroupTN TaskGroup in TaskGroupsInOrbit)
+            {
+                TaskGroup.Contact.XSystem = XSystem;
+                TaskGroup.Contact.YSystem = YSystem;
+            }
         }
     }
 }

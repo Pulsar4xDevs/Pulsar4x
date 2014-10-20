@@ -194,6 +194,12 @@ namespace Pulsar4X.UI.SceenGraph
                         m_oTravelLine.StartPos = lastPos;
                         m_oTravelLine.EndPos = pos;
                     }
+                    else if (m_oSystemContect.TaskGroup.DrawTravelLine == 3)
+                    {
+                        m_oTravelLine.StartPos = pos;
+                        m_oTravelLine.EndPos = pos;
+                    }
+
                     if (m_oSystemContect.TaskGroup.DrawTravelLine == 2)
                     {
                         m_oSystemContect.TaskGroup.DrawTravelLine = 3;
@@ -210,6 +216,12 @@ namespace Pulsar4X.UI.SceenGraph
                         m_oTravelLine.StartPos = lastPos;
                         m_oTravelLine.EndPos = pos;
                     }
+                    else if (m_oSystemContect.MissileGroup.DrawTravelLine == 3)
+                    {
+                        m_oTravelLine.StartPos = pos;
+                        m_oTravelLine.EndPos = pos;
+                    }
+
                     if (m_oSystemContect.MissileGroup.DrawTravelLine == 2)
                     {
                         m_oSystemContect.MissileGroup.DrawTravelLine = 3;

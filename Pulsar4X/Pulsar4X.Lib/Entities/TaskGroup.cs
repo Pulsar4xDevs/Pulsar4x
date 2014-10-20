@@ -1172,10 +1172,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// GetPositionFromOrbit returns systemKm from SystemAU. If a ship is orbiting a body it will move with that body.
         /// </summary>
+        
         public void GetPositionFromOrbit()
         {
-            Contact.XSystem = OrbitingBody.XSystem + OrbitingBody.Primary.XSystem;
-            Contact.YSystem = OrbitingBody.YSystem + OrbitingBody.Primary.YSystem;
+#warning GetPositionFromOrbit may need reworking
+            Contact.XSystem = OrbitingBody.XSystem /*+ OrbitingBody.Primary.XSystem*/;
+            Contact.YSystem = OrbitingBody.YSystem /*+ OrbitingBody.Primary.YSystem*/;
         }
 
         /// <summary>
@@ -1195,6 +1197,11 @@ namespace Pulsar4X.Entities
             if (IsOrbiting)
             {
                 GetPositionFromOrbit();
+                Planet OrbitingPlanet = OrbitingBody as Planet;
+                if (OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
+                {
+                    OrbitingPlanet.TaskGroupsInOrbit.Remove(this);
+                }
                 IsOrbiting = false;
             }
 
@@ -1669,6 +1676,28 @@ namespace Pulsar4X.Entities
         /// </summary>
         public uint PerformOrders(uint TimeSlice)
         {
+
+            /// <summary>
+            /// Handle orbiting planets here. breaking orbits is done elsewhere.
+            /// </summary>
+            if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body || TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
+            {
+                IsOrbiting = true;
+                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                {
+                    OrbitingBody = TaskGroupOrders[0].body;
+                }
+                else
+                {
+                    OrbitingBody = TaskGroupOrders[0].pop.Planet;
+                }
+                Planet OrbitingPlanet = OrbitingBody as Planet;
+                if (!OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
+                {
+                    OrbitingPlanet.TaskGroupsInOrbit.Add(this);
+                }
+            }
+
             if (TaskGroupOrders[0].orderDelay >= TimeSlice)
             {
                 TaskGroupOrders[0].orderDelay = TaskGroupOrders[0].orderDelay - (int)TimeSlice;
@@ -2261,9 +2290,20 @@ namespace Pulsar4X.Entities
                     IsOrbiting = true;
 
                     if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                    {
                         OrbitingBody = TaskGroupOrders[0].body;
+                    }
                     else
+                    {
                         OrbitingBody = TaskGroupOrders[0].pop.Planet;
+                    }
+
+                    Planet OrbitingPlanet = OrbitingBody as Planet;
+
+                    if (!OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
+                    {
+                        OrbitingPlanet.TaskGroupsInOrbit.Add(this);
+                    }
                 }   
             }
             TaskGroupOrders.Clear();
