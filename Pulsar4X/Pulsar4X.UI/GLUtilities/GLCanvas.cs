@@ -299,7 +299,6 @@ namespace Pulsar4X.UI.GLUtilities
             GraphicsContext.CurrentContext.SwapInterval = 1; // this prevents us using 100% GPU/CPU
             Loaded = true;           // So we know we have a valid Loaded OpenGL context.
 
-            #if DEBUG
                 m_eGLError = GL.GetError();
                 if (m_eGLError != ErrorCode.NoError)
                 {
@@ -307,7 +306,6 @@ namespace Pulsar4X.UI.GLUtilities
                     logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
 #endif
                 }   
-            #endif
             //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.ReadBuffer(ReadBufferMode.Back);
@@ -380,13 +378,11 @@ namespace Pulsar4X.UI.GLUtilities
                 OpenGLVersionMajor = int.Parse(OpenGLVersion[0].ToString());      // extracts the major verion number an converts it to a int.
                 OpenGLVersionMinor = int.Parse(OpenGLVersion[2].ToString());      // same again for minor verion number.
                // OpenGLVersionMajor = 2; - uncomment to force GL 2.0 - for testing
-#if DEBUG
 /// <summary>
 /// double stacked pre-processor directives because why not? #debug isn't consistent for all loggers though.
 /// </summary>
 #if LOG4NET_ENABLED
                 logger.Debug("Highest OpenGL Version Initialised is " + OpenGLVersion);
-#endif
 #endif
             }
             catch (System.NullReferenceException exp)
