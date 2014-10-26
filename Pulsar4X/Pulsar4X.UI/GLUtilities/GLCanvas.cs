@@ -8,8 +8,10 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Graphics;
 using Pulsar4X.UI;
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 namespace Pulsar4X.UI.GLUtilities
 {
@@ -20,8 +22,10 @@ namespace Pulsar4X.UI.GLUtilities
     {
         #region Properties and Member Vars
 
+#if LOG4NET_ENABLED
         // logger:
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLCanvas));
+#endif
 
         /// <summary> Used for testing for OpenGL Errors. </summary>
         private ErrorCode m_eGLError;
@@ -187,7 +191,9 @@ namespace Pulsar4X.UI.GLUtilities
         {
             RegisterEventHandlers();
             #if DEBUG
+#if LOG4NET_ENABLED
                 logger.Info("UI: Creating an OpenGL 2.0+ GLCanvas");
+#endif
             #endif
         }
 
@@ -200,7 +206,9 @@ namespace Pulsar4X.UI.GLUtilities
         {
             RegisterEventHandlers();
             #if DEBUG
+#if LOG4NET_ENABLED
                 logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
+#endif
             #endif
         }
 
@@ -228,7 +236,9 @@ namespace Pulsar4X.UI.GLUtilities
                 m_eGLError = GL.GetError();
                 if (m_eGLError != ErrorCode.NoError)
                 {
+#if LOG4NET_ENABLED
                     logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+#endif
                 }   
             #endif
             //GL.ShadeModel(ShadingModel.Smooth);
@@ -254,19 +264,25 @@ namespace Pulsar4X.UI.GLUtilities
             m_eGLError = GL.GetError();
             if (m_eGLError != ErrorCode.NoError)
             {
+#if LOG4NET_ENABLED
                 logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
+#endif
             } 
-                
+
+#if LOG4NET_ENABLED
             logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
             // Log out OpeGL specific stuff if debug build.
             logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
             logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
             logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
             logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
+#endif
             m_eGLError = GL.GetError();
             if (m_eGLError != ErrorCode.NoError)
             {
+#if LOG4NET_ENABLED
                 logger.Info("OpenGL Error Check, InvalidEnum or NoError Expected: " + m_eGLError.ToString());
+#endif
             }
 
             m_oEffect = new GLUtilities.GLEffectBasic30("./Resources/Shaders/Basic30_Vertex_Shader.glsl", "./Resources/Shaders/Basic30_Fragment_Shader.glsl");
@@ -287,7 +303,9 @@ namespace Pulsar4X.UI.GLUtilities
                 m_eGLError = GL.GetError();
                 if (m_eGLError != ErrorCode.NoError)
                 {
+#if LOG4NET_ENABLED
                     logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+#endif
                 }   
             #endif
             //GL.ShadeModel(ShadingModel.Smooth);
@@ -313,19 +331,25 @@ namespace Pulsar4X.UI.GLUtilities
             m_eGLError = GL.GetError();
             if (m_eGLError != ErrorCode.NoError)
             {
+#if LOG4NET_ENABLED
                 logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
+#endif
             }  
 
+#if LOG4NET_ENABLED
             logger.Info("UI: GLCanvas2.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
                 // Log out OpeGL specific stuff if debug build.
             logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
             logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
             logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
             logger.Info("UI: Extensions: " + GL.GetString(StringName.Extensions));
+#endif
             m_eGLError = GL.GetError();
             if (m_eGLError != ErrorCode.NoError)
             {
+#if LOG4NET_ENABLED
                 logger.Info("OpenGL Error Check, InvalidEnum or NoError Expected: " + m_eGLError.ToString());
+#endif
             }
 
             m_oEffect = new GLUtilities.GLEffectBasic21("./Resources/Shaders/Basic20_Vertex_Shader.glsl", "./Resources/Shaders/Basic20_Fragment_Shader.glsl");
@@ -357,13 +381,20 @@ namespace Pulsar4X.UI.GLUtilities
                 OpenGLVersionMinor = int.Parse(OpenGLVersion[2].ToString());      // same again for minor verion number.
                // OpenGLVersionMajor = 2; - uncomment to force GL 2.0 - for testing
 #if DEBUG
+/// <summary>
+/// double stacked pre-processor directives because why not? #debug isn't consistent for all loggers though.
+/// </summary>
+#if LOG4NET_ENABLED
                 logger.Debug("Highest OpenGL Version Initialised is " + OpenGLVersion);
+#endif
 #endif
             }
             catch (System.NullReferenceException exp)
             {
                 // Problem occured when trying to get open GL Verion, Logg and assume 2.0 so program exacution can continue:
+#if LOG4NET_ENABLED
                 logger.Error("Error Getting OpenGL Version, Assuming version 2.0!");
+#endif
                 OpenGLVersion = "2.0";
                 OpenGLVersionMajor = 2;
                 OpenGLVersionMinor = 0;
@@ -389,7 +420,9 @@ namespace Pulsar4X.UI.GLUtilities
             {
                 
                 String MSG = String.Format("Unknown OpenGL Version {0}.{1}",OpenGLVersionMajor,OpenGLVersionMinor);
+#if LOG4NET_ENABLED
                 logger.Error(MSG);
+#endif
             }
         }
 

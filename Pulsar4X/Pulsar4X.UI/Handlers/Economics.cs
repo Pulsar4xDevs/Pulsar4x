@@ -6,15 +6,19 @@ using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 namespace Pulsar4X.UI.Handlers
 {
     public class Economics
     {
-        // System Map Logger:
+        // economics Logger:
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Economics));
+#endif
 
         /// <summary>
         /// Panel that contains the list of populated systems.
@@ -210,7 +214,9 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
+#if LOG4NET_ENABLED
                 logger.Error("Something whent wrong Creating Colums for Economics summary screen...");
+#endif
             }
         }
 
@@ -260,7 +266,9 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
+#if LOG4NET_ENABLED
                 logger.Error("Something whent wrong Refreshing Cells for Economics summary screen...");
+#endif
             }
         }
 

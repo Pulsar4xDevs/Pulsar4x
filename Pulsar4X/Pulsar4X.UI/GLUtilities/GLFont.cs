@@ -6,8 +6,10 @@ using Pulsar4X.UI;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 namespace Pulsar4X.UI.GLUtilities
 {
@@ -19,7 +21,7 @@ namespace Pulsar4X.UI.GLUtilities
     {
 #if LOG4NET_ENABLED
         /// <summary>
-        /// TG Logger:
+        /// GLFont Logger:
         /// </summary>
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLFont));
 #endif

@@ -8,8 +8,10 @@ using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 using Pulsar4X.UI.GLUtilities;
 using Pulsar4X.UI.SceenGraph;
 using OpenTK;
@@ -53,7 +55,9 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// TG Logger:
         /// </summary>
-        public static readonly ILog logger = LogManager.GetLogger(typeof(TaskGroup));
+#if LOG4NET_ENABLED
+        public static readonly ILog logger = LogManager.GetLogger(typeof(TaskGroup_type));
+#endif
 
         /// <summary>
         /// Panel for taskgroup related stuff. Opengl shouldn't be used here I don't think, but I'm not sure. Included everything from SystemMap.cs anyway.
@@ -127,7 +131,7 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Constructor for this handler.
         /// </summary>
-        public TaskGroup()
+        public TaskGroup_type()
         {
             m_oTaskGroupPanel = new Panels.TaskGroup_Panel();
             m_oRenameTaskGroupPanel = new Panels.ClassDes_RenameClass();
@@ -542,7 +546,9 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
+#if LOG4NET_ENABLED
                 logger.Error("Something went wrong Creating Columns for Taskgroup summary screen...");
+#endif
             }
         }
 
@@ -572,7 +578,9 @@ namespace Pulsar4X.UI.Handlers
                 }
                 catch
                 {
+#if LOG4NET_ENABLED
                     logger.Error("Something went wrong Creating Rows for Taskgroup summary screen...");
+#endif
                 }
             }
         }
@@ -656,7 +664,9 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
+#if LOG4NET_ENABLED
                 logger.Error("Something went wrong Refreshing Cells for Taskgroup Ship summary screen...");
+#endif
             }
         }
 

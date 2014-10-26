@@ -6,8 +6,10 @@ using Pulsar4X.UI;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 using Pulsar4X.Entities;
 using Pulsar4X.Lib;
 
@@ -88,21 +90,21 @@ namespace Pulsar4X.UI.GLUtilities
             // tell Opgl about our VBOs:
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
             GL.BindVertexArray(m_uiVextexArrayHandle);                      // Lets OpenGL that this is the current "active" vertex array.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Generate VAO: " + GL.GetError().ToString());
             //#endif
 
             GL.GenBuffers(1, out m_uiVertexBufferHandle);                   // Generate our Vertex Buffer Object and get the handle to it.
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
             GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Generate VBO: " + GL.GetError().ToString());
             //#endif
 
             GL.GenBuffers(1, out m_uiIndexBufferHandle);                    //Generate Our index Buffer and get handle to it.
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle); // Lets Open GL know that this is the current active buffer object.
             GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(m_auiIndicies.Length * sizeof(ushort)), m_auiIndicies, BufferUsageHint.StaticDraw); // Tells OpenGL how the data is structured.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Generate EBO: " + GL.GetError().ToString());
             //#endif
 
@@ -110,7 +112,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), 0);  // Tells OpenGL about the first three doubles in the vbo, i.e the position of the vertex.
             GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, true, GLVertex.SizeInBytes(), Vector4.SizeInBytes); // tells OpenGL about the floats used to repesent color.
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector4.SizeInBytes + Vector4.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Create Vertes Attribute Pointers: " + GL.GetError().ToString());
             //#endif
 
@@ -119,7 +121,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
 
-           // #if DEBUG
+            // #if LOG4NET_ENABLED
            //     logger.Info("OpenGL Create Circle Primitive: " + GL.GetError().ToString());
             //#endif
         }
@@ -179,21 +181,21 @@ namespace Pulsar4X.UI.GLUtilities
             // tell Opgl about our VBOs:
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
             GL.BindVertexArray(m_uiVextexArrayHandle);                      // Lets OpenGL that this is the current "active" vertex array.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Generate VAO: " + GL.GetError().ToString());
             //#endif
 
             GL.GenBuffers(1, out m_uiVertexBufferHandle);                   // Generate our Vertex Buffer Object and get the handle to it.
             GL.BindBuffer(BufferTarget.ArrayBuffer, m_uiVertexBufferHandle);// Lets Open GL know that this is the current active buffer object.
             GL.BufferData<GLVertex>(BufferTarget.ArrayBuffer, new IntPtr(m_aoVerticies.Length * GLVertex.SizeInBytes()), m_aoVerticies, BufferUsageHint.StaticDraw); // tells OpenGL about the structure of the data.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Generate VBO: " + GL.GetError().ToString());
             //#endif
 
             GL.GenBuffers(1, out m_uiIndexBufferHandle);                    //Generate Our index Buffer and get handle to it.
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, m_uiIndexBufferHandle); // Lets Open GL know that this is the current active buffer object.
             GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(m_auiIndicies.Length * sizeof(ushort)), m_auiIndicies, BufferUsageHint.StaticDraw); // Tells OpenGL how the data is structured.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Generate EBO: " + GL.GetError().ToString());
             //#endif
 
@@ -201,7 +203,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), 0);  // Tells OpenGL about the first three doubles in the vbo, i.e the position of the vertex.
             GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, true, GLVertex.SizeInBytes(), Vector4.SizeInBytes); // tells OpenGL about the 4 floats used to repesent color.
             GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, GLVertex.SizeInBytes(), (Vector4.SizeInBytes + Vector4.SizeInBytes)); // tells OpenGL about the 2 floats in the vertgexc used to repesent UV coords.
-            //#if DEBUG
+            //#if LOG4NET_ENABLED
             //    logger.Info("OpenGL Create Vertes Attribute Pointers: " + GL.GetError().ToString());
             //#endif
 
@@ -210,7 +212,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
 
-            // #if DEBUG
+            //#if LOG4NET_ENABLED
             //     logger.Info("OpenGL Create Circle Primitive: " + GL.GetError().ToString());
             //#endif
         }
