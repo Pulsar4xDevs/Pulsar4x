@@ -8,12 +8,8 @@ using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
-
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
-
 using Pulsar4X.UI.GLUtilities;
 using Pulsar4X.UI.SceenGraph;
 using OpenTK;
@@ -32,9 +28,7 @@ namespace Pulsar4X.UI.Handlers
         #region Properties and Member Vars
 
         // System Map Logger:
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(SystemMap));
-#endif
 
         /// <summary>
         /// Panel that contains the System map view port (i.e. openGL canvas).
@@ -381,7 +375,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-#warning this is deprecated
+#warning this may be deprecated
         private void StartSim_Click(object sender, EventArgs e)
         {
             if (GameState.SE.SimCreated == false)

@@ -10,10 +10,8 @@ using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
 using Newtonsoft.Json;
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
 using Pulsar4X.Entities.Components;
 using System.Runtime.InteropServices;
 
@@ -21,9 +19,7 @@ namespace Pulsar4X.UI.Handlers
 {
     public class Components
     {
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Components));
-#endif
 
         Panels.Component_Design m_oComponentDesignPanel;
 

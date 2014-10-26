@@ -6,10 +6,8 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using Pulsar4X.UI;
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
 
 namespace Pulsar4X.UI.GLUtilities
 {
@@ -51,9 +49,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.GetShaderInfoLog(iGLVertexShader, out szShaderError);
             if (iShaderError != 1)
             {
-#if LOG4NET_ENABLED
                 logger.Error("Error " + iShaderError.ToString() + " Compiling Vertex Shader: " + szShaderError); // Log Result!
-#endif
                 iShaderError = 1;
             }
 
@@ -65,9 +61,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.GetShaderInfoLog(iGLPixelShader, out szShaderError);
             if (iShaderError != 1)
             {
-#if LOG4NET_ENABLED
                 logger.Error("Error " + iShaderError.ToString() + " Compiling Fragment/Pixel Shader: " + szShaderError); // Log Result!
-#endif
                 iShaderError = 1;
             }
 
@@ -86,9 +80,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.GetShaderInfoLog(iGLPixelShader, out szShaderError);
             if (iShaderError != 1)
             {
-#if LOG4NET_ENABLED
                 logger.Error("Error " + iShaderError.ToString() + " Creating Shader Program: " + szShaderError); // Log Result!
-#endif
                 iShaderError = 1;
             }
 
@@ -102,9 +94,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_eGLError = GL.GetError();
             if (m_eGLError != ErrorCode.NoError)
             {
-#if LOG4NET_ENABLED
                 logger.Info("OpenGL Bind Matricies to Shader Code: " + m_eGLError.ToString());
-#endif
             }
             // This tells OpenGL to delete the shader objects. 
             // Note that OpenGL wont delete them until all shader programs currently useing them are deleted also.

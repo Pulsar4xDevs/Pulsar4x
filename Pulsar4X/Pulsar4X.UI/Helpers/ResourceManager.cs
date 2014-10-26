@@ -2,12 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
-
 using System.Drawing;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
@@ -20,9 +16,7 @@ namespace Pulsar4X.UI.Helpers
     /// </summary>
     public class ResourceManager
     {
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(ResourceManager));
-#endif
 
         /// <summary>
         /// Instance of the singelton class.
@@ -103,9 +97,7 @@ namespace Pulsar4X.UI.Helpers
             // Second check if the file exists:
             if (!System.IO.File.Exists(a_szTextureFile))
             {
-#if LOG4NET_ENABLED
                 logger.Error("Could not find texture file: " + a_szTextureFile);
-#endif
                 return 0; // retun 0 if invalid file.
             }
 
@@ -138,9 +130,7 @@ namespace Pulsar4X.UI.Helpers
             // Load data by telling OpenGL to build mipmaps out of bitmap data
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, oTextureBitmap.Width, oTextureBitmap.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, oRawTextureData.Scan0);
 
-#if LOG4NET_ENABLED
             logger.Info("OpenGL Loading Texture " + a_szTextureFile + ": " + GL.GetError().ToString());
-#endif
 
             // Now that we have provided the data to OpenGL we can free the texture from system Ram.
             oTextureBitmap.UnlockBits(oRawTextureData);
@@ -267,9 +257,7 @@ namespace Pulsar4X.UI.Helpers
                 }
                 else
                 {
-#if LOG4NET_ENABLED
                     logger.Error("Couldn't find texture path for " + a_szFontDataFile);
-#endif
                 }
 
                 // Move to first Charecter element
@@ -325,26 +313,20 @@ namespace Pulsar4X.UI.Helpers
 
                     if (r1 == false || r2 == false || r3 == false || r4 == false)
                     {
-#if LOG4NET_ENABLED
                         logger.Info("ResourceManager.cs Char: " + szBuffer + " Coordinates: " + oUVCoords.m_v2UVMin.X + "/" + oUVCoords.m_v2UVMin.Y + "," + oUVCoords.m_v2UVMax.X + "/" + oUVCoords.m_v2UVMax.Y + 
                                     "|" + r1 + " " + r2 + " " + r3 + " " + r4);
-#endif
                     }
 
                 } while (oXMLReader.ReadToNextSibling("Character"));  // Move to Next Charcter Element
 
-#if LOG4NET_ENABLED
                 logger.Info("Loaded GLFont Data File " + a_szFontDataFile);
-#endif
             }
             catch (XmlException e)
             {
                 // XML Error occured, catch and log.
-#if LOG4NET_ENABLED
                 logger.Error("Error: faild to load Font Data file " + a_szFontDataFile);
                 logger.Error("Font Exception: " + e.Message);
                 logger.Info("You May have an unsupported Charcter in thoe font data file, inclundg <, >, &");
-#endif
             }
             finally
             {

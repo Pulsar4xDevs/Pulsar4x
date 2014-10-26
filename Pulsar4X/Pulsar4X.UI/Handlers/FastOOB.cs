@@ -9,10 +9,8 @@ using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 
@@ -21,9 +19,7 @@ namespace Pulsar4X.UI.Handlers
     public class FastOOB
     {
 
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(FastOOB));
-#endif
 
         /// <summary>
         /// Currently selected empire.

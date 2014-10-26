@@ -9,10 +9,8 @@ using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
 using Pulsar4X.Stargen;
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#if LOG4NET_ENABLED
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 
@@ -72,9 +70,7 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Class Design Logger:
         /// </summary>
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(TaskGroup));
-#endif
 
         //Panels.ClassDes_DesignAndInfo m_oDesignAndInformationPanel;
         Panels.ClassDes_Options m_oOptionsPanel;
@@ -1422,7 +1418,6 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Almost exactly the same as the above design tab builder, but this one gets the component selected from the grouped list.
-        /// also no commenting, have fun.
         /// </summary>
         /// <param name="LineIndex">Line we want to find</param>
         /// <param name="CType">Component type to be "returned"</param>
@@ -1760,8 +1755,8 @@ namespace Pulsar4X.UI.Handlers
                     Column.SortMode = DataGridViewColumnSortMode.NotSortable;
                 }
 
-#warning These are needed for debug for right now.
                 /*
+                 * These are needed for debug for right now.
                 m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 1].Visible = false;
                 m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 2].Visible = false;
                 m_oOptionsPanel.ComponentDataGrid.Columns[m_oOptionsPanel.ComponentDataGrid.Columns.Count - 3].Visible = false;
@@ -1770,9 +1765,7 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
-#if LOG4NET_ENABLED
                 logger.Error("Something went wrong Creating Columns for Class Design ComponentGrid screen...");
-#endif
             }
         }
 
@@ -2730,9 +2723,7 @@ namespace Pulsar4X.UI.Handlers
                 }
                 catch
                 {
-#if LOG4NET_ENABLED
                     logger.Error("Something went wrong Creating Rows for Class Design ComponentGrid screen...");
-#endif
                 }
             }
             else if( TotalComponents != List.TotalComponents)
@@ -3977,9 +3968,7 @@ namespace Pulsar4X.UI.Handlers
                 }
                 catch
                 {
-#if LOG4NET_ENABLED
                     logger.Error("Something went wrong with updating rows for class design componentGrid screen...");
-#endif
                 }
             }
         }
@@ -4882,9 +4871,7 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
-#if LOG4NET_ENABLED
                 logger.Error("Something went wrong Creating Columns for Class Design MissileGrid screen...");
-#endif
             }
         }
 
@@ -5033,9 +5020,7 @@ namespace Pulsar4X.UI.Handlers
             }
             catch
             {
-#if LOG4NET_ENABLED
                 logger.Error("Something went wrong Creating Rows for Class Design MissileGrid screen..");
-#endif
             }
         }
         #endregion

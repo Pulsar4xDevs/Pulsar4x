@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Pulsar4X.Stargen;
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
 using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.UI
@@ -14,9 +12,7 @@ namespace Pulsar4X.UI
     static class Program
     {
 
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Program));
-#endif
 
         /// <summary>
         /// The main entry point for the application.
@@ -25,9 +21,7 @@ namespace Pulsar4X.UI
         static void Main()
         {
             XmlConfigurator.Configure(); // Enables Log4net based on App.config file.
-#if LOG4NET_ENABLED
             logger.Info("Program Started");
-#endif
 
             // gen star system:
             Entities.StarSystem otest = GameState.Instance.StarSystemFactory.Create("Test");
@@ -211,9 +205,7 @@ namespace Pulsar4X.UI
 
             Application.EnableVisualStyles();
 
-            /// <summary>
-            /// Initialize damage values.
-            /// </summary>
+            //Initialize damage values.
             DamageValuesTN.init();
             
 
@@ -222,9 +214,7 @@ namespace Pulsar4X.UI
             //Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Forms.MainForm());
 
-#if LOG4NET_ENABLED
             logger.Info("Program Ended");
-#endif
         }
     }
 }

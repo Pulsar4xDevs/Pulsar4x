@@ -77,8 +77,7 @@ namespace Pulsar4X.Lib
             /// <summary>
             /// orbitFraction is essentially mean Anomaly
             /// </summary>
-            //double orbitFraction = 1.0 * ((DaysSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
-            double orbitFraction = 1.0 * theOrbit.TimeSinceApogee / orbitPeriod;
+            double orbitFraction = 1.0 * ((DaysSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
 
 #warning how can this orbit code be made more efficient?
 

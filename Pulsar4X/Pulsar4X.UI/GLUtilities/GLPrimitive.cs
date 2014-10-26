@@ -6,10 +6,8 @@ using OpenTK.Graphics;
 using Pulsar4X.UI;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
-#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif
 
 namespace Pulsar4X.UI.GLUtilities
 {
@@ -20,9 +18,7 @@ namespace Pulsar4X.UI.GLUtilities
     public abstract class GLPrimitive
     {
         // Note: for AU/KM conversions: Constants.Units.KM_PER_AU
-#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLPrimitive));
-#endif
 
         /// <summary>
         /// Array of verticies that make up this primative.
