@@ -6,8 +6,10 @@ using Pulsar4X.UI;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 using Pulsar4X.Entities;
 using Pulsar4X.Lib;
 

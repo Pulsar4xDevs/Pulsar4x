@@ -7,14 +7,19 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+
+#if LOG4NET_ENABLED
 using log4net;
+#endif
 
 namespace Pulsar4X.UI.SceenGraph
 {
     public class MapMarker : SceenElement
     {
 
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(MapMarker));
+#endif
 
         private GameEntity m_oGameEntity;
 

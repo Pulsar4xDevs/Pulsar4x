@@ -1149,7 +1149,7 @@ namespace Pulsar4X.Entities
         /// <param name="YearTickValue">The second count for the current year.</param>
         public void SensorSweep(int YearTickValue)
         {
-            /// <summary
+            /// <summary>
             /// clear the fleet preempt list.
             /// </summary>
             GameState.SE.ClearFleetPreemptList();

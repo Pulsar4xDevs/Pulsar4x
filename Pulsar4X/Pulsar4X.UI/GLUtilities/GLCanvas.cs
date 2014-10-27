@@ -239,8 +239,8 @@ namespace Pulsar4X.UI.GLUtilities
 #if LOG4NET_ENABLED
                     logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
 #endif
-                }   
-            #endif
+                }  
+#endif
             //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.ReadBuffer(ReadBufferMode.Back);

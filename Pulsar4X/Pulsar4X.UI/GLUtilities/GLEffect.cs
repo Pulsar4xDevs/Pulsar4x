@@ -6,14 +6,19 @@ using OpenTK.Graphics;
 using Pulsar4X.UI;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
+
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 namespace Pulsar4X.UI.GLUtilities
 {
     public class GLEffect
     {
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(GLEffect));
+#endif
 
         /// <summary> Used for getting the last OpenGL Error. </summary>
         protected ErrorCode m_eGLError;

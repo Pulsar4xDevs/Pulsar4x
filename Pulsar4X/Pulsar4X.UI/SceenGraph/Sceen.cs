@@ -10,8 +10,11 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+
+#if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+#endif
 
 namespace Pulsar4X.UI.SceenGraph
 {
@@ -21,9 +24,11 @@ namespace Pulsar4X.UI.SceenGraph
     public class Sceen
     {
         /// <summary>
-        /// TG Logger:
+        /// Sceen Logger:
         /// </summary>
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Sceen));
+#endif
 
         /// <summary>
         /// List of all top level Sprites That Make up the Sceen.
