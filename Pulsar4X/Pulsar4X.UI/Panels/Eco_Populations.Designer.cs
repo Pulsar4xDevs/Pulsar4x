@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             this.FactionGroupBox = new System.Windows.Forms.GroupBox();
-            this.PopulatedSystemGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oFactionSelectionComboBox = new System.Windows.Forms.ComboBox();
+            this.PopulatedSystemGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oPopulationsListBox = new System.Windows.Forms.ListBox();
             this.FactionGroupBox.SuspendLayout();
             this.PopulatedSystemGroupBox.SuspendLayout();
@@ -46,11 +46,19 @@
             this.FactionGroupBox.TabStop = false;
             this.FactionGroupBox.Text = "Faction";
             // 
+            // m_oFactionSelectionComboBox
+            // 
+            this.m_oFactionSelectionComboBox.FormattingEnabled = true;
+            this.m_oFactionSelectionComboBox.Location = new System.Drawing.Point(11, 20);
+            this.m_oFactionSelectionComboBox.Name = "m_oFactionSelectionComboBox";
+            this.m_oFactionSelectionComboBox.Size = new System.Drawing.Size(183, 21);
+            this.m_oFactionSelectionComboBox.TabIndex = 0;
+            // 
             // PopulatedSystemGroupBox
             // 
-            this.PopulatedSystemGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.PopulatedSystemGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.PopulatedSystemGroupBox.AutoSize = true;
             this.PopulatedSystemGroupBox.Controls.Add(this.m_oPopulationsListBox);
             this.PopulatedSystemGroupBox.Location = new System.Drawing.Point(2, 61);
@@ -59,14 +67,6 @@
             this.PopulatedSystemGroupBox.TabIndex = 1;
             this.PopulatedSystemGroupBox.TabStop = false;
             this.PopulatedSystemGroupBox.Text = "Populated Systems";
-            // 
-            // m_oFactionSelectionComboBox
-            // 
-            this.m_oFactionSelectionComboBox.FormattingEnabled = true;
-            this.m_oFactionSelectionComboBox.Location = new System.Drawing.Point(11, 20);
-            this.m_oFactionSelectionComboBox.Name = "m_oFactionSelectionComboBox";
-            this.m_oFactionSelectionComboBox.Size = new System.Drawing.Size(183, 21);
-            this.m_oFactionSelectionComboBox.TabIndex = 0;
             // 
             // m_oPopulationsListBox
             // 

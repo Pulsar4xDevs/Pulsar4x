@@ -45,7 +45,7 @@ namespace Pulsar4X.UI.Panels
             m_oSummaryDataGrid.AllowUserToResizeRows = true;
             m_oSummaryDataGrid.ReadOnly = true;
             m_oSummaryDataGrid.Enabled = false;
-            this.Controls.Add(m_oSummaryDataGrid);
+            m_oSummaryGroupBox.Controls.Add(m_oSummaryDataGrid);
         }
     }
 }

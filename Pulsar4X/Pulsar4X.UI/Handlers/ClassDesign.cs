@@ -78,6 +78,7 @@ namespace Pulsar4X.UI.Handlers
         public static readonly ILog logger = LogManager.GetLogger(typeof(TaskGroup));
 #endif
 
+#warning DesignAndInfo and Properties are deprecated ClassDes_Options does all the work.
         //Panels.ClassDes_DesignAndInfo m_oDesignAndInformationPanel;
         Panels.ClassDes_Options m_oOptionsPanel;
         //Panels.ClassDes_Properties m_oClassPropertiesPanel;
