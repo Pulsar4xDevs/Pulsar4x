@@ -74,7 +74,8 @@ namespace Pulsar4X.UI.Forms
             /// Who doesn't like spaghetti references?
             /// </summary>
             Helpers.UIController.Instance.SystemMap.MainFormReference = this;
-            Helpers.UIController.Instance.TaskGroup.SystemMapReference = Helpers.UIController.Instance.SystemMap;
+            Helpers.UIController.Instance.Economics.MainFormReference = this;
+            Helpers.UIController.Instance.Economics.SystemMapReference = Helpers.UIController.Instance.SystemMap;
         }
 
         #region MenuAndToolStripEvents

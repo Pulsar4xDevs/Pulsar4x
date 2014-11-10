@@ -124,11 +124,6 @@ namespace Pulsar4X.UI.Handlers
         public ViewModels.TaskGroupViewModel VM { get; set; }
 
         /// <summary>
-        /// This reference I need to taskgroup renames to appear on the systemmap.
-        /// </summary>
-        public Pulsar4X.UI.Handlers.SystemMap SystemMapReference { get; set; }
-
-        /// <summary>
         /// Dictionary of interesting locations for the SystemLocationList
         /// </summary>
         private Dictionary<string, SystemListObject> SystemLocationDict { get; set; }

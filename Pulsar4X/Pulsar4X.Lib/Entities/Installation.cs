@@ -11,6 +11,7 @@ namespace Pulsar4X.Entities
         public enum InstallationType
         {
             AutomatedMine,
+            CivilianMiningComplex,
             CommercialShipyard,
             ConstructionFactory,
             DeepSpaceTrackingStation,
@@ -32,7 +33,7 @@ namespace Pulsar4X.Entities
             InstallationCount
         }
 
-        public const int NO_OF_INSTALLATIONS = 19;
+        public const int NO_OF_INSTALLATIONS = 20;
  
         public InstallationType Type { get; set; }
         public int Cost { get; set; }
@@ -73,6 +74,11 @@ namespace Pulsar4X.Entities
                         Cost = 240;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 120;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = 120;
+                        break;
+                    }
+                case InstallationType.CivilianMiningComplex:
+                    {
+                        Name = "Civilian Mining Complex";
                         break;
                     }
                 case InstallationType.CommercialShipyard:

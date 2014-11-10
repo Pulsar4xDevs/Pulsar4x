@@ -244,7 +244,7 @@ namespace Pulsar4X.UI.Helpers
             }
             else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Eco_Summary))
             {
-                m_oEconomics.ActivatePopulationsPanel();
+                m_oEconomics.ActivateSummaryPanel();
             }
             else if (a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Ships_Design) || a_oDockPanel.ActiveDocument.GetType() == typeof(Panels.Individual_Unit_Details_Panel))
             {

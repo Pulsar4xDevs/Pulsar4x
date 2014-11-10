@@ -1,4 +1,5 @@
-﻿namespace Pulsar4X.UI.Panels
+﻿using System.Windows.Forms;
+namespace Pulsar4X.UI.Panels
 {
     partial class Eco_Summary
     {
@@ -6,6 +7,96 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+
+        #region General Economics Buttons, Faction Combo Box, and Population Tree View.
+        /// <summary>
+        /// Selection for which faction's economics page to view
+        /// </summary>
+        public ComboBox FactionComboBox
+        {
+            get { return m_oFactionComboBox; }
+        }
+
+        /// <summary>
+        /// Populations held by this empire are selectable here.
+        /// </summary>
+        public TreeView PopulationTreeView
+        {
+            get { return m_oPopulationTreeView; }
+        }
+
+        /// <summary>
+        /// Hide Civilian Mining Complexes
+        /// </summary>
+        public CheckBox HideCMCCheckBox
+        {
+            get { return m_oHideCMCCheckBox; }
+        }
+
+        /// <summary>
+        /// Group populations by function
+        /// </summary>
+        public CheckBox GroupByFunctionCheckBox
+        {
+            get { return m_oFunctionGroupCheckBox; }
+        }
+
+        #region Time Control
+        /// <summary>
+        /// Time Control buttons
+        /// </summary>
+        public Button FiveSecondsButton
+        {
+            get { return m_o5SecondsButton; }
+        }
+
+        public Button ThirtySecondsButton
+        {
+            get { return m_o30SecondsButton; }
+        }
+
+        public Button FiveMinutesButton
+        {
+            get { return m_o5MinutesButton; }
+        }
+
+        public Button TwentyMinutesButton
+        {
+            get { return m_o20MinutesButton; }
+        }
+
+        public Button OneHourButton
+        {
+            get { return m_o1HourButton; }
+        }
+
+        public Button ThreeHoursButton
+        {
+            get { return m_o3HoursButton; }
+        }
+
+        public Button EightHoursButton
+        {
+            get { return m_o8HoursButton; }
+        }
+
+        public Button OneDayButton
+        {
+            get { return m_o1DayButton; }
+        }
+
+        public Button FiveDaysButton
+        {
+            get { return m_o5DaysButton; }
+        }
+
+        public Button ThirtyDaysButton
+        {
+            get { return m_o30DaysButton; }
+        }
+        #endregion
+
+        #endregion
 
         /// <summary> 
         /// Clean up any resources being used.
@@ -33,7 +124,7 @@
             this.m_oPopulationGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oFunctionGroupCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oHideCMCCheckBox = new System.Windows.Forms.CheckBox();
-            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.m_oPopulationTreeView = new System.Windows.Forms.TreeView();
             this.m_oIndustryControlGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oSMModButton = new System.Windows.Forms.Button();
             this.m_oAllResearchButton = new System.Windows.Forms.Button();
@@ -107,7 +198,7 @@
             // 
             this.m_oPopulationGroupBox.Controls.Add(this.m_oFunctionGroupCheckBox);
             this.m_oPopulationGroupBox.Controls.Add(this.m_oHideCMCCheckBox);
-            this.m_oPopulationGroupBox.Controls.Add(this.treeView1);
+            this.m_oPopulationGroupBox.Controls.Add(this.m_oPopulationTreeView);
             this.m_oPopulationGroupBox.Location = new System.Drawing.Point(12, 71);
             this.m_oPopulationGroupBox.Name = "m_oPopulationGroupBox";
             this.m_oPopulationGroupBox.Size = new System.Drawing.Size(366, 734);
@@ -137,12 +228,12 @@
             this.m_oHideCMCCheckBox.Text = "Hide CMC";
             this.m_oHideCMCCheckBox.UseVisualStyleBackColor = true;
             // 
-            // treeView1
+            // m_oPopulationTreeView
             // 
-            this.treeView1.Location = new System.Drawing.Point(6, 19);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(354, 686);
-            this.treeView1.TabIndex = 0;
+            this.m_oPopulationTreeView.Location = new System.Drawing.Point(6, 19);
+            this.m_oPopulationTreeView.Name = "m_oPopulationTreeView";
+            this.m_oPopulationTreeView.Size = new System.Drawing.Size(354, 686);
+            this.m_oPopulationTreeView.TabIndex = 0;
             // 
             // m_oIndustryControlGroupBox
             // 
@@ -305,7 +396,7 @@
             // 
             // m_o30DaysButton
             // 
-            this.m_o30DaysButton.Location = new System.Drawing.Point(735, 19);
+            this.m_o30DaysButton.Location = new System.Drawing.Point(742, 19);
             this.m_o30DaysButton.Name = "m_o30DaysButton";
             this.m_o30DaysButton.Size = new System.Drawing.Size(75, 23);
             this.m_o30DaysButton.TabIndex = 20;
@@ -314,7 +405,7 @@
             // 
             // m_o5DaysButton
             // 
-            this.m_o5DaysButton.Location = new System.Drawing.Point(654, 19);
+            this.m_o5DaysButton.Location = new System.Drawing.Point(661, 19);
             this.m_o5DaysButton.Name = "m_o5DaysButton";
             this.m_o5DaysButton.Size = new System.Drawing.Size(75, 23);
             this.m_o5DaysButton.TabIndex = 19;
@@ -323,7 +414,7 @@
             // 
             // m_o1DayButton
             // 
-            this.m_o1DayButton.Location = new System.Drawing.Point(573, 19);
+            this.m_o1DayButton.Location = new System.Drawing.Point(580, 19);
             this.m_o1DayButton.Name = "m_o1DayButton";
             this.m_o1DayButton.Size = new System.Drawing.Size(75, 23);
             this.m_o1DayButton.TabIndex = 18;
@@ -332,7 +423,7 @@
             // 
             // m_o8HoursButton
             // 
-            this.m_o8HoursButton.Location = new System.Drawing.Point(492, 19);
+            this.m_o8HoursButton.Location = new System.Drawing.Point(499, 19);
             this.m_o8HoursButton.Name = "m_o8HoursButton";
             this.m_o8HoursButton.Size = new System.Drawing.Size(75, 23);
             this.m_o8HoursButton.TabIndex = 17;
@@ -341,7 +432,7 @@
             // 
             // m_o3HoursButton
             // 
-            this.m_o3HoursButton.Location = new System.Drawing.Point(411, 19);
+            this.m_o3HoursButton.Location = new System.Drawing.Point(418, 19);
             this.m_o3HoursButton.Name = "m_o3HoursButton";
             this.m_o3HoursButton.Size = new System.Drawing.Size(75, 23);
             this.m_o3HoursButton.TabIndex = 16;
@@ -350,7 +441,7 @@
             // 
             // m_o1HourButton
             // 
-            this.m_o1HourButton.Location = new System.Drawing.Point(330, 19);
+            this.m_o1HourButton.Location = new System.Drawing.Point(337, 19);
             this.m_o1HourButton.Name = "m_o1HourButton";
             this.m_o1HourButton.Size = new System.Drawing.Size(75, 23);
             this.m_o1HourButton.TabIndex = 15;
@@ -359,7 +450,7 @@
             // 
             // m_o20MinutesButton
             // 
-            this.m_o20MinutesButton.Location = new System.Drawing.Point(249, 19);
+            this.m_o20MinutesButton.Location = new System.Drawing.Point(256, 19);
             this.m_o20MinutesButton.Name = "m_o20MinutesButton";
             this.m_o20MinutesButton.Size = new System.Drawing.Size(75, 23);
             this.m_o20MinutesButton.TabIndex = 14;
@@ -368,7 +459,7 @@
             // 
             // m_o5MinutesButton
             // 
-            this.m_o5MinutesButton.Location = new System.Drawing.Point(168, 19);
+            this.m_o5MinutesButton.Location = new System.Drawing.Point(175, 19);
             this.m_o5MinutesButton.Name = "m_o5MinutesButton";
             this.m_o5MinutesButton.Size = new System.Drawing.Size(75, 23);
             this.m_o5MinutesButton.TabIndex = 13;
@@ -377,7 +468,7 @@
             // 
             // m_o30SecondsButton
             // 
-            this.m_o30SecondsButton.Location = new System.Drawing.Point(87, 19);
+            this.m_o30SecondsButton.Location = new System.Drawing.Point(94, 19);
             this.m_o30SecondsButton.Name = "m_o30SecondsButton";
             this.m_o30SecondsButton.Size = new System.Drawing.Size(75, 23);
             this.m_o30SecondsButton.TabIndex = 12;
@@ -386,7 +477,7 @@
             // 
             // m_o5SecondsButton
             // 
-            this.m_o5SecondsButton.Location = new System.Drawing.Point(6, 19);
+            this.m_o5SecondsButton.Location = new System.Drawing.Point(13, 19);
             this.m_o5SecondsButton.Name = "m_o5SecondsButton";
             this.m_o5SecondsButton.Size = new System.Drawing.Size(75, 23);
             this.m_o5SecondsButton.TabIndex = 11;
@@ -475,80 +566,80 @@
             // 
             // m_oIndustryTab
             // 
-            this.m_oIndustryTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oIndustryTab.Location = new System.Drawing.Point(4, 40);
             this.m_oIndustryTab.Name = "m_oIndustryTab";
             this.m_oIndustryTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oIndustryTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oIndustryTab.Size = new System.Drawing.Size(831, 690);
             this.m_oIndustryTab.TabIndex = 1;
             this.m_oIndustryTab.Text = "Industry";
             this.m_oIndustryTab.UseVisualStyleBackColor = true;
             // 
             // m_oMiningTab
             // 
-            this.m_oMiningTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oMiningTab.Location = new System.Drawing.Point(4, 40);
             this.m_oMiningTab.Name = "m_oMiningTab";
             this.m_oMiningTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oMiningTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oMiningTab.Size = new System.Drawing.Size(831, 690);
             this.m_oMiningTab.TabIndex = 2;
             this.m_oMiningTab.Text = "Mining/Maintenance";
             this.m_oMiningTab.UseVisualStyleBackColor = true;
             // 
             // m_oShipyardTab
             // 
-            this.m_oShipyardTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oShipyardTab.Location = new System.Drawing.Point(4, 40);
             this.m_oShipyardTab.Name = "m_oShipyardTab";
             this.m_oShipyardTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oShipyardTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oShipyardTab.Size = new System.Drawing.Size(831, 690);
             this.m_oShipyardTab.TabIndex = 3;
             this.m_oShipyardTab.Text = "Manage Shipyards ";
             this.m_oShipyardTab.UseVisualStyleBackColor = true;
             // 
             // m_oShipyardTaskTab
             // 
-            this.m_oShipyardTaskTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oShipyardTaskTab.Location = new System.Drawing.Point(4, 40);
             this.m_oShipyardTaskTab.Name = "m_oShipyardTaskTab";
             this.m_oShipyardTaskTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oShipyardTaskTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oShipyardTaskTab.Size = new System.Drawing.Size(831, 690);
             this.m_oShipyardTaskTab.TabIndex = 4;
             this.m_oShipyardTaskTab.Text = "Shipyard Tasks";
             this.m_oShipyardTaskTab.UseVisualStyleBackColor = true;
             // 
             // m_oResearchTab
             // 
-            this.m_oResearchTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oResearchTab.Location = new System.Drawing.Point(4, 40);
             this.m_oResearchTab.Name = "m_oResearchTab";
             this.m_oResearchTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oResearchTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oResearchTab.Size = new System.Drawing.Size(831, 690);
             this.m_oResearchTab.TabIndex = 5;
             this.m_oResearchTab.Text = "Research";
             this.m_oResearchTab.UseVisualStyleBackColor = true;
             // 
             // m_oEnvironmentTab
             // 
-            this.m_oEnvironmentTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oEnvironmentTab.Location = new System.Drawing.Point(4, 40);
             this.m_oEnvironmentTab.Name = "m_oEnvironmentTab";
             this.m_oEnvironmentTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oEnvironmentTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oEnvironmentTab.Size = new System.Drawing.Size(831, 690);
             this.m_oEnvironmentTab.TabIndex = 6;
             this.m_oEnvironmentTab.Text = "Environment / GMC";
             this.m_oEnvironmentTab.UseVisualStyleBackColor = true;
             // 
             // m_oTeamsTab
             // 
-            this.m_oTeamsTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oTeamsTab.Location = new System.Drawing.Point(4, 40);
             this.m_oTeamsTab.Name = "m_oTeamsTab";
             this.m_oTeamsTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oTeamsTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oTeamsTab.Size = new System.Drawing.Size(831, 690);
             this.m_oTeamsTab.TabIndex = 7;
             this.m_oTeamsTab.Text = "Teams / Academy";
             this.m_oTeamsTab.UseVisualStyleBackColor = true;
             // 
             // m_oCivTab
             // 
-            this.m_oCivTab.Location = new System.Drawing.Point(4, 22);
+            this.m_oCivTab.Location = new System.Drawing.Point(4, 40);
             this.m_oCivTab.Name = "m_oCivTab";
             this.m_oCivTab.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oCivTab.Size = new System.Drawing.Size(831, 708);
+            this.m_oCivTab.Size = new System.Drawing.Size(831, 690);
             this.m_oCivTab.TabIndex = 8;
             this.m_oCivTab.Text = "Civilians / Ind Status";
             this.m_oCivTab.UseVisualStyleBackColor = true;
@@ -616,7 +707,7 @@
         private System.Windows.Forms.GroupBox m_oTimeGroupBox;
         private System.Windows.Forms.CheckBox m_oFunctionGroupCheckBox;
         private System.Windows.Forms.CheckBox m_oHideCMCCheckBox;
-        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TreeView m_oPopulationTreeView;
         private System.Windows.Forms.Button m_oCloseButton;
         private System.Windows.Forms.Button m_oAbandonButton;
         private System.Windows.Forms.Button m_oMissileButton;

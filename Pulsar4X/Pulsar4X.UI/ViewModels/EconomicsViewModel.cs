@@ -84,6 +84,14 @@ namespace Pulsar4X.UI.ViewModels
             }
         }
 
+        private void OnFactionChanged()
+        {
+            if (FactionChanged != null)
+            {
+                FactionChanged(this, new EventArgs());
+            }
+        }
+
         private void OnPopulationChanged()
         {
             if (PopulationChanged != null)
@@ -104,5 +112,7 @@ namespace Pulsar4X.UI.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
 
         public event EventHandler PopulationChanged;
+
+        public event EventHandler FactionChanged;
     }
 }

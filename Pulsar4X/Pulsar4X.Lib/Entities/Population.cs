@@ -20,6 +20,11 @@ namespace Pulsar4X.Entities
         public Faction Faction { get; set; }
 
         /// <summary>
+        /// Which species is on this planet.
+        /// </summary>
+        public Species Species { get; set; }
+
+        /// <summary>
         /// Planet the population is attached to
         /// </summary>
         public Planet Planet { get; set; }
@@ -58,6 +63,12 @@ namespace Pulsar4X.Entities
         /// Populations with structures tend to emit a thermal signature. 5 per installation I believe.
         /// </summary>
         public int ThermalSignature { get; set; }
+
+        /// <summary>
+        /// How many orbital terraforming modules are in orbit around this planet?
+        /// </summary>
+        public float OrbitalTerraformModules { get; set; }
+
 
         public float CivilianPopulation { get; set; }
         public float PopulationGrowthRate { get; set; }
@@ -159,7 +170,7 @@ namespace Pulsar4X.Entities
 
         #endregion
 
-        public Population(Planet a_oPlanet, Faction a_oFaction)
+        public Population(Planet a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
         {
             // initialise minerials:
             m_aiMinerials = new int[Constants.Minerals.NO_OF_MINERIALS];
@@ -184,10 +195,18 @@ namespace Pulsar4X.Entities
             ModifierProduction = 1.0f;
             ModifierWealthAndTrade = 1.0f;
 
-            Name = "Earth";  // just a default Value!
+            Name = a_oName;  // just a default Value!
 
             Faction = a_oFaction;
             Planet = a_oPlanet;
+            if (a_oSpecies == null)
+            {
+                Species = Faction.Species;
+            }
+            else
+            {
+                Species = a_oSpecies;
+            }
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
 
             Contact = new SystemContact(Faction,this);
@@ -198,6 +217,8 @@ namespace Pulsar4X.Entities
             ComponentStockpileCount = new BindingList<float>();
             ComponentStockpileLookup = new Dictionary<Guid, int>();
             MissileStockpile = new Dictionary<OrdnanceDefTN, int>();
+
+            OrbitalTerraformModules = 0.0f;
             
         }
 

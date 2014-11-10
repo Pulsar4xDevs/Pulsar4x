@@ -160,7 +160,10 @@ namespace Pulsar4X.Entities
         [JsonIgnore]
         public double IceCoverInPercent { get { return IceCover * 100.0; } set { IceCover = value / 100.0; } }
 
-        
+        /// <summary>
+        /// Entry for whether or not this planet has ruins on it.
+        /// </summary>
+        public Ruins PlanetaryRuins { get; set; }
 
         public Planet(Star primary, OrbitingEntity parent) : base()
         {
@@ -176,6 +179,9 @@ namespace Pulsar4X.Entities
             Parent = parent;
 
             TaskGroupsInOrbit = new BindingList<TaskGroupTN>();
+
+#warning planet generation needs minerals, anomalies, and ruins generation.
+            PlanetaryRuins = null;
         }
 
         /// <summary>
