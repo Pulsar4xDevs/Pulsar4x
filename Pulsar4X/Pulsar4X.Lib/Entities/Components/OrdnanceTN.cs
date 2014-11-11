@@ -1750,7 +1750,7 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Then test other nearby FCs.
                         /// </summary>
-                        Intercept = GameState.SE.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
+                        Intercept = PointDefense.FinalDefensiveFire(GameState.Instance.Factions, Missiles[loop], RNG);
                     }
 
                     /// <summary>

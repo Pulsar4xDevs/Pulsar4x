@@ -1205,7 +1205,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Handle fleet interception check here.
                             /// </summary>
-                            if (GameState.SE.FleetInterceptionPreemptTick != YearTickValue)
+                            if (GameState.SE.FleetInterceptionPreemptTick != YearTickValue && System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
                             {
                                 /// <summary>
                                 /// how far could this TG travel within a single day?
@@ -1223,9 +1223,9 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// If this Taskgroup isn't already detected, and the distance is short enough, put it in the fleet intercept preempt list.
                                 /// </summary>
-                                if (TaskGroupDistance >= (dist / 5.0) && ( DetectedContactLists.ContainsKey(System) == false ||
-                                    (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) || 
-                                     DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false ) ) ) )
+                                if (TaskGroupDistance >= (dist / 5.0) && (DetectedContactLists.ContainsKey(System) == false ||
+                                    (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) ||
+                                     DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false))))
                                 {
 #warning Update this fleet intercept list for planets/populations
                                     GameState.SE.FleetInterceptionPreemptTick = YearTickValue;
@@ -1237,6 +1237,7 @@ namespace Pulsar4X.Entities
                                         GameState.SE.AddFleetToPreemptList(System.SystemContactList[loop2].TaskGroup);
                                     }
                                 }
+                                    
                             }
                         }
 
