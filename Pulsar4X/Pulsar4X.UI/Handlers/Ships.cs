@@ -520,18 +520,26 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Remove the FC from the point defense FC list.
                         /// </summary>
-                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                        if (_CurrnetFaction.PointDefense.Count != 0)
                         {
-                            _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                            if(_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == true)
+                            {
+                                if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
+                                {
+                                    _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+                                }
+
+                                /// <summary>
+                                /// Cleanup the starsystem so that the point defense list isn't cluttered.
+                                /// </summary>
+                                if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
+                                {
+                                    _CurrnetFaction.PointDefense.Remove(CurrentSystem);
+                                }
+                            }
                         }
 
-                        /// <summary>
-                        /// cleanup the starsystem so that the point defense list isn't cluttered.
-                        /// </summary>
-                        if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.Count == 0)
-                        {
-                            _CurrnetFaction.PointDefense.Remove(CurrentSystem);
-                        }
+                        
                     }
                 }
                 else

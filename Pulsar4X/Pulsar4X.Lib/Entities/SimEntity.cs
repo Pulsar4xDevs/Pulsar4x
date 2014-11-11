@@ -281,6 +281,9 @@ namespace Pulsar4X.Entities
                     int FiveSecondIncrements = (int)Math.Floor((float)MissileTimeToHit / 5.0f);
                     desiredTime = FiveSecondIncrements * 5;
 
+                    if (desiredTime == 0)
+                        desiredTime = (int)Constants.TimeInSeconds.FiveSeconds;
+
                     /// <summary>
                     /// I want to pause right before the missile hits.
                     /// </summary>
