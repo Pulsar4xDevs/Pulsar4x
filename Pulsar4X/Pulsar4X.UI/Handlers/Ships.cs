@@ -511,7 +511,8 @@ namespace Pulsar4X.UI.Handlers
                         /// </summary>
                         if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == false)
                         {
-                            String Error = String.Format("Star System {0} not found in point defense listing for {1} on {2}.", CurrentSystem, _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip);
+#warning leave this error message in for now
+                            String Error = String.Format("Star System {0} not found in point defense listing for {1} on {2}. Not necessarily a bug.", CurrentSystem, _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip);
                             MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
                                                                   GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
                             _CurrnetFaction.MessageLog.Add(MessageEnter);

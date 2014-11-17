@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
-    public class Gas
+    public class Gas : GameEntity
     {
         public int MoleculeId { get; set; }
         public double SurfacePressure { get; set; } //units of millibars (mb)

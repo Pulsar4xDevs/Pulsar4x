@@ -1007,6 +1007,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.MissileAgility] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
 
 #warning FastOOB magic numbers
             ShipBPTotal = 8000.0m;
@@ -1094,6 +1095,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.MissileAgility] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
 
 #warning FastOOB magic numbers
             ShipBPTotal = 8000.0m;

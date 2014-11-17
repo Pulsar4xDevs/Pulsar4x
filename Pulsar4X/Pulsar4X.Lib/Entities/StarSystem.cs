@@ -206,5 +206,30 @@ namespace Pulsar4X.Entities
                GameState.Instance.Factions[0].MessageLog.Add(Entry2);
            }
         }
+
+        /// <summary>
+        /// Get the PPV level for this faction in this system.
+        /// </summary>
+        /// <param name="fact">Faction to find PPV for</param>
+        /// <returns>PPV value</returns>
+        public int GetProtectionLevel(Faction fact)
+        {
+            int PPV = 0;
+            foreach (SystemContact Contact in SystemContactList)
+            {
+                if (Contact.SSEntity == StarSystemEntityType.TaskGroup)
+                {
+                    if (Contact.TaskGroup.TaskGroupFaction == fact)
+                    {
+                        foreach (ShipTN Ship in Contact.TaskGroup.Ships)
+                        {
+                            PPV = PPV + Ship.ShipClass.PlanetaryProtectionValue;
+                        }
+                    }
+                }
+            }
+
+            return PPV;
+        }
     }
 }

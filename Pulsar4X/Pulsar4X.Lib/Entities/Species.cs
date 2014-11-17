@@ -18,6 +18,9 @@ namespace Pulsar4X.Entities
         public double MinimumTemperatureConstraint { get; set; }
         public double MaximumTemperatureConstraint { get; set; }
         
+        /// <summary>
+        /// Probably a list of toxic gases for this species.
+        /// </summary>
         public List<SpeciesGasConstraint> GasConstraints { get; set; }
 
         public Species()
@@ -31,7 +34,7 @@ namespace Pulsar4X.Entities
             MaximumGravityConstraint = 1.9;
             BasePressure = 1.0;
             MinimumPressureConstraint = 0.4;
-            MaximumPressureConstraint = 2.0;
+            MaximumPressureConstraint = 4.0;
             BaseTemperature = 14.0;
             MinimumTemperatureConstraint = -15.0;
             MaximumTemperatureConstraint = 45.0;

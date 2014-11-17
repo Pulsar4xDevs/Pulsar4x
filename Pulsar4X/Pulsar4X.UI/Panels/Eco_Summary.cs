@@ -41,10 +41,10 @@ namespace Pulsar4X.UI.Panels
             m_oSummaryDataGrid.AllowUserToAddRows = false;
             m_oSummaryDataGrid.AllowUserToDeleteRows = false;
             m_oSummaryDataGrid.AllowUserToOrderColumns = false;
-            m_oSummaryDataGrid.AllowUserToResizeColumns = true;
-            m_oSummaryDataGrid.AllowUserToResizeRows = true;
+            m_oSummaryDataGrid.AllowUserToResizeColumns = false;
+            m_oSummaryDataGrid.AllowUserToResizeRows = false;
             m_oSummaryDataGrid.ReadOnly = true;
-            m_oSummaryDataGrid.Enabled = false;
+            m_oSummaryDataGrid.Enabled = true;
             m_oSummaryGroupBox.Controls.Add(m_oSummaryDataGrid);
         }
     }

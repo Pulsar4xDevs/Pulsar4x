@@ -50,7 +50,6 @@ namespace Pulsar4X.UI
             /// This following section should probably be moved to the Faction constructor at some point.
             /// </summary>
             oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
-            oNewFaction.Populations.First().CivilianPopulation = 100.0f;
             GameState.Instance.Factions.Add(oNewFaction);
             oNewFaction.AddNewContactList(otest);
 
@@ -120,6 +119,7 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[1], 200);
             oNewFaction.ShipDesigns[1].IsLocked = true;
             oNewFaction.ShipDesigns[1].BuildClassSummary();
+            
 
             oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
             oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);

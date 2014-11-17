@@ -1848,6 +1848,7 @@ namespace Pulsar4X.Entities
             }
 
             TotalPowerRequirement = TotalPowerRequirement + (int)(Beam.powerRequirement * inc);
+            PlanetaryProtectionValue = PlanetaryProtectionValue + (int)(Beam.powerRequirement * inc);
             UpdateClass(Beam, inc);
         }
 
@@ -2036,6 +2037,7 @@ namespace Pulsar4X.Entities
             LauncherCount = LauncherCount + inc;
             LauncherMagSpace = LauncherMagSpace + ((int)Tube.launchMaxSize * inc);
             TotalMagazineCapacity = TotalMagazineCapacity + ((int)Tube.launchMaxSize * inc);
+            PlanetaryProtectionValue = PlanetaryProtectionValue + ((int)Tube.launchMaxSize * inc);
             UpdateClass(Tube, inc);
         }
 

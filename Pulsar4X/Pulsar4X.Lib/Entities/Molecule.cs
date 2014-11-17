@@ -5,11 +5,15 @@ using System.Text;
 
 namespace Pulsar4X.Entities
 {
-    public class Molecule
+    public class Molecule : GameEntity
     {
+        /// <summary>
+        /// Does this need an Id separate from the GameEntity Guid?
+        /// </summary>
         public int Id { get; set; }
+
+
         public string Symbol { get; set; }
-        public string Name { get; set; }
         public double AtomicWeight { get; set; }
         public double MeltingPoint { get; set; }
         public double BoilingPoint { get; set; }

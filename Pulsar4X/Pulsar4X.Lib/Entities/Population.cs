@@ -12,6 +12,19 @@ namespace Pulsar4X.Entities
 {
     public class Population : GameEntity
     {
+
+        /// <summary>
+        /// What is the political situation on this colony? how productive is it and how much of a military presence is needed to hold control of it.
+        /// </summary>
+        public enum PoliticalStatus
+        {
+            Conquered,
+            Subjugated,
+            Occupied,
+            Candidate,
+            Imperial,
+            Count
+        }
         #region Properties
 
         /// <summary>
@@ -38,6 +51,11 @@ namespace Pulsar4X.Entities
         /// If so who is he?
         /// </summary>
         public Commander PopulationGovernor { get; set; }
+
+        /// <summary>
+        /// How skilled in administration should the Planetary Governor be?
+        /// </summary>
+        public int AdminRating { get; set; }
 
         /// <summary>
         /// The contact that this population is associated with.
@@ -75,13 +93,21 @@ namespace Pulsar4X.Entities
         public float FuelStockpile { get; set; }
         public int MaintenanceSupplies { get; set; }
 
+        /// <summary>
+        /// What is the situation of this colony.
+        /// </summary>
+        public PoliticalStatus PoliticalPopStatus { get; set; }
+
 
         public float PopulationWorkingInAgriAndEnviro
         {
             get
             {
                 // 5% of civi pop
-                return CivilianPopulation * 0.05f;
+
+                //5 + 5 * ColonyCost
+                float Agriculture = 0.05f + (0.05f * (float)Species.ColonyCost(Planet));
+                return CivilianPopulation * Agriculture;
             }
         }
 
@@ -90,7 +116,13 @@ namespace Pulsar4X.Entities
             get
             {
                 // 75% of Civi Pop
-                return CivilianPopulation * 0.75f;
+                //ServicePercent = Sqr(Sqr(TotalPop * 100000)) / 100
+                float ServicePercent = (float)(Math.Sqrt(Math.Sqrt((double)CivilianPopulation * 100000.0)) / 100.0);
+                if (ServicePercent > 0.75f)
+                    ServicePercent = 0.75f;
+
+                float pop = CivilianPopulation - PopulationWorkingInAgriAndEnviro;
+                return ServicePercent * pop;
             }
         }
 
@@ -99,18 +131,14 @@ namespace Pulsar4X.Entities
             get
             {
                 // 20% of civi pop
-                return CivilianPopulation * 0.20f;
+                return CivilianPopulation - (PopulationWorkingInAgriAndEnviro + PopulationWorkingInServiceIndustries);
             }
         }
 
-        public int EMSignature
-        {
-            get
-            {
-                // Todo: Proper Formula for EM Sig!
-                return (int)((CivilianPopulation * CivilianPopulation) / 10);
-            }
-        }
+        /// <summary>
+        /// EM Signature is related to population.
+        /// </summary>
+        public int EMSignature { get; set; }
 
 
         int[] m_aiMinerials;
@@ -212,6 +240,7 @@ namespace Pulsar4X.Entities
             Contact = new SystemContact(Faction,this);
 
             GovernorPresent = false;
+            AdminRating = 0;
 
             ComponentStockpile = new BindingList<ComponentDefTN>();
             ComponentStockpileCount = new BindingList<float>();
@@ -219,7 +248,46 @@ namespace Pulsar4X.Entities
             MissileStockpile = new Dictionary<OrdnanceDefTN, int>();
 
             OrbitalTerraformModules = 0.0f;
+
+            PoliticalPopStatus = PoliticalStatus.Imperial;
+
+            for (int InstallationIterator = 0; InstallationIterator < (int)Installation.InstallationType.InstallationCount; InstallationIterator++)
+            {
+                Installations[InstallationIterator].Number = 0.0f;
+            }
+
+            FuelStockpile = 0.0f;
+            MaintenanceSupplies = 0;
+            EMSignature = 0;
+            ThermalSignature = 0;
+            ModifierEconomicProduction = 1.0f;
+            ModifierManfacturing = 1.0f;
+            ModifierProduction = 1.0f;
+            ModifierWealthAndTrade = 1.0f;
+            ModifierPoliticalStability = 1.0f;
+
+            ConventionalStart();
             
+        }
+
+        public void ConventionalStart()
+        {
+            Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = 1000.0f;
+            Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number = 1.0f;
+            Installations[(int)Installation.InstallationType.MilitaryAcademy].Number = 1.0f;
+            Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number = 1.0f;
+            Installations[(int)Installation.InstallationType.MaintenanceFacility].Number = 5.0f;
+            Installations[(int)Installation.InstallationType.ResearchLab].Number = 5.0f;
+
+            FuelStockpile = 0.0f;
+            MaintenanceSupplies = 2000;
+
+            CivilianPopulation = 500.0f;
+        }
+
+        public void TNStart()
+        {
+            CivilianPopulation = 500.0f;
         }
 
         /// <summary>
@@ -352,6 +420,82 @@ namespace Pulsar4X.Entities
                     return inc;
                 }
             }
+        }
+
+        /// <summary>
+        /// Calculate the thermal signature of this colony
+        /// </summary>
+        /// <returns>Thermal Signature</returns>
+        public int CalcThermalSignature()
+        {
+            int signature = (int)Math.Round(CivilianPopulation * Constants.Colony.CivilianThermalSignature);
+            foreach (Installation Inst in m_aoInstallations)
+            {
+                if (Inst.Type == Installation.InstallationType.CommercialShipyard)
+                {
+                    int ThermalBase = (int)Inst.ThermalSignature;
+                    int SYCount = (int)Math.Floor(Inst.Number);
+                    for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
+                    {
+                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        signature = signature + ThermalBase + (int)Math.Round((float)totalTons / Constants.Colony.CommercialShipyardTonnageDivisor);
+                    }
+                }
+                else if (Inst.Type == Installation.InstallationType.NavalShipyardComplex)
+                {
+                    int ThermalBase = (int)Inst.ThermalSignature;
+                    int SYCount = (int)Math.Floor(Inst.Number);
+                    for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
+                    {
+                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        signature = signature + ThermalBase + (int)Math.Round((float)totalTons / Constants.Colony.NavalShipyardTonnageDivisor);
+                    }
+                }
+                else
+                {
+                    signature = signature + (int)Math.Round(Inst.ThermalSignature * Math.Floor(Inst.Number));
+                }
+            }
+            ThermalSignature = signature;
+            return signature;
+        }
+
+        /// <summary>
+        /// Calculate the EM signature of this colony
+        /// </summary>
+        /// <returns>EM Signature</returns>
+        public int CalcEMSignature()
+        {
+            int signature = (int)Math.Round(CivilianPopulation * Constants.Colony.CivilianEMSignature);
+            foreach (Installation Inst in m_aoInstallations)
+            {
+                if (Inst.Type == Installation.InstallationType.CommercialShipyard)
+                {
+                    int EMBase = (int)Inst.EMSignature;
+                    int SYCount = (int)Math.Floor(Inst.Number);
+                    for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
+                    {
+                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        signature = signature + EMBase + (int)Math.Round((float)totalTons / Constants.Colony.CommercialShipyardTonnageDivisor);
+                    }
+                }
+                else if (Inst.Type == Installation.InstallationType.NavalShipyardComplex)
+                {
+                    int EMBase = (int)Inst.EMSignature;
+                    int SYCount = (int)Math.Floor(Inst.Number);
+                    for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
+                    {
+                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        signature = signature + EMBase + (int)Math.Round((float)totalTons / Constants.Colony.NavalShipyardTonnageDivisor);
+                    }
+                }
+                else
+                {
+                    signature = signature + (int)Math.Round(Inst.EMSignature * Math.Floor(Inst.Number));
+                }
+            }
+            EMSignature = signature;
+            return signature;
         }
     }
 }

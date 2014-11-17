@@ -14,6 +14,14 @@ namespace Pulsar4X.Entities
 {
     public class Planet : OrbitingEntity
     {
+        public enum Tectonics
+        {
+            Dead,
+            Minimal,
+            Earthlike,
+            Volcanic,
+            Count
+        }
 
 #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
@@ -28,6 +36,11 @@ namespace Pulsar4X.Entities
         /// accomplished by a bindinglist of factions, since only factions present will have surveyed the body.
         /// </summary>
         public Dictionary<Faction, bool> GeoSurveyList { get; set; }
+
+        /// <summary>
+        /// Has a geological team surveyed this world?
+        /// </summary>
+        public bool GeoTeamSurvey { get; set; }
 
         //TODO: Currently Id is only unique in the star it belongs to, not unique across multiple stars
         public PlanetTypes PlanetType { get; set; }
@@ -165,6 +178,12 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Ruins PlanetaryRuins { get; set; }
 
+
+        /// <summary>
+        /// How geologically active is this planet. will this be used?
+        /// </summary>
+        public Tectonics PlanetaryTectonics { get; set; }
+
         public Planet(Star primary, OrbitingEntity parent) : base()
         {
             Moons = new BindingList<Planet>();
@@ -172,6 +191,7 @@ namespace Pulsar4X.Entities
             Populations = new BindingList<Population>();
 
             GeoSurveyList = new Dictionary<Faction, bool>();
+            GeoTeamSurvey = false;
 
             SSEntity = StarSystemEntityType.Body;
 
@@ -181,7 +201,9 @@ namespace Pulsar4X.Entities
             TaskGroupsInOrbit = new BindingList<TaskGroupTN>();
 
 #warning planet generation needs minerals, anomalies, and ruins generation.
-            PlanetaryRuins = null;
+            PlanetaryRuins = new Ruins();
+
+            PlanetaryTectonics = Tectonics.Dead;
         }
 
         /// <summary>

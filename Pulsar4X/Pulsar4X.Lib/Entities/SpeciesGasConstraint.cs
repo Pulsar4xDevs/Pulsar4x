@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.Entities
 {
-    public class SpeciesGasConstraint
+    public class SpeciesGasConstraint : GameEntity
     {
         public Molecule Molecule { get; set; }
         public double Minimum { get; set; }

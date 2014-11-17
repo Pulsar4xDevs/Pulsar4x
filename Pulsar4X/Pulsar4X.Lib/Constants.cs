@@ -985,6 +985,42 @@ namespace Pulsar4X
         }
 
         /// <summary>
+        /// Colony related constants
+        /// </summary>
+        public static class Colony
+        {
+            /// <summary>
+            /// Thermal signature per million pop.
+            /// </summary>
+            public static float CivilianThermalSignature = 5.0f;
+
+            /// <summary>
+            /// EM signature per million pop.
+            /// </summary>
+            public static float CivilianEMSignature = 50.0f;
+
+
+            /// <summary>
+            /// For Thermal and EM signature calculations.
+            /// </summary>
+            public static float NavalShipyardTonnageDivisor = 50.0f;
+
+            /// <summary>
+            /// For Thermal and EM signature calculations.
+            /// </summary>
+            public static float CommercialShipyardTonnageDivisor = 500.0f;
+            /// <summary>
+            /// What sensor strength will a single DSTS add? This is about equal to a full sized thermal sensor array at each tech level.
+            /// </summary>
+            public static int[] DeepSpaceStrength = { 250, 300, 400, 550, 700, 900, 1200, 1600, 2000, 2500, 3000, 3750 };
+
+            /// <summary>
+            /// Maximum index to DeepSpaceStrength
+            /// </summary>
+            public const int DeepSpaceMax = 11;
+        }
+
+        /// <summary>
         /// Tick times to complete said interval.
         /// </summary>
         public static class TimeInSeconds
