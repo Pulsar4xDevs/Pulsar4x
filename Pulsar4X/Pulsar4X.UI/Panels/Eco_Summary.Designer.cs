@@ -96,6 +96,40 @@ namespace Pulsar4X.UI.Panels
         }
         #endregion
 
+        #region Industrial Tab
+        /// <summary>
+        /// These groupboxes need to be set to visible or not depending on user input. 
+        /// </summary>
+        public GroupBox ShipComponentGroupBox
+        {
+            get { return m_oShipComponentGroupBox; }
+        }
+        public GroupBox PlanetMissileGroupBox
+        {
+            get { return m_oPlanetMissileGroupBox; }
+        }
+        public GroupBox PlanetPDCGroupBox
+        {
+            get { return m_oPlanetPDCGroupBox; }
+        }
+        public GroupBox PlanetFighterGroupBox
+        {
+            get { return m_oPlanetFighterGroupBox; }
+        }
+
+        public ComboBox InstallationTypeComboBox
+        {
+            get { return m_oInstallationTypeComboBox; }
+        }
+        /// <summary>
+        /// Stockpile button swaps the display between the industrial projects under construction display and the listing of planetary stockpiles.
+        /// </summary>
+        public Button StockpileButton
+        {
+            get { return m_oStockpileButton; }
+        }
+        #endregion
+
         #endregion
 
         /// <summary> 
@@ -158,6 +192,46 @@ namespace Pulsar4X.UI.Panels
             this.m_oPlanetaryGovernorLabel = new System.Windows.Forms.Label();
             this.m_oSummaryGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oIndustryTab = new System.Windows.Forms.TabPage();
+            this.m_oStockpileButton = new System.Windows.Forms.Button();
+            this.m_oFighterLabel = new System.Windows.Forms.Label();
+            this.m_oOrdnanceLabel = new System.Windows.Forms.Label();
+            this.m_oConstructionLabel = new System.Windows.Forms.Label();
+            this.m_oFuelProductionGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oFuelReservesLabel = new System.Windows.Forms.Label();
+            this.m_oFuelProductionlabel = new System.Windows.Forms.Label();
+            this.m_oRefineriesLabel = new System.Windows.Forms.Label();
+            this.m_oStartFuelButton = new System.Windows.Forms.Button();
+            this.m_oStopFuelButton = new System.Windows.Forms.Button();
+            this.m_oIndustrialProjectGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oItemNumberTextBox = new System.Windows.Forms.TextBox();
+            this.m_oItemPercentTextBox = new System.Windows.Forms.TextBox();
+            this.m_oNewFightersLabel = new System.Windows.Forms.Label();
+            this.m_oPercentageLabel = new System.Windows.Forms.Label();
+            this.m_oItemNumberLabel = new System.Windows.Forms.Label();
+            this.m_oNewFighterTaskGroupComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oPriorityDownButton = new System.Windows.Forms.Button();
+            this.m_oPriorityUpButton = new System.Windows.Forms.Button();
+            this.m_oSMAddButton = new System.Windows.Forms.Button();
+            this.m_oPauseButton = new System.Windows.Forms.Button();
+            this.m_oCancelButton = new System.Windows.Forms.Button();
+            this.m_oModifyButton = new System.Windows.Forms.Button();
+            this.m_oCreateButton = new System.Windows.Forms.Button();
+            this.m_oIndustrialAllocationGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oPlanetFighterGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oFighterListBox = new System.Windows.Forms.ListBox();
+            this.m_oScrapFightersButton = new System.Windows.Forms.Button();
+            this.m_oPlanetMissileGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMissileStockListBox = new System.Windows.Forms.ListBox();
+            this.m_oScrapMissilesButton = new System.Windows.Forms.Button();
+            this.m_oPlanetPDCGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oPDCListBox = new System.Windows.Forms.ListBox();
+            this.m_oShipComponentGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oShipCompListBox = new System.Windows.Forms.ListBox();
+            this.m_oDisassembleCompButton = new System.Windows.Forms.Button();
+            this.m_oScrapCompButton = new System.Windows.Forms.Button();
+            this.m_oConstructionOptionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oInstallationTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oInstallationCostListBox = new System.Windows.Forms.ListBox();
             this.m_oMiningTab = new System.Windows.Forms.TabPage();
             this.m_oShipyardTab = new System.Windows.Forms.TabPage();
             this.m_oShipyardTaskTab = new System.Windows.Forms.TabPage();
@@ -168,12 +242,22 @@ namespace Pulsar4X.UI.Panels
             this.m_oGUTab = new System.Windows.Forms.TabPage();
             this.m_oGUTrainingTab = new System.Windows.Forms.TabPage();
             this.m_oWealthTab = new System.Windows.Forms.TabPage();
+            this.m_oInstallationGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oEmpireGroupBox.SuspendLayout();
             this.m_oPopulationGroupBox.SuspendLayout();
             this.m_oIndustryControlGroupBox.SuspendLayout();
             this.m_oTimeGroupBox.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.m_oSummaryTab.SuspendLayout();
+            this.m_oIndustryTab.SuspendLayout();
+            this.m_oFuelProductionGroupBox.SuspendLayout();
+            this.m_oIndustrialProjectGroupBox.SuspendLayout();
+            this.m_oIndustrialAllocationGroupBox.SuspendLayout();
+            this.m_oPlanetFighterGroupBox.SuspendLayout();
+            this.m_oPlanetMissileGroupBox.SuspendLayout();
+            this.m_oPlanetPDCGroupBox.SuspendLayout();
+            this.m_oShipComponentGroupBox.SuspendLayout();
+            this.m_oConstructionOptionsGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oEmpireGroupBox
@@ -566,6 +650,14 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oIndustryTab
             // 
+            this.m_oIndustryTab.Controls.Add(this.m_oStockpileButton);
+            this.m_oIndustryTab.Controls.Add(this.m_oFighterLabel);
+            this.m_oIndustryTab.Controls.Add(this.m_oOrdnanceLabel);
+            this.m_oIndustryTab.Controls.Add(this.m_oConstructionLabel);
+            this.m_oIndustryTab.Controls.Add(this.m_oFuelProductionGroupBox);
+            this.m_oIndustryTab.Controls.Add(this.m_oIndustrialProjectGroupBox);
+            this.m_oIndustryTab.Controls.Add(this.m_oIndustrialAllocationGroupBox);
+            this.m_oIndustryTab.Controls.Add(this.m_oConstructionOptionsGroupBox);
             this.m_oIndustryTab.Location = new System.Drawing.Point(4, 40);
             this.m_oIndustryTab.Name = "m_oIndustryTab";
             this.m_oIndustryTab.Padding = new System.Windows.Forms.Padding(3);
@@ -573,6 +665,398 @@ namespace Pulsar4X.UI.Panels
             this.m_oIndustryTab.TabIndex = 1;
             this.m_oIndustryTab.Text = "Industry";
             this.m_oIndustryTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oStockpileButton
+            // 
+            this.m_oStockpileButton.Location = new System.Drawing.Point(750, 19);
+            this.m_oStockpileButton.Name = "m_oStockpileButton";
+            this.m_oStockpileButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oStockpileButton.TabIndex = 5;
+            this.m_oStockpileButton.Text = "Stockpiles";
+            this.m_oStockpileButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oFighterLabel
+            // 
+            this.m_oFighterLabel.AutoSize = true;
+            this.m_oFighterLabel.Location = new System.Drawing.Point(543, 24);
+            this.m_oFighterLabel.Name = "m_oFighterLabel";
+            this.m_oFighterLabel.Size = new System.Drawing.Size(120, 13);
+            this.m_oFighterLabel.TabIndex = 4;
+            this.m_oFighterLabel.Text = "Fighter Production: 0 (0)";
+            // 
+            // m_oOrdnanceLabel
+            // 
+            this.m_oOrdnanceLabel.AutoSize = true;
+            this.m_oOrdnanceLabel.Location = new System.Drawing.Point(322, 24);
+            this.m_oOrdnanceLabel.Name = "m_oOrdnanceLabel";
+            this.m_oOrdnanceLabel.Size = new System.Drawing.Size(135, 13);
+            this.m_oOrdnanceLabel.TabIndex = 3;
+            this.m_oOrdnanceLabel.Text = "Ordnance Production: 0 (0)";
+            // 
+            // m_oConstructionLabel
+            // 
+            this.m_oConstructionLabel.AutoSize = true;
+            this.m_oConstructionLabel.Location = new System.Drawing.Point(96, 24);
+            this.m_oConstructionLabel.Name = "m_oConstructionLabel";
+            this.m_oConstructionLabel.Size = new System.Drawing.Size(160, 13);
+            this.m_oConstructionLabel.TabIndex = 2;
+            this.m_oConstructionLabel.Text = "Construction: 1000.0 (0/0/1000)";
+            // 
+            // m_oFuelProductionGroupBox
+            // 
+            this.m_oFuelProductionGroupBox.Controls.Add(this.m_oFuelReservesLabel);
+            this.m_oFuelProductionGroupBox.Controls.Add(this.m_oFuelProductionlabel);
+            this.m_oFuelProductionGroupBox.Controls.Add(this.m_oRefineriesLabel);
+            this.m_oFuelProductionGroupBox.Controls.Add(this.m_oStartFuelButton);
+            this.m_oFuelProductionGroupBox.Controls.Add(this.m_oStopFuelButton);
+            this.m_oFuelProductionGroupBox.Location = new System.Drawing.Point(215, 621);
+            this.m_oFuelProductionGroupBox.Name = "m_oFuelProductionGroupBox";
+            this.m_oFuelProductionGroupBox.Size = new System.Drawing.Size(610, 63);
+            this.m_oFuelProductionGroupBox.TabIndex = 1;
+            this.m_oFuelProductionGroupBox.TabStop = false;
+            this.m_oFuelProductionGroupBox.Text = "Fuel Production";
+            // 
+            // m_oFuelReservesLabel
+            // 
+            this.m_oFuelReservesLabel.AutoSize = true;
+            this.m_oFuelReservesLabel.Location = new System.Drawing.Point(214, 40);
+            this.m_oFuelReservesLabel.Name = "m_oFuelReservesLabel";
+            this.m_oFuelReservesLabel.Size = new System.Drawing.Size(75, 13);
+            this.m_oFuelReservesLabel.TabIndex = 12;
+            this.m_oFuelReservesLabel.Text = "Fuel Reserves";
+            // 
+            // m_oFuelProductionlabel
+            // 
+            this.m_oFuelProductionlabel.AutoSize = true;
+            this.m_oFuelProductionlabel.Location = new System.Drawing.Point(6, 40);
+            this.m_oFuelProductionlabel.Name = "m_oFuelProductionlabel";
+            this.m_oFuelProductionlabel.Size = new System.Drawing.Size(97, 13);
+            this.m_oFuelProductionlabel.TabIndex = 11;
+            this.m_oFuelProductionlabel.Text = "Annual Production:";
+            // 
+            // m_oRefineriesLabel
+            // 
+            this.m_oRefineriesLabel.AutoSize = true;
+            this.m_oRefineriesLabel.Location = new System.Drawing.Point(6, 20);
+            this.m_oRefineriesLabel.Name = "m_oRefineriesLabel";
+            this.m_oRefineriesLabel.Size = new System.Drawing.Size(57, 13);
+            this.m_oRefineriesLabel.TabIndex = 6;
+            this.m_oRefineriesLabel.Text = "Refineries:";
+            // 
+            // m_oStartFuelButton
+            // 
+            this.m_oStartFuelButton.Location = new System.Drawing.Point(448, 23);
+            this.m_oStartFuelButton.Name = "m_oStartFuelButton";
+            this.m_oStartFuelButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oStartFuelButton.TabIndex = 10;
+            this.m_oStartFuelButton.Text = "Start";
+            this.m_oStartFuelButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oStopFuelButton
+            // 
+            this.m_oStopFuelButton.Location = new System.Drawing.Point(529, 23);
+            this.m_oStopFuelButton.Name = "m_oStopFuelButton";
+            this.m_oStopFuelButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oStopFuelButton.TabIndex = 9;
+            this.m_oStopFuelButton.Text = "Stop";
+            this.m_oStopFuelButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oIndustrialProjectGroupBox
+            // 
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oItemNumberTextBox);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oItemPercentTextBox);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oNewFightersLabel);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oPercentageLabel);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oItemNumberLabel);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oNewFighterTaskGroupComboBox);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oPriorityDownButton);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oPriorityUpButton);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oSMAddButton);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oPauseButton);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oCancelButton);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oModifyButton);
+            this.m_oIndustrialProjectGroupBox.Controls.Add(this.m_oCreateButton);
+            this.m_oIndustrialProjectGroupBox.Location = new System.Drawing.Point(215, 515);
+            this.m_oIndustrialProjectGroupBox.Name = "m_oIndustrialProjectGroupBox";
+            this.m_oIndustrialProjectGroupBox.Size = new System.Drawing.Size(610, 100);
+            this.m_oIndustrialProjectGroupBox.TabIndex = 1;
+            this.m_oIndustrialProjectGroupBox.TabStop = false;
+            this.m_oIndustrialProjectGroupBox.Text = "Create Industrial Project for";
+            // 
+            // m_oItemNumberTextBox
+            // 
+            this.m_oItemNumberTextBox.Location = new System.Drawing.Point(103, 28);
+            this.m_oItemNumberTextBox.Name = "m_oItemNumberTextBox";
+            this.m_oItemNumberTextBox.Size = new System.Drawing.Size(42, 20);
+            this.m_oItemNumberTextBox.TabIndex = 25;
+            this.m_oItemNumberTextBox.Text = "1";
+            this.m_oItemNumberTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oItemPercentTextBox
+            // 
+            this.m_oItemPercentTextBox.Location = new System.Drawing.Point(225, 28);
+            this.m_oItemPercentTextBox.Name = "m_oItemPercentTextBox";
+            this.m_oItemPercentTextBox.Size = new System.Drawing.Size(42, 20);
+            this.m_oItemPercentTextBox.TabIndex = 24;
+            this.m_oItemPercentTextBox.Text = "100";
+            this.m_oItemPercentTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oNewFightersLabel
+            // 
+            this.m_oNewFightersLabel.AutoSize = true;
+            this.m_oNewFightersLabel.Location = new System.Drawing.Point(280, 31);
+            this.m_oNewFightersLabel.Name = "m_oNewFightersLabel";
+            this.m_oNewFightersLabel.Size = new System.Drawing.Size(123, 13);
+            this.m_oNewFightersLabel.TabIndex = 23;
+            this.m_oNewFightersLabel.Text = "New Fighters Taskgroup";
+            // 
+            // m_oPercentageLabel
+            // 
+            this.m_oPercentageLabel.AutoSize = true;
+            this.m_oPercentageLabel.Location = new System.Drawing.Point(157, 31);
+            this.m_oPercentageLabel.Name = "m_oPercentageLabel";
+            this.m_oPercentageLabel.Size = new System.Drawing.Size(62, 13);
+            this.m_oPercentageLabel.TabIndex = 22;
+            this.m_oPercentageLabel.Text = "Percentage";
+            // 
+            // m_oItemNumberLabel
+            // 
+            this.m_oItemNumberLabel.AutoSize = true;
+            this.m_oItemNumberLabel.Location = new System.Drawing.Point(6, 31);
+            this.m_oItemNumberLabel.Name = "m_oItemNumberLabel";
+            this.m_oItemNumberLabel.Size = new System.Drawing.Size(84, 13);
+            this.m_oItemNumberLabel.TabIndex = 21;
+            this.m_oItemNumberLabel.Text = "Number of Items";
+            // 
+            // m_oNewFighterTaskGroupComboBox
+            // 
+            this.m_oNewFighterTaskGroupComboBox.FormattingEnabled = true;
+            this.m_oNewFighterTaskGroupComboBox.Location = new System.Drawing.Point(411, 28);
+            this.m_oNewFighterTaskGroupComboBox.Name = "m_oNewFighterTaskGroupComboBox";
+            this.m_oNewFighterTaskGroupComboBox.Size = new System.Drawing.Size(151, 21);
+            this.m_oNewFighterTaskGroupComboBox.TabIndex = 20;
+            // 
+            // m_oPriorityDownButton
+            // 
+            this.m_oPriorityDownButton.Location = new System.Drawing.Point(572, 62);
+            this.m_oPriorityDownButton.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oPriorityDownButton.Name = "m_oPriorityDownButton";
+            this.m_oPriorityDownButton.Size = new System.Drawing.Size(28, 28);
+            this.m_oPriorityDownButton.TabIndex = 19;
+            this.m_oPriorityDownButton.Text = "\\/";
+            this.m_oPriorityDownButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPriorityUpButton
+            // 
+            this.m_oPriorityUpButton.Location = new System.Drawing.Point(572, 23);
+            this.m_oPriorityUpButton.Margin = new System.Windows.Forms.Padding(7);
+            this.m_oPriorityUpButton.Name = "m_oPriorityUpButton";
+            this.m_oPriorityUpButton.Size = new System.Drawing.Size(28, 28);
+            this.m_oPriorityUpButton.TabIndex = 18;
+            this.m_oPriorityUpButton.Text = "/\\";
+            this.m_oPriorityUpButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSMAddButton
+            // 
+            this.m_oSMAddButton.Location = new System.Drawing.Point(330, 71);
+            this.m_oSMAddButton.Name = "m_oSMAddButton";
+            this.m_oSMAddButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oSMAddButton.TabIndex = 17;
+            this.m_oSMAddButton.Text = "SM Add";
+            this.m_oSMAddButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPauseButton
+            // 
+            this.m_oPauseButton.Location = new System.Drawing.Point(249, 71);
+            this.m_oPauseButton.Name = "m_oPauseButton";
+            this.m_oPauseButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oPauseButton.TabIndex = 16;
+            this.m_oPauseButton.Text = "Pause";
+            this.m_oPauseButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCancelButton
+            // 
+            this.m_oCancelButton.Location = new System.Drawing.Point(168, 71);
+            this.m_oCancelButton.Name = "m_oCancelButton";
+            this.m_oCancelButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oCancelButton.TabIndex = 15;
+            this.m_oCancelButton.Text = "Cancel";
+            this.m_oCancelButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oModifyButton
+            // 
+            this.m_oModifyButton.Location = new System.Drawing.Point(87, 71);
+            this.m_oModifyButton.Name = "m_oModifyButton";
+            this.m_oModifyButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oModifyButton.TabIndex = 14;
+            this.m_oModifyButton.Text = "Modify";
+            this.m_oModifyButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCreateButton
+            // 
+            this.m_oCreateButton.Location = new System.Drawing.Point(6, 71);
+            this.m_oCreateButton.Name = "m_oCreateButton";
+            this.m_oCreateButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oCreateButton.TabIndex = 13;
+            this.m_oCreateButton.Text = "Create";
+            this.m_oCreateButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oIndustrialAllocationGroupBox
+            // 
+            this.m_oIndustrialAllocationGroupBox.Controls.Add(this.m_oPlanetFighterGroupBox);
+            this.m_oIndustrialAllocationGroupBox.Controls.Add(this.m_oPlanetMissileGroupBox);
+            this.m_oIndustrialAllocationGroupBox.Controls.Add(this.m_oPlanetPDCGroupBox);
+            this.m_oIndustrialAllocationGroupBox.Controls.Add(this.m_oShipComponentGroupBox);
+            this.m_oIndustrialAllocationGroupBox.Location = new System.Drawing.Point(215, 55);
+            this.m_oIndustrialAllocationGroupBox.Name = "m_oIndustrialAllocationGroupBox";
+            this.m_oIndustrialAllocationGroupBox.Size = new System.Drawing.Size(610, 454);
+            this.m_oIndustrialAllocationGroupBox.TabIndex = 1;
+            this.m_oIndustrialAllocationGroupBox.TabStop = false;
+            this.m_oIndustrialAllocationGroupBox.Text = "Industrial Allocation";
+            // 
+            // m_oPlanetFighterGroupBox
+            // 
+            this.m_oPlanetFighterGroupBox.Controls.Add(this.m_oFighterListBox);
+            this.m_oPlanetFighterGroupBox.Controls.Add(this.m_oScrapFightersButton);
+            this.m_oPlanetFighterGroupBox.Location = new System.Drawing.Point(315, 244);
+            this.m_oPlanetFighterGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oPlanetFighterGroupBox.Name = "m_oPlanetFighterGroupBox";
+            this.m_oPlanetFighterGroupBox.Size = new System.Drawing.Size(282, 197);
+            this.m_oPlanetFighterGroupBox.TabIndex = 1;
+            this.m_oPlanetFighterGroupBox.TabStop = false;
+            this.m_oPlanetFighterGroupBox.Text = "Fighters in Orbit";
+            // 
+            // m_oFighterListBox
+            // 
+            this.m_oFighterListBox.FormattingEnabled = true;
+            this.m_oFighterListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oFighterListBox.Name = "m_oFighterListBox";
+            this.m_oFighterListBox.Size = new System.Drawing.Size(270, 147);
+            this.m_oFighterListBox.TabIndex = 10;
+            // 
+            // m_oScrapFightersButton
+            // 
+            this.m_oScrapFightersButton.Location = new System.Drawing.Point(102, 168);
+            this.m_oScrapFightersButton.Name = "m_oScrapFightersButton";
+            this.m_oScrapFightersButton.Size = new System.Drawing.Size(85, 23);
+            this.m_oScrapFightersButton.TabIndex = 7;
+            this.m_oScrapFightersButton.Text = "Scrap Fighters";
+            this.m_oScrapFightersButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPlanetMissileGroupBox
+            // 
+            this.m_oPlanetMissileGroupBox.Controls.Add(this.m_oMissileStockListBox);
+            this.m_oPlanetMissileGroupBox.Controls.Add(this.m_oScrapMissilesButton);
+            this.m_oPlanetMissileGroupBox.Location = new System.Drawing.Point(321, 26);
+            this.m_oPlanetMissileGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oPlanetMissileGroupBox.Name = "m_oPlanetMissileGroupBox";
+            this.m_oPlanetMissileGroupBox.Size = new System.Drawing.Size(282, 197);
+            this.m_oPlanetMissileGroupBox.TabIndex = 1;
+            this.m_oPlanetMissileGroupBox.TabStop = false;
+            this.m_oPlanetMissileGroupBox.Text = "Planetary Missile Stockpile";
+            // 
+            // m_oMissileStockListBox
+            // 
+            this.m_oMissileStockListBox.FormattingEnabled = true;
+            this.m_oMissileStockListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oMissileStockListBox.Name = "m_oMissileStockListBox";
+            this.m_oMissileStockListBox.Size = new System.Drawing.Size(270, 147);
+            this.m_oMissileStockListBox.TabIndex = 10;
+            // 
+            // m_oScrapMissilesButton
+            // 
+            this.m_oScrapMissilesButton.Location = new System.Drawing.Point(96, 168);
+            this.m_oScrapMissilesButton.Name = "m_oScrapMissilesButton";
+            this.m_oScrapMissilesButton.Size = new System.Drawing.Size(85, 23);
+            this.m_oScrapMissilesButton.TabIndex = 9;
+            this.m_oScrapMissilesButton.Text = "Scrap Missiles";
+            this.m_oScrapMissilesButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPlanetPDCGroupBox
+            // 
+            this.m_oPlanetPDCGroupBox.Controls.Add(this.m_oPDCListBox);
+            this.m_oPlanetPDCGroupBox.Location = new System.Drawing.Point(13, 244);
+            this.m_oPlanetPDCGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oPlanetPDCGroupBox.Name = "m_oPlanetPDCGroupBox";
+            this.m_oPlanetPDCGroupBox.Size = new System.Drawing.Size(282, 197);
+            this.m_oPlanetPDCGroupBox.TabIndex = 1;
+            this.m_oPlanetPDCGroupBox.TabStop = false;
+            this.m_oPlanetPDCGroupBox.Text = "Prefabricated PDC Components";
+            // 
+            // m_oPDCListBox
+            // 
+            this.m_oPDCListBox.FormattingEnabled = true;
+            this.m_oPDCListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oPDCListBox.Name = "m_oPDCListBox";
+            this.m_oPDCListBox.Size = new System.Drawing.Size(270, 173);
+            this.m_oPDCListBox.TabIndex = 11;
+            // 
+            // m_oShipComponentGroupBox
+            // 
+            this.m_oShipComponentGroupBox.Controls.Add(this.m_oShipCompListBox);
+            this.m_oShipComponentGroupBox.Controls.Add(this.m_oDisassembleCompButton);
+            this.m_oShipComponentGroupBox.Controls.Add(this.m_oScrapCompButton);
+            this.m_oShipComponentGroupBox.Location = new System.Drawing.Point(13, 26);
+            this.m_oShipComponentGroupBox.Margin = new System.Windows.Forms.Padding(10);
+            this.m_oShipComponentGroupBox.Name = "m_oShipComponentGroupBox";
+            this.m_oShipComponentGroupBox.Size = new System.Drawing.Size(282, 197);
+            this.m_oShipComponentGroupBox.TabIndex = 0;
+            this.m_oShipComponentGroupBox.TabStop = false;
+            this.m_oShipComponentGroupBox.Text = "Ship Component Stockpile";
+            // 
+            // m_oShipCompListBox
+            // 
+            this.m_oShipCompListBox.FormattingEnabled = true;
+            this.m_oShipCompListBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oShipCompListBox.Name = "m_oShipCompListBox";
+            this.m_oShipCompListBox.Size = new System.Drawing.Size(270, 147);
+            this.m_oShipCompListBox.TabIndex = 9;
+            // 
+            // m_oDisassembleCompButton
+            // 
+            this.m_oDisassembleCompButton.Location = new System.Drawing.Point(191, 168);
+            this.m_oDisassembleCompButton.Name = "m_oDisassembleCompButton";
+            this.m_oDisassembleCompButton.Size = new System.Drawing.Size(85, 23);
+            this.m_oDisassembleCompButton.TabIndex = 8;
+            this.m_oDisassembleCompButton.Text = "Disassemble";
+            this.m_oDisassembleCompButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oScrapCompButton
+            // 
+            this.m_oScrapCompButton.Location = new System.Drawing.Point(6, 168);
+            this.m_oScrapCompButton.Name = "m_oScrapCompButton";
+            this.m_oScrapCompButton.Size = new System.Drawing.Size(85, 23);
+            this.m_oScrapCompButton.TabIndex = 6;
+            this.m_oScrapCompButton.Text = "Scrap";
+            this.m_oScrapCompButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oConstructionOptionsGroupBox
+            // 
+            this.m_oConstructionOptionsGroupBox.Controls.Add(this.m_oInstallationGroupBox);
+            this.m_oConstructionOptionsGroupBox.Controls.Add(this.m_oInstallationTypeComboBox);
+            this.m_oConstructionOptionsGroupBox.Controls.Add(this.m_oInstallationCostListBox);
+            this.m_oConstructionOptionsGroupBox.Location = new System.Drawing.Point(6, 55);
+            this.m_oConstructionOptionsGroupBox.Name = "m_oConstructionOptionsGroupBox";
+            this.m_oConstructionOptionsGroupBox.Size = new System.Drawing.Size(203, 629);
+            this.m_oConstructionOptionsGroupBox.TabIndex = 0;
+            this.m_oConstructionOptionsGroupBox.TabStop = false;
+            this.m_oConstructionOptionsGroupBox.Text = "Construction Options";
+            // 
+            // m_oInstallationTypeComboBox
+            // 
+            this.m_oInstallationTypeComboBox.FormattingEnabled = true;
+            this.m_oInstallationTypeComboBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oInstallationTypeComboBox.Name = "m_oInstallationTypeComboBox";
+            this.m_oInstallationTypeComboBox.Size = new System.Drawing.Size(191, 21);
+            this.m_oInstallationTypeComboBox.TabIndex = 26;
+            // 
+            // m_oInstallationCostListBox
+            // 
+            this.m_oInstallationCostListBox.FormattingEnabled = true;
+            this.m_oInstallationCostListBox.Location = new System.Drawing.Point(6, 476);
+            this.m_oInstallationCostListBox.Name = "m_oInstallationCostListBox";
+            this.m_oInstallationCostListBox.Size = new System.Drawing.Size(191, 147);
+            this.m_oInstallationCostListBox.TabIndex = 11;
             // 
             // m_oMiningTab
             // 
@@ -674,6 +1158,14 @@ namespace Pulsar4X.UI.Panels
             this.m_oWealthTab.Text = "Wealth / Trade";
             this.m_oWealthTab.UseVisualStyleBackColor = true;
             // 
+            // m_oInstallationGroupBox
+            // 
+            this.m_oInstallationGroupBox.Location = new System.Drawing.Point(7, 45);
+            this.m_oInstallationGroupBox.Name = "m_oInstallationGroupBox";
+            this.m_oInstallationGroupBox.Size = new System.Drawing.Size(190, 425);
+            this.m_oInstallationGroupBox.TabIndex = 27;
+            this.m_oInstallationGroupBox.TabStop = false;
+            // 
             // Eco_Summary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -695,6 +1187,18 @@ namespace Pulsar4X.UI.Panels
             this.tabControl1.ResumeLayout(false);
             this.m_oSummaryTab.ResumeLayout(false);
             this.m_oSummaryTab.PerformLayout();
+            this.m_oIndustryTab.ResumeLayout(false);
+            this.m_oIndustryTab.PerformLayout();
+            this.m_oFuelProductionGroupBox.ResumeLayout(false);
+            this.m_oFuelProductionGroupBox.PerformLayout();
+            this.m_oIndustrialProjectGroupBox.ResumeLayout(false);
+            this.m_oIndustrialProjectGroupBox.PerformLayout();
+            this.m_oIndustrialAllocationGroupBox.ResumeLayout(false);
+            this.m_oPlanetFighterGroupBox.ResumeLayout(false);
+            this.m_oPlanetMissileGroupBox.ResumeLayout(false);
+            this.m_oPlanetPDCGroupBox.ResumeLayout(false);
+            this.m_oShipComponentGroupBox.ResumeLayout(false);
+            this.m_oConstructionOptionsGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -750,5 +1254,46 @@ namespace Pulsar4X.UI.Panels
         private System.Windows.Forms.TabPage m_oGUTab;
         private System.Windows.Forms.TabPage m_oGUTrainingTab;
         private System.Windows.Forms.TabPage m_oWealthTab;
+        private GroupBox m_oFuelProductionGroupBox;
+        private GroupBox m_oIndustrialProjectGroupBox;
+        private GroupBox m_oIndustrialAllocationGroupBox;
+        private GroupBox m_oConstructionOptionsGroupBox;
+        private Button m_oStockpileButton;
+        private Label m_oFighterLabel;
+        private Label m_oOrdnanceLabel;
+        private Label m_oConstructionLabel;
+        private GroupBox m_oPlanetFighterGroupBox;
+        private GroupBox m_oPlanetMissileGroupBox;
+        private GroupBox m_oPlanetPDCGroupBox;
+        private GroupBox m_oShipComponentGroupBox;
+        private Button m_oScrapFightersButton;
+        private Button m_oScrapMissilesButton;
+        private Button m_oDisassembleCompButton;
+        private Button m_oScrapCompButton;
+        private Label m_oFuelReservesLabel;
+        private Label m_oFuelProductionlabel;
+        private Label m_oRefineriesLabel;
+        private Button m_oStartFuelButton;
+        private Button m_oStopFuelButton;
+        private Button m_oSMAddButton;
+        private Button m_oPauseButton;
+        private Button m_oCancelButton;
+        private Button m_oModifyButton;
+        private Button m_oCreateButton;
+        private ListBox m_oFighterListBox;
+        private ListBox m_oMissileStockListBox;
+        private ListBox m_oPDCListBox;
+        private ListBox m_oShipCompListBox;
+        private Button m_oPriorityDownButton;
+        private Button m_oPriorityUpButton;
+        private TextBox m_oItemNumberTextBox;
+        private TextBox m_oItemPercentTextBox;
+        private Label m_oNewFightersLabel;
+        private Label m_oPercentageLabel;
+        private Label m_oItemNumberLabel;
+        private ComboBox m_oNewFighterTaskGroupComboBox;
+        private ComboBox m_oInstallationTypeComboBox;
+        private ListBox m_oInstallationCostListBox;
+        private GroupBox m_oInstallationGroupBox;
     }
 }

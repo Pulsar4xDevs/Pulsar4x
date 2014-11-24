@@ -71,5 +71,23 @@ namespace Pulsar4X.UI
 
         }
 
+        public static class EconomicsPage
+        {
+            public enum ConstructionID
+            {
+                Installations,
+                Missiles,
+                Fighters,
+                ShipComponents,
+                BuildPDCOrbitalHabitat,
+                PrefabPDC,
+                AssemblePDC,
+                RefitPDC,
+                MaintenanceSupplies,
+                Count
+            }
+            public static String[] ConstructionTypes = { "Installations", "Missiles", "Fighters", "Ship Components", "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };
+        }
+
     }
 }

@@ -6,11 +6,40 @@ using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
 #endif
+
+/*
+m_oIndustrialProjectGroupBox
+m_oIndustrialAllocationGroupBox
+m_oStockpileButton
+m_oConstructionLabel
+m_oOrdnanceLabel
+m_oFighterLabel
+m_oRefineriesLabel
+m_oFuelProductionLabel
+m_oFuelReservesLabel
+m_oShipCompListBox
+m_oMissileStockListBox
+m_oFighterListBox
+m_oPDCListBox
+m_oCreateButton
+m_oModifyButton
+m_oCancelButton
+m_oPauseButton
+m_oSMAddButton
+ * m_oPriorityUpButton
+ * m_oPriorityDownButton
+ * m_oItemNumberTextBox
+m_oItemPercentTextBox
+m_oNewFighterTaskGroupComboBox
+ * m_oInstallationCostListBox
+m_oInstallationTypeComboBox
+*/
 
 namespace Pulsar4X.UI.Handlers
 {
@@ -81,6 +110,11 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         public Pulsar4X.UI.Handlers.SystemMap SystemMapReference { get; set; }
 
+        /// <summary>
+        /// If the row goes beyond this something needs to be done.
+        /// </summary>
+        private const int MaxRows = 50;
+
         public Economics()
         {
             //Create the summary panel.
@@ -133,8 +167,22 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.SummaryDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
             m_oSummaryPanel.SummaryDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.SummaryDataGrid.AutoGenerateColumns = false;
+            m_oSummaryPanel.BuildDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            m_oSummaryPanel.BuildDataGrid.RowHeadersVisible = false;
+            m_oSummaryPanel.BuildDataGrid.AutoGenerateColumns = false;
+            m_oSummaryPanel.ConstructionDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            m_oSummaryPanel.ConstructionDataGrid.RowHeadersVisible = false;
+            m_oSummaryPanel.ConstructionDataGrid.AutoGenerateColumns = false;
             SetupSummaryDataGrid();
             RefreshSummaryCells();
+
+            #region Industrial Tab
+            m_oSummaryPanel.StockpileButton.Click += new EventHandler(StockpileButton_Click);
+            StockpileButton_Click(null, null);
+
+            m_oSummaryPanel.InstallationTypeComboBox.SelectedIndexChanged +=new EventHandler(InstallationTypeComboBox_SelectedIndexChanged);
+            BuildConstructionComboBox();
+            #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
             RefreshPanels();
@@ -180,6 +228,16 @@ namespace Pulsar4X.UI.Handlers
         private void FactionComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             RefreshPanels();
+        }
+
+        /// <summary>
+        /// if a new category of items to build is selected update that.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void InstallationTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            RefreshIndustryTab();
         }
 
         /// <summary>
@@ -360,6 +418,29 @@ namespace Pulsar4X.UI.Handlers
         }
         #endregion
 
+        #region IndustrialTab
+        private void StockpileButton_Click(object sender, EventArgs e)
+        {
+            if(m_oSummaryPanel.ConstructionDataGrid.Visible == false)
+            {
+                m_oSummaryPanel.ConstructionDataGrid.Visible = true;
+                m_oSummaryPanel.ShipComponentGroupBox.Visible = false;
+                m_oSummaryPanel.PlanetMissileGroupBox.Visible = false;
+                m_oSummaryPanel.PlanetPDCGroupBox.Visible = false;
+                m_oSummaryPanel.PlanetFighterGroupBox.Visible = false;
+            }
+            else
+            {
+                m_oSummaryPanel.ConstructionDataGrid.Visible = false;
+                m_oSummaryPanel.ShipComponentGroupBox.Visible = true;
+                m_oSummaryPanel.PlanetMissileGroupBox.Visible = true;
+                m_oSummaryPanel.PlanetPDCGroupBox.Visible = true;
+                m_oSummaryPanel.PlanetFighterGroupBox.Visible = true;
+            }
+
+        }
+        #endregion
+
 
         /// <summary>
         /// Refresh all the various panels that make up this display.
@@ -368,13 +449,52 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_oCurrnetFaction != null)
             {
+                /// <summary>
+                /// reset the construction type combo box selection to 0.
+                /// </summary>
+                if(m_oSummaryPanel.InstallationTypeComboBox.Items.Count != 0)
+                    m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex = 0;
+
+
+                /// <summary>
+                /// Build the population lists.
+                /// </summary>
                 BuildTreeView();
 
+                /// <summary>
+                /// Summary Tab:
+                /// </summary>
                 RefreshSummaryCells();
+
+                /// <summary>
+                /// Industry Tab:
+                /// </summary>
+                RefreshIndustryTab();
             }
         }
 
+        /// <summary>
+        /// Just a space saver here to avoid copy pasting a lot. this is copied from taskgroup
+        /// </summary>
+        /// <param name="Header">Text of column header.</param>
+        /// <param name="newPadding">Padding in use, not sure what this is or why its necessary. Cargo culting it is.</param>
+        private void AddColumn(String Header, Padding newPadding, DataGridView TheDataGrid)
+        {
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.HeaderText = Header;
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                col.DefaultCellStyle.Padding = newPadding;
 
+                if (col != null)
+                {
+                    TheDataGrid.Columns.Add(col);
+                }
+            }
+        }
+
+#region General F2 page
         /// <summary>
         /// Build the tree view box of populations.
         /// </summary>
@@ -654,6 +774,7 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             m_oSummaryPanel.PopulationTreeView.Nodes[0].ExpandAll();
         }
+#endregion
 
 #region Industrial Summary
         private void SetupSummaryDataGrid()
@@ -662,50 +783,20 @@ namespace Pulsar4X.UI.Handlers
             {
                 // Add coloums:
                 Padding newPadding = new Padding(2, 0, 2, 0);
-                using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-                {
-                    col.HeaderText = "Item";
-                    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                    col.DefaultCellStyle.Padding = newPadding;
-                    if (col != null)
-                    {
-                        m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
-                    }
-                }
-                using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-                {
-                    col.HeaderText = "Amount";
-                    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                    col.DefaultCellStyle.Padding = newPadding;
-                    if (col != null)
-                    {
-                        m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
-                    }
-                }
-                using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-                {
-                    col.HeaderText = "Installation";
-                    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
-                    col.DefaultCellStyle.Padding = newPadding;
-                    if (col != null)
-                    {
-                        m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
-                    }
-                }
-                using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-                {
-                    col.HeaderText = "Number or Level";
-                    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
-                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                    col.DefaultCellStyle.Padding = newPadding;
-                    if (col != null)
-                    {
-                        m_oSummaryPanel.SummaryDataGrid.Columns.Add(col);
-                    }
-                }
+                AddColumn("Item", newPadding, m_oSummaryPanel.SummaryDataGrid);
+                AddColumn("Amount", newPadding, m_oSummaryPanel.SummaryDataGrid);
+                AddColumn("Installation", newPadding, m_oSummaryPanel.SummaryDataGrid);
+                AddColumn("Number or Level", newPadding, m_oSummaryPanel.SummaryDataGrid);
+
+                AddColumn("Item", newPadding, m_oSummaryPanel.BuildDataGrid);
+
+                AddColumn("Project", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("Amount Remaining", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("% of Capacity", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("Production Rate", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("Cost Per Item", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("Estimated Completion Date", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("Pause / Queue", newPadding, m_oSummaryPanel.ConstructionDataGrid);
 
                 // Add Rows:
                 for (int i = 0; i < 38; ++i)
@@ -715,6 +806,23 @@ namespace Pulsar4X.UI.Handlers
                         // setup row height. note that by default they are 22 pixels in height!
                         row.Height = 18;
                         m_oSummaryPanel.SummaryDataGrid.Rows.Add(row);
+                    }
+                }
+
+                for (int RowIterator = 0; RowIterator < 50; RowIterator++)
+                {
+                    using (DataGridViewRow row = new DataGridViewRow())
+                    {
+                        // setup row height. note that by default they are 22 pixels in height!
+                        row.Height = 16;
+                        m_oSummaryPanel.BuildDataGrid.Rows.Add(row);
+                    }
+
+                    using (DataGridViewRow row = new DataGridViewRow())
+                    {
+                        // setup row height. note that by default they are 22 pixels in height!
+                        row.Height = 16;
+                        m_oSummaryPanel.ConstructionDataGrid.Rows.Add(row);
                     }
                 }
 
@@ -1456,6 +1564,84 @@ namespace Pulsar4X.UI.Handlers
 #if LOG4NET_ENABLED
                 logger.Error("Something whent wrong Refreshing Cells for Economics summary screen...");
 #endif
+            }
+        }
+        #endregion
+
+        #region Industrial Tab
+        /// <summary>
+        /// Puts all the strings in the Installation combo box.
+        /// </summary>
+        private void BuildConstructionComboBox()
+        {
+
+            m_oSummaryPanel.InstallationTypeComboBox.Items.Clear();
+            foreach (String Const in UIConstants.EconomicsPage.ConstructionTypes)
+            {
+                m_oSummaryPanel.InstallationTypeComboBox.Items.Add(Const);
+            }
+
+            m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex = 0;
+            
+        }
+
+#warning PDC/fighter stuff not done for industrial tab
+        /// <summary>
+        /// Refresh industrial tab updates the display for the various industrial tab items.
+        /// </summary>
+        private void RefreshIndustryTab()
+        {
+            if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex != -1)
+            {
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Installation")
+                {
+
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Missiles)
+                {
+                    int row = 0;
+                    foreach (OrdnanceDefTN Missile in CurrentFaction.ComponentList.MissileDef)
+                    {
+                        if (row < MaxRows)
+                        {
+                            m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Missile.Name;
+                            row++;
+
+                        }
+                        else
+                        {
+                            // make new rows and add items.
+                        }
+                    }
+                }
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Fighters")
+                {
+
+                }
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Ship Components")
+                {
+
+                }
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Build PDC / Orbital Habitat")
+                {
+
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Prefab PDC")
+                {
+
+                }
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Assemble PDC")
+                {
+
+                }
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Refit PDC")
+                {
+
+                }
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Maintenance Supplies")
+                {
+
+                }
             }
         }
         #endregion
