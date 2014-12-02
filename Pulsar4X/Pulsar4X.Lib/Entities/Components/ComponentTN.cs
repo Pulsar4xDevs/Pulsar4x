@@ -12,6 +12,7 @@ namespace Pulsar4X.Entities.Components
     /// in Shipclass.cs add the Add_Component() function, and update the class summary.
     /// when adding components in general do the declarations, at them to shipclass, add them to ship, work out their mechanics and place those appropriately.
     /// In Class Design.cs, and Components.cs any new components need to be filled in for just about every component type switch(lots of them). also BuildDesignTab and GetListBoxComponent
+    /// In Economics.cs new components need to be handled for the build components list.
     /// </summary>
     public enum ComponentTypeTN
     {

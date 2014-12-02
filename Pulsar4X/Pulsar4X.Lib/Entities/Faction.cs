@@ -826,6 +826,7 @@ namespace Pulsar4X.Entities
             SmallEngineeringSection,
             FlagBridge,
             FuelStorage,
+            ImprovedCommandAndControl,
             MaintModule,
             OrbHabitat,
             RecModule,

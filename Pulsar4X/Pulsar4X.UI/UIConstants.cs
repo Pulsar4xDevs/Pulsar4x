@@ -78,7 +78,12 @@ namespace Pulsar4X.UI
                 Installations,
                 Missiles,
                 Fighters,
-                ShipComponents,
+                BasicComponents,
+                ElectronicShieldComponents,
+                EngineComponents,
+                SensorsFCComponents,
+                TransportIndustryComponents,
+                WeaponsSupportComponents,
                 BuildPDCOrbitalHabitat,
                 PrefabPDC,
                 AssemblePDC,
@@ -86,7 +91,9 @@ namespace Pulsar4X.UI
                 MaintenanceSupplies,
                 Count
             }
-            public static String[] ConstructionTypes = { "Installations", "Missiles", "Fighters", "Ship Components", "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };
+            public static String[] ConstructionTypes = { "Installations", "Missiles", "Fighters", "Basic Components", "Electronic / Shield Components", "Engine Components", 
+                                                         "Sensor / Fire Control Components", "Transport / Industry Components", "Weapon / Support Components", 
+                                                         "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };
         }
 
     }

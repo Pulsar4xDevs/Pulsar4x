@@ -113,7 +113,7 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// If the row goes beyond this something needs to be done.
         /// </summary>
-        private const int MaxRows = 50;
+        private int BuildTabMaxRows = 50;
 
         public Economics()
         {
@@ -809,19 +809,19 @@ namespace Pulsar4X.UI.Handlers
                     }
                 }
 
-                for (int RowIterator = 0; RowIterator < 50; RowIterator++)
+                for (int RowIterator = 0; RowIterator < BuildTabMaxRows; RowIterator++)
                 {
                     using (DataGridViewRow row = new DataGridViewRow())
                     {
                         // setup row height. note that by default they are 22 pixels in height!
-                        row.Height = 16;
+                        row.Height = 17;
                         m_oSummaryPanel.BuildDataGrid.Rows.Add(row);
                     }
 
                     using (DataGridViewRow row = new DataGridViewRow())
                     {
                         // setup row height. note that by default they are 22 pixels in height!
-                        row.Height = 16;
+                        row.Height = 17;
                         m_oSummaryPanel.ConstructionDataGrid.Rows.Add(row);
                     }
                 }
@@ -1582,10 +1582,15 @@ namespace Pulsar4X.UI.Handlers
             }
 
             m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex = 0;
+
+            int row = 0;
+            for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+            {
+                m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+            }
             
         }
 
-#warning PDC/fighter stuff not done for industrial tab
         /// <summary>
         /// Refresh industrial tab updates the display for the various industrial tab items.
         /// </summary>
@@ -1593,54 +1598,709 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex != -1)
             {
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Installation")
+                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Installations)
                 {
+                    int row = 0;
+                    foreach (Installation Install in CurrentFaction.InstallationTypes)
+                    {
+                        if (Install.IsBuildable(CurrentFaction, CurrentPopulation) == true)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Install.Name;
+                                row++;
 
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Install.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                        
+                    }
+
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
                 }
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Missiles)
                 {
                     int row = 0;
                     foreach (OrdnanceDefTN Missile in CurrentFaction.ComponentList.MissileDef)
                     {
-                        if (row < MaxRows)
+                        if (Missile.isObsolete == false)
                         {
-                            m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Missile.Name;
-                            row++;
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Missile.Name;
+                                row++;
 
-                        }
-                        else
-                        {
-                            // make new rows and add items.
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Missile.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
                         }
                     }
-                }
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Fighters")
-                {
 
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
                 }
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Ship Components")
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Fighters)
                 {
-
+                    int row = 0;
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+#warning do fighter list here.
                 }
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Build PDC / Orbital Habitat")
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BasicComponents)
                 {
+                    int row = 0;
+                    foreach (GeneralComponentDefTN Crew in CurrentFaction.ComponentList.CrewQuarters)
+                    {
+                        if (Crew.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Crew.Name;
+                                row++;
 
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Crew.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (GeneralComponentDefTN Fuel in CurrentFaction.ComponentList.FuelStorage)
+                    {
+                        if (Fuel.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Fuel.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Fuel.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (GeneralComponentDefTN EBay in CurrentFaction.ComponentList.EngineeringSpaces)
+                    {
+                        if (EBay.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = EBay.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = EBay.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (GeneralComponentDefTN Other in CurrentFaction.ComponentList.OtherComponents)
+                    {
+                        if (Other.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Other.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Other.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
                 }
-                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Prefab PDC")
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.ElectronicShieldComponents)
                 {
+                    int row = 0;
+                    foreach (ShieldDefTN Shield in CurrentFaction.ComponentList.ShieldDef)
+                    {
+                        if (Shield.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Shield.Name;
+                                row++;
 
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Shield.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
                 }
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Assemble PDC")
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.EngineComponents)
                 {
+                    int row = 0;
 
+                    /// <summary>
+                    /// loop through each engine.
+                    /// </summary>
+                    foreach (EngineDefTN Engine in CurrentFaction.ComponentList.Engines)
+                    {
+                        /// <summary>
+                        /// Don't display obsolete engines.
+                        /// </summary>
+                        if (Engine.isObsolete == false)
+                        {
+                            /// <summary>
+                            /// if current row is less than the current max row count set the row to visible and put the name of the engine component into the cell.
+                            /// </summary>
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Engine.Name;
+                                row++;
+
+                            }
+                            /// <summary>
+                            /// add a new row, and increment the current max row count.
+                            /// </summary>
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Engine.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    /// <summary>
+                    /// set all other rows to not visible
+                    /// </summary>
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
                 }
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Refit PDC")
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.SensorsFCComponents)
                 {
+                    int row = 0;
+                    foreach (PassiveSensorDefTN Passive in CurrentFaction.ComponentList.PassiveSensorDef)
+                    {
+                        if (Passive.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Passive.Name;
+                                row++;
 
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Passive.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (ActiveSensorDefTN Active in CurrentFaction.ComponentList.ActiveSensorDef)
+                    {
+                        if (Active.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Active.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Active.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (BeamFireControlDefTN BFC in CurrentFaction.ComponentList.BeamFireControlDef)
+                    {
+                        if (BFC.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = BFC.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = BFC.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (ActiveSensorDefTN MFC in CurrentFaction.ComponentList.MissileFireControlDef)
+                    {
+                        if (MFC.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = MFC.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = MFC.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
                 }
-                if (m_oSummaryPanel.InstallationTypeComboBox.SelectedText == "Maintenance Supplies")
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.TransportIndustryComponents)
                 {
+                    int row = 0;
+                    foreach (CargoDefTN Hold in CurrentFaction.ComponentList.CargoHoldDef)
+                    {
+                        if (Hold.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Hold.Name;
+                                row++;
 
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Hold.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (ColonyDefTN Bay in CurrentFaction.ComponentList.ColonyBayDef)
+                    {
+                        if (Bay.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Bay.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Bay.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (CargoHandlingDefTN CHS in CurrentFaction.ComponentList.CargoHandleSystemDef)
+                    {
+                        if (CHS.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CHS.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CHS.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.WeaponsSupportComponents)
+                {
+                    int row = 0;
+                    foreach (BeamDefTN Beam in CurrentFaction.ComponentList.BeamWeaponDef)
+                    {
+                        if (Beam.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Beam.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Beam.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (TurretDefTN Turret in CurrentFaction.ComponentList.TurretDef)
+                    {
+                        if (Turret.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Turret.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Turret.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (CIWSDefTN CIWS in CurrentFaction.ComponentList.CIWSDef)
+                    {
+                        if (CIWS.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CIWS.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CIWS.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (MissileLauncherDefTN Tube in CurrentFaction.ComponentList.MLauncherDef)
+                    {
+                        if (Tube.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Tube.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Tube.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (ReactorDefTN Reactor in CurrentFaction.ComponentList.ReactorDef)
+                    {
+                        if (Reactor.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Reactor.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Reactor.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    foreach (MagazineDefTN Mag in CurrentFaction.ComponentList.MagazineDef)
+                    {
+                        if (Mag.isObsolete == false)
+                        {
+                            if (row < BuildTabMaxRows)
+                            {
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Mag.Name;
+                                row++;
+
+                            }
+                            else
+                            {
+                                using (DataGridViewRow Row = new DataGridViewRow())
+                                {
+                                    // setup row height. note that by default they are 22 pixels in height!
+                                    Row.Height = 17;
+                                    m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                                }// make new rows and add items.
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Mag.Name;
+                                row++;
+                                BuildTabMaxRows++;
+                            }
+                        }
+                    }
+
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BuildPDCOrbitalHabitat)
+                {
+                    int row = 0;
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+#warning do Industrial PDC orbhab build here
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.PrefabPDC)
+                {
+                    int row = 0;
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+#warning do Industrial PDC Prefab here
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.AssemblePDC)
+                {
+                    int row = 0;
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+#warning do Industrial PDC assembly here
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.RefitPDC)
+                {
+                    int row = 0;
+                    for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+#warning do Industrial PDC refit here
+                }
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.MaintenanceSupplies)
+                {
+                    m_oSummaryPanel.BuildDataGrid.Rows[0].Visible = true;
+                    m_oSummaryPanel.BuildDataGrid.Rows[0].Cells[0].Value = "Maintenance Supplies";
+
+                    for (int RowIterator = 1; RowIterator < BuildTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
+                    }
+                    
                 }
             }
         }
