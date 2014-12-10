@@ -1211,6 +1211,12 @@ namespace Pulsar4X.Entities
                             if (GameState.SE.FleetInterceptionPreemptTick != YearTickValue && System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
                             {
                                 /// <summary>
+                                /// player created empty taskgroups should not get checked here.
+                                /// </summary>
+                                if (System.SystemContactList[loop2].TaskGroup.Ships.Count == 0)
+                                    continue;
+
+                                /// <summary>
                                 /// how far could this TG travel within a single day?
                                 /// </summary>
                                 float TaskGroupDistance = (TaskGroups[loop].CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;

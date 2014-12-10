@@ -126,8 +126,12 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Dictionary of interesting locations for the SystemLocationList
         /// </summary>
-        private Dictionary<string, SystemListObject> SystemLocationDict { get; set; }
+        private Dictionary<Guid, SystemListObject> SystemLocationDict { get; set; }
 
+        /// <summary>
+        /// strings aren't unique unfortunately so I need to use Guid, but Guid does not translate into the display very well.
+        /// </summary>
+        private Dictionary<Guid, string> SystemLocationGuidDict { get; set; }
         
         /// <summary>
         /// PlottedMovesListbox orders vars. 
@@ -143,6 +147,12 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oTaskGroupPanel = new Panels.TaskGroup_Panel();
             m_oRenameTaskGroupPanel = new Panels.ClassDes_RenameClass();
+
+            /// <summary>
+            /// create the location dictionary
+            /// </summary>
+            SystemLocationDict = new Dictionary<Guid, SystemListObject>();
+            SystemLocationGuidDict = new Dictionary<Guid, string>();
 
             /// <summary>
             /// setup viewmodel:
@@ -438,8 +448,7 @@ namespace Pulsar4X.UI.Handlers
             /// Planets, Contacts, TG, WP
             /// </summary>
             int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
-            SystemListObject selected = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()];
-            
+
             Orders NewOrder = null;
 
             /// <summary>
@@ -447,6 +456,10 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             if (PlaceIndex != -1)
             {
+                List<Guid> GID = SystemLocationGuidDict.Keys.ToList();
+                SystemListObject selected = SystemLocationDict[GID[PlaceIndex]];
+
+
                 int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
                 
                 /// <summary>
@@ -731,7 +744,8 @@ namespace Pulsar4X.UI.Handlers
         {
             //m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
 
-            SystemLocationDict = new Dictionary<string, SystemListObject>();
+            SystemLocationDict.Clear();
+            SystemLocationGuidDict.Clear();
             AddPlanetsToList();
 
             if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
@@ -743,7 +757,7 @@ namespace Pulsar4X.UI.Handlers
             if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
                 AddWaypointsToList();
 
-            m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationDict.Keys.ToList();
+            m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
 
         /// <summary>
@@ -779,8 +793,16 @@ namespace Pulsar4X.UI.Handlers
         {
             var currentSelectedAction = m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem;
             ClearActionList();
-            GameEntity selectedEntity = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].Entity;
-            SystemListObject.ListEntityType entityType = SystemLocationDict[m_oTaskGroupPanel.SystemLocationsListBox.SelectedItem.ToString()].EntityType;
+
+            List<Guid> GID = SystemLocationGuidDict.Keys.ToList();
+
+            if (m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex == -1)
+                return;
+
+
+            GameEntity selectedEntity = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].Entity;
+            SystemListObject.ListEntityType entityType = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].EntityType;
+
             List<Orders> previousOrders = new List<Orders>();
             int olistindex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
@@ -878,7 +900,8 @@ namespace Pulsar4X.UI.Handlers
                     GameEntity entObj = CurrentTaskGroup.Contact.CurrentSystem.Stars[loop].Planets[loop2];
                     SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
                     SystemListObject valueObj = new SystemListObject(entType, entObj);
-                    SystemLocationDict.Add(keyName, valueObj);
+                    SystemLocationGuidDict.Add(entObj.Id, keyName);
+                    SystemLocationDict.Add(entObj.Id, valueObj);
                 }
             }
         }
@@ -914,7 +937,10 @@ namespace Pulsar4X.UI.Handlers
                     String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
 
                     //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
-                    SystemLocationDict.Add(Entry, new SystemListObject(SystemListObject.ListEntityType.Contacts, pair.Key)); //maybe this should be the value? though with the key I can *get* the value easly anyway.
+                    SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Contacts;
+                    SystemListObject valueObj = new SystemListObject(entType, pair.Key); //maybe this should be the value? though with the key I can *get* the value easly anyway.
+                    SystemLocationGuidDict.Add(pair.Key.Id, Entry);
+                    SystemLocationDict.Add(pair.Key.Id, valueObj); 
                 }
             }
         }
@@ -935,7 +961,9 @@ namespace Pulsar4X.UI.Handlers
                         //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup);
                         string keyName = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup.Name;
                         GameEntity entObj = CurrentTaskGroup.Contact.CurrentSystem.SystemContactList[loop].TaskGroup;
-                        SystemLocationDict.Add(keyName, new SystemListObject(SystemListObject.ListEntityType.TaskGroups, entObj));
+                        SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.TaskGroups, entObj);
+                        SystemLocationGuidDict.Add(entObj.Id, keyName);
+                        SystemLocationDict.Add(entObj.Id, valueObj);
                     }
                 }
             }
@@ -953,7 +981,10 @@ namespace Pulsar4X.UI.Handlers
                 {    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop]);
                     string keyName = CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop].Name;
                     GameEntity entObj = CurrentTaskGroup.Contact.CurrentSystem.Waypoints[loop];
-                    SystemLocationDict.Add(keyName, new SystemListObject(SystemListObject.ListEntityType.Waypoints, entObj));
+
+                    SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Waypoints, entObj);
+                    SystemLocationGuidDict.Add(entObj.Id, keyName);
+                    SystemLocationDict.Add(entObj.Id, valueObj);
                 }
             }
         }
@@ -1068,6 +1099,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     double Count = dZ / Constants.Units.MAX_KM_IN_AU;
 
+#warning magic numbers in distance/time calculation for taskgroup
                     double newDistance = Math.Floor(2.147483648 * Count * 100.0);
                     newDistance = newDistance / 100.0;
 

@@ -186,6 +186,11 @@ namespace Pulsar4X.Entities
 
         public Planet(Star primary, OrbitingEntity parent) : base()
         {
+            /// <summary>
+            /// create these or else anything that relies on a unique global id will break.
+            /// </summary>
+            Id = Guid.NewGuid();
+
             Moons = new BindingList<Planet>();
             Gases = new BindingList<Gas>();
             Populations = new BindingList<Population>();

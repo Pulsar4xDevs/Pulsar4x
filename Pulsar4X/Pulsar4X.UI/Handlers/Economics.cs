@@ -46,6 +46,38 @@ namespace Pulsar4X.UI.Handlers
     public class Economics
     {
         /// <summary>
+        /// Lifted directly from the taskgroup code
+        /// </summary>
+        public class BuildListObject
+        {
+            /// <summary>
+            /// type of entity for filtering.
+            /// </summary>
+            public enum ListEntityType
+            {
+                Installation,
+                Component,
+                Missile,
+                Fighter,
+                PDC_Build,
+                PDC_Prefab,
+                PDC_Assemble,
+                PDC_Refit,
+                MaintenanceSupplies,
+                Count
+            }
+
+            public GameEntity Entity { get; private set; }
+            public ListEntityType EntityType { get; private set; }
+
+            public BuildListObject(ListEntityType entityType, GameEntity entity)
+            {
+                Entity = entity;
+                EntityType = entityType;
+            }
+        }
+
+        /// <summary>
         /// Economics Logger:
         /// </summary>
 #if LOG4NET_ENABLED
@@ -115,6 +147,16 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private int BuildTabMaxRows = 50;
 
+        /// <summary>
+        /// Dictionary of buildings and their GUID
+        /// </summary>
+        private Dictionary<Guid, BuildListObject> BuildLocationDict { get; set; }
+
+        /// <summary>
+        /// GUID to displayed string dictionary
+        /// </summary>
+        private Dictionary<Guid, string> BuildLocationDisplayDict { get; set; }
+
         public Economics()
         {
             //Create the summary panel.
@@ -127,6 +169,12 @@ namespace Pulsar4X.UI.Handlers
             /// Create the tree view dictionary obviously.
             /// </summary>
             TreeViewDictionary = new Dictionary<string, Population>();
+
+            /// <summary>
+            /// Create the dictionary for the list of construction orders. lifted straight from the TG code.
+            /// </summary>
+            BuildLocationDict = new Dictionary<Guid, BuildListObject>();
+            BuildLocationDisplayDict = new Dictionary<Guid, string>();
 
             // create Bindings:
             m_oSummaryPanel.FactionComboBox.Bind(c => c.DataSource, VM, d => d.Factions);
@@ -182,6 +230,8 @@ namespace Pulsar4X.UI.Handlers
 
             m_oSummaryPanel.InstallationTypeComboBox.SelectedIndexChanged +=new EventHandler(InstallationTypeComboBox_SelectedIndexChanged);
             BuildConstructionComboBox();
+
+            m_oSummaryPanel.BuildDataGrid.SelectionChanged += new EventHandler(BuildDataGrid_SelectionChanged);
             #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
@@ -419,6 +469,11 @@ namespace Pulsar4X.UI.Handlers
         #endregion
 
         #region IndustrialTab
+        /// <summary>
+        /// Stockpile swap button functionality
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void StockpileButton_Click(object sender, EventArgs e)
         {
             if(m_oSummaryPanel.ConstructionDataGrid.Visible == false)
@@ -438,6 +493,16 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.PlanetFighterGroupBox.Visible = true;
             }
 
+        }
+
+        /// <summary>
+        /// if the user selects a different item in the build list handle this event here.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BuildDataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            BuildCostListBox();
         }
         #endregion
 
@@ -1596,17 +1661,46 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RefreshIndustryTab()
         {
+            /// <summary>
+            /// Clear the dictionary for the build list grid
+            /// </summary>
+            BuildLocationDict.Clear();
+            BuildLocationDisplayDict.Clear();
+
+            /// <summary>
+            /// Check if there is a valid selected index.
+            /// </summary>
             if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex != -1)
             {
+                #region Installations
+                /// <summary>
+                /// Check the selected index against the construction ID for the build grid.
+                /// </summary>
                 if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Installations)
                 {
                     int row = 0;
+                    /// <summary>
+                    /// Loop through every installation.
+                    /// </summary>
                     foreach (Installation Install in CurrentFaction.InstallationTypes)
                     {
+                        /// <summary>
+                        /// can this installation be built?
+                        /// </summary>
                         if (Install.IsBuildable(CurrentFaction, CurrentPopulation) == true)
                         {
+                            /// <summary>
+                            /// do we not need to add a row?
+                            /// </summary>
                             if (row < BuildTabMaxRows)
                             {
+                                /// <summary>
+                                /// add to the build location dictionary and print to the build data grid.
+                                /// </summary>
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Installation,Install);
+                                BuildLocationDisplayDict.Add(Install.Id, Install.Name);
+                                BuildLocationDict.Add(Install.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Install.Name;
                                 row++;
@@ -1614,12 +1708,20 @@ namespace Pulsar4X.UI.Handlers
                             }
                             else
                             {
+                                /// <summary>
+                                /// create a row.
+                                /// </summary>
                                 using (DataGridViewRow Row = new DataGridViewRow())
                                 {
                                     // setup row height. note that by default they are 22 pixels in height!
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Installation, Install);
+                                BuildLocationDisplayDict.Add(Install.Id, Install.Name);
+                                BuildLocationDict.Add(Install.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Install.Name;
                                 row++;
@@ -1629,11 +1731,16 @@ namespace Pulsar4X.UI.Handlers
                         
                     }
 
+                    /// <summary>
+                    /// Set all unused rows to not visible.
+                    /// </summary>
                     for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
                     {
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Missiles
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Missiles)
                 {
                     int row = 0;
@@ -1643,6 +1750,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Missile, Missile);
+                                BuildLocationDisplayDict.Add(Missile.Id, Missile.Name);
+                                BuildLocationDict.Add(Missile.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Missile.Name;
                                 row++;
@@ -1656,6 +1767,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Missile, Missile);
+                                BuildLocationDisplayDict.Add(Missile.Id, Missile.Name);
+                                BuildLocationDict.Add(Missile.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Missile.Name;
                                 row++;
@@ -1669,6 +1785,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Fighters
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.Fighters)
                 {
                     int row = 0;
@@ -1678,6 +1796,8 @@ namespace Pulsar4X.UI.Handlers
                     }
 #warning do fighter list here.
                 }
+                #endregion
+                #region Basic Components
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BasicComponents)
                 {
                     int row = 0;
@@ -1687,6 +1807,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Crew);
+                                BuildLocationDisplayDict.Add(Crew.Id, Crew.Name);
+                                BuildLocationDict.Add(Crew.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Crew.Name;
                                 row++;
@@ -1700,6 +1824,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Crew);
+                                BuildLocationDisplayDict.Add(Crew.Id, Crew.Name);
+                                BuildLocationDict.Add(Crew.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Crew.Name;
                                 row++;
@@ -1714,6 +1843,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Fuel);
+                                BuildLocationDisplayDict.Add(Fuel.Id, Fuel.Name);
+                                BuildLocationDict.Add(Fuel.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Fuel.Name;
                                 row++;
@@ -1727,6 +1860,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Fuel);
+                                BuildLocationDisplayDict.Add(Fuel.Id, Fuel.Name);
+                                BuildLocationDict.Add(Fuel.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Fuel.Name;
                                 row++;
@@ -1741,6 +1879,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, EBay);
+                                BuildLocationDisplayDict.Add(EBay.Id, EBay.Name);
+                                BuildLocationDict.Add(EBay.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = EBay.Name;
                                 row++;
@@ -1754,6 +1896,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, EBay);
+                                BuildLocationDisplayDict.Add(EBay.Id, EBay.Name);
+                                BuildLocationDict.Add(EBay.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = EBay.Name;
                                 row++;
@@ -1768,6 +1915,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Other);
+                                BuildLocationDisplayDict.Add(Other.Id, Other.Name);
+                                BuildLocationDict.Add(Other.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Other.Name;
                                 row++;
@@ -1781,6 +1932,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Other);
+                                BuildLocationDisplayDict.Add(Other.Id, Other.Name);
+                                BuildLocationDict.Add(Other.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Other.Name;
                                 row++;
@@ -1794,6 +1950,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Electronics and Shields
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.ElectronicShieldComponents)
                 {
                     int row = 0;
@@ -1803,6 +1961,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Shield);
+                                BuildLocationDisplayDict.Add(Shield.Id, Shield.Name);
+                                BuildLocationDict.Add(Shield.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Shield.Name;
                                 row++;
@@ -1816,6 +1978,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Shield);
+                                BuildLocationDisplayDict.Add(Shield.Id, Shield.Name);
+                                BuildLocationDict.Add(Shield.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Shield.Name;
                                 row++;
@@ -1829,6 +1996,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Engines
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.EngineComponents)
                 {
                     int row = 0;
@@ -1848,6 +2017,10 @@ namespace Pulsar4X.UI.Handlers
                             /// </summary>
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Engine);
+                                BuildLocationDisplayDict.Add(Engine.Id, Engine.Name);
+                                BuildLocationDict.Add(Engine.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Engine.Name;
                                 row++;
@@ -1864,6 +2037,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Engine);
+                                BuildLocationDisplayDict.Add(Engine.Id, Engine.Name);
+                                BuildLocationDict.Add(Engine.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Engine.Name;
                                 row++;
@@ -1880,6 +2058,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Sensors and Fire Controls
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.SensorsFCComponents)
                 {
                     int row = 0;
@@ -1889,6 +2069,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Passive);
+                                BuildLocationDisplayDict.Add(Passive.Id, Passive.Name);
+                                BuildLocationDict.Add(Passive.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Passive.Name;
                                 row++;
@@ -1902,6 +2086,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Passive);
+                                BuildLocationDisplayDict.Add(Passive.Id, Passive.Name);
+                                BuildLocationDict.Add(Passive.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Passive.Name;
                                 row++;
@@ -1916,6 +2105,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Active);
+                                BuildLocationDisplayDict.Add(Active.Id, Active.Name);
+                                BuildLocationDict.Add(Active.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Active.Name;
                                 row++;
@@ -1929,6 +2122,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Active);
+                                BuildLocationDisplayDict.Add(Active.Id, Active.Name);
+                                BuildLocationDict.Add(Active.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Active.Name;
                                 row++;
@@ -1936,13 +2134,16 @@ namespace Pulsar4X.UI.Handlers
                             }
                         }
                     }
-
                     foreach (BeamFireControlDefTN BFC in CurrentFaction.ComponentList.BeamFireControlDef)
                     {
                         if (BFC.isObsolete == false)
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, BFC);
+                                BuildLocationDisplayDict.Add(BFC.Id, BFC.Name);
+                                BuildLocationDict.Add(BFC.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = BFC.Name;
                                 row++;
@@ -1956,6 +2157,10 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, BFC);
+                                BuildLocationDisplayDict.Add(BFC.Id, BFC.Name);
+                                BuildLocationDict.Add(BFC.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = BFC.Name;
                                 row++;
@@ -1970,6 +2175,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, MFC);
+                                BuildLocationDisplayDict.Add(MFC.Id, MFC.Name);
+                                BuildLocationDict.Add(MFC.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = MFC.Name;
                                 row++;
@@ -1983,6 +2192,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, MFC);
+                                BuildLocationDisplayDict.Add(MFC.Id, MFC.Name);
+                                BuildLocationDict.Add(MFC.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = MFC.Name;
                                 row++;
@@ -1996,6 +2210,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Transport and Industry
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.TransportIndustryComponents)
                 {
                     int row = 0;
@@ -2005,6 +2221,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Hold);
+                                BuildLocationDisplayDict.Add(Hold.Id, Hold.Name);
+                                BuildLocationDict.Add(Hold.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Hold.Name;
                                 row++;
@@ -2018,6 +2238,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Hold);
+                                BuildLocationDisplayDict.Add(Hold.Id, Hold.Name);
+                                BuildLocationDict.Add(Hold.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Hold.Name;
                                 row++;
@@ -2032,6 +2257,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Bay);
+                                BuildLocationDisplayDict.Add(Bay.Id, Bay.Name);
+                                BuildLocationDict.Add(Bay.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Bay.Name;
                                 row++;
@@ -2045,6 +2274,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Bay);
+                                BuildLocationDisplayDict.Add(Bay.Id, Bay.Name);
+                                BuildLocationDict.Add(Bay.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Bay.Name;
                                 row++;
@@ -2059,6 +2293,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, CHS);
+                                BuildLocationDisplayDict.Add(CHS.Id, CHS.Name);
+                                BuildLocationDict.Add(CHS.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CHS.Name;
                                 row++;
@@ -2072,6 +2310,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, CHS);
+                                BuildLocationDisplayDict.Add(CHS.Id, CHS.Name);
+                                BuildLocationDict.Add(CHS.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CHS.Name;
                                 row++;
@@ -2085,6 +2328,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
+                #endregion
+                #region Weapon and Support Components
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.WeaponsSupportComponents)
                 {
                     int row = 0;
@@ -2094,6 +2339,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Beam);
+                                BuildLocationDisplayDict.Add(Beam.Id, Beam.Name);
+                                BuildLocationDict.Add(Beam.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Beam.Name;
                                 row++;
@@ -2107,6 +2356,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Beam);
+                                BuildLocationDisplayDict.Add(Beam.Id, Beam.Name);
+                                BuildLocationDict.Add(Beam.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Beam.Name;
                                 row++;
@@ -2121,6 +2375,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Turret);
+                                BuildLocationDisplayDict.Add(Turret.Id, Turret.Name);
+                                BuildLocationDict.Add(Turret.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Turret.Name;
                                 row++;
@@ -2134,6 +2392,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Turret);
+                                BuildLocationDisplayDict.Add(Turret.Id, Turret.Name);
+                                BuildLocationDict.Add(Turret.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Turret.Name;
                                 row++;
@@ -2148,6 +2411,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, CIWS);
+                                BuildLocationDisplayDict.Add(CIWS.Id, CIWS.Name);
+                                BuildLocationDict.Add(CIWS.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CIWS.Name;
                                 row++;
@@ -2161,6 +2428,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, CIWS);
+                                BuildLocationDisplayDict.Add(CIWS.Id, CIWS.Name);
+                                BuildLocationDict.Add(CIWS.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = CIWS.Name;
                                 row++;
@@ -2175,6 +2447,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Tube);
+                                BuildLocationDisplayDict.Add(Tube.Id, Tube.Name);
+                                BuildLocationDict.Add(Tube.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Tube.Name;
                                 row++;
@@ -2188,6 +2464,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Tube);
+                                BuildLocationDisplayDict.Add(Tube.Id, Tube.Name);
+                                BuildLocationDict.Add(Tube.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Tube.Name;
                                 row++;
@@ -2202,6 +2483,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Reactor);
+                                BuildLocationDisplayDict.Add(Reactor.Id, Reactor.Name);
+                                BuildLocationDict.Add(Reactor.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Reactor.Name;
                                 row++;
@@ -2215,6 +2500,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Reactor);
+                                BuildLocationDisplayDict.Add(Reactor.Id, Reactor.Name);
+                                BuildLocationDict.Add(Reactor.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Reactor.Name;
                                 row++;
@@ -2229,6 +2519,10 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (row < BuildTabMaxRows)
                             {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Mag);
+                                BuildLocationDisplayDict.Add(Mag.Id, Mag.Name);
+                                BuildLocationDict.Add(Mag.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Mag.Name;
                                 row++;
@@ -2242,6 +2536,11 @@ namespace Pulsar4X.UI.Handlers
                                     Row.Height = 17;
                                     m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
                                 }// make new rows and add items.
+
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, Mag);
+                                BuildLocationDisplayDict.Add(Mag.Id, Mag.Name);
+                                BuildLocationDict.Add(Mag.Id, Temp);
+
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
                                 m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = Mag.Name;
                                 row++;
@@ -2255,7 +2554,9 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
                 }
-                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BuildPDCOrbitalHabitat)
+                #endregion
+                #region Build PDC
+                else if(m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BuildPDCOrbitalHabitat)
                 {
                     int row = 0;
                     for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
@@ -2264,6 +2565,8 @@ namespace Pulsar4X.UI.Handlers
                     }
 #warning do Industrial PDC orbhab build here
                 }
+                #endregion
+                #region Prefab PDC
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.PrefabPDC)
                 {
                     int row = 0;
@@ -2273,6 +2576,8 @@ namespace Pulsar4X.UI.Handlers
                     }
 #warning do Industrial PDC Prefab here
                 }
+                #endregion
+                #region Assemble PDC
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.AssemblePDC)
                 {
                     int row = 0;
@@ -2282,6 +2587,8 @@ namespace Pulsar4X.UI.Handlers
                     }
 #warning do Industrial PDC assembly here
                 }
+                #endregion
+                #region Refit PDC
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.RefitPDC)
                 {
                     int row = 0;
@@ -2291,8 +2598,19 @@ namespace Pulsar4X.UI.Handlers
                     }
 #warning do Industrial PDC refit here
                 }
+                #endregion
+                #region Maintenance Supplies
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.MaintenanceSupplies)
                 {
+                    /// <summary>
+                    /// Maintenance supplies don't have a game entity, so this is a kludge to make that work within the confines of the existing build location dictionary.
+                    /// </summary>
+                    GameEntity Placeholder = new GameEntity();
+                    Placeholder.Id = Guid.NewGuid();
+                    BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.MaintenanceSupplies, Placeholder);
+                    BuildLocationDisplayDict.Add(Placeholder.Id, "Maintenance Supplies");
+                    BuildLocationDict.Add(Placeholder.Id, Temp);
+
                     m_oSummaryPanel.BuildDataGrid.Rows[0].Visible = true;
                     m_oSummaryPanel.BuildDataGrid.Rows[0].Cells[0].Value = "Maintenance Supplies";
 
@@ -2300,9 +2618,70 @@ namespace Pulsar4X.UI.Handlers
                     {
                         m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
                     }
-                    
+                }
+                #endregion
+            }
+
+            BuildCostListBox();
+        }
+
+        public void BuildCostListBox()
+        {
+            
+            m_oSummaryPanel.InstallationCostListBox.Items.Clear();
+
+            if (m_oSummaryPanel.BuildDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    List<Guid> GID = BuildLocationDisplayDict.Keys.ToList();
+                    String CostString = "N/A";
+                    switch (BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].EntityType)
+                    {
+                        case BuildListObject.ListEntityType.Installation:
+                            Installation Install = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as Installation;
+                            CostString = String.Format("Cost: {0}", Install.Cost);
+                            m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                            for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                            {
+                                if (Install.MinerialsCost[MineralIterator] != 0)
+                                {
+                                    CostString = String.Format("{0} x {1} ()", Install.MinerialsCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator);
+                                    m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                                }
+                            }
+                            break;
+                        case BuildListObject.ListEntityType.Missile:
+                            break;
+                        case BuildListObject.ListEntityType.Fighter:
+                            break;
+                        case BuildListObject.ListEntityType.Component:
+                            break;
+                        case BuildListObject.ListEntityType.PDC_Build:
+                            break;
+                        case BuildListObject.ListEntityType.PDC_Prefab:
+                            break;
+                        case BuildListObject.ListEntityType.PDC_Assemble:
+                            break;
+                        case BuildListObject.ListEntityType.PDC_Refit:
+                            break;
+                        case BuildListObject.ListEntityType.MaintenanceSupplies:
+                            CostString = String.Format("Cost: {0:N2}", Constants.Colony.MaintenanceSupplyCost);
+                            m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                            for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                            {
+                                if (Constants.Colony.MaintenanceMineralCost[MineralIterator] != 0.0f)
+                                {
+                                    CostString = String.Format("{0:N4} x {1} ()", Constants.Colony.MaintenanceMineralCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator);
+                                    m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                                }
+                            }
+                            break;
+                    }
                 }
             }
+            //Cost: AMT
+            //AMT x Resource(Total of Resource)
         }
         #endregion
 

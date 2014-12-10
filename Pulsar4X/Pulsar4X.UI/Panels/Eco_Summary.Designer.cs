@@ -121,6 +121,11 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oInstallationTypeComboBox; }
         }
+
+        public ListBox InstallationCostListBox
+        {
+            get { return m_oInstallationCostListBox; }
+        }
         /// <summary>
         /// Stockpile button swaps the display between the industrial projects under construction display and the listing of planetary stockpiles.
         /// </summary>

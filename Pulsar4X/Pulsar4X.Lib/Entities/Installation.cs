@@ -44,7 +44,11 @@ namespace Pulsar4X.Entities
 
         public const int NO_OF_INSTALLATIONS = (int)InstallationType.InstallationCount;
  
+        /// <summary>
+        /// Which installation is this?
+        /// </summary>
         public InstallationType Type { get; set; }
+
         /// <summary>
         /// amount of wealth and resource units to build.
         /// </summary>
@@ -59,7 +63,6 @@ namespace Pulsar4X.Entities
         /// Size of this installation for cargo transfering.
         /// </summary>
         public int Mass { get; set; }
-
 
         /// <summary>
         /// What thermal signature does this installation have.
@@ -123,6 +126,11 @@ namespace Pulsar4X.Entities
 
         public Installation()
         {
+            /// <summary>
+            /// Id must be present or anything needing it will lose its cookies.
+            /// </summary>
+            Id = Guid.NewGuid();
+
             Number = 0;
             Mass = 25000;
             Type = InstallationType.InstallationCount;
@@ -137,6 +145,11 @@ namespace Pulsar4X.Entities
 
         public Installation(InstallationType a_eType)
         {
+            /// <summary>
+            /// Id must be present or anything needing it will lose its cookies.
+            /// </summary>
+            Id = Guid.NewGuid();
+
             Number = 0;
             Mass = 25000;
             Tonnage = new BindingList<int>();

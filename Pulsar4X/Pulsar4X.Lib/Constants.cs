@@ -758,7 +758,7 @@ namespace Pulsar4X
                 MinerialCount
             }
 
-            public const int NO_OF_MINERIALS = 11;
+            public const int NO_OF_MINERIALS = (int)MinerialNames.MinerialCount;
         }
 
         /// <summary>
@@ -1018,6 +1018,9 @@ namespace Pulsar4X
             /// Maximum index to DeepSpaceStrength
             /// </summary>
             public const int DeepSpaceMax = 11;
+
+            public static float MaintenanceSupplyCost = 0.25f;
+            public static float[] MaintenanceMineralCost = { 0.125f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, 0.0f, 0.0625f };
         }
 
         /// <summary>

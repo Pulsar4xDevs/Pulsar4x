@@ -10,6 +10,207 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
+    /// <summary>
+    /// Parent class for planetary build queue items
+    /// </summary>
+    public abstract class BuildQueueItem : GameEntity
+    {
+        /// <summary>
+        /// How many of this item should be built?
+        /// </summary>
+        private float m_NumToBuild;
+        public float numToBuild
+        {
+            get { return m_NumToBuild; }
+        }
+
+        /// <summary>
+        /// How much of planetary industry in percentage terms is devoted to this item(must be validated)
+        /// </summary>
+        private float m_BuildCapcity;
+        public float buildCapacity
+        {
+            get { return m_BuildCapcity; }
+        }
+
+        /// <summary>
+        /// How many planetary buildpoints per annum are devoted to this build order.
+        /// </summary>
+        private float m_ProductionRate;
+        public float productionRate
+        {
+            get { return m_ProductionRate; }
+        }
+
+        /// <summary>
+        /// How much does each item cost?
+        /// </summary>
+        private decimal m_CostPerItem;
+        public decimal costPerItem
+        {
+            get { return m_CostPerItem; }
+        }
+
+        /// <summary>
+        /// When will this item finish?
+        /// </summary>
+        private DateTime m_CompletionDate;
+        public DateTime completionDate
+        {
+            get { return m_CompletionDate; }
+        }
+
+        /// <summary>
+        /// Is this item currently being built or is construction paused? queued items can be paused
+        /// </summary>
+        private bool m_InProduction;
+        public bool inProduction
+        {
+            get { return m_InProduction; }
+        }
+
+        public void UpdateBuildQueueInfo()
+        {
+
+        }
+    }
+
+    public class ConstructionBuildQueueItem : BuildQueueItem
+    {
+        public enum CBType
+        {
+            /// <summary>
+            /// Planetary Installation
+            /// </summary>
+            PlanetaryInstallation,
+            /// <summary>
+            /// Ship Component
+            /// </summary>
+            ShipComponent,
+            /// <summary>
+            /// Building a PDC from scratch
+            /// </summary>
+            PDCConstruction,
+            /// <summary>
+            /// Building the PDC prefab parts. 100% of cost for parts that speed construction by 90%.
+            /// </summary>
+            PDCPrefab,
+            /// <summary>
+            /// Build PDC from prefabbed parts. 10% of cost + prefabbed parts.
+            /// </summary>
+            PDCAssembly,
+            /// <summary>
+            /// Refit existing PDC
+            /// </summary>
+            PDCRefit,
+            MaintenanceSupplies,
+            Count
+        }
+        /// <summary>
+        /// type of construction to build.
+        /// </summary>
+        private CBType m_BuildType;
+        public CBType buildType
+        {
+            get { return m_BuildType; }
+        }
+
+        /// <summary>
+        /// Installation that this build item will construct.
+        /// </summary>
+        private Installation m_InstallationBuild;
+        public Installation installationBuild
+        {
+            get { return m_InstallationBuild; }
+        }
+
+        /// <summary>
+        /// Component that this build item will construct
+        /// </summary>
+        private ComponentDefTN m_ComponentBuild;
+        public ComponentDefTN componentBuild
+        {
+            get { return m_ComponentBuild; }
+        }
+
+
+        /// <summary>
+        /// Constructor for Installations.
+        /// </summary>
+        /// <param name="InstallationToBuild">Installation to build</param>
+        public ConstructionBuildQueueItem(Installation InstallationToBuild)
+        {
+            m_BuildType = CBType.PlanetaryInstallation;
+            m_InstallationBuild = InstallationToBuild;
+        }
+
+        /// <summary>
+        /// Constructor for ship components.
+        /// </summary>
+        /// <param name="ComponentToBuild">Ship Component to build</param>
+        public ConstructionBuildQueueItem(ComponentDefTN ComponentToBuild)
+        {
+            m_BuildType = CBType.ShipComponent;
+            m_ComponentBuild = ComponentToBuild;
+        }
+
+        /// <summary>
+        /// Maintenance supplies build queue constructor
+        /// </summary>
+        public ConstructionBuildQueueItem()
+        {
+            m_BuildType = CBType.MaintenanceSupplies;
+        }
+    }
+
+    /// <summary>
+    /// Missile Build Queue.
+    /// </summary>
+    public class MissileBuildQueueItem : BuildQueueItem
+    {
+        /// <summary>
+        /// Missile to build.
+        /// </summary>
+        private OrdnanceDefTN m_OrdanceDef;
+        public OrdnanceDefTN ordnanceDef
+        {
+            get { return m_OrdanceDef; }
+        }
+
+        /// <summary>
+        /// Constructor for Missile Build Queue Items
+        /// </summary>
+        /// <param name="Definition"></param>
+        public MissileBuildQueueItem(OrdnanceDefTN Definition)
+        {
+            m_OrdanceDef = Definition;
+        }
+    }
+
+    /// <summary>
+    /// Fighter Build Queue
+    /// </summary>
+    public class FighterBuildQueueItem : BuildQueueItem
+    {
+        /// <summary>
+        /// Fighter to build.
+        /// </summary>
+        private ShipClassTN m_ShipClassDef;
+        public ShipClassTN shipClassDef
+        {
+            get { return m_ShipClassDef; }
+        }
+
+        /// <summary>
+        /// Constructor for Missile Build Queue Items
+        /// </summary>
+        /// <param name="Definition"></param>
+        public FighterBuildQueueItem(ShipClassTN Definition)
+        {
+            m_ShipClassDef = Definition;
+        }
+    }
+
     public class Population : GameEntity
     {
 
@@ -196,6 +397,21 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Dictionary<OrdnanceDefTN, int> MissileStockpile { get; set; }
 
+        /// <summary>
+        /// Build queue for construction factories.
+        /// </summary>
+        public BindingList<ConstructionBuildQueueItem> ConstructionBuildQueue { get; set; }
+
+        /// <summary>
+        /// Build queue for ordnance factories.
+        /// </summary>
+        public BindingList<MissileBuildQueueItem> MissileBuildQueue { get; set; }
+
+        /// <summary>
+        /// Build Queue for fighter factories
+        /// </summary>
+        public BindingList<FighterBuildQueueItem> FighterBuildQueue { get; set; }
+
         #endregion
 
         public Population(Planet a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
@@ -265,6 +481,10 @@ namespace Pulsar4X.Entities
             ModifierProduction = 1.0f;
             ModifierWealthAndTrade = 1.0f;
             ModifierPoliticalStability = 1.0f;
+
+            ConstructionBuildQueue = new BindingList<ConstructionBuildQueueItem>();
+            MissileBuildQueue = new BindingList<MissileBuildQueueItem>();
+            FighterBuildQueue = new BindingList<FighterBuildQueueItem>();
 
             ConventionalStart();
             

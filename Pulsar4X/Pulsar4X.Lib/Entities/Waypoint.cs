@@ -29,6 +29,12 @@ namespace Pulsar4X.Entities
         public Waypoint(String Title,StarSystem Sys,double X, double Y, int FactionID)
         {
             Name = Title;
+
+            /// <summary>
+            /// create these or else anything that relies on a unique global id will break.
+            /// </summary>
+            Id = Guid.NewGuid();
+
             FactionId = FactionID;
             System = Sys;
             XSystem = X;

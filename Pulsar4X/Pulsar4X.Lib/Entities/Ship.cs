@@ -440,6 +440,11 @@ namespace Pulsar4X.Entities
             int index;
 
             /// <summary>
+            /// create these or else anything that relies on a unique global id will break.
+            /// </summary>
+            Id = Guid.NewGuid();
+
+            /// <summary>
             /// Set the class definition
             /// </summary>
             ShipClass = ClassDefinition;

@@ -201,6 +201,10 @@ namespace Pulsar4X.Entities
         public TaskGroupTN(string Title, Faction FID, OrbitingEntity StartingBody, StarSystem StartingSystem)
         {
             Name = Title;
+            /// <summary>
+            /// create these or else anything that relies on a unique global id will break.
+            /// </summary>
+            Id = Guid.NewGuid();
 
             TaskGroupFaction = FID;
 
