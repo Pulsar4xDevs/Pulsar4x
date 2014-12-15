@@ -1019,6 +1019,9 @@ namespace Pulsar4X
             /// </summary>
             public const int DeepSpaceMax = 11;
 
+            /// <summary>
+            /// Maintenance supply part cost.
+            /// </summary>
             public static float MaintenanceSupplyCost = 0.25f;
             public static float[] MaintenanceMineralCost = { 0.125f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, 0.0f, 0.0625f };
         }
@@ -1210,7 +1213,7 @@ namespace Pulsar4X
         public static class MagazineTN
         {
             /// <summary>
-            /// Internal armor factor for magazines.
+            /// Internal armor factor for magazines, and for everywhere else that uses armor. Good programming practices.
             /// </summary>
             public static int[] MagArmor = { 2, 5, 6, 8, 10, 12, 15, 18, 21, 25, 30, 36, 45 };
 

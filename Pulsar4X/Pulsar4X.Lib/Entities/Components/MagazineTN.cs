@@ -106,6 +106,15 @@ namespace Pulsar4X.Entities.Components
 
             float ArmorFactor = 0.0f;
 
+
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.75m;
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = cost * 0.25m;
+
             /// <summary>
             /// have some rounding to do here:
             /// </summary>
@@ -127,7 +136,29 @@ namespace Pulsar4X.Entities.Components
 
                 int mult = desiredHTK - 1;
 
-                cost = cost + (decimal)(StrReq * mult);
+                decimal ArmorCost = (decimal)(StrReq * mult);
+
+                cost = cost + ArmorCost;
+
+                /// <summary>
+                /// Copied and pasted from the ArmorDefTN Section:
+                /// </summary>
+                //0-1.0 1-1.0 2-1.0 3- D:9/10 N:1/10 ... 12 - D:1/10 N:9/10
+                int fraction = 13 - ArmorTech;
+                //13 12 11 10 9 8 7 6 5 4 3 2 1
+                float DuraniumFraction = (float)fraction / 10.0f;
+                //1.3 1.2 1.1 1.0 .9 .8 .7 .6 .5 .4 .3 .2 .1
+                float NeutroniumFraction = (10.0f - (float)fraction) / 10.0f;
+                //-.3  -.2  -.1 0 .1 .2 .3 .4 .5 .6 .7 .8 .9   
+                if (DuraniumFraction >= 1.0)
+                {
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] + cost;
+                }
+                else
+                {
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] + (cost * (decimal)DuraniumFraction);
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = cost * (decimal)NeutroniumFraction;
+                }
 
                 ArmorFactor = (StrReq / Constants.MagazineTN.MagArmor[ArmorTech]) * (float)mult;
             }

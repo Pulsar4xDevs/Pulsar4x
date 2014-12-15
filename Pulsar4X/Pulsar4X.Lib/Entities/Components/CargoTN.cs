@@ -86,6 +86,13 @@ namespace Pulsar4X.Entities.Components
             cost = ComponentCost;
             crew = CrewRequirement;
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost;
+
             htk = 1;
 
             CargoCapacity = (int)(size * Constants.ShipTN.TonsPerHS);

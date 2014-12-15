@@ -138,6 +138,13 @@ namespace Pulsar4X.Entities.Components
             crew = (byte)(size * 2.0);
             cost = (decimal)((size * (float)Sensitivity) + ((size * (float)Sensitivity) * 0.25f * (float)(hardTech-1)));
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = cost;
+
             if (size <= 1.0)
                 isMilitary = false;
             else

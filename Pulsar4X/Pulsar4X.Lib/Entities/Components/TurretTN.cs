@@ -133,6 +133,28 @@ namespace Pulsar4X.Entities.Components
 
             size = size + (GearSize * GearCount);
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+
+            switch (BaseBeamWeapon.componentType)
+            {
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = BaseBeamWeapon.minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] * Multiplier;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = BaseBeamWeapon.minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] * Multiplier;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = BaseBeamWeapon.minerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] * Multiplier;
+                    break;
+                case ComponentTypeTN.Gauss:
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = BaseBeamWeapon.minerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] * Multiplier;
+                    break;
+            }
+
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] + (1.5m * (decimal)GearCount);
+
             if (Armour != 0)
             {
                 double volume = size;
@@ -155,6 +177,8 @@ namespace Pulsar4X.Entities.Components
 
                 ArmourCost = (decimal)area;
                 ArmourSize = turretArmour;
+
+                minerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = ArmourCost;
             }
             else
             {

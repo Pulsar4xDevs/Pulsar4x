@@ -2778,7 +2778,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n",ActiveSensorProject.cost, ActiveSensorProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (ActiveSensorProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, ActiveSensorProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("Development Cost for Project: {0}RP\n", ActiveSensorProject.cost * 10);
@@ -2966,7 +2975,16 @@ namespace Pulsar4X.UI.Handlers
                     Entry = String.Format("Chance of destruction by electronic damage: {0}%\n", (Hard * 100.0f));
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                    Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                    Entry = String.Format("Materials Required:");
+
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        if (BeamFCProject.minerialsCost[mineralIterator] != 0)
+                        {
+                            Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamFCProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                        }
+                    }
+                    Entry = String.Format("{0}\n\n", Entry);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                     Entry = String.Format("Development Cost for Project: {0}RP\n", BeamFCProject.cost * 10);
@@ -3063,7 +3081,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n", CloseInProject.cost, CloseInProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented.\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (CloseInProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, CloseInProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("Base Chance to Hit: 50%\nDevelopment Cost for Project: {0}RP\n", CloseInProject.cost * 10);
@@ -3174,7 +3201,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n", PassiveSensorProject.cost, PassiveSensorProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (PassiveSensorProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, PassiveSensorProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("Development Cost for Project: {0}RP", (PassiveSensorProject.cost * 10));
@@ -3358,7 +3394,16 @@ namespace Pulsar4X.UI.Handlers
                     Entry = String.Format("Cost: {0}    Crew: {1}\n",EngineProject.cost,EngineProject.crew);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                    Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                    Entry = String.Format("Materials Required:");
+
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        if (EngineProject.minerialsCost[mineralIterator] != 0)
+                        {
+                            Entry = String.Format("{0} {1:N1}x {2}", Entry, EngineProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                        }
+                    }
+                    Entry = String.Format("{0}\n", Entry);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                     if (EngineProject.isMilitary == true)
@@ -3419,7 +3464,17 @@ namespace Pulsar4X.UI.Handlers
 
                         Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (BeamProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         if (BeamProject.size != 6.0f)
@@ -3483,7 +3538,16 @@ namespace Pulsar4X.UI.Handlers
                     Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                    Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                    Entry = String.Format("Materials Required:");
+
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        if (BeamProject.minerialsCost[mineralIterator] != 0)
+                        {
+                            Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                        }
+                    }
+                    Entry = String.Format("{0}\n", Entry);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                     Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost * 50));
@@ -3645,7 +3709,16 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.ParametersTextBox.AppendText("Spinal Weapon Only\n");
                     }
 
-                    Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                    Entry = String.Format("Materials Required:");
+
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        if (BeamProject.minerialsCost[mineralIterator] != 0)
+                        {
+                            Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                        }
+                    }
+                    Entry = String.Format("{0}\n", Entry);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                     Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost * 50));
@@ -3747,7 +3820,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n", MagazineProject.cost, MagazineProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (MagazineProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, MagazineProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (MagazineProject.cost * 10));
@@ -3807,7 +3889,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n",BeamProject.cost, BeamProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (BeamProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n",(BeamProject.cost * 50));
@@ -3953,7 +4044,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Thermal Signature: {0:N2}\n", MissileEngineProject.thermalSignature);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (MissileEngineProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, MissileEngineProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0:N0}RP\n", (MissileEngineProject.cost * 200));
@@ -4042,7 +4142,16 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
                         }
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (LauncherProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, LauncherProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", Math.Round(LauncherProject.cost * 10));
@@ -4127,7 +4236,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (BeamProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost * 50));
@@ -4197,7 +4315,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n",BeamProject.cost, BeamProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (BeamProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n",(BeamProject.cost*50));
@@ -4337,7 +4464,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n",ReactorProject.cost, ReactorProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (ReactorProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, ReactorProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("Development Cost for Project: {0}RP\n",(ReactorProject.cost) * 10);
@@ -4436,7 +4572,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}\n", BeamProject.cost, BeamProject.crew);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (BeamProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, BeamProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (BeamProject.cost*50));
@@ -4542,7 +4687,16 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("Cost: {0}    Crew: {1}     Daily Fuel Cost while Active: {2} Litres\n",ShieldProject.cost, ShieldProject.crew, (ShieldProject.fuelCostPerHour * 24.0f));
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                        Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (ShieldProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, ShieldProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n\n", Entry);
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                         Entry = String.Format("Development Cost for Project: {0}RP\n", (ShieldProject.cost*100));
@@ -4648,7 +4802,16 @@ namespace Pulsar4X.UI.Handlers
                     Entry = String.Format("Cost: {0}    Crew: {1}\n", PassiveSensorProject.cost, PassiveSensorProject.crew);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
-                    Entry = String.Format("Materials Required: Not Yet Implemented\n\n");
+                    Entry = String.Format("Materials Required:");
+
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        if (PassiveSensorProject.minerialsCost[mineralIterator] != 0)
+                        {
+                            Entry = String.Format("{0} {1:N1}x {2}", Entry, PassiveSensorProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                        }
+                    }
+                    Entry = String.Format("{0}\n\n", Entry);
                     m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
 
                     Entry = String.Format("Development Cost for Project: {0}RP", (PassiveSensorProject.cost * 10));

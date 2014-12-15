@@ -70,6 +70,13 @@ namespace Pulsar4X.Entities.Components
 
             cost = (decimal)(Math.Round(PowerGen * 3.0f));
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = cost;
+
             if (BoostMod == 1.0f)
                 ExpRisk = 5.0f;
             else if (BoostMod == 1.05f)

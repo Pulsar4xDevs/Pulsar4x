@@ -173,6 +173,13 @@ namespace Pulsar4X.Entities.Components
             if (cost < 5)
                 cost = 5;
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Gallicite] = cost;
+
             /// <summary>
             /// Crew required is EngineSize * Power Mod with a minimum of 1 crewman required.
             /// </summary>

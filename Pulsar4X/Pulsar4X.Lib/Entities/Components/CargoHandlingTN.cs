@@ -21,7 +21,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="Title">Title of the CHS.</param>
         /// <param name="TractorMult">Tractor multiplier that the CHS possesses.</param>
-        public CargoHandlingDefTN(string Title, int TractorMult)
+        public CargoHandlingDefTN(string Title, int TractorMult, decimal ComponentCost)
         {
             Id = Guid.NewGuid();
 
@@ -31,8 +31,16 @@ namespace Pulsar4X.Entities.Components
             TractorMultiplier = TractorMult;
 
             size = 2.0f;
-            cost = 10.0m;
+            cost = ComponentCost;
             crew = 10;
+
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.25m;
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Mercassium] = cost * 0.75m;
 
 
             htk = 1;

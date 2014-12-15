@@ -115,6 +115,15 @@ namespace Pulsar4X.Entities.Components
                 cost = (decimal)((2.0f * ShieldGen) + (2.0f * ShieldPool));
             }
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost*0.25m;
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Corbomite] = cost * 0.375m;
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = cost * 0.375m;
+
             FuelCostPerHour = 10.0f * ShieldPool * FuelConsumptionMod;
 
             isMilitary = true;

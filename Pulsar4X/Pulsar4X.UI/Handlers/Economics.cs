@@ -2640,13 +2640,15 @@ namespace Pulsar4X.UI.Handlers
                     {
                         case BuildListObject.ListEntityType.Installation:
                             Installation Install = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as Installation;
-                            CostString = String.Format("Cost: {0}", Install.Cost);
+                            CostString = String.Format("Cost: {0:N2}", Install.Cost);
                             m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                             for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
                             {
                                 if (Install.MinerialsCost[MineralIterator] != 0)
                                 {
-                                    CostString = String.Format("{0} x {1} ()", Install.MinerialsCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator);
+                                    string FormattedMineralTotal = CurrentPopulation.Minerials[MineralIterator].ToString("#,##0");
+
+                                    CostString = String.Format("{0:N4} x {1} ({2})", Install.MinerialsCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal);
                                     m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                                 }
                             }
@@ -2656,6 +2658,19 @@ namespace Pulsar4X.UI.Handlers
                         case BuildListObject.ListEntityType.Fighter:
                             break;
                         case BuildListObject.ListEntityType.Component:
+                            ComponentDefTN Component = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as ComponentDefTN;
+                            CostString = String.Format("Cost: {0:N2}", Component.cost);
+                            m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                            for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                            {
+                                if (Component.minerialsCost[MineralIterator] != 0)
+                                {
+                                    string FormattedMineralTotal = CurrentPopulation.Minerials[MineralIterator].ToString("#,##0");
+
+                                    CostString = String.Format("{0:N4} x {1} ({2})", Component.minerialsCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal);
+                                    m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                                }
+                            }
                             break;
                         case BuildListObject.ListEntityType.PDC_Build:
                             break;
@@ -2672,7 +2687,11 @@ namespace Pulsar4X.UI.Handlers
                             {
                                 if (Constants.Colony.MaintenanceMineralCost[MineralIterator] != 0.0f)
                                 {
-                                    CostString = String.Format("{0:N4} x {1} ()", Constants.Colony.MaintenanceMineralCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator);
+                                    string FormattedMineralTotal = CurrentPopulation.Minerials[MineralIterator].ToString("#,##0");
+
+                                    CostString = String.Format("{0:N4} x {1} ({2})", Constants.Colony.MaintenanceMineralCost[MineralIterator], 
+                                                                                     (Constants.Minerals.MinerialNames)MineralIterator, 
+                                                                                     FormattedMineralTotal);
                                     m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                                 }
                             }

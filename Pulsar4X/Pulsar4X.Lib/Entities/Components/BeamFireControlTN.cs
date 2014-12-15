@@ -216,7 +216,14 @@ namespace Pulsar4X.Entities.Components
             float res = (float)Math.Round((R + T) * size);
             res = (float)Math.Round(res + ((float)res * 0.25f * (float)(hardTech - 1)));
 
-            cost = (decimal)(res); 
+            cost = (decimal)(res);
+
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = cost;
 
             /// <summary>
             /// Range * 2 / 10000.0

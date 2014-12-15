@@ -173,6 +173,46 @@ namespace Pulsar4X.Entities.Components
             m_oStrength = strengthReq;
             m_oArea = area / m_oDepth;
             cost = (decimal)m_oArea;
+
+            /// <summary>
+            /// This is a kludge to find the armor type and calculate the armor cost in minerals because I wrote ArmorDefTN first and did not put the tech as a member of ArmorDefTN and don't
+            /// feel like fixing it.
+            /// </summary>
+            for (int ArmorIterator = 0; ArmorIterator < Constants.MagazineTN.MagArmor.Count(); ArmorIterator++)
+            {
+                if (m_oArmorPerHS == Constants.MagazineTN.MagArmor[ArmorIterator])
+                {
+                    /// <summary>
+                    /// do duranium/neutronium split here.
+                    /// </summary>
+                    //0-1.0 1-1.0 2-1.0 3- D:9/10 N:1/10 ... 12 - D:1/10 N:9/10
+                    int fraction = 13 - ArmorIterator;
+                    //13 12 11 10 9 8 7 6 5 4 3 2 1
+                    float DuraniumFraction = (float)fraction / 10.0f;
+                    //1.3 1.2 1.1 1.0 .9 .8 .7 .6 .5 .4 .3 .2 .1
+                    float NeutroniumFraction = (10.0f - (float)fraction )/ 10.0f;
+                    //-.3  -.2  -.1 0 .1 .2 .3 .4 .5 .6 .7 .8 .9   
+
+                    minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        minerialsCost[mineralIterator] = 0;
+                    }
+
+                    if (DuraniumFraction >= 1.0)
+                    {
+                        minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost;
+                    }
+                    else
+                    {
+                        minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * (decimal)DuraniumFraction;
+                        minerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = cost * (decimal)NeutroniumFraction;
+                    }
+
+                    break;
+                }
+            }
+
             m_oCNum = (ushort)Math.Floor(strengthReq / (double)m_oDepth);
 
             double Tonnage = Math.Ceiling(size + sizeOfCraft);

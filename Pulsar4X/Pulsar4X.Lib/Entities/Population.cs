@@ -342,6 +342,9 @@ namespace Pulsar4X.Entities
         public int EMSignature { get; set; }
 
 
+        /// <summary>
+        /// Mineral stockpile for this population
+        /// </summary>
         int[] m_aiMinerials;
         public int[] Minerials
         {
@@ -490,6 +493,8 @@ namespace Pulsar4X.Entities
             
         }
 
+
+        #region starting options and debug
         public void ConventionalStart()
         {
             Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = 1000.0f;
@@ -509,6 +514,15 @@ namespace Pulsar4X.Entities
         {
             CivilianPopulation = 500.0f;
         }
+
+        public void MineralSet()
+        {
+            for(int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerials[mineralIterator] = 10000 + mineralIterator;
+            }
+        }
+        #endregion
 
         /// <summary>
         /// I am not sure if this will be necessary but since the population has detection statistics it should have a contact with an accessible

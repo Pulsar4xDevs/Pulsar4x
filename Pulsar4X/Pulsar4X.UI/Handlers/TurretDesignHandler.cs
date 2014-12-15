@@ -409,7 +409,16 @@ namespace Pulsar4X.UI.Handlers
             Entry = String.Format("Maximum Tracking Speed: {0} km/s\n", TurretProject.tracking);
             m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
-            Entry = String.Format("Materials Required: Not Yet Implemented\n");
+            Entry = String.Format("Materials Required:");
+
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                if (TurretProject.minerialsCost[mineralIterator] != 0)
+                {
+                    Entry = String.Format("{0} {1:N1}x {2}", Entry, TurretProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                }
+            }
+            Entry = String.Format("{0}\n", Entry);
             m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
             Entry = String.Format("\nDevelopment Cost for Project: {0} RP\n", (TurretProject.cost * 4));

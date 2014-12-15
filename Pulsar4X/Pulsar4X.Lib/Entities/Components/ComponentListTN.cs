@@ -256,7 +256,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Only TN starts begin with this component for now. the improved,advanced, and grav-assisted variants have to be researched. Count 22, to 23
             /// </summary>
-            CargoHandlingDefTN CHS = new CargoHandlingDefTN("Cargo Handling System", 5);
+            CargoHandlingDefTN CHS = new CargoHandlingDefTN("Cargo Handling System", 5, 10.0m);
             CargoHandleSystemDef.Add(CHS);
             TotalComponents = TotalComponents + 1;
 

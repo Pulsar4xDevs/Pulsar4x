@@ -184,6 +184,22 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Tectonics PlanetaryTectonics { get; set; }
 
+        /// <summary>
+        /// What mineral resources does this planet have to be mined?
+        /// </summary>
+        int[] m_aiMinerialReserves;
+        public int[] MinerialReserves
+        {
+            get
+            {
+                return m_aiMinerialReserves;
+            }
+            set
+            {
+                m_aiMinerialReserves = value;
+            }
+        }
+
         public Planet(Star primary, OrbitingEntity parent) : base()
         {
             /// <summary>
@@ -209,6 +225,16 @@ namespace Pulsar4X.Entities
             PlanetaryRuins = new Ruins();
 
             PlanetaryTectonics = Tectonics.Dead;
+
+            /// <summary>
+            /// Default mineral amount is zero.
+            /// do mineral generation elsewhere.
+            /// </summary>
+            m_aiMinerialReserves = new int[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerialReserves[mineralIterator] = 0;
+            }
         }
 
         /// <summary>

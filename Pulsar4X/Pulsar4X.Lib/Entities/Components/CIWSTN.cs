@@ -187,9 +187,24 @@ namespace Pulsar4X.Entities.Components
 	        /// cost + (Turret tracking gear / 100 + 5)
 	        /// cost + 2.5 per ECCM level
             /// </summary>
-            float costFactor = ((float)Constants.BFCTN.BeamFireControlTracking[TurretTech] / 100.0f) + 5.0f;
-	        cost = (decimal)( 3.0f + ((float)ROF * 5.0f) + ((float)GearCount * 0.5f * costFactor ) + ((float)ECCM * 2.5f ));
+            float costFactor = ((float)Constants.BFCTN.BeamFireControlTracking[TurretTech] / 1000.0f) + 8.0f;
+	        cost = (decimal)( ((float)ROF * 2.5f) + ((float)(GearCount * 0.5f) * costFactor ) + ((float)ECCM * 5.0f ));
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+
+            /// <summary>
+            /// Duranium cost seems a consistent turretSize * 5, but uridium seems to be the leftover.
+            /// </summary>
+            float UridiumAdjust = (float)(GearCount * 0.5f * costFactor) - (GearCount * 2.5f);
+
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = ((decimal)GearCount * 2.5m);
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Corbomite] = ((decimal)ECCM * 5.0m);
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = ((decimal)ROF * 2.5m);
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = ((decimal)UridiumAdjust);
 
             isSalvaged = false;
             isObsolete = false;

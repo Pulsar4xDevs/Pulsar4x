@@ -104,6 +104,14 @@ namespace Pulsar4X.Entities.Components
                 cost = (decimal)(size * 4.0f) + (decimal)(size * (float)(ReloadTech-1));
             }
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.25m;
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = cost * 0.75m;
+
             /// <summary>
             /// Missile Launcher Specific stats:
             /// </summary>

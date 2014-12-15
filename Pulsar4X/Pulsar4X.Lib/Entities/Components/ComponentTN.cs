@@ -169,6 +169,23 @@ namespace Pulsar4X.Entities.Components
             get { return m_oComponentType; }
             set { m_oComponentType = value; }
         }
+
+        
+        /// <summary>
+        /// Cost of this component in minerals
+        /// </summary>
+        private decimal[] m_aiMinerialsCost;
+        public decimal[] minerialsCost
+        {
+            get
+            {
+                return m_aiMinerialsCost;
+            }
+            set
+            {
+                m_aiMinerialsCost = value;
+            }
+        }
     }
     /// <summary>
     /// End ComponentDefTN class

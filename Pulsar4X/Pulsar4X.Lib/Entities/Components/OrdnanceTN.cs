@@ -113,6 +113,13 @@ namespace Pulsar4X.Entities.Components
             isObsolete = false;
             cost = (decimal)(EnginePower / 4.0f);
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Gallicite] = cost;
+
             /// <summary>
             /// Ignore these:
             /// </summary>

@@ -30,6 +30,36 @@ namespace Pulsar4X.Entities.Components
             cost = ComponentCost;
             componentType = GeneralComponentType;
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            
+            switch (componentType)
+            {
+                case ComponentTypeTN.Crew: //25% Duranium 75% Mercassium
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.25m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Mercassium] = cost * 0.75m;
+                break;
+                case ComponentTypeTN.Fuel: //50% Duranium 50% Boronide
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.50m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = cost * 0.50m;
+                break;
+                case ComponentTypeTN.Engineering: //100% Duranium
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost;
+                break;
+                case ComponentTypeTN.Bridge:      //50% Duranium, 50% corbomite
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.50m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Corbomite] = cost * 0.50m;
+                break;
+                //case ComponentTypeTN.FlagBridge: 50% corbomite, 50% Uridium
+                //case ComponentTypeTN.MaintenanceBay: 50% Duranium, 50% Neutronium
+                //case ComponentTypeTN.OrbitalHabitat: 25% Duranium, 25% Boronide, 50% Mercassium
+                //case ComponentTypeTN.RecFacility: 20% Duranium, 20% Tritanium, 60% Boronide
+                //case ComponentTypeTN.DamageControl: 50% Duranium, 25% Neutronium, 25% Uridium
+            }
+
             isDivisible = false;
 
             if (componentType <= ComponentTypeTN.MaintenanceBay)

@@ -498,6 +498,39 @@ namespace Pulsar4X.Entities.Components
                 m_oROF = 5;
             }
 
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+            switch (componentType)
+            {
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvParticle:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave: //20%D 20%B 60%C
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.2m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = cost * 0.2m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Corundium] = cost * 0.6m;
+                    break;
+
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.AdvRail: //20%D 20%B 60%N
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.2m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = cost * 0.2m;
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = cost * 0.6m;
+                    break;
+
+                case ComponentTypeTN.Gauss: //100%V
+                    minerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = cost;
+                    break;
+            }
+            
+
             isMilitary = true;
             isObsolete = false;
             isDivisible = false;
