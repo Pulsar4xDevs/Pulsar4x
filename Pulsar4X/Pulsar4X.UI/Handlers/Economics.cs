@@ -548,6 +548,7 @@ namespace Pulsar4X.UI.Handlers
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = Header;
+                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
                 col.DefaultCellStyle.Padding = newPadding;
@@ -2654,6 +2655,42 @@ namespace Pulsar4X.UI.Handlers
                             }
                             break;
                         case BuildListObject.ListEntityType.Missile:
+                            OrdnanceDefTN Missile = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as OrdnanceDefTN;
+                            CostString = String.Format("Cost: {0:N2}", Missile.cost);
+                            m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                            for (int MineralIterator = 0; MineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; MineralIterator++ )
+                            {
+                                if (Missile.minerialsCost[MineralIterator] != 0.0m)
+                                {
+                                    string FormattedMineralTotal = CurrentPopulation.Minerials[MineralIterator].ToString("#,##0");
+                                    CostString = String.Format("{0:N4} x {1} ({2})", Missile.minerialsCost[MineralIterator], (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal);
+                                    m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                                }
+                            }
+                            if (Missile.fuelCost != 0.0f)
+                            {
+                                float fuel = 0.0f;
+                                string FormattedFuelTotal = "";
+                                if(CurrentPopulation.FuelStockpile > 1000000)
+                                {
+                                    fuel = CurrentPopulation.FuelStockpile / 1000000.0f;
+                                    FormattedFuelTotal = String.Format("{0:N2}m",fuel);
+                                }
+                                else if(CurrentPopulation.FuelStockpile > 100000)
+                                {
+                                    fuel = CurrentPopulation.FuelStockpile / 100000.0f;
+                                    FormattedFuelTotal = String.Format("{0:N2}k",fuel);
+                                }
+                                else
+                                {
+                                    FormattedFuelTotal = CurrentPopulation.FuelStockpile.ToString("#,##0");
+                                }
+                                CostString = String.Format("Fuel x{0} ({1})\n", Math.Floor(Missile.fuelCost),FormattedFuelTotal);
+                                m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
+                            }
+
+
+
                             break;
                         case BuildListObject.ListEntityType.Fighter:
                             break;

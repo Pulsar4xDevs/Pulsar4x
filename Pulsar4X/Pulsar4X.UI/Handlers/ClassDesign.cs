@@ -1789,6 +1789,7 @@ namespace Pulsar4X.UI.Handlers
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = Header;
+                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 col.DefaultCellStyle.Padding = newPadding;
@@ -1852,7 +1853,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CrewQuarters[loop].crew;
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CrewQuarters[loop]);
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -1880,7 +1881,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.FuelStorage[loop].size * 50.0f).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.FuelStorage[loop].crew;
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.FuelStorage[loop]);
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -1908,7 +1909,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.EngineeringSpaces[loop].size * 50.0f).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.EngineeringSpaces[loop].crew;
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.EngineeringSpaces[loop]);
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -1959,7 +1960,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.OtherComponents[loop].size * 50.0f).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.OtherComponents[loop].crew;
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.OtherComponents[loop]);
 
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.OtherComponents[loop].componentType).ToString();
                             m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2010,7 +2011,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.Engines[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.Engines[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.Engines[loop]); ;
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2062,7 +2063,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.BeamFireControlDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.BeamFireControlDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamFireControlDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2108,7 +2109,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.MissileFireControlDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.MissileFireControlDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MissileFireControlDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2184,7 +2185,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.BeamWeaponDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.BeamWeaponDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamWeaponDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2218,7 +2219,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CIWSDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CIWSDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CIWSDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2265,7 +2266,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.TurretDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.TurretDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.TurretDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.TurretDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2316,7 +2317,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.MLauncherDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.MLauncherDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MLauncherDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MLauncherDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2366,7 +2367,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.MagazineDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.MagazineDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MagazineDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MagazineDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2440,7 +2441,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ReactorDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ReactorDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ReactorDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ReactorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2507,7 +2508,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ActiveSensorDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ActiveSensorDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ActiveSensorDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ActiveSensorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2557,7 +2558,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.PassiveSensorDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.PassiveSensorDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.PassiveSensorDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.PassiveSensorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2607,7 +2608,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ShieldDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ShieldDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ShieldDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ShieldDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2657,7 +2658,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CargoHandleSystemDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CargoHandleSystemDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHandleSystemDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHandleSystemDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2685,7 +2686,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CargoHoldDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CargoHoldDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHoldDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHoldDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2713,7 +2714,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ColonyBayDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ColonyBayDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ColonyBayDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ColonyBayDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2794,7 +2795,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CrewQuarters[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CrewQuarters[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2847,7 +2848,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.FuelStorage[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.FuelStorage[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.FuelStorage[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2900,7 +2901,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.EngineeringSpaces[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.EngineeringSpaces[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.EngineeringSpaces[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -2984,7 +2985,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.OtherComponents[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.OtherComponents[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.OtherComponents[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.OtherComponents[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3045,7 +3046,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.Engines[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.Engines[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.Engines[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3103,7 +3104,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamFireControlDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamFireControlDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamFireControlDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3178,7 +3179,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MissileFireControlDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MissileFireControlDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MissileFireControlDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3274,7 +3275,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamWeaponDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamWeaponDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamWeaponDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3330,7 +3331,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CIWSDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CIWSDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CIWSDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3403,7 +3404,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.TurretDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.TurretDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.TurretDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.TurretDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3464,7 +3465,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MLauncherDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MLauncherDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MLauncherDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MLauncherDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3525,7 +3526,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MagazineDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MagazineDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MagazineDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MagazineDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3589,7 +3590,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ReactorDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ReactorDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ReactorDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ReactorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3667,7 +3668,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ActiveSensorDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ActiveSensorDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ActiveSensorDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ActiveSensorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3728,7 +3729,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.PassiveSensorDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.PassiveSensorDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.PassiveSensorDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.PassiveSensorDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3789,7 +3790,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ShieldDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ShieldDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ShieldDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ShieldDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3850,7 +3851,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CargoHandleSystemDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CargoHandleSystemDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHandleSystemDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHandleSystemDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3907,7 +3908,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CargoHoldDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CargoHoldDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHoldDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHoldDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3964,7 +3965,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ColonyBayDef[loop].size * 50.0f).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ColonyBayDef[loop].crew;
 
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = "Not Yet Implemented";
+                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ColonyBayDef[loop]);
 
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ColonyBayDef[loop].componentType).ToString();
                                 m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
@@ -3985,6 +3986,24 @@ namespace Pulsar4X.UI.Handlers
 #endif
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds the mineral cost for AuroraTN components.
+        /// </summary>
+        /// <param name="Comp">Component whos cost I want.</param>
+        /// <returns>Mineral cost string.</returns>
+        private String BuildMineralCost(ComponentDefTN Comp)
+        {
+            String MineralString = "";
+            for (int mineralIterator = 1; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                if (Comp.minerialsCost[mineralIterator] != 0)
+                {
+                    MineralString = String.Format("{0} {1:N2}x {2}", MineralString, Comp.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                }
+            }
+            return MineralString;
         }
 
 

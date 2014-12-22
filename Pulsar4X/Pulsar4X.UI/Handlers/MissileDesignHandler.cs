@@ -564,6 +564,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void CloseMDButton_Click(object sender, EventArgs e)
         {
+            m_oMissileDesignPanel.MissileSummaryTextBox.Clear();
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oMissileDesignPanel.Hide();
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
@@ -1099,32 +1100,24 @@ namespace Pulsar4X.UI.Handlers
 
             res = float.TryParse(m_oMissileDesignPanel.ECMMSPTextBox.Text, out ECM);
 
-            if (res && ECM >= 0.0f)
+            if (res && ECM > 0.0f)
             {
                 int ECMTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MissileECM];
                 if (ECMTech > 9)
                     ECMTech = 9;
 
-                if (ECM == 0)
-                {
-                    ECMMSP = 0.0f;
-                    ECMValue = 0;
-                }
-                else
-                {
-
-                    /// <summary>
-                    /// Always 1.0 for now.
-                    /// </summary>
+                if (ECM > 1.0f)
+                     ECMMSP = 1.0f;
+                 else
+                     ECMMSP = ECM;
                     
-                    ECMMSP = 1.0f;
-                    ECMValue = ECMTech + 1;
-                }
+                 ECMValue = (float)((ECMTech + 1) * 10) * ECMMSP;
+                
 
                 m_oMissileDesignPanel.ECMMSPTextBox.Text = ECMMSP.ToString();
                 m_oMissileDesignPanel.ECMValueTextBox.Text = ECMValue.ToString();
             }
-            else if (ECM < 0.0f)
+            else if (res && ECM < 0.0f)
             {
                 ECMMSP = 0.0f;
                 ECMValue = 0.0f;
@@ -1132,7 +1125,12 @@ namespace Pulsar4X.UI.Handlers
                 m_oMissileDesignPanel.ECMMSPTextBox.Text = "0";
                 m_oMissileDesignPanel.ECMValueTextBox.Text = "0";
             }
-            else
+            else if(res && ECM == 0.0f)
+            {
+                ECMMSP = 0.0f;
+                ECMValue = 0.0f;
+            }
+            else if(res == false)
             {
                 ECMMSP = 0.0f;
                 ECMValue = 0.0f;
@@ -1422,6 +1420,12 @@ namespace Pulsar4X.UI.Handlers
                     m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
                 }
 
+                if (OrdnanceProject.eCMValue != 0)
+                {
+                    Entry = String.Format("ECM Level: {0}\n", ((float)OrdnanceProject.eCMValue / 10.0f));
+                    m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
+                }
+
                 Entry = String.Format("Cost Per Missile: {0}\n", OrdnanceProject.cost);
                 m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
 
@@ -1507,7 +1511,19 @@ namespace Pulsar4X.UI.Handlers
                                                                                                                    OrdnanceProject.ToHit(5000.0f), OrdnanceProject.ToHit(10000.0f));
                 m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
 
-                Entry = String.Format("Materials Required:    Not Yet Implemented\n");
+                Entry = "Materials Required: ";
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++ )
+                {
+                    if(OrdnanceProject.minerialsCost[mineralIterator] != 0.0m)
+                    {
+                        Entry = String.Format("{0}   {1:N3}x {2}", Entry, OrdnanceProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                    }
+                }
+                if (OrdnanceProject.fuel != 0.0f)
+                {
+                    Entry = String.Format("{0}   Fuel x{1}\n", Entry, Math.Floor(OrdnanceProject.fuelCost));
+                }
+
                 m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
 
                 Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (OrdnanceProject.cost * 100));

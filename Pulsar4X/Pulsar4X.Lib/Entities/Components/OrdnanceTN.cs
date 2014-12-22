@@ -247,6 +247,15 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Total amount of fuel that this missile and all submissiles will use
+        /// </summary>
+        private float FuelCost;
+        public float fuelCost
+        {
+            get { return FuelCost; }
+        }
+
+        /// <summary>
         /// Manueverability of this missile.
         /// </summary>
         private int Agility;
@@ -559,7 +568,7 @@ namespace Pulsar4X.Entities.Components
                 /// <summary>
                 /// Laser warheads won't do radiation, but won't pierce atmosphere.
                 /// </summary>
-                RadValue = 0; 
+                RadValue = 0;
 
             }
             size = size + whMSP;
@@ -568,6 +577,8 @@ namespace Pulsar4X.Entities.Components
             /// Fuel handling Section.
             /// </summary>
             Fuel = fuelMSP * 2500.0f;
+            FuelCost = Fuel;
+
             size = size + fuelMSP;
 
 
@@ -633,7 +644,10 @@ namespace Pulsar4X.Entities.Components
 
             if (ECMMSP != 0.0f)
             {
-                ECMValue = (ecmTech+1) * 10;
+                if (ECMMSP > 1.0f)
+                    ECMMSP = 1.0f;
+
+                ECMValue = (int)Math.Round((float)(ecmTech+1) * 10.0f * ECMMSP);
                 size = size + ECMMSP;
             }
 
@@ -675,7 +689,14 @@ namespace Pulsar4X.Entities.Components
                 DetectMSP = DetectMSP - 6;
             }
 
-            cost = cost + (decimal)((float)Warhead / 4.0f);
+            if (Warhead == RadValue || RadValue == 0)
+            {
+                cost = cost + (decimal)((float)Warhead / 4.0f);
+            }
+            else
+            {
+                cost = cost + (decimal)((float)(Warhead * Constants.OrdnanceTN.radTech[radTech]) / 4.0f);
+            }
             if (OrdnanceEngine != null)
             {
                 cost = cost + (OrdnanceEngine.cost * EngineCount);
@@ -687,12 +708,37 @@ namespace Pulsar4X.Entities.Components
             cost = cost + (decimal)(ActiveStr);
             cost = cost + (decimal)(GeoStr * 25.0f);
             cost = cost + (decimal)((float)Armor / 4.0f);
-            cost = cost + (decimal)((float)ECMValue / 2.0f);
+            cost = cost + (decimal)((float)ECMValue / 20.0f);
+
+            minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0;
+            }
+
+            if (Warhead == RadValue || RadValue == 0)
+            {
+                 minerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = (decimal)(((float)Warhead / 4.0f) + ((float)Armor / 4.0f));
+            }
+            else
+            {
+                minerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = (decimal)((float)(Warhead * Constants.OrdnanceTN.radTech[radTech]) / 4.0f);
+            }
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Gallicite] = (decimal)(OrdnanceEngine.cost * EngineCount) + (decimal)((float)Agility / 50.0f);
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Uridium] = (decimal)(ThermalStr + EMStr + ActiveStr + (GeoStr * 25.0f) + ((float)ECMValue / 20.0f));
+            minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = (decimal)(ReactorValue * 3.0f);
 
             if (SubMunition != null)
             {
                 size = size + (SubMunition.size * SubMunitionCount);
                 cost = cost + (SubMunition.cost * SubMunitionCount);
+
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    minerialsCost[mineralIterator] = minerialsCost[mineralIterator] + (SubMunition.minerialsCost[mineralIterator] * SubMunitionCount);
+                }
+
+                FuelCost = FuelCost + (SubMunition.FuelCost * SubMunitionCount);
             }
 
             isObsolete = false;
