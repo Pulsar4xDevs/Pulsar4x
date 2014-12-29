@@ -148,6 +148,11 @@ namespace Pulsar4X.UI.Handlers
         private int BuildTabMaxRows = 50;
 
         /// <summary>
+        /// This is the max row count for the construction build queue data grid.
+        /// </summary>
+        private int ConstructionTabMaxRows = 50;
+
+        /// <summary>
         /// Dictionary of buildings and their GUID
         /// </summary>
         private Dictionary<Guid, BuildListObject> BuildLocationDict { get; set; }
@@ -232,6 +237,11 @@ namespace Pulsar4X.UI.Handlers
             BuildConstructionComboBox();
 
             m_oSummaryPanel.BuildDataGrid.SelectionChanged += new EventHandler(BuildDataGrid_SelectionChanged);
+
+            m_oSummaryPanel.CreateBuildProjButton.Click += new EventHandler(CreateBuildProjButton_Click);
+            m_oSummaryPanel.ModifyBuildProjButton.Click += new EventHandler(ModifyBuildProjButton_Click);
+            m_oSummaryPanel.CancelBuildProjButton.Click += new EventHandler(CancelBuildProjButton_Click);
+            m_oSummaryPanel.PauseBuildProjButton.Click += new EventHandler(PauseBuildProjButton_Click);
             #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
@@ -504,6 +514,74 @@ namespace Pulsar4X.UI.Handlers
         {
             BuildCostListBox();
         }
+
+        /// <summary>
+        /// These following button presses perform different tasks to the currently selected population's build queue.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CreateBuildProjButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentPopulation != null)
+            {
+                if (m_oSummaryPanel.BuildDataGrid.CurrentCell != null)
+                {
+                    float NumToBuild = -1.0f;
+                    float PercentCapacity = -1.0f;
+                    bool r1 = float.TryParse(m_oSummaryPanel.ItemNumberTextBox.Text, out NumToBuild);
+                    bool r2 = float.TryParse(m_oSummaryPanel.ItemPercentTextBox.Text, out PercentCapacity);
+
+                    if (m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex != -1 && r1 == true && r2 == true)
+                    {
+                        List<Guid> GID = BuildLocationDisplayDict.Keys.ToList();
+                        switch (BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].EntityType)
+                        {
+                            case BuildListObject.ListEntityType.Installation:
+                                Installation Install = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as Installation;
+                                CurrentPopulation.BuildQueueAddInstallation(Install,NumToBuild,PercentCapacity);
+                                break;
+                            case BuildListObject.ListEntityType.Component:
+                                ComponentDefTN Component = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as ComponentDefTN;
+                                CurrentPopulation.BuildQueueAddComponent(Component, NumToBuild, PercentCapacity);
+                                break;
+                            case BuildListObject.ListEntityType.Missile:
+                                OrdnanceDefTN Missile = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as OrdnanceDefTN;
+                                CurrentPopulation.BuildQueueAddMissile(Missile, NumToBuild, PercentCapacity);
+                                break;
+                            case BuildListObject.ListEntityType.Fighter:
+#warning fighter and PDC not done here.
+                                break;
+                            case BuildListObject.ListEntityType.PDC_Build:
+                                break;
+                            case BuildListObject.ListEntityType.PDC_Prefab:
+                                break;
+                            case BuildListObject.ListEntityType.PDC_Assemble:
+                                break;
+                            case BuildListObject.ListEntityType.PDC_Refit:
+                                break;
+                            case BuildListObject.ListEntityType.MaintenanceSupplies:
+                                CurrentPopulation.BuildQueueAddMSP(NumToBuild, PercentCapacity);
+                                break;
+                        }
+                    }
+                }
+            }
+            Build_BuildQueue();
+        }
+        /// <summary>
+        /// Need to find current selection for these next 3.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ModifyBuildProjButton_Click(object sender, EventArgs e)
+        {
+        }
+        private void CancelBuildProjButton_Click(object sender, EventArgs e)
+        {
+        }
+        private void PauseBuildProjButton_Click(object sender, EventArgs e)
+        {
+        }
         #endregion
 
 
@@ -543,14 +621,37 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="Header">Text of column header.</param>
         /// <param name="newPadding">Padding in use, not sure what this is or why its necessary. Cargo culting it is.</param>
-        private void AddColumn(String Header, Padding newPadding, DataGridView TheDataGrid)
+        /// <param name="CellControl">Alignment control. 0 = both left, 1 = header left, cells center, 2 = header center, cells left, 3 = both center.</param>
+        private void AddColumn(String Header, Padding newPadding, DataGridView TheDataGrid, int CellControl = -1)
         {
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.HeaderText = Header;
-                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+
+                col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+
+                if (CellControl == 0)
+                {
+                    col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                }
+                else if (CellControl == 1)
+                {
+                    col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                }
+                else if (CellControl == 2)
+                {
+                    col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+                }
+                else if (CellControl == 3)
+                {
+                    col.HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                }
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
                 col.DefaultCellStyle.Padding = newPadding;
 
                 if (col != null)
@@ -560,7 +661,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-#region General F2 page
+        #region General F2 page
         /// <summary>
         /// Build the tree view box of populations.
         /// </summary>
@@ -842,27 +943,27 @@ namespace Pulsar4X.UI.Handlers
         }
 #endregion
 
-#region Industrial Summary
+        #region Industrial Summary
         private void SetupSummaryDataGrid()
         {
             try
             {
                 // Add coloums:
                 Padding newPadding = new Padding(2, 0, 2, 0);
-                AddColumn("Item", newPadding, m_oSummaryPanel.SummaryDataGrid);
-                AddColumn("Amount", newPadding, m_oSummaryPanel.SummaryDataGrid);
-                AddColumn("Installation", newPadding, m_oSummaryPanel.SummaryDataGrid);
-                AddColumn("Number or Level", newPadding, m_oSummaryPanel.SummaryDataGrid);
+                AddColumn("Item", newPadding, m_oSummaryPanel.SummaryDataGrid,2);
+                AddColumn("Amount", newPadding, m_oSummaryPanel.SummaryDataGrid,3);
+                AddColumn("Installation", newPadding, m_oSummaryPanel.SummaryDataGrid,2);
+                AddColumn("Number or Level", newPadding, m_oSummaryPanel.SummaryDataGrid,3);
 
                 AddColumn("Item", newPadding, m_oSummaryPanel.BuildDataGrid);
 
-                AddColumn("Project", newPadding, m_oSummaryPanel.ConstructionDataGrid);
-                AddColumn("Amount Remaining", newPadding, m_oSummaryPanel.ConstructionDataGrid);
-                AddColumn("% of Capacity", newPadding, m_oSummaryPanel.ConstructionDataGrid);
-                AddColumn("Production Rate", newPadding, m_oSummaryPanel.ConstructionDataGrid);
-                AddColumn("Cost Per Item", newPadding, m_oSummaryPanel.ConstructionDataGrid);
-                AddColumn("Estimated Completion Date", newPadding, m_oSummaryPanel.ConstructionDataGrid);
-                AddColumn("Pause / Queue", newPadding, m_oSummaryPanel.ConstructionDataGrid);
+                AddColumn("Project", newPadding, m_oSummaryPanel.ConstructionDataGrid,0);
+                AddColumn("Amount Remaining", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
+                AddColumn("% of Capacity", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
+                AddColumn("Production Rate", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
+                AddColumn("Cost Per Item", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
+                AddColumn("Estimated Completion Date", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
+                AddColumn("Pause / Queue", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
 
                 // Add Rows:
                 for (int i = 0; i < 38; ++i)
@@ -2624,8 +2725,13 @@ namespace Pulsar4X.UI.Handlers
             }
 
             BuildCostListBox();
+
+            Build_BuildQueue();
         }
 
+        /// <summary>
+        /// This listbox handles the cost of the selected item to be built.
+        /// </summary>
         public void BuildCostListBox()
         {
             
@@ -2688,9 +2794,6 @@ namespace Pulsar4X.UI.Handlers
                                 CostString = String.Format("Fuel x{0} ({1})\n", Math.Floor(Missile.fuelCost),FormattedFuelTotal);
                                 m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                             }
-
-
-
                             break;
                         case BuildListObject.ListEntityType.Fighter:
                             break;
@@ -2736,8 +2839,128 @@ namespace Pulsar4X.UI.Handlers
                     }
                 }
             }
-            //Cost: AMT
-            //AMT x Resource(Total of Resource)
+        }
+
+        /// <summary>
+        /// This will determine estimated completion dates as well as other things.
+        /// </summary>
+        private void Build_BuildQueue()
+        {
+#warning fighters and PDCs not yet handled here.
+            try
+            {
+                if (CurrentPopulation != null)
+                {
+                    float BuildPercentage = 0.0f;
+
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[3].Value = "C Fact";
+                    int CurrentRow = 1;
+                    int QueueNum = 1;
+
+                    foreach (ConstructionBuildQueueItem CBQ in CurrentPopulation.ConstructionBuildQueue)
+                    {
+                        switch (CBQ.buildType)
+                        {
+                            case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = CBQ.installationBuild.Name;
+                                break;
+                            case ConstructionBuildQueueItem.CBType.ShipComponent:
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = CBQ.componentBuild.Name;
+                                break;
+                            case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = "Maintenance Supplies";
+                                break;
+                        }
+
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", CBQ.numToBuild);
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", CBQ.buildCapacity);
+
+                        //float DevotedToThis =  CBQ.buildCapacity * CurrentPopulation.TotalCFIndustry;
+
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("Implement This");
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", CBQ.costPerItem);
+                        
+
+                        if ((BuildPercentage + CBQ.buildCapacity) <= 100.0f)
+                        {
+                            BuildPercentage = BuildPercentage + CBQ.buildCapacity;
+                            //this item is being built
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "Implement This";
+
+                            if (CBQ.inProduction == true)
+                            {
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "No";
+                            }
+                            else
+                            {
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "Paused";
+                            }
+                        }
+                        else
+                        {
+                            //this item is in the queue.
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = String.Format("Queue-{0}",QueueNum);
+                            QueueNum++;
+                        }
+
+                        CurrentRow++;
+                    }
+
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = "";
+                    CurrentRow++;
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = "O Fact";
+                    CurrentRow++;
+                    QueueNum = 1;
+                    BuildPercentage = 0.0f;
+
+                    foreach (MissileBuildQueueItem MBQ in CurrentPopulation.MissileBuildQueue)
+                    {
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = MBQ.ordnanceDef.Name;
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", MBQ.numToBuild);
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", MBQ.buildCapacity);
+
+                        //float DevotedToThis =  MBQ.buildCapacity * CurrentPopulation.TotalOFIndustry;
+
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("Implement This");
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", MBQ.costPerItem);
+
+
+                        if ((BuildPercentage + MBQ.buildCapacity) <= 100.0f)
+                        {
+                            BuildPercentage = BuildPercentage + MBQ.buildCapacity;
+                            //this item is being built
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "Implement This";
+
+                            if (MBQ.inProduction == true)
+                            {
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "No";
+                            }
+                            else
+                            {
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "Paused";
+                            }
+                        }
+                        else
+                        {
+                            //this item is in the queue.
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = String.Format("Queue-{0}", QueueNum);
+                            QueueNum++;
+                        }
+
+                        CurrentRow++;
+                    }
+
+
+                }
+            }
+            catch
+            {
+#if LOG4NET_ENABLED
+                logger.Error("Error building the build queue.");
+#endif
+            }
         }
         #endregion
 

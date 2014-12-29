@@ -22,6 +22,7 @@ namespace Pulsar4X.Entities
         public float numToBuild
         {
             get { return m_NumToBuild; }
+            set { m_NumToBuild = value; }
         }
 
         /// <summary>
@@ -31,6 +32,7 @@ namespace Pulsar4X.Entities
         public float buildCapacity
         {
             get { return m_BuildCapcity; }
+            set { m_BuildCapcity = value; }
         }
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace Pulsar4X.Entities
         public float productionRate
         {
             get { return m_ProductionRate; }
+            set { m_ProductionRate = value; }
         }
 
         /// <summary>
@@ -49,6 +52,7 @@ namespace Pulsar4X.Entities
         public decimal costPerItem
         {
             get { return m_CostPerItem; }
+            set { m_CostPerItem = value; }
         }
 
         /// <summary>
@@ -58,20 +62,30 @@ namespace Pulsar4X.Entities
         public DateTime completionDate
         {
             get { return m_CompletionDate; }
+            set { m_CompletionDate = value; }
         }
 
         /// <summary>
-        /// Is this item currently being built or is construction paused? queued items can be paused
+        /// Is this item currently being built or is construction paused? queued items can be paused. false = paused.
         /// </summary>
         private bool m_InProduction;
         public bool inProduction
         {
             get { return m_InProduction; }
+            set { m_InProduction = value; }
         }
 
-        public void UpdateBuildQueueInfo()
+        /// <summary>
+        /// Update the build queue information for this item. should it be in production? how many should be built, how much industry should be put in?
+        /// </summary>
+        /// <param name="BuildNum">Number to build</param>
+        /// <param name="BuildPercent">Percent of industry to devote to production.</param>
+        /// <param name="Production">Is this item paused?</param>
+        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production)
         {
-
+            m_NumToBuild = BuildNum;
+            m_BuildCapcity = BuildPercent;
+            m_InProduction = true;
         }
     }
 
@@ -140,6 +154,11 @@ namespace Pulsar4X.Entities
         /// <param name="InstallationToBuild">Installation to build</param>
         public ConstructionBuildQueueItem(Installation InstallationToBuild)
         {
+            numToBuild = 0.0f;
+            buildCapacity = 0.0f;
+            productionRate = 0.0f;
+            costPerItem = InstallationToBuild.Cost;
+
             m_BuildType = CBType.PlanetaryInstallation;
             m_InstallationBuild = InstallationToBuild;
         }
@@ -150,6 +169,11 @@ namespace Pulsar4X.Entities
         /// <param name="ComponentToBuild">Ship Component to build</param>
         public ConstructionBuildQueueItem(ComponentDefTN ComponentToBuild)
         {
+            numToBuild = 0.0f;
+            buildCapacity = 0.0f;
+            productionRate = 0.0f;
+            costPerItem = ComponentToBuild.cost;
+
             m_BuildType = CBType.ShipComponent;
             m_ComponentBuild = ComponentToBuild;
         }
@@ -159,6 +183,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public ConstructionBuildQueueItem()
         {
+            numToBuild = 0.0f;
+            buildCapacity = 0.0f;
+            productionRate = 0.0f;
+            costPerItem = 0.25m;
+
             m_BuildType = CBType.MaintenanceSupplies;
         }
     }
@@ -183,6 +212,13 @@ namespace Pulsar4X.Entities
         /// <param name="Definition"></param>
         public MissileBuildQueueItem(OrdnanceDefTN Definition)
         {
+            numToBuild = 0.0f;
+            buildCapacity = 0.0f;
+            productionRate = 0.0f;
+            costPerItem = Definition.cost;
+
+            inProduction = false;
+
             m_OrdanceDef = Definition;
         }
     }
@@ -207,6 +243,11 @@ namespace Pulsar4X.Entities
         /// <param name="Definition"></param>
         public FighterBuildQueueItem(ShipClassTN Definition)
         {
+            numToBuild = 0.0f;
+            buildCapacity = 0.0f;
+            productionRate = 0.0f;
+            costPerItem = Definition.BuildPointCost;
+
             m_ShipClassDef = Definition;
         }
     }
@@ -656,6 +697,7 @@ namespace Pulsar4X.Entities
             }
         }
 
+        #region Sensor Characteristcs
         /// <summary>
         /// Calculate the thermal signature of this colony
         /// </summary>
@@ -731,5 +773,63 @@ namespace Pulsar4X.Entities
             EMSignature = signature;
             return signature;
         }
+        #endregion
+
+        #region Build Queue
+        /// <summary>
+        /// Add an installation to the build queue.
+        /// </summary>
+        /// <param name="Install">Installation to add.</param>
+        /// <param name="BuildAmt">number of such installations to construct.</param>
+        /// <param name="RequestedBuildPercentage">Percent of construction factories, conventional industry, engineering teams to devote to construction.</param>
+        public void BuildQueueAddInstallation(Installation Install, float BuildAmt, float RequestedBuildPercentage)
+        {
+            ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(Install);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+
+            ConstructionBuildQueue.Add(NewCBQItem);
+        }
+
+        /// <summary>
+        /// Add a component to the build queue.
+        /// </summary>
+        /// <param name="ComponentDef">Component to add.</param>
+        /// <param name="BuildAmt">number of components to construct.</param>
+        /// <param name="RequestedBuildPercentage">Percent of construction factories, conventional industry, engineering teams to devote to construction.</param>
+        public void BuildQueueAddComponent(ComponentDefTN ComponentDef, float BuildAmt, float RequestedBuildPercentage)
+        {
+            ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(ComponentDef);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+
+            ConstructionBuildQueue.Add(NewCBQItem);
+        }
+
+        /// <summary>
+        /// Add MSP to the build queue.
+        /// </summary>
+        /// <param name="BuildAmt">number of MSP to construct.</param>
+        /// <param name="RequestedBuildPercentage">Percent of construction factories, conventional industry, engineering teams to devote to construction.</param>
+        public void BuildQueueAddMSP(float BuildAmt, float RequestedBuildPercentage)
+        {
+            ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem();
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+
+            ConstructionBuildQueue.Add(NewCBQItem);
+        }
+
+        /// <summary>
+        /// Add a missile to the missile build queue.
+        /// </summary>
+        /// <param name="MissileDef">Missile to add</param>
+        /// <param name="BuildAmt">missile build count</param>
+        /// <param name="RequestedBuildPercentage">percentage of Ordnance factories to devote to construction.</param>
+        public void BuildQueueAddMissile(OrdnanceDefTN MissileDef, float BuildAmt, float RequestedBuildPercentage)
+        {
+            MissileBuildQueueItem NewMBQItem = new MissileBuildQueueItem(MissileDef);
+            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+
+            MissileBuildQueue.Add(NewMBQItem);
+        }
+        #endregion
     }
 }

@@ -133,6 +133,54 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oStockpileButton; }
         }
+
+        /// <summary>
+        /// Create an industrial project at this population.
+        /// </summary>
+        public Button CreateBuildProjButton
+        {
+            get { return m_oCreateButton; }
+        }
+
+        /// <summary>
+        /// Modify an industrial project at this population.
+        /// </summary>
+        public Button ModifyBuildProjButton
+        {
+            get { return m_oModifyButton; }
+        }
+
+        /// <summary>
+        /// Cancel an industrial project at this population.
+        /// </summary>
+        public Button CancelBuildProjButton
+        {
+            get { return m_oCancelButton; }
+        }
+
+        /// <summary>
+        /// Pause an industrial project at this population.
+        /// </summary>
+        public Button PauseBuildProjButton
+        {
+            get { return m_oPauseButton; }
+        }
+
+        /// <summary>
+        /// User input textbox for number of an item to construct.
+        /// </summary>
+        public TextBox ItemNumberTextBox
+        {
+            get { return m_oItemNumberTextBox; }
+        }
+
+        /// <summary>
+        /// User input textbox for percentage of population build capacity to devote to construction.
+        /// </summary>
+        public TextBox ItemPercentTextBox
+        {
+            get { return m_oItemPercentTextBox; }
+        }
         #endregion
 
         #endregion
