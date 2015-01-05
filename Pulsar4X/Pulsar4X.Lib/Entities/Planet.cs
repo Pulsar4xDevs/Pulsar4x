@@ -187,8 +187,8 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// What mineral resources does this planet have to be mined?
         /// </summary>
-        int[] m_aiMinerialReserves;
-        public int[] MinerialReserves
+        float [] m_aiMinerialReserves;
+        public float [] MinerialReserves
         {
             get
             {
@@ -230,10 +230,10 @@ namespace Pulsar4X.Entities
             /// Default mineral amount is zero.
             /// do mineral generation elsewhere.
             /// </summary>
-            m_aiMinerialReserves = new int[Constants.Minerals.NO_OF_MINERIALS];
+            m_aiMinerialReserves = new float[Constants.Minerals.NO_OF_MINERIALS];
             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
             {
-                m_aiMinerialReserves[mineralIterator] = 0;
+                m_aiMinerialReserves[mineralIterator] = 0.0f;
             }
         }
 

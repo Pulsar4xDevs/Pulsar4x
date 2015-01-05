@@ -190,6 +190,9 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.FactionComboBox.SelectedIndexChanged += (s, args) => m_oSummaryPanel.FactionComboBox.DataBindings["SelectedItem"].WriteValue();
             m_oSummaryPanel.FactionComboBox.SelectedIndexChanged += new EventHandler(FactionComboBox_SelectedIndexChanged);
 
+            VM.PopulationChanged += (s, args) => CurrentPopulation = VM.CurrentPopulation;
+            CurrentPopulation = VM.CurrentPopulation;
+
             /// <summary>
             /// Checkboxes:
             /// </summary>
@@ -362,6 +365,8 @@ namespace Pulsar4X.UI.Handlers
             /// update planet/taskgroup/other positions as needed.
             /// </summary>
             SystemMapReference.RefreshStarSystem();
+
+            SoftRefresh();
         }
 
 
@@ -613,6 +618,22 @@ namespace Pulsar4X.UI.Handlers
                 /// Industry Tab:
                 /// </summary>
                 RefreshIndustryTab();
+            }
+        }
+
+        private void SoftRefresh()
+        {
+            if (m_oCurrnetFaction != null)
+            {
+                /// <summary>
+                /// Summary Tab:
+                /// </summary>
+                RefreshSummaryCells();
+
+                /// <summary>
+                /// Refresh the construction queue:
+                /// </summary>
+                Build_BuildQueue();
             }
         }
 
@@ -1682,7 +1703,11 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Don't want to print this space if there is nothing above it.
                     /// </summary>
-                    if (Adjust2 != 0 && (string)m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[3].Value != "")
+                    if (Adjust2 != 0 && (string)m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value == "")
+                    {
+                        Adjust2++;
+                    }
+                    else if (Adjust2 != 0)// && (string)m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[3].Value != "")
                     {
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "";
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[3].Value = "";
@@ -2825,7 +2850,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                             for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
                             {
-                                if (Constants.Colony.MaintenanceMineralCost[MineralIterator] != 0.0f)
+                                if (Constants.Colony.MaintenanceMineralCost[MineralIterator] != 0.0m)
                                 {
                                     string FormattedMineralTotal = CurrentPopulation.Minerials[MineralIterator].ToString("#,##0");
 
@@ -2853,12 +2878,23 @@ namespace Pulsar4X.UI.Handlers
                 {
                     float BuildPercentage = 0.0f;
 
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[0].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[1].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[2].Value = "";
                     m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[3].Value = "C Fact";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[4].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[5].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[0].Cells[6].Value = "";
                     int CurrentRow = 1;
                     int QueueNum = 1;
 
                     foreach (ConstructionBuildQueueItem CBQ in CurrentPopulation.ConstructionBuildQueue)
                     {
+                        if (CurrentRow > ConstructionTabMaxRows)
+                        {
+#warning do something about this condition.
+                        }
+
                         switch (CBQ.buildType)
                         {
                             case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
@@ -2875,18 +2911,24 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", CBQ.numToBuild);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", CBQ.buildCapacity);
 
-                        //float DevotedToThis =  CBQ.buildCapacity * CurrentPopulation.TotalCFIndustry;
+                        float DevotedToThis =  (CBQ.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
 
-                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("Implement This");
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("{0:N2}", DevotedToThis);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", CBQ.costPerItem);
                         
 
                         if ((BuildPercentage + CBQ.buildCapacity) <= 100.0f)
                         {
                             BuildPercentage = BuildPercentage + CBQ.buildCapacity;
-                            //this item is being built
-                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "Implement This";
+                            float BPRequirement = (float)Math.Floor(CBQ.numToBuild) * (float)CBQ.costPerItem;
+                            int TimeToBuild = (int)Math.Floor( (float)((BPRequirement / DevotedToThis) * Constants.TimeInSeconds.Year));
 
+                            DateTime EstTime = GameState.Instance.GameDateTime;
+                            TimeSpan TS = new TimeSpan(0, 0, TimeToBuild);
+                            EstTime = EstTime.Add(TS);
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+
+                            //this item is being built
                             if (CBQ.inProduction == true)
                             {
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "No";
@@ -2907,31 +2949,67 @@ namespace Pulsar4X.UI.Handlers
                         CurrentRow++;
                     }
 
+                    if (CurrentRow > ConstructionTabMaxRows)
+                    {
+#warning do something about this condition.
+                    }
+
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = "";
                     m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "";
                     CurrentRow++;
+
+                    if (CurrentRow > ConstructionTabMaxRows)
+                    {
+#warning do something about this condition.
+                    }
+
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = "";
                     m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = "O Fact";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "";
+                    m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "";
                     CurrentRow++;
                     QueueNum = 1;
                     BuildPercentage = 0.0f;
 
                     foreach (MissileBuildQueueItem MBQ in CurrentPopulation.MissileBuildQueue)
                     {
+                        if (CurrentRow > ConstructionTabMaxRows)
+                        {
+#warning do something about this condition.
+                        }
+
+
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = MBQ.ordnanceDef.Name;
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", MBQ.numToBuild);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", MBQ.buildCapacity);
 
-                        //float DevotedToThis =  MBQ.buildCapacity * CurrentPopulation.TotalOFIndustry;
+                        float DevotedToThis = (MBQ.buildCapacity/100.0f) * CurrentPopulation.CalcTotalIndustry();
 
-                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("Implement This");
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("{0:N2}", DevotedToThis);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", MBQ.costPerItem);
 
 
                         if ((BuildPercentage + MBQ.buildCapacity) <= 100.0f)
                         {
                             BuildPercentage = BuildPercentage + MBQ.buildCapacity;
-                            //this item is being built
-                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "Implement This";
+                           
+                            float BPRequirement = (float)Math.Floor(MBQ.numToBuild) * (float)MBQ.costPerItem;
+                            int TimeToBuild = (int)Math.Floor((float)((BPRequirement / DevotedToThis) * Constants.TimeInSeconds.Year));
 
+                            DateTime EstTime = GameState.Instance.GameDateTime;
+                            TimeSpan TS = new TimeSpan(0, 0, TimeToBuild);
+                            EstTime = EstTime.Add(TS);
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+
+                            //this item is being built
                             if (MBQ.inProduction == true)
                             {
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "No";
@@ -2948,11 +3026,19 @@ namespace Pulsar4X.UI.Handlers
                             m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = String.Format("Queue-{0}", QueueNum);
                             QueueNum++;
                         }
-
                         CurrentRow++;
                     }
 
-
+                    for (int RowIterator = CurrentRow; RowIterator < ConstructionTabMaxRows; RowIterator++)
+                    {
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[0].Value = "";
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[1].Value = "";
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[2].Value = "";
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[3].Value = "";
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[4].Value = "";
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[5].Value = "";
+                        m_oSummaryPanel.ConstructionDataGrid.Rows[RowIterator].Cells[6].Value = "";
+                    }
                 }
             }
             catch

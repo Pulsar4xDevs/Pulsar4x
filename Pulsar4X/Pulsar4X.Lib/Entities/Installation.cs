@@ -111,8 +111,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool CanBeBuilt { get; set; }
 
-        int[] m_aiMinerialsCost;
-        public int[] MinerialsCost
+        decimal[] m_aiMinerialsCost;
+        public decimal[] MinerialsCost
         {
             get
             {
@@ -155,7 +155,7 @@ namespace Pulsar4X.Entities
             Tonnage = new BindingList<int>();
             Slipways = new BindingList<int>();
             Type = a_eType;
-            m_aiMinerialsCost = new int[Constants.Minerals.NO_OF_MINERIALS];
+            m_aiMinerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
             ThermalSignature = 0;
             EMSignature = 0;
             RequiredPrerequisitInstallation = InstallationType.InstallationCount;

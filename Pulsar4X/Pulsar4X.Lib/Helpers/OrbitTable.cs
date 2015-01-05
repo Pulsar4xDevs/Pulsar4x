@@ -79,6 +79,9 @@ namespace Pulsar4X.Lib
             /// </summary>
             //double orbitFraction = 1.0 * ((DaysSinceEpoch + theOrbit.TimeSinceApogee) % orbitPeriod) / orbitPeriod;
             double orbitFraction = 1.0 * theOrbit.TimeSinceApogee / orbitPeriod;
+            double orbitFractionRemainder = 1.0 * ((float)(theOrbit.TimeSinceApogeeRemainder / (float)Constants.TimeInSeconds.Day) / (float)orbitPeriod);
+
+            orbitFraction = orbitFraction + orbitFractionRemainder;
 
 #warning how can this orbit code be made more efficient?
 

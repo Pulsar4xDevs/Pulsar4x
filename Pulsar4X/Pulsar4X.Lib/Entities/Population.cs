@@ -154,6 +154,7 @@ namespace Pulsar4X.Entities
         /// <param name="InstallationToBuild">Installation to build</param>
         public ConstructionBuildQueueItem(Installation InstallationToBuild)
         {
+            Name = InstallationToBuild.Name;
             numToBuild = 0.0f;
             buildCapacity = 0.0f;
             productionRate = 0.0f;
@@ -169,6 +170,7 @@ namespace Pulsar4X.Entities
         /// <param name="ComponentToBuild">Ship Component to build</param>
         public ConstructionBuildQueueItem(ComponentDefTN ComponentToBuild)
         {
+            Name = ComponentToBuild.Name;
             numToBuild = 0.0f;
             buildCapacity = 0.0f;
             productionRate = 0.0f;
@@ -183,6 +185,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public ConstructionBuildQueueItem()
         {
+            Name = "Maintenance Supplies";
             numToBuild = 0.0f;
             buildCapacity = 0.0f;
             productionRate = 0.0f;
@@ -386,8 +389,8 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Mineral stockpile for this population
         /// </summary>
-        int[] m_aiMinerials;
-        public int[] Minerials
+        float[] m_aiMinerials;
+        public float[] Minerials
         {
             get
             {
@@ -461,7 +464,7 @@ namespace Pulsar4X.Entities
         public Population(Planet a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
         {
             // initialise minerials:
-            m_aiMinerials = new int[Constants.Minerals.NO_OF_MINERIALS];
+            m_aiMinerials = new float[Constants.Minerals.NO_OF_MINERIALS];
             for (int i = 0; i < Constants.Minerals.NO_OF_MINERIALS; ++i)
             {
                 m_aiMinerials[i] = 0;
@@ -611,6 +614,47 @@ namespace Pulsar4X.Entities
                 ComponentStockpileCount.Add(increment);
                 ComponentStockpileLookup.Add(ComponentDef.Id, ComponentStockpile.IndexOf(ComponentDef));
             }
+        }
+
+        /// <summary>
+        /// Constructs TN facilities at this population center.
+        /// </summary>
+        /// <param name="Inst">Installation to be built</param>
+        /// <param name="increment">Amount of said installation to be built</param>
+        public void AddInstallation(Installation Inst, float increment)
+        {
+            int Index = (int)Inst.Type;
+            switch(Inst.Type)
+            {
+                case Installation.InstallationType.ConvertCIToConstructionFactory:
+                    Index = (int)Installation.InstallationType.ConstructionFactory;
+                    break;
+                case Installation.InstallationType.ConvertCIToFighterFactory:
+                    Index = (int)Installation.InstallationType.FighterFactory;
+                    break;
+                case Installation.InstallationType.ConvertCIToFuelRefinery:
+                    Index = (int)Installation.InstallationType.FuelRefinery;
+                    break;
+                case Installation.InstallationType.ConvertCIToMine:
+                    Index = (int)Installation.InstallationType.Mine;
+                    break;
+                case Installation.InstallationType.ConvertCIToOrdnanceFactory:
+                    Index = (int)Installation.InstallationType.OrdnanceFactory;
+                    break;
+                case Installation.InstallationType.ConvertMineToAutomated:
+                    Index = (int)Installation.InstallationType.AutomatedMine;
+                    break;
+            }
+            Installations[Index].Number = Installations[Index].Number + increment;
+        }
+
+        /// <summary>
+        /// Constructs maintenance supply parts at this population.
+        /// </summary>
+        /// <param name="increment">number to build.</param>
+        public void AddMSP(int increment)
+        {
+            MaintenanceSupplies = MaintenanceSupplies + increment;
         }
 
         /// <summary>
@@ -829,6 +873,115 @@ namespace Pulsar4X.Entities
             NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
 
             MissileBuildQueue.Add(NewMBQItem);
+        }
+
+        /// <summary>
+        /// Add Construction factories, engineering squads, and conventional industry, then modify by construction technology, governor bonus, sector bonus.
+        /// </summary>
+        /// <returns>total annual industrial production</returns>
+        public float CalcTotalIndustry()
+        {
+#warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled.
+            float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+            return BP;
+        }
+
+        /// <summary>
+        /// CIRequirement checks to see if this population center has enough Conventional industry to perform conversions.
+        /// </summary>
+        /// <param name="CIReq">Number to convert</param>
+        /// <returns>Whether enough CI is present.</returns>
+        public bool CIRequirement(int CIReq)
+        {
+            bool ret = false;
+            if (Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number) >= CIReq)
+            { 
+                ret = true;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// MineRequirement checks to see if enough mines are present to convert to automines.
+        /// </summary>
+        /// <param name="MineReq">Number to convert</param>
+        /// <returns>Are enough present?</returns>
+        public bool MineRequirement(int MineReq)
+        {
+            bool ret = false;
+            if (Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number) >= MineReq)
+            {
+                ret = true;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// Mineral Requirement checks to see if this population has enough of the specified mineral to commence building.
+        /// </summary>
+        /// <param name="MineralCost">Cost in minerals of this project.</param>
+        /// <returns>Whether enough of said mineral is present.</returns>
+        public bool MineralRequirement(decimal [] MineralCost)
+        {
+            bool ret = true;
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                if (MineralCost[(int)mineralIterator] != 0.0m)
+                {
+                    if (m_aiMinerials[mineralIterator] >= (float)MineralCost[(int)mineralIterator])
+                    {
+                        ret = true;
+                    }
+                    else
+                    {
+                        ret = false;
+                        break;
+                    }
+                }
+            }
+            return ret;
+        }
+        
+        /// <summary>
+        /// This function decrements CI and minerals as per the cost of the item being built.
+        /// </summary>
+        /// <param name="CBQ">Construction Build Queue Item</param>
+        /// <param name="numBuilt">Number built.</param>
+        /// <param name="MineralCost">Mineral Requirement</param>
+        /// <param name="CIConvAmt">CI if any required.</param>
+        public void HandleBuildItemCost(decimal ItemCost, decimal[] MineralCost, int CIConvAmt = -1, int MineConvAmt = -1)
+        {
+            /// <summary>
+            /// Wealth cost adjustment.
+            /// </summary>
+            Faction.FactionWealth = Faction.FactionWealth - ItemCost;
+
+            /// <summary>
+            /// Mineral Cost adjustment.
+            /// </summary>
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                if (MineralCost[mineralIterator] != 0.0m)
+                {
+                    m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - (float)MineralCost[mineralIterator];
+                }
+            }
+
+            /// <summary>
+            /// CI Installation requirement adjustment. if CIConvAmt is -1 then no CI are required.
+            /// </summary>
+            if (CIConvAmt != -1)
+            {
+                Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = Installations[(int)Installation.InstallationType.ConventionalIndustry].Number - (float)CIConvAmt;
+            }
+
+            /// <summary>
+            /// Mine conversion adjustment. if MineConvAmt is -1 then no CI are required.
+            /// </summary>
+            if (MineConvAmt != -1)
+            {
+                Installations[(int)Installation.InstallationType.Mine].Number = Installations[(int)Installation.InstallationType.Mine].Number - (float)MineConvAmt;
+            }
         }
         #endregion
     }

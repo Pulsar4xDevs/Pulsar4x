@@ -37,9 +37,23 @@ namespace Pulsar4X.Entities
         public int factionCount { get; set; }
         public int TGStart { get; set; }
         public int TGCount { get; set; }
-        public int CurrentTick { get; set; }
-        public int lastTick { get; set; }
         public bool SimCreated { get; set; }
+
+        /// <summary>
+        /// What the current Tick is.
+        /// </summary>
+        public int CurrentTick { get; set; }
+
+        /// <summary>
+        /// Tick the last time simEntity updated.
+        /// </summary>
+        public int lastTick { get; set; }
+
+        /// <summary>
+        /// Should construction work be done?
+        /// </summary>
+        public int ConstructionTick { get; set; }
+        
 
         /// <summary>
         /// Does the potential for a fleet interception event exist this tick? if this is set to currentTick the answer is true
@@ -536,6 +550,7 @@ namespace Pulsar4X.Entities
             }
             lastTick = CurrentTick;
             CurrentTick += tickValue;
+            ConstructionTick += tickValue;
 
             /// <summary>
             /// Update the position of all planets. This should probably be in something like the construction tick in Aurora.
@@ -555,6 +570,242 @@ namespace Pulsar4X.Entities
                         CurrentPlanet.UpdatePosition(tickValue);
                     }
                     
+                }
+            }
+
+            /// <summary>
+            /// Do the construction tick work here.
+            /// </summary>
+
+            while (ConstructionTick >= Constants.Colony.ConstructionCycle)
+            {
+                /// <summary>
+                /// Subtract the construction cycle from the construction tick.
+                /// </summary>
+                ConstructionTick = ConstructionTick - (int)Constants.Colony.ConstructionCycle;
+                foreach (Faction CurrentFaction in P)
+                {
+                    foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                    {
+                        /// <summary>
+                        /// How much construction work per day does this colony do? default should be 5 day construction cycle.
+                        /// </summary>
+                        float TimeAdjust = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
+                        float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * TimeAdjust;
+                        float BuildPercentage = 0.0f;
+
+                        foreach (ConstructionBuildQueueItem CurrentConstruction in CurrentPopulation.ConstructionBuildQueue)
+                        {
+                            /// <summary>
+                            /// Check to see if this item is in the current build queue, or has to wait for capacity to free up.
+                            /// </summary>
+                            if ((BuildPercentage + CurrentConstruction.buildCapacity) <= 100.0f)
+                            {
+                                BuildPercentage = BuildPercentage + CurrentConstruction.buildCapacity;
+                            }
+                            else
+                            {
+                                break;
+                            }
+
+                            /// <summary>
+                            /// This construction project is paused right now.
+                            /// </summary>
+                            if (CurrentConstruction.inProduction == false)
+                            {
+                                continue;
+                            }
+
+                            /// <summary>
+                            /// how much of total industry does this build project use?
+                            /// </summary>
+                            float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
+                            float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
+                            int NumberBuilt = 0;
+
+
+                            /// <summary>
+                            /// Final bit of a construction project to complete.
+                            /// </summary>
+                            if (Completion >= CurrentConstruction.numToBuild)
+                            {
+                                NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
+                                Completion = CurrentConstruction.numToBuild;
+                            }
+                            /// <summary>
+                            /// This is a new build item.
+                            /// </summary>
+                            else if (Math.Floor(CurrentConstruction.numToBuild) == CurrentConstruction.numToBuild)
+                            {
+                                /// <summary>
+                                /// This colony will build or start to build this many items. charge for all of them.
+                                /// </summary>
+                                NumberBuilt = (int)Math.Ceiling(Completion);
+
+                                /// <summary>
+                                /// the colony can build everything in one go.
+                                /// </summary>
+                                if (NumberBuilt >= Math.Floor(CurrentConstruction.numToBuild))
+                                {
+                                    NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
+                                    Completion = CurrentConstruction.numToBuild;
+                                }
+                            }
+                            /// <summary>
+                            /// This is an inprogress item, new items will be started however.
+                            /// </summary>
+                            else if((CurrentConstruction.numToBuild - Completion) < Math.Floor(CurrentConstruction.numToBuild))
+                            { 
+                                /// <summary>
+                                /// Adjust out the current build fraction, and then calculate how many new items will be started.
+                                float CurBuildReq = (CurrentConstruction.numToBuild - (float)Math.Floor(CurrentConstruction.numToBuild));
+                                NumberBuilt = (int)Math.Ceiling(Completion - CurBuildReq);
+                                if (NumberBuilt > Math.Floor(CurrentConstruction.numToBuild))
+                                {
+                                    NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
+                                }
+                            }
+
+                            bool CIRequired = false;
+                            bool MineRequired = false;
+                            bool CanBuild = false;
+
+                            /// <summary>
+                            /// Conventional industry must also be used.
+                            /// </summary>
+                            if (CurrentConstruction.buildType == ConstructionBuildQueueItem.CBType.PlanetaryInstallation)
+                            {
+                                if ((int)CurrentConstruction.installationBuild.Type >= (int)Installation.InstallationType.ConvertCIToConstructionFactory &&
+                                   (int)CurrentConstruction.installationBuild.Type <= (int)Installation.InstallationType.ConvertCIToOrdnanceFactory)
+                                {
+                                    CIRequired = true;
+                                    CanBuild = CurrentPopulation.CIRequirement(NumberBuilt);
+
+                                    if (CanBuild == false)
+                                    {
+                                        String Entry = String.Format("Insufficent Conventional Industry to continue build order on {0} for {1}x {2}",CurrentPopulation,CurrentConstruction.numToBuild,
+                                            CurrentConstruction.Name);
+                                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.CurrentSystem, CurrentPopulation.Contact, 
+                                                                            GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                        CurrentFaction.MessageLog.Add(Msg);
+                                        continue;
+                                    }
+                                }
+
+                                if ((int)CurrentConstruction.installationBuild.Type == (int)Installation.InstallationType.ConvertMineToAutomated)
+                                {
+                                    MineRequired = true;
+                                    CanBuild = CurrentPopulation.MineRequirement(NumberBuilt);
+
+                                    if (CanBuild == false)
+                                    {
+                                        String Entry = String.Format("Insufficent Mines to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
+                                            CurrentConstruction.Name);
+                                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.CurrentSystem, CurrentPopulation.Contact,
+                                                                            GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                        CurrentFaction.MessageLog.Add(Msg);
+                                        continue;
+                                    }
+                                }
+                            }
+
+
+                            /// <summary>
+                            /// Check mineral costs to see if this can be built.
+                            /// </summary>
+                            switch (CurrentConstruction.buildType)
+                            {
+#warning PDC construction needs to be implemented here and slightly further down.
+                                case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
+                                    CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.installationBuild.MinerialsCost);
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.ShipComponent:
+                                    CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.componentBuild.minerialsCost);
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCConstruction:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCPrefab:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCAssembly:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCRefit:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
+                                    CanBuild = CurrentPopulation.MineralRequirement(Constants.Colony.MaintenanceMineralCost);
+                                    break;
+                            }
+
+                            if (CanBuild == false)
+                            {
+                                String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
+                                            CurrentConstruction.Name);
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.CurrentSystem, CurrentPopulation.Contact,
+                                                                    GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                CurrentFaction.MessageLog.Add(Msg);
+                                continue;
+                            }
+
+
+                            /// <summary>
+                            /// Adjust number to build downward to reflect construction happening.
+                            /// </summary>
+                            int CompletedItems = (int)Math.Ceiling(CurrentConstruction.numToBuild);
+                            CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
+                            CompletedItems = CompletedItems - (int)Math.Ceiling(CurrentConstruction.numToBuild);
+
+                            switch (CurrentConstruction.buildType)
+                            {
+                                case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
+                                    if (NumberBuilt != 0)
+                                    {
+                                        if (CIRequired == false && MineRequired == false)
+                                            CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.installationBuild.MinerialsCost);
+                                        else if (CIRequired == true && MineRequired == false)
+                                            CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.installationBuild.MinerialsCost, NumberBuilt, -1);
+                                        else if (CIRequired == false && MineRequired == true)
+                                            CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.installationBuild.MinerialsCost, -1, NumberBuilt);
+                                    }
+                                    CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.ShipComponent:
+                                    if (NumberBuilt != 0)
+                                    {
+                                        CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.componentBuild.minerialsCost);
+                                    }
+                                    CurrentPopulation.AddComponentsToStockpile(CurrentConstruction.componentBuild, Completion);
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCConstruction:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCPrefab:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCAssembly:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.PDCRefit:
+                                    break;
+                                case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
+                                    if (NumberBuilt != 0)
+                                    {
+                                        CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), Constants.Colony.MaintenanceMineralCost);
+                                    }
+                                    CurrentPopulation.AddMSP(CompletedItems);
+                                    break;
+                            }   
+                            
+                        }
+
+                        /// <summary>
+                        /// Cleanup the CBQ here.
+                        /// </summary>
+                        for(int CBQIterator = 0; CBQIterator < CurrentPopulation.ConstructionBuildQueue.Count; CBQIterator++)
+                        {
+                            if (CurrentPopulation.ConstructionBuildQueue[CBQIterator].numToBuild == 0.0f)
+                            {
+                                CurrentPopulation.ConstructionBuildQueue.RemoveAt(CBQIterator);
+                                CBQIterator--;
+                            }
+
+                        }
+                    }
                 }
             }
 
@@ -1260,6 +1511,10 @@ namespace Pulsar4X.Entities
 
             MissileInterceptPreemptTick = -1;
             MissileTimeToHit = 0;
+
+            lastTick = 0;
+            CurrentTick = 0;
+            ConstructionTick = 0;
 
 #warning subpulse related magic numbers
             SubPulse = new Dictionary<int, SubPulseTimeList>();

@@ -982,6 +982,11 @@ namespace Pulsar4X
             /// FactionMax has to be relatively hard coded or else the sensor model goes to hell.
             /// </summary>
             public const int FactionMax = 64;
+
+            /// <summary>
+            /// What should the starting wealth be?
+            /// </summary>
+            public const decimal StartingWealth = 100000.0m;
         }
 
         /// <summary>
@@ -1022,8 +1027,13 @@ namespace Pulsar4X
             /// <summary>
             /// Maintenance supply part cost.
             /// </summary>
-            public static float MaintenanceSupplyCost = 0.25f;
-            public static float[] MaintenanceMineralCost = { 0.125f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0625f, 0.0f, 0.0625f };
+            public static decimal MaintenanceSupplyCost = 0.25m;
+            public static decimal[] MaintenanceMineralCost = { 0.125m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0625m, 0.0m, 0.0625m };
+
+            /// <summary>
+            /// How often should build work be run?
+            /// </summary>
+            public const uint ConstructionCycle = Constants.TimeInSeconds.FiveDays;
         }
 
         /// <summary>

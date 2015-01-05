@@ -427,6 +427,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         public enum MessageType
         {
+            ColonyLacksCI,
+            ColonyLacksMinerals,
+
             ContactNew,
             ContactUpdate,
             ContactLost,
@@ -927,6 +930,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public decimal PDCBPTotal { get; set; }
 
+        /// <summary>
+        /// How much cash this faction has on hand, this can go negative.
+        /// </summary>
+        public decimal FactionWealth { get; set; }
+
 
         /// <summary>
         /// Constructor for basic faction.
@@ -1013,6 +1021,9 @@ namespace Pulsar4X.Entities
 #warning FastOOB magic numbers
             ShipBPTotal = 8000.0m;
             PDCBPTotal = 4000.0m;
+
+
+            FactionWealth = Constants.Faction.StartingWealth;
         }
 
         /// <summary>
@@ -1101,6 +1112,8 @@ namespace Pulsar4X.Entities
 #warning FastOOB magic numbers
             ShipBPTotal = 8000.0m;
             PDCBPTotal = 4000.0m;
+
+            FactionWealth = Constants.Faction.StartingWealth;
         }
 
         /// <summary>
