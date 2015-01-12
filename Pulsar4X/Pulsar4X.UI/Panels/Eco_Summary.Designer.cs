@@ -181,6 +181,23 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oItemPercentTextBox; }
         }
+
+        /// <summary>
+        /// List of Ship components
+        /// </summary>
+        public ListBox ShipCompListBox
+        {
+            get { return m_oShipCompListBox; }
+        }
+
+        /// <summary>
+        /// List of missiles
+        /// </summary>
+        public ListBox MissileStockListBox
+        {
+            get { return m_oMissileStockListBox; }
+        }
+
         #endregion
 
         #endregion

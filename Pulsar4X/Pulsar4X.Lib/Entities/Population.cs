@@ -881,10 +881,21 @@ namespace Pulsar4X.Entities
         /// <returns>total annual industrial production</returns>
         public float CalcTotalIndustry()
         {
-#warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled.
+#warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF.
             float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
             return BP;
         }
+
+        /// <summary>
+        /// Add ordnance factories and modify by tech, efficiency, governor,etc
+        /// </summary>
+        /// <returns></returns>
+        public float CalcTotalOrdnanceIndustry()
+        {
+            float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.OrdnanceFactory].Number) * 10.0f);
+            return BP;
+        }
+
 
         /// <summary>
         /// CIRequirement checks to see if this population center has enough Conventional industry to perform conversions.

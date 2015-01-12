@@ -1055,6 +1055,7 @@ namespace Pulsar4X
             public const uint Week = 604800;
             public const uint Month = 2592000;
             public const uint Year = 31104000;
+            public const uint RealYear = 31556736;
             public const uint Century = 3110400000;
         }
 

@@ -241,6 +241,8 @@ namespace Pulsar4X.UI.Handlers
 
             m_oSummaryPanel.BuildDataGrid.SelectionChanged += new EventHandler(BuildDataGrid_SelectionChanged);
 
+            m_oSummaryPanel.ConstructionDataGrid.SelectionChanged += new EventHandler(ConstructionDataGrid_SelectionChanged);
+
             m_oSummaryPanel.CreateBuildProjButton.Click += new EventHandler(CreateBuildProjButton_Click);
             m_oSummaryPanel.ModifyBuildProjButton.Click += new EventHandler(ModifyBuildProjButton_Click);
             m_oSummaryPanel.CancelBuildProjButton.Click += new EventHandler(CancelBuildProjButton_Click);
@@ -511,13 +513,43 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// if the user selects a different item in the build list handle this event here.
+        /// If the user selects a different item in the build list handle this event here.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void BuildDataGrid_SelectionChanged(object sender, EventArgs e)
         {
             BuildCostListBox();
+        }
+
+        /// <summary>
+        /// If the user selects another construction project update the display with information about that project for the modify project button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConstructionDataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+#warning when fighters are implemented This, and the next 4 functions need to be updated.
+            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
+                    if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
+                    {
+                        int RealIndex = index - 1;
+                        m_oSummaryPanel.ItemNumberTextBox.Text = CurrentPopulation.ConstructionBuildQueue[RealIndex].numToBuild.ToString();
+                        m_oSummaryPanel.ItemPercentTextBox.Text = CurrentPopulation.ConstructionBuildQueue[RealIndex].buildCapacity.ToString();
+                    }
+                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) &&
+                             index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
+                    {
+                        int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
+                        m_oSummaryPanel.ItemNumberTextBox.Text = CurrentPopulation.MissileBuildQueue[RealIndex].numToBuild.ToString();
+                        m_oSummaryPanel.ItemPercentTextBox.Text = CurrentPopulation.MissileBuildQueue[RealIndex].buildCapacity.ToString();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -580,12 +612,108 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ModifyBuildProjButton_Click(object sender, EventArgs e)
         {
+            if(m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            {
+                if(m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    float NumToBuild = -1.0f;
+                    float PercentCapacity = -1.0f;
+                    bool r1 = float.TryParse(m_oSummaryPanel.ItemNumberTextBox.Text, out NumToBuild);
+                    bool r2 = float.TryParse(m_oSummaryPanel.ItemPercentTextBox.Text, out PercentCapacity);
+
+                    int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
+                    if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
+                    {
+                        int RealIndex = index - 1;
+                        CurrentPopulation.ConstructionBuildQueue[RealIndex].numToBuild = NumToBuild;
+                        CurrentPopulation.ConstructionBuildQueue[RealIndex].buildCapacity = PercentCapacity;
+                    }
+                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) && 
+                             index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
+                    {
+                        int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
+                        CurrentPopulation.MissileBuildQueue[RealIndex].numToBuild = NumToBuild;
+                        CurrentPopulation.MissileBuildQueue[RealIndex].buildCapacity = PercentCapacity;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Update the display.
+            /// </summary>
+            Build_BuildQueue();
         }
+
+        /// <summary>
+        /// Cancels the selected build project.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void CancelBuildProjButton_Click(object sender, EventArgs e)
         {
+            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
+                    if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
+                    {
+                        int RealIndex = index - 1;
+                        CurrentPopulation.ConstructionBuildQueue.RemoveAt(RealIndex);
+                    }
+                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) &&
+                             index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
+                    {
+                        int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
+                        CurrentPopulation.MissileBuildQueue.RemoveAt(RealIndex);
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Update the display.
+            /// </summary>
+            Build_BuildQueue();
         }
+
+        /// <summary>
+        /// Pauses the currently selected build project.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PauseBuildProjButton_Click(object sender, EventArgs e)
         {
+            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
+                    if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
+                    {
+                        int RealIndex = index - 1;
+
+                        if (CurrentPopulation.ConstructionBuildQueue[RealIndex].inProduction == true)
+                            CurrentPopulation.ConstructionBuildQueue[RealIndex].inProduction = false;
+                        else
+                            CurrentPopulation.ConstructionBuildQueue[RealIndex].inProduction = true;
+                    }
+                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) &&
+                             index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
+                    {
+                        int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
+
+                        if (CurrentPopulation.MissileBuildQueue[RealIndex].inProduction == true)
+                            CurrentPopulation.MissileBuildQueue[RealIndex].inProduction = false;
+                        else
+                            CurrentPopulation.MissileBuildQueue[RealIndex].inProduction = true;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Update the display.
+            /// </summary>
+            Build_BuildQueue();
         }
         #endregion
 
@@ -621,6 +749,9 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// Soft refresh does not refresh the entire page, and only updates items that may change as a result of time advancement.
+        /// </summary>
         private void SoftRefresh()
         {
             if (m_oCurrnetFaction != null)
@@ -634,6 +765,11 @@ namespace Pulsar4X.UI.Handlers
                 /// Refresh the construction queue:
                 /// </summary>
                 Build_BuildQueue();
+
+                /// <summary>
+                /// Update stockpiles.
+                /// </summary>
+                BuildStockListBoxes();
             }
         }
 
@@ -2751,6 +2887,8 @@ namespace Pulsar4X.UI.Handlers
 
             BuildCostListBox();
 
+            BuildStockListBoxes();
+
             Build_BuildQueue();
         }
 
@@ -2867,6 +3005,34 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
+        /// BuildStockListBoxes builds the Missile and component stockpile listboxes, and will later build the PDC and fighter listboxes.
+        /// </summary>
+        private void BuildStockListBoxes()
+        {
+            m_oSummaryPanel.ShipCompListBox.Items.Clear();
+            m_oSummaryPanel.MissileStockListBox.Items.Clear();
+
+            /// <summary>
+            /// Must have done this one before learning of dictionaries.
+            /// </summary>
+            for(int componentIterator = 0; componentIterator < CurrentPopulation.ComponentStockpile.Count; componentIterator++)
+            {
+                ComponentDefTN CurrentComponent = CurrentPopulation.ComponentStockpile[componentIterator];
+                float ComponentCount = CurrentPopulation.ComponentStockpileCount[componentIterator];
+                String Entry = String.Format("{0:N4}x {1}", ComponentCount, CurrentComponent);
+                m_oSummaryPanel.ShipCompListBox.Items.Add(Entry);
+            }
+
+            foreach (KeyValuePair<OrdnanceDefTN,int> MissilePair in CurrentPopulation.MissileStockpile)
+            {
+                String Entry = String.Format("{0:N4}x {1}", MissilePair.Value, MissilePair.Key.Name);
+                m_oSummaryPanel.MissileStockListBox.Items.Add(Entry);
+            }
+
+#warning do PDC and fighter listboxes here.
+        }
+
+        /// <summary>
         /// This will determine estimated completion dates as well as other things.
         /// </summary>
         private void Build_BuildQueue()
@@ -2890,9 +3056,16 @@ namespace Pulsar4X.UI.Handlers
 
                     foreach (ConstructionBuildQueueItem CBQ in CurrentPopulation.ConstructionBuildQueue)
                     {
-                        if (CurrentRow > ConstructionTabMaxRows)
+                        if (CurrentRow == ConstructionTabMaxRows)
                         {
-#warning do something about this condition.
+                            using (DataGridViewRow row = new DataGridViewRow())
+                            {
+                                // setup row height. note that by default they are 22 pixels in height!
+                                row.Height = 17;
+                                m_oSummaryPanel.ConstructionDataGrid.Rows.Add(row);
+                            }
+
+                            ConstructionTabMaxRows++;
                         }
 
                         switch (CBQ.buildType)
@@ -2921,12 +3094,24 @@ namespace Pulsar4X.UI.Handlers
                         {
                             BuildPercentage = BuildPercentage + CBQ.buildCapacity;
                             float BPRequirement = (float)Math.Floor(CBQ.numToBuild) * (float)CBQ.costPerItem;
-                            int TimeToBuild = (int)Math.Floor( (float)((BPRequirement / DevotedToThis) * Constants.TimeInSeconds.Year));
-
-                            DateTime EstTime = GameState.Instance.GameDateTime;
-                            TimeSpan TS = new TimeSpan(0, 0, TimeToBuild);
-                            EstTime = EstTime.Add(TS);
-                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+                            float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                            float YearsOfProduction = (BPRequirement / DevotedToThis);
+                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                            /// <summary>
+                            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
+                            /// </summary>
+#warning magic number here.
+                            if (DevotedToThis == 0.0f || YearsOfProduction > 5475852)
+                            {
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
+                            }
+                            else
+                            {
+                                DateTime EstTime = GameState.Instance.GameDateTime;
+                                TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                                EstTime = EstTime.Add(TS);
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+                            }
 
                             //this item is being built
                             if (CBQ.inProduction == true)
@@ -2949,9 +3134,16 @@ namespace Pulsar4X.UI.Handlers
                         CurrentRow++;
                     }
 
-                    if (CurrentRow > ConstructionTabMaxRows)
+                    if (CurrentRow == ConstructionTabMaxRows)
                     {
-#warning do something about this condition.
+                        using (DataGridViewRow row = new DataGridViewRow())
+                        {
+                            // setup row height. note that by default they are 22 pixels in height!
+                            row.Height = 17;
+                            m_oSummaryPanel.ConstructionDataGrid.Rows.Add(row);
+                        }
+
+                        ConstructionTabMaxRows++;
                     }
 
                     m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = "";
@@ -2963,9 +3155,16 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "";
                     CurrentRow++;
 
-                    if (CurrentRow > ConstructionTabMaxRows)
+                    if (CurrentRow == ConstructionTabMaxRows)
                     {
-#warning do something about this condition.
+                        using (DataGridViewRow row = new DataGridViewRow())
+                        {
+                            // setup row height. note that by default they are 22 pixels in height!
+                            row.Height = 17;
+                            m_oSummaryPanel.ConstructionDataGrid.Rows.Add(row);
+                        }
+
+                        ConstructionTabMaxRows++;
                     }
 
                     m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[0].Value = "";
@@ -2981,9 +3180,16 @@ namespace Pulsar4X.UI.Handlers
 
                     foreach (MissileBuildQueueItem MBQ in CurrentPopulation.MissileBuildQueue)
                     {
-                        if (CurrentRow > ConstructionTabMaxRows)
+                        if (CurrentRow == ConstructionTabMaxRows)
                         {
-#warning do something about this condition.
+                            using (DataGridViewRow row = new DataGridViewRow())
+                            {
+                                // setup row height. note that by default they are 22 pixels in height!
+                                row.Height = 17;
+                                m_oSummaryPanel.ConstructionDataGrid.Rows.Add(row);
+                            }
+
+                            ConstructionTabMaxRows++;
                         }
 
 
@@ -2991,7 +3197,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", MBQ.numToBuild);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", MBQ.buildCapacity);
 
-                        float DevotedToThis = (MBQ.buildCapacity/100.0f) * CurrentPopulation.CalcTotalIndustry();
+                        float DevotedToThis = (MBQ.buildCapacity/100.0f) * CurrentPopulation.CalcTotalOrdnanceIndustry();
 
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("{0:N2}", DevotedToThis);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", MBQ.costPerItem);
@@ -3002,13 +3208,25 @@ namespace Pulsar4X.UI.Handlers
                             BuildPercentage = BuildPercentage + MBQ.buildCapacity;
                            
                             float BPRequirement = (float)Math.Floor(MBQ.numToBuild) * (float)MBQ.costPerItem;
-                            int TimeToBuild = (int)Math.Floor((float)((BPRequirement / DevotedToThis) * Constants.TimeInSeconds.Year));
+                            float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                            float YearsOfProduction = (BPRequirement / DevotedToThis);
+                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
 
-                            DateTime EstTime = GameState.Instance.GameDateTime;
-                            TimeSpan TS = new TimeSpan(0, 0, TimeToBuild);
-                            EstTime = EstTime.Add(TS);
-                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
-
+                            /// <summary>
+                            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
+                            /// </summary>
+#warning magic number here.
+                            if (DevotedToThis == 0.0f || YearsOfProduction > 5475852)
+                            {
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
+                            }
+                            else
+                            {
+                                DateTime EstTime = GameState.Instance.GameDateTime;
+                                TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                                EstTime = EstTime.Add(TS);
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+                            }
                             //this item is being built
                             if (MBQ.inProduction == true)
                             {
