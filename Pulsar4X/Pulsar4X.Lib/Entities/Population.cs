@@ -875,6 +875,7 @@ namespace Pulsar4X.Entities
             MissileBuildQueue.Add(NewMBQItem);
         }
 
+        #region production calculation: Construction, ordnance, fighters, mining, refining and others TBD. not all modifiers in place.
         /// <summary>
         /// Add Construction factories, engineering squads, and conventional industry, then modify by construction technology, governor bonus, sector bonus.
         /// </summary>
@@ -895,6 +896,29 @@ namespace Pulsar4X.Entities
             float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.OrdnanceFactory].Number) * 10.0f);
             return BP;
         }
+
+        /// <summary>
+        /// Add Fighter factories, tech, efficiency, governor,etc to produce total fighter factory industry.
+        /// </summary>
+        /// <returns></returns>
+        public float CalcTotalFighterIndustry()
+        {
+            float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FighterFactory].Number) * 10.0f);
+            return BP;
+        }
+
+        /// <summary>
+        /// Add mines, automines, conventional industry
+        /// </summary>
+        /// <returns></returns>
+        public float CalcTotalMining()
+        {
+            float MP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number) * 10.0f) + (float)(Math.Floor(Installations[(int)Installation.InstallationType.AutomatedMine].Number) * 10.0f)
+                              + (float)(Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number));
+
+            return MP;
+        }
+        #endregion
 
 
         /// <summary>

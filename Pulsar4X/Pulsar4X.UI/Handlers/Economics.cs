@@ -249,6 +249,12 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.PauseBuildProjButton.Click += new EventHandler(PauseBuildProjButton_Click);
             #endregion
 
+            #region Mining Tab
+            m_oSummaryPanel.MiningDataGrid.RowHeadersVisible = false;
+            m_oSummaryPanel.MaintenanceDataGrid.RowHeadersVisible = false;
+            SetupMiningTab();
+            #endregion
+
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
             RefreshPanels();
              
@@ -746,6 +752,11 @@ namespace Pulsar4X.UI.Handlers
                 /// Industry Tab:
                 /// </summary>
                 RefreshIndustryTab();
+
+                /// <summary>
+                /// Mining Tab:
+                /// </summary>
+                RefreshMiningTab();
             }
         }
 
@@ -770,6 +781,11 @@ namespace Pulsar4X.UI.Handlers
                 /// Update stockpiles.
                 /// </summary>
                 BuildStockListBoxes();
+
+                /// <summary>
+                /// Mining Tab:
+                /// </summary>
+                RefreshMiningTab();
             }
         }
 
@@ -3268,7 +3284,108 @@ namespace Pulsar4X.UI.Handlers
         }
         #endregion
 
+        #region Mining Tab
+        /// <summary>
+        /// Initialize the mining tab columns.
+        /// </summary>
+        private void SetupMiningTab()
+        {
+            try
+            {
+                Padding newPadding = new Padding(2, 0, 2, 0);
+                AddColumn("Mineral", newPadding, m_oSummaryPanel.MiningDataGrid, 0);
+                AddColumn("Quantity", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Access.", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Annual Production", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Years to Depletion", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Stockpile", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Recent SP +/-", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Mass Driver +/-", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Stockpile plus Production", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Projected Usage", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
+                AddColumn("Reserve Level (Dbl-Clk to Set)", newPadding, m_oSummaryPanel.MiningDataGrid, 3);
 
+                // Add Rows:
+                for (int i = 0; i <= (int)Constants.Minerals.MinerialNames.MinerialCount; ++i)
+                {
+                    using (DataGridViewRow row = new DataGridViewRow())
+                    {
+                        // setup row height. note that by default they are 22 pixels in height!
+                        row.Height = 18;
+                        m_oSummaryPanel.MiningDataGrid.Rows.Add(row);
+                    }
+                }
+
+                /// <summary>
+                /// populate mineral names.
+                /// </summary>
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+                    m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[0].Value = String.Format("{0}",(Constants.Minerals.MinerialNames)mineralIterator);
+                }
+                m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[0].Value = "Total";
+            }
+            catch
+            {
+#if LOG4NET_ENABLED
+                logger.Error("Something whent wrong Creating Columns for the mining tab in the economics screen...");
+#endif
+            }
+        }
+
+        /// <summary>
+        /// Displays the mining data for the current population.
+        /// </summary>
+        private void RefreshMiningTab()
+        {
+            if (m_oCurrnetPopulation != null && m_oSummaryPanel.MiningDataGrid.Rows.Count != 0)
+            {
+                //access annual production and years to depletion are "-" if 0.
+                int mineralReserveTotal = 0;
+                int mineralStockTotal = 0;
+                float Accessibility = 0;
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                {
+
+                    /// <summary>
+                    /// Planetary reserves.
+                    /// </summary>
+                    mineralReserveTotal = mineralReserveTotal + (int)Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]);
+                    if (m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator] != 0.0f)
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[1].Value = String.Format("{0}", Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]));
+                    else
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[1].Value = "-";
+
+                    /// <summary>
+                    /// Planetary Accessibility
+                    /// </summary>
+                    Accessibility = Accessibility + m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator];
+                    if( m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator] != 0.0f)
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[2].Value = String.Format("{0}", m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator]);
+                    else
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[2].Value = "-";
+
+                    /// <summary>
+                    /// Population mineral stockpile
+                    /// </summary>
+                    mineralStockTotal = mineralStockTotal + (int)Math.Floor(m_oCurrnetPopulation.Minerials[mineralIterator]);
+                    m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[5].Value = String.Format("{0}", Math.Floor(m_oCurrnetPopulation.Minerials[mineralIterator]));
+                }
+                if (mineralReserveTotal != 0)
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[1].Value = String.Format("{0}", mineralReserveTotal);
+                else
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[1].Value = "-";
+
+                if(Accessibility != 0.0f)
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = String.Format("{0:N1}", Accessibility);
+                else
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = "-";
+
+                m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[5].Value = String.Format("{0}", mineralStockTotal);
+            }
+        }
+
+        #endregion
         #endregion
 
     }

@@ -200,6 +200,22 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// What is the accessibility of this mineral?
+        /// </summary>
+        private float[] m_aiMinerialAccessibility;
+        public float[] MinerialAccessibility
+        {
+            get
+            {
+                return m_aiMinerialAccessibility;
+            }
+            set
+            {
+                m_aiMinerialAccessibility = value;
+            }
+        }
+
         public Planet(Star primary, OrbitingEntity parent) : base()
         {
             /// <summary>
@@ -231,9 +247,11 @@ namespace Pulsar4X.Entities
             /// do mineral generation elsewhere.
             /// </summary>
             m_aiMinerialReserves = new float[Constants.Minerals.NO_OF_MINERIALS];
+            m_aiMinerialAccessibility = new float[Constants.Minerals.NO_OF_MINERIALS];
             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
             {
                 m_aiMinerialReserves[mineralIterator] = 0.0f;
+                m_aiMinerialAccessibility[mineralIterator] = 0.0f;
             }
         }
 

@@ -53,8 +53,31 @@ namespace Pulsar4X.UI.Panels
             }
         }
 
+        /// <summary>
+        /// Mineral storage and production datagrid
+        /// </summary>
+        private DataGridView m_oMiningDataGrid;
 
+        public DataGridView MiningDataGrid
+        {
+            get
+            {
+                return m_oMiningDataGrid;
+            }
+        }
 
+        /// <summary>
+        /// Ship maintenance datagrid.
+        /// </summary>
+        private DataGridView m_oMaintenanceDataGrid;
+
+        public DataGridView MaintenanceDataGrid
+        {
+            get
+            {
+                return m_oMaintenanceDataGrid;
+            }
+        }
         #endregion
 
         public Eco_Summary()
@@ -103,6 +126,30 @@ namespace Pulsar4X.UI.Panels
             m_oConstructionDataGrid.Enabled = true;
             m_oConstructionDataGrid.Visible = false;
             m_oIndustrialAllocationGroupBox.Controls.Add(m_oConstructionDataGrid);
+
+            m_oMiningDataGrid = new DataGridView();
+            m_oMiningDataGrid.Dock = DockStyle.Fill;
+            m_oMiningDataGrid.AllowUserToAddRows = false;
+            m_oMiningDataGrid.AllowUserToDeleteRows = false;
+            m_oMiningDataGrid.AllowUserToOrderColumns = false;
+            m_oMiningDataGrid.AllowUserToResizeColumns = false;
+            m_oMiningDataGrid.AllowUserToResizeRows = false;
+            m_oMiningDataGrid.MultiSelect = false;
+            m_oMiningDataGrid.ReadOnly = true;
+            m_oMiningDataGrid.Enabled = true;
+            m_oMineralProductionGroupBox.Controls.Add(m_oMiningDataGrid);
+
+            m_oMaintenanceDataGrid = new DataGridView();
+            m_oMaintenanceDataGrid.Dock = DockStyle.Fill;
+            m_oMaintenanceDataGrid.AllowUserToAddRows = false;
+            m_oMaintenanceDataGrid.AllowUserToDeleteRows = false;
+            m_oMaintenanceDataGrid.AllowUserToOrderColumns = false;
+            m_oMaintenanceDataGrid.AllowUserToResizeColumns = false;
+            m_oMaintenanceDataGrid.AllowUserToResizeRows = false;
+            m_oMaintenanceDataGrid.MultiSelect = false;
+            m_oMaintenanceDataGrid.ReadOnly = true;
+            m_oMaintenanceDataGrid.Enabled = true;
+            m_oMaintFacilityGroupBox.Controls.Add(m_oMaintenanceDataGrid);
         }
     }
 }

@@ -300,6 +300,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oDisassembleCompButton = new System.Windows.Forms.Button();
             this.m_oScrapCompButton = new System.Windows.Forms.Button();
             this.m_oConstructionOptionsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oInstallationGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oInstallationTypeComboBox = new System.Windows.Forms.ComboBox();
             this.m_oInstallationCostListBox = new System.Windows.Forms.ListBox();
             this.m_oMiningTab = new System.Windows.Forms.TabPage();
@@ -312,7 +313,13 @@ namespace Pulsar4X.UI.Panels
             this.m_oGUTab = new System.Windows.Forms.TabPage();
             this.m_oGUTrainingTab = new System.Windows.Forms.TabPage();
             this.m_oWealthTab = new System.Windows.Forms.TabPage();
-            this.m_oInstallationGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMiningReportGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMaintFacilityGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oUsageNoteLabel = new System.Windows.Forms.Label();
+            this.m_oMassDriverDestGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMineralProductionGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oMassDriverDestinationComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oMineProductionLabel = new System.Windows.Forms.Label();
             this.m_oEmpireGroupBox.SuspendLayout();
             this.m_oPopulationGroupBox.SuspendLayout();
             this.m_oIndustryControlGroupBox.SuspendLayout();
@@ -328,6 +335,9 @@ namespace Pulsar4X.UI.Panels
             this.m_oPlanetPDCGroupBox.SuspendLayout();
             this.m_oShipComponentGroupBox.SuspendLayout();
             this.m_oConstructionOptionsGroupBox.SuspendLayout();
+            this.m_oMiningTab.SuspendLayout();
+            this.m_oMiningReportGroupBox.SuspendLayout();
+            this.m_oMassDriverDestGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oEmpireGroupBox
@@ -1112,6 +1122,14 @@ namespace Pulsar4X.UI.Panels
             this.m_oConstructionOptionsGroupBox.TabStop = false;
             this.m_oConstructionOptionsGroupBox.Text = "Construction Options";
             // 
+            // m_oInstallationGroupBox
+            // 
+            this.m_oInstallationGroupBox.Location = new System.Drawing.Point(7, 45);
+            this.m_oInstallationGroupBox.Name = "m_oInstallationGroupBox";
+            this.m_oInstallationGroupBox.Size = new System.Drawing.Size(190, 425);
+            this.m_oInstallationGroupBox.TabIndex = 27;
+            this.m_oInstallationGroupBox.TabStop = false;
+            // 
             // m_oInstallationTypeComboBox
             // 
             this.m_oInstallationTypeComboBox.FormattingEnabled = true;
@@ -1130,6 +1148,9 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oMiningTab
             // 
+            this.m_oMiningTab.Controls.Add(this.m_oUsageNoteLabel);
+            this.m_oMiningTab.Controls.Add(this.m_oMaintFacilityGroupBox);
+            this.m_oMiningTab.Controls.Add(this.m_oMiningReportGroupBox);
             this.m_oMiningTab.Location = new System.Drawing.Point(4, 40);
             this.m_oMiningTab.Name = "m_oMiningTab";
             this.m_oMiningTab.Padding = new System.Windows.Forms.Padding(3);
@@ -1228,13 +1249,71 @@ namespace Pulsar4X.UI.Panels
             this.m_oWealthTab.Text = "Wealth / Trade";
             this.m_oWealthTab.UseVisualStyleBackColor = true;
             // 
-            // m_oInstallationGroupBox
+            // m_oMiningReportGroupBox
             // 
-            this.m_oInstallationGroupBox.Location = new System.Drawing.Point(7, 45);
-            this.m_oInstallationGroupBox.Name = "m_oInstallationGroupBox";
-            this.m_oInstallationGroupBox.Size = new System.Drawing.Size(190, 425);
-            this.m_oInstallationGroupBox.TabIndex = 27;
-            this.m_oInstallationGroupBox.TabStop = false;
+            this.m_oMiningReportGroupBox.Controls.Add(this.m_oMineProductionLabel);
+            this.m_oMiningReportGroupBox.Controls.Add(this.m_oMineralProductionGroupBox);
+            this.m_oMiningReportGroupBox.Controls.Add(this.m_oMassDriverDestGroupBox);
+            this.m_oMiningReportGroupBox.Location = new System.Drawing.Point(9, 7);
+            this.m_oMiningReportGroupBox.Name = "m_oMiningReportGroupBox";
+            this.m_oMiningReportGroupBox.Size = new System.Drawing.Size(816, 315);
+            this.m_oMiningReportGroupBox.TabIndex = 0;
+            this.m_oMiningReportGroupBox.TabStop = false;
+            this.m_oMiningReportGroupBox.Text = "Mining Report";
+            // 
+            // m_oMaintFacilityGroupBox
+            // 
+            this.m_oMaintFacilityGroupBox.Location = new System.Drawing.Point(6, 369);
+            this.m_oMaintFacilityGroupBox.Name = "m_oMaintFacilityGroupBox";
+            this.m_oMaintFacilityGroupBox.Size = new System.Drawing.Size(819, 315);
+            this.m_oMaintFacilityGroupBox.TabIndex = 1;
+            this.m_oMaintFacilityGroupBox.TabStop = false;
+            this.m_oMaintFacilityGroupBox.Text = "Estimated Annual Mineral Requirements for Maintenance Facilities";
+            // 
+            // m_oUsageNoteLabel
+            // 
+            this.m_oUsageNoteLabel.AutoSize = true;
+            this.m_oUsageNoteLabel.Location = new System.Drawing.Point(14, 338);
+            this.m_oUsageNoteLabel.Name = "m_oUsageNoteLabel";
+            this.m_oUsageNoteLabel.Size = new System.Drawing.Size(752, 13);
+            this.m_oUsageNoteLabel.TabIndex = 2;
+            this.m_oUsageNoteLabel.Text = "Projected Usage includes all queued ordnance, fighters, and construction, any cur" +
+                "rent shipyard tasks, maintenance facilities and one year of supply production";
+            // 
+            // m_oMassDriverDestGroupBox
+            // 
+            this.m_oMassDriverDestGroupBox.Controls.Add(this.m_oMassDriverDestinationComboBox);
+            this.m_oMassDriverDestGroupBox.Location = new System.Drawing.Point(608, 9);
+            this.m_oMassDriverDestGroupBox.Name = "m_oMassDriverDestGroupBox";
+            this.m_oMassDriverDestGroupBox.Size = new System.Drawing.Size(202, 49);
+            this.m_oMassDriverDestGroupBox.TabIndex = 0;
+            this.m_oMassDriverDestGroupBox.TabStop = false;
+            this.m_oMassDriverDestGroupBox.Text = "Mass Driver Destination";
+            // 
+            // m_oMineralProductionGroupBox
+            // 
+            this.m_oMineralProductionGroupBox.Location = new System.Drawing.Point(6, 64);
+            this.m_oMineralProductionGroupBox.Name = "m_oMineralProductionGroupBox";
+            this.m_oMineralProductionGroupBox.Size = new System.Drawing.Size(804, 245);
+            this.m_oMineralProductionGroupBox.TabIndex = 1;
+            this.m_oMineralProductionGroupBox.TabStop = false;
+            // 
+            // m_oMassDriverDestinationComboBox
+            // 
+            this.m_oMassDriverDestinationComboBox.FormattingEnabled = true;
+            this.m_oMassDriverDestinationComboBox.Location = new System.Drawing.Point(7, 20);
+            this.m_oMassDriverDestinationComboBox.Name = "m_oMassDriverDestinationComboBox";
+            this.m_oMassDriverDestinationComboBox.Size = new System.Drawing.Size(189, 21);
+            this.m_oMassDriverDestinationComboBox.TabIndex = 0;
+            // 
+            // m_oMineProductionLabel
+            // 
+            this.m_oMineProductionLabel.AutoSize = true;
+            this.m_oMineProductionLabel.Location = new System.Drawing.Point(6, 32);
+            this.m_oMineProductionLabel.Name = "m_oMineProductionLabel";
+            this.m_oMineProductionLabel.Size = new System.Drawing.Size(344, 13);
+            this.m_oMineProductionLabel.TabIndex = 2;
+            this.m_oMineProductionLabel.Text = "Ground-based Mines: ******    Annual Production(accessibility 1.0): ******";
             // 
             // Eco_Summary
             // 
@@ -1269,6 +1348,11 @@ namespace Pulsar4X.UI.Panels
             this.m_oPlanetPDCGroupBox.ResumeLayout(false);
             this.m_oShipComponentGroupBox.ResumeLayout(false);
             this.m_oConstructionOptionsGroupBox.ResumeLayout(false);
+            this.m_oMiningTab.ResumeLayout(false);
+            this.m_oMiningTab.PerformLayout();
+            this.m_oMiningReportGroupBox.ResumeLayout(false);
+            this.m_oMiningReportGroupBox.PerformLayout();
+            this.m_oMassDriverDestGroupBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1365,5 +1449,12 @@ namespace Pulsar4X.UI.Panels
         private ComboBox m_oInstallationTypeComboBox;
         private ListBox m_oInstallationCostListBox;
         private GroupBox m_oInstallationGroupBox;
+        private Label m_oUsageNoteLabel;
+        private GroupBox m_oMaintFacilityGroupBox;
+        private GroupBox m_oMiningReportGroupBox;
+        private Label m_oMineProductionLabel;
+        private GroupBox m_oMineralProductionGroupBox;
+        private GroupBox m_oMassDriverDestGroupBox;
+        private ComboBox m_oMassDriverDestinationComboBox;
     }
 }
