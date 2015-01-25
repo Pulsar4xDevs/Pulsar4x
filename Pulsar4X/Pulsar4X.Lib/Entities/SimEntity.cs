@@ -587,6 +587,8 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 ConstructionCycle.ConstructionFactoryBuild(P);
                 ConstructionCycle.OrdnanceFactoryBuild(P);
+                ConstructionCycle.MinePlanets(P);
+                ConstructionCycle.RefineFuel(P);
             }
 
             /// <summary>

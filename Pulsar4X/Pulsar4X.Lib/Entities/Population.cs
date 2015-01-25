@@ -459,6 +459,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<FighterBuildQueueItem> FighterBuildQueue { get; set; }
 
+        /// <summary>
+        /// Does this planet refine sorium into fuel?
+        /// </summary>
+        public bool IsRefining { get; set; }
+
         #endregion
 
         public Population(Planet a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
@@ -533,12 +538,14 @@ namespace Pulsar4X.Entities
             MissileBuildQueue = new BindingList<MissileBuildQueueItem>();
             FighterBuildQueue = new BindingList<FighterBuildQueueItem>();
 
-            ConventionalStart();
-            
+            IsRefining = false;
         }
 
 
         #region starting options and debug
+        /// <summary>
+        /// start without TN technology.
+        /// </summary>
         public void ConventionalStart()
         {
             Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = 1000.0f;
@@ -552,20 +559,19 @@ namespace Pulsar4X.Entities
             MaintenanceSupplies = 2000;
 
             CivilianPopulation = 500.0f;
+
+            IsRefining = true;
         }
 
+        /// <summary>
+        /// Start a transnewtonian empire. not yet implemented.
+        /// </summary>
         public void TNStart()
         {
             CivilianPopulation = 500.0f;
+
         }
 
-        public void MineralSet()
-        {
-            for(int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
-            {
-                m_aiMinerials[mineralIterator] = 10000 + mineralIterator;
-            }
-        }
         #endregion
 
         /// <summary>
@@ -882,7 +888,7 @@ namespace Pulsar4X.Entities
         /// <returns>total annual industrial production</returns>
         public float CalcTotalIndustry()
         {
-#warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF.
+#warning No Governor,Sector, Tech bonuses, and no engineering squad additions. likewise activation and deactivation of industry should be handled. also efficiencies. also for OF and FF, mining and refining.
             float BP = (float)Math.Floor(Installations[(int)Installation.InstallationType.ConstructionFactory].Number) * 10.0f + (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
             return BP;
         }
@@ -917,6 +923,17 @@ namespace Pulsar4X.Entities
                               + (float)(Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number));
 
             return MP;
+        }
+
+        /// <summary>
+        /// Add refineries and CI to get total refining.
+        /// </summary>
+        /// <returns></returns>
+        public float CalcTotalRefining()
+        {
+            float BP = (float)(Math.Floor(Installations[(int)Installation.InstallationType.FuelRefinery].Number) * Constants.Colony.SoriumToFuel * 10.0f) +
+                       (float)Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number * Constants.Colony.SoriumToFuel);
+            return BP;
         }
         #endregion
 

@@ -50,7 +50,8 @@ namespace Pulsar4X.UI
             /// This following section should probably be moved to the Faction constructor at some point.
             /// </summary>
             oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
-            oNewFaction.Populations[0].MineralSet();
+            oNewFaction.Populations[0].Planet.HomeworldMineralGeneration();
+            oNewFaction.Populations[0].ConventionalStart();
             GameState.Instance.Factions.Add(oNewFaction);
             oNewFaction.AddNewContactList(otest);
 
@@ -58,16 +59,16 @@ namespace Pulsar4X.UI
             P1.XSystem = 10.0;
             P1.YSystem = 10.0;
 
-            oNewFaction.Capitol = P1;
+            oNewFaction.Capitol = oNewFaction.Populations[0].Planet;
+            oNewFaction.Capitol.GeoSurveyList.Add(oNewFaction, true);
             oNewFaction.AddNewTaskGroup("Combat Taskgroup", P1, otest);
             oNewFaction.FactionColor = System.Drawing.Color.Blue;
 
             Entities.Faction oNewFaction2 = new Entities.Faction(1);
             oNewFaction2.Name = "Terran Federation";
             oNewFaction2.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction2));
-
-            oNewFaction2.Populations[0].MineralSet();
-
+            oNewFaction2.Populations[0].Planet.HomeworldMineralGeneration();
+            oNewFaction2.Populations[0].ConventionalStart();
             GameState.Instance.Factions.Add(oNewFaction2);
             oNewFaction2.AddNewContactList(otest);
 
@@ -76,7 +77,8 @@ namespace Pulsar4X.UI
             P2.YSystem = -10.0;
 
 
-            oNewFaction2.Capitol = P2;
+            oNewFaction2.Capitol = oNewFaction2.Populations[0].Planet;
+            oNewFaction2.Capitol.GeoSurveyList.Add(oNewFaction2, true);
             oNewFaction2.AddNewTaskGroup("Combat Taskgroup", P2, otest);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 

@@ -286,5 +286,20 @@ namespace Pulsar4X.Entities
                 TaskGroup.Contact.YSystem = YSystem;
             }
         }
+
+        /// <summary>
+        /// This generates the rich assortment of all minerals for a homeworld. non-hw planets have less, or even no resources.
+        /// should some resources be scarcer than others?
+        /// </summary>
+        public void HomeworldMineralGeneration()
+        {
+            m_aiMinerialReserves[0] = 150000.0f + (100000.0f * ((float)GameState.RNG.Next(0,100000) / 100000.0f));
+            m_aiMinerialAccessibility[0] = 1.0f;
+            for (int mineralIterator = 1; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerialReserves[mineralIterator] = 50000.0f + (70000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
+                m_aiMinerialAccessibility[mineralIterator] = 1.0f * ((float)GameState.RNG.Next(2, 10) / 10.0f);
+            }
+        }
     }
 }

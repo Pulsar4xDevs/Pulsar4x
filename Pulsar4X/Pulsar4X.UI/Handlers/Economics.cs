@@ -247,6 +247,8 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ModifyBuildProjButton.Click += new EventHandler(ModifyBuildProjButton_Click);
             m_oSummaryPanel.CancelBuildProjButton.Click += new EventHandler(CancelBuildProjButton_Click);
             m_oSummaryPanel.PauseBuildProjButton.Click += new EventHandler(PauseBuildProjButton_Click);
+            m_oSummaryPanel.StartRefiningButton.Click += new EventHandler(StartRefiningButton_Click);
+            m_oSummaryPanel.StopRefiningButton.Click += new EventHandler(StopRefiningButton_Click);
             #endregion
 
             #region Mining Tab
@@ -721,6 +723,34 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             Build_BuildQueue();
         }
+
+        /// <summary>
+        /// Start fuel production at this colony
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StartRefiningButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentPopulation != null)
+                CurrentPopulation.IsRefining = true;
+
+            m_oSummaryPanel.StartRefiningButton.Enabled = false;
+            m_oSummaryPanel.StopRefiningButton.Enabled = true;
+        }
+
+        /// <summary>
+        /// Stop fuel production at this colony.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StopRefiningButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentPopulation != null)
+                CurrentPopulation.IsRefining = false;
+
+            m_oSummaryPanel.StartRefiningButton.Enabled = true;
+            m_oSummaryPanel.StopRefiningButton.Enabled = false;
+        }
         #endregion
 
 
@@ -781,6 +811,12 @@ namespace Pulsar4X.UI.Handlers
                 /// Update stockpiles.
                 /// </summary>
                 BuildStockListBoxes();
+
+                /// <summary>
+                /// Industry Tab:
+                /// </summary>
+                BuildConstructionLabel();
+                BuildRefiningLabel();
 
                 /// <summary>
                 /// Mining Tab:
@@ -2906,6 +2942,23 @@ namespace Pulsar4X.UI.Handlers
             BuildStockListBoxes();
 
             Build_BuildQueue();
+
+            BuildConstructionLabel();
+            BuildRefiningLabel();
+
+            if (CurrentPopulation != null)
+            {
+                if (CurrentPopulation.IsRefining == false)
+                {
+                    m_oSummaryPanel.StopRefiningButton.Enabled = false;
+                    m_oSummaryPanel.StartRefiningButton.Enabled = true;
+                }
+                else
+                {
+                    m_oSummaryPanel.StopRefiningButton.Enabled = true;
+                    m_oSummaryPanel.StartRefiningButton.Enabled = false;
+                }
+            }
         }
 
         /// <summary>
@@ -3282,6 +3335,44 @@ namespace Pulsar4X.UI.Handlers
 #endif
             }
         }
+
+        /// <summary>
+        /// Build the industrial tab label containing production totals.
+        /// </summary>
+        private void BuildConstructionLabel()
+        {
+            if (CurrentPopulation != null)
+            {
+                float CFProd = CurrentPopulation.CalcTotalIndustry();
+                float OFProd = CurrentPopulation.CalcTotalOrdnanceIndustry();
+                float FFProd = CurrentPopulation.CalcTotalFighterIndustry();
+                int CF = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.ConstructionFactory].Number);
+                int EB = 0;
+                int CI = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+                int OF = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.OrdnanceFactory].Number); ;
+                int FF = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.FighterFactory].Number); ;
+                String CLabel = String.Format("Construction: {0:N1} ({1}/{2}/{3})                    Ordnance Production: {4:N1} ({5})                    Fighter Production: {6:N1} ({7})",
+                                               CFProd,CF,EB,CI,OFProd,OF,FFProd,FF);
+                m_oSummaryPanel.ConstructionLabel.Text = CLabel;
+            }
+        }
+
+        private void BuildRefiningLabel()
+        {
+            if (CurrentPopulation != null)
+            {
+                float RFProd = CurrentPopulation.CalcTotalRefining();
+                int CI = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.ConventionalIndustry].Number);
+                int RF = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.FuelRefinery].Number);
+
+                String FormattedProduction = ((int)Math.Floor(RFProd)).ToString("#,##0");
+                String FormattedStockpile = ((int)Math.Floor(CurrentPopulation.FuelStockpile)).ToString("#,##0");
+
+                m_oSummaryPanel.RefineryLabel.Text = String.Format("Industry:{0}     Refineries:{1}", CI,RF);
+                m_oSummaryPanel.FuelProductionLabel.Text = String.Format("Annual Production:{0} Litres", FormattedProduction);
+                m_oSummaryPanel.FuelStockpileLabel.Text = String.Format("Fuel Reserves:{0} Litres", FormattedStockpile);
+            }
+        }
         #endregion
 
         #region Mining Tab
@@ -3344,6 +3435,8 @@ namespace Pulsar4X.UI.Handlers
                 int mineralReserveTotal = 0;
                 int mineralStockTotal = 0;
                 float Accessibility = 0;
+                int Production = 0;
+                int YearsToDepletion = 0;
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
 
@@ -3366,6 +3459,27 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[2].Value = "-";
 
                     /// <summary>
+                    /// 3 is annual production
+                    /// </summary>
+                    int AnnualProd = (int)Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator]);
+                    Production  = Production + AnnualProd;
+                    if (AnnualProd != 0)
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[3].Value = String.Format("{0}", AnnualProd);
+                    else
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[3].Value = "-";
+
+                    /// <summary>
+                    /// 4 is YTD. reserves / mining
+                    /// </summary>
+                    int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator]) ) );
+                    if (YTD > YearsToDepletion)
+                        YearsToDepletion = YTD;
+                    if (YTD != 0)
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = String.Format("{0}", YTD);
+                    else
+                        m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[4].Value = "-";
+
+                    /// <summary>
                     /// Population mineral stockpile
                     /// </summary>
                     mineralStockTotal = mineralStockTotal + (int)Math.Floor(m_oCurrnetPopulation.Minerials[mineralIterator]);
@@ -3377,11 +3491,38 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[1].Value = "-";
 
                 if(Accessibility != 0.0f)
-                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = String.Format("{0:N1}", Accessibility);
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = String.Format("{0:N2}", (Accessibility / 11.0f));
                 else
                     m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = "-";
 
+                if (Production != 0)
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[3].Value = String.Format("{0}", Production);
+                else
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[3].Value = "-";
+
+                if (YearsToDepletion != 0)
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[4].Value = String.Format("{0}", YearsToDepletion);
+                else
+                    m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[4].Value = "-";
+
                 m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[5].Value = String.Format("{0}", mineralStockTotal);
+            }
+
+            BuildMiningLabel();
+        }
+
+        /// <summary>
+        /// Builds the label informing the user how many mines and how much production comes from those mines under ideal circumstances.
+        /// </summary>
+        private void BuildMiningLabel()
+        {
+            if (CurrentPopulation != null)
+            {
+                int Mines = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.Mine].Number) +
+                            (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.AutomatedMine].Number) +
+                            (int)(Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.ConventionalIndustry].Number)/10.0f);
+                float Mining = CurrentPopulation.CalcTotalMining();
+                m_oSummaryPanel.MiningLabel.Text = String.Format("Ground-based Mines: {0}          Annual Production(accessibility 1.0): {1:N1}", Mines, Mining);
             }
         }
 

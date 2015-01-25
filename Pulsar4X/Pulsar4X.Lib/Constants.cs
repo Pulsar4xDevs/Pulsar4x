@@ -1034,6 +1034,8 @@ namespace Pulsar4X
             /// How often should build work be run?
             /// </summary>
             public const uint ConstructionCycle = Constants.TimeInSeconds.FiveDays;
+
+            public const float SoriumToFuel = 2000.0f;
         }
 
         /// <summary>
