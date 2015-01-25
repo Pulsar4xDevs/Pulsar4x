@@ -189,6 +189,10 @@ namespace Pulsar4X.Stargen
                         // New orbital distance
                         newA = (aPlanet.Mass + bPlanet.Mass) / ((aPlanet.Mass / aPlanet.SemiMajorAxis) + (bPlanet.Mass / bPlanet.SemiMajorAxis));
 
+//#if LOG4NET_ENABLED
+//logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
+//#endif
+
                         // Compute new eccentricity
                         temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
                         temp = temp + (bPlanet.Mass * Math.Sqrt(bPlanet.SemiMajorAxis) * Math.Sqrt(Math.Sqrt(1.0 - Math.Pow(bPlanet.Eccentricity, 2.0))));

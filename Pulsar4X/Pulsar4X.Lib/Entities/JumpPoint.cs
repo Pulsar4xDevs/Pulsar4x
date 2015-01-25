@@ -104,6 +104,11 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Will ultimately handle exploring JPs
+        /// A new system needs to be created, likewise atleast 1 connection JP needs to be created for this new system.
+        /// Is the JP we transited closed on this new end?
+        /// The Ship in question needs to have its data updated.
+        /// The system we left needs its contacts and faction detection lists updated.
+        /// The faction needs a contact list for the new/"new" system
         /// </summary>
         public void ExploreJP()
         {
