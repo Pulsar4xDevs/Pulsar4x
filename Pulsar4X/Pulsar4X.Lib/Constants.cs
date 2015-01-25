@@ -75,7 +75,7 @@ namespace Pulsar4X
             /// </summary>
             public const double SOLAR_RADIUS_IN_KM = 696342.0;
 
-            public const double SOLAR_RADIUS_IN_AU = SOLAR_RADIUS_IN_KM / KM_PER_AU; 
+            public const double SOLAR_RADIUS_IN_AU = SOLAR_RADIUS_IN_KM / KM_PER_AU;
 
             public const double SECONDS_PER_HOUR = 3600.0;
 
@@ -89,7 +89,7 @@ namespace Pulsar4X
             /// <summary>
             /// units: g*m2/(sec2*K*mol)
             /// </summary>
-            public const double MOLAR_GAS_CONST = 8314.41;	
+            public const double MOLAR_GAS_CONST = 8314.41;
 
             /// <summary>
             ///  ratio of esc vel to RMS vel
@@ -118,7 +118,7 @@ namespace Pulsar4X
             public const double CLOUD_ALBEDO = 0.52;
             public const double GAS_GIANT_ALBEDO = 0.5;
             public const double AIRLESS_ICE_ALBEDO = 0.5;
-            public const double EARTH_ALBEDO = 0.3;	
+            public const double EARTH_ALBEDO = 0.3;
             public const double GREENHOUSE_TRIGGER_ALBEDO = 0.20;
             public const double ROCKY_ALBEDO = 0.15;
             public const double ROCKY_AIRLESS_ALBEDO = 0.07;
@@ -142,8 +142,8 @@ namespace Pulsar4X
                 /// <summary>
                 /// Units of kg
                 /// </summary>
-                public const double MASS_IN_KILOGRAMS = 1.989E30;		 	
-                                                                             
+                public const double MASS_IN_KILOGRAMS = 1.989E30;
+
                 public const double MASS_IN_EARTH_MASSES = 332775.64;
             }
 
@@ -208,7 +208,7 @@ namespace Pulsar4X
                 /// Units of degrees Kelvin
                 /// </summary>
                 public const double EXOSPHERE_TEMP = 1273.0;
-                
+
                 /// <summary>
                 /// Units of degrees Kelvin was 255
                 /// </summary>
@@ -216,11 +216,11 @@ namespace Pulsar4X
 
                 public const double SURF_PRES_IN_MILLIBARS = 1013.25;
                 public const double SURF_PRES_IN_MMHG = 760.0; // Dole p. 15
-                
+
                 /// <summary>
                 /// Pounds per square inch
                 /// </summary>
-                public const double SURF_PRES_IN_PSI = 14.696; 
+                public const double SURF_PRES_IN_PSI = 14.696;
                 public const double MMHG_TO_MILLIBARS = (SURF_PRES_IN_MILLIBARS / SURF_PRES_IN_MMHG);
                 public const double PSI_TO_MILLIBARS = (SURF_PRES_IN_MILLIBARS / SURF_PRES_IN_PSI);
                 public const double PPM_PRSSURE = (SURF_PRES_IN_MILLIBARS / 1000000.0);
@@ -1067,7 +1067,7 @@ namespace Pulsar4X
         public static class SensorTN
         {
             public static byte[] ActiveStrength = { 10, 12, 16, 21, 28, 36, 48, 60, 80, 100, 135, 180 };
-            public static byte[] PassiveStrength = { 5,  6,  8, 11, 14, 18, 24, 32, 40,  50,  60,  75 };
+            public static byte[] PassiveStrength = { 5, 6, 8, 11, 14, 18, 24, 32, 40, 50, 60, 75 };
         }
 
         /// <summary>
@@ -1110,7 +1110,7 @@ namespace Pulsar4X
             /// <summary>
             /// Fuel consumption reduction per engine power hour(or else per hour for standard shields).
             /// </summary>
-            public static float[] FuelConsumption = { 1.0f, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.25f, 0.2f, 0.16f, 0.125f, 0.1f};
+            public static float[] FuelConsumption = { 1.0f, 0.9f, 0.8f, 0.7f, 0.6f, 0.5f, 0.4f, 0.3f, 0.25f, 0.2f, 0.16f, 0.125f, 0.1f };
 
             /// <summary>
             /// Thermal reduction for engines.
@@ -1192,7 +1192,7 @@ namespace Pulsar4X
             /// <summary>
             /// Size reduction and accuracy modifiers for Gauss weapons.
             /// </summary>
-            public static float[] GaussSize =     { 6.0f, 5.0f,  4.0f,  3.0f, 2.0f,  1.5f,  1.0f,  0.75f,  0.6f, 0.5f };
+            public static float[] GaussSize = { 6.0f, 5.0f, 4.0f, 3.0f, 2.0f, 1.5f, 1.0f, 0.75f, 0.6f, 0.5f };
             public static float[] GaussAccuracy = { 1.0f, 0.85f, 0.67f, 0.5f, 0.33f, 0.25f, 0.17f, 0.125f, 0.1f, 0.08f };
 
             /// <summary>
@@ -1203,7 +1203,7 @@ namespace Pulsar4X
             /// <summary>
             /// Gear size multipliers for multi-barreled turrets.
             /// </summary>
-            public static float[] TurretGearFactor = { 0.1f, 0.095f, 0.0925f, 0.09f }; 
+            public static float[] TurretGearFactor = { 0.1f, 0.095f, 0.0925f, 0.09f };
         }
 
         /// <summary>
@@ -1233,7 +1233,7 @@ namespace Pulsar4X
             /// <summary>
             /// Chance of not having catastrophic destruction occur on mag destruction.
             /// </summary>
-            public static float[] Ejection      = { 0.7f, 0.8f, 0.85f, 0.9f, 0.93f, 0.95f, 0.97f, 0.98f, 0.99f };
+            public static float[] Ejection = { 0.7f, 0.8f, 0.85f, 0.9f, 0.93f, 0.95f, 0.97f, 0.98f, 0.99f };
 
             /// <summary>
             /// Internal space not devoted to the feed mechanism.
@@ -1251,7 +1251,7 @@ namespace Pulsar4X
             /// <summary>
             /// Launcher penalty from reduction.
             /// </summary>
-            public static float[] Penalty     = { 1.0f, 2.0f, 5.0f, 20.0f, 100.0f, 15.0f };
+            public static float[] Penalty = { 1.0f, 2.0f, 5.0f, 20.0f, 100.0f, 15.0f };
 
             /// <summary>
             /// Which index is the boxlauncher?
@@ -1262,11 +1262,11 @@ namespace Pulsar4X
 
         public static class OrdnanceTN
         {
-            public static int[] warheadTech   = { 2,3,4,5,6,8,10,12,16,20,24,30 };
-            public static int[] agilityTech   = { 20, 32, 48, 64, 80, 100, 128, 160, 200, 240, 320, 400 };
+            public static int[] warheadTech = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 30 };
+            public static int[] agilityTech = { 20, 32, 48, 64, 80, 100, 128, 160, 200, 240, 320, 400 };
             public static float[] passiveTech = { 0.25f, 0.3f, 0.4f, 0.55f, 0.7f, 0.9f, 1.2f, 1.6f, 2.0f, 2.5f, 3.0f, 3.75f };
-            public static float[] activeTech  = { 0.5f, 0.6f, 0.8f, 1.05f, 1.4f, 1.6f, 2.4f, 3.0f, 4.0f, 5.0f, 6.75f, 9.0f };
-            public static float[] geoTech     = { 0.01f, 0.02f, 0.03f, 0.05f };
+            public static float[] activeTech = { 0.5f, 0.6f, 0.8f, 1.05f, 1.4f, 1.6f, 2.4f, 3.0f, 4.0f, 5.0f, 6.75f, 9.0f };
+            public static float[] geoTech = { 0.01f, 0.02f, 0.03f, 0.05f };
             public static float[] reactorTech = { 0.1f, 0.15f, 0.225f, 0.3f, 0.4f, 0.5f, 0.6f, 0.8f, 1.0f, 1.2f, 1.6f, 2.0f };
             public static int[] radTech = { 2, 3, 4, 5 };
             public static int[] laserTech = { 2, 4, 6, 10 };

@@ -30,7 +30,7 @@ namespace Pulsar4X.UI.ViewModels
         public MenuViewModel()
         {
             // get the current gameDateTime:
-            
+
             _GameDateTime = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString(); // note that date should be formated according to system local!
         }
 

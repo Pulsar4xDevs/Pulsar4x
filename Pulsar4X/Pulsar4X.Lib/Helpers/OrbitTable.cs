@@ -7,8 +7,8 @@ using Pulsar4X.Entities;
 
 namespace Pulsar4X.Lib
 {
-	public class OrbitTable
-	{
+    public class OrbitTable
+    {
         private static OrbitTable m_oInstance;
         public static OrbitTable Instance
         {
@@ -22,31 +22,31 @@ namespace Pulsar4X.Lib
             }
         }
 
-		private static uint m_oNodes = 100;		//Each table point reprsents 1/(2n)th of an orbital period
-		private static int m_oOrbits = 40;	//Each each orbital excentricy has a different profile.
+        private static uint m_oNodes = 100;		//Each table point reprsents 1/(2n)th of an orbital period
+        private static int m_oOrbits = 40;	//Each each orbital excentricy has a different profile.
 
         /// <summary>
         /// This is a table of eccentric orbits, with each eccentricity from  0.0 to 1.0 in increments of 0.025, with 100 nodes for each orbit of that eccentricity 
         /// </summary>
         private static double[,] m_lTable = new double[m_oOrbits + 1, m_oNodes + 1];
 
-		private OrbitTable ()
-		{
-			//generate lookup table
-			int j;
+        private OrbitTable()
+        {
+            //generate lookup table
+            int j;
             for (j = 0; j < m_oOrbits; j++)
             {
                 double excentricy = 1.0 * j / m_oOrbits;
-				double angle = 0;
+                double angle = 0;
                 m_lTable[j, 0] = 0;
 
-				int k;
+                int k;
 
 
                 /// <summary>
                 /// Total number of increments of the following loop. More gives a more precise location for each table entry.
                 /// </summary>
-                uint StepFactor = 4;                
+                uint StepFactor = 4;
                 uint TotalSteps = m_oNodes * StepFactor;
 
                 for (k = 0; k < TotalSteps; k++)
@@ -54,22 +54,22 @@ namespace Pulsar4X.Lib
                     /// <summary>
                     /// Stepfactor: the '4' reflects solving for 4x as many points as table elements to improve accuracy.
                     /// </summary>
-					if (k % StepFactor == 0)	
+                    if (k % StepFactor == 0)
                         m_lTable[j, (int)(k / StepFactor)] = angle;
 
-					//Secant Predition-Correction Method. 
-					//Pretty good accuracy when excentricy is small. For accuracy with large excentricy smaller steps are required.
+                    //Secant Predition-Correction Method. 
+                    //Pretty good accuracy when excentricy is small. For accuracy with large excentricy smaller steps are required.
                     double iAngle1 = angle + Math.PI * 2 / (2.0 * TotalSteps) * Math.Pow(1 - excentricy * Math.Cos(angle), 2.0) / Math.Pow(1 - excentricy * excentricy, 1.5);
                     double iAngle2 = angle + Math.PI * 2 / (2.0 * TotalSteps) * Math.Pow(1 - excentricy * Math.Cos(iAngle1), 2.0) / Math.Pow(1 - excentricy * excentricy, 1.5);
                     angle = 0.5 * (iAngle1 + iAngle2);
-				}
+                }
                 m_lTable[j, m_oNodes] = angle;
-			}
-		}
+            }
+        }
 
 
-		public void FindPolarPosition(OrbitingEntity theOrbit, long DaysSinceEpoch, out double angle, out double radius)
-		{
+        public void FindPolarPosition(OrbitingEntity theOrbit, long DaysSinceEpoch, out double angle, out double radius)
+        {
 
             long orbitPeriod = (long)(theOrbit.OrbitalPeriod);
 
@@ -102,7 +102,7 @@ namespace Pulsar4X.Lib
             /// </summary>
             double partial = eccentricAnomaly - theOrbit.Eccentricity * Math.Sin((meanAnomaly * radian)) - meanAnomaly;
 
-            while( (Math.Abs(partial) > delta) && (iteration < maxIteration))
+            while ((Math.Abs(partial) > delta) && (iteration < maxIteration))
             {
                 eccentricAnomaly = eccentricAnomaly - partial / (1.0 - theOrbit.Eccentricity * Math.Cos((eccentricAnomaly * radian)));
                 partial = eccentricAnomaly - theOrbit.Eccentricity * Math.Sin((eccentricAnomaly * radian)) - meanAnomaly;
@@ -138,7 +138,7 @@ namespace Pulsar4X.Lib
 				orbitFraction = 1.0 - orbitFraction;
 			}*/
 
-           
+
 
             /*if (theOrbit.Eccentricity >= 0.15)
             {                
@@ -183,9 +183,9 @@ namespace Pulsar4X.Lib
             /// (angle+theOrbit.LongitudeOfApogee) appears to be true anomaly
             /// <summary>
 #warning did we mean / (1 - theOrbit.Eccentricity despite that being incorrect? also corrected all the ones further down.
-			//radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
+            //radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 
-		}
+        }
 
         public void UpdatePosition(OrbitingEntity theOrbit, long delta)
         {
@@ -219,40 +219,40 @@ namespace Pulsar4X.Lib
             theOrbit.YSystem = y;
         }
 
-		public void FindCartesianPosition(OrbitingEntity theOrbit, long DaysSinceEpoch, out double x, out double y)
-		{
-			double angle, radius;
-			FindPolarPosition(theOrbit, DaysSinceEpoch, out angle, out radius);
-			x = -1 * radius * Math.Sin(angle);
-			y = radius * Math.Cos(angle);
-		}
+        public void FindCartesianPosition(OrbitingEntity theOrbit, long DaysSinceEpoch, out double x, out double y)
+        {
+            double angle, radius;
+            FindPolarPosition(theOrbit, DaysSinceEpoch, out angle, out radius);
+            x = -1 * radius * Math.Sin(angle);
+            y = radius * Math.Cos(angle);
+        }
 
-		public double FindRadiusFromAngle(OrbitingEntity theOrbit, double angle)
-		{
-			//angle += theOrbit.LongitudeOfApogee;
-			//if(angle > Math.PI * 2)
-			//	angle -= Math.PI * 2;
-			
-			//double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
+        public double FindRadiusFromAngle(OrbitingEntity theOrbit, double angle)
+        {
+            //angle += theOrbit.LongitudeOfApogee;
+            //if(angle > Math.PI * 2)
+            //	angle -= Math.PI * 2;
 
-            double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle/* + theOrbit.TrueAnomaly*/));
-			return radius;
-		}
-
-		public void FindCordsFromAngle(OrbitingEntity theOrbit, double angle, out double x, out double y)
-		{
-			//angle += theOrbit.LongitudeOfApogee;
-			//if(angle > Math.PI * 2)
-				//angle -= Math.PI * 2;
-			
-			//double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
+            //double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
 
             double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle/* + theOrbit.TrueAnomaly*/));
-			x = -1 * radius * Math.Sin(angle);
-			y = radius * Math.Cos(angle);	
-		}
+            return radius;
+        }
 
-	}
+        public void FindCordsFromAngle(OrbitingEntity theOrbit, double angle, out double x, out double y)
+        {
+            //angle += theOrbit.LongitudeOfApogee;
+            //if(angle > Math.PI * 2)
+            //angle -= Math.PI * 2;
+
+            //double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
+
+            double radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle/* + theOrbit.TrueAnomaly*/));
+            x = -1 * radius * Math.Sin(angle);
+            y = radius * Math.Cos(angle);
+        }
+
+    }
 
 }
 

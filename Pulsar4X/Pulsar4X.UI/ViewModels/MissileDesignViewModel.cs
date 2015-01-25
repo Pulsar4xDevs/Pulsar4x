@@ -78,7 +78,7 @@ namespace Pulsar4X.UI.ViewModels
             get { return _CurrnetMissileSeries; }
             set
             {
-                
+
                 if (_CurrnetMissileSeries != value)
                 {
                     _CurrnetMissileSeries = value;
@@ -108,7 +108,7 @@ namespace Pulsar4X.UI.ViewModels
                 }
             }
         }
-        
+
         /// <summary>
         /// Constructor for this view model.
         /// </summary>
@@ -150,7 +150,7 @@ namespace Pulsar4X.UI.ViewModels
 
             MissileEngines = _CurrnetFaction.ComponentList.MissileEngineDef;
 
-            if(MissileEngines.Count != 0)
+            if (MissileEngines.Count != 0)
                 CurrentMissileEngine = MissileEngines[0];
 
             Missiles = _CurrnetFaction.ComponentList.MissileDef;

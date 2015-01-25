@@ -35,24 +35,24 @@ namespace Pulsar4X.Entities.Components
             {
                 minerialsCost[mineralIterator] = 0;
             }
-            
+
             switch (componentType)
             {
                 case ComponentTypeTN.Crew: //25% Duranium 75% Mercassium
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.25m;
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Mercassium] = cost * 0.75m;
-                break;
+                    break;
                 case ComponentTypeTN.Fuel: //50% Duranium 50% Boronide
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.50m;
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Boronide] = cost * 0.50m;
-                break;
+                    break;
                 case ComponentTypeTN.Engineering: //100% Duranium
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost;
-                break;
+                    break;
                 case ComponentTypeTN.Bridge:      //50% Duranium, 50% corbomite
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = cost * 0.50m;
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Corbomite] = cost * 0.50m;
-                break;
+                    break;
                 //case ComponentTypeTN.FlagBridge: 50% corbomite, 50% Uridium
                 //case ComponentTypeTN.MaintenanceBay: 50% Duranium, 50% Neutronium
                 //case ComponentTypeTN.OrbitalHabitat: 25% Duranium, 25% Boronide, 50% Mercassium

@@ -16,8 +16,8 @@ namespace Pulsar4X.UI.GLUtilities
 {
     class GLLine : GLPrimitive
     {
-        private Vector3 m_V3PosEnd;  
-      
+        private Vector3 m_V3PosEnd;
+
         public Vector3 PosEnd
         {
             get
@@ -65,13 +65,13 @@ namespace Pulsar4X.UI.GLUtilities
             m_aoVerticies = new GLVertex[2];
             m_aoVerticies[0] = new GLVertex(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), a_oColor, new Vector2(0.0f, 0.0f));
             m_aoVerticies[1] = new GLVertex(new Vector4(0.0f, 0.0f, 0.0f, 1.0f), a_oColor, new Vector2(1.0f, 1.0f));
-            
+
 
             // Setup Draw order. *this apears to have no effect under GL2.X*
             m_auiIndicies = new ushort[2];
             m_auiIndicies[0] = 0;
             m_auiIndicies[1] = 1;
-            
+
             // tell OpenGL about our VBOs:
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
             GL.BindVertexArray(m_uiVextexArrayHandle);                      // Lets OpenGL that this is the current "active" vertex array.
@@ -106,7 +106,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
 
-           // #if DEBUG
+            // #if DEBUG
             //    logger.Info("OpenGL Create Line Primitive: " + GL.GetError().ToString());
             //#endif
         }

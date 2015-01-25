@@ -48,7 +48,7 @@ namespace Pulsar4X.Entities
                 case Constants.ShipTN.OrderType.TractorSpecifiedShip:
                 case Constants.ShipTN.OrderType.TractorSpecifiedShipyard:
                     enabledType.Add(Constants.ShipTN.OrderType.ReleaseAt);
-                    break;                                    
+                    break;
             }
 
             return enabledType;
@@ -103,7 +103,7 @@ namespace Pulsar4X.Entities
         /// storage for waypoint targeted orders.
         /// </summary>
         private Waypoint WayPoint { get; set; }
-        public Waypoint wayPoint 
+        public Waypoint wayPoint
         {
             get { return WayPoint; }
         }
@@ -288,7 +288,7 @@ namespace Pulsar4X.Entities
             OrderDelay = Delay;
 
             OrderTimeRequirement = -1;
-            
+
             Name = TypeOrder.ToString() + " " + ShipOrder.Name.ToString();
         }
     }

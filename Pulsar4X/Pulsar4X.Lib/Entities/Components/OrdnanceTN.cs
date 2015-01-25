@@ -127,8 +127,8 @@ namespace Pulsar4X.Entities.Components
             isDivisible = false;
             isElectronic = false;
             isMilitary = true;
-            crew = 0; 
-            
+            crew = 0;
+
         }
     }
 
@@ -272,7 +272,7 @@ namespace Pulsar4X.Entities.Components
         {
             get { return ActiveStr; }
         }
-        
+
         /// <summary>
         /// Ship active detection table.
         /// </summary>
@@ -480,7 +480,7 @@ namespace Pulsar4X.Entities.Components
         {
             get { return GMSP; }
         }
-        
+
 
         /// <summary>
         /// Ordnance Constructor.
@@ -514,11 +514,11 @@ namespace Pulsar4X.Entities.Components
         /// <param name="SeparationDist">release separation of secondary munition from target</param>
         /// <param name="Engine">Missile engine</param>
         /// <param name="missileEngineCount">number of missile engines</param>
-        public OrdnanceDefTN(string title, OrdnanceSeriesTN Series, 
-                             float whMSP, int whTech, float fuelMSP, float AgilityMSP, int agilTech, 
+        public OrdnanceDefTN(string title, OrdnanceSeriesTN Series,
+                             float whMSP, int whTech, float fuelMSP, float AgilityMSP, int agilTech,
                              float activeMSP, int activeTech, float thermalMSP, int thermalTech, float emMSP, int emTech, float geoMSP, int geoTech, ushort aRes, int reactorTech,
-                             float armorMSP, float ECMMSP, int ecmTech, bool enhanced, int radTech, bool laser, int laserTech,MissileEngineDefTN Engine, int missileEngineCount,
-                             OrdnanceDefTN SubMunition=null, int SubMunitionCount=0,int SeparationDist=-1)
+                             float armorMSP, float ECMMSP, int ecmTech, bool enhanced, int radTech, bool laser, int laserTech, MissileEngineDefTN Engine, int missileEngineCount,
+                             OrdnanceDefTN SubMunition = null, int SubMunitionCount = 0, int SeparationDist = -1)
         {
             /// <summary>
             /// Ignore these:
@@ -607,7 +607,7 @@ namespace Pulsar4X.Entities.Components
             size = size + AgilityMSP;
 
 
-            
+
             /// <summary>
             /// Sensor Handling Section:
             /// </summary>
@@ -647,7 +647,7 @@ namespace Pulsar4X.Entities.Components
                 if (ECMMSP > 1.0f)
                     ECMMSP = 1.0f;
 
-                ECMValue = (int)Math.Round((float)(ecmTech+1) * 10.0f * ECMMSP);
+                ECMValue = (int)Math.Round((float)(ecmTech + 1) * 10.0f * ECMMSP);
                 size = size + ECMMSP;
             }
 
@@ -718,7 +718,7 @@ namespace Pulsar4X.Entities.Components
 
             if (Warhead == RadValue || RadValue == 0)
             {
-                 minerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = (decimal)(((float)Warhead / 4.0f) + ((float)Armor / 4.0f));
+                minerialsCost[(int)Constants.Minerals.MinerialNames.Tritanium] = (decimal)(((float)Warhead / 4.0f) + ((float)Armor / 4.0f));
             }
             else
             {
@@ -749,12 +749,12 @@ namespace Pulsar4X.Entities.Components
             {
                 MaxSpeed = Constants.OrdnanceTN.MaximumSpeed;
             }
-            
+
             /// <summary>
             /// Bombs dropped directly on target, or otherwise things I really don't want to move, but don't want to screw up TimeReq for.
             /// </summary>
             if (MaxSpeed == 0)
-                MaxSpeed = 1; 
+                MaxSpeed = 1;
 
             Manuever = 10.0f + (Agility / size);
 
@@ -998,7 +998,7 @@ namespace Pulsar4X.Entities.Components
 
                     if (Detected == false)
                         return false;
-                break;
+                    break;
 
                 case StarSystemEntityType.Missile:
 
@@ -1037,7 +1037,7 @@ namespace Pulsar4X.Entities.Components
                         /// but those are impossible to build.
                         /// </summary>
                         sig = (int)Math.Ceiling((float)MSP / 20.0f);
-                        TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(sig, -1);                
+                        TargettingRange = MFC.mFCSensorDef.GetActiveDetectionRange(sig, -1);
                     }
 
                     /// <summary>
@@ -1047,10 +1047,10 @@ namespace Pulsar4X.Entities.Components
 
                     if (Detected == false)
                         return false;
-                break;
+                    break;
                 case StarSystemEntityType.Population:
 #warning implement population MFC tracking here
-                break;
+                    break;
             }
             return true;
         }
@@ -1076,9 +1076,9 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// MG Logger:
         /// </summary>
-        #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(OrdnanceGroupTN));
-        #endif
+#endif
 
         /// <summary>
         /// taskgroups which are targetted on this Ordnance group.
@@ -1205,12 +1205,12 @@ namespace Pulsar4X.Entities.Components
         /// This is referenced in ContactElement and maybe simentity,SystemMap as well as in OrdnanceTN(the TG version is referenced in Taskgroup).
         /// </summary>
         private byte _DrawTravelLine;
-        public byte DrawTravelLine 
+        public byte DrawTravelLine
         {
             get { return _DrawTravelLine; }
-            set { _DrawTravelLine = value; } 
+            set { _DrawTravelLine = value; }
         }
-        
+
         /// <summary>
         /// Constructor for missile groups.
         /// </summary>
@@ -1342,24 +1342,24 @@ namespace Pulsar4X.Entities.Components
                 case StarSystemEntityType.TaskGroup:
                     dX = (float)(Contact.XSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem);
                     dY = (float)(Contact.YSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem);
-                break;
+                    break;
                 case StarSystemEntityType.Missile:
                     dX = (float)(Contact.XSystem - Missiles[0].target.missileGroup.contact.XSystem);
                     dY = (float)(Contact.YSystem - Missiles[0].target.missileGroup.contact.YSystem);
-                break;
+                    break;
 
                 case StarSystemEntityType.Population:
                     dX = (float)(Contact.XSystem - Missiles[0].target.pop.Contact.XSystem);
                     dY = (float)(Contact.YSystem - Missiles[0].target.pop.Contact.YSystem);
-                break;
+                    break;
                 case StarSystemEntityType.Body:
                     dX = (float)(Contact.XSystem - Missiles[0].target.body.XSystem + Missiles[0].target.body.Primary.XSystem);
                     dX = (float)(Contact.XSystem - Missiles[0].target.body.YSystem + Missiles[0].target.body.Primary.YSystem);
-                break;
+                    break;
                 case StarSystemEntityType.Waypoint:
                     dX = (float)(Contact.XSystem - Missiles[0].target.wp.XSystem);
                     dY = (float)(Contact.YSystem - Missiles[0].target.wp.YSystem);
-                break;
+                    break;
             }
 
 
@@ -1465,10 +1465,10 @@ namespace Pulsar4X.Entities.Components
                 Contact.LastYSystem = Contact.YSystem;
 
 #warning yet another place with body and pop missile targetting that needs to be looked at
-                switch(Missiles[0].target.targetType)
+                switch (Missiles[0].target.targetType)
                 {
                     case StarSystemEntityType.TaskGroup:
-                        
+
 
                         /// <summary>
                         /// Impact time. If the ship is already destroyed.
@@ -1490,11 +1490,11 @@ namespace Pulsar4X.Entities.Components
                             ProcessImpact(RNG);
                         }
 
-                    break;
+                        break;
                     case StarSystemEntityType.Population:
-                    break;
+                        break;
                     case StarSystemEntityType.Body:
-                    break;
+                        break;
                     case StarSystemEntityType.Missile:
 
                         /// <summary>
@@ -1517,7 +1517,7 @@ namespace Pulsar4X.Entities.Components
                             ProcessMissileImpact(RNG);
                         }
 
-                    break;
+                        break;
                     case StarSystemEntityType.Waypoint:
                         /// <summary>
                         /// If missiles are targetted on a waypoint, and are set to OnOwnSensors = true, that means they are looking for a target.
@@ -1526,13 +1526,13 @@ namespace Pulsar4X.Entities.Components
                         Contact.XSystem = Missiles[0].target.wp.XSystem;
                         Contact.YSystem = Missiles[0].target.wp.YSystem;
 
-                        if(Missiles[0].onOwnSensors == true)
+                        if (Missiles[0].onOwnSensors == true)
                             SearchForNewTarget();
-                    break;
+                        break;
                 }
-                
+
             }
-            else if(Missiles[0].missileDef.ordnanceEngine != null)
+            else if (Missiles[0].missileDef.ordnanceEngine != null)
             {
                 if (Missiles[0].onOwnSensors == true)
                 {
@@ -1546,7 +1546,7 @@ namespace Pulsar4X.Entities.Components
                         /// Search for Target
                         /// </summary>
                         SearchForNewTarget();
-                        
+
                     }
                     else if (Missiles[0].target.targetType == StarSystemEntityType.TaskGroup)
                     {
@@ -1555,12 +1555,12 @@ namespace Pulsar4X.Entities.Components
                         /// </summary>
                         int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(Missiles[0].target.ship.ShipsTaskGroup.Contact);
                         float dist = Contact.DistanceTable[TGID];
-                        
-                        if(missiles[0].missileDef.aSD == null)
+
+                        if (missiles[0].missileDef.aSD == null)
                         {
-                            #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
                             logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
-                            #endif
+#endif
                             MissilesDestroyed = Missiles.Count;
                         }
 
@@ -1584,11 +1584,11 @@ namespace Pulsar4X.Entities.Components
                         float dist = Contact.DistanceTable[TGID];
                         int detection = -1;
 
-                        if(missiles[0].missileDef.aSD == null)
+                        if (missiles[0].missileDef.aSD == null)
                         {
-                            #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
                             logger.Debug("Error, missile set to onOwnSensors has no sensor. Killing all missiles.");
-                            #endif
+#endif
                             MissilesDestroyed = Missiles.Count;
                         }
 
@@ -1672,7 +1672,7 @@ namespace Pulsar4X.Entities.Components
             if (Missiles[0].fuel <= 0.0f)
             {
                 String Entry = "N/A";
-                if(Missiles.Count > 1)
+                if (Missiles.Count > 1)
                     Entry = String.Format("{0}x {1} Missiles in Missile Group {2} have run out of fuel.", Missiles.Count, Missiles[0].Name, Name);
                 else
                     Entry = String.Format("1x {0} Missile in Missile Group {1} has run out of fuel.", Missiles[0].Name, Name);
@@ -1685,7 +1685,7 @@ namespace Pulsar4X.Entities.Components
                 /// Mark all missiles for destruction, as they have all run out of fuel.
                 /// </summary>
                 MissilesDestroyed = Missiles.Count;
-            }        
+            }
         }
 
         /// <summary>
@@ -1709,7 +1709,7 @@ namespace Pulsar4X.Entities.Components
 
                     String Entry = "N/A";
                     if (Missiles.Count > 1)
-                        Entry = String.Format("{0}x {1} Missiles in Missile Group {2} lost tracking,have no onboard sensors and will self destruct.", Missiles.Count,Missiles[0].Name, Name);
+                        Entry = String.Format("{0}x {1} Missiles in Missile Group {2} lost tracking,have no onboard sensors and will self destruct.", Missiles.Count, Missiles[0].Name, Name);
                     else
                         Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking,has no onboard sensor and will self destruct.", Missiles[0].Name, Name);
 
@@ -1851,7 +1851,7 @@ namespace Pulsar4X.Entities.Components
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
-            }                                
+            }
         }
 
         /// <summary>
@@ -1887,7 +1887,7 @@ namespace Pulsar4X.Entities.Components
                     if (Missiles[loop].target.missileGroup.missiles[0].missileDef.armor == 0)
                         ToDestroy = 100;
                     else
-                        ToDestroy = (ushort)(Math.Round((Missiles[loop].missileDef.warhead / (Missiles[loop].target.missileGroup.missiles[0].missileDef.armor + Missiles[loop].missileDef.warhead))) * 100.0f); 
+                        ToDestroy = (ushort)(Math.Round((Missiles[loop].missileDef.warhead / (Missiles[loop].target.missileGroup.missiles[0].missileDef.armor + Missiles[loop].missileDef.warhead))) * 100.0f);
                     ushort DestChance = (ushort)RNG.Next(1, 100);
 
                     if (ToDestroy >= DestChance)
@@ -2015,6 +2015,6 @@ namespace Pulsar4X.Entities.Components
 
         #endregion
 
-        
+
     }
 }

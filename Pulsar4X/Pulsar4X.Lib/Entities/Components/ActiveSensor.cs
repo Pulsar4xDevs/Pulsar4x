@@ -44,7 +44,7 @@ namespace Pulsar4X.Entities.Components
         {
             get { return m_oGPS; }
         }
-        
+
         /// <summary>
         /// Range at which sensor can detect craft of same HS as resolution. multiply this by 10000 to get value in km.
         /// </summary>
@@ -209,7 +209,7 @@ namespace Pulsar4X.Entities.Components
                     int NewRange = (int)((float)m_oMaxRange * Math.Pow((msp / (float)m_oResolution), 2.0f));
                     m_lLookUpMT.Add(NewRange);
                 }
-                else if( MissileResolution == 14 )
+                else if (MissileResolution == 14)
                 {
                     lookUpMT.Add(m_lLookUpST[0]);//size 1 is size 1
                 }
@@ -224,7 +224,7 @@ namespace Pulsar4X.Entities.Components
         ///<summary>
         ///End ActiveSensorDefTN()
         ///</summary>
-        
+
         /// <summary>
         /// Missile active sensor definition
         /// </summary>
@@ -384,7 +384,7 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     ///End ActiveSensorTN
     /// </summary>
-    
+
 
     public class MissileFireControlTN : ComponentTN
     {
@@ -571,7 +571,7 @@ namespace Pulsar4X.Entities.Components
                 if (tube.mFC == this)
                     tube.ClearMFC();
             }
-            
+
         }
 
         /// <summary>
@@ -579,9 +579,9 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         public void ClearAllWeapons()
         {
-            foreach (MissileLauncherTN LaunchTube in m_lLinkedWeapons) 
+            foreach (MissileLauncherTN LaunchTube in m_lLinkedWeapons)
             {
-               LaunchTube.ClearMFC();
+                LaunchTube.ClearMFC();
             }
             m_lLinkedWeapons.Clear();
         }
@@ -742,7 +742,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// simple stupid sanity check.
             /// </summary>
-            if(MissilesToFire == 0)
+            if (MissilesToFire == 0)
             {
                 return 0;
             }

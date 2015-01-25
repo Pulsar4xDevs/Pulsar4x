@@ -21,7 +21,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// The detected ship.
         /// </summary>
-        public ShipTN ship{ get; set; }
+        public ShipTN ship { get; set; }
 
         /// <summary>
         /// Or it could be a detected missile.
@@ -152,7 +152,7 @@ namespace Pulsar4X.Entities
 
                     CurrentFaction.MessageLog.Add(NMsg);
                 }
-                
+
             }
 
             if (active == true)
@@ -175,7 +175,7 @@ namespace Pulsar4X.Entities
             GameState.SE.SetInterrupt(InterruptType.NewSensorContact);
         }
 
-        
+
 
         /// <summary>
         /// Each tick every faction contact should be updated on the basis of collected sensor data.
@@ -236,7 +236,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     EMTick = tick;
 
-                    
+
                     if (ship != null)
                         Contact = String.Format("{0} EM Signature {1}", Contact, ship.CurrentEMSignature);
                     else if (missileGroup != null)
@@ -272,7 +272,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     activeTick = tick;
 
-                    
+
 
                     if (ship != null)
                         Contact = String.Format("{0} TCS {1}", Contact, ship.TotalCrossSection);
@@ -289,7 +289,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Active contact lost.
                     /// </summary>
-                    
+
                     Contact = String.Format("{0} Active contact lost", Contact);
                 }
 
@@ -369,7 +369,7 @@ namespace Pulsar4X.Entities
         /// Creates a faction contact list for the specified system.
         /// </summary>
         /// <param name="system">System indicated.</param>
-        public FactionSystemDetection(Faction Fact,StarSystem system)
+        public FactionSystemDetection(Faction Fact, StarSystem system)
         {
             Faction = Fact;
             System = system;
@@ -457,7 +457,7 @@ namespace Pulsar4X.Entities
             OrdersNotCompleted,
 
             PotentialFleetInterception,
-            
+
             ShieldRecharge,
 
             ShipDamage,
@@ -467,12 +467,12 @@ namespace Pulsar4X.Entities
             Count
         }
 
-        #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
         /// <summary>
         /// Ship Logger:
         /// </summary>
         public static readonly ILog logger = LogManager.GetLogger(typeof(MessageEntry));
-        #endif
+#endif
 
         /// <summary>
         /// What specific type of message is this?
@@ -522,13 +522,13 @@ namespace Pulsar4X.Entities
             Text = text;
 
 
-            #if LOG4NET_ENABLED
-            if(TypeOf == MessageType.Error)
+#if LOG4NET_ENABLED
+            if (TypeOf == MessageType.Error)
             {
                 String Entry = String.Format("Faction Message Logging Error: Type:{0} | Time:{1} | Location:{2} - TimeSlice:{3}: Text:{4}\n", TypeOf, TimeOfMessage, Location, TimeSlice, Text);
                 logger.Debug(Entry);
             }
-            #endif
+#endif
         }
     }
 
@@ -536,17 +536,17 @@ namespace Pulsar4X.Entities
     /// This is intended to be part of a larger dictionary that separates these by system. Component and Ship data is stored for every Point defense enabled FC here.
     /// </summary>
     public class PointDefenseList
-    {        
+    {
         /// <summary>
         /// The component and which ship it is on.
         /// </summary>
-        public Dictionary<ComponentTN, ShipTN> PointDefenseFC{ get; set; }
+        public Dictionary<ComponentTN, ShipTN> PointDefenseFC { get; set; }
 
         /// <summary>
         /// FCType of the base component, again, no pointer exists to the component def so this must be stored.
         /// as always, false = MFC, true = BFC.
         /// </summary>
-        public Dictionary<ComponentTN, bool> PointDefenseType { get; set; } 
+        public Dictionary<ComponentTN, bool> PointDefenseType { get; set; }
 
         /// <summary>
         /// Constructor for PDList.
@@ -627,7 +627,7 @@ namespace Pulsar4X.Entities
         /// List of all components the faction has defined.
         /// </summary>
         public ComponentDefListTN ComponentList { get; set; }
-        
+
         /// <summary>
         /// The faction's ship designs are stored here.
         /// </summary>
@@ -646,12 +646,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// I'll just store every contact in every system potentially here right now.
         /// </summary>
-        public Dictionary<StarSystem,FactionSystemDetection> SystemContacts { get; set; }
+        public Dictionary<StarSystem, FactionSystemDetection> SystemContacts { get; set; }
 
         /// <summary>
         /// here is where only the specifically detected contacts are placed.
         /// </summary>
-        public Dictionary<StarSystem,DetectedContactsList> DetectedContactLists { get; set; }
+        public Dictionary<StarSystem, DetectedContactsList> DetectedContactLists { get; set; }
 
         /// <summary>
         /// Just a list of the available installation types for this faction.
@@ -686,7 +686,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// These are Firecontrols set to open fire.
         /// </summary>
-        public Dictionary<ComponentTN,ShipTN> OpenFireFC { get; set; }
+        public Dictionary<ComponentTN, ShipTN> OpenFireFC { get; set; }
         public Dictionary<ComponentTN, bool> OpenFireFCType { get; set; }
 
         /// <summary>
@@ -702,18 +702,18 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of ships that need various combat related functionality. the int is a status word.
         /// </summary>
-        public Dictionary<ShipTN,int> RechargeList { get; set; }
+        public Dictionary<ShipTN, int> RechargeList { get; set; }
 
         /// <summary>
         /// Bitwise status flag enumerator.
         /// </summary>
         public enum RechargeStatus
         {
-            Shields=1,
-            Weapons=2,
-            Destroyed=4,
+            Shields = 1,
+            Weapons = 2,
+            Destroyed = 4,
             CIWS = 8,
-            Count=16
+            Count = 16
         }
 
         /// <summary>
@@ -956,7 +956,7 @@ namespace Pulsar4X.Entities
             Ships = new BindingList<ShipTN>();
             ComponentList.AddInitialComponents();
 
-            SystemContacts = new Dictionary<StarSystem,FactionSystemDetection>();
+            SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
             DetectedContactLists = new Dictionary<StarSystem, DetectedContactsList>();
 
             FactionID = ID;
@@ -980,13 +980,13 @@ namespace Pulsar4X.Entities
             BaseTracking = 1250;
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
-            OpenFireFCType = new Dictionary<ComponentTN,bool>();
+            OpenFireFCType = new Dictionary<ComponentTN, bool>();
 
             PointDefense = new Dictionary<StarSystem, PointDefenseList>();
 
             MissileRemoveList = new BindingList<OrdnanceGroupTN>();
 
-            RechargeList = new Dictionary<ShipTN,int>();
+            RechargeList = new Dictionary<ShipTN, int>();
 
             FactionTechLevel = new BindingList<SByte>();
 
@@ -1122,7 +1122,7 @@ namespace Pulsar4X.Entities
         /// <param name="Title">Name.</param>
         /// <param name="StartBody">Body with population that built the ship that will be put into the TG.</param>
         /// <param name="StartSystem">System in which the TG starts in.</param>
-        public void AddNewTaskGroup(String Title,OrbitingEntity StartBody, StarSystem StartSystem)
+        public void AddNewTaskGroup(String Title, OrbitingEntity StartBody, StarSystem StartSystem)
         {
             TaskGroupTN TG = new TaskGroupTN(Title, this, StartBody, StartSystem);
             TaskGroups.Add(TG);
@@ -1130,7 +1130,7 @@ namespace Pulsar4X.Entities
 
         public void AddNewShipDesign(String Title)
         {
-            ShipClassTN Ship = new ShipClassTN(Title,this);
+            ShipClassTN Ship = new ShipClassTN(Title, this);
             ShipDesigns.Add(Ship);
         }
 
@@ -1140,10 +1140,10 @@ namespace Pulsar4X.Entities
         /// <param name="system">Starsystem for the contacts.</param>
         public void AddNewContactList(StarSystem system)
         {
-            FactionSystemDetection NewContact = new FactionSystemDetection(this,system);
+            FactionSystemDetection NewContact = new FactionSystemDetection(this, system);
             system.FactionDetectionLists.Add(NewContact);
-            SystemContacts.Add(system,NewContact);
-        
+            SystemContacts.Add(system, NewContact);
+
         }
 
         /// <summary>
@@ -1179,7 +1179,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Loop through all DSTS. ***
             /// </summary>
-            
+
             /// <summary>
             /// Loop through all faction taskgroups.
             /// </summary>
@@ -1234,7 +1234,7 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 float TaskGroupDistance = (TaskGroups[loop].CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;
 
-                                
+
 
 #warning fleet intercept preemption magic number here, if less than 5 days travel time currently.
 #warning fleet intercept needs to only process for hostile or unknown taskgroups, not all taskgroups.
@@ -1259,7 +1259,7 @@ namespace Pulsar4X.Entities
                                         GameState.SE.AddFleetToPreemptList(System.SystemContactList[loop2].TaskGroup);
                                     }
                                 }
-                                    
+
                             }
                         }
 
@@ -1307,7 +1307,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// The -1 is because a planet is most certainly not a missile.
                             /// </summary>
-                            detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[ sig ]].aSensorDef.GetActiveDetectionRange(sig,-1);
+                            detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
                             /// <summary>
                             /// Do detection calculations here.
@@ -1327,7 +1327,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Taskgroups have multiple signatures, so noDetection and allDetection become important.
                             /// </summary>
-                            
+
                             bool noDetection = false;
                             bool allDetection = false;
 
@@ -1668,7 +1668,7 @@ namespace Pulsar4X.Entities
                                 if (sig > Constants.ShipTN.ResolutionMax - 1)
                                     sig = Constants.ShipTN.ResolutionMax - 1;
 
-                                detection = TaskGroups[loop].ActiveSensorQue[ TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig,-1);
+                                detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
 
                                 bool det = LargeDetection(System, dist, detection);
@@ -1904,11 +1904,11 @@ namespace Pulsar4X.Entities
                                     /// Big missiles will be treated in HS terms: 21-40 MSP = 2 HS, 41-60 = 3 HS, 61-80 = 4 HS, 81-100 = 5 HS. The same should hold true for greater than 100 sized missiles.
                                     /// but those are impossible to build.
                                     /// </summary>
-                                    sig = (int)Math.Ceiling( (float)TotalCrossSection_MSP / 20.0f);
+                                    sig = (int)Math.Ceiling((float)TotalCrossSection_MSP / 20.0f);
 
                                     detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
                                 }
-                                
+
                                 bool det = LargeDetection(System, dist, detection);
 
                                 if (det == true)
@@ -1945,7 +1945,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// End for Faction TaskGroups.
             /// </summary>
-            
+
 
             /// <summary>
             /// Loop through all missile groups.
@@ -1987,7 +1987,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue &&
                         System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue && System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue &&
-                        ( Missile.missileDef.thermalStr != 0.0f || Missile.missileDef.eMStr != 0.0f || Missile.missileDef.activeStr != 0.0f ) )
+                        (Missile.missileDef.thermalStr != 0.0f || Missile.missileDef.eMStr != 0.0f || Missile.missileDef.activeStr != 0.0f))
                     {
                         float dist = -1.0f;
                         if (TaskGroups[loop].Contact.DistanceUpdate[loop2] == YearTickValue)
@@ -2087,378 +2087,378 @@ namespace Pulsar4X.Entities
                         else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup && System.SystemContactList[loop2].TaskGroup.Ships.Count != 0)
                         {
                             #region Taskgroup Detection by Missiles
+                            /// <summary>
+                            /// Taskgroups have multiple signatures, so noDetection and allDetection become important.
+                            /// </summary>
+
+                            bool noDetection = false;
+                            bool allDetection = false;
+
+                            #region Ship Thermal Detection Code
+                            if (System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue && Missile.missileDef.tHD != null)
+                            {
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last();
+                                ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                sig = scratch.CurrentThermalSignature;
+
+                                detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
+
                                 /// <summary>
-                                /// Taskgroups have multiple signatures, so noDetection and allDetection become important.
+                                /// Test the biggest signature against the best sensor.
                                 /// </summary>
+                                bool det = LargeDetection(System, dist, detection);
 
-                                bool noDetection = false;
-                                bool allDetection = false;
-
-                                #region Ship Thermal Detection Code
-                                if (System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue && Missile.missileDef.tHD != null)
+                                /// <summary>
+                                /// Good case, none of the ships are detected.
+                                /// </summary>
+                                if (det == false)
                                 {
-                                    int ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last();
-                                    ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                    noDetection = true;
+                                }
+
+                                /// <summary>
+                                /// Atleast the biggest ship is detected.
+                                /// </summary
+                                if (noDetection == false)
+                                {
+                                    ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.First();
+                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                     sig = scratch.CurrentThermalSignature;
 
+                                    /// <summary>
+                                    /// Now for the smallest vs the best.
+                                    /// </summary>
                                     detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
+                                    det = LargeDetection(System, dist, detection);
 
                                     /// <summary>
-                                    /// Test the biggest signature against the best sensor.
+                                    /// Best case, everything is detected.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
-
-                                    /// <summary>
-                                    /// Good case, none of the ships are detected.
-                                    /// </summary>
-                                    if (det == false)
+                                    if (det == true)
                                     {
-                                        noDetection = true;
-                                    }
+                                        allDetection = true;
 
-                                    /// <summary>
-                                    /// Atleast the biggest ship is detected.
-                                    /// </summary
-                                    if (noDetection == false)
-                                    {
-                                        ShipID = System.SystemContactList[loop2].TaskGroup.ThermalSortList.First();
-                                        scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
-                                        sig = scratch.CurrentThermalSignature;
-
-                                        /// <summary>
-                                        /// Now for the smallest vs the best.
-                                        /// </summary>
-                                        detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
-                                        det = LargeDetection(System, dist, detection);
-
-                                        /// <summary>
-                                        /// Best case, everything is detected.
-                                        /// </summary>
-                                        if (det == true)
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            allDetection = true;
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = YearTickValue;
 
-                                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                            if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
                                             {
-                                                System.SystemContactList[loop2].TaskGroup.Ships[loop3].ThermalDetection[FactionID] = YearTickValue;
-
-                                                if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
-                                                {
-                                                    DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
-                                                }
+                                                DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
                                             }
-                                            System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
                                         }
-                                        else if (noDetection == false && allDetection == false)
+                                        System.FactionDetectionLists[FactionID].Thermal[loop2] = YearTickValue;
+                                    }
+                                    else if (noDetection == false && allDetection == false)
+                                    {
+                                        /// <summary>
+                                        /// Worst case. some are detected, some aren't.
+                                        /// </summary>
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            /// <summary>
-                                            /// Worst case. some are detected, some aren't.
-                                            /// </summary>
-                                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                            LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last;
+                                            bool done = false;
+
+                                            while (!done)
                                             {
-                                                LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.ThermalSortList.Last;
-                                                bool done = false;
+                                                scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
 
-                                                while (!done)
+                                                if (scratch.ThermalDetection[FactionID] != YearTickValue)
                                                 {
-                                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
+                                                    sig = scratch.CurrentThermalSignature;
+                                                    detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
 
-                                                    if (scratch.ThermalDetection[FactionID] != YearTickValue)
+                                                    /// <summary>
+                                                    /// Test each ship until I get to one I don't see.
+                                                    /// </summary>
+                                                    det = LargeDetection(System, dist, detection);
+
+                                                    if (det == true)
                                                     {
-                                                        sig = scratch.CurrentThermalSignature;
-                                                        detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
+                                                        scratch.ThermalDetection[FactionID] = YearTickValue;
 
-                                                        /// <summary>
-                                                        /// Test each ship until I get to one I don't see.
-                                                        /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
-
-                                                        if (det == true)
+                                                        if (DetShipList.Contains(scratch) == false)
                                                         {
-                                                            scratch.ThermalDetection[FactionID] = YearTickValue;
-
-                                                            if (DetShipList.Contains(scratch) == false)
-                                                            {
-                                                                DetShipList.Add(scratch);
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            done = true;
-                                                            break;
+                                                            DetShipList.Add(scratch);
                                                         }
                                                     }
-                                                    if (node == System.SystemContactList[loop2].TaskGroup.ThermalSortList.First)
+                                                    else
                                                     {
-                                                        /// <summary>
-                                                        /// This should not happen.
-                                                        /// </summary>
-                                                        String ErrorMessage = string.Format("Partial Thermal detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
-                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.CurrentSystem, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
-                                                        MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
                                                     }
-                                                    node = node.Previous;
-                                                }//end while
-                                            }//end for
-                                        }//end else if (noDetection == false && allDetection == false)
-                                    }//end if noDetection == false
-                                }//end if not detected and missile can detect thermally
-                                #endregion
+                                                }
+                                                if (node == System.SystemContactList[loop2].TaskGroup.ThermalSortList.First)
+                                                {
+                                                    /// <summary>
+                                                    /// This should not happen.
+                                                    /// </summary>
+                                                    String ErrorMessage = string.Format("Partial Thermal detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
+                                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.CurrentSystem, MissileGroups[loop].contact,
+                                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                    MessageLog.Add(NMsg);
+                                                    done = true;
+                                                    break;
+                                                }
+                                                node = node.Previous;
+                                            }//end while
+                                        }//end for
+                                    }//end else if (noDetection == false && allDetection == false)
+                                }//end if noDetection == false
+                            }//end if not detected and missile can detect thermally
+                            #endregion
 
-                                #region Ship EM Detection Code
-                                if (System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue && Missile.missileDef.eMD != null)
+                            #region Ship EM Detection Code
+                            if (System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue && Missile.missileDef.eMD != null)
+                            {
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.Last();
+                                ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                sig = scratch.CurrentEMSignature;
+
+                                detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
+
+                                /// <summary>
+                                /// Test the biggest signature against the best sensor.
+                                /// </summary>
+                                bool det = LargeDetection(System, dist, detection);
+
+                                /// <summary>
+                                /// Good case, none of the ships are detected.
+                                /// </summary>
+                                if (det == false)
                                 {
-                                    int ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.Last();
-                                    ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                    noDetection = true;
+                                }
+
+                                /// <summary>
+                                /// Atleast the biggest ship is detected.
+                                /// </summary
+                                if (noDetection == false)
+                                {
+                                    ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.First();
+                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                     sig = scratch.CurrentEMSignature;
 
+                                    /// <summary>
+                                    /// Now for the smallest vs the best.
+                                    /// </summary>
                                     detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
+                                    det = LargeDetection(System, dist, detection);
 
                                     /// <summary>
-                                    /// Test the biggest signature against the best sensor.
+                                    /// Best case, everything is detected.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
-
-                                    /// <summary>
-                                    /// Good case, none of the ships are detected.
-                                    /// </summary>
-                                    if (det == false)
+                                    if (det == true)
                                     {
-                                        noDetection = true;
-                                    }
+                                        allDetection = true;
 
-                                    /// <summary>
-                                    /// Atleast the biggest ship is detected.
-                                    /// </summary
-                                    if (noDetection == false)
-                                    {
-                                        ShipID = System.SystemContactList[loop2].TaskGroup.EMSortList.First();
-                                        scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
-                                        sig = scratch.CurrentEMSignature;
-
-                                        /// <summary>
-                                        /// Now for the smallest vs the best.
-                                        /// </summary>
-                                        detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
-                                        det = LargeDetection(System, dist, detection);
-
-                                        /// <summary>
-                                        /// Best case, everything is detected.
-                                        /// </summary>
-                                        if (det == true)
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            allDetection = true;
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = YearTickValue;
 
-                                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                            if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
                                             {
-                                                System.SystemContactList[loop2].TaskGroup.Ships[loop3].EMDetection[FactionID] = YearTickValue;
-
-                                                if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
-                                                {
-                                                    DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
-                                                }
+                                                DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
                                             }
-                                            System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                         }
-                                        else if (noDetection == false && allDetection == false)
+                                        System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
+                                    }
+                                    else if (noDetection == false && allDetection == false)
+                                    {
+                                        /// <summary>
+                                        /// Worst case. some are detected, some aren't.
+                                        /// </summary>
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            /// <summary>
-                                            /// Worst case. some are detected, some aren't.
-                                            /// </summary>
-                                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                            LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.EMSortList.Last;
+                                            bool done = false;
+
+                                            while (!done)
                                             {
-                                                LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.EMSortList.Last;
-                                                bool done = false;
+                                                scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
 
-                                                while (!done)
+                                                if (scratch.EMDetection[FactionID] != YearTickValue)
                                                 {
-                                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
+                                                    sig = scratch.CurrentEMSignature;
 
-                                                    if (scratch.EMDetection[FactionID] != YearTickValue)
+                                                    /// <summary>
+                                                    /// here is where EM detection differs from Thermal detection:
+                                                    /// If a ship has a signature of 0 by this point(and we didn't already hit noDetection above,
+                                                    /// it means that one ship is emitting a signature, but that no other ships are.
+                                                    /// Mark the group as totally detected, but not the ships, this serves to tell me that the ships are undetectable
+                                                    /// in this case.
+                                                    /// Also, sig will never be 0 for the first iteration of the loop, that has already been tested, so I don't need to worry about
+                                                    /// node.Next.Value blowing up on me.
+                                                    /// </summary>
+                                                    if (sig == 0)
                                                     {
-                                                        sig = scratch.CurrentEMSignature;
-
                                                         /// <summary>
-                                                        /// here is where EM detection differs from Thermal detection:
-                                                        /// If a ship has a signature of 0 by this point(and we didn't already hit noDetection above,
-                                                        /// it means that one ship is emitting a signature, but that no other ships are.
-                                                        /// Mark the group as totally detected, but not the ships, this serves to tell me that the ships are undetectable
-                                                        /// in this case.
-                                                        /// Also, sig will never be 0 for the first iteration of the loop, that has already been tested, so I don't need to worry about
-                                                        /// node.Next.Value blowing up on me.
+                                                        /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
+                                                        /// Mark the entire group as "spotted" because no other detection will occur.
                                                         /// </summary>
-                                                        if (sig == 0)
+                                                        if (System.SystemContactList[loop2].TaskGroup.Ships[node.Next.Value].EMDetection[FactionID] == YearTickValue)
                                                         {
-                                                            /// <summary>
-                                                            /// The last signature we looked at was the ship emitting an EM sig, and this one is not.
-                                                            /// Mark the entire group as "spotted" because no other detection will occur.
-                                                            /// </summary>
-                                                            if (System.SystemContactList[loop2].TaskGroup.Ships[node.Next.Value].EMDetection[FactionID] == YearTickValue)
-                                                            {
-                                                                System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
-                                                            }
-                                                            break;
+                                                            System.FactionDetectionLists[FactionID].EM[loop2] = YearTickValue;
                                                         }
+                                                        break;
+                                                    }
 
 
-                                                        detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
+                                                    detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
 
-                                                        /// <summary>
-                                                        /// Test each ship until I get to one I don't see.
-                                                        /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
+                                                    /// <summary>
+                                                    /// Test each ship until I get to one I don't see.
+                                                    /// </summary>
+                                                    det = LargeDetection(System, dist, detection);
 
-                                                        if (det == true)
+                                                    if (det == true)
+                                                    {
+                                                        scratch.EMDetection[FactionID] = YearTickValue;
+
+                                                        if (DetShipList.Contains(scratch) == false)
                                                         {
-                                                            scratch.EMDetection[FactionID] = YearTickValue;
-
-                                                            if (DetShipList.Contains(scratch) == false)
-                                                            {
-                                                                DetShipList.Add(scratch);
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            done = true;
-                                                            break;
+                                                            DetShipList.Add(scratch);
                                                         }
                                                     }
-                                                    if (node == System.SystemContactList[loop2].TaskGroup.EMSortList.First)
+                                                    else
                                                     {
-                                                        /// <summary>
-                                                        /// This should not happen.
-                                                        /// </summary>
-                                                        String ErrorMessage = string.Format("Partial EM detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
-                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.CurrentSystem, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
-                                                        MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
                                                     }
-                                                    node = node.Previous;
-                                                }//end while
-                                            }//end for
-                                        }//end else if (noDetection == false && allDetection == false)
-                                    }//end if noDetection == false
-                                }//end if not detected and missile can detect EM
-                                #endregion
+                                                }
+                                                if (node == System.SystemContactList[loop2].TaskGroup.EMSortList.First)
+                                                {
+                                                    /// <summary>
+                                                    /// This should not happen.
+                                                    /// </summary>
+                                                    String ErrorMessage = string.Format("Partial EM detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
+                                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.CurrentSystem, MissileGroups[loop].contact,
+                                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                    MessageLog.Add(NMsg);
+                                                    done = true;
+                                                    break;
+                                                }
+                                                node = node.Previous;
+                                            }//end while
+                                        }//end for
+                                    }//end else if (noDetection == false && allDetection == false)
+                                }//end if noDetection == false
+                            }//end if not detected and missile can detect EM
+                            #endregion
 
-                                #region Ship Active Detection Code
-                                if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue && Missile.missileDef.aSD != null)
+                            #region Ship Active Detection Code
+                            if (System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue && Missile.missileDef.aSD != null)
+                            {
+                                int ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last();
+                                ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                sig = scratch.TotalCrossSection;
+
+                                detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
+
+                                /// <summary>
+                                /// Test the biggest signature against the best sensor.
+                                /// </summary>
+                                bool det = LargeDetection(System, dist, detection);
+
+                                /// <summary>
+                                /// Good case, none of the ships are detected.
+                                /// </summary>
+                                if (det == false)
                                 {
-                                    int ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last();
-                                    ShipTN scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
+                                    noDetection = true;
+                                }
+
+                                /// <summary>
+                                /// Atleast the biggest ship is detected.
+                                /// </summary
+                                if (noDetection == false)
+                                {
+                                    ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.First();
+                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
                                     sig = scratch.TotalCrossSection;
 
-                                    detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig,-1);
-
                                     /// <summary>
-                                    /// Test the biggest signature against the best sensor.
+                                    /// Now for the smallest vs the best.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
+                                    det = LargeDetection(System, dist, detection);
 
                                     /// <summary>
-                                    /// Good case, none of the ships are detected.
+                                    /// Best case, everything is detected.
                                     /// </summary>
-                                    if (det == false)
+                                    if (det == true)
                                     {
-                                        noDetection = true;
-                                    }
+                                        allDetection = true;
 
-                                    /// <summary>
-                                    /// Atleast the biggest ship is detected.
-                                    /// </summary
-                                    if (noDetection == false)
-                                    {
-                                        ShipID = System.SystemContactList[loop2].TaskGroup.ActiveSortList.First();
-                                        scratch = System.SystemContactList[loop2].TaskGroup.Ships[ShipID];
-                                        sig = scratch.TotalCrossSection;
-
-                                        /// <summary>
-                                        /// Now for the smallest vs the best.
-                                        /// </summary>
-                                        detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
-                                        det = LargeDetection(System, dist, detection);
-
-                                        /// <summary>
-                                        /// Best case, everything is detected.
-                                        /// </summary>
-                                        if (det == true)
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            allDetection = true;
+                                            System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = YearTickValue;
 
-                                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                            if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
                                             {
-                                                System.SystemContactList[loop2].TaskGroup.Ships[loop3].ActiveDetection[FactionID] = YearTickValue;
-
-                                                if (DetShipList.Contains(System.SystemContactList[loop2].TaskGroup.Ships[loop3]) == false)
-                                                {
-                                                    DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
-                                                }
+                                                DetShipList.Add(System.SystemContactList[loop2].TaskGroup.Ships[loop3]);
                                             }
-                                            System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                                         }
-                                        else if (noDetection == false && allDetection == false)
+                                        System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
+                                    }
+                                    else if (noDetection == false && allDetection == false)
+                                    {
+                                        /// <summary>
+                                        /// Worst case. some are detected, some aren't.
+                                        /// </summary>
+                                        for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
                                         {
-                                            /// <summary>
-                                            /// Worst case. some are detected, some aren't.
-                                            /// </summary>
-                                            for (int loop3 = 0; loop3 < System.SystemContactList[loop2].TaskGroup.Ships.Count; loop3++)
+                                            LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last;
+                                            bool done = false;
+
+                                            while (!done)
                                             {
-                                                LinkedListNode<int> node = System.SystemContactList[loop2].TaskGroup.ActiveSortList.Last;
-                                                bool done = false;
+                                                scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
 
-                                                while (!done)
+                                                if (scratch.ActiveDetection[FactionID] != YearTickValue)
                                                 {
-                                                    scratch = System.SystemContactList[loop2].TaskGroup.Ships[node.Value];
+                                                    sig = scratch.TotalCrossSection;
+                                                    detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
 
-                                                    if (scratch.ActiveDetection[FactionID] != YearTickValue)
+                                                    /// <summary>
+                                                    /// Test each ship until I get to one I don't see.
+                                                    /// </summary>
+                                                    det = LargeDetection(System, dist, detection);
+
+                                                    if (det == true)
                                                     {
-                                                        sig = scratch.TotalCrossSection;
-                                                        detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
+                                                        scratch.ActiveDetection[FactionID] = YearTickValue;
 
-                                                        /// <summary>
-                                                        /// Test each ship until I get to one I don't see.
-                                                        /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
-
-                                                        if (det == true)
+                                                        if (DetShipList.Contains(scratch) == false)
                                                         {
-                                                            scratch.ActiveDetection[FactionID] = YearTickValue;
-
-                                                            if (DetShipList.Contains(scratch) == false)
-                                                            {
-                                                                DetShipList.Add(scratch);
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            done = true;
-                                                            break;
+                                                            DetShipList.Add(scratch);
                                                         }
                                                     }
-                                                    if (node == System.SystemContactList[loop2].TaskGroup.ActiveSortList.First)
+                                                    else
                                                     {
-                                                        /// <summary>
-                                                        /// This should not happen.
-                                                        /// </summary>
-                                                        String ErrorMessage = string.Format("Partial Active detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
-                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.CurrentSystem, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
-                                                        MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
                                                     }
-                                                    node = node.Previous;
-                                                }//end while
-                                            }//end for
-                                        }//end else if (noDetection == false && allDetection == false)
-                                    }//end if noDetection == false
-                                }//end if not detected and missile can detect TCS
-                                #endregion
+                                                }
+                                                if (node == System.SystemContactList[loop2].TaskGroup.ActiveSortList.First)
+                                                {
+                                                    /// <summary>
+                                                    /// This should not happen.
+                                                    /// </summary>
+                                                    String ErrorMessage = string.Format("Partial Active detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
+                                                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.CurrentSystem, MissileGroups[loop].contact,
+                                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                    MessageLog.Add(NMsg);
+                                                    done = true;
+                                                    break;
+                                                }
+                                                node = node.Previous;
+                                            }//end while
+                                        }//end for
+                                    }//end else if (noDetection == false && allDetection == false)
+                                }//end if noDetection == false
+                            }//end if not detected and missile can detect TCS
+                            #endregion
                             #endregion
                         }
                         else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.Missile && System.SystemContactList[loop2].MissileGroup.missiles.Count != 0)
@@ -2539,7 +2539,7 @@ namespace Pulsar4X.Entities
                                 sig = -1;
                                 detection = -1;
 
-                                if (TotalCrossSection_MSP < ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1) )
+                                if (TotalCrossSection_MSP < ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
                                 {
                                     if (TotalCrossSection_MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
                                     {

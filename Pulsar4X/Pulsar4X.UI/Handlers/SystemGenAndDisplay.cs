@@ -158,7 +158,7 @@ namespace Pulsar4X.UI.Handlers
                 VM.CurrentPlanet = (Planet)sel[0].DataBoundItem;
             }
         }
-        
+
         #endregion
 
         #region PublicMethods

@@ -55,7 +55,7 @@ namespace Pulsar4X.UI.Helpers
         /// <summary> The dic of Loaded textures </summary>
         Dictionary<string, TextureData> m_dicTextures = new Dictionary<string, TextureData>();
 
-       
+
         /// <summary>   
         /// A Structure used to store data about a OpenGL Font. 
         /// </summary>
@@ -74,7 +74,7 @@ namespace Pulsar4X.UI.Helpers
             public uint m_uiUseCount = 0;
             public uint m_uiTextureID = 0;
 
-            public GLFontData() {}
+            public GLFontData() { }
         }
 
 
@@ -87,7 +87,7 @@ namespace Pulsar4X.UI.Helpers
         /// </summary>
         private ResourceManager()
         {
-            
+
         }
 
         public uint LoadTexture(string a_szTextureFile)
@@ -161,7 +161,7 @@ namespace Pulsar4X.UI.Helpers
             {
                 return 0;
             }
-            
+
             // next we see if this string has been gend already:
             TextureData oTexture;
             if (m_dicTextures.TryGetValue(a_szString, out oTexture))
@@ -188,12 +188,12 @@ namespace Pulsar4X.UI.Helpers
                 Font oFont = new Font(new FontFamily("Arial"), 128.0f, FontStyle.Regular, GraphicsUnit.Pixel);
                 SolidBrush oBrush = new SolidBrush(Color.White);
                 gfx.DrawString(a_szString, oFont, oBrush, 0, 0);
-                                
+
             }
 
             // lock bits for editing:
-            System.Drawing.Imaging.BitmapData oBitmapData = oStringBitmap.LockBits(new Rectangle(0,0, oStringBitmap.Width, oStringBitmap.Height),
-                                                                                    System.Drawing.Imaging.ImageLockMode.ReadOnly, 
+            System.Drawing.Imaging.BitmapData oBitmapData = oStringBitmap.LockBits(new Rectangle(0, 0, oStringBitmap.Width, oStringBitmap.Height),
+                                                                                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
                                                                                     System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
 
@@ -281,7 +281,7 @@ namespace Pulsar4X.UI.Helpers
                     /// <summary>
                     /// All of the System.Globalization stuff is due ot the fact that the default float.TryParse behaves differently on different computers. thanks microsoft.
                     /// </summary>
-                    
+
                     GLFontData.UVCoords oUVCoords = new GLFontData.UVCoords();
 
                     System.Globalization.CultureInfo culture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
@@ -326,7 +326,7 @@ namespace Pulsar4X.UI.Helpers
                     if (r1 == false || r2 == false || r3 == false || r4 == false)
                     {
 #if LOG4NET_ENABLED
-                        logger.Info("ResourceManager.cs Char: " + szBuffer + " Coordinates: " + oUVCoords.m_v2UVMin.X + "/" + oUVCoords.m_v2UVMin.Y + "," + oUVCoords.m_v2UVMax.X + "/" + oUVCoords.m_v2UVMax.Y + 
+                        logger.Info("ResourceManager.cs Char: " + szBuffer + " Coordinates: " + oUVCoords.m_v2UVMin.X + "/" + oUVCoords.m_v2UVMin.Y + "," + oUVCoords.m_v2UVMax.X + "/" + oUVCoords.m_v2UVMax.Y +
                                     "|" + r1 + " " + r2 + " " + r3 + " " + r4);
 #endif
                     }
@@ -362,7 +362,7 @@ namespace Pulsar4X.UI.Helpers
         }
 
 
-        
+
         /// <summary>
         /// Unloads the Specified Texture if it is no longer in use.
         /// </summary>

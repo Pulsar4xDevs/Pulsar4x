@@ -88,7 +88,7 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             Name = title;
             size = hs * Constants.LauncherTN.Reduction[Reduction];
-            htk = (byte)Math.Round((size/2.0f));
+            htk = (byte)Math.Round((size / 2.0f));
 
             /// <summary>
             /// Boxlaunchers have no crew requirement, and reload rate should not affect their cost as it has no other effects.
@@ -101,7 +101,7 @@ namespace Pulsar4X.Entities.Components
             else
             {
                 crew = (byte)Math.Round(size * 3.0f);
-                cost = (decimal)(size * 4.0f) + (decimal)(size * (float)(ReloadTech-1));
+                cost = (decimal)(size * 4.0f) + (decimal)(size * (float)(ReloadTech - 1));
             }
 
             minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
@@ -119,7 +119,7 @@ namespace Pulsar4X.Entities.Components
             ReloadRateTech = ReloadTech;
             IsPDCSilo = ShipOrPDC;
 
-            float ReloadFactor = ( 30.0f * hs ) / (float)ReloadTech;
+            float ReloadFactor = (30.0f * hs) / (float)ReloadTech;
             ReloadFactor = ReloadFactor * Constants.LauncherTN.Penalty[Reduction];
 
             if (isPDCSilo == true)

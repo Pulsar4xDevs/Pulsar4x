@@ -13,25 +13,26 @@ namespace Pulsar4X.Stargen
         private const double MinAge = 1.0E9;
         private const double MaxAge = 6.0E9;
 
-        #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystemFactory));
-        #endif
+#endif
 
         private readonly double _minimumStellarAge;
         private readonly double _maximumStellarAge;
         private readonly bool _generateMoons;
 
-        public StarSystemFactory(bool genMoons = true) : this(MinAge, MaxAge, genMoons)
+        public StarSystemFactory(bool genMoons = true)
+            : this(MinAge, MaxAge, genMoons)
         {
         }
 
-        public StarSystemFactory(double minStellarAge, double maxStellarAge,  bool genMoons)
+        public StarSystemFactory(double minStellarAge, double maxStellarAge, bool genMoons)
         {
             _minimumStellarAge = minStellarAge;
             _maximumStellarAge = maxStellarAge;
             _generateMoons = genMoons;
         }
-        
+
         public StarSystem Create(string name, int seed = -1)
         {
             Random rnd;
@@ -42,7 +43,7 @@ namespace Pulsar4X.Stargen
 
             if (string.IsNullOrEmpty(name)) throw new ArgumentException("Name cannot be null or empty.");
 
-            var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge,  _generateMoons, rnd);
+            var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge, _generateMoons, rnd);
             var ss = accrete.Create(name);
 
             // save seed to star system:
@@ -51,7 +52,7 @@ namespace Pulsar4X.Stargen
             /// <summary>
             /// redundancy:
             /// </summary>
-            #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
             if (logger.IsDebugEnabled)
             {
                 /*
@@ -75,12 +76,12 @@ namespace Pulsar4X.Stargen
                 }
                 */
             }
-            #endif
+#endif
 
             // Create the faciton contact information for each faction.
             foreach (Faction f in GameState.Instance.Factions)
             {
-               f.AddNewContactList(ss);
+                f.AddNewContactList(ss);
             }
             return ss;
         }

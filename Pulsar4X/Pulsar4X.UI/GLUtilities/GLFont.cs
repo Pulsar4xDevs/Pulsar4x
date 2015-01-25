@@ -13,7 +13,7 @@ using log4net;
 
 namespace Pulsar4X.UI.GLUtilities
 {
-   
+
     /// <summary> 
     /// A Font for use in OpenGL, will Render is current "Text".
     /// </summary>
@@ -32,7 +32,7 @@ namespace Pulsar4X.UI.GLUtilities
         /// <summary>   
         /// Gets or sets the text to render. 
         /// </summary>
-        public string Text 
+        public string Text
         {
             get
             {
@@ -42,7 +42,7 @@ namespace Pulsar4X.UI.GLUtilities
             {
                 m_szText = value;
                 UpdateUVCoords();
-            } 
+            }
         }
 
         private Vector3 m_v3Position;

@@ -95,8 +95,8 @@ namespace Pulsar4X.Entities.Components
                 /// <summary>
                 /// Beams are the best at penetrating armor.
                 /// </summary>
-                case DamageTypeTN.Beam :
-                    
+                case DamageTypeTN.Beam:
+
                     /// <summary>
                     /// As near as I can tell higher power beams are better at penetration overall than lower power beams.
                     /// </summary>
@@ -112,26 +112,26 @@ namespace Pulsar4X.Entities.Components
                     {
                         Penetration = 3;
                     }
-                break;
+                    break;
                 /// <summary>
                 /// Railguns and particle beams are not as good at penetrating armor, but have other characteristics that are valuable.
                 /// </summary>
                 case DamageTypeTN.Kinetic:
                     Penetration = 2;
-                break;
+                    break;
                 /// <summary>
                 /// Plasma likewise roils over armor, but is cheap and does plenty of damage.
                 /// Actual penetration is in effect 1/2.
                 /// </summary>
                 case DamageTypeTN.Plasma:
                     Penetration = 1;
-                break;
+                    break;
                 /// <summary>
                 /// Missiles are the premier weapon of the game, and have the weakest penetration overall.
                 /// </summary>
                 case DamageTypeTN.Missile:
                     Penetration = 1;
-                break;
+                    break;
             }
 
             /// <summary>
@@ -223,7 +223,7 @@ namespace Pulsar4X.Entities.Components
                 else
                 {
                     DamageTemplate[HitPoint] = 1;
-                    DamageTemplate[HitPoint+1] = 1;
+                    DamageTemplate[HitPoint + 1] = 1;
                     RemainingDamage = RemainingDamage - 2;
 
                     Spread = 2;
@@ -232,7 +232,7 @@ namespace Pulsar4X.Entities.Components
                     {
                         HalfSpread = Spread / 2;
 
-                        for (int loop = HalfSpread; loop >=0; loop--)
+                        for (int loop = HalfSpread; loop >= 0; loop--)
                         {
                             DamageTemplate[HitPoint - loop] = (ushort)(DamageTemplate[HitPoint - loop] + (ushort)1);
 
@@ -249,7 +249,7 @@ namespace Pulsar4X.Entities.Components
 
                         Spread = Spread + 2;
                     }
-                }  
+                }
             }
 
             /// <summary>
@@ -257,7 +257,7 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
 
             int limit = DamageTemplate.Count;
-            for (int loop = limit-1; loop >= 0; loop--)
+            for (int loop = limit - 1; loop >= 0; loop--)
             {
                 if (DamageTemplate[loop] == 0)
                 {
@@ -270,47 +270,47 @@ namespace Pulsar4X.Entities.Components
         }
     }
 
+    /// <summary>
+    /// Damage Table kludge.
+    /// </summary>
+    public static class DamageValuesTN
+    {
+        public static BindingList<DamageTableTN> EnergyTable;
+
+        public static BindingList<DamageTableTN> PlasmaTable;
+
+        public static BindingList<DamageTableTN> KineticTable;
+
+        public static BindingList<DamageTableTN> MissileTable;
+
         /// <summary>
-        /// Damage Table kludge.
+        /// Provisional Damage table location. Check out program.cs for where this is initialized.
         /// </summary>
-        public static class DamageValuesTN
+        public static void init()
         {
-            public static BindingList<DamageTableTN> EnergyTable;
-
-            public static BindingList<DamageTableTN> PlasmaTable;
-
-            public static BindingList<DamageTableTN> KineticTable;
-
-            public static BindingList<DamageTableTN> MissileTable;
-
-            /// <summary>
-            /// Provisional Damage table location. Check out program.cs for where this is initialized.
-            /// </summary>
-            public static void init()
+            EnergyTable = new BindingList<DamageTableTN>();
+            PlasmaTable = new BindingList<DamageTableTN>();
+            KineticTable = new BindingList<DamageTableTN>();
+            MissileTable = new BindingList<DamageTableTN>();
+            for (int loop = 0; loop < 210; loop++)
             {
-                EnergyTable = new BindingList<DamageTableTN>();
-                PlasmaTable = new BindingList<DamageTableTN>();
-                KineticTable = new BindingList<DamageTableTN>();
-                MissileTable = new BindingList<DamageTableTN>();
-                for (int loop = 0; loop < 210; loop++)
-                {
-                    DamageTableTN EV = new DamageTableTN(DamageTypeTN.Beam, (ushort)(loop + 1));
-                    DamageTableTN PV = new DamageTableTN(DamageTypeTN.Plasma, (ushort)(loop + 1));
-                    EnergyTable.Add(EV);
-                    PlasmaTable.Add(PV);
-                }
+                DamageTableTN EV = new DamageTableTN(DamageTypeTN.Beam, (ushort)(loop + 1));
+                DamageTableTN PV = new DamageTableTN(DamageTypeTN.Plasma, (ushort)(loop + 1));
+                EnergyTable.Add(EV);
+                PlasmaTable.Add(PV);
+            }
 
-                for (int loop = 0; loop < 80; loop++)
-                {
-                    DamageTableTN KV = new DamageTableTN(DamageTypeTN.Kinetic, (ushort)(loop + 1));
-                    KineticTable.Add(KV);
-                }
+            for (int loop = 0; loop < 80; loop++)
+            {
+                DamageTableTN KV = new DamageTableTN(DamageTypeTN.Kinetic, (ushort)(loop + 1));
+                KineticTable.Add(KV);
+            }
 
-                for (int loop = 0; loop < 3000; loop++)
-                {
-                    DamageTableTN MV = new DamageTableTN(DamageTypeTN.Missile, (ushort)(loop + 1));
-                    MissileTable.Add(MV);
-                }
+            for (int loop = 0; loop < 3000; loop++)
+            {
+                DamageTableTN MV = new DamageTableTN(DamageTypeTN.Missile, (ushort)(loop + 1));
+                MissileTable.Add(MV);
             }
         }
+    }
 }

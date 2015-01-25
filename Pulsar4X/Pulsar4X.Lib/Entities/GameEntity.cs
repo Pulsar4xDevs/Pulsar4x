@@ -19,7 +19,7 @@ namespace Pulsar4X.Entities
             get { return _name; }
             set
             {
-                if(value != _name)
+                if (value != _name)
                 {
                     _name = value;
                     OnPropertyChanged("Name");
@@ -31,7 +31,7 @@ namespace Pulsar4X.Entities
         {
         }
 
-        public override string ToString() 
+        public override string ToString()
         {
             if (Name != null)
             {
@@ -48,7 +48,7 @@ namespace Pulsar4X.Entities
         {
             List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
             //generic orders a selected tg targeting anything will have all these options if the selecteed tg can do these.
-            legalOrders.Add(Constants.ShipTN.OrderType.MoveTo);            
+            legalOrders.Add(Constants.ShipTN.OrderType.MoveTo);
             legalOrders.Add(Constants.ShipTN.OrderType.ExtendedOrbit);
             legalOrders.Add(Constants.ShipTN.OrderType.Picket);
             legalOrders.Add(Constants.ShipTN.OrderType.SendMessage);
@@ -85,7 +85,7 @@ namespace Pulsar4X.Entities
                 Planet planet = (Planet)this;
                 if (planet.GeoSurveyList.ContainsKey(faction) == true)
                 {
-                    if(planet.GeoSurveyList[faction] == false)
+                    if (planet.GeoSurveyList[faction] == false)
                         legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
                 }
             }
@@ -93,12 +93,12 @@ namespace Pulsar4X.Entities
             {
                 Population pop = (Population)this;
                 if (faction == pop.Faction)
-                {                    
+                {
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
                     if (pop.FuelStockpile > 0)
                         legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
                     if (pop.MaintenanceSupplies > 0)
-                        legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);                               
+                        legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);
                     if (Array.Exists(pop.Installations, x => x.Type == Installation.InstallationType.MaintenanceFacility))
                         legalOrders.Add(Constants.ShipTN.OrderType.BeginOverhaul);
                     if (pop.Installations.Count() > 0)
@@ -116,10 +116,10 @@ namespace Pulsar4X.Entities
                     legalOrders.Add(Constants.ShipTN.OrderType.UnloadColonists);
                     legalOrders.Add(Constants.ShipTN.OrderType.UnloadFuelToPlanet);
                     legalOrders.Add(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet);
-                    if (Array.Exists(pop.Installations, x => x.Type == Installation.InstallationType.OrdnanceFactory) || pop.MissileStockpile.Count > 0)                        
+                    if (Array.Exists(pop.Installations, x => x.Type == Installation.InstallationType.OrdnanceFactory) || pop.MissileStockpile.Count > 0)
                         legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
                     legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
-                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);                 
+                    legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
                 }
             }
             if (this is SystemContact)
@@ -132,9 +132,9 @@ namespace Pulsar4X.Entities
                 ShipTN[] shipsArray = tg.Ships.ToArray();
                 legalOrders.Add(Constants.ShipTN.OrderType.Follow);
                 legalOrders.Add(Constants.ShipTN.OrderType.Join);
-                legalOrders.Add(Constants.ShipTN.OrderType.Absorb);                
-                legalOrders.Add(Constants.ShipTN.OrderType.RefuelTargetFleet);                
-                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyTargetFleet);                
+                legalOrders.Add(Constants.ShipTN.OrderType.Absorb);
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelTargetFleet);
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyTargetFleet);
                 legalOrders.Add(Constants.ShipTN.OrderType.ReloadTargetFleet);
 
                 if (Array.Exists(shipsArray, x => x.ShipClass.IsTanker)) //if this fleet is targeted and has a IsTanker.

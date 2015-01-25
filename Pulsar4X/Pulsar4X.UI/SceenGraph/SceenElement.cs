@@ -139,7 +139,7 @@ namespace Pulsar4X.UI.SceenGraph
         /// <summary>
         /// The Game Entity this Sceen Element repesents.
         /// </summary>
-        public abstract GameEntity SceenEntity { get; set;}
+        public abstract GameEntity SceenEntity { get; set; }
 
         /// <summary>
         /// Default Constructor

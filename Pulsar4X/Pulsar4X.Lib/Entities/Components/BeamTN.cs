@@ -178,7 +178,7 @@ namespace Pulsar4X.Entities.Components
                 /// <summary>
                 /// Laser is the the most basic jack of all trade beam weapon.
                 /// </summary>
-                case ComponentTypeTN.Laser :
+                case ComponentTypeTN.Laser:
 
                     /// <summary>
                     /// I Suspect that size is 3.2cm per HS but am just using a table for now.
@@ -203,11 +203,11 @@ namespace Pulsar4X.Entities.Components
                     /// </summary>
                     switch (m_oWMType)
                     {
-                        case MountType.Spinal :
+                        case MountType.Spinal:
                             size = (float)Math.Round(size * 1.25f);
                             m_lDamage[0] = (ushort)Math.Round((float)m_lDamage[0] * 1.5f);
                             break;
-                        case MountType.AdvancedSpinal :
+                        case MountType.AdvancedSpinal:
                             size = (float)Math.Round(size * 1.5f);
                             m_lDamage[0] = (ushort)Math.Round((float)m_lDamage[0] * 2.0f);
                             break;
@@ -232,10 +232,10 @@ namespace Pulsar4X.Entities.Components
                     CalcDamageTable(RangeIncrement);
 
                     m_oDamageType = DamageTypeTN.Beam;
-                break;
+                    break;
 
-                case ComponentTypeTN.AdvLaser :
-                size = (float)Math.Round(Constants.BeamWeaponTN.LaserSize[m_oWeaponSizeTech] * Reduction);
+                case ComponentTypeTN.AdvLaser:
+                    size = (float)Math.Round(Constants.BeamWeaponTN.LaserSize[m_oWeaponSizeTech] * Reduction);
                     m_lDamage.Add((ushort)Constants.BeamWeaponTN.AdvancedLaserDamage[m_oWeaponSizeTech]);
 
                     /// <summary>
@@ -274,12 +274,12 @@ namespace Pulsar4X.Entities.Components
                     CalcDamageTable(RangeIncrement);
 
                     m_oDamageType = DamageTypeTN.Beam;
-                break;
+                    break;
 
                 /// <summary>
                 /// Plasmas are essentially cheaper infared lasers.
                 /// </summary>
-                case ComponentTypeTN.Plasma :
+                case ComponentTypeTN.Plasma:
                     m_oWeaponRangeTech = 0;
 
                     /// <summary>
@@ -311,9 +311,9 @@ namespace Pulsar4X.Entities.Components
                     CalcDamageTable(RangeIncrement);
 
                     m_oDamageType = DamageTypeTN.Plasma;
-                break;
+                    break;
 
-                case ComponentTypeTN.AdvPlasma :
+                case ComponentTypeTN.AdvPlasma:
                     m_oWeaponRangeTech = 0;
                     size = (float)Constants.BeamWeaponTN.LaserSize[m_oWeaponSizeTech];
                     m_oRange = (float)Constants.BeamWeaponTN.AdvancedLaserDamage[m_oWeaponSizeTech] * 10000.0f * (float)(m_oWeaponRangeTech + 1);
@@ -323,8 +323,8 @@ namespace Pulsar4X.Entities.Components
                     CalcDamageTable(RangeIncrement);
 
                     m_oDamageType = DamageTypeTN.Plasma;
-                break;
-                
+                    break;
+
                 /// <summary>
                 /// Railguns have a higher damage than lasers of equal size, though it is spread out over many hits.
                 /// Likewise railguns are not suitable for turrets, lastly railguns don't have the full tech progression that lasers have.
@@ -341,7 +341,7 @@ namespace Pulsar4X.Entities.Components
                     CalcDamageTable(RangeIncrement);
 
                     m_oDamageType = DamageTypeTN.Kinetic;
-                break;
+                    break;
 
                 /// <summary>
                 /// Only difference here is 1 more shot.
@@ -357,7 +357,7 @@ namespace Pulsar4X.Entities.Components
                     CalcDamageTable(RangeIncrement);
 
                     m_oDamageType = DamageTypeTN.Kinetic;
-                break;
+                    break;
 
                 /// <summary>
                 /// Mesons have half the range that lasers have, and only do 1 damage, but always pass through armor and shields.
@@ -377,7 +377,7 @@ namespace Pulsar4X.Entities.Components
                     m_lDamage.Add(0);
 
                     m_oDamageType = DamageTypeTN.Meson;
-                break;
+                    break;
 
                 /// <summary>
                 /// Microwaves do electronic only damage, though they do triple against shields. this isn't very useful though as they don't do triple normal laser damage vs shields, just 3.
@@ -399,7 +399,7 @@ namespace Pulsar4X.Entities.Components
                     m_lDamage.Add(0);
 
                     m_oDamageType = DamageTypeTN.Microwave;
-                break;
+                    break;
 
                 /// <summary>
                 /// Particle Beams suffer no range dissipation so will out damage lasers at their maximum range, but are shorter ranged than lasers.
@@ -420,7 +420,7 @@ namespace Pulsar4X.Entities.Components
                     m_lDamage.Add(0);
 
                     m_oDamageType = DamageTypeTN.Kinetic;
-                break;
+                    break;
 
                 /// <summary>
                 /// More damage is the only change for advanced particle beams.
@@ -440,7 +440,7 @@ namespace Pulsar4X.Entities.Components
                     m_lDamage.Add(0);
 
                     m_oDamageType = DamageTypeTN.Kinetic;
-                break;
+                    break;
 
                 /// <summary>
                 /// Gauss Cannons differ substantially from other beam weapons. Size is determined directly from a size vs accuracy choice.
@@ -461,7 +461,7 @@ namespace Pulsar4X.Entities.Components
                     m_lDamage.Add(0);
 
                     m_oDamageType = DamageTypeTN.Kinetic;
-                break;
+                    break;
             }
 
             /// <summary>
@@ -491,7 +491,7 @@ namespace Pulsar4X.Entities.Components
                     htk = 1;
                 else
                     htk = 0;
-            
+
                 crew = (byte)(size * 2.0f);
                 cost = (decimal)((size * 2.0f) * (float)(m_oWeaponRangeTech + 1) * (float)(m_oWeaponCapacitor + 1));
 
@@ -529,7 +529,7 @@ namespace Pulsar4X.Entities.Components
                     minerialsCost[(int)Constants.Minerals.MinerialNames.Vendarite] = cost;
                     break;
             }
-            
+
 
             isMilitary = true;
             isObsolete = false;
@@ -662,7 +662,7 @@ namespace Pulsar4X.Entities.Components
 
             return ready;
         }
-        
+
         /// <summary>
         /// timeToFire calculates how many seconds until this beam weapon is charged.
         /// </summary>

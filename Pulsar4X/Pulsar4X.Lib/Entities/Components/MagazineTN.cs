@@ -77,7 +77,7 @@ namespace Pulsar4X.Entities.Components
             Id = Guid.NewGuid();
 
             componentType = ComponentTypeTN.Magazine;
-            
+
             Name = title;
             size = hs;
 
@@ -88,8 +88,8 @@ namespace Pulsar4X.Entities.Components
                 desiredHTK = 10;
 
             htk = desiredHTK;
-            
-            
+
+
             crew = (byte)(size / 2.0f);
 
             if (crew == 0)
@@ -118,7 +118,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// have some rounding to do here:
             /// </summary>
-            if(desiredHTK >= 2)
+            if (desiredHTK >= 2)
             {
                 ArmorFactor = 1.0f;
                 float pi = 3.14159654f;

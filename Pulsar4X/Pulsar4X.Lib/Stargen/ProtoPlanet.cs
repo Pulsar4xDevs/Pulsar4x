@@ -24,7 +24,7 @@ namespace Pulsar4X.Stargen
 
         public ProtoPlanet(Star Primary, OrbitingEntity Parent)
         {
-            Planet = new Planet(Primary,Parent);
+            Planet = new Planet(Primary, Parent);
         }
 
         public void init()
@@ -54,7 +54,7 @@ namespace Pulsar4X.Stargen
 
         private void SetCloudDensity()
         {
-            if(IsMoon)
+            if (IsMoon)
                 CloudDensity = Constants.Stargen.DUST_DENSITY_COEFF * Math.Sqrt(MoonOf.Mass) * Math.Exp(-Constants.Stargen.ALPHA * Math.Pow(SemiMajorAxis, (1.0 / Constants.Stargen.N)));
             CloudDensity = Constants.Stargen.DUST_DENSITY_COEFF * Math.Sqrt(Star.Mass) * Math.Exp(-Constants.Stargen.ALPHA * Math.Pow(SemiMajorAxis, (1.0 / Constants.Stargen.N)));
         }

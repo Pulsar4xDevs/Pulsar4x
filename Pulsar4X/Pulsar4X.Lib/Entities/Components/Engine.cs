@@ -151,7 +151,7 @@ namespace Pulsar4X.Entities.Components
             /// Each HS of engineSize reduces fuel consumption by 1%.
             /// FuelUsePerHour is the product of engine power and these various modifiers.
             /// </summary>
-            float fuelPowerMod = (float)Math.Pow((double)PowerMod,2.5);
+            float fuelPowerMod = (float)Math.Pow((double)PowerMod, 2.5);
             float EngineSizeMod = (float)(1.0 - ((double)size * 0.01));
             FuelUsePerHour = EnginePower * fuelPowerMod * FuelConsumptionMod * EngineSizeMod;
 
@@ -164,7 +164,7 @@ namespace Pulsar4X.Entities.Components
             /// The Thermal reduction modifier is merely tech level * 0.25.
             /// Cost is 1/2 of EnginePower modified by thermal reduction tech.
             /// </summary>
-            float ThermalReductionCostMod = (float)((float)(ThmRedTech-1) * 0.25f);
+            float ThermalReductionCostMod = (float)((float)(ThmRedTech - 1) * 0.25f);
             cost = (decimal)(((EnginePower / 2.0f) * ((float)ThermalReductionCostMod) + (EnginePower / 2.0f)));
 
             /// <summary>
@@ -242,25 +242,26 @@ namespace Pulsar4X.Entities.Components
     /// End EngineTN Class
     /// </summary>
 
-	public class NewtonianEngine : BasicNewtonian
-	{
-		public double m_oIsReactionless;
+    public class NewtonianEngine : BasicNewtonian
+    {
+        public double m_oIsReactionless;
 
-		public double m_oMaxThrust;
+        public double m_oMaxThrust;
 
-		public double m_oPower;
+        public double m_oPower;
 
-		public double m_oMaxSpeed;
+        public double m_oMaxSpeed;
 
-		public double m_oBurnRate;
+        public double m_oBurnRate;
 
-		public NewtonianEngine () : base ()
-		{
-			m_oType = NewtonianType.Engine;
-		}
+        public NewtonianEngine()
+            : base()
+        {
+            m_oType = NewtonianType.Engine;
+        }
 
-		//TODO: Impliment Engine mechanics
-	}
+        //TODO: Impliment Engine mechanics
+    }
 
 
 }
