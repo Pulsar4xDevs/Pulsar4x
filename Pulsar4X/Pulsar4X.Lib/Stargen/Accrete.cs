@@ -668,6 +668,10 @@ namespace Pulsar4X.Stargen
             return true;
         }
 
+        /// <summary>
+        /// Generates JumpPoints around a designated star.
+        /// </summary>
+        /// <param name="Star">JumpPoint Star Parent</param>
         private void GenerateJumpPoints(Star Star)
         {
             int numJumpPoints = 1; // Each star always generates a JP.
@@ -678,7 +682,7 @@ namespace Pulsar4X.Stargen
             foreach (Planet p in Star.Planets)
             {
 #warning Magic number for JumpPoint generation chance.
-                int chance = 20;
+                int chance = 10;
                 if (p.IsMoon)
                     continue;
                 // Higher mass planets = higher chance.
@@ -715,6 +719,8 @@ namespace Pulsar4X.Stargen
                 // Determine a location for the new JP.
                 double offsetX = ((maxDistance - minDistance) * rnd.Next(76) / 100) + minDistance;
                 double offsetY = ((maxDistance - minDistance) * rnd.Next(76) / 100) + minDistance;
+
+                // Randomly flip the sign of the offsets.
                 if (rnd.Next(2) == 0)
                 {
                     offsetX = -offsetX;
@@ -726,6 +732,7 @@ namespace Pulsar4X.Stargen
 
                 if (Star.Parent != null)
                 {
+                    //We need the Star to have a valid position to offset from.
                     Star.UpdatePosition(1);
                 }
 
