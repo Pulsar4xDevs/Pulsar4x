@@ -61,7 +61,7 @@ namespace Pulsar4X.UI
 
             oNewFaction.Capitol = oNewFaction.Populations[0].Planet;
             oNewFaction.Capitol.GeoSurveyList.Add(oNewFaction, true);
-            oNewFaction.AddNewTaskGroup("Combat Taskgroup", P1, otest);
+            oNewFaction.AddNewTaskGroup("Combat Taskgroup  HR", P1, otest);
             oNewFaction.FactionColor = System.Drawing.Color.Blue;
 
             Entities.Faction oNewFaction2 = new Entities.Faction(1);
@@ -79,7 +79,7 @@ namespace Pulsar4X.UI
 
             oNewFaction2.Capitol = oNewFaction2.Populations[0].Planet;
             oNewFaction2.Capitol.GeoSurveyList.Add(oNewFaction2, true);
-            oNewFaction2.AddNewTaskGroup("Combat Taskgroup", P2, otest);
+            oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, otest);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 
             oNewFaction.AddNewShipDesign("Sword");

@@ -1421,6 +1421,11 @@ namespace Pulsar4X.Entities
                 }
             }
 
+            if (CanOrder != Constants.ShipTN.OrderState.AcceptOrders)
+            {
+                return;
+            }
+           
             if (OrderCount == 0)
             {
                 if (IsOrbiting)
@@ -2275,6 +2280,17 @@ namespace Pulsar4X.Entities
                        }
                     break;
                     #endregion
+
+                    case (int)Constants.ShipTN.OrderType.StandardTransit:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    (TaskGroupOrders[0].target as JumpPoint).StandardTransit(this);
+                    break;
+                    case (int)Constants.ShipTN.OrderType.SquadronTransit:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    (TaskGroupOrders[0].target as JumpPoint).SquadronTransit(this);
+                    break;
+
+
 
                 }
             }
