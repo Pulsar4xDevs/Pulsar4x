@@ -96,7 +96,7 @@ namespace Pulsar4X.UI.Handlers
                 if (value != m_oCurrnetFaction)
                 {
                     m_oCurrnetFaction = value;
-                    if(m_oCurrnetFaction.Populations.Count != 0)
+                    if (m_oCurrnetFaction.Populations.Count != 0)
                         m_oCurrnetPopulation = m_oCurrnetFaction.Populations[0];
                     RefreshPanels();
                 }
@@ -236,7 +236,7 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.StockpileButton.Click += new EventHandler(StockpileButton_Click);
             StockpileButton_Click(null, null);
 
-            m_oSummaryPanel.InstallationTypeComboBox.SelectedIndexChanged +=new EventHandler(InstallationTypeComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.InstallationTypeComboBox.SelectedIndexChanged += new EventHandler(InstallationTypeComboBox_SelectedIndexChanged);
             BuildConstructionComboBox();
 
             m_oSummaryPanel.BuildDataGrid.SelectionChanged += new EventHandler(BuildDataGrid_SelectionChanged);
@@ -259,7 +259,7 @@ namespace Pulsar4X.UI.Handlers
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
             RefreshPanels();
-             
+
             // setup Event handlers:
 
         }
@@ -340,7 +340,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void PopulationTreeView_Input(object sender, EventArgs e)
         {
-            if( m_oSummaryPanel.PopulationTreeView.SelectedNode != null)
+            if (m_oSummaryPanel.PopulationTreeView.SelectedNode != null)
             {
                 if (TreeViewDictionary.ContainsKey(m_oSummaryPanel.PopulationTreeView.SelectedNode.Name) == true)
                 {
@@ -501,7 +501,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void StockpileButton_Click(object sender, EventArgs e)
         {
-            if(m_oSummaryPanel.ConstructionDataGrid.Visible == false)
+            if (m_oSummaryPanel.ConstructionDataGrid.Visible == false)
             {
                 m_oSummaryPanel.ConstructionDataGrid.Visible = true;
                 m_oSummaryPanel.ShipComponentGroupBox.Visible = false;
@@ -583,7 +583,7 @@ namespace Pulsar4X.UI.Handlers
                         {
                             case BuildListObject.ListEntityType.Installation:
                                 Installation Install = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as Installation;
-                                CurrentPopulation.BuildQueueAddInstallation(Install,NumToBuild,PercentCapacity);
+                                CurrentPopulation.BuildQueueAddInstallation(Install, NumToBuild, PercentCapacity);
                                 break;
                             case BuildListObject.ListEntityType.Component:
                                 ComponentDefTN Component = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as ComponentDefTN;
@@ -620,9 +620,9 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ModifyBuildProjButton_Click(object sender, EventArgs e)
         {
-            if(m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
             {
-                if(m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
                 {
                     float NumToBuild = -1.0f;
                     float PercentCapacity = -1.0f;
@@ -636,7 +636,7 @@ namespace Pulsar4X.UI.Handlers
                         CurrentPopulation.ConstructionBuildQueue[RealIndex].numToBuild = NumToBuild;
                         CurrentPopulation.ConstructionBuildQueue[RealIndex].buildCapacity = PercentCapacity;
                     }
-                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) && 
+                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) &&
                              index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
                     {
                         int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
@@ -764,7 +764,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// reset the construction type combo box selection to 0.
                 /// </summary>
-                if(m_oSummaryPanel.InstallationTypeComboBox.Items.Count != 0)
+                if (m_oSummaryPanel.InstallationTypeComboBox.Items.Count != 0)
                     m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex = 0;
 
 
@@ -878,7 +878,7 @@ namespace Pulsar4X.UI.Handlers
         {
             TreeViewDictionary.Clear();
 
-            Dictionary<StarSystem, float> SystemPopulation = new Dictionary<StarSystem,float>();
+            Dictionary<StarSystem, float> SystemPopulation = new Dictionary<StarSystem, float>();
 
             m_oSummaryPanel.PopulationTreeView.Nodes.Clear();
 
@@ -888,7 +888,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oSummaryPanel.PopulationTreeView.Nodes.Add("Automated Mining Colonies");
 
-                if(m_oSummaryPanel.HideCMCCheckBox.Checked == false)
+                if (m_oSummaryPanel.HideCMCCheckBox.Checked == false)
                     m_oSummaryPanel.PopulationTreeView.Nodes.Add("Civilian Mining Colonies");
 
                 m_oSummaryPanel.PopulationTreeView.Nodes.Add("Listening Posts");
@@ -1090,7 +1090,7 @@ namespace Pulsar4X.UI.Handlers
                         int mines = (int)Math.Floor(Pop.Installations[(int)Installation.InstallationType.CivilianMiningComplex].Number);
                         Class = String.Format(": {0}x Civ Mines", mines);
 
-                        if(m_oSummaryPanel.HideCMCCheckBox.Checked == true)
+                        if (m_oSummaryPanel.HideCMCCheckBox.Checked == true)
                             CMCPrintControl = false;
                     }
                     /// <summary>
@@ -1105,16 +1105,16 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Archeological Dig. will have ruins, and may have orbital terraforming.
                     /// </summary>
-                    else if(Pop.Planet.PlanetaryRuins.RuinSize != Ruins.RSize.NoRuins)
+                    else if (Pop.Planet.PlanetaryRuins.RuinSize != Ruins.RSize.NoRuins)
                     {
                         Class = String.Format(" Archeological Dig");
                     }
                     /// <summary>
                     /// Orbital Terraforming modules. a planet with ships in orbit that will terraform it.
                     /// </summary>
-                    else if(Pop.OrbitalTerraformModules >= 1)
+                    else if (Pop.OrbitalTerraformModules >= 1)
                     {
-                        Class = String.Format(": {0:n1}x Orbital Terraform",Pop.OrbitalTerraformModules);
+                        Class = String.Format(": {0:n1}x Orbital Terraform", Pop.OrbitalTerraformModules);
                     }
 
                     /// <summary>
@@ -1139,7 +1139,7 @@ namespace Pulsar4X.UI.Handlers
 #warning if Populated systems isn't the 0th node location in sorted view this will break so change this to search for populated system if that is done.
                 int key = m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.IndexOfKey(pair.Key.Name);
 
-                String Entry = String.Format("{0}({1:n1}m)",pair.Key.Name,pair.Value);
+                String Entry = String.Format("{0}({1:n1}m)", pair.Key.Name, pair.Value);
 
                 m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes[key].Text = Entry;
             }
@@ -1150,7 +1150,7 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             m_oSummaryPanel.PopulationTreeView.Nodes[0].ExpandAll();
         }
-#endregion
+        #endregion
 
         #region Industrial Summary
         private void SetupSummaryDataGrid()
@@ -1159,20 +1159,20 @@ namespace Pulsar4X.UI.Handlers
             {
                 // Add coloums:
                 Padding newPadding = new Padding(2, 0, 2, 0);
-                AddColumn("Item", newPadding, m_oSummaryPanel.SummaryDataGrid,2);
-                AddColumn("Amount", newPadding, m_oSummaryPanel.SummaryDataGrid,3);
-                AddColumn("Installation", newPadding, m_oSummaryPanel.SummaryDataGrid,2);
-                AddColumn("Number or Level", newPadding, m_oSummaryPanel.SummaryDataGrid,3);
+                AddColumn("Item", newPadding, m_oSummaryPanel.SummaryDataGrid, 2);
+                AddColumn("Amount", newPadding, m_oSummaryPanel.SummaryDataGrid, 3);
+                AddColumn("Installation", newPadding, m_oSummaryPanel.SummaryDataGrid, 2);
+                AddColumn("Number or Level", newPadding, m_oSummaryPanel.SummaryDataGrid, 3);
 
                 AddColumn("Item", newPadding, m_oSummaryPanel.BuildDataGrid);
 
-                AddColumn("Project", newPadding, m_oSummaryPanel.ConstructionDataGrid,0);
-                AddColumn("Amount Remaining", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
-                AddColumn("% of Capacity", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
-                AddColumn("Production Rate", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
-                AddColumn("Cost Per Item", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
-                AddColumn("Estimated Completion Date", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
-                AddColumn("Pause / Queue", newPadding, m_oSummaryPanel.ConstructionDataGrid,3);
+                AddColumn("Project", newPadding, m_oSummaryPanel.ConstructionDataGrid, 0);
+                AddColumn("Amount Remaining", newPadding, m_oSummaryPanel.ConstructionDataGrid, 3);
+                AddColumn("% of Capacity", newPadding, m_oSummaryPanel.ConstructionDataGrid, 3);
+                AddColumn("Production Rate", newPadding, m_oSummaryPanel.ConstructionDataGrid, 3);
+                AddColumn("Cost Per Item", newPadding, m_oSummaryPanel.ConstructionDataGrid, 3);
+                AddColumn("Estimated Completion Date", newPadding, m_oSummaryPanel.ConstructionDataGrid, 3);
+                AddColumn("Pause / Queue", newPadding, m_oSummaryPanel.ConstructionDataGrid, 3);
 
                 // Add Rows:
                 for (int i = 0; i < 38; ++i)
@@ -1205,8 +1205,8 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// General Colony Information
                 /// </summary>
-                m_oSummaryPanel.SummaryDataGrid.Rows[0].Cells[0].Value  = "Political Status";
-                m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[0].Value  = "Species";
+                m_oSummaryPanel.SummaryDataGrid.Rows[0].Cells[0].Value = "Political Status";
+                m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[0].Value = "Species";
                 m_oSummaryPanel.SummaryDataGrid.Rows[2].Cells[0].Value = "Planetary Suitability(colony cost)";
                 m_oSummaryPanel.SummaryDataGrid.Rows[3].Cells[0].Value = "Administration Level Required";
 
@@ -1218,9 +1218,9 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Population Breakdown
                 /// </summary>
-                m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[0].Value  = "Population";
-                m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[0].Value  = "   Agriculture and Enviromental (5.0%)";
-                m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[0].Value  = "   Service Industries (75.0%)";
+                m_oSummaryPanel.SummaryDataGrid.Rows[7].Cells[0].Value = "Population";
+                m_oSummaryPanel.SummaryDataGrid.Rows[8].Cells[0].Value = "   Agriculture and Enviromental (5.0%)";
+                m_oSummaryPanel.SummaryDataGrid.Rows[9].Cells[0].Value = "   Service Industries (75.0%)";
                 m_oSummaryPanel.SummaryDataGrid.Rows[10].Cells[0].Value = "   Manufacturing (20.0%)";
                 m_oSummaryPanel.SummaryDataGrid.Rows[11].Cells[0].Value = "Anual Growth Rate";
 
@@ -1295,7 +1295,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.SummaryDataGrid.Rows[23].Cells[2].Value = "Gene Modification Centers";
                 m_oSummaryPanel.SummaryDataGrid.Rows[24].Cells[2].Value = "Financial Centre";
                 m_oSummaryPanel.SummaryDataGrid.Rows[25].Cells[2].Value = "Ground Force Training Facilities";
-                
+
                 /// <summary>
                 /// Colony Supplies
                 /// </summary>
@@ -1344,7 +1344,7 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// General Colony Information
                     /// </summary>
-                    m_oSummaryPanel.SummaryDataGrid.Rows[0].Cells[1].Value = CurrentPopulation.PoliticalPopStatus.ToString() + " Population" ;
+                    m_oSummaryPanel.SummaryDataGrid.Rows[0].Cells[1].Value = CurrentPopulation.PoliticalPopStatus.ToString() + " Population";
                     m_oSummaryPanel.SummaryDataGrid.Rows[1].Cells[1].Value = CurrentPopulation.Species.Name;
 
                     // need planetary hab rating vs species tolerance
@@ -1395,7 +1395,7 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[9 + Adjust1].Cells[1].Value = CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number.ToString();
 
                     if (ColCost != 0.0f)
-                        m_oSummaryPanel.SummaryDataGrid.Rows[10+Adjust1].Cells[1].Value = (CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number / (ColCost * 200.0)).ToString();
+                        m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = (CurrentPopulation.Installations[(int)Installation.InstallationType.Infrastructure].Number / (ColCost * 200.0)).ToString();
                     else
                         m_oSummaryPanel.SummaryDataGrid.Rows[10 + Adjust1].Cells[1].Value = "No Maximum";
 
@@ -1425,7 +1425,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
                         /// </summary>
-                        ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 10); 
+                        ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 10);
                     }
 
                     for (int NSYIterator = 0; NSYIterator < (int)CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number; NSYIterator++)
@@ -1437,7 +1437,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
                         /// </summary>
-                        ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 1); 
+                        ShipyardWorkers = ShipyardWorkers + (slips * tons * 100 / 1);
                     }
 
                     /// <summary>
@@ -1515,7 +1515,7 @@ namespace Pulsar4X.UI.Handlers
                     {
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Annual Genetic Conversion Rate";
 
-                        float rate = 0.25f * (float)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.GeneticModificationCentre].Number); 
+                        float rate = 0.25f * (float)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.GeneticModificationCentre].Number);
                         Entry = String.Format("{0:N2}m", rate);
                         m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[3].Value = Entry;
 
@@ -1564,7 +1564,7 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Shipyards
                     /// </summary>
-                    if(iShipyards != 0)
+                    if (iShipyards != 0)
                     {
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[0].Value = "Shipyard Workers";
                         Entry = String.Format("{0:N2}m", (ShipyardWorkers / 1000000.0f));
@@ -1634,7 +1634,7 @@ namespace Pulsar4X.UI.Handlers
                             Entry = String.Format("{0:N2}m", workers);
                             m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = Entry;
 
-                             TotalWorkerReq = TotalWorkerReq + workers;
+                            TotalWorkerReq = TotalWorkerReq + workers;
 
                             Adjust1++;
                         }
@@ -1811,7 +1811,7 @@ namespace Pulsar4X.UI.Handlers
                     if (CurrentPopulation.CivilianPopulation != 0.0f)
                     {
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[0].Value = "Available Workers";
-                        Entry = String.Format("{0:N2}",(CurrentPopulation.PopulationWorkingInManufacturing - TotalWorkerReq));
+                        Entry = String.Format("{0:N2}", (CurrentPopulation.PopulationWorkingInManufacturing - TotalWorkerReq));
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = Entry;
 
                         Adjust1++;
@@ -1822,7 +1822,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     if (CurrentPopulation.CivilianPopulation >= 10.0f)
                     {
-                        
+
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[0].Value = "";
                         m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = "";
                         m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[0].Value = "Requested Protection Level";
@@ -1909,8 +1909,8 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = "";
 
-                    
-                    
+
+
 #warning Calcluate these signatures in simEntity
                     CurrentPopulation.CalcThermalSignature();
                     CurrentPopulation.CalcEMSignature();
@@ -1927,7 +1927,7 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = (CurrentPopulation.ModifierManfacturing * 100).ToString() + "%";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Political Status Production Modifier";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = (CurrentPopulation.ModifierProduction * 100).ToString() + "%";
-                    m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value ="Political Status Wealth/Trade Modifier";
+                    m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Political Status Wealth/Trade Modifier";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = (CurrentPopulation.ModifierWealthAndTrade * 100).ToString() + "%";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2].Cells[2].Value = "Political Status Modifier";
                     m_oSummaryPanel.SummaryDataGrid.Rows[Adjust2++].Cells[3].Value = (CurrentPopulation.ModifierPoliticalStability * 100).ToString() + "%";
@@ -1968,7 +1968,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oSummaryPanel.BuildDataGrid.Rows[RowIterator].Visible = false;
             }
-            
+
         }
 
         /// <summary>
@@ -2012,7 +2012,7 @@ namespace Pulsar4X.UI.Handlers
                                 /// <summary>
                                 /// add to the build location dictionary and print to the build data grid.
                                 /// </summary>
-                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Installation,Install);
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Installation, Install);
                                 BuildLocationDisplayDict.Add(Install.Id, Install.Name);
                                 BuildLocationDict.Add(Install.Id, Temp);
 
@@ -2043,7 +2043,7 @@ namespace Pulsar4X.UI.Handlers
                                 BuildTabMaxRows++;
                             }
                         }
-                        
+
                     }
 
                     /// <summary>
@@ -2871,7 +2871,7 @@ namespace Pulsar4X.UI.Handlers
                 }
                 #endregion
                 #region Build PDC
-                else if(m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BuildPDCOrbitalHabitat)
+                else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.BuildPDCOrbitalHabitat)
                 {
                     int row = 0;
                     for (int RowIterator = row; RowIterator < BuildTabMaxRows; RowIterator++)
@@ -2966,7 +2966,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         public void BuildCostListBox()
         {
-            
+
             m_oSummaryPanel.InstallationCostListBox.Items.Clear();
 
             if (m_oSummaryPanel.BuildDataGrid.CurrentCell != null)
@@ -2996,7 +2996,7 @@ namespace Pulsar4X.UI.Handlers
                             OrdnanceDefTN Missile = BuildLocationDict[GID[m_oSummaryPanel.BuildDataGrid.CurrentCell.RowIndex]].Entity as OrdnanceDefTN;
                             CostString = String.Format("Cost: {0:N2}", Missile.cost);
                             m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
-                            for (int MineralIterator = 0; MineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; MineralIterator++ )
+                            for (int MineralIterator = 0; MineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; MineralIterator++)
                             {
                                 if (Missile.minerialsCost[MineralIterator] != 0.0m)
                                 {
@@ -3009,21 +3009,21 @@ namespace Pulsar4X.UI.Handlers
                             {
                                 float fuel = 0.0f;
                                 string FormattedFuelTotal = "";
-                                if(CurrentPopulation.FuelStockpile > 1000000)
+                                if (CurrentPopulation.FuelStockpile > 1000000)
                                 {
                                     fuel = CurrentPopulation.FuelStockpile / 1000000.0f;
-                                    FormattedFuelTotal = String.Format("{0:N2}m",fuel);
+                                    FormattedFuelTotal = String.Format("{0:N2}m", fuel);
                                 }
-                                else if(CurrentPopulation.FuelStockpile > 100000)
+                                else if (CurrentPopulation.FuelStockpile > 100000)
                                 {
                                     fuel = CurrentPopulation.FuelStockpile / 100000.0f;
-                                    FormattedFuelTotal = String.Format("{0:N2}k",fuel);
+                                    FormattedFuelTotal = String.Format("{0:N2}k", fuel);
                                 }
                                 else
                                 {
                                     FormattedFuelTotal = CurrentPopulation.FuelStockpile.ToString("#,##0");
                                 }
-                                CostString = String.Format("Fuel x{0} ({1})\n", Math.Floor(Missile.fuelCost),FormattedFuelTotal);
+                                CostString = String.Format("Fuel x{0} ({1})\n", Math.Floor(Missile.fuelCost), FormattedFuelTotal);
                                 m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                             }
                             break;
@@ -3061,8 +3061,8 @@ namespace Pulsar4X.UI.Handlers
                                 {
                                     string FormattedMineralTotal = CurrentPopulation.Minerials[MineralIterator].ToString("#,##0");
 
-                                    CostString = String.Format("{0:N4} x {1} ({2})", Constants.Colony.MaintenanceMineralCost[MineralIterator], 
-                                                                                     (Constants.Minerals.MinerialNames)MineralIterator, 
+                                    CostString = String.Format("{0:N4} x {1} ({2})", Constants.Colony.MaintenanceMineralCost[MineralIterator],
+                                                                                     (Constants.Minerals.MinerialNames)MineralIterator,
                                                                                      FormattedMineralTotal);
                                     m_oSummaryPanel.InstallationCostListBox.Items.Add(CostString);
                                 }
@@ -3084,7 +3084,7 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Must have done this one before learning of dictionaries.
             /// </summary>
-            for(int componentIterator = 0; componentIterator < CurrentPopulation.ComponentStockpile.Count; componentIterator++)
+            for (int componentIterator = 0; componentIterator < CurrentPopulation.ComponentStockpile.Count; componentIterator++)
             {
                 ComponentDefTN CurrentComponent = CurrentPopulation.ComponentStockpile[componentIterator];
                 float ComponentCount = CurrentPopulation.ComponentStockpileCount[componentIterator];
@@ -3092,7 +3092,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.ShipCompListBox.Items.Add(Entry);
             }
 
-            foreach (KeyValuePair<OrdnanceDefTN,int> MissilePair in CurrentPopulation.MissileStockpile)
+            foreach (KeyValuePair<OrdnanceDefTN, int> MissilePair in CurrentPopulation.MissileStockpile)
             {
                 String Entry = String.Format("{0:N4}x {1}", MissilePair.Value, MissilePair.Key.Name);
                 m_oSummaryPanel.MissileStockListBox.Items.Add(Entry);
@@ -3153,11 +3153,11 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", CBQ.numToBuild);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", CBQ.buildCapacity);
 
-                        float DevotedToThis =  (CBQ.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
+                        float DevotedToThis = (CBQ.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalIndustry();
 
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("{0:N2}", DevotedToThis);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", CBQ.costPerItem);
-                        
+
 
                         if ((BuildPercentage + CBQ.buildCapacity) <= 100.0f)
                         {
@@ -3196,7 +3196,7 @@ namespace Pulsar4X.UI.Handlers
                         {
                             //this item is in the queue.
                             m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
-                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = String.Format("Queue-{0}",QueueNum);
+                            m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = String.Format("Queue-{0}", QueueNum);
                             QueueNum++;
                         }
 
@@ -3266,7 +3266,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[1].Value = String.Format("{0:N2}", MBQ.numToBuild);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[2].Value = String.Format("{0:N2}", MBQ.buildCapacity);
 
-                        float DevotedToThis = (MBQ.buildCapacity/100.0f) * CurrentPopulation.CalcTotalOrdnanceIndustry();
+                        float DevotedToThis = (MBQ.buildCapacity / 100.0f) * CurrentPopulation.CalcTotalOrdnanceIndustry();
 
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[3].Value = String.Format("{0:N2}", DevotedToThis);
                         m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[4].Value = String.Format("{0:N2}", MBQ.costPerItem);
@@ -3275,7 +3275,7 @@ namespace Pulsar4X.UI.Handlers
                         if ((BuildPercentage + MBQ.buildCapacity) <= 100.0f)
                         {
                             BuildPercentage = BuildPercentage + MBQ.buildCapacity;
-                           
+
                             float BPRequirement = (float)Math.Floor(MBQ.numToBuild) * (float)MBQ.costPerItem;
                             float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
                             float YearsOfProduction = (BPRequirement / DevotedToThis);
@@ -3352,7 +3352,7 @@ namespace Pulsar4X.UI.Handlers
                 int OF = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.OrdnanceFactory].Number); ;
                 int FF = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.FighterFactory].Number); ;
                 String CLabel = String.Format("Construction: {0:N1} ({1}/{2}/{3})                    Ordnance Production: {4:N1} ({5})                    Fighter Production: {6:N1} ({7})",
-                                               CFProd,CF,EB,CI,OFProd,OF,FFProd,FF);
+                                               CFProd, CF, EB, CI, OFProd, OF, FFProd, FF);
                 m_oSummaryPanel.ConstructionLabel.Text = CLabel;
             }
         }
@@ -3368,7 +3368,7 @@ namespace Pulsar4X.UI.Handlers
                 String FormattedProduction = ((int)Math.Floor(RFProd)).ToString("#,##0");
                 String FormattedStockpile = ((int)Math.Floor(CurrentPopulation.FuelStockpile)).ToString("#,##0");
 
-                m_oSummaryPanel.RefineryLabel.Text = String.Format("Industry:{0}     Refineries:{1}", CI,RF);
+                m_oSummaryPanel.RefineryLabel.Text = String.Format("Industry:{0}     Refineries:{1}", CI, RF);
                 m_oSummaryPanel.FuelProductionLabel.Text = String.Format("Annual Production:{0} Litres", FormattedProduction);
                 m_oSummaryPanel.FuelStockpileLabel.Text = String.Format("Fuel Reserves:{0} Litres", FormattedStockpile);
             }
@@ -3412,7 +3412,7 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
                 for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[0].Value = String.Format("{0}",(Constants.Minerals.MinerialNames)mineralIterator);
+                    m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[0].Value = String.Format("{0}", (Constants.Minerals.MinerialNames)mineralIterator);
                 }
                 m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[0].Value = "Total";
             }
@@ -3453,7 +3453,7 @@ namespace Pulsar4X.UI.Handlers
                     /// Planetary Accessibility
                     /// </summary>
                     Accessibility = Accessibility + m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator];
-                    if( m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator] != 0.0f)
+                    if (m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator] != 0.0f)
                         m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[2].Value = String.Format("{0}", m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator]);
                     else
                         m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[2].Value = "-";
@@ -3462,7 +3462,7 @@ namespace Pulsar4X.UI.Handlers
                     /// 3 is annual production
                     /// </summary>
                     int AnnualProd = (int)Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator]);
-                    Production  = Production + AnnualProd;
+                    Production = Production + AnnualProd;
                     if (AnnualProd != 0)
                         m_oSummaryPanel.MiningDataGrid.Rows[mineralIterator].Cells[3].Value = String.Format("{0}", AnnualProd);
                     else
@@ -3471,7 +3471,7 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// 4 is YTD. reserves / mining
                     /// </summary>
-                    int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator]) ) );
+                    int YTD = (int)(Math.Floor(m_oCurrnetPopulation.Planet.MinerialReserves[mineralIterator]) / (Math.Floor(m_oCurrnetPopulation.CalcTotalMining() * m_oCurrnetPopulation.Planet.MinerialAccessibility[mineralIterator])));
                     if (YTD > YearsToDepletion)
                         YearsToDepletion = YTD;
                     if (YTD != 0)
@@ -3490,7 +3490,7 @@ namespace Pulsar4X.UI.Handlers
                 else
                     m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[1].Value = "-";
 
-                if(Accessibility != 0.0f)
+                if (Accessibility != 0.0f)
                     m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = String.Format("{0:N2}", (Accessibility / 11.0f));
                 else
                     m_oSummaryPanel.MiningDataGrid.Rows[(int)Constants.Minerals.MinerialNames.MinerialCount].Cells[2].Value = "-";
@@ -3520,7 +3520,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 int Mines = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.Mine].Number) +
                             (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.AutomatedMine].Number) +
-                            (int)(Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.ConventionalIndustry].Number)/10.0f);
+                            (int)(Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.ConventionalIndustry].Number) / 10.0f);
                 float Mining = CurrentPopulation.CalcTotalMining();
                 m_oSummaryPanel.MiningLabel.Text = String.Format("Ground-based Mines: {0}          Annual Production(accessibility 1.0): {1:N1}", Mines, Mining);
             }

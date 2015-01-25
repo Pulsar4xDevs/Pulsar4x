@@ -190,7 +190,7 @@ namespace Pulsar4X.UI.Handlers
                     /// <summary>
                     /// Create waypoint on the back end to correspond to the front end display.
                     /// </summary>
-                    m_oCurrnetSystem.AddWaypoint(m_oCurrentSceen.MapMarkers.Last().Lable.Text,v3CurPosWorldCorrds.X, v3CurPosWorldCorrds.Y,0);
+                    m_oCurrnetSystem.AddWaypoint(m_oCurrentSceen.MapMarkers.Last().Lable.Text, v3CurPosWorldCorrds.X, v3CurPosWorldCorrds.Y, 0);
 
                     m_bCreateMapMarkerOnNextClick = false;
 
@@ -210,8 +210,8 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
 
                 m_oCurrnetSystem.RemoveWaypoint(m_oCurrnetSystem.Waypoints[m_oControlsPanel.MapMarkersListBox.SelectedIndex]);
-                
-                m_oCurrentSceen.MapMarkers.Remove(oMarker);      
+
+                m_oCurrentSceen.MapMarkers.Remove(oMarker);
             }
         }
 
@@ -242,7 +242,7 @@ namespace Pulsar4X.UI.Handlers
             /// Put the date time somewhere.
             /// </summary>
 #warning don't really need this debug info
-            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.SE.CurrentTick.ToString() + " " + GameState.SE.lastTick.ToString() ;
+            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.SE.CurrentTick.ToString() + " " + GameState.SE.lastTick.ToString();
 
             MainFormReference.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
 

@@ -42,7 +42,7 @@ namespace Pulsar4X.UI.SceenGraph
         {
         }
 
-        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, Planet a_oPlanet,  System.Drawing.Color a_oColor)
+        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, Planet a_oPlanet, System.Drawing.Color a_oColor)
             : base(a_oPlanet)
         {
             m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oPlanet, a_oColor);
@@ -152,7 +152,7 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             // Adjust the size of the text so it is always 10 point:
-            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler; 
+            Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / a_fZoomScaler;
 
             /// <summary>
             /// Update the position of this element.

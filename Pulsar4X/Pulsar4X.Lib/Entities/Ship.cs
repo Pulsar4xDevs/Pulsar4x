@@ -27,12 +27,12 @@ namespace Pulsar4X.Entities
             Count
         }
 
-        #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
         /// <summary>
         /// The logger for this class
         /// </summary>
         public static readonly ILog logger = LogManager.GetLogger(typeof(ShipTN));
-        #endif
+#endif
 
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Just how much is this specific ship holding.
         /// </summary>
-        public int CurrentCargoTonnage{ get; set; }
+        public int CurrentCargoTonnage { get; set; }
 
         /// <summary>
         /// List of installations in the cargo hold.
@@ -327,7 +327,7 @@ namespace Pulsar4X.Entities
         /// All shields on this ship.
         /// </summary>
         public BindingList<ShieldTN> ShipShield { get; set; }
-        
+
         /// <summary>
         /// Current shield strength value.
         /// </summary>
@@ -373,8 +373,8 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Missile types this ship is carrying.
         /// </summary>
-        public Dictionary<OrdnanceDefTN,int> ShipOrdnance { get; set; }
-        
+        public Dictionary<OrdnanceDefTN, int> ShipOrdnance { get; set; }
+
         /// <summary>
         /// Ordnance currently on this ship.
         /// </summary>
@@ -453,7 +453,7 @@ namespace Pulsar4X.Entities
             /// Inform the class that it has a new member.
             /// </summary>
             ClassDefinition.ShipsInClass.Add(this);
-            
+
             /// <summary>
             /// Ships are standard crewed vessels for now.
             /// </summary>
@@ -608,7 +608,7 @@ namespace Pulsar4X.Entities
             CurrentCargoTonnage = 0;
             CargoList = new Dictionary<Installation.InstallationType, CargoListEntryTN>();
             CargoComponentList = new Dictionary<ComponentDefTN, CargoListEntryTN>();
-       
+
             /// <summary>
             /// While only colonyships will have the major bays, just about any craft can have an emergency cryo bay.
             /// </summary>
@@ -744,7 +744,7 @@ namespace Pulsar4X.Entities
                 {
                     BeamTN Beam = new BeamTN(ClassDefinition.ShipBeamDef[loop]);
                     Beam.componentIndex = ShipBeam.Count;
-                    
+
                     int BeamIndex = loop2 + 1;
                     Beam.Name = Beam.beamDef.Name + " #" + BeamIndex.ToString();
 
@@ -754,7 +754,7 @@ namespace Pulsar4X.Entities
             }
 
             ShipReactor = new BindingList<ReactorTN>();
-            for(int loop = 0; loop < ClassDefinition.ShipReactorDef.Count; loop++)
+            for (int loop = 0; loop < ClassDefinition.ShipReactorDef.Count; loop++)
             {
                 index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipReactorDef[loop]);
                 ComponentDefIndex[index] = (ushort)ShipComponents.Count;
@@ -789,7 +789,7 @@ namespace Pulsar4X.Entities
 
 
             ShipMLaunchers = new BindingList<MissileLauncherTN>();
-            for(int loop = 0; loop < ClassDefinition.ShipMLaunchDef.Count; loop++)
+            for (int loop = 0; loop < ClassDefinition.ShipMLaunchDef.Count; loop++)
             {
                 index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipMLaunchDef[loop]);
                 ComponentDefIndex[index] = (ushort)ShipComponents.Count;
@@ -847,7 +847,7 @@ namespace Pulsar4X.Entities
             CurrentMagazineMagCapacityMax = ClassDefinition.MagazineMagSpace;
 
             ShipCIWS = new BindingList<CIWSTN>();
-            for(int loop = 0; loop < ClassDefinition.ShipCIWSDef.Count; loop++)
+            for (int loop = 0; loop < ClassDefinition.ShipCIWSDef.Count; loop++)
             {
                 index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipCIWSDef[loop]);
                 ComponentDefIndex[index] = (ushort)ShipComponents.Count;
@@ -870,7 +870,7 @@ namespace Pulsar4X.Entities
             {
                 index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipTurretDef[loop]);
                 ComponentDefIndex[index] = (ushort)ShipComponents.Count;
-                for(int loop2 = 0; loop2 < ClassDefinition.ShipTurretCount[loop]; loop2++)
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipTurretCount[loop]; loop2++)
                 {
                     TurretTN Turret = new TurretTN(ClassDefinition.ShipTurretDef[loop]);
                     Turret.componentIndex = ShipTurret.Count;
@@ -992,7 +992,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Sensor">Sensor to be set.</param>
         /// <param name="active">On or off.</param>
-        public void SetSensor(ActiveSensorTN Sensor,bool active)
+        public void SetSensor(ActiveSensorTN Sensor, bool active)
         {
             if (Sensor.isActive == true && Sensor.isDestroyed == false && active == false)
             {
@@ -1074,7 +1074,7 @@ namespace Pulsar4X.Entities
                 }
                 else
                 {
-                    if (CurrentShieldPool >= Damage )
+                    if (CurrentShieldPool >= Damage)
                     {
                         CurrentShieldPool = CurrentShieldPool - Damage;
                         Damage = 0;
@@ -1202,7 +1202,7 @@ namespace Pulsar4X.Entities
                         {
                             ColumnPenetration = true;
                         }
-                        
+
                         right++;
                     }
 
@@ -1234,7 +1234,7 @@ namespace Pulsar4X.Entities
                             {
                                 ColumnPenetration = true;
                             }
-                        
+
                         }
 
                         if (Table.hitPoint + loop < Table.damageTemplate.Count)
@@ -1251,7 +1251,7 @@ namespace Pulsar4X.Entities
                             {
                                 ColumnPenetration = true;
                             }
-                        
+
                         }
 
                         left--;
@@ -1278,10 +1278,10 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         switch (TypeOf)
                         {
-                            case ShipType.Standard :
+                            case ShipType.Standard:
                                 DamageString = String.Format("{0} is streaming atmosphere", Name);
                                 break;
-                            case ShipType.Organic :
+                            case ShipType.Organic:
                                 DamageString = String.Format("{0} is streaming fluid", Name);
                                 break;
                         }
@@ -1311,7 +1311,7 @@ namespace Pulsar4X.Entities
                 /// This is a meson strike.
                 /// </summary>
                 internalDamage = 1;
-            }            
+            }
 
             /// <summary>
             /// Internal Component Damage. Each component with an HTK >0 can take atleast 1 hit. a random number is rolled over the entire dac. the selected component's HTK
@@ -1470,15 +1470,15 @@ namespace Pulsar4X.Entities
 
                             switch (list.Key.componentType)
                             {
-                                case ComponentTypeTN.ActiveSensor :
+                                case ComponentTypeTN.ActiveSensor:
                                     hardValue = ShipASensor[ComponentIndex].aSensorDef.hardening * 100.0f;
-                                break;
-                                case ComponentTypeTN.PassiveSensor :
+                                    break;
+                                case ComponentTypeTN.PassiveSensor:
                                     hardValue = ShipPSensor[ComponentIndex].pSensorDef.hardening * 100.0f;
-                                break;
-                                case ComponentTypeTN.BeamFireControl :
+                                    break;
+                                case ComponentTypeTN.BeamFireControl:
                                     hardValue = ShipBFC[ComponentIndex].beamFireControlDef.hardening * 100.0f;
-                                break;
+                                    break;
                             }
 
                             int DamageDone = -1;
@@ -1489,9 +1489,9 @@ namespace Pulsar4X.Entities
                                 /// This is an error condition obviously.
                                 /// </summary>
 #warning faction message log this?
-                                #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
                                 logger.Debug("Unidentified electronic component in onDamaged().");
-                                #endif
+#endif
                             }
                             else
                             {
@@ -1536,14 +1536,14 @@ namespace Pulsar4X.Entities
                                 }
                             }
 
-                            
+
 
                             if (DamageDone == -1)
                             {
                                 Attempts++;
                                 if (Attempts == 5)
                                 {
-                                    internalDamage = 0;   
+                                    internalDamage = 0;
                                 }
                                 break;
                             }
@@ -1581,7 +1581,7 @@ namespace Pulsar4X.Entities
 
             int ID = ComponentDefIndex[ComponentListDefIndex] + ComponentIndex;
 
-            if(ShipComponents[ID].isDestroyed == true)
+            if (ShipComponents[ID].isDestroyed == true)
             {
                 return -1;
             }
@@ -1614,7 +1614,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// All damage was absorbed by the component without it being destroyed.
                         /// </summary>
-                        
+
                         DamageReturn = Damage;
                         return DamageReturn;
                     }
@@ -1640,7 +1640,7 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 case ComponentTypeTN.Crew:
                     SpareBerths = SpareBerths - (int)(CrewQuarters[ShipComponents[ID].componentIndex].genCompDef.size / ShipClass.TonsPerMan);
-                break;
+                    break;
 
                 case ComponentTypeTN.Fuel:
                     float Fuel = FuelTanks[ShipComponents[ID].componentIndex].genCompDef.size * 50000.0f;
@@ -1648,32 +1648,32 @@ namespace Pulsar4X.Entities
                     float FuelLoss = FuelPercentage * CurrentFuel;
                     CurrentFuel = CurrentFuel - FuelLoss;
                     CurrentFuelCapacity = CurrentFuelCapacity - Fuel;
-                break;
+                    break;
 
                 case ComponentTypeTN.Engineering:
                     float MSP = EngineeringBays[ShipComponents[ID].componentIndex].genCompDef.size;
                     float MSPPercentage = MSP / ShipClass.TotalMSPCapacity;
                     float MSPLoss = MSPPercentage * CurrentMSP;
                     CurrentMSP = CurrentMSP - (int)MSPLoss;
-                    CurrentMSPCapacity = CurrentMSPCapacity - (int)((float)ShipClass.BuildPointCost * (( MSP / ShipClass.SizeHS ) / 0.08f));
+                    CurrentMSPCapacity = CurrentMSPCapacity - (int)((float)ShipClass.BuildPointCost * ((MSP / ShipClass.SizeHS) / 0.08f));
                     CurrentDamageControlRating = CurrentDamageControlRating - 1;
-                break;
+                    break;
 
                 /// <summary>
                 /// Nothing special for these yet.
                 /// </summary>
                 case ComponentTypeTN.Bridge:
-                break;
+                    break;
                 case ComponentTypeTN.MaintenanceBay:
-                break;
+                    break;
                 case ComponentTypeTN.FlagBridge:
-                break;
+                    break;
                 case ComponentTypeTN.DamageControl:
-                break;
+                    break;
                 case ComponentTypeTN.OrbitalHabitat:
-                break;
+                    break;
                 case ComponentTypeTN.RecFacility:
-                break;
+                    break;
 
                 case ComponentTypeTN.Engine:
                     /// <summary>
@@ -1714,7 +1714,7 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         /// SecondaryExplosion(SecondaryType.Engine,ShipEngine[0].engineDef.enginePower);
                     }
-                break;
+                    break;
 
                 case ComponentTypeTN.PassiveSensor:
                     /// <summary>
@@ -1736,7 +1736,7 @@ namespace Pulsar4X.Entities
                                         if (ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.EM &&
                                             ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].isDestroyed == false)
                                         {
-                                            if (ShipsTaskGroup.BestEMCount == 0 || ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.rating > ShipsTaskGroup.BestEM.pSensorDef.rating )
+                                            if (ShipsTaskGroup.BestEMCount == 0 || ShipsTaskGroup.Ships[loop].ShipPSensor[loop2].pSensorDef.rating > ShipsTaskGroup.BestEM.pSensorDef.rating)
                                             {
                                                 ShipsTaskGroup.BestEM = ShipsTaskGroup.Ships[loop].ShipPSensor[loop2];
                                                 ShipsTaskGroup.BestEMCount = 1;
@@ -1746,7 +1746,7 @@ namespace Pulsar4X.Entities
                                                 ShipsTaskGroup.BestEMCount++;
                                             }
                                         }
-                                        
+
                                     }
                                 }
                             }
@@ -1783,28 +1783,28 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
-                break;
+                    break;
                 case ComponentTypeTN.ActiveSensor:
                     /// <summary>
                     /// Luckily this function already takes care of active sensors being deactivated and removed from the sort lists.
                     /// </summary>
                     ShipsTaskGroup.SetActiveSensor(ShipsTaskGroup.Ships.IndexOf(this), ShipComponents[ID].componentIndex, false);
-                break;
+                    break;
 
                 case ComponentTypeTN.CargoHold:
                     /// <summary>
                     /// Cargo should be destroyed here.
                     /// </summary>
-                break;
+                    break;
 
                 case ComponentTypeTN.CargoHandlingSystem:
                     CurrentTractorMultiplier = CurrentTractorMultiplier - ShipCHS[ShipComponents[ID].componentIndex].cargoHandleDef.tractorMultiplier;
-                break;
+                    break;
                 case ComponentTypeTN.CryoStorage:
                     /// <summary>
                     /// Colonists in stasis or lifeboat rescuees should be destroyed here.
                     /// </summary>
-                break;
+                    break;
 
 
                 /// <summary>
@@ -1818,7 +1818,7 @@ namespace Pulsar4X.Entities
                         ShipsFaction.OpenFireFC.Remove(ShipComponents[ID]);
                         ShipsFaction.OpenFireFCType.Remove(ShipComponents[ID]);
                     }
-                break;
+                    break;
                 case ComponentTypeTN.Rail:
                 case ComponentTypeTN.Gauss:
                 case ComponentTypeTN.Plasma:
@@ -1832,7 +1832,7 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.AdvParticle:
                     UnlinkWeapon(ShipBeam[ShipComponents[ID].componentIndex]);
                     ShipBeam[ShipComponents[ID].componentIndex].currentCapacitor = 0;
-                break;
+                    break;
 
                 case ComponentTypeTN.Reactor:
 
@@ -1847,29 +1847,29 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         /// SecondaryExplosion(SecondaryType.Reactor,ShipReactor[ShipComponents[ID].componentIndex].reactorDef.powerGen);
                     }
-                break;
+                    break;
 
                 /// <summary>
                 /// For shields I will preserve ShieldIsActive as is, but set the other values down on component destruction.
                 /// </summary.
                 case ComponentTypeTN.Shield:
 
-                   CurrentShieldPoolMax = CurrentShieldPoolMax - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool;
-                   CurrentShieldGen = CurrentShieldGen - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldGenPerTick;
-                   CurrentShieldFuelUse = CurrentShieldFuelUse - (ShipShield[ShipComponents[ID].componentIndex].shieldDef.fuelCostPerHour / 720.0f);
+                    CurrentShieldPoolMax = CurrentShieldPoolMax - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool;
+                    CurrentShieldGen = CurrentShieldGen - ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldGenPerTick;
+                    CurrentShieldFuelUse = CurrentShieldFuelUse - (ShipShield[ShipComponents[ID].componentIndex].shieldDef.fuelCostPerHour / 720.0f);
 
-                   /// <summary>
-                   /// In the event of meson damage/mixed meson and non-meson damage:
-                   /// </summary>
-                   if (CurrentShieldPool != 0.0f && CurrentShieldPool > CurrentShieldPoolMax)
-                       CurrentShieldPool = CurrentShieldPoolMax;
+                    /// <summary>
+                    /// In the event of meson damage/mixed meson and non-meson damage:
+                    /// </summary>
+                    if (CurrentShieldPool != 0.0f && CurrentShieldPool > CurrentShieldPoolMax)
+                        CurrentShieldPool = CurrentShieldPoolMax;
 
-                   if (ShieldIsActive == true)
-                   {
-                       CurrentEMSignature = CurrentEMSignature - (int)(ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool * 30.0f);
-                       ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
-                   }
-                break;
+                    if (ShieldIsActive == true)
+                    {
+                        CurrentEMSignature = CurrentEMSignature - (int)(ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool * 30.0f);
+                        ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
+                    }
+                    break;
 
                 case ComponentTypeTN.AbsorptionShield:
                     CurrentShieldPool = 0.0f;
@@ -1882,7 +1882,7 @@ namespace Pulsar4X.Entities
                         CurrentEMSignature = CurrentEMSignature - (int)(ShipShield[ShipComponents[ID].componentIndex].shieldDef.shieldPool * 30.0f);
                         ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                     }
-                break;
+                    break;
 
                 case ComponentTypeTN.MissileLauncher:
 
@@ -1914,8 +1914,8 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// This condition could arise because all such missiles have been fired. Check the total ship ordnance vs magazine capacity to decide if another missile should be destroyed.
                             /// </summary>
-                            
-                            if(CurrentMagazineCapacity > CurrentMagazineMagCapacityMax)
+
+                            if (CurrentMagazineCapacity > CurrentMagazineMagCapacityMax)
                             {
                                 foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipOrdnance)
                                 {
@@ -1933,7 +1933,7 @@ namespace Pulsar4X.Entities
                                     {
 #if LOG4NET_ENABLED
 #warning faction messagelog this?
-                                        String Entry = String.Format("Ship {0} has ship ordnance in quantities of zero from somewhere.",this.Name);
+                                        String Entry = String.Format("Ship {0} has ship ordnance in quantities of zero from somewhere.", this.Name);
                                         logger.Debug(Entry);
 #endif
                                     }
@@ -1975,12 +1975,12 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
-                    
+
                     CurrentLauncherMagCapacityMax = CurrentLauncherMagCapacityMax - ShipMLaunchers[ShipComponents[ID].componentIndex].missileLauncherDef.launchMaxSize;
                     CurrentMagazineCapacityMax = CurrentMagazineCapacityMax - ShipMLaunchers[ShipComponents[ID].componentIndex].missileLauncherDef.launchMaxSize;
                     CurrentMagazineCapacity = CurrentMagazineCapacity - (int)Math.Ceiling(ShipMLaunchers[ShipComponents[ID].componentIndex].loadedOrdnance.size);
                     ShipMLaunchers[ShipComponents[ID].componentIndex].ClearMFC();
-                break;
+                    break;
 
                 case ComponentTypeTN.Magazine:
                     /// <summary>
@@ -2054,7 +2054,7 @@ namespace Pulsar4X.Entities
                             }
                         }
                     }
-                    
+
                     CurrentMagazineCapacityMax = CurrentMagazineCapacityMax - ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity;
                     CurrentMagazineMagCapacityMax = CurrentMagazineMagCapacityMax - ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.capacity;
 
@@ -2066,8 +2066,8 @@ namespace Pulsar4X.Entities
                         /// *** Do secondary damage here. ***
                         /// </summary>
                         /// SecondaryExplosion(SecondaryType.Magazine,WarheadTotal);
-                    }       
-                break;
+                    }
+                    break;
 
                 case ComponentTypeTN.MissileFireControl:
                     ShipMFC[ShipComponents[ID].componentIndex].ClearAllWeapons();
@@ -2078,18 +2078,18 @@ namespace Pulsar4X.Entities
                         ShipsFaction.OpenFireFC.Remove(ShipComponents[ID]);
                         ShipsFaction.OpenFireFCType.Remove(ShipComponents[ID]);
                     }
-                break;
+                    break;
 
                 case ComponentTypeTN.CIWS:
-                /// <summary>
-                /// Do nothing for CIWS.
-                /// </summary>
-                break;
+                    /// <summary>
+                    /// Do nothing for CIWS.
+                    /// </summary>
+                    break;
 
                 case ComponentTypeTN.Turret:
                     UnlinkWeapon(ShipTurret[ShipComponents[ID].componentIndex]);
                     ShipTurret[ShipComponents[ID].componentIndex].currentCapacitor = 0;
-                break;
+                    break;
             }
             return DamageReturn;
         }
@@ -2103,37 +2103,37 @@ namespace Pulsar4X.Entities
             ShipComponents[ComponentIndex].isDestroyed = false;
             DestroyedComponents.Remove((ushort)ComponentIndex);
 
-            switch(Type)
+            switch (Type)
             {
-                case ComponentTypeTN.Crew :
+                case ComponentTypeTN.Crew:
                     SpareBerths = SpareBerths + (int)(CrewQuarters[ShipComponents[ComponentIndex].componentIndex].genCompDef.size / ShipClass.TonsPerMan);
-                break;
+                    break;
 
-                case ComponentTypeTN.Fuel :
+                case ComponentTypeTN.Fuel:
                     CurrentFuelCapacity = CurrentFuelCapacity + (FuelTanks[ShipComponents[ComponentIndex].componentIndex].genCompDef.size * 50000.0f);
-                break;
+                    break;
 
-                case ComponentTypeTN.Engineering :
+                case ComponentTypeTN.Engineering:
                     float MSP = EngineeringBays[ShipComponents[ComponentIndex].componentIndex].genCompDef.size;
-                    CurrentMSPCapacity = CurrentMSPCapacity + (int)((float)ShipClass.BuildPointCost * (( MSP / ShipClass.SizeHS ) / 0.08f));
+                    CurrentMSPCapacity = CurrentMSPCapacity + (int)((float)ShipClass.BuildPointCost * ((MSP / ShipClass.SizeHS) / 0.08f));
                     CurrentDamageControlRating = CurrentDamageControlRating + 1;
-                break;
+                    break;
 
                 /// <summary>
                 /// Nothing special is done for these yet.
                 /// </summary>
                 case ComponentTypeTN.Bridge:
-                break;
+                    break;
                 case ComponentTypeTN.MaintenanceBay:
-                break;
+                    break;
                 case ComponentTypeTN.FlagBridge:
-                break;
+                    break;
                 case ComponentTypeTN.DamageControl:
-                break;
+                    break;
                 case ComponentTypeTN.OrbitalHabitat:
-                break;
+                    break;
                 case ComponentTypeTN.RecFacility:
-                break;
+                    break;
 
                 case ComponentTypeTN.Engine:
                     /// <summary>
@@ -2159,7 +2159,7 @@ namespace Pulsar4X.Entities
                     else
                         CurrentMaxSpeed = (int)((1000.0f / (float)ShipClass.TotalCrossSection) * (float)CurrentMaxEnginePower);
 
-                    int speedMin=0;
+                    int speedMin = 0;
                     for (int loop = 0; loop < ShipsTaskGroup.Ships.Count; loop++)
                     {
                         if (ShipsTaskGroup.Ships[loop].CurrentMaxSpeed > speedMin)
@@ -2177,10 +2177,10 @@ namespace Pulsar4X.Entities
                         }
                     }
 
-                    if(oldThermal != CurrentThermalSignature)
+                    if (oldThermal != CurrentThermalSignature)
                         ShipsTaskGroup.SortShipBySignature(ThermalList, ShipsTaskGroup.ThermalSortList, 0);
 
-                break;
+                    break;
                 case ComponentTypeTN.PassiveSensor:
                     if (ShipPSensor[ShipComponents[ComponentIndex].componentIndex].pSensorDef.thermalOrEM == PassiveSensorType.EM)
                     {
@@ -2206,27 +2206,27 @@ namespace Pulsar4X.Entities
                             ShipsTaskGroup.BestThermalCount++;
                         }
                     }
-                break;
+                    break;
 
                 /// <summary>
                 /// Nothing special for these yet.
                 /// </summary>
                 case ComponentTypeTN.ActiveSensor:
-                break;
+                    break;
                 case ComponentTypeTN.CargoHold:
-                break;
+                    break;
 
                 case ComponentTypeTN.CargoHandlingSystem:
-                CurrentTractorMultiplier = CurrentTractorMultiplier + ShipCHS[ShipComponents[ComponentIndex].componentIndex].cargoHandleDef.tractorMultiplier;
-                break;
+                    CurrentTractorMultiplier = CurrentTractorMultiplier + ShipCHS[ShipComponents[ComponentIndex].componentIndex].cargoHandleDef.tractorMultiplier;
+                    break;
 
                 /// <summary>
                 /// Nothing special for these yet. Weapon links won't be restored.
                 /// </summary>
                 case ComponentTypeTN.CryoStorage:
-                break;
+                    break;
                 case ComponentTypeTN.BeamFireControl:
-                break;
+                    break;
                 case ComponentTypeTN.Rail:
                 case ComponentTypeTN.Gauss:
                 case ComponentTypeTN.Plasma:
@@ -2238,11 +2238,11 @@ namespace Pulsar4X.Entities
                 case ComponentTypeTN.AdvLaser:
                 case ComponentTypeTN.AdvPlasma:
                 case ComponentTypeTN.AdvParticle:
-                break;
+                    break;
 
                 case ComponentTypeTN.Reactor:
                     CurrentPowerGen = CurrentPowerGen + (int)(Math.Round(ShipReactor[ShipComponents[ComponentIndex].componentIndex].reactorDef.powerGen));
-                break;
+                    break;
 
                 /// <summary>
                 /// For shields I will preserve ShieldIsActive as is, but set the other values up on component repair.
@@ -2257,7 +2257,7 @@ namespace Pulsar4X.Entities
                         CurrentEMSignature = CurrentEMSignature + (int)(ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool * 30.0f);
                         ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                     }
-                break;
+                    break;
 
                 case ComponentTypeTN.AbsorptionShield:
                     CurrentShieldPoolMax = ShipClass.TotalShieldPool;
@@ -2269,26 +2269,26 @@ namespace Pulsar4X.Entities
                         CurrentEMSignature = CurrentEMSignature + (int)(ShipShield[ShipComponents[ComponentIndex].componentIndex].shieldDef.shieldPool * 30.0f);
                         ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                     }
-                break;
+                    break;
 
                 case ComponentTypeTN.MissileLauncher:
                     CurrentLauncherMagCapacityMax = CurrentLauncherMagCapacityMax + ShipMLaunchers[ShipComponents[ComponentIndex].componentIndex].missileLauncherDef.launchMaxSize;
                     CurrentMagazineCapacityMax = CurrentMagazineCapacityMax + ShipMLaunchers[ShipComponents[ComponentIndex].componentIndex].missileLauncherDef.launchMaxSize;
-                break;
+                    break;
 
                 case ComponentTypeTN.Magazine:
                     CurrentMagazineMagCapacityMax = CurrentMagazineMagCapacityMax + ShipMagazines[ShipComponents[ComponentIndex].componentIndex].magazineDef.capacity;
                     CurrentMagazineCapacityMax = CurrentMagazineCapacityMax + ShipMagazines[ShipComponents[ComponentIndex].componentIndex].magazineDef.capacity;
-                break;
+                    break;
 
                 case ComponentTypeTN.MissileFireControl:
-                break;
+                    break;
 
                 case ComponentTypeTN.CIWS:
-                break;
+                    break;
 
                 case ComponentTypeTN.Turret:
-                break;
+                    break;
             }
         }
         /// <summary>
@@ -2683,7 +2683,7 @@ namespace Pulsar4X.Entities
                     }
 
                     return (int)AvailablePower;
-                }  
+                }
             }
             return (int)PowerRecharge;
         }
@@ -2694,7 +2694,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="CurrentTick">Tick the ship is ordered to fire.</param>
         /// <param name="RNG">RNG passed from further up the food chain since I can't generate random results except by having a "global" rng.</param>
-        public bool ShipFireWeapons(int CurrentTick,Random RNG)
+        public bool ShipFireWeapons(int CurrentTick, Random RNG)
         {
             bool fired = false;
             for (int loop = 0; loop < ShipBFC.Count; loop++)
@@ -2809,13 +2809,13 @@ namespace Pulsar4X.Entities
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
                                 String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error,ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
-                                ShipsFaction.MessageLog.Add(Entry); 
-                                
+                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.CurrentSystem, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                ShipsFaction.MessageLog.Add(Entry);
+
                                 return false;
                             }
 
-                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup,this);
+                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
                         }
                     }
                     else if (ShipMFC[loop].target.targetType == StarSystemEntityType.Missile)
@@ -2892,7 +2892,7 @@ namespace Pulsar4X.Entities
                 if (CurrentShieldPool + ShieldRecharge >= CurrentShieldPoolMax)
                 {
                     ShieldRecharge = CurrentShieldPoolMax - CurrentShieldPool;
-                    CurrentShieldPool = CurrentShieldPoolMax;  
+                    CurrentShieldPool = CurrentShieldPoolMax;
                 }
                 else
                 {
@@ -2954,7 +2954,7 @@ namespace Pulsar4X.Entities
                         } // end foreach
                     }
 
-                    
+
                 }
             }
         }

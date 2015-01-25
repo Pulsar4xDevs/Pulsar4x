@@ -18,8 +18,8 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// Ship Class armor definition. each copy of a ship will point to their shipclass, which points to this for important and hopefully static data.
     /// </summary>
-	public class ArmorDefTN : ComponentDefTN
-	{
+    public class ArmorDefTN : ComponentDefTN
+    {
         /// <summary>
         /// Armor coverage of surface area of the ship per HullSpace(50.0 ton increment). This will vary with techlevel and can be updated. CalcArmor requires this.
         /// </summary>
@@ -37,7 +37,7 @@ namespace Pulsar4X.Entities.Components
         {
             get { return m_oDepth; }
         }
-        
+
         /// <summary>
         /// Area coverage of the armor, Cost and column # both require this.
         /// </summary>
@@ -69,11 +69,11 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Just an empty constructor. I don't really need this, the main show is in CalcArmor.
         /// </summary>
-	    public ArmorDefTN(string Title)
-	    {
+        public ArmorDefTN(string Title)
+        {
             Name = Title;
-		    size = 0.0f;
-		    cost = 0.0m;
+            size = 0.0f;
+            cost = 0.0m;
             m_oArea = 0.0;
             htk = 1;
 
@@ -87,7 +87,7 @@ namespace Pulsar4X.Entities.Components
             isDivisible = false;
 
             componentType = ComponentTypeTN.Armor;
-	    }
+        }
 
         /// <summary>
         /// CalcArmor takes the size of the craft, as well as armor tech level and requested depth, and calculates how big the armor must be to cover the ship.
@@ -97,8 +97,8 @@ namespace Pulsar4X.Entities.Components
         /// <param name="armorPerHS"> armor Per Unit of Hull Space </param>
         /// <param name="sizeOfCraft"> In HullSpace increments </param>
         /// <param name="armorDepth"> Armor Layers </param>
-	    public void CalcArmor(string Title, ushort armorPerHS, double sizeOfCraft, ushort armorDepth)
-	    {
+        public void CalcArmor(string Title, ushort armorPerHS, double sizeOfCraft, ushort armorDepth)
+        {
             /// <summary>
             /// Bounds checking as armorDepth is a short, but then so is the value passed...
             /// well armor can't be 0 layers atleast.
@@ -122,53 +122,53 @@ namespace Pulsar4X.Entities.Components
 
             bool done;
             int ArmourLayer;
-		    double volume,radius3,radius2,radius,area=0.0, strengthReq=0.0,lastPro;
-		    double areaF;
-		    double temp1 = 1.0 / 3.0;	
-		    double pi = 3.14159654;		
+            double volume, radius3, radius2, radius, area = 0.0, strengthReq = 0.0, lastPro;
+            double areaF;
+            double temp1 = 1.0 / 3.0;
+            double pi = 3.14159654;
 
             /// <summary>
             /// Size must be initialized to 0.0 for this
             /// Armor is being totally recalculated every time this is run, the previous result is thrown out.
             /// </summary>
-		    size = 0.0f; 
+            size = 0.0f;
 
             /// <summary>
             /// For each layer of Depth.
             /// </summary>
-            for (ArmourLayer = 0; ArmourLayer < m_oDepth; ArmourLayer++) 
-		    {
-			    done = false;
-			    lastPro = -1;
-	    		volume = Math.Ceiling( sizeOfCraft + (double)size );
-		
+            for (ArmourLayer = 0; ArmourLayer < m_oDepth; ArmourLayer++)
+            {
+                done = false;
+                lastPro = -1;
+                volume = Math.Ceiling(sizeOfCraft + (double)size);
+
                 /// <summary>
                 /// While Armor does not yet fully cover the ship and itself.
                 /// </summary>
-			    while( done == false ) 
-			    {
-				    radius3 = ( 3.0 * volume ) / ( 4.0 * pi ) ;
-				    radius = Math.Pow( radius3, temp1 );
-				    radius2 = Math.Pow( radius, 2.0 );
-				    area = ( 4.0 * pi ) * radius2;
+                while (done == false)
+                {
+                    radius3 = (3.0 * volume) / (4.0 * pi);
+                    radius = Math.Pow(radius3, temp1);
+                    radius2 = Math.Pow(radius, 2.0);
+                    area = (4.0 * pi) * radius2;
 
                     /// <summary>
                     /// This wonky multiply by 10 then divide by 10 is to get the same behavior as in Aurora.
                     /// </summary>
-				    areaF = Math.Floor( area * 10.0 ) / 10.0;
-				    area = ( Math.Round(area * 10.0) ) / 10.0;
+                    areaF = Math.Floor(area * 10.0) / 10.0;
+                    area = (Math.Round(area * 10.0)) / 10.0;
                     area *= (double)(ArmourLayer + 1);
-				    strengthReq = area / 4.0 ;
+                    strengthReq = area / 4.0;
 
                     size = (float)Math.Ceiling((strengthReq / (double)m_oArmorPerHS) * 10.0) / 10.0f;
-				    volume = Math.Ceiling(sizeOfCraft + (double)size);
+                    volume = Math.Ceiling(sizeOfCraft + (double)size);
 
-				    if( size == lastPro )
-					    done = true;
+                    if (size == lastPro)
+                        done = true;
 
-				    lastPro = size;
-			    }
-		    }
+                    lastPro = size;
+                }
+            }
 
             m_oStrength = strengthReq;
             m_oArea = area / m_oDepth;
@@ -190,7 +190,7 @@ namespace Pulsar4X.Entities.Components
                     //13 12 11 10 9 8 7 6 5 4 3 2 1
                     float DuraniumFraction = (float)fraction / 10.0f;
                     //1.3 1.2 1.1 1.0 .9 .8 .7 .6 .5 .4 .3 .2 .1
-                    float NeutroniumFraction = (10.0f - (float)fraction )/ 10.0f;
+                    float NeutroniumFraction = (10.0f - (float)fraction) / 10.0f;
                     //-.3  -.2  -.1 0 .1 .2 .3 .4 .5 .6 .7 .8 .9   
 
                     minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
@@ -220,7 +220,7 @@ namespace Pulsar4X.Entities.Components
             {
                 m_oCNum = (ushort)Math.Floor((Tonnage) / 2.0);
             }
-	    }
+        }
         /// <summary>
         /// End of Function CalcArmor
         /// </summary>
@@ -228,7 +228,7 @@ namespace Pulsar4X.Entities.Components
     /// <summary>
     /// End of Class ArmorDefTN
     /// </summary>
-    
+
     /// <summary>
     /// Armor contains ship data itself. each ship will have its own copy of this.
     /// </summary>
@@ -446,7 +446,7 @@ namespace Pulsar4X.Entities.Components
         /// This constructor initializes armor statistics for CalcArmor.
         /// </summary>
         /// <param name="MJBox">Megajoules per armor box, how resistant to damage each part of the armor is</param>
-        public ArmorDefNA(string Title,ushort MJBox)
+        public ArmorDefNA(string Title, ushort MJBox)
         {
             Name = Title;
             m_oUnitMass = 0;
@@ -489,7 +489,7 @@ namespace Pulsar4X.Entities.Components
 
 
             int loop;
-            double volume, radius3, radius2, radius=0.0, area = 0.0;
+            double volume, radius3, radius2, radius = 0.0, area = 0.0;
             double temp1 = 1.0 / 3.0;
             double pi = 3.14159654;
 
@@ -506,7 +506,7 @@ namespace Pulsar4X.Entities.Components
             {
                 volume = Math.Ceiling((double)(SizeInTonsOfShip + m_oUnitMass));
                 volume = volume * 10;
-                
+
                 radius3 = (3.0 * volume) / (4.0 * pi);
                 radius = Math.Pow(radius3, temp1);
                 radius2 = Math.Pow(radius, 2.0);

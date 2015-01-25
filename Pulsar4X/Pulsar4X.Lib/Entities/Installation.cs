@@ -43,7 +43,7 @@ namespace Pulsar4X.Entities
         }
 
         public const int NO_OF_INSTALLATIONS = (int)InstallationType.InstallationCount;
- 
+
         /// <summary>
         /// Which installation is this?
         /// </summary>
@@ -233,7 +233,7 @@ namespace Pulsar4X.Entities
                         CanBeBuilt = false;
                         break;
                     }
-                    case InstallationType.ConvertCIToConstructionFactory:
+                case InstallationType.ConvertCIToConstructionFactory:
                     {
                         Name = "Convert CI to Construction Factory";
                         /// <summary>
@@ -252,7 +252,7 @@ namespace Pulsar4X.Entities
                         OutputInstallation = InstallationType.ConstructionFactory;
                         break;
                     }
-                    case InstallationType.ConvertCIToFighterFactory:
+                case InstallationType.ConvertCIToFighterFactory:
                     {
                         Name = "Convert CI to Fighter Factory";
                         /// <summary>
@@ -270,7 +270,7 @@ namespace Pulsar4X.Entities
                         OutputInstallation = InstallationType.FighterFactory;
                         break;
                     }
-            case InstallationType.ConvertCIToFuelRefinery:
+                case InstallationType.ConvertCIToFuelRefinery:
                     {
                         Name = "Convert CI to Fuel Refinery";
                         /// <summary>
@@ -287,7 +287,7 @@ namespace Pulsar4X.Entities
                         OutputInstallation = InstallationType.FuelRefinery;
                         break;
                     }
-            case InstallationType.ConvertCIToMine:
+                case InstallationType.ConvertCIToMine:
                     {
                         Name = "Convert CI to Mine";
                         /// <summary>
@@ -305,7 +305,7 @@ namespace Pulsar4X.Entities
                         OutputInstallation = InstallationType.Mine;
                         break;
                     }
-            case InstallationType.ConvertCIToOrdnanceFactory:
+                case InstallationType.ConvertCIToOrdnanceFactory:
                     {
                         Name = "Convert CI to Ordnance Factory";
                         /// <summary>
@@ -323,7 +323,7 @@ namespace Pulsar4X.Entities
                         OutputInstallation = InstallationType.OrdnanceFactory;
                         break;
                     }
-            case InstallationType.ConvertMineToAutomated:
+                case InstallationType.ConvertMineToAutomated:
                     {
                         Name = "Convert mine to Automated";
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 75;

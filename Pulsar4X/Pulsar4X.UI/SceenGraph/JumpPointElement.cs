@@ -16,12 +16,12 @@ namespace Pulsar4X.UI.SceenGraph
 
         public override GameEntity SceenEntity
         {
-	        get 
-	        {
+            get
+            {
                 return m_oJumpPoint;
-	        }
-	        set 
-	        {
+            }
+            set
+            {
                 m_oJumpPoint = value as JumpPoint;
             }
         }

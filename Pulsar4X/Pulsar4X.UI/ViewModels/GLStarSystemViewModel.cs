@@ -10,7 +10,7 @@ using System.Linq.Expressions;
 
 namespace Pulsar4X.UI.ViewModels
 {
-    public class GLStarSystemViewModel: INotifyPropertyChanged
+    public class GLStarSystemViewModel : INotifyPropertyChanged
     {
 
         public BindingList<StarSystem> StarSystems { get; set; }

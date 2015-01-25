@@ -105,7 +105,7 @@ namespace Pulsar4X.UI
             {
                 oNewFaction.ShipDesigns[0].AddBeamWeapon(CL.BeamWeaponDef[loop], 1);
             }
-            oNewFaction.ShipDesigns[0].NewArmor("Composite",8,4);
+            oNewFaction.ShipDesigns[0].NewArmor("Composite", 8, 4);
 
             oNewFaction.AddNewShipDesign("Hammer");
             oNewFaction.ShipDesigns[1].AddEngine(CL.Engines[2], 2);
@@ -125,7 +125,7 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[1].SetPreferredOrdnance(CL.MissileDef[1], 200);
             oNewFaction.ShipDesigns[1].IsLocked = true;
             oNewFaction.ShipDesigns[1].BuildClassSummary();
-            
+
 
             oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
             oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
@@ -220,7 +220,7 @@ namespace Pulsar4X.UI
 
             //Initialize damage values.
             DamageValuesTN.init();
-            
+
 
             // Init our UI Controller:
             Helpers.UIController.Instance.Initialise();

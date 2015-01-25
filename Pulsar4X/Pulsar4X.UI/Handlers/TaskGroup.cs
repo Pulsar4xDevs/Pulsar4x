@@ -45,7 +45,7 @@ namespace Pulsar4X.UI.Handlers
         public SystemListObject(ListEntityType entityType, GameEntity entity)
         {
             Entity = entity;
-            EntityType = entityType;     
+            EntityType = entityType;
         }
     }
 
@@ -133,7 +133,7 @@ namespace Pulsar4X.UI.Handlers
         /// strings aren't unique unfortunately so I need to use Guid, but Guid does not translate into the display very well.
         /// </summary>
         private Dictionary<Guid, string> SystemLocationGuidDict { get; set; }
-        
+
         /// <summary>
         /// PlottedMovesListbox orders vars. 
         /// </summary>
@@ -462,7 +462,7 @@ namespace Pulsar4X.UI.Handlers
 
 
                 int ActionIndex = m_oTaskGroupPanel.AvailableActionsListBox.SelectedIndex;
-                
+
                 /// <summary>
                 /// if AddMove is clicked with no selection action it will bomb.
                 /// </summary>
@@ -475,7 +475,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     var entity = selected.Entity;
                     var etype = selected.EntityType;
-                    
+
                     switch (etype)
                     {
 
@@ -534,7 +534,7 @@ namespace Pulsar4X.UI.Handlers
                         SelectedOrderIndex = PrevioslySelectedOrderIndex;
                         //m_oTaskGroupPanel.PlottedMovesListBox.SelectedItem = PrevioslySelectedOrderIndex + 1;
                     }
-                    
+
                 }
 
                 if (removeindex == -1)
@@ -547,7 +547,7 @@ namespace Pulsar4X.UI.Handlers
                     //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
                 }
                 ClearActionList();
-                BuildPlottedMoveList();               
+                BuildPlottedMoveList();
                 CalculateTimeDistance();
                 BuildActionList();
             }
@@ -773,14 +773,14 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void PlottedMovesListBox_MouseDown(object sender, MouseEventArgs e)
         {
-            
+
             if (m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex != -1)
             {
                 var rect = m_oTaskGroupPanel.PlottedMovesListBox.GetItemRectangle(m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex);
                 if (rect.Contains(e.Location) && m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex != SelectedOrderIndex)
                 {
-                        m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
-                        SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+                    m_oTaskGroupPanel.AddMoveButton.Text = "Insert Order";
+                    SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
                 }
                 else
                 {
@@ -820,7 +820,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oTaskGroupPanel.AvailableActionsListBox.Items.Add(item);
             }
-  
+
             //set the selected action to be the previously selected action if it exsists.
             if (currentSelectedAction != null && m_oTaskGroupPanel.AvailableActionsListBox.Items.Contains(currentSelectedAction))
                 m_oTaskGroupPanel.AvailableActionsListBox.SelectedItem = currentSelectedAction;
@@ -844,7 +844,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 thisTGLegalOrders = Enum.GetValues(typeof(Constants.ShipTN.OrderType)).Cast<Constants.ShipTN.OrderType>().ToList();
             }
-            else 
+            else
             {
                 thisTGLegalOrders = thisTG.LegalOrdersTG();
                 foreach (var order in previousOrders)
@@ -876,7 +876,7 @@ namespace Pulsar4X.UI.Handlers
         {
             int prevIndex = SelectedOrderIndex;
             SelectedOrderIndex = -1;
-            m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();            
+            m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
             for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
             {
                 m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(CurrentTaskGroup.TaskGroupOrders[loop].Name);
@@ -884,7 +884,7 @@ namespace Pulsar4X.UI.Handlers
 
             if (prevIndex < CurrentTaskGroup.TaskGroupOrders.Count)
             {
-                
+
                 m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = prevIndex;
                 SelectedOrderIndex = prevIndex;
             }
@@ -958,7 +958,7 @@ namespace Pulsar4X.UI.Handlers
                     SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Contacts;
                     SystemListObject valueObj = new SystemListObject(entType, pair.Key); //maybe this should be the value? though with the key I can *get* the value easly anyway.
                     SystemLocationGuidDict.Add(pair.Key.Id, Entry);
-                    SystemLocationDict.Add(pair.Key.Id, valueObj); 
+                    SystemLocationDict.Add(pair.Key.Id, valueObj);
                 }
             }
         }

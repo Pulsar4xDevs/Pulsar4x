@@ -20,7 +20,7 @@ namespace Pulsar4X.UI.ViewModels
 
         public BindingList<Faction> Factions { get; set; }
 
-        private BindingList<ShipTN> _ships; 
+        private BindingList<ShipTN> _ships;
         public BindingList<ShipTN> Ships
         {
             get
@@ -103,7 +103,7 @@ namespace Pulsar4X.UI.ViewModels
                 OnSFCChanged();
             }
         }
-        
+
         #endregion
 
 
@@ -116,7 +116,7 @@ namespace Pulsar4X.UI.ViewModels
                 return;
             }
 
-            CurrentFaction = Factions[0];   
+            CurrentFaction = Factions[0];
         }
 
         private void OnFactionChanged()
@@ -129,7 +129,7 @@ namespace Pulsar4X.UI.ViewModels
 
         private void OnShipChanged()
         {
-            if(ShipChanged != null)
+            if (ShipChanged != null)
             {
                 ShipChanged(this, new EventArgs());
             }
@@ -140,7 +140,7 @@ namespace Pulsar4X.UI.ViewModels
         /// </summary>
         private void OnSFCChanged()
         {
-            if(SFCChanged != null)
+            if (SFCChanged != null)
             {
                 SFCChanged(this, new EventArgs());
             }

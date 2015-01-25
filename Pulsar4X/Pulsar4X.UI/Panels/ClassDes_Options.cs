@@ -130,8 +130,8 @@ namespace Pulsar4X.UI.Panels
         }
         public bool Collier
         {
-            get{ return m_oCollierCheckBox.Checked; }
-            set{ m_oCollierCheckBox.Checked = value; }
+            get { return m_oCollierCheckBox.Checked; }
+            set { m_oCollierCheckBox.Checked = value; }
         }
         public CheckBox CollierCheckBox
         {

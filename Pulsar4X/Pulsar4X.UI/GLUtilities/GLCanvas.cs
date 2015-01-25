@@ -79,17 +79,17 @@ namespace Pulsar4X.UI.GLUtilities
         private float m_fZoomScaler = UIConstants.ZOOM_DEFAULT_SCALLER;
 
         /// <summary> The view offset, i.e. how much the view should be offset from 0, 0 </summary>
-        private Vector3 m_v3ViewOffset = new Vector3(0.0f,0.0f,0.0f);
+        private Vector3 m_v3ViewOffset = new Vector3(0.0f, 0.0f, 0.0f);
 
         /// <summary>
         /// The Current Sceen for the Canvas to Render.
         /// </summary>
         private SceenGraph.Sceen m_oSceenToRender;
-        
+
         /// <summary>
         /// The Sceen for the Canvas to render.
         /// </summary>
-        public SceenGraph.Sceen SceenToRender 
+        public SceenGraph.Sceen SceenToRender
         {
             get
             {
@@ -190,11 +190,11 @@ namespace Pulsar4X.UI.GLUtilities
             : base(new GraphicsMode(32, 24, 8, 4), 2, 0, GraphicsContextFlags.Default)
         {
             RegisterEventHandlers();
-            #if DEBUG
+#if DEBUG
 #if LOG4NET_ENABLED
-                logger.Info("UI: Creating an OpenGL 2.0+ GLCanvas");
+            logger.Info("UI: Creating an OpenGL 2.0+ GLCanvas");
 #endif
-            #endif
+#endif
         }
 
         /// <summary>
@@ -205,11 +205,11 @@ namespace Pulsar4X.UI.GLUtilities
             : base(new GraphicsMode(32, 24, 8, 4), 3, 2, GraphicsContextFlags.Default)
         {
             RegisterEventHandlers();
-            #if DEBUG
+#if DEBUG
 #if LOG4NET_ENABLED
-                logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
+            logger.Info("UI: Creating an OpenGL 3.2+ GLCanvas");
 #endif
-            #endif
+#endif
         }
 
         #endregion
@@ -232,14 +232,14 @@ namespace Pulsar4X.UI.GLUtilities
             GraphicsContext.CurrentContext.SwapInterval = 1; // this prevents us using 100% GPU/CPU.
             Loaded = true;           // So we know we have a valid Loaded OpenGL context.
 
-            #if DEBUG
-                m_eGLError = GL.GetError();
-                if (m_eGLError != ErrorCode.NoError)
-                {
+#if DEBUG
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
 #if LOG4NET_ENABLED
-                    logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+                logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
 #endif
-                }  
+            }
 #endif
             //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -267,7 +267,7 @@ namespace Pulsar4X.UI.GLUtilities
 #if LOG4NET_ENABLED
                 logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
 #endif
-            } 
+            }
 
 #if LOG4NET_ENABLED
             logger.Info("UI: GLCanvas3.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
@@ -299,13 +299,13 @@ namespace Pulsar4X.UI.GLUtilities
             GraphicsContext.CurrentContext.SwapInterval = 1; // this prevents us using 100% GPU/CPU
             Loaded = true;           // So we know we have a valid Loaded OpenGL context.
 
-                m_eGLError = GL.GetError();
-                if (m_eGLError != ErrorCode.NoError)
-                {
+            m_eGLError = GL.GetError();
+            if (m_eGLError != ErrorCode.NoError)
+            {
 #if LOG4NET_ENABLED
-                    logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
+                logger.Info("OpenGL Pre State Config Error Check: " + m_eGLError.ToString());
 #endif
-                }   
+            }
             //GL.ShadeModel(ShadingModel.Smooth);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.ReadBuffer(ReadBufferMode.Back);
@@ -332,11 +332,11 @@ namespace Pulsar4X.UI.GLUtilities
 #if LOG4NET_ENABLED
                 logger.Info("OpenGL Post State Config Error Check: " + m_eGLError.ToString());
 #endif
-            }  
+            }
 
 #if LOG4NET_ENABLED
             logger.Info("UI: GLCanvas2.X Loaded Successfully, Open GL Version: " + GL.GetString(StringName.Version));
-                // Log out OpeGL specific stuff if debug build.
+            // Log out OpeGL specific stuff if debug build.
             logger.Info("UI: GLSL Version: " + GL.GetString(StringName.ShadingLanguageVersion));
             logger.Info("UI: Renderer: " + GL.GetString(StringName.Renderer));
             logger.Info("UI: Vender: " + GL.GetString(StringName.Vendor));
@@ -377,10 +377,10 @@ namespace Pulsar4X.UI.GLUtilities
                 OpenGLVersion = GL.GetString(StringName.Version);
                 OpenGLVersionMajor = int.Parse(OpenGLVersion[0].ToString());      // extracts the major verion number an converts it to a int.
                 OpenGLVersionMinor = int.Parse(OpenGLVersion[2].ToString());      // same again for minor verion number.
-               // OpenGLVersionMajor = 2; - uncomment to force GL 2.0 - for testing
-/// <summary>
-/// double stacked pre-processor directives because why not? #debug isn't consistent for all loggers though.
-/// </summary>
+                // OpenGLVersionMajor = 2; - uncomment to force GL 2.0 - for testing
+                /// <summary>
+                /// double stacked pre-processor directives because why not? #debug isn't consistent for all loggers though.
+                /// </summary>
 #if LOG4NET_ENABLED
                 logger.Debug("Highest OpenGL Version Initialised is " + OpenGLVersion);
 #endif
@@ -414,8 +414,8 @@ namespace Pulsar4X.UI.GLUtilities
             }
             else
             {
-                
-                String MSG = String.Format("Unknown OpenGL Version {0}.{1}",OpenGLVersionMajor,OpenGLVersionMinor);
+
+                String MSG = String.Format("Unknown OpenGL Version {0}.{1}", OpenGLVersionMajor, OpenGLVersionMinor);
 #if LOG4NET_ENABLED
                 logger.Error(MSG);
 #endif
@@ -481,8 +481,8 @@ namespace Pulsar4X.UI.GLUtilities
         /// <param name="a_iViewportPosY">The Y-axis Position of the Viewport Relative to the world</param>
         /// <param name="a_iViewportWidth">The Width of the Viewport</param>
         /// <param name="a_iViewPortHeight">The Height of the Viewport</param>
-        public void SetupViewPort(  int a_iViewportPosX,    int a_iViewportPosY, 
-                                            int a_iViewportWidth,    int a_iViewPortHeight)
+        public void SetupViewPort(int a_iViewportPosX, int a_iViewportPosY,
+                                            int a_iViewportWidth, int a_iViewPortHeight)
         {
             GL.Viewport(a_iViewportPosX, a_iViewportPosY, a_iViewportWidth, a_iViewPortHeight);
             //float aspectRatio = a_iViewportWidth / (float)(a_iViewPortHeight); // Calculate Aspect Ratio.

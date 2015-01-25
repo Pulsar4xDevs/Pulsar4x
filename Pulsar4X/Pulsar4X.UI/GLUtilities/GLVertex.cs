@@ -22,19 +22,19 @@ namespace Pulsar4X.UI.GLUtilities
         /// <summary>
         /// The Vertix position Relative to the position of the whole object of which this vertex is a part of.
         /// </summary>lo
-        public OpenTK.Vector4   m_v4Position;
+        public OpenTK.Vector4 m_v4Position;
 
         /// <summary>
         /// The Color of the vertex. We are using a Half size float because each chanle only needs 8 bits of data, 
         /// the half size float provide 10bits, i.e. more than enough, while still saving on copying 2 bytes of data
         /// to the graphics card each call (or 8 bytes for a quad!!).
         /// </summary>
-        public OpenTK.Vector4  m_v4Color;
+        public OpenTK.Vector4 m_v4Color;
 
         /// <summary>
         /// The Texture "UV" coordinates for this vertex.
         /// </summary>
-        public OpenTK.Vector2   m_v2UV;
+        public OpenTK.Vector2 m_v2UV;
 
         //public GLVertex()
         //{

@@ -17,7 +17,7 @@ namespace Pulsar4X.Entities
         public double BaseTemperature { get; set; }
         public double MinimumTemperatureConstraint { get; set; }
         public double MaximumTemperatureConstraint { get; set; }
-        
+
         /// <summary>
         /// Probably a list of toxic gases for this species.
         /// </summary>
@@ -90,7 +90,7 @@ namespace Pulsar4X.Entities
             foreach (SpeciesGasConstraint constraint in GasConstraints)
             {
                 var gas = planet.Gases.FirstOrDefault(x => x.MoleculeId == constraint.Molecule.Id);
-                if(gas!=null)
+                if (gas != null)
                 {
                     if (gas.SurfacePressure < constraint.Minimum)
                         cost *= 2;

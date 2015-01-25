@@ -24,7 +24,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Subtract the construction cycle from the construction tick.
             /// </summary>
-            
+
             foreach (Faction CurrentFaction in P)
             {
                 foreach (Population CurrentPopulation in CurrentFaction.Populations)

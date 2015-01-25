@@ -27,16 +27,16 @@ namespace Pulsar4X.Entities.Components
         RecFacility,
 
         Armor,
-        
+
         Engine,
-        
+
         PassiveSensor,
         ActiveSensor,
-        
+
         CargoHold,
         CargoHandlingSystem,
         CryoStorage,
-        
+
         BeamFireControl,
         Rail,
         Gauss,
@@ -170,7 +170,7 @@ namespace Pulsar4X.Entities.Components
             set { m_oComponentType = value; }
         }
 
-        
+
         /// <summary>
         /// Cost of this component in minerals
         /// </summary>

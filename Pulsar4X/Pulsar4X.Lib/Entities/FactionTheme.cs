@@ -22,7 +22,7 @@ namespace Pulsar4X.Entities
     public class FactionTheme
     {
         protected const string NAME_UNAVAILABLE = "Name Unavailable";
-        
+
         public Guid Id { get; set; }
         public string Name { get; set; }
 
@@ -41,7 +41,7 @@ namespace Pulsar4X.Entities
         {
             get { return (SystemNames != null && SystemNames.Count > 0); }
         }
-        
+
         /// <summary>
         /// Use GetNextClassName to retrieve Class names for the user
         /// </summary>
@@ -56,7 +56,7 @@ namespace Pulsar4X.Entities
         /// Use GetRanks to retrieve Ranks for the user
         /// </summary>
         public List<ThemeRank> RankNames { get; set; }
-        
+
         /// <summary>
         /// Returns the next Class name for the Theme
         /// </summary>

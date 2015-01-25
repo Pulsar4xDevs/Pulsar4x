@@ -142,7 +142,7 @@ namespace Pulsar4X.UI.SceenGraph
         /// <summary>
         /// Get The Entity This System Repesents.
         /// </summary>
-        public GameEntity SceenEntity 
+        public GameEntity SceenEntity
         {
             get
             {
@@ -190,7 +190,7 @@ namespace Pulsar4X.UI.SceenGraph
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;
             SceenID = a_oStarSystem.Id;
-            
+
             // Create measurement element:
             m_oMeasurementElement = new MeasurementElement();
             m_oMeasurementElement.PrimaryPrimitive = new GLLine(a_oDefaultEffect, Vector3.Zero, new Vector2(1.0f, 1.0f), Color.Yellow, UIConstants.Textures.DEFAULT_TEXTURE);
@@ -211,7 +211,7 @@ namespace Pulsar4X.UI.SceenGraph
             double dMoonOrbitRadius = 0;                                        // used for holding the orbit in Km for a Moon.
             float fMoonSize = 0;                                                // used to hold the Moons size.
             Vector3 v3MoonPos = Vector3.Zero;                                   // Used to store the Moons Position.
-            
+
             // start creating star branches in the sceen graph:
             SceenElement oRootStar;
             SceenElement oCurrStar;
@@ -229,12 +229,12 @@ namespace Pulsar4X.UI.SceenGraph
                     Random rnd = new Random();
                     //float fAngle = 0.0f; // rnd.Next(0, 360);
                     //fAngle = MathHelper.DegreesToRadians(fAngle);
-                   // double x, y;
+                    // double x, y;
                     Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oStar, 0);
                     v3StarPos.X = (float)(oStar.XSystem); //(float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     v3StarPos.Y = (float)(oStar.YSystem);    //(float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis);
-                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar.Class),  false);
+                    oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar.Class), false);
 
                     // create orbit circle
                     /*GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
@@ -244,7 +244,7 @@ namespace Pulsar4X.UI.SceenGraph
                         UIConstants.Textures.DEFAULT_TEXTURE);
                     oCurrStar.AddPrimitive(oStarOrbitCirc);*/
                 }
-                
+
 
                 fStarSize = (float)(oStar.Radius * 2.0 * (Constants.Units.SOLAR_RADIUS_IN_AU));
 

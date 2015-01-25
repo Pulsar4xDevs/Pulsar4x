@@ -29,7 +29,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// eccentricity of solar orbit
         /// </summary>
-        public double Eccentricity { get; set; } 
+        public double Eccentricity { get; set; }
 
         /// <summary>
         /// length of local year (in days)
@@ -76,7 +76,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double TrueAnomaly { get; set; }
 
-        public OrbitingEntity() : base()
+        public OrbitingEntity()
+            : base()
         {
             TrueAnomaly = 0.0;
             TimeSinceApogeeRemainder = 0;

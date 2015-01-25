@@ -15,7 +15,7 @@ namespace Pulsar4X.UI.SceenGraph
     /// </summary>
     class TravelLine : SceenElement
     {
-        public override GameEntity SceenEntity  { get; set; }
+        public override GameEntity SceenEntity { get; set; }
 
         // Chache start and end positions:
         private Vector3 m_v3Start;
@@ -57,7 +57,7 @@ namespace Pulsar4X.UI.SceenGraph
         public TravelLine()
             : base()
         {
-            
+
         }
 
         public TravelLine(GLEffect a_oDefaultEffect, System.Drawing.Color a_oColor)
