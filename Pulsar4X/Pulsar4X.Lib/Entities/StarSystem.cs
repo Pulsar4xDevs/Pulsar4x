@@ -80,7 +80,7 @@ namespace Pulsar4X.Entities
         /// <param name="YSystemAU">System Position Y in AU</param>
         public void AddWaypoint(String Title, double XSystemAU, double YSystemAU, int FactionID)
         {
-            Waypoint NewWP = new Waypoint(Title,this,XSystemAU, YSystemAU, FactionID);
+            Waypoint NewWP = new Waypoint(Title, this, XSystemAU, YSystemAU, FactionID);
             Waypoints.Add(NewWP);
             //logger.Info("Waypoint added.");
             //logger.Info(XSystemAU.ToString());
@@ -101,18 +101,6 @@ namespace Pulsar4X.Entities
             else
                 Waypoints.Remove(Remove);
         }
-
-        /// <summary>
-        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function. Perhaps there should be.
-        /// </summary>
-        /// <param name="XSystemAU">X Location in AU of JP.</param>
-        /// <param name="YSystemAU">Y Location in AU of JP.</param>
-        public void AddJumpPoint(double XSystemAU, double YSystemAU)
-        {
-            JumpPoint NewJP = new JumpPoint(this,XSystemAU,YSystemAU);
-            JumpPoints.Add(NewJP);
-        }
-
 
         /// <summary>
         /// Systems have to store a global(or perhaps system wide) list of contacts. This function adds a contact in the event one is generated.
@@ -165,46 +153,46 @@ namespace Pulsar4X.Entities
         {
             int index = SystemContactList.IndexOf(Contact);
 
-           if (index != -1)
-           {
-               /// <summary>
-               /// Remove the contact from each of the faction contact lists as well as the System contact list.
-               /// </summary>
-               for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
-               {
-                   FactionDetectionLists[loop].RemoveContact(index);
-               }
+            if (index != -1)
+            {
+                /// <summary>
+                /// Remove the contact from each of the faction contact lists as well as the System contact list.
+                /// </summary>
+                for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+                {
+                    FactionDetectionLists[loop].RemoveContact(index);
+                }
 
-               SystemContactList.Remove(Contact);
+                SystemContactList.Remove(Contact);
 
-               /// <summary>
-               /// Distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
-               /// causes no issues with distance calculations.
-               /// </summary>
-               for (int loop = 0; loop < SystemContactList.Count; loop++)
-               {
-                   SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
-                   SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
-               }
+                /// <summary>
+                /// Distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
+                /// causes no issues with distance calculations.
+                /// </summary>
+                for (int loop = 0; loop < SystemContactList.Count; loop++)
+                {
+                    SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
+                    SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
+                }
 
-               /// <summary>
-               /// inform the display that this contact needs to be deleted.
-               /// </summary>
-               ContactDeleteList.Add(Contact);
+                /// <summary>
+                /// inform the display that this contact needs to be deleted.
+                /// </summary>
+                ContactDeleteList.Add(Contact);
 
-               /// <summary>
-               /// also clean up the contact create list if this contact hasn't been created yet by the display.
-               /// </summary>
-               if (ContactCreateList.Contains(Contact) == true)
-                   ContactCreateList.Remove(Contact);
-           }
-           else
-           {
-               String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
-               MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.CurrentSystem, Contact,
-                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
-               GameState.Instance.Factions[0].MessageLog.Add(Entry2);
-           }
+                /// <summary>
+                /// also clean up the contact create list if this contact hasn't been created yet by the display.
+                /// </summary>
+                if (ContactCreateList.Contains(Contact) == true)
+                    ContactCreateList.Remove(Contact);
+            }
+            else
+            {
+                String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
+                MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.CurrentSystem, Contact,
+                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                GameState.Instance.Factions[0].MessageLog.Add(Entry2);
+            }
         }
 
         /// <summary>

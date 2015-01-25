@@ -14,9 +14,9 @@ namespace Pulsar4X.Stargen
 {
     class Accrete
     {
-        #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Accrete));
-        #endif
+#endif
 
         private readonly bool _generateMoons;
         private readonly double _minimumStellarAge;
@@ -137,17 +137,18 @@ namespace Pulsar4X.Stargen
 #endif
                     }
                 } while (protoStar.DustAvailable && counter < 10000) ;
-                
+
                 //populate the Star from the protoStar
                 protoStar.Planets.ForEach(planet =>
-                                              {
-                                                  planet.Planet.Primary = star;
-                                                  if (_generateMoons)
-                                                      DistMoonMasses(protoStar, planet);
-                                                  star.Planets.Add(planet.Planet);
-                                              });
+                {
+                    planet.Planet.Primary = star;
+                    if (_generateMoons)
+                        DistMoonMasses(protoStar, planet);
+                    star.Planets.Add(planet.Planet);
+                });
                 star.Planets = new BindingList<Planet>(star.Planets.OrderBy(x => x.SemiMajorAxis).ToList());
                 GeneratePlanets(star);
+                GenerateJumpPoints(star);
             }
 
             return starSystem;
@@ -188,9 +189,6 @@ namespace Pulsar4X.Stargen
                         // New orbital distance
                         newA = (aPlanet.Mass + bPlanet.Mass) / ((aPlanet.Mass / aPlanet.SemiMajorAxis) + (bPlanet.Mass / bPlanet.SemiMajorAxis));
 
-//#if LOG4NET_ENABLED
-                        //logger.Debug(String.Format("Collision between two planetesimals! {0:N4} AU ({1:N5}) + {2:N4} AU ({3:N5}) -> {4:N4} AU", bPlanet.SemiMajorAxis, bPlanet.MassInEarthMasses, aPlanet.SemiMajorAxis, aPlanet.MassInEarthMasses, newA));
-//#endif
                         // Compute new eccentricity
                         temp = aPlanet.Mass * Math.Sqrt(aPlanet.SemiMajorAxis) * Math.Sqrt(1.0 - Math.Pow(aPlanet.Eccentricity, 2.0));
                         temp = temp + (bPlanet.Mass * Math.Sqrt(bPlanet.SemiMajorAxis) * Math.Sqrt(Math.Sqrt(1.0 - Math.Pow(bPlanet.Eccentricity, 2.0))));
@@ -209,7 +207,7 @@ namespace Pulsar4X.Stargen
                             DustMass = aPlanet.DustMass + bPlanet.DustMass,
                             GasMass = aPlanet.GasMass + bPlanet.GasMass,
                             Star = Disc.Star,
-                            IsMoon=aPlanet.IsMoon,
+                            IsMoon = aPlanet.IsMoon,
                             MoonOf = aPlanet.MoonOf
                         };
                         newP.init();
@@ -349,7 +347,7 @@ namespace Pulsar4X.Stargen
             {
                 counter++;
 
-                ProtoPlanet moon = new ProtoPlanet(star.Star,planet.Planet)
+                ProtoPlanet moon = new ProtoPlanet(star.Star, planet.Planet)
                 {
                     SemiMajorAxis = rnd.NextDouble(planet.PlanetInnerBound, planet.PlanetOuterBound),
                     Eccentricity = rnd.RandomEccentricity(),
@@ -383,15 +381,15 @@ namespace Pulsar4X.Stargen
                     logger.Debug("Exceeded 10000 attempts to create a planet! Will not continue!");
 #endif
                 }
-            }while (planet.DustAvailable && counter < 10000);
+            } while (planet.DustAvailable && counter < 10000);
 
             planet.Planets = new List<ProtoPlanet>(planet.Planets.OrderBy(x => x.SemiMajorAxis));
 
-            planet.Planets.ForEach(moon=>
-                    {
-                        moon.Planet.Primary = planet.Star;
-                        planet.Planet.Moons.Add(moon.Planet);
-                    });
+            planet.Planets.ForEach(moon =>
+            {
+                moon.Planet.Primary = planet.Star;
+                planet.Planet.Moons.Add(moon.Planet);
+            });
         }
 
         private void GeneratePlanets(Star Star)
@@ -622,7 +620,7 @@ namespace Pulsar4X.Stargen
 
                             //TODO: Look at adding atmosphere call to this
                             var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
-                            
+
                             //if ((rocheLimit * 3.0) < hillSphere)
                             if (moon.SemiMajorAxis < rocheLimit)
                             {
@@ -666,6 +664,67 @@ namespace Pulsar4X.Stargen
             return true;
         }
 
+        private void GenerateJumpPoints(Star Star)
+        {
+            int numJumpPoints = 1; // Each star always generates a JP.
+            double maxDistance = double.MinValue; // Max Distance from the star.
+            double minDistance = double.MaxValue; // Minimum Distance from the star
+
+            // Give a chance per planet to generate a JumpPoint
+            foreach (Planet p in Star.Planets)
+            {
+#warning Magic number for JumpPoint generation chance.
+                int chance = 20;
+                if (p.IsMoon)
+                    continue;
+                // Higher mass planets = higher chance.
+                if (p.MassInEarthMasses > 1)
+                {
+                    chance = chance + 2;
+                    if (p.MassInEarthMasses > 3)
+                    {
+                        chance = chance + 3;
+                    }
+                    if (p.MassInEarthMasses > 5)
+                    {
+                        chance = chance + 5;
+                    }
+                }
+                if (chance >= rnd.Next(100))
+                {
+                    numJumpPoints++;
+                }
+
+                // Clamp Min/Max distances for JP's
+                if (p.SemiMajorAxis < minDistance)
+                {
+                    minDistance = p.SemiMajorAxis;
+                }
+                if (p.SemiMajorAxis > maxDistance)
+                {
+                    maxDistance = p.SemiMajorAxis;
+                }
+            }
+
+            while (numJumpPoints-- > 0)
+            {
+                // Determine a location for the new JP.
+                double offsetX = ((maxDistance - minDistance) * rnd.Next(76) / 100) + minDistance;
+                double offsetY = ((maxDistance - minDistance) * rnd.Next(76) / 100) + minDistance;
+                if (rnd.Next(2) == 0)
+                {
+                    offsetX = -offsetX;
+                }
+                if (rnd.Next(2) == 0)
+                {
+                    offsetY = -offsetY;
+                }
+
+                JumpPoint newJumpPoint = new JumpPoint(Star.StarSystem, Star, offsetX, offsetY);
+                Star.StarSystem.JumpPoints.Add(newJumpPoint);
+            }
+        }
+
         private void initOrbitPosition(OrbitingEntity entity)
         {
             if (entity.Parent != null)
@@ -674,7 +733,7 @@ namespace Pulsar4X.Stargen
                 entity.LongitudeOfApogee = rnd.NextDouble(0.0, 2 * Math.PI);
                 entity.TimeSinceApogee = Convert.ToInt64(rnd.NextDouble(0.0, entity.OrbitalPeriod * Constants.Units.SECONDS_PER_HOUR * 24.0));
             }
-        
+
         }
 
         private void CalculateGases(Planet planet)

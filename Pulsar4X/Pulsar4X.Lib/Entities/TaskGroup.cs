@@ -1411,16 +1411,6 @@ namespace Pulsar4X.Entities
             int OrderCount = TaskGroupOrders.Count - 1;
             double dX = 0.0, dY = 0.0, dZ;
 
-            if (TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.StandardTransit || 
-                TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.SquadronTransit || 
-                TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
-            {
-                if (TaskGroupOrders[OrderCount].jumpPoint.IsExplored == false)
-                {
-                    CanOrder = Constants.ShipTN.OrderState.DisallowOrdersUnknownJump;
-                }
-            }
-
             if (OrderCount == 0)
             {
                 if (IsOrbiting)
@@ -2275,6 +2265,17 @@ namespace Pulsar4X.Entities
                        }
                     break;
                     #endregion
+
+                    case (int)Constants.ShipTN.OrderType.StandardTransit:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    (TaskGroupOrders[0].target as JumpPoint).StandardTransit(this);
+                    break;
+                    case (int)Constants.ShipTN.OrderType.SquadronTransit:
+                    TaskGroupOrders[0].orderTimeRequirement = 0;
+                    (TaskGroupOrders[0].target as JumpPoint).SquadronTransit(this);
+                    break;
+
+
 
                 }
             }

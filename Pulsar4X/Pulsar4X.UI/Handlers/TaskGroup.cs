@@ -35,7 +35,8 @@ namespace Pulsar4X.UI.Handlers
             Contacts,
             TaskGroups,
             Waypoints,
-            Count
+            JumpPoint,
+            Count,
         }
 
         public GameEntity Entity { get; private set; }
@@ -486,8 +487,12 @@ namespace Pulsar4X.UI.Handlers
                         case SystemListObject.ListEntityType.Planets:
                             Planet planet = (Planet)entity;
                             NewOrder = new Orders(selected_ordertype, -1, -1, 0, planet);
-                            
                             break;
+                        case SystemListObject.ListEntityType.JumpPoint:
+                            JumpPoint jp = (JumpPoint)entity;
+                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, jp);
+                            break;
+
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
                             NewOrder = new Orders(selected_ordertype, -1, -1, 0, TargetOfOrder);
@@ -747,6 +752,7 @@ namespace Pulsar4X.UI.Handlers
             SystemLocationDict.Clear();
             SystemLocationGuidDict.Clear();
             AddPlanetsToList();
+            AddJumpPointsToList();
 
             if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
                 AddContactsToList();
@@ -903,6 +909,18 @@ namespace Pulsar4X.UI.Handlers
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
                     SystemLocationDict.Add(entObj.Id, valueObj);
                 }
+            }
+        }
+
+        private void AddJumpPointsToList()
+        {
+            foreach (JumpPoint jp in CurrentTaskGroup.Contact.CurrentSystem.JumpPoints)
+            {
+                GameEntity entObj = jp;
+                SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
+                SystemListObject valueObj = new SystemListObject(entType, entObj);
+                SystemLocationGuidDict.Add(entObj.Id, jp.Name);
+                SystemLocationDict.Add(entObj.Id, valueObj);
             }
         }
 

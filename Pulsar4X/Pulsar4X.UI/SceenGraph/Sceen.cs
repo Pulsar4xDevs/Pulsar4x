@@ -360,6 +360,28 @@ namespace Pulsar4X.UI.SceenGraph
                     iMoonCounter = 0;
                 }
                 iPlanetCounter = 0;
+                foreach (Pulsar4X.Entities.JumpPoint oJumpPoint in a_oStarSystem.JumpPoints)
+                {
+                    SceenElement oJumpPointElement = new JumpPointElement(oJumpPoint);
+                    oJumpPointElement.EntityID = oJumpPoint.Id;
+
+                    Vector3 v3JPPos = new Vector3((float)oJumpPoint.XSystem, (float)oJumpPoint.YSystem, 0.0f);
+
+                    GLQuad oJPQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
+                                                                    v3JPPos,
+                                                                    new Vector2(0.0001f, 0.0001f),                   // what size is a jump point anyway???
+                                                                    Color.Cyan,
+                                                                    UIConstants.Textures.DEFAULT_JUMPPOINT_ICON);
+
+                    oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3JPPos,
+                    UIConstants.DEFAULT_TEXT_SIZE, Color.Cyan, UIConstants.Textures.DEFAULT_GLFONT2, oJumpPoint.Name);
+
+                    oJumpPointElement.Lable = oNameLable;
+                    oJumpPointElement.PrimaryPrimitive = oJPQuad;
+                    oJumpPointElement.AddPrimitive(oJPQuad);
+                    oJumpPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
+                    oCurrStar.AddChildElement(oJumpPointElement);
+                }
                 iStarCounter++;
             }
 
