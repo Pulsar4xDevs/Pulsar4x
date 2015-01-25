@@ -152,11 +152,10 @@ namespace Pulsar4X.Entities
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
 
+            // Move us to the JP in the other system.
             TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 
-            /// <summary>
-            /// Likewise, set Standard transit penalties for the TG
-            /// </summary>
+            // TODO: Set Standard transit penalties here
 
             return 1;
         }
@@ -183,19 +182,11 @@ namespace Pulsar4X.Entities
 
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
-            if (!TransitTG.TaskGroupFaction.SystemContacts.ContainsKey(Connect.System))
-            {
-                TransitTG.TaskGroupFaction.AddNewContactList(Connect.System);
-            }
 
-            /// <summary>
-            /// Add/subtract offset to X/Y for this.
-            /// <summary>
+            // Move us to the JP in the other system.
             TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 
-            /// <summary>
-            /// Set Squadron Transit penalties here
-            /// </summary>
+            // TODO: Set Squadron transit penalties here
 
             return 1;
         }
