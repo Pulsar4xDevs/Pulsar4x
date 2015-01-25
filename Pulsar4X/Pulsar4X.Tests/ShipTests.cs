@@ -737,6 +737,15 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
+            System1.AddJumpPoint(S1, 0.1, 0.2);
+            System2.AddJumpPoint(S2, 0.2, 0.1);
+
+            System1.JumpPoints[0].Connect = System2.JumpPoints[0];
+            System2.JumpPoints[0].Connect = System1.JumpPoints[0];
+
+            System1.JumpPoints[0].StandardTransit(PlayerFaction1.TaskGroups[0]);
+            System1.JumpPoints[0].StandardTransit(PlayerFaction2.TaskGroups[0]);
+            
             PlayerFaction1.SensorSweep(15);
             PlayerFaction2.SensorSweep(15);
 

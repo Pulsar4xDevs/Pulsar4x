@@ -385,65 +385,6 @@ namespace Pulsar4X.UI.SceenGraph
                 iStarCounter++;
             }
 
-            // create any system contacts:
-            foreach (Pulsar4X.Entities.SystemContact oContact in a_oStarSystem.SystemContactList)
-            {
-                SceenElement oContactElement;
-                Vector3 v3ContactPos;
-                GLUtilities.GLFont oNameLable;
-                GLUtilities.GLQuad oContactQuad;
-
-                switch(oContact.SSEntity)
-                {
-                    case StarSystemEntityType.TaskGroup:
-                        oContactElement = new ContactElement(a_oDefaultEffect, oContact);
-                        oContactElement.EntityID = oContact.Id;
-
-                        v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
-
-                        oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
-                                                                        v3ContactPos,
-                                                                        new Vector2(0.0001f, 0.0001f),                   // what size is a task groug anyway???
-                                                                        oContact.faction.FactionColor,                   
-                                                                        UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
-
-                        oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                        UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
-
-                        oContactElement.Lable = oNameLable;
-                        oContactElement.PrimaryPrimitive = oContactQuad;
-                        oContactElement.AddPrimitive(oContactQuad);
-                        oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
-                        this.AddElement(oContactElement);
-                        (oContactElement as ContactElement).ParentSceen = this;
-                    break;
-                    case StarSystemEntityType.Missile:
-                        oContactElement = new ContactElement(a_oDefaultEffect, oContact);
-                        oContactElement.EntityID = oContact.Id;
-
-                        v3ContactPos = new Vector3((float)oContact.MissileGroup.contact.XSystem, (float)oContact.MissileGroup.contact.YSystem, 0.0f);
-
-                        oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
-                                                                    v3ContactPos,
-                                                                    new Vector2(0.0001f, 0.0001f),                   // what size is a missile?
-                                                                    oContact.faction.FactionColor,
-                                                                    UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
-
-                        oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                        UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.MissileGroup.Name);
-
-                        oContactElement.Lable = oNameLable;
-                        oContactElement.PrimaryPrimitive = oContactQuad;
-                        oContactElement.AddPrimitive(oContactQuad);
-                        oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
-                        this.AddElement(oContactElement);
-                        (oContactElement as ContactElement).ParentSceen = this;
-                    break;                     
-                }
-
-                oContact.ContactElementCreated = SystemContact.CEState.Created;
-            }
-
             // Set Sceen Size basd on Max Orbit:
             m_v2SceenSize = new Vector2d(dMaxOrbitDist * 2, dMaxOrbitDist * 2);
         }
@@ -671,6 +612,7 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
                 }
             }
+
         }
 
         /// <summary>

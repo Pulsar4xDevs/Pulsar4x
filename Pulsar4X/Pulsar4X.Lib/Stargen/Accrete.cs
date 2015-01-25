@@ -720,6 +720,11 @@ namespace Pulsar4X.Stargen
                     offsetY = -offsetY;
                 }
 
+                if (Star.Parent != null)
+                {
+                    Star.UpdatePosition(1);
+                }
+
                 JumpPoint newJumpPoint = new JumpPoint(Star.StarSystem, Star, offsetX, offsetY);
                 Star.StarSystem.JumpPoints.Add(newJumpPoint);
             }

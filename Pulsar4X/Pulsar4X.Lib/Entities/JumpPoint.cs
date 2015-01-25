@@ -58,8 +58,9 @@ namespace Pulsar4X.Entities
         public SystemContact Contact { get; set; }
 
         /// <summary>
-        /// Creates a new JP at location in AU X,Y
+        /// Creates a new JP at a location offset from the parent star by X and Y AU.
         /// </summary>
+        /// <param name="Par">Parent Star</param>
         /// <param name="X">X in AU offset from parent star.</param>
         /// <param name="Y">Y in AU offset from parent star.</param>
         public JumpPoint(StarSystem Sys, Star Par, double X, double Y)
@@ -116,8 +117,10 @@ namespace Pulsar4X.Entities
 
             // Connect us to them.
             Connect = newSystem.JumpPoints[i];
+            Name = Name + "(" + Connect.System.Name + ")";
             // Connect them to us.
             Connect.Connect = this;
+            Connect.Name = Connect.Name + "(" + System.Name + ")";
 
         }
 
@@ -141,10 +144,6 @@ namespace Pulsar4X.Entities
 #warning Not sure why, but the old contact is still displayed in the old system.
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
-            if (!TransitTG.TaskGroupFaction.SystemContacts.ContainsKey(Connect.System))
-            {
-                TransitTG.TaskGroupFaction.AddNewContactList(Connect.System);
-            }
 
             TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 

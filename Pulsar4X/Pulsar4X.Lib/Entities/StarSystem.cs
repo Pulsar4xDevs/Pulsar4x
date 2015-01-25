@@ -103,6 +103,19 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function. Perhaps there should be.
+        /// </summary>
+        /// <param name="parentStar">Star to attach this JP to.</param>
+        /// <param name="XSystemAU">X offset from Star Position</param>
+        /// <param name="YSystemAU">Y offset from Star Position.</param>
+        /// <returns>Newly Created Jumpoint</returns>
+        public JumpPoint AddJumpPoint(Star parentStar, double XOffsetAU, double YOffsetAU)
+        {
+            JumpPoint NewJP = new JumpPoint(this, parentStar, XOffsetAU, YOffsetAU);
+            JumpPoints.Add(NewJP);
+            return NewJP;
+        }
+        /// <summary>
         /// Systems have to store a global(or perhaps system wide) list of contacts. This function adds a contact in the event one is generated.
         /// Generation events include construction, hangar launches, missile launches, and Jump Point Entry into the System.
         /// </summary>

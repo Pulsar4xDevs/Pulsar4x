@@ -122,6 +122,8 @@ namespace Pulsar4X.UI.SceenGraph
             {
                 oElement.Refresh(a_fZoomScaler);
             }
+
+            Lable.Text = m_oJumpPoint.Name;
         }
     }
 }

@@ -76,6 +76,12 @@ namespace Pulsar4X.Stargen
                 */
             }
             #endif
+
+            // Create the faciton contact information for each faction.
+            foreach (Faction f in GameState.Instance.Factions)
+            {
+               f.AddNewContactList(ss);
+            }
             return ss;
         }
     }
