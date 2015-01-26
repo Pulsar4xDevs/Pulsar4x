@@ -153,7 +153,9 @@ namespace Pulsar4X.Entities
             Connect.System.AddContact(TransitTG.Contact);
 
             // Move us to the JP in the other system.
-            TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
+            //TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
+            TransitTG.Contact.UpdateLocationAfterTransit(Connect.XSystem, Connect.YSystem);
+
 
             // TODO: Set Standard transit penalties here
 
@@ -184,7 +186,8 @@ namespace Pulsar4X.Entities
             Connect.System.AddContact(TransitTG.Contact);
 
             // Move us to the JP in the other system.
-            TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
+            //TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
+            TransitTG.Contact.UpdateLocationAfterTransit(Connect.XSystem, Connect.YSystem);
 
             // TODO: Set Squadron transit penalties here
 
@@ -212,14 +215,17 @@ namespace Pulsar4X.Entities
             if (IsGated)
             {
                 // TODO: Add "Allow Friendly factions to use Gates"
-                if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
-                {
+                //if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
+                //{
                     // If nobody owns the gate, or we do, allow the jump.
                     return true;
-                }
+                //}
             }
             // TODO: Expand this to take into account JumpDrives.
-            // Currently, JumpDrives don't exist, so how could we possibly jump?
+            // Currently, JumpDrives don't exist, so how could we possibly jump? 
+            //    Gates aren't phsyical things, so they can't really be interdicted easily.
+            //    GateOwner is more of a display thing, your gates are yellow boxes, while all other gates are red boxes.
+            //    If we want to, we could change that, and make gates capturable, destructable,etc.
             return false; 
         }
     }
