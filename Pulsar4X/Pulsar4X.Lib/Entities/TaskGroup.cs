@@ -1415,7 +1415,7 @@ namespace Pulsar4X.Entities
                 TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
                 TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
             {
-                if (TaskGroupOrders[OrderCount].jumpPoint.IsExplored == false)
+                if (TaskGroupOrders[OrderCount].jumpPoint.Connect == null)
                 {
                     CanOrder = Constants.ShipTN.OrderState.DisallowOrdersUnknownJump;
                 }

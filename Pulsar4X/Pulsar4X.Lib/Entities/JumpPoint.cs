@@ -38,11 +38,6 @@ namespace Pulsar4X.Entities
         public JumpPoint Connect { get; set; }
 
         /// <summary>
-        /// Has this JP been explored and either connected to an existing system or had a new system created?
-        /// </summary>
-        public bool IsExplored { get; set; }
-
-        /// <summary>
         /// Did someone build a gate for this JP side?
         /// </summary>
         public bool IsGated { get; set; }
@@ -77,43 +72,49 @@ namespace Pulsar4X.Entities
 
             Id = Guid.NewGuid();
 
-            /// <summary>
-            /// Starsystems won't start off with explored jump points, which means that any attempt to transit them must create a new system.
-            /// </summary>
-            IsExplored = false;
+            // JumpPoints won't start off connected, which means that any attempt to transit them must create a new system.
             Connect = null;
 
-            /// <summary>
-            /// How should gate at startup be decided?
-            /// </summary>
+            // How should gate at startup be decided?
             IsGated = true; // TODO: Make setting to determine if all JP's have gates.
             GateOwner = null;
 
-            Name = "JumpPoint #" + Sys.JumpPoints.Count;
+            Name = "(G) JumpPoint #" + (Sys.JumpPoints.Count + 1); // Temp: Since all JP's have gates, add "(G)".
         }
 
         /// <summary>
-        /// Builds a gate at this JP
+        /// Adds a JumpGate at this JumpPoint.
         /// </summary>
         /// <param name="F">Faction of the gate builder</param>
-        public void BuildGate(Faction F)
+        public void AddGate(Faction F)
         {
             IsGated = true;
             GateOwner = F;
+            Name = "(G) " + Name;
         }
 
         /// <summary>
-        /// Will ultimately handle exploring JPs
-        /// A new system needs to be created, likewise atleast 1 connection JP needs to be created for this new system.
-        /// Is the JP we transited closed on this new end?
-        /// The Ship in question needs to have its data updated.
-        /// The system we left needs its contacts and faction detection lists updated.
-        /// The faction needs a contact list for the new/"new" system
+        /// Removes the JumpGate at this JumpPoint.
+        /// </summary>
+        public void RemoveGate()
+        {
+            IsGated = false;
+            GateOwner = null;
+            Name = Name.Substring(4, Name.Length); // Remove the "(G)"
+        }
+
+        /// <summary>
+        /// Handles exploring unconnected jump points.
+        /// This function only handles the connection of JumpPoints to new JumpPoints/Systems
+        /// 
+        /// TODO: Implement connecting to existing systems.
+        /// Design Questions: 
+        /// How do we determine we want to connect to an existing system? (X% Chance?, X% Chance if we already have other connections?, Other?)
+        /// How do we decide what system to connect to? (Random?, "System Proximity" based?, Other?)
         /// </summary>
         public void ExploreJP()
         {
             // Generate a new system.
-#warning JumpPoints cannot yet connect to existing systems.
             StarSystem newSystem = GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
             GameState.Instance.StarSystems.Add(newSystem);
 
@@ -126,7 +127,6 @@ namespace Pulsar4X.Entities
             // Connect them to us.
             Connect.Connect = this;
             Connect.Name = Connect.Name + "(" + System.Name + ")";
-
         }
 
         /// <summary>
@@ -137,24 +137,25 @@ namespace Pulsar4X.Entities
         /// <returns>Success or failure of transit as an integer code.</returns>
         public int StandardTransit(TaskGroupTN TransitTG)
         {
-            /// <summary>
-            /// Jump Engine/Gate logic needs to be done here.
-            /// </summary>
+            // Check Jump Drive logic.
+            if (!CanJump(TransitTG, true))
+            {
+                return 0;
+            }
 
             // Ensure we have a connection, if not create one.
             if (Connect == null)
             {
                 ExploreJP();
             }
-#warning Not sure why, but the old contact is still displayed in the old system.
+
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
 
+            // Move us to the JP in the other system.
             TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 
-            /// <summary>
-            /// Likewise, set Standard transit penalties for the TG
-            /// </summary>
+            // TODO: Set Standard transit penalties here
 
             return 1;
         }
@@ -167,9 +168,11 @@ namespace Pulsar4X.Entities
         /// <returns>Success or failure of transit as an integer code.</returns>
         public int SquadronTransit(TaskGroupTN TransitTG)
         {
-            /// <summary>
-            /// Check Jump Engine logic here.
-            /// </summary>
+            // Check Jump Drive logic.
+            if (!CanJump(TransitTG, false))
+            {
+                return 0;
+            }
 
             // Ensure we have a connection, if not create one.
             if (Connect == null)
@@ -179,19 +182,11 @@ namespace Pulsar4X.Entities
 
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
-            if (!TransitTG.TaskGroupFaction.SystemContacts.ContainsKey(Connect.System))
-            {
-                TransitTG.TaskGroupFaction.AddNewContactList(Connect.System);
-            }
 
-            /// <summary>
-            /// Add/subtract offset to X/Y for this.
-            /// <summary>
+            // Move us to the JP in the other system.
             TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
 
-            /// <summary>
-            /// Set Squadron Transit penalties here
-            /// </summary>
+            // TODO: Set Squadron transit penalties here
 
             return 1;
         }
@@ -203,6 +198,29 @@ namespace Pulsar4X.Entities
         {
             XSystem = Parent.XSystem + XOffset;
             YSystem = Parent.YSystem + YOffset;
+        }
+
+        /// <summary>
+        /// Determines if a TaskGroup has the ability to jump through this JumpPoint.
+        /// Checks Gate, Gate Ownership, and JumpDrives.
+        /// </summary>
+        /// <param name="TransitTG">TG requesting Transit.</param>
+        /// <param name="IsStandardTransit">True if StandardTransit, False if SquadronTransit</param>
+        /// <returns>True if TG is capable of doing this jump.</returns>
+        public bool CanJump(TaskGroupTN TransitTG, bool IsStandardTransit)
+        {
+            if (IsGated)
+            {
+                // TODO: Add "Allow Friendly factions to use Gates"
+                if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
+                {
+                    // If nobody owns the gate, or we do, allow the jump.
+                    return true;
+                }
+            }
+            // TODO: Expand this to take into account JumpDrives.
+            // Currently, JumpDrives don't exist, so how could we possibly jump?
+            return false; 
         }
     }
 }
