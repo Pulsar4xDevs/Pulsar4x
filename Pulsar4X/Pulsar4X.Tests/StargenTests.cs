@@ -82,7 +82,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotNull(stars);
             Assert.AreEqual(4, stars.Count);
         }
-        
+
         [Test]
         public void StarFactory_Create_With_Defaults()
         {

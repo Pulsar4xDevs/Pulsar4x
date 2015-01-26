@@ -18,7 +18,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Multiplier influences shot count, size, and cost of this turret. essentially it is this many beams.
         /// </summary>
-        private int Multiplier; 
+        private int Multiplier;
         public int multiplier
         {
             get { return Multiplier; }
@@ -96,7 +96,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="BaseTrackingTech">The faction tracking tech.</param>
         /// <param name="Armor">Desired armour coverage of this turret.</param>
         /// <param name="ArmourTech">Armour Tech for this turret.</param>
-        public TurretDefTN(String Title, BeamDefTN BaseWeapon, int Mult, int Track, int BaseTrackingTech, int Armor, int ArmourTech) 
+        public TurretDefTN(String Title, BeamDefTN BaseWeapon, int Mult, int Track, int BaseTrackingTech, int Armor, int ArmourTech)
         {
             Name = Title;
             Id = Guid.NewGuid();
@@ -105,9 +105,9 @@ namespace Pulsar4X.Entities.Components
 
             BaseBeamWeapon = BaseWeapon;
 
-            if(Mult < 1)
+            if (Mult < 1)
                 Mult = 1;
-            if(Mult > 4)
+            if (Mult > 4)
                 Mult = 4;
 
             Multiplier = Mult;
@@ -119,7 +119,7 @@ namespace Pulsar4X.Entities.Components
 
             size = BaseBeamWeapon.size * Multiplier;
             htk = (byte)(BaseBeamWeapon.htk * Multiplier);
-            crew = (byte)(BaseBeamWeapon.crew * Multiplier) ;
+            crew = (byte)(BaseBeamWeapon.crew * Multiplier);
             cost = (decimal)Math.Round((float)BaseBeamWeapon.cost * Multiplier * 1.5f * GearCount);
 
             TotalShotCount = BaseBeamWeapon.shotCount * Multiplier;

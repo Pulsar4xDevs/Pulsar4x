@@ -98,7 +98,7 @@ namespace Pulsar4X.Entities.Components
         {
             Id = Guid.NewGuid();
             componentType = ComponentTypeTN.PassiveSensor;
-           
+
             Name = title;
             size = HS;
             Sensitivity = sens;
@@ -118,7 +118,7 @@ namespace Pulsar4X.Entities.Components
             /// Populate the lookup table.
             /// </summary>
             LookUpTable = new BindingList<int>();
-            for(ushort loop = 0; loop < LookUpTableMax; loop++)
+            for (ushort loop = 0; loop < LookUpTableMax; loop++)
             {
                 int DetectionRange = CalcUnknownSignature(loop);
                 LookUpTable.Add(DetectionRange);
@@ -127,7 +127,7 @@ namespace Pulsar4X.Entities.Components
             ///<summary>
             ///HTK is either 1 or 0, because all sensors are very weak to damage, especially electronic damage.
             ///</summary>
-            if(size >= 1.0)
+            if (size >= 1.0)
                 htk = 1;
             else
                 htk = 0;
@@ -136,7 +136,7 @@ namespace Pulsar4X.Entities.Components
             /// Crew and cost are related to size, sensitivity, and hardening.
             /// </summary>
             crew = (byte)(size * 2.0);
-            cost = (decimal)((size * (float)Sensitivity) + ((size * (float)Sensitivity) * 0.25f * (float)(hardTech-1)));
+            cost = (decimal)((size * (float)Sensitivity) + ((size * (float)Sensitivity) * 0.25f * (float)(hardTech - 1)));
 
             minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
@@ -180,7 +180,7 @@ namespace Pulsar4X.Entities.Components
             /// while Range tells me at what distance a signature of 1000 will be detected in KM.
             /// </summary>
             Rating = PassiveStrength;
-            Range = (int)(Rating*100.0f);
+            Range = (int)(Rating * 100.0f);
 
             /// <summary>
             /// Populate the lookup table.
@@ -226,7 +226,7 @@ namespace Pulsar4X.Entities.Components
         /// <returns>Range at which this sensor can detect this signature.</returns>
         public int GetPassiveDetectionRange(int Signature)
         {
-            int shipDet=0;
+            int shipDet = 0;
             int shipSig = Signature;
 
             if (shipSig >= LookUpTableMax)

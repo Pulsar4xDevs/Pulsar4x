@@ -61,8 +61,8 @@ namespace Pulsar4X.UI.ViewModels
         public Faction CurrentFaction
         {
             get { return _CurrnetFaction; }
-            set 
-            { 
+            set
+            {
                 _CurrnetFaction = value;
 
                 if (_CurrnetFaction == null)

@@ -14,7 +14,7 @@ using log4net;
 
 namespace Pulsar4X.UI.GLUtilities
 {
-   
+
     /// <summary>
     /// A Quad Primitive
     /// </summary>
@@ -36,7 +36,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_oEffect = a_oEffect;
             m_m4ModelMatrix = Matrix4.Identity;
             ///< @todo make quads scale better, so it can scale on X or Y...
-            m_m4ModelMatrix =  Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);  // x and y should be the same, so scale by X
+            m_m4ModelMatrix = Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);  // x and y should be the same, so scale by X
 
             if (a_szTexture != "")
             {
@@ -68,7 +68,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_auiIndicies[1] = 1;
             m_auiIndicies[2] = 2;
             m_auiIndicies[3] = 3;
-            
+
 
             // tell OpenGL about our VBOs:
             GL.GenVertexArrays(1, out m_uiVextexArrayHandle);               // Generate Our Vertex Array and get the handle to it.
@@ -104,7 +104,7 @@ namespace Pulsar4X.UI.GLUtilities
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
 
-           // #if DEBUG
+            // #if DEBUG
             //    logger.Info("OpenGL Create Quad Primitive: " + GL.GetError().ToString());
             //#endif
         }

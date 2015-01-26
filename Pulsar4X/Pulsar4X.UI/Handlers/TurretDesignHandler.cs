@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 #if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif 
+#endif
 
 using Pulsar4X.Entities.Components;
 
@@ -292,15 +292,15 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildTurretDesignPage()
         {
-            #warning two occurences of magic number tech checking here.
+#warning two occurences of magic number tech checking here.
             int TrackTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking];
 
-            if(TrackTech > 11)
+            if (TrackTech > 11)
                 TrackTech = 11;
 
             int ArmourTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection];
 
-            if(ArmourTech > 12)
+            if (ArmourTech > 12)
                 ArmourTech = 12;
 
             if (_CurrnetBeam != null)
@@ -321,20 +321,20 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void BuildFactionInfo()
         {
-            #warning two occurences of magic number tech checking here.
+#warning two occurences of magic number tech checking here.
             int TrackTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking];
 
-            if(TrackTech > 11)
+            if (TrackTech > 11)
                 TrackTech = 11;
 
-            String Entry = String.Format("Turret Tracking Speed(10% Gear) {0} km/s",Constants.BFCTN.BeamFireControlTracking[TrackTech]);
+            String Entry = String.Format("Turret Tracking Speed(10% Gear) {0} km/s", Constants.BFCTN.BeamFireControlTracking[TrackTech]);
             m_oTurretDesignPanel.TurretTrackTextBox.Text = Entry;
 
             int FCTrackTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.BeamFireControlTracking];
-            if(FCTrackTech > 11)
+            if (FCTrackTech > 11)
                 FCTrackTech = 11;
 
-            Entry = String.Format("Fire Control Speed Rating {0} km/s",Constants.BFCTN.BeamFireControlTracking[FCTrackTech]);
+            Entry = String.Format("Fire Control Speed Rating {0} km/s", Constants.BFCTN.BeamFireControlTracking[FCTrackTech]);
             m_oTurretDesignPanel.FireControlTrackTextBox.Text = Entry;
         }
 
@@ -345,7 +345,7 @@ namespace Pulsar4X.UI.Handlers
         {
             if (_CurrnetBeam != null)
             {
-                m_oTurretDesignPanel.BeamCostTextBox.Text = String.Format("{0}",_CurrnetBeam.cost);
+                m_oTurretDesignPanel.BeamCostTextBox.Text = String.Format("{0}", _CurrnetBeam.cost);
                 m_oTurretDesignPanel.BeamSizeTextBox.Text = String.Format("{0}", _CurrnetBeam.size);
                 m_oTurretDesignPanel.TotalCostTextBox.Text = String.Format("{0}", (_CurrnetBeam.cost * Multiplier));
                 m_oTurretDesignPanel.TotalSizeTextBox.Text = String.Format("{0}", (_CurrnetBeam.size * Multiplier));
@@ -389,7 +389,7 @@ namespace Pulsar4X.UI.Handlers
             float ROF = (float)Math.Ceiling(TurretProject.powerRequirement / (TurretProject.baseBeamWeapon.weaponCapacitor * TurretProject.multiplier)) * 5.0f;
             if (ROF < 5)
                 ROF = 5;
-            String Entry = String.Format("Damage Output {0}x{1}      Rate of Fire: {2} seconds     Range Modifier: {3}\n", TurretProject.baseBeamWeapon.damage[0],TurretProject.multiplier,
+            String Entry = String.Format("Damage Output {0}x{1}      Rate of Fire: {2} seconds     Range Modifier: {3}\n", TurretProject.baseBeamWeapon.damage[0], TurretProject.multiplier,
                                          ROF.ToString(), (TurretProject.baseBeamWeapon.damage.Count - 1));
             m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
@@ -397,13 +397,13 @@ namespace Pulsar4X.UI.Handlers
             String Range = String.Format("Range {0} km", FormattedRange);
             float SpacePerWeapon = TurretProject.size / TurretProject.multiplier;
 
-            Entry = String.Format("Max {0}    Turret Size: {1:N2}    SPW: {2:N2}    Turret HTK: {3}\n", Range ,TurretProject.size, SpacePerWeapon, TurretProject.htk );
+            Entry = String.Format("Max {0}    Turret Size: {1:N2}    SPW: {2:N2}    Turret HTK: {3}\n", Range, TurretProject.size, SpacePerWeapon, TurretProject.htk);
             m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
-            Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n", TurretProject.powerRequirement, (TurretProject.baseBeamWeapon.weaponCapacitor * TurretProject.multiplier) );
+            Entry = String.Format("Power Requirement: {0}    Power Recharge per 5 Secs: {1}\n", TurretProject.powerRequirement, (TurretProject.baseBeamWeapon.weaponCapacitor * TurretProject.multiplier));
             m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
-            Entry = String.Format("Cost: {0}    Crew: {1}\n", TurretProject.cost, TurretProject.crew );
+            Entry = String.Format("Cost: {0}    Crew: {1}\n", TurretProject.cost, TurretProject.crew);
             m_oTurretDesignPanel.TurretParametersTextBox.AppendText(Entry);
 
             Entry = String.Format("Maximum Tracking Speed: {0} km/s\n", TurretProject.tracking);

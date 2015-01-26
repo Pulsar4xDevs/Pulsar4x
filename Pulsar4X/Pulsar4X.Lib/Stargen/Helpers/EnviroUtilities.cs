@@ -23,7 +23,7 @@ namespace Pulsar4X.Stargen
             double Period = (Math.PI * 2 * Math.Sqrt(separation * separation * separation / (Mass * Constants.Units.GRAV_CONSTANT)));
             Period = Period / Constants.TimeInSeconds.Day;
             return Period;
-            
+
             /// <summary>
             /// This code is for the Period of two objects that are effecting one another.
             /// </summary>
@@ -44,7 +44,7 @@ namespace Pulsar4X.Stargen
             double volume = mass / density;
             return Math.Pow((3.0 * volume) / (4.0 * Math.PI), (1.0 / 3.0)) / Constants.Units.CM_PER_KM;
         }
-        
+
         /// <summary>
         ///	 Returns the radius of the planet in kilometers.						
         ///	 The mass passed in is in units of solar masses.						
@@ -136,7 +136,7 @@ namespace Pulsar4X.Stargen
                 return (temp * 1.2);
             return (temp * 5.5);
         }
-        
+
         /// <summary>
         ///	The mass passed in is in units of solar masses, and the equatorial		
         ///	radius is in km.  The density is returned in units of grams/cc.			
@@ -151,7 +151,7 @@ namespace Pulsar4X.Stargen
             double volume = (4.0 * Math.PI * Math.Pow(equatRadius, 3.0)) / 3.0;
             return (mass / volume);
         }
-        
+
         /// <summary>
         /// Fogg's information for this routine came from Dole "Habitable Planets	
         /// for Man", Blaisdell Publishing Company, NY, 1964.  From this, he came	
@@ -239,8 +239,8 @@ namespace Pulsar4X.Stargen
                 return 2;
             return 3;
         }
-        
-       
+
+
         /// <summary>
         ///	 This function implements the escape velocity calculation.	Note that	
         ///	it appears that Fogg's eq.15 is incorrect.								
@@ -256,7 +256,7 @@ namespace Pulsar4X.Stargen
             double radiusInCm = radius * Constants.Units.CM_PER_KM;
             return Math.Sqrt(2.0 * Constants.Units.GRAV_CONSTANT * massInGrams / radiusInCm);
         }
-        
+
         /// <summary>
         ///	This is Fogg's eq.16.  The molecular weight (usually assumed to be N2)	
         ///	is used as the basis of the Root Mean Square (RMS) velocity of the		
@@ -302,7 +302,7 @@ namespace Pulsar4X.Stargen
             return (Constants.Units.GRAV_CONSTANT * (mass * Constants.Units.SOLAR_MASS_IN_GRAMS) /
                                Math.Pow(radius * Constants.Units.CM_PER_KM, 2.0));
         }
-        
+
         /// <summary>
         ///	 This function calculates the surface gravity of a planet.	The			
         ///	acceleration is in units of cm/sec2, and the gravity is returned in		
@@ -356,7 +356,7 @@ namespace Pulsar4X.Stargen
             }
             return 0.0;
         }
-        
+
         /// <summary>
         ///	This implements Fogg's eq.18.  The pressure returned is in units of		
         ///	millibars (mb).	 The gravity is in units of Earth gravities, the radius 
@@ -387,7 +387,7 @@ namespace Pulsar4X.Stargen
             double surfacePressureInBars = surfPressure / Constants.Units.MILLIBARS_PER_BAR;
             return (1.0 / ((Math.Log(surfacePressureInBars) / -5050.5) + (1.0 / 373.0)));
         }
-        
+
         /// <summary>
         ///	 This function is Fogg's eq.22.	 Given the volatile gas inventory and	
         ///	 planetary radius of a planet (in Km), this function returns the		
@@ -406,7 +406,7 @@ namespace Pulsar4X.Stargen
 
             return (temp);
         }
-        
+
         /// <summary>
         ///	 Given the surface temperature of a planet (in Kelvin), this function	
         ///	 returns the fraction of cloud cover available.	 This is Fogg's eq.23.	
@@ -476,14 +476,14 @@ namespace Pulsar4X.Stargen
                    * Math.Sqrt(Math.Sqrt((1.0 - albedo) / (1.0 - Constants.Sol.Earth.ALBEDO)))
                    * Constants.Sol.Earth.EFFECTIVE_TEMP);
         }
-        
+
         public static double EstTemp(double ecosphereRadius, double orbRadius, double albedo)
         {
             return (Math.Sqrt(ecosphereRadius / orbRadius)
                    * Math.Sqrt(Math.Sqrt((1.0 - albedo) / (1.0 - Constants.Sol.Earth.ALBEDO)))
                    * Constants.Sol.Earth.AVERAGE_KELVIN);
         }
-        
+
         /// <summary>
         /// Old grnhouse:                                                           
         ///	Note that if the orbital radius of the planet is greater than or equal	
@@ -531,7 +531,7 @@ namespace Pulsar4X.Stargen
 
             return rise;
         }
-        
+
         /// <summary>
         ///	 The surface temperature passed in is in units of Kelvin.				
         ///	 The cloud adjustment is the fraction of cloud cover obscuring each		
@@ -589,7 +589,7 @@ namespace Pulsar4X.Stargen
 
             return (cloudPart + rockPart + waterPart + icePart);
         }
-        
+
         /// <summary>
         ///	 This function returns the dimensionless quantity of optical depth,		
         ///	 which is useful in determining the amount of greenhouse effect on a	
@@ -629,7 +629,7 @@ namespace Pulsar4X.Stargen
 
             return opticalDepth;
         }
-        
+
         /// <summary>
         /// calculates the number of years it takes for 1/e of a gas to escape
         ///	from a planet's atmosphere. 
@@ -707,7 +707,7 @@ namespace Pulsar4X.Stargen
 
             return guess2;
         }
-        
+
         /// <summary>
         /// The temperature calculated is in degrees Kelvin.						
         ///	 Quantities already known which are used in these calculations:			
@@ -849,7 +849,7 @@ namespace Pulsar4X.Stargen
             var fraction = gasPressure / surfPressure;
             return (surfPressure - Constants.Gases.InspiredPartialPressure.H20_ASSUMED_PRESSURE) * fraction;
         }
-        
+
         /// <summary>
         ///  This function uses figures on the maximum inspired partial pressures   
         ///  of Oxygen, other atmospheric and traces gases as laid out on pages 15,

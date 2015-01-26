@@ -96,7 +96,7 @@ namespace Pulsar4X.Stargen
                     star.Eccentricity = rnd.RandomEccentricity();
                     star.Parent = stars[0];
                 }
-               
+
 
                 stars.Add(star);
             }

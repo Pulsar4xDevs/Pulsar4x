@@ -18,7 +18,7 @@ namespace Pulsar4X.UI.SceenGraph
 
         private Star m_oStar;
 
-        public override GameEntity SceenEntity 
+        public override GameEntity SceenEntity
         {
             get
             {
@@ -54,7 +54,7 @@ namespace Pulsar4X.UI.SceenGraph
             }
             else
                 m_oOrbitCircle = null;
-            
+
 
         }
 

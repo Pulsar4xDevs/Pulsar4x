@@ -29,7 +29,7 @@ namespace Pulsar4X.UI.SceenGraph
         public CircleElement()
             : base()
         {
-            
+
         }
 
         public CircleElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, OrbitingEntity a_oOrbitEntity, System.Drawing.Color a_oColor)

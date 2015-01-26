@@ -132,13 +132,13 @@ namespace Pulsar4X.Entities.Components
             /// FC range must be 20,000 to ensure 100% accuracy at 10,000 for final defensive fire. size is 1.0 / FCfactor.
             /// this variable should be between 8.75(maximum) to 0.5(minimum). The BFC has to be able to fire at 10k km at atleast 50%.
             /// </summary>
-            float FCfactor = ((float)Constants.BFCTN.BeamFireControlRange[BeamFCRangeTech] * 1000.0f) / 20000.0f;  
+            float FCfactor = ((float)Constants.BFCTN.BeamFireControlRange[BeamFCRangeTech] * 1000.0f) / 20000.0f;
 
             /// <summary>
             /// base size is 5.0 HS.
             /// </summary>
             size = 5.0f;
-            
+
             /// <summary>
             /// Gear Size is 0.5.
             /// </summary>
@@ -183,12 +183,12 @@ namespace Pulsar4X.Entities.Components
 
             /// <summary>
             /// base cost of 3
-	        /// cost + 5 per gauss level
-	        /// cost + (Turret tracking gear / 100 + 5)
-	        /// cost + 2.5 per ECCM level
+            /// cost + 5 per gauss level
+            /// cost + (Turret tracking gear / 100 + 5)
+            /// cost + 2.5 per ECCM level
             /// </summary>
             float costFactor = ((float)Constants.BFCTN.BeamFireControlTracking[TurretTech] / 1000.0f) + 8.0f;
-	        cost = (decimal)( ((float)ROF * 2.5f) + ((float)(GearCount * 0.5f) * costFactor ) + ((float)ECCM * 5.0f ));
+            cost = (decimal)(((float)ROF * 2.5f) + ((float)(GearCount * 0.5f) * costFactor) + ((float)ECCM * 5.0f));
 
             minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)

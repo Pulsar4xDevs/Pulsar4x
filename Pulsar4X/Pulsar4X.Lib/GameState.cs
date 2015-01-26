@@ -52,7 +52,7 @@ namespace Pulsar4X
             {
                 if (_SE == null)
                 {
-                    _SE = new SimEntity(2,0);
+                    _SE = new SimEntity(2, 0);
                 }
                 return _SE;
             }
@@ -74,7 +74,7 @@ namespace Pulsar4X
                 _RNG = new Random();
             }
 
-            if(_SE == null)
+            if (_SE == null)
             {
                 _SE = new SimEntity(2, 0);
             }
@@ -113,7 +113,7 @@ namespace Pulsar4X
         #region Game Meta data
         public string Name { get; set; }
         public string SaveDirectoryPath { get; set; }
-        #endregion    
+        #endregion
 
         #region Game Data
 
@@ -127,7 +127,7 @@ namespace Pulsar4X
             }
             set
             {
-                m_oGameDateTime = value; 
+                m_oGameDateTime = value;
             }
         }
 
@@ -259,8 +259,8 @@ namespace Pulsar4X
             set { _compResearchTechs = value; }
         }
 
-            
-#endregion Entities
+
+        #endregion Entities
 
     }
 }

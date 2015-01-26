@@ -41,7 +41,7 @@ namespace Pulsar4X.UI.SceenGraph
                                 m_oSystemContect.MissileGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
                                 break;
                         }
-                        
+
                     }
                     m_oSystemContect = value as SystemContact;
                     if (value != null)
@@ -58,7 +58,7 @@ namespace Pulsar4X.UI.SceenGraph
                                 m_oSystemContect.MissileGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
                                 break;
                         }
-                        
+
                     }
                 }
             }
@@ -69,17 +69,17 @@ namespace Pulsar4X.UI.SceenGraph
             if (e.PropertyName == "Name")
             {
                 // Change Label here! If we are doing this by system contact, then we need to check what type of StarSystemEntity this contact is.
-                switch(m_oSystemContect.SSEntity)
+                switch (m_oSystemContect.SSEntity)
                 {
                     case StarSystemEntityType.TaskGroup:
                         Lable.Text = m_oSystemContect.TaskGroup.Name;
-                    break;
+                        break;
                     case StarSystemEntityType.Population:
                         Lable.Text = m_oSystemContect.Pop.Name;
-                    break;
+                        break;
                     case StarSystemEntityType.Missile:
                         Lable.Text = m_oSystemContect.MissileGroup.Name;
-                    break;
+                        break;
                 }
 
                 ParentSceen.Refresh();
@@ -204,7 +204,7 @@ namespace Pulsar4X.UI.SceenGraph
                     {
                         m_oSystemContect.TaskGroup.DrawTravelLine = 3;
                     }
-                break;
+                    break;
                 case StarSystemEntityType.Population:
                     break;
                 case StarSystemEntityType.Missile:
@@ -228,9 +228,9 @@ namespace Pulsar4X.UI.SceenGraph
                     }
                     break;
             }
-            
 
-            
+
+
 
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;

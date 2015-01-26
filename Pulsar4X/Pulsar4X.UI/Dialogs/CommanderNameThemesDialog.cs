@@ -62,7 +62,7 @@ namespace Pulsar4X.UI.Dialogs
             {
                 col.DataPropertyName = "NamePosition";
                 col.HeaderText = "Name Position";
-                col.DataSource = Enum.GetValues(typeof (NamePosition));
+                col.DataSource = Enum.GetValues(typeof(NamePosition));
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 dgvNameEntries.Columns.Add(col);
             }

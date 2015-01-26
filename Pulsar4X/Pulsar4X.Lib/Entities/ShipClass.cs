@@ -35,7 +35,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Notes on this ship class, used by the UI/Player.
         /// </summary>
-        [DisplayName("Notes"), 
+        [DisplayName("Notes"),
         Category("Description"),
         Description("Notes on this ship class"),
         Browsable(true),
@@ -58,7 +58,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Cost in BP of the ship, not its mineral cost, not doing that just yet.
         /// </summary>
-        [DisplayName("Cost"), 
+        [DisplayName("Cost"),
         Category("Detials"),
         Description("Cost in BP of the ship."),
         Browsable(true),
@@ -68,7 +68,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Size in tons.
         /// </summary>
-        [DisplayName("Size in Tons"), 
+        [DisplayName("Size in Tons"),
         Category("Detials"),
         Description("Size in tons."),
         Browsable(true),
@@ -78,7 +78,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Size in tons / 50.0; 1HS = 50 tons.
         /// </summary>
-        [DisplayName("Size in HS"), 
+        [DisplayName("Size in HS"),
         Category("Detials"),
         Description("Size in Hull Sizes (HS), 1HS = 50 tons."),
         Browsable(true),
@@ -88,7 +88,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Total Internal Hit to kill of all components. components need not all be destroyed in order for a ship to be destroyed however.
         /// </summary>
-        [DisplayName("Total HTK"), 
+        [DisplayName("Total HTK"),
         Category("Detials"),
         Description("Total Internal Hit to kill of all components."),
         Browsable(true),
@@ -124,7 +124,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         [Browsable(false)]
         public bool IsObsolete { get; set; }
-        
+
         /// <summary>
         /// Is this design locked to further changes?
         /// </summary>
@@ -153,12 +153,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of where each component group falls on the ships hull distribution. size less than 1 components each have DAC of atleast 1.
         /// </summary>
-        [DisplayName("Damage Allocation Chart"), 
+        [DisplayName("Damage Allocation Chart"),
         Category("Detials"),
         Description("Where components are in relation to potential internal component strikes."),
         Browsable(true),
         ReadOnly(true)]
-        public Dictionary<ComponentDefTN,int> DamageAllocationChart { get; set; }
+        public Dictionary<ComponentDefTN, int> DamageAllocationChart { get; set; }
 
         [DisplayName("Electronic Damage Allocation Chart"),
         Category("Detials"),
@@ -170,7 +170,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// What is the perceived protection value this ship class provides to civilians.
         /// </summary>
-        [DisplayName("Planetary Protection Value"), 
+        [DisplayName("Planetary Protection Value"),
         Category("Detials"),
         Description("What is the perceived protection value this ship class provides to civilians."),
         Browsable(true),
@@ -187,7 +187,7 @@ namespace Pulsar4X.Entities
         /// Crew Quarters, Small Crew Quarters, Tiny Crew Quarters.
         /// Every ship has a required crew amount, though for some small sensor only craft it might be 0.
         /// </summary>
-        [DisplayName("Crew Quarters"), 
+        [DisplayName("Crew Quarters"),
         Category("Component Lists"),
         Description("List of Crew Quarters on this ship."),
         Browsable(true),
@@ -370,28 +370,28 @@ namespace Pulsar4X.Entities
         /// List of passive sensor types, and how many of each that there are in this ship.
         /// Likewise the best possible sensors are stored.
         /// </summary>
-        [DisplayName("Passive Sensors"), 
+        [DisplayName("Passive Sensors"),
         Category("Component Lists"),
         Description("List of passive sensors on this ship."),
         Browsable(true),
         ReadOnly(true)]
         public BindingList<PassiveSensorDefTN> ShipPSensorDef { get; set; }
 
-        [DisplayName("Passive Sensors Count"), 
+        [DisplayName("Passive Sensors Count"),
         Category("Component Counts"),
         Description("Number of passive sensors on this ship."),
         Browsable(true),
         ReadOnly(true)]
         public BindingList<ushort> ShipPSensorCount { get; set; }
 
-        [DisplayName("Best Thermal Rating"), 
+        [DisplayName("Best Thermal Rating"),
         Category("Detials"),
         Description("Best Thermal Rating that can be detected by this ships passive sensors."),
         Browsable(true),
         ReadOnly(true)]
         public int BestThermalRating { get; set; }
 
-        [DisplayName("Best EM Rating"), 
+        [DisplayName("Best EM Rating"),
         Category("Detials"),
         Description("Best EM Rating that can be detected by this ships passive sensors."),
         Browsable(true),
@@ -401,7 +401,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of active sensors, as well as the number of each, and the TCS and EM signatures of the craft.
         /// </summary>
-        [DisplayName("Active Sensors"), 
+        [DisplayName("Active Sensors"),
         Category("Component Lists"),
         Description("List of active sensors on this ship."),
         Browsable(true),
@@ -411,7 +411,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Number of Active sensors of each type on this ship class.
         /// </summary>
-        [DisplayName("Active Sensors Count"), 
+        [DisplayName("Active Sensors Count"),
         Category("Component Counts"),
         Description("Number of active sensors on this ship."),
         Browsable(true),
@@ -421,7 +421,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Total Cross Section is essentially the HS count in integer form for the sensor model.
         /// </summary>
-        [DisplayName("Cross Cection"), 
+        [DisplayName("Cross Cection"),
         Category("Detials"),
         Description("Total Cross Section of this Class."),
         Browsable(true),
@@ -431,7 +431,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Largest possible EM signature for this ship class.
         /// </summary>
-        [DisplayName("Max EM Signature"), 
+        [DisplayName("Max EM Signature"),
         Category("Detials"),
         Description("Max EM Signature of this class.."),
         Browsable(true),
@@ -449,7 +449,7 @@ namespace Pulsar4X.Entities
         Browsable(true),
         ReadOnly(true)]
         public BindingList<CargoDefTN> ShipCargoDef { get; set; }
-        
+
         /// <summary>
         /// Counter for each Cargo hold definition.
         /// </summary>
@@ -889,7 +889,7 @@ namespace Pulsar4X.Entities
 
             ListOfComponentDefs = new BindingList<ComponentDefTN>();
             ListOfComponentDefsCount = new BindingList<short>();
-            DamageAllocationChart = new Dictionary<ComponentDefTN,int>();
+            DamageAllocationChart = new Dictionary<ComponentDefTN, int>();
             ElectronicDamageAllocationChart = new Dictionary<ComponentDefTN, int>();
 
             CrewQuarters = new BindingList<GeneralComponentDefTN>();
@@ -913,7 +913,7 @@ namespace Pulsar4X.Entities
             TotalMSPCapacity = 0;
             EngineeringHS = 0.0f;
             MaintenanceLife = 0.0f;
-            AnnualFailureRate = 0.0f; 
+            AnnualFailureRate = 0.0f;
             InitialFailureRate = 0.0f;
             YearOneFailureTotal = 0.0f;
             YearFiveFailureTotal = 0.0f;
@@ -1036,7 +1036,7 @@ namespace Pulsar4X.Entities
             {
                 ListOfComponentDefsCount[CIndex] = (short)(ListOfComponentDefsCount[CIndex] + increment);
             }
-            
+
             if (CIndex == -1 && increment >= 1)
             {
                 /// <summary>
@@ -1063,7 +1063,7 @@ namespace Pulsar4X.Entities
                             ElectronicDamageAllocationChart.Remove(ListOfComponentDefs[CIndex]);
                         }
                         ListOfComponentDefsCount.RemoveAt(CIndex);
-                        ListOfComponentDefs.RemoveAt(CIndex);  
+                        ListOfComponentDefs.RemoveAt(CIndex);
                     }
                 }
                 else
@@ -1154,7 +1154,7 @@ namespace Pulsar4X.Entities
             }
             else
             {
-                TotalMSPCapacity = (int)((float)BuildPointCost * ((EngineeringHS / SizeHS) / 0.08f)); 
+                TotalMSPCapacity = (int)((float)BuildPointCost * ((EngineeringHS / SizeHS) / 0.08f));
             }
 
             /// <summary>
@@ -1266,7 +1266,7 @@ namespace Pulsar4X.Entities
             /// Armor requires that size and cost be subtracted from the ship before recalculation/readding.
             /// </summary>
             BuildPointCost = BuildPointCost - ShipArmorDef.cost;
-            SizeHS = SizeHS - ShipArmorDef.size; 
+            SizeHS = SizeHS - ShipArmorDef.size;
 
             ShipArmorDef.CalcArmor(Title, ArmorPHS, SizeHS, ArmorDepth);
 
@@ -1299,7 +1299,7 @@ namespace Pulsar4X.Entities
             {
                 CrewQuartersCount[CrewIndex] = (ushort)((short)CrewQuartersCount[CrewIndex] + inc);
             }
-            
+
             if (CrewIndex == -1 && inc >= 1)
             {
                 CrewQuarters.Add(CrewQ);
@@ -1614,7 +1614,7 @@ namespace Pulsar4X.Entities
                     return;
                 }
             }
-        
+
             SpareCryoBerths = SpareCryoBerths + (Colony.cryoBerths * inc);
             UpdateClass(Colony, inc);
         }
@@ -1782,7 +1782,7 @@ namespace Pulsar4X.Entities
             {
                 ShipBFCCount[BFCIndex] = (ushort)((short)ShipBFCCount[BFCIndex] + inc);
             }
-            
+
             if (BFCIndex == -1 && inc >= 1)
             {
                 ShipBFCDef.Add(BFC);
@@ -1822,7 +1822,7 @@ namespace Pulsar4X.Entities
             {
                 ShipBeamCount[BeamIndex] = (ushort)((short)ShipBeamCount[BeamIndex] + inc);
             }
-            
+
             if (BeamIndex == -1 && inc >= 1)
             {
                 ShipBeamDef.Add(Beam);
@@ -1864,7 +1864,7 @@ namespace Pulsar4X.Entities
             {
                 ShipReactorCount[ReactorIndex] = (ushort)((short)ShipReactorCount[ReactorIndex] + inc);
             }
-            
+
             if (ReactorIndex == -1 && inc >= 1)
             {
                 ShipReactorDef.Add(Reactor);
@@ -1983,7 +1983,7 @@ namespace Pulsar4X.Entities
             {
                 ShipMLaunchCount[TubeIndex] = (ushort)((short)ShipMLaunchCount[TubeIndex] + inc);
             }
-            
+
             if (TubeIndex == -1 && inc >= 1)
             {
                 if (Tube.launchMaxSize > LargestLauncher)
@@ -2053,7 +2053,7 @@ namespace Pulsar4X.Entities
             {
                 ShipMagazineCount[MagIndex] = (ushort)((short)ShipMagazineCount[MagIndex] + inc);
             }
-            
+
             if (MagIndex == -1 && inc >= 1)
             {
                 ShipMagazineDef.Add(Mag);
@@ -2095,7 +2095,7 @@ namespace Pulsar4X.Entities
             {
                 ShipMFCCount[MFCIndex] = (ushort)((short)ShipMFCCount[MFCIndex] + inc);
             }
-            
+
             if (MFCIndex == -1 && inc >= 1)
             {
                 ShipMFCDef.Add(MFC);
@@ -2268,7 +2268,7 @@ namespace Pulsar4X.Entities
                     ShipClassOrdnance[missile] = ShipClassOrdnance[missile] + loadAmt;
                     PreferredOrdnanceSize = PreferredOrdnanceSize + loadSize;
 
-                    PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt*missile.cost);
+                    PreferredOrdnanceCost = PreferredOrdnanceCost + (loadAmt * missile.cost);
 
                     PreferredOrdnanceCount = PreferredOrdnanceCount + loadAmt;
                 }
@@ -2341,8 +2341,8 @@ namespace Pulsar4X.Entities
             String Entry = String.Format("{0} class Warship   {1} tons   {2} Crew   {3} BP   TCS {4} TH {5} EM {6}\n", Name, Tons.ToString(),
                                          TotalRequiredCrew.ToString(), Math.Floor(BuildPointCost).ToString(), TotalCrossSection.ToString(),
                                          MaxThermalSignature.ToString(), MaxEMSignature.ToString());
-                
-            Summary = String.Format("{0}",Entry);
+
+            Summary = String.Format("{0}", Entry);
 
             String ShieldR = "0";
             if (ShipShieldDef != null)
@@ -2359,19 +2359,19 @@ namespace Pulsar4X.Entities
             }
 
             Entry = String.Format("{0} km/s   Armour {1}-{2}   Shields {3}-{4}   Sensors {5}/{6}/{7}/{8}   Damage Control Rating {9}  PPV {10}\n", MaxSpeed,
-                                  ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating, 
+                                  ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating,
                                   PlanetaryProtectionValue);
 
-            Summary = String.Format("{0}{1}",Summary,Entry);
+            Summary = String.Format("{0}{1}", Summary, Entry);
 
-            Entry = String.Format("Maint Life {0} Years   MSP {1}   AFR {2}   IFR {3}   1YR {4}   5YR {5}   Max Repair {6} MSP\n", MaintenanceLife, TotalMSPCapacity, AnnualFailureRate, 
+            Entry = String.Format("Maint Life {0} Years   MSP {1}   AFR {2}   IFR {3}   1YR {4}   5YR {5}   Max Repair {6} MSP\n", MaintenanceLife, TotalMSPCapacity, AnnualFailureRate,
                                   InitialFailureRate, YearOneFailureTotal, YearFiveFailureTotal, MaxRepair);
 
-            Summary = String.Format("{0}{1}",Summary,Entry);
+            Summary = String.Format("{0}{1}", Summary, Entry);
 
             Entry = String.Format("Intended Deployment Time: {0} months   Spare Berths {1}\n", MaxDeploymentTime, SpareCrewQuarters);
 
-            Summary = String.Format("{0}{1}",Summary,Entry);
+            Summary = String.Format("{0}{1}", Summary, Entry);
 
             if (ShipMagazineDef.Count != 0)
             {
@@ -2379,7 +2379,7 @@ namespace Pulsar4X.Entities
                 Summary = String.Format("{0}{1}", Summary, Entry);
             }
 
-            Summary = String.Format("{0}\n",Summary);
+            Summary = String.Format("{0}\n", Summary);
             #endregion
 
             #region Engine Info
@@ -2391,7 +2391,7 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})   Power {2}   Fuel Use {3}%    Signature {4}    Armour 0    Exp {5}%\n", ShipEngineDef.Name, ShipEngineCount,
                                                                    ShipEngineDef.enginePower, FuelString, ShipEngineDef.thermalSignature, ShipEngineDef.expRisk);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
             }
 
             if (TotalFuelCapacity != 0)
@@ -2433,7 +2433,7 @@ namespace Pulsar4X.Entities
 
                 Entry = String.Format("Fuel Capacity {0} Litres   {1}\n", TotalFuelCapacity, Range);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
             }
 
             if (ShipShieldDef != null)
@@ -2444,11 +2444,11 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})   Total Fuel Cost  {2} Litres per hour  ({3} per day)\n", ShipShieldDef, ShipShieldCount,
                                                                              FuelCostPerHour, FuelCostPerDay);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
             }
 
             Entry = "\n";
-            Summary = String.Format("{0}{1}",Summary,Entry);
+            Summary = String.Format("{0}{1}", Summary, Entry);
             #endregion
 
             #region Beam Weapon Info CIWS and turrets
@@ -2516,7 +2516,7 @@ namespace Pulsar4X.Entities
                                           ShipBeamDef[loop].Name, ShipBeamCount[loop], Range, Tracking, Power,
                                           (ShipBeamDef[loop].damage.Count - 1), ROF, DamageString);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
                 control = true;
             }
 
@@ -2556,7 +2556,7 @@ namespace Pulsar4X.Entities
                     Power = String.Format("{0}-{1}", ShipTurretDef[loop].powerRequirement, (ShipTurretDef[loop].baseBeamWeapon.weaponCapacitor * ShipTurretDef[loop].multiplier));
                 }
 
-                float ROF = (float)Math.Ceiling(ShipTurretDef[loop].powerRequirement / (ShipTurretDef[loop].baseBeamWeapon.weaponCapacitor * ShipTurretDef[loop].multiplier) ) * 5.0f;
+                float ROF = (float)Math.Ceiling(ShipTurretDef[loop].powerRequirement / (ShipTurretDef[loop].baseBeamWeapon.weaponCapacitor * ShipTurretDef[loop].multiplier)) * 5.0f;
                 if (ROF < 5)
                     ROF = 5;
 
@@ -2576,7 +2576,7 @@ namespace Pulsar4X.Entities
                     DamageString = String.Format("{0} {1}", DamageString, value);
                 }
 
-                Entry = String.Format("{0} ({1}x{2})    {3}     {4}     {5}     RM {6}    ROF {7}        {8}\n",ShipTurretDef[loop].Name, ShipTurretCount[loop],
+                Entry = String.Format("{0} ({1}x{2})    {3}     {4}     {5}     RM {6}    ROF {7}        {8}\n", ShipTurretDef[loop].Name, ShipTurretCount[loop],
                                       ShipTurretDef[loop].multiplier, Range, Tracking, Power, (ShipTurretDef[loop].baseBeamWeapon.damage.Count - 1), ROF.ToString(), DamageString);
                 Summary = String.Format("{0}{1}", Summary, Entry);
                 control = true;
@@ -2585,10 +2585,10 @@ namespace Pulsar4X.Entities
             for (int loop = 0; loop < ShipCIWSDef.Count; loop++)
             {
 
-                Entry = String.Format("{0} ({1}x{2})    Range 1000 km     TS: {3} km/s     ROF 5       Base 50% To Hit\n", ShipCIWSDef[loop].Name, ShipCIWSCount[loop], ShipCIWSDef[loop].rOF, 
+                Entry = String.Format("{0} ({1}x{2})    Range 1000 km     TS: {3} km/s     ROF 5       Base 50% To Hit\n", ShipCIWSDef[loop].Name, ShipCIWSCount[loop], ShipCIWSDef[loop].rOF,
                                                                                                                          ShipCIWSDef[loop].tracking);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
                 control = true;
             }
 
@@ -2612,7 +2612,7 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})   Max Range: {2} km   TS: {3} km/s   {4}\n", ShipBFCDef[loop].Name, ShipBFCCount[loop], ShipBFCDef[loop].range,
                                       ShipBFCDef[loop].tracking, AccString);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
 
                 control = true;
             }
@@ -2631,7 +2631,7 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})   Total Power Output {2}   Armour 0    Exp {3}%\n", ShipReactorDef[loop].Name,
                                           ShipReactorCount[loop], TPO, ShipReactorDef[loop].expRisk);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
 
                 control = true;
             }
@@ -2648,9 +2648,9 @@ namespace Pulsar4X.Entities
 
             for (int loop = 0; loop < ShipMLaunchDef.Count; loop++)
             {
-                Entry = String.Format("{0} ({1})    Missile Size {2}    Rate of Fire {3}\n",ShipMLaunchDef[loop].Name,ShipMLaunchCount[loop],ShipMLaunchDef[loop].launchMaxSize,
+                Entry = String.Format("{0} ({1})    Missile Size {2}    Rate of Fire {3}\n", ShipMLaunchDef[loop].Name, ShipMLaunchCount[loop], ShipMLaunchDef[loop].launchMaxSize,
                                                                                           ShipMLaunchDef[loop].rateOfFire);
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
                 control = true;
             }
 
@@ -2707,54 +2707,54 @@ namespace Pulsar4X.Entities
                 String FormattedSpeed = pair.Key.maxSpeed.ToString("#,##0");
 
                 float Endurance = 0.0f;
-                if(pair.Key.fuel != 0 && pair.Key.totalFuelConsumption != 0)
+                if (pair.Key.fuel != 0 && pair.Key.totalFuelConsumption != 0)
                     Endurance = (pair.Key.fuel / pair.Key.totalFuelConsumption);
                 String EndString = "N/A";
-                
-                if(Endurance >= 8640.0f)
+
+                if (Endurance >= 8640.0f)
                 {
                     float YE = Endurance / 8640.0f;
-                    EndString = String.Format("{0:N1} Years",YE);
+                    EndString = String.Format("{0:N1} Years", YE);
                 }
-                else if(Endurance >= 720.0f)
+                else if (Endurance >= 720.0f)
                 {
                     float ME = Endurance / 720.0f;
-                    EndString = String.Format("{0:N1} Months",ME);
+                    EndString = String.Format("{0:N1} Months", ME);
                 }
-                else if(Endurance >= 24.0f)
+                else if (Endurance >= 24.0f)
                 {
                     float DE = Endurance / 24.0f;
-                    EndString = String.Format("{0:N1} Days",DE);
+                    EndString = String.Format("{0:N1} Days", DE);
                 }
-                else if(Endurance >= 1.0f)
+                else if (Endurance >= 1.0f)
                 {
-                    EndString = String.Format("{0:N1} hours",Endurance);
+                    EndString = String.Format("{0:N1} hours", Endurance);
                 }
-                else if((Endurance * 60.0f) >= 1.0f)
+                else if ((Endurance * 60.0f) >= 1.0f)
                 {
-                    EndString = String.Format("{0:N1} minutes",(Endurance * 60.0f));
+                    EndString = String.Format("{0:N1} minutes", (Endurance * 60.0f));
                 }
                 else
                 {
                     EndString = String.Format("0m");
                 }
 
-                float TimeOneBillionKM = (1000000000.0f / (pair.Key.maxSpeed * 3600.0f)); 
+                float TimeOneBillionKM = (1000000000.0f / (pair.Key.maxSpeed * 3600.0f));
                 float test = Endurance / TimeOneBillionKM;
                 String RangeString = "N/A";
-                if(test >= 1.0f)
+                if (test >= 1.0f)
                 {
-                    RangeString = String.Format("{0:N1}B km",test);
+                    RangeString = String.Format("{0:N1}B km", test);
                 }
                 else
                 {
                     float range = Endurance * (pair.Key.maxSpeed * 3600.0f);
                     range = range / 1000000.0f;
-                    RangeString = String.Format("{0:N1}M km",range);
+                    RangeString = String.Format("{0:N1}M km", range);
                 }
 
-                Entry = String.Format("{0} ({1})  Speed: {2} km/s   End: {3}    Range: {4}   WH: {5}    Size: {6}    TH: {7}/{8}/{9}\n", pair.Key.Name, pair.Value, FormattedSpeed, EndString, 
-                                      RangeString, pair.Key.warhead, pair.Key.size,pair.Key.ToHit(3000.0f), pair.Key.ToHit(5000.0f),pair.Key.ToHit(10000.0f));
+                Entry = String.Format("{0} ({1})  Speed: {2} km/s   End: {3}    Range: {4}   WH: {5}    Size: {6}    TH: {7}/{8}/{9}\n", pair.Key.Name, pair.Value, FormattedSpeed, EndString,
+                                      RangeString, pair.Key.warhead, pair.Key.size, pair.Key.ToHit(3000.0f), pair.Key.ToHit(5000.0f), pair.Key.ToHit(10000.0f));
                 Summary = String.Format("{0}{1}", Summary, Entry);
 
                 control = true;
@@ -2818,7 +2818,7 @@ namespace Pulsar4X.Entities
                                           ShipASensorCount[loop], ShipASensorDef[loop].gps, RangeString, MCRString,
                                           ShipASensorDef[loop].resolution);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
 
                 control = true;
             }
@@ -2843,7 +2843,7 @@ namespace Pulsar4X.Entities
                 Entry = String.Format("{0} ({1})     Sensitivity {2}     Detect Sig Strength 1000:  {3} km\n", ShipPSensorDef[loop].Name,
                                           ShipPSensorCount[loop], ShipPSensorDef[loop].rating, RangeString);
 
-                Summary = String.Format("{0}{1}",Summary,Entry);
+                Summary = String.Format("{0}{1}", Summary, Entry);
 
                 control = true;
             }
@@ -2864,7 +2864,7 @@ namespace Pulsar4X.Entities
                 Entry = "This design is classed as a Commercial Vessel for maintenance purposes\n";
             }
 
-            Summary = String.Format("{0}{1}",Summary,Entry);
+            Summary = String.Format("{0}{1}", Summary, Entry);
         }
     }
 }

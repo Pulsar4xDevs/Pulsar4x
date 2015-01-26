@@ -505,7 +505,7 @@ namespace Pulsar4X.Entities
             }
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
 
-            Contact = new SystemContact(Faction,this);
+            Contact = new SystemContact(Faction, this);
 
             GovernorPresent = false;
             AdminRating = 0;
@@ -630,7 +630,7 @@ namespace Pulsar4X.Entities
         public void AddInstallation(Installation Inst, float increment)
         {
             int Index = (int)Inst.Type;
-            switch(Inst.Type)
+            switch (Inst.Type)
             {
                 case Installation.InstallationType.ConvertCIToConstructionFactory:
                     Index = (int)Installation.InstallationType.ConstructionFactory;
@@ -947,7 +947,7 @@ namespace Pulsar4X.Entities
         {
             bool ret = false;
             if (Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number) >= CIReq)
-            { 
+            {
                 ret = true;
             }
             return ret;
@@ -973,7 +973,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="MineralCost">Cost in minerals of this project.</param>
         /// <returns>Whether enough of said mineral is present.</returns>
-        public bool MineralRequirement(decimal [] MineralCost)
+        public bool MineralRequirement(decimal[] MineralCost)
         {
             bool ret = true;
             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
@@ -993,7 +993,7 @@ namespace Pulsar4X.Entities
             }
             return ret;
         }
-        
+
         /// <summary>
         /// This function decrements CI and minerals as per the cost of the item being built.
         /// </summary>

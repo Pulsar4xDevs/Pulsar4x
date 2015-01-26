@@ -203,6 +203,6 @@ namespace Pulsar4X.UI.ViewModels
 
         public event EventHandler ShipClassChanged;
 
-        
+
     }
 }

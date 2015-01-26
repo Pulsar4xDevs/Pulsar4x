@@ -105,9 +105,9 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oFastOOBPanel = new Panels.FastOOB_Panel();
 
-            
+
             VM = new ViewModels.FastOOBViewModel();
-            
+
             /// <summary>
             /// setup bindings:
             /// </summary>
@@ -143,7 +143,7 @@ namespace Pulsar4X.UI.Handlers
             m_oFastOOBPanel.CloseButton.Click += new EventHandler(CloseButton_Click);
 
             m_oFastOOBPanel.NumberTextBox.TextChanged += new EventHandler(NumberTextBox_TextChanged);
-            
+
         }
 
         /// <summary>

@@ -20,13 +20,13 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Mass is totally unnecessary here.
         /// </summary>
-        public override double Mass 
-        { 
-            get { return 0.0; } 
-            set { value = 0.0; } 
+        public override double Mass
+        {
+            get { return 0.0; }
+            set { value = 0.0; }
         }
 
-        public Waypoint(String Title,StarSystem Sys,double X, double Y, int FactionID)
+        public Waypoint(String Title, StarSystem Sys, double X, double Y, int FactionID)
         {
             Name = Title;
 

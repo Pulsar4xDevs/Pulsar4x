@@ -15,7 +15,7 @@ using Pulsar4X.Lib;
 
 namespace Pulsar4X.UI.GLUtilities
 {
-    
+
     /// <summary>   
     /// Circle Primitive.
     /// </summary>
@@ -44,7 +44,7 @@ namespace Pulsar4X.UI.GLUtilities
             {
                 iNumOfVerts = 360;
             }
-            
+
             // create some working vars:
             double dAngle;
             float fX, fY;
@@ -71,10 +71,10 @@ namespace Pulsar4X.UI.GLUtilities
 
             // Setup Matrix:
             m_m4ModelMatrix = Matrix4.CreateScale(a_fRadus * 2) * Matrix4.CreateTranslation(a_v3Pos);
-            
+
             // Set our shader program:
             m_oEffect = a_oEffect;
-            
+
             // Load texture if specified:
             if (a_szTexture != "")
             {
@@ -121,8 +121,8 @@ namespace Pulsar4X.UI.GLUtilities
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
 
-           // #if DEBUG
-           //     logger.Info("OpenGL Create Circle Primitive: " + GL.GetError().ToString());
+            // #if DEBUG
+            //     logger.Info("OpenGL Create Circle Primitive: " + GL.GetError().ToString());
             //#endif
         }
 

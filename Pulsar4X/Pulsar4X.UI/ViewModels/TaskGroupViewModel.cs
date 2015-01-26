@@ -46,9 +46,9 @@ namespace Pulsar4X.UI.ViewModels
         public TaskGroupTN CurrentTaskGroup
         {
             get { return _CurrentTaskGroup; }
-            set 
-            { 
-                if(_CurrentTaskGroup != value)
+            set
+            {
+                if (_CurrentTaskGroup != value)
                 {
                     _CurrentTaskGroup = value;
                     OnTaskGroupChanged();
@@ -65,7 +65,7 @@ namespace Pulsar4X.UI.ViewModels
             _CurrentFaction = GameState.Instance.Factions[0];
             Factions = GameState.Instance.Factions;
 
-            if(GameState.Instance.Factions[0].TaskGroups.Count != 0)
+            if (GameState.Instance.Factions[0].TaskGroups.Count != 0)
                 _CurrentTaskGroup = GameState.Instance.Factions[0].TaskGroups[0];
 
             TaskGroups = GameState.Instance.Factions[0].TaskGroups;
@@ -76,7 +76,7 @@ namespace Pulsar4X.UI.ViewModels
         {
             TaskGroups = GameState.Instance.Factions[_CurrentFaction.FactionID].TaskGroups;
 
-            if(TaskGroups.Count != 0)
+            if (TaskGroups.Count != 0)
                 _CurrentTaskGroup = TaskGroups[0];
 
 

@@ -11,9 +11,9 @@ namespace Pulsar4X.Stargen
 {
     public class ProtoStar : AccreteDisc
     {
-        #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystemFactory));
-        #endif
+#endif
 
         public double Luminosity { get { return Star.Luminosity; } set { Star.Luminosity = value; } }
         public override double Mass { get { return Star.Mass; } }
@@ -32,7 +32,7 @@ namespace Pulsar4X.Stargen
         //list of planets that are created from protoplanets in the process of accretion
         //public List<ProtoPlanet> Planets { get; set; }
 
-        public override Star Star { get;  set; }
+        public override Star Star { get; set; }
 
         public ProtoStar(Star star)
         {
@@ -44,7 +44,7 @@ namespace Pulsar4X.Stargen
             CloudEccentricity = 0.2D;
             DustRatio = 1.0D; //TODO: Parameterize this
             DustDensityCoeff = Constants.Stargen.DUST_DENSITY_COEFF * DustRatio;
-            
+
             //PlanetInnerBound = NearestPlanet;
             //PlanetOuterBound = FarthestPlanet;
 

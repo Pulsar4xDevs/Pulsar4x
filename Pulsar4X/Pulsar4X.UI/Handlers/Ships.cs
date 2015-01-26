@@ -29,10 +29,10 @@ namespace Pulsar4X.UI.Handlers
         /// Currently selected ship.
         /// </summary>
         private Pulsar4X.Entities.ShipTN _CurrnetShip;
-        public Pulsar4X.Entities.ShipTN CurrentShip 
+        public Pulsar4X.Entities.ShipTN CurrentShip
         {
             get { return _CurrnetShip; }
-            set 
+            set
             {
                 if (value != _CurrnetShip)
                 {
@@ -131,7 +131,7 @@ namespace Pulsar4X.UI.Handlers
         /// I need to know what type of FC I have.
         /// </summary>
         public bool isBFC { get; set; }
-        
+
         /// <summary>
         /// View Model used by Ships
         /// </summary>
@@ -208,7 +208,7 @@ namespace Pulsar4X.UI.Handlers
         {
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oShipListPanel.Show(a_oDockPanel, DockState.DockLeft);
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false; 
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
         public void ActivateShipListPanel()
@@ -224,7 +224,7 @@ namespace Pulsar4X.UI.Handlers
         {
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oDetailsPanel.Show(a_oDockPanel, DockState.Document);
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false; 
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
         public void ActivateDetailsPanel()
@@ -238,7 +238,7 @@ namespace Pulsar4X.UI.Handlers
         {
             Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
             m_oDesignPanel.Show(a_oDockPanel, DockState.Document);
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false; 
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
         }
 
         public void ActivateDesignPanel()
@@ -279,7 +279,7 @@ namespace Pulsar4X.UI.Handlers
             /// This is a part of the kludge below for the SFC and SA combo boxes.
             /// Order of operations matters, set the index to -1 to delete BEFORE clearing everything.
             /// </summary>
-            
+
 
             m_oDetailsPanel.SelectedActiveComboBox.SelectedIndex = -1;
             m_oDetailsPanel.SelectedActiveComboBox.Items.Clear();
@@ -390,7 +390,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void PDComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
+
         }
 
         /// <summary>
@@ -523,7 +523,7 @@ namespace Pulsar4X.UI.Handlers
                         /// </summary>
                         if (_CurrnetFaction.PointDefense.Count != 0)
                         {
-                            if(_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == true)
+                            if (_CurrnetFaction.PointDefense.ContainsKey(CurrentSystem) == true)
                             {
                                 if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
                                 {
@@ -540,7 +540,7 @@ namespace Pulsar4X.UI.Handlers
                             }
                         }
 
-                        
+
                     }
                 }
                 else
@@ -734,12 +734,12 @@ namespace Pulsar4X.UI.Handlers
 #warning Planetary targetting not yet implemented.
             if (m_oDetailsPanel.ContactListBox.SelectedIndex != -1 && _CurrnetFC != null)
             {
-                
+
 
                 if (isBFC == true)
                 {
                     int count = 0;
-                    if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
+                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
 
                         foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
@@ -803,7 +803,7 @@ namespace Pulsar4X.UI.Handlers
                 else
                 {
                     int count = 0;
-                    if(_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
+                    if (_CurrnetFaction.DetectedContactLists.ContainsKey(_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem) == true)
                     {
                         foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts)
                         {
@@ -855,7 +855,7 @@ namespace Pulsar4X.UI.Handlers
                                     count++;
                                 }
                             }
-                        }  
+                        }
 
                         if (count <= m_oDetailsPanel.ContactListBox.SelectedIndex)
                         {
@@ -930,7 +930,7 @@ namespace Pulsar4X.UI.Handlers
                                         }
                                         count++;
                                     }
-                                }          
+                                }
                             }//end foreach contact
                         }//end if count < selection
                     }//end if detectedlist contains system
@@ -980,7 +980,7 @@ namespace Pulsar4X.UI.Handlers
                         }
                     }
 
-                    
+
 
                     TargetTN Target = _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex].getTarget();
                     if (Target != null)
@@ -992,7 +992,7 @@ namespace Pulsar4X.UI.Handlers
                                 /// Populations are not yet implemented. I may have a shipsTargetting list for population as well, in which case remove that here.
                                 /// If I don't do that however, just delete this.
                                 /// </summary>
-                                #warning Pop Not Yet Implemented
+#warning Pop Not Yet Implemented
                                 break;
                             case StarSystemEntityType.TaskGroup:
                                 ShipTN vessel = Target.ship;
@@ -1053,7 +1053,7 @@ namespace Pulsar4X.UI.Handlers
                                 /// Populations are not yet implemented. I may have a shipsTargetting list for population as well, in which case remove that here.
                                 /// If I don't do that however, just delete this.
                                 /// </summary>
-                                #warning Pop Not Yet Implemented
+#warning Pop Not Yet Implemented
                                 break;
                             case StarSystemEntityType.TaskGroup:
                                 ShipTN vessel = Target.ship;
@@ -1061,19 +1061,19 @@ namespace Pulsar4X.UI.Handlers
                                 {
                                     vessel.ShipsTargetting.Remove(_CurrnetShip);
                                 }
-                            break;
+                                break;
                             case StarSystemEntityType.Missile:
                                 OrdnanceGroupTN MissileGroup = Target.missileGroup;
                                 if (MissileGroup.shipsTargetting.Contains(_CurrnetShip) == true)
                                 {
                                     MissileGroup.shipsTargetting.Remove(_CurrnetShip);
                                 }
-                            break;
+                                break;
                             case StarSystemEntityType.Waypoint:
 #warning Waypoint and Body may need additional work as well.
-                            break;
+                                break;
                             case StarSystemEntityType.Body:
-                            break;
+                                break;
                         }
 
                         if (_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].getTarget().targetType == StarSystemEntityType.TaskGroup)
@@ -1132,7 +1132,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     foreach (int Index in m_oDetailsPanel.WeaponListBox.SelectedIndices)
                     {
-                        MissileLauncherTN SelectedTube = _CurrnetShip.ShipMLaunchers[Index]; 
+                        MissileLauncherTN SelectedTube = _CurrnetShip.ShipMLaunchers[Index];
 
                         if (SelectedTube.mFC != null)
                         {
@@ -1429,7 +1429,7 @@ namespace Pulsar4X.UI.Handlers
 
                     if (Target == null)
                     {
-                        Entry = String.Format("{0}{1}: No Target Assignment\n", _CurrnetShip.ShipBFC[loop].Name,PD);
+                        Entry = String.Format("{0}{1}: No Target Assignment\n", _CurrnetShip.ShipBFC[loop].Name, PD);
                     }
                     else
                     {
@@ -1443,24 +1443,24 @@ namespace Pulsar4X.UI.Handlers
                         {
                             case StarSystemEntityType.Population:
                                 TargetName = Target.pop.Name;
-                            break;
+                                break;
                             case StarSystemEntityType.TaskGroup:
                                 TargetName = Target.ship.Name;
-                            break;
+                                break;
                             case StarSystemEntityType.Missile:
                                 TargetName = Target.missileGroup.Name;
-                            break;
+                                break;
 
                             /// <summary>
                             /// BFCs can't target these.
                             /// </summary>
                             case StarSystemEntityType.Waypoint:
-                            break;
+                                break;
                             case StarSystemEntityType.Body:
-                            break;
+                                break;
                         }
 
-                        Entry = String.Format("{0}{1}: Targeting {2} - {3}\n", _CurrnetShip.ShipBFC[loop].Name, PD,TargetName, fireAuth);
+                        Entry = String.Format("{0}{1}: Targeting {2} - {3}\n", _CurrnetShip.ShipBFC[loop].Name, PD, TargetName, fireAuth);
                     }
 
                     m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
@@ -1519,19 +1519,19 @@ namespace Pulsar4X.UI.Handlers
                         {
                             case StarSystemEntityType.Population:
                                 Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.pop.Name, fireAuth);
-                            break;
+                                break;
                             case StarSystemEntityType.TaskGroup:
                                 Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.ship.Name, fireAuth);
-                            break;
+                                break;
                             case StarSystemEntityType.Missile:
                                 Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.missileGroup.Name, fireAuth);
-                            break;
+                                break;
                             case StarSystemEntityType.Waypoint:
                                 Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.wp.Name, fireAuth);
-                            break;
+                                break;
                             case StarSystemEntityType.Body:
                                 Entry = String.Format("{0}{1}: {2} - {3}\n", _CurrnetShip.ShipMFC[loop].Name, PD, Target.body.Name, fireAuth);
-                            break;
+                                break;
                         }
                     }
 
@@ -1546,11 +1546,11 @@ namespace Pulsar4X.UI.Handlers
                         }
                         if (_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].readyToFire() == true)
                         {
-                            Entry = String.Format("{0} (Ready to Fire)\n",Entry);
+                            Entry = String.Format("{0} (Ready to Fire)\n", Entry);
                         }
                         else
                         {
-                            Entry = String.Format("{0} ({1} secs to reload)\n", Entry,_CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
+                            Entry = String.Format("{0} ({1} secs to reload)\n", Entry, _CurrnetShip.ShipMFC[loop].linkedWeapons[loop2].loadTime);
                         }
 
                         m_oDetailsPanel.CombatSummaryTextBox.AppendText(Entry);
@@ -1751,11 +1751,11 @@ namespace Pulsar4X.UI.Handlers
                                 else
                                 {
                                     String Error = String.Format("BuildContactList has a missile detected via EM that has no Active sensor(which is the only way it can be detected via EM)");
-                                    MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact, 
+                                    MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.CurrentSystem, _CurrnetShip.ShipsTaskGroup.Contact,
                                                                           GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
                                     _CurrnetFaction.MessageLog.Add(MessageEnter);
                                 }
-                                
+
                             }
 
                             String ACT = "";
@@ -1851,7 +1851,7 @@ namespace Pulsar4X.UI.Handlers
                             /// <summary>
                             /// Missile detection goes from 1-6 = minimum, 7-19 MSP specific, 20 and above treated as HS
                             /// </summary>
-                            if(MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
+                            if (MSP <= ((Constants.OrdnanceTN.MissileResolutionMaximum + 6) + 1))
                             {
                                 if (MSP <= (Constants.OrdnanceTN.MissileResolutionMinimum + 6))
                                 {
@@ -1860,7 +1860,7 @@ namespace Pulsar4X.UI.Handlers
                                 else if (MSP <= (Constants.OrdnanceTN.MissileResolutionMaximum + 6))
                                 {
                                     sig = MSP - 6;
-                                }    
+                                }
                                 detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(0, sig);
                             }
                             else
@@ -2004,7 +2004,7 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Combat Settings Tab:
             /// </summary>
-                
+
             BuildWeaponList();
             BuildPDComboBox();
             BuildContactsList();
@@ -2021,8 +2021,8 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void StandardReloadButton_Click(object sender, EventArgs e)
         {
-           if (_CurrnetShip.ShipClass.ShipClassOrdnance.Count != 0)
-           {
+            if (_CurrnetShip.ShipClass.ShipClassOrdnance.Count != 0)
+            {
                 _CurrnetShip.ShipOrdnance.Clear();
                 foreach (KeyValuePair<OrdnanceDefTN, int> pair in _CurrnetShip.ShipClass.ShipClassOrdnance)
                 {
@@ -2032,7 +2032,7 @@ namespace Pulsar4X.UI.Handlers
                 _CurrnetShip.CurrentMagazineCapacity = _CurrnetShip.ShipClass.PreferredOrdnanceSize;
 
                 BuildOrdnanceManagementTab();
-            }     
+            }
         }
 
         /// <summary>
@@ -2046,9 +2046,9 @@ namespace Pulsar4X.UI.Handlers
             {
                 int count = 0;
                 OrdnanceDefTN SelectedOrdnance = null;
-                foreach(KeyValuePair<OrdnanceDefTN,int> pair in _CurrnetShip.ShipOrdnance)
+                foreach (KeyValuePair<OrdnanceDefTN, int> pair in _CurrnetShip.ShipOrdnance)
                 {
-                    if(count == m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex)
+                    if (count == m_oDetailsPanel.CurrentMagazineListBox.SelectedIndex)
                     {
                         SelectedOrdnance = pair.Key;
                         break;
@@ -2086,9 +2086,9 @@ namespace Pulsar4X.UI.Handlers
                     }
                     count++;
                 }
-                for(int loop = 0; loop < _CurrnetShip.ShipMLaunchers.Count; loop++)
+                for (int loop = 0; loop < _CurrnetShip.ShipMLaunchers.Count; loop++)
                 {
-                    if(_CurrnetShip.ShipMLaunchers[loop].missileLauncherDef.launchMaxSize >= (int)Math.Ceiling(SelectedOrdnance.size))
+                    if (_CurrnetShip.ShipMLaunchers[loop].missileLauncherDef.launchMaxSize >= (int)Math.Ceiling(SelectedOrdnance.size))
                         _CurrnetShip.ShipMLaunchers[loop].loadedOrdnance = SelectedOrdnance;
                 }
 
@@ -2112,7 +2112,7 @@ namespace Pulsar4X.UI.Handlers
             BuildOrdnanceManagementTab();
             BuildCombatSummary();
         }
-            
+
         /// <summary>
         /// Build the Ordnance Tab
         /// </summary>

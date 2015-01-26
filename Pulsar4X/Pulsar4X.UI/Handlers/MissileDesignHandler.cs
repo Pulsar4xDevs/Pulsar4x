@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 #if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
-#endif 
+#endif
 
 using Pulsar4X.Entities.Components;
 using System.Runtime.InteropServices;
@@ -370,7 +370,7 @@ namespace Pulsar4X.UI.Handlers
             }
             else
             {
-                String Error = String.Format("Faction {0} somehow has no default missile series \"No Series Selected\".",_CurrnetFaction.Name);
+                String Error = String.Format("Faction {0} somehow has no default missile series \"No Series Selected\".", _CurrnetFaction.Name);
                 MessageEntry MessageEntry = new MessageEntry(MessageEntry.MessageType.Error, null, null,
                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
                 _CurrnetFaction.MessageLog.Add(MessageEntry);
@@ -437,7 +437,7 @@ namespace Pulsar4X.UI.Handlers
         {
             String Entry;
 
-            Entry = String.Format("{0:N4}",CurrentMissile.wMSP);
+            Entry = String.Format("{0:N4}", CurrentMissile.wMSP);
 
             if (Entry == "0.0000")
                 Entry = "0";
@@ -650,7 +650,7 @@ namespace Pulsar4X.UI.Handlers
 
             if (index > 0 && index < _CurrnetFaction.OrdnanceSeries.Count)
             {
-                foreach(OrdnanceDefTN def in _CurrnetFaction.OrdnanceSeries[index].missilesInSeries)
+                foreach (OrdnanceDefTN def in _CurrnetFaction.OrdnanceSeries[index].missilesInSeries)
                 {
                     def.ordSeries = _CurrnetFaction.OrdnanceSeries[0];
                 }
@@ -711,13 +711,13 @@ namespace Pulsar4X.UI.Handlers
 
             BuildMissileDesignPage();
         }
-            
+
         /// <summary>
         /// alters the previous missile selections series to the current series.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void SetSeriesButton_Click(object sender, EventArgs e) 
+        private void SetSeriesButton_Click(object sender, EventArgs e)
         {
             if (CurrentMissile != null)
             {
@@ -760,7 +760,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReplaceAllButton_Click(object sender, EventArgs e) 
+        private void ReplaceAllButton_Click(object sender, EventArgs e)
         {
         }
 
@@ -769,7 +769,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CreateMissileButton_Click(object sender, EventArgs e) 
+        private void CreateMissileButton_Click(object sender, EventArgs e)
         {
         }
 
@@ -814,9 +814,9 @@ namespace Pulsar4X.UI.Handlers
                 float EP = _CurrnetMissileEngine.enginePower * number;
                 float size = _CurrnetMissileEngine.size * number * 20.0f;
                 decimal cost = _CurrnetMissileEngine.cost * number;
-                m_oMissileDesignPanel.TotalEngineCostTextBox.Text = String.Format("{0:N4}",cost);
-                m_oMissileDesignPanel.TotalEngineSizeTextBox.Text = String.Format("{0:N2}",size);
-                m_oMissileDesignPanel.TotalEPTextBox.Text = String.Format("{0:N3}",EP);
+                m_oMissileDesignPanel.TotalEngineCostTextBox.Text = String.Format("{0:N4}", cost);
+                m_oMissileDesignPanel.TotalEngineSizeTextBox.Text = String.Format("{0:N2}", size);
+                m_oMissileDesignPanel.TotalEPTextBox.Text = String.Format("{0:N3}", EP);
                 EngineCount = number;
             }
         }
@@ -866,11 +866,11 @@ namespace Pulsar4X.UI.Handlers
                 FuelValue = FuelVal;
                 m_oMissileDesignPanel.FuelValueTextBox.Text = FuelValue.ToString();
             }
-            else if ( Fuel < 0.0f)
+            else if (Fuel < 0.0f)
             {
                 FuelMSP = 0.0f;
                 FuelValue = 0.0f;
-                
+
                 m_oMissileDesignPanel.FuelMSPTextBox.Text = "0";
                 m_oMissileDesignPanel.FuelValueTextBox.Text = "0";
             }
@@ -1039,7 +1039,7 @@ namespace Pulsar4X.UI.Handlers
                 }
 
                 Resolution = Resol;
-                
+
             }
 
             ReactorValue = ((ActiveValue + ThermalValue + EMValue + GeoValue) / 5.0f);
@@ -1107,12 +1107,12 @@ namespace Pulsar4X.UI.Handlers
                     ECMTech = 9;
 
                 if (ECM > 1.0f)
-                     ECMMSP = 1.0f;
-                 else
-                     ECMMSP = ECM;
-                    
-                 ECMValue = (float)((ECMTech + 1) * 10) * ECMMSP;
-                
+                    ECMMSP = 1.0f;
+                else
+                    ECMMSP = ECM;
+
+                ECMValue = (float)((ECMTech + 1) * 10) * ECMMSP;
+
 
                 m_oMissileDesignPanel.ECMMSPTextBox.Text = ECMMSP.ToString();
                 m_oMissileDesignPanel.ECMValueTextBox.Text = ECMValue.ToString();
@@ -1125,12 +1125,12 @@ namespace Pulsar4X.UI.Handlers
                 m_oMissileDesignPanel.ECMMSPTextBox.Text = "0";
                 m_oMissileDesignPanel.ECMValueTextBox.Text = "0";
             }
-            else if(res && ECM == 0.0f)
+            else if (res && ECM == 0.0f)
             {
                 ECMMSP = 0.0f;
                 ECMValue = 0.0f;
             }
-            else if(res == false)
+            else if (res == false)
             {
                 ECMMSP = 0.0f;
                 ECMValue = 0.0f;
@@ -1242,13 +1242,13 @@ namespace Pulsar4X.UI.Handlers
                 m_oMissileDesignPanel.ERCheckBox.Enabled = true;
 
             int LWTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.LaserWarhead];
-            if(LWTech == -1)
+            if (LWTech == -1)
                 m_oMissileDesignPanel.LaserWCheckBox.Enabled = false;
             else
                 m_oMissileDesignPanel.LaserWCheckBox.Enabled = true;
 
             double TotalSize = WarheadMSP + FuelMSP + AgilityMSP + ActiveMSP + ThermalMSP + EMMSP + GeoMSP + ReactorMSP + ECMMSP + ArmourMSP;
-            if(_CurrnetMissileEngine != null && EngineCount != 0)
+            if (_CurrnetMissileEngine != null && EngineCount != 0)
             {
                 TotalSize = TotalSize + (EngineCount * _CurrnetMissileEngine.size * 20.0f);
             }
@@ -1384,7 +1384,7 @@ namespace Pulsar4X.UI.Handlers
                 if (OrdnanceProject.thermalStr != 0.0f)
                 {
                     String FormattedSRange = (OrdnanceProject.tHD.range * 10000).ToString("#,##0");
-                    Entry = String.Format("Thermal Sensor Strength: {0}    Detect Sig Strength 1000:  {1} km\n",OrdnanceProject.thermalStr,FormattedSRange);
+                    Entry = String.Format("Thermal Sensor Strength: {0}    Detect Sig Strength 1000:  {1} km\n", OrdnanceProject.thermalStr, FormattedSRange);
                     m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
                 }
 
@@ -1405,7 +1405,7 @@ namespace Pulsar4X.UI.Handlers
                         maxPoints = OrdnanceProject.geoStr * Endurance;
                     }
 
-                    Entry = String.Format("Geo Sensor Strength: {0}    Maximum points: {1:N4}\n",OrdnanceProject.geoStr, maxPoints);
+                    Entry = String.Format("Geo Sensor Strength: {0}    Maximum points: {1:N4}\n", OrdnanceProject.geoStr, maxPoints);
                     m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
                 }
 
@@ -1503,7 +1503,7 @@ namespace Pulsar4X.UI.Handlers
                     else
                         RangeString = "0.0M";
 
-                    Entry = String.Format("Overall Endurance: {0}   Overall Range: {1} km\n",EndString,RangeString);
+                    Entry = String.Format("Overall Endurance: {0}   Overall Range: {1} km\n", EndString, RangeString);
                     m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
                 }
 
@@ -1512,9 +1512,9 @@ namespace Pulsar4X.UI.Handlers
                 m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
 
                 Entry = "Materials Required: ";
-                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++ )
+                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
                 {
-                    if(OrdnanceProject.minerialsCost[mineralIterator] != 0.0m)
+                    if (OrdnanceProject.minerialsCost[mineralIterator] != 0.0m)
                     {
                         Entry = String.Format("{0}   {1:N3}x {2}", Entry, OrdnanceProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
                     }
@@ -1530,7 +1530,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
 
             }
-            else if(TotalSize > Constants.OrdnanceTN.MaxSize)
+            else if (TotalSize > Constants.OrdnanceTN.MaxSize)
             {
                 String Entry = String.Format("Missile Exceeds max size.\n");
                 m_oMissileDesignPanel.MissileSummaryTextBox.AppendText(Entry);
@@ -1663,7 +1663,7 @@ namespace Pulsar4X.UI.Handlers
             m_oMissileDesignPanel.TechDataGrid.Rows[0].Cells[1].Value = Constants.OrdnanceTN.warheadTech[WHTech];
             m_oMissileDesignPanel.TechDataGrid.Rows[1].Cells[1].Value = Constants.OrdnanceTN.agilityTech[AgilTech];
             m_oMissileDesignPanel.TechDataGrid.Rows[2].Cells[1].Value = Constants.EngineTN.FuelConsumption[FuelTech];
-            m_oMissileDesignPanel.TechDataGrid.Rows[3].Cells[1].Value = (ECMTech+1);
+            m_oMissileDesignPanel.TechDataGrid.Rows[3].Cells[1].Value = (ECMTech + 1);
             m_oMissileDesignPanel.TechDataGrid.Rows[4].Cells[1].Value = Constants.OrdnanceTN.activeTech[ActTech];
             m_oMissileDesignPanel.TechDataGrid.Rows[5].Cells[1].Value = Constants.OrdnanceTN.passiveTech[THTech];
             m_oMissileDesignPanel.TechDataGrid.Rows[6].Cells[1].Value = Constants.OrdnanceTN.passiveTech[EMTech];
@@ -1676,7 +1676,7 @@ namespace Pulsar4X.UI.Handlers
         #endregion
 
         #region SubMunition kludge
-        
+
         /// <summary>
         /// Build the combo box appropriately.
         /// </summary>

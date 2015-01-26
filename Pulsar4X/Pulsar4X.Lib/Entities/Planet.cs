@@ -187,8 +187,8 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// What mineral resources does this planet have to be mined?
         /// </summary>
-        float [] m_aiMinerialReserves;
-        public float [] MinerialReserves
+        float[] m_aiMinerialReserves;
+        public float[] MinerialReserves
         {
             get
             {
@@ -216,7 +216,8 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public Planet(Star primary, OrbitingEntity parent) : base()
+        public Planet(Star primary, OrbitingEntity parent)
+            : base()
         {
             /// <summary>
             /// create these or else anything that relies on a unique global id will break.
@@ -293,7 +294,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void HomeworldMineralGeneration()
         {
-            m_aiMinerialReserves[0] = 150000.0f + (100000.0f * ((float)GameState.RNG.Next(0,100000) / 100000.0f));
+            m_aiMinerialReserves[0] = 150000.0f + (100000.0f * ((float)GameState.RNG.Next(0, 100000) / 100000.0f));
             m_aiMinerialAccessibility[0] = 1.0f;
             for (int mineralIterator = 1; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
             {

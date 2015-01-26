@@ -125,7 +125,7 @@ namespace Pulsar4X.UI.GLUtilities
         /// </summary>
         protected GLEffect m_oEffect;
 
-        protected System.Drawing.Color m_oColor; 
+        protected System.Drawing.Color m_oColor;
 
         /// <summary>   
         /// Default constructor. 

@@ -17,11 +17,11 @@ namespace Pulsar4X.Storage
         private readonly string _saveGameFileName;
         private string _saveGameDirectoryPath;
         private string _fullSaveGameFileNamePath;
-        
+
 
         public Store(string saveGameFileName, string saveGameDirectoryPath)
         {
-            if (string.IsNullOrEmpty(saveGameFileName)) throw  new ArgumentNullException("saveGameFileName");
+            if (string.IsNullOrEmpty(saveGameFileName)) throw new ArgumentNullException("saveGameFileName");
 
             _saveGameDirectoryPath = saveGameDirectoryPath;
             _saveGameFileName = saveGameFileName;

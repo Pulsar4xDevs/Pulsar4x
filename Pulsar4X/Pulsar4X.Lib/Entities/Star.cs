@@ -23,7 +23,7 @@ namespace Pulsar4X.Entities
         public double Temperature { get; set; }
         //public double Radius { get; set; }
         public Color Color { get; set; }
-        
+
         //public double EcoSphereRadius { get; set; }
         public int SpectrumAdjustment { get; set; }
         public StarSpectrum Spectrum { get; set; }
@@ -31,7 +31,7 @@ namespace Pulsar4X.Entities
         //public double OrbitalRadius { get; set; }
         public double EcoSphereRadius { get; set; }
         public double Luminosity { get; set; }
-        
+
         public BindingList<Planet> Planets { get; set; }
         public StarSystem StarSystem { get; set; }
 
@@ -44,7 +44,8 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public Star() : base()
+        public Star()
+            : base()
         {
             Planets = new BindingList<Planet>();
         }

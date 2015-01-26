@@ -38,7 +38,7 @@ namespace Pulsar4X.Entities
         /// Unused at the moment.
         /// </summary>
         public TaskForce TaskForce { get; set; }
-        
+
         /// <summary>
         /// Faction this taskgroup will be a member of.
         /// </summary>
@@ -73,7 +73,7 @@ namespace Pulsar4X.Entities
         /// Orders that this taskgroup is under.
         /// </summary>
         public BindingList<Orders> TaskGroupOrders { get; set; }
-        
+
         /// <summary>
         /// What is the state of this taskgroup's ability to accept orders?
         /// </summary>
@@ -213,7 +213,7 @@ namespace Pulsar4X.Entities
 
             SSEntity = StarSystemEntityType.TaskGroup;
 
-            Contact = new SystemContact(TaskGroupFaction,this);
+            Contact = new SystemContact(TaskGroupFaction, this);
 
             Contact.XSystem = OrbitingBody.XSystem;
             Contact.YSystem = OrbitingBody.YSystem;
@@ -223,7 +223,7 @@ namespace Pulsar4X.Entities
             Contact.CurrentSystem = StartingSystem;
             StartingSystem.AddContact(Contact);
             DrawTravelLine = 3;
-            
+
             m_dMass = 0.0;
 
 
@@ -385,7 +385,7 @@ namespace Pulsar4X.Entities
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
                 legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
-                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);                
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);
             }
 
             /// <summary>
@@ -451,7 +451,7 @@ namespace Pulsar4X.Entities
             if (Array.Exists(shipsArray, x => x.CurrentMagazineCapacityMax > 0))
             {
                 legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
-                legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);               
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
             }
 
             /// <summary>
@@ -486,7 +486,7 @@ namespace Pulsar4X.Entities
         /// <param name="shipDef">definition of the ship to be added.</param>
         public void AddShip(ShipClassTN shipDef, int CurrentTimeSlice)
         {
-            ShipTN ship = new ShipTN(shipDef,Ships.Count, CurrentTimeSlice, this, TaskGroupFaction);
+            ShipTN ship = new ShipTN(shipDef, Ships.Count, CurrentTimeSlice, this, TaskGroupFaction);
             Ships.Add(ship);
 
             /// <summary>
@@ -559,7 +559,7 @@ namespace Pulsar4X.Entities
             {
                 if (ship.ShipPSensor[loop].pSensorDef.thermalOrEM == PassiveSensorType.Thermal)
                 {
-                    if ( (BestThermalCount == 0) || (ship.ShipPSensor[loop].pSensorDef.rating > BestThermal.pSensorDef.rating) )
+                    if ((BestThermalCount == 0) || (ship.ShipPSensor[loop].pSensorDef.rating > BestThermal.pSensorDef.rating))
                     {
                         BestThermal = ship.ShipPSensor[loop];
                         BestThermalCount = 1;
@@ -639,24 +639,24 @@ namespace Pulsar4X.Entities
                         switch (TEA)
                         {
                             case 0: NewValue = Ships[NextNode.Value].CurrentThermalSignature;
-                            break;
+                                break;
                             case 1: NewValue = Ships[NextNode.Value].CurrentEMSignature;
-                            break;
+                                break;
                             case 2: NewValue = Ships[NextNode.Value].TotalCrossSection;
-                            break;
+                                break;
                         }
 
                         if (value < LastValue)
                         {
-                            #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
 #warning faction messagelog this?
-                            String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}\n. Condition One with V < LV",Name,LastValue,NewValue,NextNode.Value);
+                            String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}\n. Condition One with V < LV", Name, LastValue, NewValue, NextNode.Value);
                             logger.Debug(MSG);
 #endif
                         }
                         else if (value == LastValue && value > NewValue)
                         {
-                            #if LOG4NET_ENABLED
+#if LOG4NET_ENABLED
 #warning faction messagelog this?
                             String MSG = String.Format("Taskgroup {0} Sort messed up between {1} and {2}, current NextNodeValue is {3}. Condition Two with V = LV V > NV\n", Name, LastValue, NewValue, NextNode.Value);
                             logger.Debug(MSG);
@@ -671,7 +671,7 @@ namespace Pulsar4X.Entities
 
                         NextNode = NextNode.Next;
                         LastValue = NewValue;
-                        
+
                     }
                 }
             }
@@ -683,9 +683,9 @@ namespace Pulsar4X.Entities
         /// <param name="Ship">Ship to be added.</param>
         public void AddShipToSort(ShipTN Ship)
         {
-            AddNodeToSort(ThermalSortList, Ship.ThermalList,0);
-            AddNodeToSort(EMSortList, Ship.EMList,1);
-            AddNodeToSort(ActiveSortList, Ship.ActiveList,2);
+            AddNodeToSort(ThermalSortList, Ship.ThermalList, 0);
+            AddNodeToSort(EMSortList, Ship.EMList, 1);
+            AddNodeToSort(ActiveSortList, Ship.ActiveList, 2);
         }
         #endregion
 
@@ -811,7 +811,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Search through the lookuptables to replace instances of inQue and Count+1
                         /// </summary>
-                        else if(ActiveSensorQue.Count != 1)
+                        else if (ActiveSensorQue.Count != 1)
                         {
                             /// <summary>
                             /// Reassign the ship table
@@ -878,7 +878,7 @@ namespace Pulsar4X.Entities
                         ActiveSensorQue[inQue] = ActiveSensorQue[(ActiveSensorQue.Count - 1)];
                         ActiveSensorCount[inQue] = ActiveSensorCount[(ActiveSensorCount.Count - 1)];
 
-                        ActiveSensorQue.RemoveAt((ActiveSensorQue.Count-1));
+                        ActiveSensorQue.RemoveAt((ActiveSensorQue.Count - 1));
                         ActiveSensorCount.RemoveAt((ActiveSensorCount.Count - 1));
                     }
 
@@ -893,7 +893,7 @@ namespace Pulsar4X.Entities
 
             if (Ships[ShipIndex].CurrentEMSignature != oldEMSignature)
             {
-                SortShipBySignature(Ships[ShipIndex].EMList,EMSortList,1);
+                SortShipBySignature(Ships[ShipIndex].EMList, EMSortList, 1);
             }
         }
         /// <summary>
@@ -913,7 +913,7 @@ namespace Pulsar4X.Entities
             /// Before the sortlist can be worked on, the values must be adjusted accordingly.
             /// Node.Value is this ship's placement within the sortList, not its signature, this is an important distinction to be aware of.
             /// </summary>
-            
+
             LinkedListNode<int> Prev = ShipSignatureNode.Previous;
             LinkedListNode<int> Next = ShipSignatureNode.Next;
 
@@ -929,7 +929,7 @@ namespace Pulsar4X.Entities
 
             switch (TEA)
             {
-                case 0 :
+                case 0:
                     if (Ships[ShipSignatureNode.Value].CurrentThermalSignature < Ships[Prev.Value].CurrentThermalSignature)
                     {
                         /// <summary>
@@ -979,107 +979,107 @@ namespace Pulsar4X.Entities
                         /// Thermal signature may have changed, but not enough to alter Value placement.
                         /// </summary>
                     }
-                break;
-                case 1 :
-                   if (Ships[ShipSignatureNode.Value].CurrentEMSignature < Ships[Prev.Value].CurrentEMSignature)
-                   {
-                       /// <summary>
-                       /// EM signature was lowered, and we need to adjust value downwards. Shield/sensor deactivation/destruction are probable causes.
-                       /// </summary>
-                       while (Ships[ShipSignatureNode.Value].CurrentEMSignature < Ships[Prev.Value].CurrentEMSignature)
-                       {
-                           if (Prev == SortList.First)
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddBefore(Prev, ShipSignatureNode);
-                               break;
-                           }
-                           else
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddBefore(Prev, ShipSignatureNode);
-                               Prev = ShipSignatureNode.Previous;
-                           }
-                       }
-                   }
-                   else if (Ships[ShipSignatureNode.Value].CurrentEMSignature > Ships[Next.Value].CurrentEMSignature)
-                   {
-                       /// <summary>
-                       /// EM signature went up, Shield/sensor activation or repair are probable causes of this.
-                       /// </summary>
-                       while (Ships[ShipSignatureNode.Value].CurrentEMSignature > Ships[Next.Value].CurrentEMSignature)
-                       {
-                           if (Next == SortList.Last)
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddAfter(Next, ShipSignatureNode);
-                               break;
-                           }
-                           else
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddAfter(Next, ShipSignatureNode);
-                               Next = ShipSignatureNode.Next;
-                           }
-                       }
-                   }
-                   else
-                   {
-                       /// <summary>
-                       /// EM signature may have changed, but not enough to alter Value placement.
-                       /// </summary>
-                   }
-                break;
-                case 2 :
-                   if (Ships[ShipSignatureNode.Value].TotalCrossSection < Ships[Prev.Value].TotalCrossSection)
-                   {
-                       /// <summary>
-                       /// TCS signature was lowered, a cloaking device got repaired.
-                       /// </summary>
-                       while (Ships[ShipSignatureNode.Value].TotalCrossSection < Ships[Prev.Value].TotalCrossSection)
-                       {
-                           if (Prev == SortList.First)
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddBefore(Prev, ShipSignatureNode);
-                               break;
-                           }
-                           else
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddBefore(Prev, ShipSignatureNode);
-                               Prev = ShipSignatureNode.Previous;
-                           }
-                       }
-                   }
-                   else if (Ships[ShipSignatureNode.Value].TotalCrossSection > Ships[Next.Value].TotalCrossSection)
-                   {
-                       /// <summary>
-                       /// TCS signature went up, cloaking device destruction is basically it.
-                       /// </summary>
-                       while (Ships[ShipSignatureNode.Value].TotalCrossSection > Ships[Next.Value].TotalCrossSection)
-                       {
-                           if (Next == SortList.Last)
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddAfter(Next, ShipSignatureNode);
-                               break;
-                           }
-                           else
-                           {
-                               SortList.Remove(ShipSignatureNode);
-                               SortList.AddAfter(Next, ShipSignatureNode);
-                               Next = ShipSignatureNode.Next;
-                           }
-                       }
-                   }
-                   else
-                   {
-                       /// <summary>
-                       /// TCS may have changed, but not enough to alter Value placement.
-                       /// </summary>
-                   }
-                break;
+                    break;
+                case 1:
+                    if (Ships[ShipSignatureNode.Value].CurrentEMSignature < Ships[Prev.Value].CurrentEMSignature)
+                    {
+                        /// <summary>
+                        /// EM signature was lowered, and we need to adjust value downwards. Shield/sensor deactivation/destruction are probable causes.
+                        /// </summary>
+                        while (Ships[ShipSignatureNode.Value].CurrentEMSignature < Ships[Prev.Value].CurrentEMSignature)
+                        {
+                            if (Prev == SortList.First)
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddBefore(Prev, ShipSignatureNode);
+                                break;
+                            }
+                            else
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddBefore(Prev, ShipSignatureNode);
+                                Prev = ShipSignatureNode.Previous;
+                            }
+                        }
+                    }
+                    else if (Ships[ShipSignatureNode.Value].CurrentEMSignature > Ships[Next.Value].CurrentEMSignature)
+                    {
+                        /// <summary>
+                        /// EM signature went up, Shield/sensor activation or repair are probable causes of this.
+                        /// </summary>
+                        while (Ships[ShipSignatureNode.Value].CurrentEMSignature > Ships[Next.Value].CurrentEMSignature)
+                        {
+                            if (Next == SortList.Last)
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddAfter(Next, ShipSignatureNode);
+                                break;
+                            }
+                            else
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddAfter(Next, ShipSignatureNode);
+                                Next = ShipSignatureNode.Next;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// EM signature may have changed, but not enough to alter Value placement.
+                        /// </summary>
+                    }
+                    break;
+                case 2:
+                    if (Ships[ShipSignatureNode.Value].TotalCrossSection < Ships[Prev.Value].TotalCrossSection)
+                    {
+                        /// <summary>
+                        /// TCS signature was lowered, a cloaking device got repaired.
+                        /// </summary>
+                        while (Ships[ShipSignatureNode.Value].TotalCrossSection < Ships[Prev.Value].TotalCrossSection)
+                        {
+                            if (Prev == SortList.First)
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddBefore(Prev, ShipSignatureNode);
+                                break;
+                            }
+                            else
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddBefore(Prev, ShipSignatureNode);
+                                Prev = ShipSignatureNode.Previous;
+                            }
+                        }
+                    }
+                    else if (Ships[ShipSignatureNode.Value].TotalCrossSection > Ships[Next.Value].TotalCrossSection)
+                    {
+                        /// <summary>
+                        /// TCS signature went up, cloaking device destruction is basically it.
+                        /// </summary>
+                        while (Ships[ShipSignatureNode.Value].TotalCrossSection > Ships[Next.Value].TotalCrossSection)
+                        {
+                            if (Next == SortList.Last)
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddAfter(Next, ShipSignatureNode);
+                                break;
+                            }
+                            else
+                            {
+                                SortList.Remove(ShipSignatureNode);
+                                SortList.AddAfter(Next, ShipSignatureNode);
+                                Next = ShipSignatureNode.Next;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// TCS may have changed, but not enough to alter Value placement.
+                        /// </summary>
+                    }
+                    break;
 
             };
         }
@@ -1176,7 +1176,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// GetPositionFromOrbit returns systemKm from SystemAU. If a ship is orbiting a body it will move with that body.
         /// </summary>
-        
+
         public void GetPositionFromOrbit()
         {
 #warning GetPositionFromOrbit may need reworking
@@ -1211,7 +1211,7 @@ namespace Pulsar4X.Entities
 
             if (TaskGroupOrders.Count > 0)
             {
-                double dX,dY;
+                double dX, dY;
 
                 /// <summary>
                 /// planets (and populations on planets) positions are stored relative to their star.
@@ -1315,7 +1315,7 @@ namespace Pulsar4X.Entities
                 }
 
 
-                
+
                 double dZ = Math.Sqrt(((dX * dX) + (dY * dY)));
 
                 /// <summary>
@@ -1386,7 +1386,7 @@ namespace Pulsar4X.Entities
             }
         }
 
-#endregion
+        #endregion
 
 
         #region Taskgroup orders issuing,following,performing,clearing
@@ -1411,11 +1411,11 @@ namespace Pulsar4X.Entities
             int OrderCount = TaskGroupOrders.Count - 1;
             double dX = 0.0, dY = 0.0, dZ;
 
-            if (TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.StandardTransit || 
-                TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.SquadronTransit || 
+            if (TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.StandardTransit ||
+                TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.SquadronTransit ||
                 TaskGroupOrders[OrderCount].typeOf == Constants.ShipTN.OrderType.TransitAndDivide)
             {
-                if (TaskGroupOrders[OrderCount].jumpPoint.IsExplored == false)
+                if (TaskGroupOrders[OrderCount].jumpPoint.Connect == null)
                 {
                     CanOrder = Constants.ShipTN.OrderState.DisallowOrdersUnknownJump;
                 }
@@ -1425,7 +1425,7 @@ namespace Pulsar4X.Entities
             {
                 return;
             }
-           
+
             if (OrderCount == 0)
             {
                 if (IsOrbiting)
@@ -1533,7 +1533,7 @@ namespace Pulsar4X.Entities
             GetSpeed();
 
             GetTimeRequirement();
-                //NewOrders = false;
+            //NewOrders = false;
             //}
 
             if (TimeRequirement < TimeSlice)
@@ -1551,8 +1551,8 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Move the taskgroup to the targeted location.
                     /// </summary>
-                    
-                    double dX,dY;
+
+                    double dX, dY;
 
                     if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                     {
@@ -1570,7 +1570,7 @@ namespace Pulsar4X.Entities
                         dY = TaskGroupOrders[0].target.YSystem;
                     }
 
-                    Contact.UpdateLocationInSystem(dX,dY);
+                    Contact.UpdateLocationInSystem(dX, dY);
                     TotalOrderDistance = TotalOrderDistance - (double)(CurrentSpeed * TimeRequirement);
 
                     /// <summary>
@@ -1634,9 +1634,9 @@ namespace Pulsar4X.Entities
 
                             if (check == -1)
                             {
-                                String Entry = String.Format("Ship Error, no TaskGroupsOrdered found for TG {0} in Faction {1}, {2} has completed an order to move.",TaskGroupOrders[0].taskGroup.Name,
+                                String Entry = String.Format("Ship Error, no TaskGroupsOrdered found for TG {0} in Faction {1}, {2} has completed an order to move.", TaskGroupOrders[0].taskGroup.Name,
                                     TaskGroupOrders[0].taskGroup.TaskGroupFaction.Name, Name);
-                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error,Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
                                 TaskGroupFaction.MessageLog.Add(NME);
                             }
                         }
@@ -1763,7 +1763,7 @@ namespace Pulsar4X.Entities
                             }
                             TaskGroupOrders[0].pop.MaintenanceSupplies = Ships[loop].Resupply(TaskGroupOrders[0].pop.MaintenanceSupplies);
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Load Installation
@@ -1821,7 +1821,7 @@ namespace Pulsar4X.Entities
                             TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
                             TimeSlice = 0;
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Unload Installation
@@ -1850,7 +1850,7 @@ namespace Pulsar4X.Entities
                             TaskGroupOrders[0].orderTimeRequirement = TaskGroupOrders[0].orderTimeRequirement - (int)TimeSlice;
                             TimeSlice = 0;
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Unload Ship Component
@@ -1879,9 +1879,9 @@ namespace Pulsar4X.Entities
                             {
                                 if (Ships[loop].CargoComponentList.Count != 0)
                                 {
-                                    foreach( KeyValuePair<ComponentDefTN,CargoListEntryTN> pair in Ships[loop].CargoComponentList)
+                                    foreach (KeyValuePair<ComponentDefTN, CargoListEntryTN> pair in Ships[loop].CargoComponentList)
                                     {
-                                        if(TaskGroupOrders[0].secondary == TGComponentCount)
+                                        if (TaskGroupOrders[0].secondary == TGComponentCount)
                                         {
                                             UnloadOrder = pair.Key;
                                             TGComponentCount = -1;
@@ -1905,7 +1905,7 @@ namespace Pulsar4X.Entities
                             TimeSlice = 0;
                         }
 
-                    break;
+                        break;
                     #endregion
 
                     #region Load Colonists
@@ -2116,7 +2116,7 @@ namespace Pulsar4X.Entities
                     #endregion
 
                     #region Resupply Target Fleet
-                    case (int) Constants.ShipTN.OrderType.ResupplyTargetFleet:
+                    case (int)Constants.ShipTN.OrderType.ResupplyTargetFleet:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
                         int SupplyPlace = 0;
                         /// <summary>
@@ -2152,7 +2152,7 @@ namespace Pulsar4X.Entities
                             /// Order could not be carried out.
                             /// </summary>
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Resupply From Own Supply Ships
@@ -2189,17 +2189,17 @@ namespace Pulsar4X.Entities
                             }
                         }
 
-                        if(SupplyPlace != Ships.Count || (Ships.Last().CurrentMSP != Ships.Last().ShipClass.TotalMSPCapacity && Ships.Last().ShipClass.IsSupply == false ) )
+                        if (SupplyPlace != Ships.Count || (Ships.Last().CurrentMSP != Ships.Last().ShipClass.TotalMSPCapacity && Ships.Last().ShipClass.IsSupply == false))
                         {
                             /// <summary>
                             /// Order could not be carried out.
                             /// </summary>
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Resupply From Target Fleet
-                    case (int) Constants.ShipTN.OrderType.ResupplyFromTargetFleet:
+                    case (int)Constants.ShipTN.OrderType.ResupplyFromTargetFleet:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
                         SupplyPlace = 0;
                         for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
@@ -2232,7 +2232,7 @@ namespace Pulsar4X.Entities
                             /// Order could not be carried out.
                             /// </summary>
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Unload 90% Of Supplies To Planet
@@ -2252,43 +2252,43 @@ namespace Pulsar4X.Entities
                                 }
                             }
                         }
-                    break;
+                        break;
                     #endregion
 
                     #region Load Ordnance From Colony
                     case (int)Constants.ShipTN.OrderType.LoadOrdnanceFromColony:
-                       TaskGroupOrders[0].orderTimeRequirement = 0;
-                       for (int loop = 0; loop < Ships.Count; loop++)
-                       {
-                           if (Ships[loop].ShipMagazines.Count != 0)
-                           {
-                               Ships[loop].LoadOrdnance(TaskGroupOrders[0].pop);
-                           }
-                       }
-                    break;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipMagazines.Count != 0)
+                            {
+                                Ships[loop].LoadOrdnance(TaskGroupOrders[0].pop);
+                            }
+                        }
+                        break;
                     #endregion
 
                     #region Unload Ordnance To Colony
-                    case (int) Constants.ShipTN.OrderType.UnloadOrdnanceToColony:
-                       TaskGroupOrders[0].orderTimeRequirement = 0;
-                       for (int loop = 0; loop < Ships.Count; loop++)
-                       {
-                           if (Ships[loop].ShipMagazines.Count != 0)
-                           {
-                               Ships[loop].UnloadOrdnance(TaskGroupOrders[0].pop);
-                           }
-                       }
-                    break;
+                    case (int)Constants.ShipTN.OrderType.UnloadOrdnanceToColony:
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        for (int loop = 0; loop < Ships.Count; loop++)
+                        {
+                            if (Ships[loop].ShipMagazines.Count != 0)
+                            {
+                                Ships[loop].UnloadOrdnance(TaskGroupOrders[0].pop);
+                            }
+                        }
+                        break;
                     #endregion
 
                     case (int)Constants.ShipTN.OrderType.StandardTransit:
-                    TaskGroupOrders[0].orderTimeRequirement = 0;
-                    (TaskGroupOrders[0].target as JumpPoint).StandardTransit(this);
-                    break;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        (TaskGroupOrders[0].target as JumpPoint).StandardTransit(this);
+                        break;
                     case (int)Constants.ShipTN.OrderType.SquadronTransit:
-                    TaskGroupOrders[0].orderTimeRequirement = 0;
-                    (TaskGroupOrders[0].target as JumpPoint).SquadronTransit(this);
-                    break;
+                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        (TaskGroupOrders[0].target as JumpPoint).SquadronTransit(this);
+                        break;
 
 
 
@@ -2324,14 +2324,14 @@ namespace Pulsar4X.Entities
                     {
                         OrbitingPlanet.TaskGroupsInOrbit.Add(this);
                     }
-                }   
+                }
             }
             TaskGroupOrders.Clear();
             TimeRequirement = 0;
             TotalOrderDistance = 0;
         }
 
-        
+
 #warning potentially unused 3 functions here, ContainsTanker,ContainsSupply, ContainsCollier
         /// <summary>
         /// Does this taskgroup have a tanker in it?
@@ -2429,8 +2429,8 @@ namespace Pulsar4X.Entities
             {
                 int RemainingShipTonnage = Ships[loop].ShipClass.TotalCargoCapacity - Ships[loop].CurrentCargoTonnage;
                 if (Ships[loop].ShipClass.TotalCargoCapacity != 0 && RemainingShipTonnage != 0)
-                {   
-                    int ShipMassToLoad = Math.Min(MassToLoad,RemainingShipTonnage);
+                {
+                    int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
 
                     /// <summary>
                     /// Load the mass onto the taskgroup as a whole for display purposes.
@@ -2491,7 +2491,7 @@ namespace Pulsar4X.Entities
                     Pop.Installations[(int)InstType].Number = Pop.Installations[(int)InstType].Number + (float)(ShipMassToUnload / TaskGroupFaction.InstallationTypes[(int)InstType].Mass);
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -2580,7 +2580,7 @@ namespace Pulsar4X.Entities
         public void LoadComponents(Population Pop, int ComponentIndex, int Limit)
         {
             int RemainingTonnage = TotalCargoTonnage - CurrentCargoTonnage;
-            int TotalMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * (float)Limit); 
+            int TotalMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * (float)Limit);
             int AvailableMass = (int)(Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS * Pop.ComponentStockpileCount[ComponentIndex]);
 
             int MassToLoad = 0;
@@ -2611,7 +2611,7 @@ namespace Pulsar4X.Entities
                 {
                     int RemainingShipTonnage = Ships[loop].ShipClass.TotalCargoCapacity - Ships[loop].CurrentCargoTonnage;
                     int ShipMassToLoad = Math.Min(MassToLoad, RemainingShipTonnage);
-                    float ShipComponentLoadCount= (float)ShipMassToLoad / (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS);
+                    float ShipComponentLoadCount = (float)ShipMassToLoad / (Pop.ComponentStockpile[ComponentIndex].size * Constants.ShipTN.TonsPerHS);
 
                     /// <summary>
                     /// Don't break up these components.
@@ -2715,19 +2715,19 @@ namespace Pulsar4X.Entities
                 }
                 else
                 {
-                    LogisticsBonus = 1.0f; 
+                    LogisticsBonus = 1.0f;
                 }
 
                 int ShipLoadTime = 0;
 
                 switch ((int)Type)
                 {
-                    case (int)Constants.ShipTN.LoadType.Cargo : ShipLoadTime = (int)((float)Ships[loop].ShipClass.CargoLoadTime / LogisticsBonus);
-                    break;
-                    case (int)Constants.ShipTN.LoadType.Cryo : ShipLoadTime = (int)((float)Ships[loop].ShipClass.CryoLoadTime / LogisticsBonus);
-                    break;
+                    case (int)Constants.ShipTN.LoadType.Cargo: ShipLoadTime = (int)((float)Ships[loop].ShipClass.CargoLoadTime / LogisticsBonus);
+                        break;
+                    case (int)Constants.ShipTN.LoadType.Cryo: ShipLoadTime = (int)((float)Ships[loop].ShipClass.CryoLoadTime / LogisticsBonus);
+                        break;
                     case (int)Constants.ShipTN.LoadType.Troop: ShipLoadTime = (int)((float)Ships[loop].ShipClass.TroopLoadTime / LogisticsBonus);
-                    break;
+                        break;
                 }
                 if (ShipLoadTime > MaxLoadTime)
                 {
@@ -2775,7 +2775,7 @@ namespace Pulsar4X.Entities
 
             ShipTN min = null;
             float minDist = -1.0f;
-            if(TaskGroupFaction.DetectedContactLists.ContainsKey(Contact.CurrentSystem))
+            if (TaskGroupFaction.DetectedContactLists.ContainsKey(Contact.CurrentSystem))
             {
                 foreach (KeyValuePair<ShipTN, FactionContact> pair in TaskGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedContacts)
                 {
@@ -2783,14 +2783,14 @@ namespace Pulsar4X.Entities
                     /// Only active targets are considered for this. Is this for BFC targeting, or general things to head for?
                     /// This should be commented out if I want to investigate rather than blow up.
                     /// </summary>
-                    if (pair.Value.active == true) 
+                    if (pair.Value.active == true)
                     {
                         int ID = pair.Key.ShipsTaskGroup.Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
 
                         /// <summary>
                         /// No ship has been examined yet, so this one is the "closest".
                         /// </summary>
-                        if (min == null || minDist == -1.0f) 
+                        if (min == null || minDist == -1.0f)
                         {
 
                             min = pair.Key;

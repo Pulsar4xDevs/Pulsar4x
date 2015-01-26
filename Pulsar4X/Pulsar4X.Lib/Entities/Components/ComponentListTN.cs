@@ -347,7 +347,7 @@ namespace Pulsar4X.Entities.Components
             ActiveSensorDef.Add(AMMSensor);
             MissileFireControlDef.Add(AMMMFC);
             MissileDef.Add(MissileAMMDef);
-            
+
 
 
         }
