@@ -18,6 +18,9 @@ namespace Pulsar4X.Entities
 
     public struct SystemPosition
     {
+        /// <summary>
+        /// System currently in.
+        /// </summary>
         public StarSystem System { get; set; }
 
         /// <summary>
@@ -34,6 +37,21 @@ namespace Pulsar4X.Entities
         /// System Z coordinante in AU
         /// </summary>
         public double Z { get; set; }
+
+        /// <summary>
+        /// Initilized constructor.
+        /// </summary>
+        /// <param name="system">StarSystem value.</param>
+        /// <param name="x">X value.</param>
+        /// <param name="y">Y value.</param>
+        /// <param name="z">Z value.</param>
+        public SystemPosition(StarSystem system, double x, double y, double z) : this()
+        {
+            System = system;
+            X = x;
+            Y = y;
+            Z = z;
+        }
     }
 
     public abstract class StarSystemEntity : GameEntity

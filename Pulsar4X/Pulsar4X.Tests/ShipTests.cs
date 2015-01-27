@@ -743,8 +743,8 @@ namespace Pulsar4X.Tests
             System1.JumpPoints[0].Connect = System2.JumpPoints[0];
             System2.JumpPoints[0].Connect = System1.JumpPoints[0];
 
-            System1.JumpPoints[0].AttemptTransit(PlayerFaction1.TaskGroups[0], false);
-            System1.JumpPoints[0].AttemptTransit(PlayerFaction2.TaskGroups[0], true);
+            System1.JumpPoints[0].CanJump(PlayerFaction1.TaskGroups[0], false);
+            System1.JumpPoints[0].CanJump(PlayerFaction2.TaskGroups[0], true);
 
             PlayerFaction1.SensorSweep(15);
             PlayerFaction2.SensorSweep(15);

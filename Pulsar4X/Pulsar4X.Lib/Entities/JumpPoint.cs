@@ -104,6 +104,40 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Determines if a TaskGroup has the ability to jump through this JumpPoint.
+        /// Ensures a connection, and checks Gate, Gate Ownership, and JumpDrives.
+        /// </summary>
+        /// <param name="TransitTG">TG requesting Transit.</param>
+        /// <param name="IsStandardTransit">True if StandardTransit, False if SquadronTransit</param>
+        /// <returns>True if TG is capable of doing this jump.</returns>
+        public bool CanJump(TaskGroupTN TransitTG, bool IsStandardTransit)
+        {
+            // Ensure we have a connection, if not create one.
+            if (Connect == null)
+            {
+                CreateConnection();
+            }
+
+            if (IsGated)
+            {
+                if (Constants.GameSettings.AllowHostileGateJump || AllowHostileJumps)
+                {
+                    // Gate/Game settings are not setup to allow blocking of hostiles.
+                    return true;
+                }
+                if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
+                {
+                    // Nobody owns the gate, or we do, allow the jump.
+                    // TODO: Check if a friendly faction owns the gate, and allow.
+                    return true;
+                }
+            }
+            // TODO: Expand this to take into account JumpDrives.
+            // Currently, JumpDrives don't exist, so how could we possibly jump? 
+            return false;
+        }
+
+        /// <summary>
         /// Handles connecting unconnected jump points.
         /// This function only handles the connection of JumpPoints to new JumpPoints/Systems
         /// Currently, we create and link top new systems only.
@@ -125,40 +159,10 @@ namespace Pulsar4X.Entities
             // Connect us to them.
             Connect = newSystem.JumpPoints[i];
             Name = Name + "(" + Connect.System.Name + ")";
+
             // Connect them to us.
             Connect.Connect = this;
             Connect.Name = Connect.Name + "(" + System.Name + ")";
-        }
-
-        /// Ship Transits happen here.
-        /// Standard transits incure a higher penalty, but do not have TG size limitations.
-        /// </summary>
-        /// <param name="TransitTG">Transiting TG</param>
-        /// <param name="isSquadronTransit">Boolean indicating order type. True for Squadron transit.</param>
-        /// <returns>Success or failure of transit as an integer code.</returns>
-        public int AttemptTransit(TaskGroupTN TransitTG, bool isSquadronTransit)
-        {
-            // Check Jump Drive logic.
-            if (!CanJump(TransitTG, isSquadronTransit))
-            {
-                return 0;
-            }
-
-            // Ensure we have a connection, if not create one.
-            if (Connect == null)
-            {
-                CreateConnection();
-            }
-
-            System.RemoveContact(TransitTG.Contact);
-            Connect.System.AddContact(TransitTG.Contact);
-
-            // Move us to the JP in the other system.
-            TransitTG.Contact.UpdateLocationAfterTransit(Connect.Position.X, Connect.Position.Y);
-
-            // TODO: Set transit penalties here
-
-            return 1;
         }
 
         /// <summary>
@@ -168,34 +172,6 @@ namespace Pulsar4X.Entities
         {
             Position.X = Parent.Position.X + XOffset;
             Position.Y = Parent.Position.Y + YOffset;
-        }
-
-        /// <summary>
-        /// Determines if a TaskGroup has the ability to jump through this JumpPoint.
-        /// Checks Gate, Gate Ownership, and JumpDrives.
-        /// </summary>
-        /// <param name="TransitTG">TG requesting Transit.</param>
-        /// <param name="IsStandardTransit">True if StandardTransit, False if SquadronTransit</param>
-        /// <returns>True if TG is capable of doing this jump.</returns>
-        public bool CanJump(TaskGroupTN TransitTG, bool IsStandardTransit)
-        {
-            if (IsGated)
-            {
-                if (Constants.GameSettings.AllowHostileGateJump || AllowHostileJumps)
-                {
-                    // Gate/Game settings are not setup to allow blocking of hostiles.
-                    return true;
-                }
-                if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
-                {
-                    // Nobody owns the gate, or we do, allow the jump.
-                    // TODO: Check if a friendly faction owns the gate, and allow.
-                    return true;
-                }
-            }
-            // TODO: Expand this to take into account JumpDrives.
-            // Currently, JumpDrives don't exist, so how could we possibly jump? 
-            return false; 
         }
     }
 }

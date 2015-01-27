@@ -2270,12 +2270,50 @@ namespace Pulsar4X.Entities
                     #endregion
 
                     case (int)Constants.ShipTN.OrderType.StandardTransit:
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
-                        (TaskGroupOrders[0].target as JumpPoint).AttemptTransit(this, false);
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+
+                            // Check if we can jump.
+                            if ((TaskGroupOrders[0].target as JumpPoint).CanJump(this, false))
+                            {
+                                // Handle the jump here.
+                                // TODO: Put jump transition in it's own function within TaskGroup.
+                                SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
+                                Position.System = newPos.System;
+                                Position.X = newPos.X;
+                                Position.Y = newPos.Y;
+                                Position.Z = newPos.Z;
+
+                                Position.System.RemoveContact(Contact);
+                                newPos.System.AddContact(Contact);
+                                Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
+
+                                // TODO: Set transit penalties here
+                            }
+                        }
                         break;
                     case (int)Constants.ShipTN.OrderType.SquadronTransit:
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
-                        (TaskGroupOrders[0].target as JumpPoint).AttemptTransit(this, true);
+                        {
+                            TaskGroupOrders[0].orderTimeRequirement = 0;
+
+                            // Check if we can jump.
+                            if ((TaskGroupOrders[0].target as JumpPoint).CanJump(this, true))
+                            {
+                                // Handle the jump here.
+                                // TODO: Put jump transition in it's own function within TaskGroup.
+                                SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
+                                Position.System = newPos.System;
+                                Position.X = newPos.X;
+                                Position.Y = newPos.Y;
+                                Position.Z = newPos.Z;
+
+                                Position.System.RemoveContact(Contact);
+                                newPos.System.AddContact(Contact);
+                                Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
+
+                                // TODO: Set transit penalties here
+                            }
+                        }
                         break;
 
 
