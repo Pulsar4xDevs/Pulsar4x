@@ -8,15 +8,6 @@ namespace Pulsar4X.Entities
     public class JumpPoint : StarSystemEntity
     {
         /// <summary>
-        /// Mass is totally unnecessary here.
-        /// </summary>
-        public override double Mass
-        {
-            get { return 0.0; }
-            set { value = 0.0; }
-        }
-
-        /// <summary>
         /// StarSystem which originates this JP. Source side is never closed.
         /// </summary>
         public StarSystem System { get; set; }
@@ -72,9 +63,9 @@ namespace Pulsar4X.Entities
             Parent = Par;
             XOffset = X;
             YOffset = Y;
-            XSystem = Parent.XSystem + XOffset;
-            YSystem = Parent.YSystem + YOffset;
-            ZSystem = 0.0;
+            Position.X = Parent.Position.X + XOffset;
+            Position.Y = Parent.Position.Y + YOffset;
+            Position.Z = 0.0;
 
             SSEntity = StarSystemEntityType.JumpPoint;
 
@@ -145,7 +136,7 @@ namespace Pulsar4X.Entities
         /// <param name="TransitTG">Transiting TG</param>
         /// <param name="isSquadronTransit">Boolean indicating order type. True for Squadron transit.</param>
         /// <returns>Success or failure of transit as an integer code.</returns>
-        public int Transit(TaskGroupTN TransitTG, bool isSquadronTransit)
+        public int AttemptTransit(TaskGroupTN TransitTG, bool isSquadronTransit)
         {
             // Check Jump Drive logic.
             if (!CanJump(TransitTG, isSquadronTransit))
@@ -163,7 +154,7 @@ namespace Pulsar4X.Entities
             Connect.System.AddContact(TransitTG.Contact);
 
             // Move us to the JP in the other system.
-            TransitTG.Contact.UpdateLocationAfterTransit(Connect.XSystem, Connect.YSystem);
+            TransitTG.Contact.UpdateLocationAfterTransit(Connect.Position.X, Connect.Position.Y);
 
             // TODO: Set transit penalties here
 
@@ -175,8 +166,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void UpdatePosition()
         {
-            XSystem = Parent.XSystem + XOffset;
-            YSystem = Parent.YSystem + YOffset;
+            Position.X = Parent.Position.X + XOffset;
+            Position.Y = Parent.Position.Y + YOffset;
         }
 
         /// <summary>

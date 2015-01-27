@@ -19,28 +19,9 @@ namespace Pulsar4X.Entities
         public Faction faction { get; set; }
 
         /// <summary>
-        /// Which system is this contact in?
-        /// </summary>
-        public StarSystem CurrentSystem { get; set; }
-
-        /// <summary>
         /// where the contact was on the last tick.
         /// </summary>
-        public double LastXSystem { get; set; }
-
-        /// <summary>
-        /// Where the contact was on the last tick.
-        /// </summary>
-        public double LastYSystem { get; set; }
-
-        /// <summary>
-        /// Utterly useless Mass value included due to compiler demanding it.
-        /// </summary>
-        public override double Mass
-        {
-            get { return 0.0; }
-            set { value = 0.0; }
-        }
+        public SystemPosition LastPosition;
 
         /// <summary>
         /// If this contact is a planetary population it will be here.
@@ -93,10 +74,10 @@ namespace Pulsar4X.Entities
         {
             Id = Guid.NewGuid();
             faction = Fact;
-            XSystem = pop.Planet.XSystem;
-            YSystem = pop.Planet.YSystem;
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
+            Position.X = pop.Planet.Position.X;
+            Position.Y = pop.Planet.Position.Y;
+            LastPosition.X = Position.X;
+            LastPosition.Y = Position.Y;
 
             Pop = pop;
             SSEntity = StarSystemEntityType.Population;
@@ -116,10 +97,10 @@ namespace Pulsar4X.Entities
         {
             Id = Guid.NewGuid();
             faction = Fact;
-            XSystem = TG.XSystem;
-            YSystem = TG.YSystem;
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
+            Position.X = TG.Position.X;
+            Position.Y = TG.Position.Y;
+            LastPosition.X = Position.X;
+            LastPosition.Y = Position.Y;
 
             TaskGroup = TG;
             SSEntity = StarSystemEntityType.TaskGroup;
@@ -138,10 +119,10 @@ namespace Pulsar4X.Entities
         {
             Id = Guid.NewGuid();
             faction = Fact;
-            XSystem = MG.XSystem;
-            YSystem = MG.YSystem;
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
+            Position.X = MG.Position.X;
+            Position.Y = MG.Position.Y;
+            LastPosition.X = Position.X;
+            LastPosition.Y = Position.Y;
 
             MissileGroup = MG;
             SSEntity = StarSystemEntityType.Missile;
@@ -158,23 +139,23 @@ namespace Pulsar4X.Entities
         /// <param name="Y">Y Position in AU.</param>
         public void UpdateLocationInSystem(double X, double Y)
         {
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
-            XSystem = X;
-            YSystem = Y;
+            LastPosition.X = Position.X;
+            LastPosition.Y = Position.Y;
+            Position.X = X;
+            Position.Y = Y;
         }
 
         /// <summary>
-        /// Updates the contact after transiting a jump point, LastXSystem needs to be set to current position for the travel line.
+        /// Updates the contact after transiting a jump point, LastPosition.X needs to be set to current position for the travel line.
         /// </summary>
         /// <param name="X">X position in AU in the new system</param>
         /// <param name="Y">Y position in AU in the new system</param>
         public void UpdateLocationAfterTransit(double X, double Y)
         {
-            LastXSystem = X;
-            LastYSystem = Y;
-            XSystem = X;
-            YSystem = Y;
+            LastPosition.X = X;
+            LastPosition.Y = Y;
+            Position.X = X;
+            Position.Y = Y;
         }
 
         /// <summary>
@@ -183,7 +164,7 @@ namespace Pulsar4X.Entities
         /// <param name="system">new System.</param>
         public void UpdateSystem(StarSystem system)
         {
-            CurrentSystem = system;
+            Position.System = system;
 
             DistanceTable.Clear();
             DistanceUpdate.Clear();
@@ -191,7 +172,7 @@ namespace Pulsar4X.Entities
             DistanceTable.RaiseListChangedEvents = false;
             DistanceUpdate.RaiseListChangedEvents = false;
 
-            for (int loop = 0; loop < CurrentSystem.SystemContactList.Count; loop++)
+            for (int loop = 0; loop < Position.System.SystemContactList.Count; loop++)
             {
                 DistanceTable.Add(0.0f);
                 DistanceUpdate.Add(-1);

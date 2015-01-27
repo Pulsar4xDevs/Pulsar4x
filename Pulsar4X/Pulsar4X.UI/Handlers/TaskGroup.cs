@@ -1027,18 +1027,18 @@ namespace Pulsar4X.UI.Handlers
                 {
                     if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                     {
-                        dX = CurrentTaskGroup.Contact.XSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.XSystem + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.XSystem);
-                        dY = CurrentTaskGroup.Contact.YSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.YSystem + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.YSystem);
+                        dX = CurrentTaskGroup.Contact.Position.X - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.X + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.Position.X);
+                        dY = CurrentTaskGroup.Contact.Position.Y - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.Position.Y);
                     }
                     else if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     {
-                        dX = CurrentTaskGroup.Contact.XSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.XSystem + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.XSystem);
-                        dY = CurrentTaskGroup.Contact.YSystem - (CurrentTaskGroup.TaskGroupOrders[0].target.YSystem + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.YSystem);
+                        dX = CurrentTaskGroup.Contact.Position.X - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.X + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.Position.X);
+                        dY = CurrentTaskGroup.Contact.Position.Y - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.Position.Y);
                     }
                     else
                     {
-                        dX = CurrentTaskGroup.Contact.XSystem - CurrentTaskGroup.TaskGroupOrders[0].target.XSystem;
-                        dY = CurrentTaskGroup.Contact.YSystem - CurrentTaskGroup.TaskGroupOrders[0].target.YSystem;
+                        dX = CurrentTaskGroup.Contact.Position.X - CurrentTaskGroup.TaskGroupOrders[0].target.Position.X;
+                        dY = CurrentTaskGroup.Contact.Position.Y - CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y;
                     }
 
                     dZ = Math.Sqrt((dX * dX) + (dY * dY));
@@ -1049,25 +1049,25 @@ namespace Pulsar4X.UI.Handlers
                     if (CurrentTaskGroup.IsOrbiting == true)
                         CurrentTaskGroup.GetPositionFromOrbit();
 
-                    double tX = CurrentTaskGroup.Contact.XSystem;
-                    double tY = CurrentTaskGroup.Contact.YSystem;
+                    double tX = CurrentTaskGroup.Contact.Position.X;
+                    double tY = CurrentTaskGroup.Contact.Position.Y;
 
                     for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
                     {
                         if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                         {
-                            dX = CurrentTaskGroup.Contact.XSystem - (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.XSystem);
-                            dY = CurrentTaskGroup.Contact.YSystem - (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.YSystem);
+                            dX = CurrentTaskGroup.Contact.Position.X - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.X);
+                            dY = CurrentTaskGroup.Contact.Position.Y - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.Y);
                         }
                         else if (CurrentTaskGroup.TaskGroupOrders[loop].target.SSEntity == StarSystemEntityType.Population)
                         {
-                            dX = tX - (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.XSystem);
-                            dY = tY - (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.YSystem);
+                            dX = tX - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.X);
+                            dY = tY - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.Y);
                         }
                         else
                         {
-                            dX = tX - CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem;
-                            dY = tY - CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem;
+                            dX = tX - CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X;
+                            dY = tY - CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y;
                         }
 
                         dZ = dZ + Math.Sqrt((dX * dX) + (dY * dY));
@@ -1078,18 +1078,18 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                             {
-                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.XSystem);
-                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.YSystem);
+                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.X);
+                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.Y);
                             }
                             else if (CurrentTaskGroup.TaskGroupOrders[loop].target.SSEntity == StarSystemEntityType.Population)
                             {
-                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.XSystem);
-                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.YSystem);
+                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.X);
+                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.Y);
                             }
                             else
                             {
-                                tX = CurrentTaskGroup.TaskGroupOrders[loop].target.XSystem;
-                                tY = CurrentTaskGroup.TaskGroupOrders[loop].target.YSystem;
+                                tX = CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X;
+                                tY = CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y;
                             }
                         }
                         else
@@ -1100,8 +1100,8 @@ namespace Pulsar4X.UI.Handlers
 
                             try
                             {
-                                tX = CurrentTaskGroup.TaskGroupOrders[loop].jumpPoint.Connect.XSystem;
-                                tY = CurrentTaskGroup.TaskGroupOrders[loop].jumpPoint.Connect.YSystem;
+                                tX = CurrentTaskGroup.TaskGroupOrders[loop].jumpPoint.Connect.Position.X;
+                                tY = CurrentTaskGroup.TaskGroupOrders[loop].jumpPoint.Connect.Position.Y;
                             }
                             catch
                             {

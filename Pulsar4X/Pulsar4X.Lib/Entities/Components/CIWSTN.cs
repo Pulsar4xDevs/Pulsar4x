@@ -310,7 +310,7 @@ namespace Pulsar4X.Entities.Components
                 if (InterceptChance >= (float)Hit)
                 {
                     String Entry = String.Format("CIWS {0} Fired at 10,000 km and hit.", Name);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     ShipFaction.MessageLog.Add(Msg);
                     return true;
@@ -318,7 +318,7 @@ namespace Pulsar4X.Entities.Components
                 else
                 {
                     String Entry = String.Format("CIWS {0} Fired at 10,000 km and missed.", Name);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     ShipFaction.MessageLog.Add(Msg);
                 }

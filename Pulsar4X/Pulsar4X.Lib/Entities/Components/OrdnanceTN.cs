@@ -932,7 +932,7 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// If there are no contacts in this system, then obviously we don't have a target.
             /// </summary>
-            if (missileGroup.ordnanceGroupFaction.DetectedContactLists.ContainsKey(missileGroup.contact.CurrentSystem) == false)
+            if (missileGroup.ordnanceGroupFaction.DetectedContactLists.ContainsKey(missileGroup.contact.Position.System) == false)
             {
                 return false;
             }
@@ -961,7 +961,7 @@ namespace Pulsar4X.Entities.Components
                     if (TGT.ship.IsDestroyed == true)
                         return false;
 
-                    StarSystem Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
+                    StarSystem Sys = FiringShip.ShipsTaskGroup.Contact.Position.System;
 
                     /// <summary>
                     /// is the specified ship in the detected contacts list? and is it detected by an active?
@@ -1008,7 +1008,7 @@ namespace Pulsar4X.Entities.Components
                     if (TGT.missileGroup.missilesDestroyed == TGT.missileGroup.missiles.Count)
                         return false;
 
-                    Sys = FiringShip.ShipsTaskGroup.Contact.CurrentSystem;
+                    Sys = FiringShip.ShipsTaskGroup.Contact.Position.System;
                     targetIndex = Sys.SystemContactList.IndexOf(TGT.missileGroup.contact);
 
                     /// <summary>
@@ -1106,15 +1106,6 @@ namespace Pulsar4X.Entities.Components
         public BindingList<OrdnanceTN> missiles
         {
             get { return Missiles; }
-        }
-
-        /// <summary>
-        /// Useless mass override for StarSystem Entity.
-        /// </summary>
-        public override double Mass
-        {
-            get { return 0.0; }
-            set { value = 0.0; }
         }
 
         /// <summary>
@@ -1226,8 +1217,8 @@ namespace Pulsar4X.Entities.Components
                 LaunchedFrom.GetPositionFromOrbit();
             }
 
-            XSystem = LaunchedFrom.Contact.XSystem;
-            YSystem = LaunchedFrom.Contact.YSystem;
+            Position.X = LaunchedFrom.Contact.Position.X;
+            Position.Y = LaunchedFrom.Contact.Position.Y;
 
             Contact = new SystemContact(LaunchedFrom.TaskGroupFaction, this);
 
@@ -1254,8 +1245,8 @@ namespace Pulsar4X.Entities.Components
 
             OrdnanceGroupFaction = LaunchedFrom.TaskGroupFaction;
 
-            Contact.CurrentSystem = LaunchedFrom.Contact.CurrentSystem;
-            LaunchedFrom.Contact.CurrentSystem.AddContact(Contact);
+            Contact.Position.System = LaunchedFrom.Contact.Position.System;
+            LaunchedFrom.Contact.Position.System.AddContact(Contact);
             DrawTravelLine = 0;
 
             ShipsTargetting = new BindingList<ShipTN>();
@@ -1340,25 +1331,25 @@ namespace Pulsar4X.Entities.Components
             switch (Missiles[0].target.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
-                    dX = (float)(Contact.XSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem);
-                    dY = (float)(Contact.YSystem - Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.X);
+                    dY = (float)(Contact.Position.Y - Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.Y);
                     break;
                 case StarSystemEntityType.Missile:
-                    dX = (float)(Contact.XSystem - Missiles[0].target.missileGroup.contact.XSystem);
-                    dY = (float)(Contact.YSystem - Missiles[0].target.missileGroup.contact.YSystem);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.missileGroup.contact.Position.X);
+                    dY = (float)(Contact.Position.Y - Missiles[0].target.missileGroup.contact.Position.Y);
                     break;
 
                 case StarSystemEntityType.Population:
-                    dX = (float)(Contact.XSystem - Missiles[0].target.pop.Contact.XSystem);
-                    dY = (float)(Contact.YSystem - Missiles[0].target.pop.Contact.YSystem);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.pop.Contact.Position.X);
+                    dY = (float)(Contact.Position.Y - Missiles[0].target.pop.Contact.Position.Y);
                     break;
                 case StarSystemEntityType.Body:
-                    dX = (float)(Contact.XSystem - Missiles[0].target.body.XSystem + Missiles[0].target.body.Primary.XSystem);
-                    dX = (float)(Contact.XSystem - Missiles[0].target.body.YSystem + Missiles[0].target.body.Primary.YSystem);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.X + Missiles[0].target.body.Primary.Position.X);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.Y + Missiles[0].target.body.Primary.Position.Y);
                     break;
                 case StarSystemEntityType.Waypoint:
-                    dX = (float)(Contact.XSystem - Missiles[0].target.wp.XSystem);
-                    dY = (float)(Contact.YSystem - Missiles[0].target.wp.YSystem);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.wp.Position.X);
+                    dY = (float)(Contact.Position.Y - Missiles[0].target.wp.Position.Y);
                     break;
             }
 
@@ -1461,8 +1452,8 @@ namespace Pulsar4X.Entities.Components
                 /// <summary>
                 /// Use fuel and either impact missile or bring missile to halt.
                 /// </summary>
-                Contact.LastXSystem = Contact.XSystem;
-                Contact.LastYSystem = Contact.YSystem;
+                Contact.LastPosition.X = Contact.Position.X;
+                Contact.LastPosition.Y = Contact.Position.Y;
 
 #warning yet another place with body and pop missile targetting that needs to be looked at
                 switch (Missiles[0].target.targetType)
@@ -1485,8 +1476,8 @@ namespace Pulsar4X.Entities.Components
                             /// <summary>
                             /// I want to attempt to destroy enemy missiles by hitting them.
                             /// </summary>
-                            Contact.XSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
-                            Contact.YSystem = Missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
+                            Contact.Position.X = Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.X;
+                            Contact.Position.Y = Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.Y;
                             ProcessImpact(RNG);
                         }
 
@@ -1512,8 +1503,8 @@ namespace Pulsar4X.Entities.Components
                             /// <summary>
                             /// I want to attempt to destroy enemy missiles by hitting them.
                             /// </summary>
-                            Contact.XSystem = Missiles[0].target.missileGroup.contact.XSystem;
-                            Contact.YSystem = Missiles[0].target.missileGroup.contact.YSystem;
+                            Contact.Position.X = Missiles[0].target.missileGroup.contact.Position.X;
+                            Contact.Position.Y = Missiles[0].target.missileGroup.contact.Position.Y;
                             ProcessMissileImpact(RNG);
                         }
 
@@ -1523,8 +1514,8 @@ namespace Pulsar4X.Entities.Components
                         /// If missiles are targetted on a waypoint, and are set to OnOwnSensors = true, that means they are looking for a target.
                         /// Do I want special handling for timeReq = 0 and waypoint/planet target?
                         /// </summary>
-                        Contact.XSystem = Missiles[0].target.wp.XSystem;
-                        Contact.YSystem = Missiles[0].target.wp.YSystem;
+                        Contact.Position.X = Missiles[0].target.wp.Position.X;
+                        Contact.Position.Y = Missiles[0].target.wp.Position.Y;
 
                         if (Missiles[0].onOwnSensors == true)
                             SearchForNewTarget();
@@ -1553,7 +1544,7 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Check if TG is still in range.
                         /// </summary>
-                        int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(Missiles[0].target.ship.ShipsTaskGroup.Contact);
+                        int TGID = Contact.Position.System.SystemContactList.IndexOf(Missiles[0].target.ship.ShipsTaskGroup.Contact);
                         float dist = Contact.DistanceTable[TGID];
 
                         if (missiles[0].missileDef.aSD == null)
@@ -1565,7 +1556,7 @@ namespace Pulsar4X.Entities.Components
                         }
 
                         int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
-                        bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+                        bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
 
                         if (det == false)
                         {
@@ -1580,7 +1571,7 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Check if missile is still in range.
                         /// </summary>
-                        int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(Missiles[0].target.missileGroup.contact);
+                        int TGID = Contact.Position.System.SystemContactList.IndexOf(Missiles[0].target.missileGroup.contact);
                         float dist = Contact.DistanceTable[TGID];
                         int detection = -1;
 
@@ -1616,7 +1607,7 @@ namespace Pulsar4X.Entities.Components
                             detection = Missiles[0].missileDef.aSD.GetActiveDetectionRange(sig, -1);
                         }
 
-                        bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+                        bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
 
                         if (det == false)
                         {
@@ -1640,11 +1631,11 @@ namespace Pulsar4X.Entities.Components
                 /// <summary>
                 /// Move missile closer to its target. provided of course that it has an engine.
                 /// </summary>
-                Contact.LastXSystem = Contact.XSystem;
-                Contact.LastYSystem = Contact.YSystem;
+                Contact.LastPosition.X = Contact.Position.X;
+                Contact.LastPosition.Y = Contact.Position.Y;
 
-                Contact.XSystem = Contact.XSystem + ((double)(TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
-                Contact.YSystem = Contact.YSystem + ((double)(TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);
+                Contact.Position.X = Contact.Position.X + ((double)(TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
+                Contact.Position.Y = Contact.Position.Y + ((double)(TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);
 
                 CheckFuel(TimeSlice);
 
@@ -1677,7 +1668,7 @@ namespace Pulsar4X.Entities.Components
                 else
                     Entry = String.Format("1x {0} Missile in Missile Group {1} has run out of fuel.", Missiles[0].Name, Name);
 
-                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileOutOfFuel, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileOutOfFuel, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                    (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                 OrdnanceGroupFaction.MessageLog.Add(Msg);
 
@@ -1713,7 +1704,7 @@ namespace Pulsar4X.Entities.Components
                     else
                         Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking,has no onboard sensor and will self destruct.", Missiles[0].Name, Name);
 
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
 
@@ -1727,7 +1718,7 @@ namespace Pulsar4X.Entities.Components
                     else
                         Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking and will switch to onboard sensors.", Missiles[0].Name, Name);
 
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
@@ -1754,16 +1745,16 @@ namespace Pulsar4X.Entities.Components
             switch (missiles[0].target.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
-                    X = missiles[0].target.ship.ShipsTaskGroup.Contact.XSystem;
-                    Y = missiles[0].target.ship.ShipsTaskGroup.Contact.YSystem;
+                    X = missiles[0].target.ship.ShipsTaskGroup.Contact.Position.X;
+                    Y = missiles[0].target.ship.ShipsTaskGroup.Contact.Position.Y;
                     break;
 
                 case StarSystemEntityType.Missile:
-                    X = missiles[0].target.missileGroup.contact.XSystem;
-                    Y = missiles[0].target.missileGroup.contact.YSystem;
+                    X = missiles[0].target.missileGroup.contact.Position.X;
+                    Y = missiles[0].target.missileGroup.contact.Position.Y;
                     break;
             }
-            Waypoint NewTarget = new Waypoint("Internal Missile Target, Do Not Display", Contact.CurrentSystem, X, Y, OrdnanceGroupFaction.FactionID);
+            Waypoint NewTarget = new Waypoint("Internal Missile Target, Do Not Display", Contact.Position.System, X, Y, OrdnanceGroupFaction.FactionID);
             TargetTN newTargetTN = new TargetTN(NewTarget);
             for (int loop = 0; loop < Missiles.Count; loop++)
                 missiles[loop].target = newTargetTN;
@@ -1812,7 +1803,7 @@ namespace Pulsar4X.Entities.Components
                     if (Intercept == true)
                     {
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} shot down by point blank defensive fire", Missiles[loop].Name, loop, Name);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
                     }
@@ -1820,7 +1811,7 @@ namespace Pulsar4X.Entities.Components
                     {
 
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit {3} for {4} damage.", Missiles[loop].Name, loop, Name, Missiles[loop].target.ship.Name, Missiles[loop].missileDef.warhead);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                            (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
 
@@ -1847,7 +1838,7 @@ namespace Pulsar4X.Entities.Components
                 else
                 {
                     String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
@@ -1893,7 +1884,7 @@ namespace Pulsar4X.Entities.Components
                     if (ToDestroy >= DestChance)
                     {
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Intercepted an enemy missile and destroyed it.", Missiles[loop].Name, loop, Name);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
 
@@ -1905,7 +1896,7 @@ namespace Pulsar4X.Entities.Components
                     else
                     {
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Intercepted an enemy missile and failed to destroyed it.", Missiles[loop].Name, loop, Name);
-                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                        MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
                     }
@@ -1923,7 +1914,7 @@ namespace Pulsar4X.Entities.Components
                 else
                 {
                     String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
-                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                    MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                        (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
@@ -1935,7 +1926,7 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         private void SearchForNewTarget()
         {
-            bool hasSystem = ordnanceGroupFaction.DetectedContactLists.ContainsKey(Contact.CurrentSystem);
+            bool hasSystem = ordnanceGroupFaction.DetectedContactLists.ContainsKey(Contact.Position.System);
             if (hasSystem)
             {
 
@@ -1945,17 +1936,17 @@ namespace Pulsar4X.Entities.Components
 #warning magic number related to missile sensor resolution and target checking. Only res 1 sensors will go after missiles.
                 if (Missiles[0].missileDef.aSD.resolution == 1)
                 {
-                    foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedMissileContacts)
+                    foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.Position.System].DetectedMissileContacts)
                     {
                         /// <summary>
                         /// active detection exists for this missile group, and it hasn't been destroyed.
                         /// </summary>
                         if (pair.Value.active == true && pair.Key.missilesDestroyed != pair.Key.Missiles.Count)
                         {
-                            int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.contact);
+                            int TGID = Contact.Position.System.SystemContactList.IndexOf(pair.Key.contact);
                             float dist = Contact.DistanceTable[TGID];
                             int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size));
-                            bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+                            bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
 
                             if (det == true)
                             {
@@ -1982,17 +1973,17 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// search for ship targets.
                     /// </summary>
-                    foreach (KeyValuePair<ShipTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.CurrentSystem].DetectedContacts)
+                    foreach (KeyValuePair<ShipTN, FactionContact> pair in ordnanceGroupFaction.DetectedContactLists[Contact.Position.System].DetectedContacts)
                     {
                         /// <summary>
                         /// Active tracking on this ship exists, and the ship itself hasn't been destroyed. If the ship is destroyed it will be cleaned up at the end of simEntity.
                         /// </summary>
                         if (pair.Value.active == true && pair.Key.IsDestroyed == false)
                         {
-                            int TGID = Contact.CurrentSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+                            int TGID = Contact.Position.System.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
                             float dist = Contact.DistanceTable[TGID];
                             int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
-                            bool det = ordnanceGroupFaction.LargeDetection(Contact.CurrentSystem, dist, detection);
+                            bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
 
                             if (det == true)
                             {

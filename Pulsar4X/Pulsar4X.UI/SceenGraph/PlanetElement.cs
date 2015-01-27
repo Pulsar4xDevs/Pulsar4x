@@ -157,12 +157,12 @@ namespace Pulsar4X.UI.SceenGraph
             /// <summary>
             /// Update the position of this element.
             /// </summary>
-            Vector3 pos = new Vector3((float)(m_oPlanet.XSystem), (float)(m_oPlanet.YSystem), 0.0f);
+            Vector3 pos = new Vector3((float)(m_oPlanet.Position.X), (float)(m_oPlanet.Position.Y), 0.0f);
 
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;
 
-            Vector3 pos2 = new Vector3((float)m_oPlanet.Parent.XSystem, (float)m_oPlanet.Parent.YSystem, 0.0f);
+            Vector3 pos2 = new Vector3((float)m_oPlanet.Parent.Position.X, (float)m_oPlanet.Parent.Position.Y, 0.0f);
             m_oOrbitCircle.CurrentPosition = pos2;
 
             /// <summary>

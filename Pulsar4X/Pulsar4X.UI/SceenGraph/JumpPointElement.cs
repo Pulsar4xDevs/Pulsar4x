@@ -112,7 +112,7 @@ namespace Pulsar4X.UI.SceenGraph
             /// <summary>
             /// Update the position of this element.
             /// </summary>
-            Vector3 pos = new Vector3((float)m_oJumpPoint.XSystem, (float)m_oJumpPoint.YSystem, 0.0f);
+            Vector3 pos = new Vector3((float)m_oJumpPoint.Position.X, (float)m_oJumpPoint.Position.Y, 0.0f);
 
             PrimaryPrimitive.Position = pos;
             Lable.Position = pos;

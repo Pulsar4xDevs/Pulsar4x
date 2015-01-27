@@ -613,8 +613,8 @@ namespace Pulsar4X.Tests
 
             Waypoint WP1 = new Waypoint("WP TG Orders", System, 0.1, 0.1, 0);
 
-            planet.XSystem = 0.0;
-            planet.YSystem = 0.0;
+            planet.Position.X = 0.0;
+            planet.Position.Y = 0.0;
 
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
@@ -639,7 +639,7 @@ namespace Pulsar4X.Tests
             while (TaskGroup1.TaskGroupOrders.Count != 0)
             {
                 TaskGroup1.FollowOrders(5);
-                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.XSystem * Constants.Units.KM_PER_AU, TaskGroup1.Contact.YSystem * Constants.Units.KM_PER_AU, TaskGroup1.Contact.XSystem, TaskGroup1.Contact.YSystem);
+                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.Position.X * Constants.Units.KM_PER_AU, TaskGroup1.Contact.Position.Y * Constants.Units.KM_PER_AU, TaskGroup1.Contact.Position.X, TaskGroup1.Contact.Position.Y);
             }
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
@@ -660,13 +660,13 @@ namespace Pulsar4X.Tests
             System2.Stars.Add(S2);
 
             Planet Start1 = new Planet(System1.Stars[0], System1.Stars[0]);
-            Start1.XSystem = 1.0;
-            Start1.YSystem = 1.0;
+            Start1.Position.X = 1.0;
+            Start1.Position.Y = 1.0;
 
 
             Planet Start2 = new Planet(System2.Stars[0], System1.Stars[0]);
-            Start2.XSystem = 1.0005;
-            Start2.YSystem = 1.0005;
+            Start2.Position.X = 1.0005;
+            Start2.Position.Y = 1.0005;
 
 
 
@@ -710,7 +710,7 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            Console.WriteLine("Time: 0 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
+            Console.WriteLine("Time: 0 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
@@ -718,7 +718,7 @@ namespace Pulsar4X.Tests
             PlayerFaction1.SensorSweep(5);
             PlayerFaction2.SensorSweep(5);
 
-            Console.WriteLine("Time: 5 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
+            Console.WriteLine("Time: 5 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
@@ -729,7 +729,7 @@ namespace Pulsar4X.Tests
             PlayerFaction1.SensorSweep(10);
             PlayerFaction2.SensorSweep(10);
 
-            Console.WriteLine("Time: 10 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
+            Console.WriteLine("Time: 10 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
@@ -737,19 +737,19 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            System1.AddJumpPoint(S1, 0.1, 0.2);
-            System2.AddJumpPoint(S2, 0.2, 0.1);
+            System1.CreateJumpPoint(S1, 0.1, 0.2);
+            System2.CreateJumpPoint(S2, 0.2, 0.1);
 
             System1.JumpPoints[0].Connect = System2.JumpPoints[0];
             System2.JumpPoints[0].Connect = System1.JumpPoints[0];
 
-            System1.JumpPoints[0].Transit(PlayerFaction1.TaskGroups[0], false);
-            System1.JumpPoints[0].Transit(PlayerFaction2.TaskGroups[0], true);
+            System1.JumpPoints[0].AttemptTransit(PlayerFaction1.TaskGroups[0], false);
+            System1.JumpPoints[0].AttemptTransit(PlayerFaction2.TaskGroups[0], true);
 
             PlayerFaction1.SensorSweep(15);
             PlayerFaction2.SensorSweep(15);
 
-            Console.WriteLine("Time: 15 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.CurrentSystem.Name, PlayerFaction2.TaskGroups[0].Contact.CurrentSystem.Name);
+            Console.WriteLine("Time: 15 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
@@ -767,8 +767,8 @@ namespace Pulsar4X.Tests
             System1.Stars.Add(S1);
             System1.Stars[0].Planets.Add(pl1);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -821,11 +821,11 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 2.0;
-            System1.Stars[0].Planets[1].YSystem = 2.0;
+            System1.Stars[0].Planets[1].Position.X = 2.0;
+            System1.Stars[0].Planets[1].Position.Y = 2.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -892,11 +892,11 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 2.0;
-            System1.Stars[0].Planets[1].YSystem = 2.0;
+            System1.Stars[0].Planets[1].Position.X = 2.0;
+            System1.Stars[0].Planets[1].Position.Y = 2.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -957,14 +957,14 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl2);
             System1.Stars[0].Planets.Add(pl3);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 0.0;
-            System1.Stars[0].Planets[1].YSystem = 3.0;
+            System1.Stars[0].Planets[1].Position.X = 0.0;
+            System1.Stars[0].Planets[1].Position.Y = 3.0;
 
-            System1.Stars[0].Planets[2].XSystem = 0.0;
-            System1.Stars[0].Planets[2].YSystem = 0.0;
+            System1.Stars[0].Planets[2].Position.X = 0.0;
+            System1.Stars[0].Planets[2].Position.Y = 0.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1012,8 +1012,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets[1].Populations[0].FuelStockpile = 10.0f;
 
             PlayerFaction1.TaskGroups[1].IsOrbiting = false;
-            PlayerFaction1.TaskGroups[1].Contact.XSystem = 3.0;
-            PlayerFaction1.TaskGroups[1].Contact.YSystem = 0.0;
+            PlayerFaction1.TaskGroups[1].Contact.Position.X = 3.0;
+            PlayerFaction1.TaskGroups[1].Contact.Position.Y = 0.0;
 
             Orders RefuelFromColony = new Orders(Constants.ShipTN.OrderType.RefuelFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(RefuelFromColony);
@@ -1035,7 +1035,7 @@ namespace Pulsar4X.Tests
             while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
             {
                 Console.WriteLine("===================={0} {1} {2}====================", tickCount, PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count, PlayerFaction1.TaskGroups[0].TimeRequirement);
-                Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.XSystem, PlayerFaction1.TaskGroups[0].Contact.YSystem);
+                Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.Position.X, PlayerFaction1.TaskGroups[0].Contact.Position.Y);
                 Console.WriteLine("Fuel:s1:{0} s2:{1} s3:{2} s4:{3} P1:{4} P2:{5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentFuel, PlayerFaction1.TaskGroups[0].Ships[1].CurrentFuel,
                     PlayerFaction1.TaskGroups[1].Ships[0].CurrentFuel, PlayerFaction1.TaskGroups[2].Ships[0].CurrentFuel, System1.Stars[0].Planets[0].Populations[0].FuelStockpile,
                     System1.Stars[0].Planets[1].Populations[0].FuelStockpile);
@@ -1045,7 +1045,7 @@ namespace Pulsar4X.Tests
             }
 
             Console.WriteLine("===================={0} {1} {2}====================", tickCount, PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count, PlayerFaction1.TaskGroups[0].TimeRequirement);
-            Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.XSystem, PlayerFaction1.TaskGroups[0].Contact.YSystem);
+            Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.Position.X, PlayerFaction1.TaskGroups[0].Contact.Position.Y);
             Console.WriteLine("Fuel:s1:{0} s2:{1} s3:{2} s4:{3} P1:{4} P2:{5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentFuel, PlayerFaction1.TaskGroups[0].Ships[1].CurrentFuel,
                 PlayerFaction1.TaskGroups[1].Ships[0].CurrentFuel, PlayerFaction1.TaskGroups[2].Ships[0].CurrentFuel, System1.Stars[0].Planets[0].Populations[0].FuelStockpile,
                 System1.Stars[0].Planets[1].Populations[0].FuelStockpile);
@@ -1069,14 +1069,14 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl2);
             System1.Stars[0].Planets.Add(pl3);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 0.0;
-            System1.Stars[0].Planets[1].YSystem = 3.0;
+            System1.Stars[0].Planets[1].Position.X = 0.0;
+            System1.Stars[0].Planets[1].Position.Y = 3.0;
 
-            System1.Stars[0].Planets[2].XSystem = 0.0;
-            System1.Stars[0].Planets[2].YSystem = 0.0;
+            System1.Stars[0].Planets[2].Position.X = 0.0;
+            System1.Stars[0].Planets[2].Position.Y = 0.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1129,8 +1129,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies = 10;
 
             PlayerFaction1.TaskGroups[1].IsOrbiting = false;
-            PlayerFaction1.TaskGroups[1].Contact.XSystem = 3.0;
-            PlayerFaction1.TaskGroups[1].Contact.YSystem = 0.0;
+            PlayerFaction1.TaskGroups[1].Contact.Position.X = 3.0;
+            PlayerFaction1.TaskGroups[1].Contact.Position.Y = 0.0;
 
             Orders ResupplyFromColony = new Orders(Constants.ShipTN.OrderType.ResupplyFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromColony);
@@ -1152,7 +1152,7 @@ namespace Pulsar4X.Tests
             while (PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count > 0)
             {
                 Console.WriteLine("===================={0} {1} {2}====================", tickCount, PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count, PlayerFaction1.TaskGroups[0].TimeRequirement);
-                Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.XSystem, PlayerFaction1.TaskGroups[0].Contact.YSystem);
+                Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.Position.X, PlayerFaction1.TaskGroups[0].Contact.Position.Y);
                 Console.WriteLine("MSP:s1:{0} s2:{1} s3:{2} s4:{3} P1:{4} P2:{5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[0].Ships[1].CurrentMSP,
                     PlayerFaction1.TaskGroups[1].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[2].Ships[0].CurrentMSP, System1.Stars[0].Planets[0].Populations[0].MaintenanceSupplies,
                     System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies);
@@ -1164,7 +1164,7 @@ namespace Pulsar4X.Tests
             }
 
             Console.WriteLine("===================={0} {1} {2}====================", tickCount, PlayerFaction1.TaskGroups[0].TaskGroupOrders.Count, PlayerFaction1.TaskGroups[0].TimeRequirement);
-            Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.XSystem, PlayerFaction1.TaskGroups[0].Contact.YSystem);
+            Console.WriteLine("X,Y: {0}/{1}", PlayerFaction1.TaskGroups[0].Contact.Position.X, PlayerFaction1.TaskGroups[0].Contact.Position.Y);
             Console.WriteLine("MSP:s1:{0} s2:{1} s3:{2} s4:{3} P1:{4} P2:{5}", PlayerFaction1.TaskGroups[0].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[0].Ships[1].CurrentMSP,
                 PlayerFaction1.TaskGroups[1].Ships[0].CurrentMSP, PlayerFaction1.TaskGroups[2].Ships[0].CurrentMSP, System1.Stars[0].Planets[0].Populations[0].MaintenanceSupplies,
                 System1.Stars[0].Planets[1].Populations[0].MaintenanceSupplies);
@@ -1186,11 +1186,11 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 2.0;
-            System1.Stars[0].Planets[1].YSystem = 2.0;
+            System1.Stars[0].Planets[1].Position.X = 2.0;
+            System1.Stars[0].Planets[1].Position.Y = 2.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1260,11 +1260,11 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 2.0;
-            System1.Stars[0].Planets[1].YSystem = 2.0;
+            System1.Stars[0].Planets[1].Position.X = 2.0;
+            System1.Stars[0].Planets[1].Position.Y = 2.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1386,8 +1386,8 @@ namespace Pulsar4X.Tests
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
                     Planet Start = new Planet(Sol.Stars[0], Sol.Stars[0]);
-                    Start.XSystem = wx;
-                    Start.YSystem = wy;
+                    Start.Position.X = wx;
+                    Start.Position.Y = wy;
 
                     string ID1 = loop.ToString();
 
@@ -1517,18 +1517,18 @@ namespace Pulsar4X.Tests
                                 {
                                     target = null;
                                     P[loop].TaskGroups[loop2].clearAllOrders();
-                                    if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
+                                    if (P[loop].TaskGroups[loop2].Contact.Position.X != 0.0 && P[loop].TaskGroups[loop2].Contact.Position.Y != 0.0)
                                         P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                 }
                             }
 
                             if (target != null)
                             {
-                                if (P[loop].DetectedContactLists.ContainsKey(target.ShipsTaskGroup.Contact.CurrentSystem))
+                                if (P[loop].DetectedContactLists.ContainsKey(target.ShipsTaskGroup.Contact.Position.System))
                                 {
-                                    if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts.ContainsKey(target))
+                                    if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.Position.System].DetectedContacts.ContainsKey(target))
                                     {
-                                        if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.CurrentSystem].DetectedContacts[target].active == true)
+                                        if (P[loop].DetectedContactLists[target.ShipsTaskGroup.Contact.Position.System].DetectedContacts[target].active == true)
                                         {
                                             if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
                                             {
@@ -1538,14 +1538,14 @@ namespace Pulsar4X.Tests
                                         else
                                         {
                                             P[loop].TaskGroups[loop2].clearAllOrders();
-                                            if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
+                                            if (P[loop].TaskGroups[loop2].Contact.Position.X != 0.0 && P[loop].TaskGroups[loop2].Contact.Position.Y != 0.0)
                                                 P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                         }
                                     }
                                     else
                                     {
                                         P[loop].TaskGroups[loop2].clearAllOrders();
-                                        if (P[loop].TaskGroups[loop2].Contact.XSystem != 0.0 && P[loop].TaskGroups[loop2].Contact.YSystem != 0.0)
+                                        if (P[loop].TaskGroups[loop2].Contact.Position.X != 0.0 && P[loop].TaskGroups[loop2].Contact.Position.Y != 0.0)
                                             P[loop].TaskGroups[loop2].IssueOrder(MoveToCenter);
                                     }
                                 }
@@ -1562,7 +1562,7 @@ namespace Pulsar4X.Tests
 
                 if (P[loop].TaskGroups.Count != 0)
                 {
-                    if (P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.CurrentSystem].DetectedContacts.Count == 0 && P[loop].TaskGroups[0].TaskGroupOrders.Count == 0)
+                    if (P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.Position.System].DetectedContacts.Count == 0 && P[loop].TaskGroups[0].TaskGroupOrders.Count == 0)
                     {
                         if (loop == (factionCount - 1) && done == true)
                         {
@@ -1587,7 +1587,7 @@ namespace Pulsar4X.Tests
                 {
                     done = true;
                 }
-                Console.WriteLine("***{0} {1} {2}***", loop, done, P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.CurrentSystem].DetectedContacts.Count);
+                Console.WriteLine("***{0} {1} {2}***", loop, done, P[loop].DetectedContactLists[P[loop].TaskGroups[0].Contact.Position.System].DetectedContacts.Count);
             }
 
             return done;
@@ -1717,7 +1717,7 @@ namespace Pulsar4X.Tests
                             {
                                 for (int loop4 = 0; loop4 < factionCount; loop4++)
                                 {
-                                    StarSystem CurSystem = P[loop].TaskGroups[loop2].Contact.CurrentSystem;
+                                    StarSystem CurSystem = P[loop].TaskGroups[loop2].Contact.Position.System;
                                     if (P[loop4].DetectedContactLists.ContainsKey(CurSystem))
                                     {
                                         if (P[loop4].DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(P[loop].TaskGroups[loop2].Ships[loop3]))
@@ -1738,7 +1738,7 @@ namespace Pulsar4X.Tests
                                 if (P[loop].TaskGroups[loop2].Ships.Count == 0)
                                 {
                                     P[loop].TaskGroups[loop2].clearAllOrders();
-                                    P[loop].TaskGroups[loop2].Contact.CurrentSystem.RemoveContact(P[loop].TaskGroups[loop2].Contact);
+                                    P[loop].TaskGroups[loop2].Contact.Position.System.RemoveContact(P[loop].TaskGroups[loop2].Contact);
                                     P[loop].TaskGroups.Remove(P[loop].TaskGroups[loop2]);
 
                                     TGDestroyed++;
@@ -1749,7 +1749,7 @@ namespace Pulsar4X.Tests
                                     break;
                                 }
 
-                                P[loop].DetectedContactLists[P[loop].TaskGroups[loop2].Contact.CurrentSystem].DetectedContacts.Clear();
+                                P[loop].DetectedContactLists[P[loop].TaskGroups[loop2].Contact.Position.System].DetectedContacts.Clear();
                             }
                         }
                         if (P[loop].TaskGroups.Count == 0)
@@ -1775,11 +1775,11 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 2.0;
-            System1.Stars[0].Planets[1].YSystem = 2.0;
+            System1.Stars[0].Planets[1].Position.X = 2.0;
+            System1.Stars[0].Planets[1].Position.Y = 2.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1862,11 +1862,11 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 2.0;
-            System1.Stars[0].Planets[1].YSystem = 2.0;
+            System1.Stars[0].Planets[1].Position.X = 2.0;
+            System1.Stars[0].Planets[1].Position.Y = 2.0;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1981,11 +1981,11 @@ namespace Pulsar4X.Tests
             Population P1 = new Population(System1.Stars[0].Planets[0], PlayerFaction1);
             Population P2 = new Population(System1.Stars[0].Planets[1], PlayerFaction2);
 
-            System1.Stars[0].Planets[0].XSystem = 1.0;
-            System1.Stars[0].Planets[0].YSystem = 1.0;
+            System1.Stars[0].Planets[0].Position.X = 1.0;
+            System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].XSystem = 1.05;
-            System1.Stars[0].Planets[1].YSystem = 1.05;
+            System1.Stars[0].Planets[1].Position.X = 1.05;
+            System1.Stars[0].Planets[1].Position.Y = 1.05;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");

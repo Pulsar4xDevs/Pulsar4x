@@ -215,8 +215,8 @@ namespace Pulsar4X.Lib
             /// now get the position.
             /// </summary>
             FindCartesianPosition(theOrbit, theOrbit.TimeSinceApogee, out x, out y);
-            theOrbit.XSystem = x;
-            theOrbit.YSystem = y;
+            theOrbit.Position.X = x;
+            theOrbit.Position.Y = y;
         }
 
         public void FindCartesianPosition(OrbitingEntity theOrbit, long DaysSinceEpoch, out double x, out double y)

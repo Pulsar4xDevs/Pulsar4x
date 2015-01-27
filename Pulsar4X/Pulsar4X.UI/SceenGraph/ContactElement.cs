@@ -186,8 +186,8 @@ namespace Pulsar4X.UI.SceenGraph
             switch (m_oSystemContect.SSEntity)
             {
                 case StarSystemEntityType.TaskGroup:
-                    pos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.XSystem, (float)m_oSystemContect.TaskGroup.Contact.YSystem, 0.0f);
-                    lastPos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.LastXSystem, (float)m_oSystemContect.TaskGroup.Contact.LastYSystem, 0.0f);
+                    pos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.Position.X, (float)m_oSystemContect.TaskGroup.Contact.Position.Y, 0.0f);
+                    lastPos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.LastPosition.X, (float)m_oSystemContect.TaskGroup.Contact.LastPosition.Y, 0.0f);
 
                     if (m_oSystemContect.TaskGroup.DrawTravelLine != 3)
                     {
@@ -208,8 +208,8 @@ namespace Pulsar4X.UI.SceenGraph
                 case StarSystemEntityType.Population:
                     break;
                 case StarSystemEntityType.Missile:
-                    pos = new Vector3((float)m_oSystemContect.MissileGroup.contact.XSystem, (float)m_oSystemContect.MissileGroup.contact.YSystem, 0.0f);
-                    lastPos = new Vector3((float)m_oSystemContect.MissileGroup.contact.LastXSystem, (float)m_oSystemContect.MissileGroup.contact.LastYSystem, 0.0f);
+                    pos = new Vector3((float)m_oSystemContect.MissileGroup.contact.Position.X, (float)m_oSystemContect.MissileGroup.contact.Position.Y, 0.0f);
+                    lastPos = new Vector3((float)m_oSystemContect.MissileGroup.contact.LastPosition.X, (float)m_oSystemContect.MissileGroup.contact.LastPosition.Y, 0.0f);
 
                     if (m_oSystemContect.MissileGroup.DrawTravelLine != 3)
                     {

@@ -52,7 +52,7 @@ namespace Pulsar4X.Entities
         public double LengthOfDay { get; set; } //length of local day (hours)
         public bool IsInResonantRotation { get; set; } //tidally locked
 
-        public override double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
+        public double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
         [JsonIgnore]
         public double MassInEarthMasses { get { return Mass * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfDust { get; set; } //mass, ignoring gas
@@ -265,10 +265,10 @@ namespace Pulsar4X.Entities
             Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, tickValue);
 
             /// <summary>
-            /// Adjust planet position based on the primary. Right now XSystem and YSystem assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
+            /// Adjust planet position based on the primary. Right now Position.X and Position.Y assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
             /// </summary>
-            XSystem = XSystem + Parent.XSystem;
-            YSystem = YSystem + Parent.YSystem;
+            Position.X = Position.X + Parent.Position.X;
+            Position.Y = Position.Y + Parent.Position.Y;
 
             /// <summary>
             /// Update all the moons.
@@ -283,8 +283,8 @@ namespace Pulsar4X.Entities
             ///</summary>
             foreach (TaskGroupTN TaskGroup in TaskGroupsInOrbit)
             {
-                TaskGroup.Contact.XSystem = XSystem;
-                TaskGroup.Contact.YSystem = YSystem;
+                TaskGroup.Contact.Position.X = Position.X;
+                TaskGroup.Contact.Position.Y = Position.Y;
             }
         }
 

@@ -27,7 +27,7 @@ namespace Pulsar4X.Entities
         public static bool FinalDefensiveFire(BindingList<Faction> P, OrdnanceTN Missile, Random RNG)
         {
             bool Intercept = false;
-            StarSystem CurrentSystem = Missile.missileGroup.contact.CurrentSystem;
+            StarSystem CurrentSystem = Missile.missileGroup.contact.Position.System;
             float PointBlank = 10000.0f / (float)Constants.Units.KM_PER_AU;
 
             /// <summary>

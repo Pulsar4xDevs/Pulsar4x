@@ -517,7 +517,7 @@ namespace Pulsar4X.Entities.Components
             {
                 if (DistanceToTarget > m_oBeamFireControlDef.range)
                 {
-                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringZeroHitChance, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringZeroHitChance, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), (this.Name + " Zero % chance to hit."));
 
                     FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -565,7 +565,7 @@ namespace Pulsar4X.Entities.Components
                                     {
                                         String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedWeapon.Name, LinkedWeapon.beamDef.damage[RangeIncrement], toHit);
 
-                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                         FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -585,7 +585,7 @@ namespace Pulsar4X.Entities.Components
                                     {
                                         String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapon.Name, toHit);
 
-                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                         FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -596,7 +596,7 @@ namespace Pulsar4X.Entities.Components
                             {
                                 String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapon.Name, LinkedWeapon.currentCapacitor, LinkedWeapon.beamDef.weaponCapacitor);
 
-                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                 FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -628,7 +628,7 @@ namespace Pulsar4X.Entities.Components
                                     {
                                         String WeaponFireS = String.Format("{0} hit {1} damage at {2}% tohit", LinkedTurret.Name, LinkedTurret.turretDef.baseBeamWeapon.damage[RangeIncrement], toHit);
 
-                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                         FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -648,7 +648,7 @@ namespace Pulsar4X.Entities.Components
                                     {
                                         String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurret.Name, toHit);
 
-                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                         FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -660,7 +660,7 @@ namespace Pulsar4X.Entities.Components
                                 String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedTurret.Name, LinkedTurret.currentCapacitor,
                                                                                                   (LinkedTurret.turretDef.baseBeamWeapon.weaponCapacitor * LinkedTurret.turretDef.multiplier));
 
-                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                 FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -725,7 +725,7 @@ namespace Pulsar4X.Entities.Components
                                         {
                                             String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedWeapon.Name, toHit);
 
-                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                             FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -744,7 +744,7 @@ namespace Pulsar4X.Entities.Components
                                         {
                                             String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedWeapon.Name, toHit);
 
-                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                             FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -754,7 +754,7 @@ namespace Pulsar4X.Entities.Components
                                     {
                                         String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedWeapon.Name, toHit);
 
-                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                         FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -765,7 +765,7 @@ namespace Pulsar4X.Entities.Components
                             {
                                 String WeaponFireS = String.Format("{0} Recharging {1}/{2} Power", LinkedWeapon.Name, LinkedWeapon.currentCapacitor, LinkedWeapon.beamDef.weaponCapacitor);
 
-                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringRecharging, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                 FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -824,7 +824,7 @@ namespace Pulsar4X.Entities.Components
                                             {
                                                 String WeaponFireS = String.Format("{0} and destroyed a missile at {1}% tohit", LinkedTurret.Name, toHit);
 
-                                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                                 FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -843,7 +843,7 @@ namespace Pulsar4X.Entities.Components
                                             {
                                                 String WeaponFireS = String.Format("{0} and failed to destroyed a missile at {1}% tohit", LinkedTurret.Name, toHit);
 
-                                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                                MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringHit, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                                 FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -853,7 +853,7 @@ namespace Pulsar4X.Entities.Components
                                         {
                                             String WeaponFireS = String.Format("{0} missed at {1}% tohit", LinkedTurret.Name, toHit);
 
-                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.CurrentSystem, FiringShip.ShipsTaskGroup.Contact,
+                                            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.FiringMissed, FiringShip.ShipsTaskGroup.Contact.Position.System, FiringShip.ShipsTaskGroup.Contact,
                                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), WeaponFireS);
 
                                             FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -1085,7 +1085,7 @@ namespace Pulsar4X.Entities.Components
                             if (toHit >= Hit)
                             {
                                 String Entry = String.Format("{0} Fired at {1} km and hit.", LinkedWeapon.Name, Range);
-                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                                    (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                                 ShipFaction.MessageLog.Add(Msg);
                                 return true;
@@ -1093,7 +1093,7 @@ namespace Pulsar4X.Entities.Components
                             else
                             {
                                 String Entry = String.Format("{0} Fired at {1} km and missed.", LinkedWeapon.Name, Range);
-                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                                    (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                                 ShipFaction.MessageLog.Add(Msg);
                             }
@@ -1109,7 +1109,7 @@ namespace Pulsar4X.Entities.Components
                         if (toHit >= Hit)
                         {
                             String Entry = String.Format("{0} Fired at {1} km and hit.", LinkedWeapon.Name, Range);
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                                (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                             ShipFaction.MessageLog.Add(Msg);
                             return true;
@@ -1117,7 +1117,7 @@ namespace Pulsar4X.Entities.Components
                         else
                         {
                             String Entry = String.Format("{0} Fired at {1} km and missed.", LinkedWeapon.Name, Range);
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                                (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                             ShipFaction.MessageLog.Add(Msg);
                         }
@@ -1152,7 +1152,7 @@ namespace Pulsar4X.Entities.Components
                         if (toHit >= Hit)
                         {
                             String Entry = String.Format("{0} Fired at {1} km and hit.", LinkedTurret.Name, Range);
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                                (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                             ShipFaction.MessageLog.Add(Msg);
                             return true;
@@ -1160,7 +1160,7 @@ namespace Pulsar4X.Entities.Components
                         else
                         {
                             String Entry = String.Format("{0} Fired at {1} km and missed.", LinkedTurret.Name, Range);
-                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.CurrentSystem, Contact, GameState.Instance.GameDateTime,
+                            MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.FiringHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
                                                                (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
                             ShipFaction.MessageLog.Add(Msg);
                         }

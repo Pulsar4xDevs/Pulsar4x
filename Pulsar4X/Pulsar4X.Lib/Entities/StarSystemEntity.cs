@@ -16,37 +16,37 @@ namespace Pulsar4X.Entities
         TypeCount
     }
 
-    public abstract class StarSystemEntity : GameEntity
+    public struct SystemPosition
     {
+        public StarSystem System { get; set; }
+
         /// <summary>
         /// System X coordinante in AU
         /// </summary>
-        public double XSystem { get; set; }
+        public double X { get; set; }
 
         /// <summary>
         /// System Y coordinante in AU
         /// </summary>
-        public double YSystem { get; set; }
+        public double Y { get; set; }
 
         /// <summary>
         /// System Z coordinante in AU
         /// </summary>
-        public double ZSystem { get; set; }
+        public double Z { get; set; }
+    }
+
+    public abstract class StarSystemEntity : GameEntity
+    {
+        /// <summary>
+        /// Current System and Position of the entity.
+        /// </summary>
+        public SystemPosition Position;
 
         /// <summary>
         /// Type of entity that is represented here.
         /// </summary>
         public StarSystemEntityType SSEntity { get; set; }
-
-        /// <summary>
-        /// The Mass of this object.
-        /// </summary>
-        protected double m_dMass;
-
-        /// <summary>
-        /// Mass in Solar Masses.
-        /// </summary>
-        public abstract double Mass { get; set; }
 
         public StarSystemEntity()
             : base()

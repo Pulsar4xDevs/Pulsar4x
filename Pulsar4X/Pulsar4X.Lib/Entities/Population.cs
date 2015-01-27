@@ -580,7 +580,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public void UpdateLocation()
         {
-            Contact.UpdateLocationInSystem(Planet.XSystem, Planet.YSystem);
+            Contact.UpdateLocationInSystem(Planet.Position.X, Planet.Position.Y);
         }
 
         /// <summary>

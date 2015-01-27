@@ -76,6 +76,16 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double TrueAnomaly { get; set; }
 
+        /// <summary>
+        /// Mass of the object.
+        /// </summary>
+        protected double m_dMass;
+
+        /// <summary>
+        /// Mass in solar masses.
+        /// </summary>
+        public double Mass { get; set; }
+
         public OrbitingEntity()
             : base()
         {
