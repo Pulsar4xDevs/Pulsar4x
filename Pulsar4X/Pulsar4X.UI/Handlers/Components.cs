@@ -90,10 +90,6 @@ namespace Pulsar4X.UI.Handlers
 
         private IntPtr eventMask;
 
-        [DllImport("user32", CharSet = CharSet.Auto)]
-        private extern static IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, IntPtr lParam);
-
-
         public Components()
         {
 
