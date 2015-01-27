@@ -1292,5 +1292,17 @@ namespace Pulsar4X
             /// </summary>
             public const int MissileResolutionMaximum = 14;
         }
+
+        /// <summary>
+        /// List of game-specific settings.
+        /// Since we don't have save/load yet, I'm just sticking this here.
+        /// TODO: Move to correct place in the code.
+        /// </summary>
+        public static class GameSettings
+        {
+            // If true, allows a faction from using a non-friendly faction's JumpGate. (True = default aurora)
+            // TODO: Not currently functional as false. Factions have no relationships with each other yet.
+            public static bool AllowHostileGateJump = true;
+        }
     }
 }
