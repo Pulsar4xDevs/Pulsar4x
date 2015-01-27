@@ -99,7 +99,7 @@ namespace Pulsar4X.Entities
             IsGated = true;
             GateOwner = F;
             Name = "(G) " + Name;
-            AllowHostileJumps = true;
+            AllowHostileJumps = true; // Default setting for new JumpGates
         }
 
         /// <summary>
@@ -190,10 +190,15 @@ namespace Pulsar4X.Entities
         {
             if (IsGated)
             {
-                // TODO: Add "Allow Friendly factions to use Gates"
-                if (Constants.GameSettings.AllowHostileGateJump || AllowHostileJumps || GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
+                if (Constants.GameSettings.AllowHostileGateJump || AllowHostileJumps)
                 {
-                    // If nobody owns the gate, or we do, allow the jump.
+                    // Gate/Game settings are not setup to allow blocking of hostiles.
+                    return true;
+                }
+                if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
+                {
+                    // Nobody owns the gate, or we do, allow the jump.
+                    // TODO: Check if a friendly faction owns the gate, and allow.
                     return true;
                 }
             }
