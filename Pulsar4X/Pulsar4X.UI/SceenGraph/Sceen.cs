@@ -14,6 +14,7 @@ using Pulsar4X.Entities;
 #if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+using Pulsar4X.Entities.Components;
 #endif
 
 namespace Pulsar4X.UI.SceenGraph
@@ -544,10 +545,11 @@ namespace Pulsar4X.UI.SceenGraph
             switch (oContact.SSEntity)
             {
                 case StarSystemEntityType.TaskGroup:
+                    TaskGroupTN TaskGroup = oContact.Entity as TaskGroupTN;
                     oContactElement = new ContactElement(a_oDefaultEffect, oContact);
                     oContactElement.EntityID = oContact.Id;
 
-                    v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.Position.X, (float)oContact.TaskGroup.Contact.Position.Y, 0.0f);
+                    v3ContactPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
                     oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                     v3ContactPos,
@@ -556,7 +558,7 @@ namespace Pulsar4X.UI.SceenGraph
                                                                     UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
 
                     oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, TaskGroup.Name);
 
                     oContactElement.Lable = oNameLable;
                     oContactElement.PrimaryPrimitive = oContactQuad;
@@ -566,10 +568,11 @@ namespace Pulsar4X.UI.SceenGraph
                     (oContactElement as ContactElement).ParentSceen = this;
                     break;
                 case StarSystemEntityType.Missile:
+                    OrdnanceGroupTN MissileGroup = oContact.Entity as OrdnanceGroupTN;
                     oContactElement = new ContactElement(a_oDefaultEffect, oContact);
                     oContactElement.EntityID = oContact.Id;
 
-                    v3ContactPos = new Vector3((float)oContact.MissileGroup.contact.Position.X, (float)oContact.MissileGroup.contact.Position.Y, 0.0f);
+                    v3ContactPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);
 
                     oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                 v3ContactPos,
@@ -578,7 +581,7 @@ namespace Pulsar4X.UI.SceenGraph
                                                                 UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
 
                     oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.MissileGroup.Name);
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, MissileGroup.Name);
 
                     oContactElement.Lable = oNameLable;
                     oContactElement.PrimaryPrimitive = oContactQuad;

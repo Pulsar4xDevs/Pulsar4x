@@ -7,6 +7,7 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.UI.SceenGraph
 {
@@ -31,14 +32,15 @@ namespace Pulsar4X.UI.SceenGraph
                     {
                         switch (m_oSystemContect.SSEntity)
                         {
+                                // TODO: Check if we really need these switches.
                             case StarSystemEntityType.TaskGroup:
-                                m_oSystemContect.TaskGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                                m_oSystemContect.Entity.PropertyChanged -= m_oSystemContect_PropertyChanged;
                                 break;
                             case StarSystemEntityType.Population:
-                                m_oSystemContect.Pop.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                                m_oSystemContect.Entity.PropertyChanged -= m_oSystemContect_PropertyChanged;
                                 break;
                             case StarSystemEntityType.Missile:
-                                m_oSystemContect.MissileGroup.PropertyChanged -= m_oSystemContect_PropertyChanged;
+                                m_oSystemContect.Entity.PropertyChanged -= m_oSystemContect_PropertyChanged;
                                 break;
                         }
 
@@ -49,13 +51,13 @@ namespace Pulsar4X.UI.SceenGraph
                         switch (m_oSystemContect.SSEntity)
                         {
                             case StarSystemEntityType.TaskGroup:
-                                m_oSystemContect.TaskGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
+                                m_oSystemContect.Entity.PropertyChanged += m_oSystemContect_PropertyChanged;
                                 break;
                             case StarSystemEntityType.Population:
-                                m_oSystemContect.Pop.PropertyChanged += m_oSystemContect_PropertyChanged;
+                                m_oSystemContect.Entity.PropertyChanged += m_oSystemContect_PropertyChanged;
                                 break;
                             case StarSystemEntityType.Missile:
-                                m_oSystemContect.MissileGroup.PropertyChanged += m_oSystemContect_PropertyChanged;
+                                m_oSystemContect.Entity.PropertyChanged += m_oSystemContect_PropertyChanged;
                                 break;
                         }
 
@@ -68,20 +70,7 @@ namespace Pulsar4X.UI.SceenGraph
         {
             if (e.PropertyName == "Name")
             {
-                // Change Label here! If we are doing this by system contact, then we need to check what type of StarSystemEntity this contact is.
-                switch (m_oSystemContect.SSEntity)
-                {
-                    case StarSystemEntityType.TaskGroup:
-                        Lable.Text = m_oSystemContect.TaskGroup.Name;
-                        break;
-                    case StarSystemEntityType.Population:
-                        Lable.Text = m_oSystemContect.Pop.Name;
-                        break;
-                    case StarSystemEntityType.Missile:
-                        Lable.Text = m_oSystemContect.MissileGroup.Name;
-                        break;
-                }
-
+                Lable.Text = m_oSystemContect.Entity.Name;
                 ParentSceen.Refresh();
             }
         }
@@ -186,45 +175,49 @@ namespace Pulsar4X.UI.SceenGraph
             switch (m_oSystemContect.SSEntity)
             {
                 case StarSystemEntityType.TaskGroup:
-                    pos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.Position.X, (float)m_oSystemContect.TaskGroup.Contact.Position.Y, 0.0f);
-                    lastPos = new Vector3((float)m_oSystemContect.TaskGroup.Contact.LastPosition.X, (float)m_oSystemContect.TaskGroup.Contact.LastPosition.Y, 0.0f);
+                    pos = new Vector3((float)m_oSystemContect.Position.X, (float)m_oSystemContect.Position.Y, 0.0f);
+                    lastPos = new Vector3((float)m_oSystemContect.LastPosition.X, (float)m_oSystemContect.LastPosition.Y, 0.0f);
 
-                    if (m_oSystemContect.TaskGroup.DrawTravelLine != 3)
+                    TaskGroupTN TaskGroup = m_oSystemContect.Entity as TaskGroupTN;
+
+                    if (TaskGroup.DrawTravelLine != 3)
                     {
                         m_oTravelLine.StartPos = lastPos;
                         m_oTravelLine.EndPos = pos;
                     }
-                    else if (m_oSystemContect.TaskGroup.DrawTravelLine == 3)
+                    else if (TaskGroup.DrawTravelLine == 3)
                     {
                         m_oTravelLine.StartPos = pos;
                         m_oTravelLine.EndPos = pos;
                     }
 
-                    if (m_oSystemContect.TaskGroup.DrawTravelLine == 2)
+                    if (TaskGroup.DrawTravelLine == 2)
                     {
-                        m_oSystemContect.TaskGroup.DrawTravelLine = 3;
+                        TaskGroup.DrawTravelLine = 3;
                     }
                     break;
                 case StarSystemEntityType.Population:
                     break;
                 case StarSystemEntityType.Missile:
-                    pos = new Vector3((float)m_oSystemContect.MissileGroup.contact.Position.X, (float)m_oSystemContect.MissileGroup.contact.Position.Y, 0.0f);
-                    lastPos = new Vector3((float)m_oSystemContect.MissileGroup.contact.LastPosition.X, (float)m_oSystemContect.MissileGroup.contact.LastPosition.Y, 0.0f);
+                    pos = new Vector3((float)m_oSystemContect.Position.X, (float)m_oSystemContect.Position.Y, 0.0f);
+                    lastPos = new Vector3((float)m_oSystemContect.LastPosition.X, (float)m_oSystemContect.LastPosition.Y, 0.0f);
 
-                    if (m_oSystemContect.MissileGroup.DrawTravelLine != 3)
+                    OrdnanceGroupTN MissileGroup = m_oSystemContect.Entity as OrdnanceGroupTN;
+
+                    if (MissileGroup.DrawTravelLine != 3)
                     {
                         m_oTravelLine.StartPos = lastPos;
                         m_oTravelLine.EndPos = pos;
                     }
-                    else if (m_oSystemContect.MissileGroup.DrawTravelLine == 3)
+                    else if (MissileGroup.DrawTravelLine == 3)
                     {
                         m_oTravelLine.StartPos = pos;
                         m_oTravelLine.EndPos = pos;
                     }
 
-                    if (m_oSystemContect.MissileGroup.DrawTravelLine == 2)
+                    if (MissileGroup.DrawTravelLine == 2)
                     {
-                        m_oSystemContect.MissileGroup.DrawTravelLine = 3;
+                        MissileGroup.DrawTravelLine = 3;
                     }
                     break;
             }
@@ -241,13 +234,7 @@ namespace Pulsar4X.UI.SceenGraph
             switch (m_oSystemContect.SSEntity)
             {
                 case StarSystemEntityType.TaskGroup:
-                    Lable.Text = m_oSystemContect.TaskGroup.Name;
-                    break;
-                case StarSystemEntityType.Population:
-                    Lable.Text = m_oSystemContect.Pop.Name;
-                    break;
-                case StarSystemEntityType.Missile:
-                    Lable.Text = m_oSystemContect.MissileGroup.Name;
+                    Lable.Text = m_oSystemContect.Entity.Name;
                     break;
             }
 

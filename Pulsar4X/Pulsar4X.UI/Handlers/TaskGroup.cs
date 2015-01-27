@@ -973,12 +973,12 @@ namespace Pulsar4X.UI.Handlers
             {
                 if (CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
                 {
-                    if (CurrentTaskGroup != CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup &&
-                        CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup.TaskGroupFaction == CurrentFaction)
+                    TaskGroupTN TaskGroup = CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].Entity as TaskGroupTN;
+                    if (CurrentTaskGroup != TaskGroup && TaskGroup.TaskGroupFaction == CurrentFaction)
                     {
                         //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup);
-                        string keyName = CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup.Name;
-                        GameEntity entObj = CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup;
+                        string keyName = TaskGroup.Name;
+                        GameEntity entObj = TaskGroup;
                         SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.TaskGroups, entObj);
                         SystemLocationGuidDict.Add(entObj.Id, keyName);
                         SystemLocationDict.Add(entObj.Id, valueObj);
