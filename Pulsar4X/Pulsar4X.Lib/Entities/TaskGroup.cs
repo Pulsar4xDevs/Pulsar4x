@@ -2279,13 +2279,12 @@ namespace Pulsar4X.Entities
                                 // Handle the jump here.
                                 // TODO: Put jump transition in it's own function within TaskGroup.
                                 SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
-                                Position.System = newPos.System;
-                                Position.X = newPos.X;
-                                Position.Y = newPos.Y;
-                                Position.Z = newPos.Z;
 
                                 Position.System.RemoveContact(Contact);
                                 newPos.System.AddContact(Contact);
+
+                                Position = newPos;
+
                                 Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
 
                                 // TODO: Set transit penalties here
@@ -2302,13 +2301,12 @@ namespace Pulsar4X.Entities
                                 // Handle the jump here.
                                 // TODO: Put jump transition in it's own function within TaskGroup.
                                 SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
-                                Position.System = newPos.System;
-                                Position.X = newPos.X;
-                                Position.Y = newPos.Y;
-                                Position.Z = newPos.Z;
 
                                 Position.System.RemoveContact(Contact);
                                 newPos.System.AddContact(Contact);
+
+                                Position = newPos;
+
                                 Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
 
                                 // TODO: Set transit penalties here
