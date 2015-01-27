@@ -30,17 +30,17 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// A list of TaskGroups currently inside this system.
         /// </summary>
-        public List<TaskGroupTN> TaskGroups { get; set; }
+        public BindingList<TaskGroupTN> TaskGroups { get; set; }
 
         /// <summary>
         /// A list of Populations currently inside this system.
         /// </summary>
-        public List<Population> Populations { get; set; }
+        public BindingList<Population> Populations { get; set; }
 
         /// <summary>
         /// A list of OrdnanceGroups (Missile Groups) currently inside this system.
         /// </summary>
-        public List<OrdnanceGroupTN> OrdnanceGroups { get; set; }
+        public BindingList<OrdnanceGroupTN> OrdnanceGroups { get; set; }
 
         /// <summary>
         /// Global List of all contacts within the system.
@@ -88,6 +88,15 @@ namespace Pulsar4X.Entities
             SystemContactList = new BindingList<SystemContact>();
             FactionDetectionLists = new BindingList<FactionSystemDetection>();
 
+            TaskGroups = new BindingList<TaskGroupTN>();
+            Populations = new BindingList<Population>();
+            OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
+
+            // Subscribe to change events.
+            TaskGroups.ListChanged += ContactsChanged;
+            Populations.ListChanged += ContactsChanged;
+            OrdnanceGroups.ListChanged += ContactsChanged;
+
             ContactCreateList = new BindingList<SystemContact>();
             ContactDeleteList = new BindingList<SystemContact>();
         }
@@ -101,9 +110,6 @@ namespace Pulsar4X.Entities
         {
             Waypoint NewWP = new Waypoint(Title, this, X, Y, FactionID);
             Waypoints.Add(NewWP);
-            //logger.Info("Waypoint added.");
-            //logger.Info(Position.XAU.ToString());
-            //logger.Info(Position.YAU.ToString());
         }
 
         /// <summary>
@@ -112,9 +118,6 @@ namespace Pulsar4X.Entities
         /// <param name="Remove"></param>
         public void RemoveWaypoint(Waypoint Remove)
         {
-            //logger.Info("Waypoint Removed.");
-            //logger.Info(Remove.Position.X.ToString());
-            //logger.Info(Remove.Position.Y.ToString());
             if (Waypoints.Count == 1)
                 Waypoints.Clear();
             else
@@ -133,18 +136,6 @@ namespace Pulsar4X.Entities
             JumpPoint NewJP = new JumpPoint(this, parentStar, XOffsetAU, YOffsetAU);
             JumpPoints.Add(NewJP);
             return NewJP;
-        }
-
-        public void AddTaskGroup(TaskGroupTN TaskGroup)
-        {
-            TaskGroups.Add(TaskGroup);
-            contactsChanged = true;
-        }
-
-        public void RemoveTaskGroup(TaskGroupTN TaskGroup)
-        {
-            TaskGroups.Remove(TaskGroup);
-            contactsChanged = true;
         }
 
         /// <summary>
@@ -248,21 +239,29 @@ namespace Pulsar4X.Entities
         public int GetProtectionLevel(Faction fact)
         {
             int PPV = 0;
-            foreach (SystemContact Contact in SystemContactList)
+            foreach (TaskGroupTN TaskGroup in TaskGroups)
             {
-                if (Contact.SSEntity == StarSystemEntityType.TaskGroup)
+                if (TaskGroup.TaskGroupFaction == fact)
                 {
-                    if (Contact.TaskGroup.TaskGroupFaction == fact)
+                    foreach (ShipTN Ship in TaskGroup.Ships)
                     {
-                        foreach (ShipTN Ship in Contact.TaskGroup.Ships)
-                        {
-                            PPV = PPV + Ship.ShipClass.PlanetaryProtectionValue;
-                        }
+                        PPV = PPV + Ship.ShipClass.PlanetaryProtectionValue;
                     }
                 }
             }
 
             return PPV;
+        }
+
+        /// <summary>
+        /// Event raised when TaskGroups, Populations, or OrdnanceGroups are
+        /// added/removed from the system.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContactsChanged(object sender, ListChangedEventArgs e)
+        {
+            contactsChanged = true;
         }
     }
 }

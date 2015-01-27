@@ -255,7 +255,7 @@ namespace Pulsar4X.Entities
         }
     }
 
-    public class Population : GameEntity
+    public class Population : StarSystemEntity
     {
 
         /// <summary>
