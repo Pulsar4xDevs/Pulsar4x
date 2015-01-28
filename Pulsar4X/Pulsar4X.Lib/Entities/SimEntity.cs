@@ -1270,7 +1270,6 @@ namespace Pulsar4X.Entities
             }
             OGRemove.missilesDestroyed = 0;
             OGRemove.missiles.Clear();
-            OGRemove.contact.ContactElementCreated = SystemContact.CEState.Delete;
 
             Faction Owner = OGRemove.ordnanceGroupFaction;
             StarSystem CurrentSystem = OGRemove.contact.Position.System;

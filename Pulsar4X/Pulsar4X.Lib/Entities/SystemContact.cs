@@ -37,23 +37,7 @@ namespace Pulsar4X.Entities
         /// Last timeslice the distance Table was updated.
         /// </summary>
         public BindingList<int> DistanceUpdate { get; set; }
-
-        /// <summary>
-        /// Contact element state.
-        /// </summary>
-        public enum CEState
-        {
-            NotCreated,
-            Created,
-            Delete,
-            TypeCount
-        }
-
-        /// <summary>
-        /// Kludge to determine when contacts should be created or deleted.
-        /// </summary>
-        public CEState ContactElementCreated { get; set; }
-
+        
         /// <summary>
         /// Creates a new system contact.
         /// </summary>
@@ -71,7 +55,6 @@ namespace Pulsar4X.Entities
             DistanceTable = new BindingList<float>();
             DistanceUpdate = new BindingList<int>();
 
-            ContactElementCreated = CEState.NotCreated;
             SSEntity = entity.SSEntity;
         }
 

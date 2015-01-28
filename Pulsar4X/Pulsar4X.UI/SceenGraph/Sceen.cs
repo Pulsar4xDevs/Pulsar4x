@@ -592,7 +592,6 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
             }
 
-            oContact.ContactElementCreated = SystemContact.CEState.Created;
         }
 
         /// <summary>
@@ -611,7 +610,6 @@ namespace Pulsar4X.UI.SceenGraph
                 if (Ele.EntityID == oContact.Id)
                 {
                     m_lElements.Remove(Ele);
-                    oContact.ContactElementCreated = SystemContact.CEState.NotCreated;
                     break;
                 }
             }
