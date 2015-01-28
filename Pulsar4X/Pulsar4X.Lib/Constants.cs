@@ -1313,8 +1313,6 @@ namespace Pulsar4X
 
             // Base chance for each planet to generate a JP.
             public static int JumpPointGenerationChance = 10;
-
-            public static int 
         }
     }
 }
