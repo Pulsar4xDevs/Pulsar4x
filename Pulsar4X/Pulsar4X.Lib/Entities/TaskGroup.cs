@@ -209,7 +209,6 @@ namespace Pulsar4X.Entities
 
             Contact.Position.X = OrbitingBody.Position.X;
             Contact.Position.Y = OrbitingBody.Position.Y;
-            Contact.Position.Z = OrbitingBody.Position.Z;
             Contact.LastPosition.X = Contact.Position.X;
             Contact.LastPosition.Y = Contact.Position.Y;
             Contact.Position.System = StartingSystem;

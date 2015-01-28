@@ -65,7 +65,6 @@ namespace Pulsar4X.Entities
             YOffset = Y;
             Position.X = Parent.Position.X + XOffset;
             Position.Y = Parent.Position.Y + YOffset;
-            Position.Z = 0.0;
 
             SSEntity = StarSystemEntityType.JumpPoint;
 

@@ -34,23 +34,44 @@ namespace Pulsar4X.Entities
         public double Y { get; set; }
 
         /// <summary>
-        /// System Z coordinante in AU
-        /// </summary>
-        public double Z { get; set; }
-
-        /// <summary>
         /// Initilized constructor.
         /// </summary>
         /// <param name="system">StarSystem value.</param>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
-        /// <param name="z">Z value.</param>
-        public SystemPosition(StarSystem system, double x, double y, double z) : this()
+        public SystemPosition(StarSystem system, double x, double y) : this()
         {
             System = system;
             X = x;
             Y = y;
-            Z = z;
+        }
+
+        /// <summary>
+        /// Static function to find the distance between two positions.
+        /// </summary>
+        /// <param name="posA"></param>
+        /// <param name="posB"></param>
+        /// <returns>Distance between posA and posB</returns>
+        public static double GetDistanceBetween(SystemPosition posA, SystemPosition posB)
+        {
+            if (posA.System != posB.System)
+            {
+                throw new InvalidOperationException("Cannont compare distances between positions in different systems.");
+            }
+            double distX = posA.X - posB.X;
+            double distY = posA.Y - posB.Y;
+
+            return Math.Sqrt((distX * distX) - (distY * distY));
+        }
+
+        /// <summary>
+        /// Instance function for those who don't like static functions.
+        /// </summary>
+        /// <param name="otherPos"></param>
+        /// <returns></returns>
+        public double GetDistanceTo(SystemPosition otherPos)
+        {
+            return GetDistanceBetween(this, otherPos);
         }
     }
 

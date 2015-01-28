@@ -30,7 +30,6 @@ namespace Pulsar4X.Entities
             System = Sys;
             Position.X = X;
             Position.Y = Y;
-            Position.Z = 0.0;
         }
     }
 }
