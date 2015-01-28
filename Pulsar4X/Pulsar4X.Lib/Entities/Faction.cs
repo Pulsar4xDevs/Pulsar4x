@@ -976,8 +976,7 @@ namespace Pulsar4X.Entities
             OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
             OrdnanceSeries.Add(NewOrd);
 
-#warning base tracking magic number
-            BaseTracking = 1250;
+            BaseTracking = Constants.GameSettings.FactionBaseTrackingSpeed;
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN, bool>();
@@ -1018,9 +1017,8 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
 
-#warning FastOOB magic numbers
-            ShipBPTotal = 8000.0m;
-            PDCBPTotal = 4000.0m;
+            ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
+            PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;
 
 
             FactionWealth = Constants.Faction.StartingWealth;
@@ -1068,8 +1066,7 @@ namespace Pulsar4X.Entities
             OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
             OrdnanceSeries.Add(NewOrd);
 
-#warning base tracking magic number
-            BaseTracking = 1250;
+            BaseTracking = Constants.GameSettings.FactionBaseTrackingSpeed;
 
             OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
             OpenFireFCType = new Dictionary<ComponentTN, bool>();
@@ -1109,9 +1106,8 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
 
-#warning FastOOB magic numbers
-            ShipBPTotal = 8000.0m;
-            PDCBPTotal = 4000.0m;
+            ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
+            PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;
 
             FactionWealth = Constants.Faction.StartingWealth;
         }

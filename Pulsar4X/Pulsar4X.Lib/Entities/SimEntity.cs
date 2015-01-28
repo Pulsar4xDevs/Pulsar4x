@@ -40,7 +40,7 @@ namespace Pulsar4X.Entities
         public bool SimCreated { get; set; }
 
         /// <summary>
-        /// What the current Tick is.
+        /// Current second in the current year.
         /// </summary>
         public int CurrentTick { get; set; }
 
@@ -543,10 +543,13 @@ namespace Pulsar4X.Entities
         /// <param name="tickValue"></param>
         public void AdvanceSim(BindingList<Faction> P, Random RNG, int tickValue)
         {
-#warning magic number 1Billion overflow prevention kludge here.
-            if (CurrentTick > 1000000000)
+            // Overflow prevention.
+            if (CurrentTick > Constants.TimeInSeconds.Year)
             {
-                CurrentTick = CurrentTick - 1000000000;
+                CurrentTick -= (int)Constants.TimeInSeconds.Year;
+                // Also subtract our lastTick. lastTick will now be negative.
+                // lastTick is often used for deltaTime, so CurrentTick - lastTick need to be positive.
+                lastTick -= (int)Constants.TimeInSeconds.Year;
             }
             lastTick = CurrentTick;
             CurrentTick += tickValue;

@@ -1118,6 +1118,9 @@ namespace Pulsar4X.UI.Handlers
                     double Count = dZ / Constants.Units.MAX_KM_IN_AU;
 
 #warning magic numbers in distance/time calculation for taskgroup
+                    // What is this magic number 2.147483648?
+                    // Please, if we're going to put number constants, at least explain what they mean.
+                    // TODO: Update this with our Constants.TimeInSeconds calculations to keep things consistent.
                     double newDistance = Math.Floor(2.147483648 * Count * 100.0);
                     newDistance = newDistance / 100.0;
 

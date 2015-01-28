@@ -1303,6 +1303,18 @@ namespace Pulsar4X
             // If true, allows a faction from using a non-friendly faction's JumpGate. (True = default aurora)
             // TODO: Not currently functional as false. Factions have no relationships with each other yet.
             public static bool AllowHostileGateJump = true;
+
+            // Starting Build Points used for FastOOB.
+            public static decimal FactionStartingShipBP = 8000m;
+            public static decimal FactionStartingPDCBP = 4000m;
+
+            // Base tracking speed factions start writh.
+            public static int FactionBaseTrackingSpeed = 1250;
+
+            // Base chance for each planet to generate a JP.
+            public static int JumpPointGenerationChance = 10;
+
+            public static int 
         }
     }
 }
