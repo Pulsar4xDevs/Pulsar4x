@@ -218,7 +218,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// GetPassiveDetectionRange determines the range at which this sensor will detect any signature.
+        /// GetPassiveDetectionRange determines the range at which this sensor will detect a specified signature.
         /// Either by looking up the signature in the table, or by outright calculating it. Ship signature must be adjusted downward by 1
         /// for the lookup table and the calculation function.
         /// </summary>

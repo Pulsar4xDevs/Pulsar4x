@@ -821,7 +821,7 @@ namespace Pulsar4X.UI.Handlers
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
 
-                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(distance, detectFactor);
 
                             /// <summary>
                             /// if det is not true then this contact does not appear in the contact list.
@@ -897,7 +897,7 @@ namespace Pulsar4X.UI.Handlers
                                     detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(sig, -1);
                                 }
 
-                                bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+                                bool det = _CurrnetShip.ShipsFaction.LargeDetection(distance, detectFactor);
 
                                 /// <summary>
                                 /// if det is not true then this contact will not appear in the contact list.
@@ -1794,7 +1794,7 @@ namespace Pulsar4X.UI.Handlers
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
 
-                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(distance, detectFactor);
 
                             if (det == true)
                             {
@@ -1873,7 +1873,7 @@ namespace Pulsar4X.UI.Handlers
                                 detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(sig, -1);
                             }
 
-                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(CurSystem, distance, detectFactor);
+                            bool det = _CurrnetShip.ShipsFaction.LargeDetection(distance, detectFactor);
 
                             if (det == true)
                             {

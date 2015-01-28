@@ -994,7 +994,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
                     /// </summary>
-                    bool Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
+                    bool Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Distance, TargettingRange);
 
                     if (Detected == false)
                         return false;
@@ -1043,7 +1043,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
                     /// </summary>
-                    Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Sys, Distance, TargettingRange);
+                    Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Distance, TargettingRange);
 
                     if (Detected == false)
                         return false;
@@ -1556,7 +1556,7 @@ namespace Pulsar4X.Entities.Components
                         }
 
                         int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
-                        bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
+                        bool det = ordnanceGroupFaction.LargeDetection(dist, detection);
 
                         if (det == false)
                         {
@@ -1607,7 +1607,7 @@ namespace Pulsar4X.Entities.Components
                             detection = Missiles[0].missileDef.aSD.GetActiveDetectionRange(sig, -1);
                         }
 
-                        bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
+                        bool det = ordnanceGroupFaction.LargeDetection(dist, detection);
 
                         if (det == false)
                         {
@@ -1946,7 +1946,7 @@ namespace Pulsar4X.Entities.Components
                             int TGID = Contact.Position.System.SystemContactList.IndexOf(pair.Key.contact);
                             float dist = Contact.DistanceTable[TGID];
                             int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size));
-                            bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
+                            bool det = ordnanceGroupFaction.LargeDetection(dist, detection);
 
                             if (det == true)
                             {
@@ -1983,7 +1983,7 @@ namespace Pulsar4X.Entities.Components
                             int TGID = Contact.Position.System.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
                             float dist = Contact.DistanceTable[TGID];
                             int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
-                            bool det = ordnanceGroupFaction.LargeDetection(Contact.Position.System, dist, detection);
+                            bool det = ordnanceGroupFaction.LargeDetection(dist, detection);
 
                             if (det == true)
                             {

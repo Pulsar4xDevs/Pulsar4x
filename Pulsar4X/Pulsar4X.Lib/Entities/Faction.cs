@@ -1184,8 +1184,8 @@ namespace Pulsar4X.Entities
             /// Loop through all faction taskgroups.
             /// </summary>
             for (int loop = 0; loop < TaskGroups.Count; loop++)
+            #region Faction Taskgroup Loop
             {
-
                 StarSystem System = TaskGroups[loop].Contact.Position.System;
                 /// <summary>
                 /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
@@ -1194,29 +1194,35 @@ namespace Pulsar4X.Entities
                 {
                     /// <summary>
                     /// I don't own loop2, and it hasn't been fully detected yet.
+                    /// TODO: CHECK: ^ What does this mean?
                     /// </summary>
                     if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != YearTickValue &&
                         System.FactionDetectionLists[FactionID].EM[loop2] != YearTickValue && System.FactionDetectionLists[FactionID].Active[loop2] != YearTickValue)
                     {
                         float dist = -1.0f;
+
+                        // Check to see if our distance table is updated for this contact.
                         if (TaskGroups[loop].Contact.DistanceUpdate[loop2] == YearTickValue)
                         {
                             dist = TaskGroups[loop].Contact.DistanceTable[loop2];
+                            // We assume since the table is up to date, that fleet interception
+                            // check has been completed.
                         }
                         else
                         {
+                            // Distance table is out of date.
                             float distX = (float)(TaskGroups[loop].Contact.Position.X - System.SystemContactList[loop2].Position.X);
                             float distY = (float)(TaskGroups[loop].Contact.Position.Y - System.SystemContactList[loop2].Position.Y);
                             dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
 
+                            // Update our distance table.
                             TaskGroups[loop].Contact.DistanceTable[loop2] = dist;
                             TaskGroups[loop].Contact.DistanceUpdate[loop2] = YearTickValue;
 
+                            // Update their distance table to us.
                             int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
-
                             System.SystemContactList[loop2].DistanceTable[TGID] = dist;
                             System.SystemContactList[loop2].DistanceUpdate[TGID] = YearTickValue;
-
 
                             /// <summary>
                             /// Handle fleet interception check here.
@@ -1261,11 +1267,11 @@ namespace Pulsar4X.Entities
                                     }
                                 }
 
-                            }
-                        }
+                            } // /Fleet Interception Check
+                        } // Distance Table Update.
 
                         /// <summary>
-                        /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since
+                        /// Now to find the biggest signature in the contact. The biggest for planets is just the planetary pop itself since
                         /// multiple colonies really shouldn't happen.
                         /// </summary>
                         int sig = -1;
@@ -1283,7 +1289,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
                             /// </summary>
-                            bool det = LargeDetection(System, dist, detection);
+                            bool det = LargeDetection(dist, detection);
 
                             /// <summary>
                             /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
@@ -1297,7 +1303,7 @@ namespace Pulsar4X.Entities
                             sig = Pop.EMSignature;
                             detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
 
-                            det = LargeDetection(System, dist, detection);
+                            det = LargeDetection(dist, detection);
 
                             if (det == true)
                             {
@@ -1314,14 +1320,13 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Do detection calculations here.
                             /// </summary>
-                            det = LargeDetection(System, dist, detection);
+                            det = LargeDetection(dist, detection);
 
                             if (det == true)
                             {
                                 Pop.ActiveDetection[FactionID] = YearTickValue;
                                 System.FactionDetectionLists[FactionID].Active[loop2] = YearTickValue;
                             }
-
                         }
                         else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
                         {
@@ -1363,7 +1368,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Test the biggest signature against the best sensor.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// Good case, none of the ships are detected.
@@ -1397,7 +1402,7 @@ namespace Pulsar4X.Entities
                                         /// <summary>
                                         /// Now for the smallest vs the best.
                                         /// </summary>
-                                        det = LargeDetection(System, dist, detection);
+                                        det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// Best case, everything is detected.
@@ -1449,7 +1454,7 @@ namespace Pulsar4X.Entities
                                                         /// <summary>
                                                         /// Test each ship until I get to one I don't see.
                                                         /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
+                                                        det = LargeDetection(dist, detection);
 
                                                         if (det == true)
                                                         {
@@ -1516,7 +1521,7 @@ namespace Pulsar4X.Entities
                                         detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                     }
 
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// Good case, none of the ships are detected.
@@ -1547,7 +1552,7 @@ namespace Pulsar4X.Entities
                                             detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                         }
 
-                                        det = LargeDetection(System, dist, detection);
+                                        det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// Best case, everything is detected.
@@ -1616,7 +1621,7 @@ namespace Pulsar4X.Entities
                                                             detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(sig);
                                                         }
 
-                                                        det = LargeDetection(System, dist, detection);
+                                                        det = LargeDetection(dist, detection);
 
                                                         if (det == true)
                                                         {
@@ -1676,7 +1681,7 @@ namespace Pulsar4X.Entities
                                     detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
 
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// Good case, none of the ships are detected.
@@ -1700,7 +1705,7 @@ namespace Pulsar4X.Entities
 
                                         detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
-                                        det = LargeDetection(System, dist, detection);
+                                        det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// Best case, everything is detected.
@@ -1750,7 +1755,7 @@ namespace Pulsar4X.Entities
 
                                                         detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
-                                                        det = LargeDetection(System, dist, detection);
+                                                        det = LargeDetection(dist, detection);
 
                                                         if (det == true)
                                                         {
@@ -1823,7 +1828,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Test the biggest signature against the best sensor.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// If one missile is detected, all are.
@@ -1867,7 +1872,7 @@ namespace Pulsar4X.Entities
                                             detection = ComponentList.DefaultPassives.GetPassiveDetectionRange(EMSignature);
                                         }
 
-                                        bool det = LargeDetection(System, dist, detection);
+                                        bool det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// If one missile is detected, all are.
@@ -1919,7 +1924,7 @@ namespace Pulsar4X.Entities
                                         detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
                                     }
 
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     if (det == true)
                                     {
@@ -1953,6 +1958,7 @@ namespace Pulsar4X.Entities
                 /// </summary>
 
             }
+            #endregion
             /// <summary>
             /// End for Faction TaskGroups.
             /// </summary>
@@ -1962,6 +1968,7 @@ namespace Pulsar4X.Entities
             /// Loop through all missile groups.
             /// </summary>
             for (int loop = 0; loop < MissileGroups.Count; loop++)
+            #region Faction Missile Loop
             {
                 /// <summary>
                 /// Hopefully I won't get into this situation ever. 
@@ -2043,7 +2050,7 @@ namespace Pulsar4X.Entities
                                 sig = Pop.ThermalSignature;
                                 detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
 
-                                bool det = LargeDetection(System, dist, detection);
+                                bool det = LargeDetection(dist, detection);
 
                                 /// <summary>
                                 /// Mark this contact as detected for this time slice via thermal for both the contact, and for the faction as a whole.
@@ -2063,7 +2070,7 @@ namespace Pulsar4X.Entities
                                 sig = Pop.EMSignature;
                                 detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
 
-                                bool det = LargeDetection(System, dist, detection);
+                                bool det = LargeDetection(dist, detection);
 
                                 /// <summary>
                                 /// Mark this contact as detected for this time slice via EM for both the contact, and for the faction as a whole.
@@ -2083,7 +2090,7 @@ namespace Pulsar4X.Entities
                                 sig = Constants.ShipTN.ResolutionMax - 1;
                                 detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
 
-                                bool det = LargeDetection(System, dist, detection);
+                                bool det = LargeDetection(dist, detection);
 
                                 /// <summary>
                                 /// Mark this contact as detected for this time slice via Active for both the contact, and for the faction as a whole.
@@ -2122,7 +2129,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Test the biggest signature against the best sensor.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// Good case, none of the ships are detected.
@@ -2145,7 +2152,7 @@ namespace Pulsar4X.Entities
                                         /// Now for the smallest vs the best.
                                         /// </summary>
                                         detection = Missile.missileDef.tHD.GetPassiveDetectionRange(sig);
-                                        det = LargeDetection(System, dist, detection);
+                                        det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// Best case, everything is detected.
@@ -2187,7 +2194,7 @@ namespace Pulsar4X.Entities
                                                         /// <summary>
                                                         /// Test each ship until I get to one I don't see.
                                                         /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
+                                                        det = LargeDetection(dist, detection);
 
                                                         if (det == true)
                                                         {
@@ -2236,7 +2243,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Test the biggest signature against the best sensor.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// Good case, none of the ships are detected.
@@ -2259,7 +2266,7 @@ namespace Pulsar4X.Entities
                                         /// Now for the smallest vs the best.
                                         /// </summary>
                                         detection = Missile.missileDef.eMD.GetPassiveDetectionRange(sig);
-                                        det = LargeDetection(System, dist, detection);
+                                        det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// Best case, everything is detected.
@@ -2325,7 +2332,7 @@ namespace Pulsar4X.Entities
                                                         /// <summary>
                                                         /// Test each ship until I get to one I don't see.
                                                         /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
+                                                        det = LargeDetection(dist, detection);
 
                                                         if (det == true)
                                                         {
@@ -2374,7 +2381,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Test the biggest signature against the best sensor.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// Good case, none of the ships are detected.
@@ -2397,7 +2404,7 @@ namespace Pulsar4X.Entities
                                         /// Now for the smallest vs the best.
                                         /// </summary>
                                         detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
-                                        det = LargeDetection(System, dist, detection);
+                                        det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// Best case, everything is detected.
@@ -2439,7 +2446,7 @@ namespace Pulsar4X.Entities
                                                         /// <summary>
                                                         /// Test each ship until I get to one I don't see.
                                                         /// </summary>
-                                                        det = LargeDetection(System, dist, detection);
+                                                        det = LargeDetection(dist, detection);
 
                                                         if (det == true)
                                                         {
@@ -2499,7 +2506,7 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Test the biggest signature against the best sensor.
                                     /// </summary>
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     /// <summary>
                                     /// If one missile is detected, all are.
@@ -2532,7 +2539,7 @@ namespace Pulsar4X.Entities
                                     {
                                         detection = Missile.missileDef.eMD.GetPassiveDetectionRange(EMSignature);
 
-                                        bool det = LargeDetection(System, dist, detection);
+                                        bool det = LargeDetection(dist, detection);
 
                                         /// <summary>
                                         /// If one missile is detected, all are.
@@ -2582,7 +2589,7 @@ namespace Pulsar4X.Entities
                                         detection = Missile.missileDef.aSD.GetActiveDetectionRange(sig, -1);
                                     }
 
-                                    bool det = LargeDetection(System, dist, detection);
+                                    bool det = LargeDetection(dist, detection);
 
                                     if (det == true)
                                     {
@@ -2605,6 +2612,7 @@ namespace Pulsar4X.Entities
                     }//end if contact not detected and can be detected
                 }//end for faction detection list contacts
             }//end for missile groups
+            #endregion
 
 
 
@@ -2707,11 +2715,10 @@ namespace Pulsar4X.Entities
         /// ActiveLargeDetection handles potentially greater than MAX distance in KM detection for actives.
         /// consider making this a static function, I am calling it from all over the place.
         /// </summary>
-        /// <param name="System">Starsystem this takes place in</param>
         /// <param name="dist">distance in AU</param>
         /// <param name="detection">Detection factor, KM / 10,000</param>
         /// <returns>Whether or not detection has occured.</returns>
-        public bool LargeDetection(StarSystem System, float dist, int detection)
+        public bool LargeDetection(float dist, int detection)
         {
 #warning 10,000 here is a magic number related to the 10K km unit that AuroraTN uses.
             /// <summary>

@@ -408,7 +408,7 @@ namespace Pulsar4X.Entities
 
                             int MFCRange = ShipMissileFC.mFCSensorDef.GetActiveDetectionRange(AltMSize, MSize);
 
-                            bool CanDetect = Fact.LargeDetection(CurrentSystem, dist, MFCRange);
+                            bool CanDetect = Fact.LargeDetection(dist, MFCRange);
 
                             /// <summary>
                             /// Can this MFC fire on the targetted missile?
