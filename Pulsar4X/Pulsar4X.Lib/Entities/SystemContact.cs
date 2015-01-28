@@ -72,6 +72,7 @@ namespace Pulsar4X.Entities
             DistanceUpdate = new BindingList<int>();
 
             ContactElementCreated = CEState.NotCreated;
+            SSEntity = entity.SSEntity;
         }
 
         /// <summary>
