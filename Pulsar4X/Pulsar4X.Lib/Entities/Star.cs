@@ -15,7 +15,7 @@ namespace Pulsar4X.Entities
         double YGalactic { get; set; }
         double ZGalactic { get; set; }
 
-        public double Mass { get { return m_dMass; } set { m_dMass = value; } }
+        public override double Mass { get { return m_dMass; } set { m_dMass = value; } }
 
         //public double Luminosity { get; set; }
         public double Life { get; set; }

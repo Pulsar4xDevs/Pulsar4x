@@ -52,7 +52,7 @@ namespace Pulsar4X.Entities
         public double LengthOfDay { get; set; } //length of local day (hours)
         public bool IsInResonantRotation { get; set; } //tidally locked
 
-        public double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
+        public override double Mass { get { return MassOfDust + MassOfGas; } set { } } //mass (in solar masses)
         [JsonIgnore]
         public double MassInEarthMasses { get { return Mass * Constants.Units.SUN_MASS_IN_EARTH_MASSES; } } //mass (in earth masses)
         public double MassOfDust { get; set; } //mass, ignoring gas

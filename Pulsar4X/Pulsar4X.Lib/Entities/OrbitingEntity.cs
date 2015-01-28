@@ -84,7 +84,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Mass in solar masses.
         /// </summary>
-        public double Mass { get; set; }
+        public virtual double Mass { get; set; }
 
         public OrbitingEntity()
             : base()
