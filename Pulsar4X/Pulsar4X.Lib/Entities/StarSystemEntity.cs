@@ -52,16 +52,16 @@ namespace Pulsar4X.Entities
         /// <param name="posA"></param>
         /// <param name="posB"></param>
         /// <returns>Distance between posA and posB</returns>
-        public static double GetDistanceBetween(SystemPosition posA, SystemPosition posB)
+        public static float GetDistanceBetween(SystemPosition posA, SystemPosition posB)
         {
             if (posA.System != posB.System)
             {
                 throw new InvalidOperationException("Cannont compare distances between positions in different systems.");
             }
-            double distX = posA.X - posB.X;
-            double distY = posA.Y - posB.Y;
+            float distX = (float)(posA.X - posB.X);
+            float distY = (float)(posA.Y - posB.Y);
 
-            return Math.Sqrt((distX * distX) - (distY * distY));
+            return (float)Math.Sqrt((distX * distX) - (distY * distY));
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="otherPos"></param>
         /// <returns></returns>
-        public double GetDistanceTo(SystemPosition otherPos)
+        public float GetDistanceTo(SystemPosition otherPos)
         {
             return GetDistanceBetween(this, otherPos);
         }
