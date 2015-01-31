@@ -13,12 +13,25 @@ namespace Pulsar4X.Entities
 {
     public class DistanceTable
     {
+        /// <summary>
+        /// Parent contact of this table.
+        /// </summary>
         private SystemContact m_parent;
 
+        /// <summary>
+        /// Lookup referances for this table.
+        /// </summary>
         private Dictionary<SystemContact, float> m_distances;
         private Dictionary<SystemContact, int> m_lastUpdateSecond;
         private Dictionary<SystemContact, int> m_lastUpdateYear;
 
+        /// <summary>
+        /// Calculates distance between the parent and the specified contact.
+        /// distance parameter is garenteed to be populated.
+        /// </summary>
+        /// <param name="contact"></param>
+        /// <param name="distance"></param>
+        /// <returns>true if distance was already in table. False if it distance was calculated.</returns>
         public bool GetDistance(SystemContact contact, out float distance)
         {
             if (m_distances.TryGetValue(contact, out distance))
@@ -34,11 +47,20 @@ namespace Pulsar4X.Entities
             return false;
         }
 
+        /// <summary>
+        /// Public constructor.
+        /// </summary>
+        /// <param name="parent"></param>
         public DistanceTable(SystemContact parent)
         {
             m_parent = parent;
         }
 
+        /// <summary>
+        /// Updates/Adds the contact in the distance table with the correct distance/timestamp.
+        /// </summary>
+        /// <param name="contact"></param>
+        /// <param name="distance"></param>
         private void UpdateDistance(SystemContact contact, float distance)
         {
             m_distances[contact] = distance;
@@ -46,6 +68,9 @@ namespace Pulsar4X.Entities
             m_lastUpdateYear[contact] = GameState.Instance.CurrentYear;
         }
 
+        /// <summary>
+        /// Clears the distance table.
+        /// </summary>
         public void Clear()
         {
             m_distances.Clear();
@@ -53,7 +78,11 @@ namespace Pulsar4X.Entities
             m_lastUpdateYear.Clear();
         }
 
-        internal void Remove(SystemContact contact)
+        /// <summary>
+        /// Moves the specified contact from the distance table.
+        /// </summary>
+        /// <param name="contact"></param>
+        public void Remove(SystemContact contact)
         {
             m_distances.Remove(contact);
             m_lastUpdateSecond.Remove(contact);
