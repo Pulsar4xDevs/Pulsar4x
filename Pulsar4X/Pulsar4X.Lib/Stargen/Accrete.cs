@@ -675,8 +675,8 @@ namespace Pulsar4X.Stargen
         private void GenerateJumpPoints(Star Star)
         {
             int numJumpPoints = 1; // Each star always generates a JP.
-            double maxDistance = double.MinValue; // Max Distance from the star.
-            double minDistance = double.MaxValue; // Minimum Distance from the star
+            double maxDistance = double.MinValue; // Max distance from the star.
+            double minDistance = double.MaxValue; // Minimum distance from the star
 
             // Give a chance per planet to generate a JumpPoint
             foreach (Planet p in Star.Planets)

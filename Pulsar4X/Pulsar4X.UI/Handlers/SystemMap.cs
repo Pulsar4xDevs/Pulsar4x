@@ -236,13 +236,11 @@ namespace Pulsar4X.UI.Handlers
             int Seconds = GameState.Instance.GameDateTime.Second + (GameState.Instance.GameDateTime.Minute * 60) + (GameState.Instance.GameDateTime.Hour * 3600) +
                            (GameState.Instance.GameDateTime.DayOfYear * 86400) - 86400;
 
-            GameState.Instance.YearTickValue = Seconds;
-
             /// <summary>
             /// Put the date time somewhere.
             /// </summary>
 #warning don't really need this debug info
-            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.SE.CurrentSecond.ToString() + " " + GameState.SE.lastTick.ToString();
+            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.Instance.CurrentSecond.ToString() + " " + GameState.Instance.LastTimestep;
 
             MainFormReference.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
 

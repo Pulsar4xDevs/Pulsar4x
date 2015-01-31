@@ -51,7 +51,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="posA"></param>
         /// <param name="posB"></param>
-        /// <returns>Distance between posA and posB</returns>
+        /// <returns>distance between posA and posB</returns>
         public static float GetDistanceBetween(SystemPosition posA, SystemPosition posB)
         {
             if (posA.System != posB.System)

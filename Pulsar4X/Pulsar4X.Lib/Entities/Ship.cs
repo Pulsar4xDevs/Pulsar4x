@@ -1098,7 +1098,7 @@ namespace Pulsar4X.Entities
                 {
                     String DamageString = String.Format("All damage to {0} absorbed by shields", Name);
                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                         GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                     ShipsFaction.MessageLog.Add(NMsg);
 
@@ -1111,7 +1111,7 @@ namespace Pulsar4X.Entities
                     {
                         String DamageString = String.Format("{0} damage to {1} absorbed by shields", (startDamage - Damage), Name);
                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                             GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                         ShipsFaction.MessageLog.Add(NMsg);
                     }
@@ -1140,7 +1140,7 @@ namespace Pulsar4X.Entities
                         {
                             String DamageString = String.Format("{0} Shock Damage to {1}", (internalDamage), Name);
                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                             ShipsFaction.MessageLog.Add(NMsg);
                         }
@@ -1263,7 +1263,7 @@ namespace Pulsar4X.Entities
 
                         String DamageString = String.Format("{0} damage to {1} absorbed by Armour", (startDamage - internalDamage), Name);
                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                             GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                         ShipsFaction.MessageLog.Add(NMsg);
                     }
@@ -1290,7 +1290,7 @@ namespace Pulsar4X.Entities
                         {
 
                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamageReport, FiringShip.ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                             FiringShip.ShipsFaction.MessageLog.Add(NMsg);
                         }
@@ -1362,7 +1362,7 @@ namespace Pulsar4X.Entities
                                 {
                                     String DamageString = String.Format("{0} hit by {1} damage and was destroyed", ShipComponents[ID].Name, DamageDone);
                                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                         GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                                     ShipsFaction.MessageLog.Add(NMsg);
                                 }
@@ -1370,7 +1370,7 @@ namespace Pulsar4X.Entities
                                 {
                                     String DamageString = String.Format("{0} Absorbed {1} damage", ShipComponents[ID].Name, DamageDone);
                                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                         GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                                     ShipsFaction.MessageLog.Add(NMsg);
                                 }
@@ -1415,7 +1415,7 @@ namespace Pulsar4X.Entities
                 {
                     String DamageString = String.Format("{0} Destroyed", Name);
                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                         GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                     ShipsFaction.MessageLog.Add(NMsg);
                     FiringShip.ShipsFaction.MessageLog.Add(NMsg);
@@ -1508,7 +1508,7 @@ namespace Pulsar4X.Entities
                                         {
                                             String DamageString = String.Format("{0} hit by {1} damage and was destroyed", ShipComponents[ID].Name, DamageDone);
                                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                                             ShipsFaction.MessageLog.Add(NMsg);
                                         }
@@ -1516,7 +1516,7 @@ namespace Pulsar4X.Entities
                                         {
                                             String DamageString = String.Format("{0} Absorbed {1} damage. Electronic Components shouldn't resist damage like this", ShipComponents[ID].Name, DamageDone);
                                             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                                 GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                                             ShipsFaction.MessageLog.Add(NMsg);
                                         }
@@ -1528,7 +1528,7 @@ namespace Pulsar4X.Entities
                                     int ID = ComponentDefIndex[CI] + destroy;
                                     String DamageString = String.Format("{0} Absorbed {1} damage", ShipComponents[ID].Name, DamageDone);
                                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShipDamage, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
-                                                                         GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), DamageString);
+                                                                         GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, DamageString);
 
                                     ShipsFaction.MessageLog.Add(NMsg);
 
@@ -2424,7 +2424,7 @@ namespace Pulsar4X.Entities
                                                                                         ShipsTaskGroup.Contact.Position.System,
                                                                                                       ShipsTaskGroup.Contact,
                                                                                              GameState.Instance.GameDateTime,
-                                                                          (GameState.SE.CurrentSecond - GameState.SE.lastTick),
+                                                                          GameState.Instance.LastTimestep,
                                                                                                                   NoOrdnance);
                             ShipsFaction.MessageLog.Add(NewMessage);
                             ShipMLaunchers[loop].loadTime = -1;
@@ -2450,7 +2450,7 @@ namespace Pulsar4X.Entities
                                                                                         ShipsTaskGroup.Contact.Position.System,
                                                                                                       ShipsTaskGroup.Contact,
                                                                                              GameState.Instance.GameDateTime,
-                                                                          (GameState.SE.CurrentSecond - GameState.SE.lastTick),
+                                                                          GameState.Instance.LastTimestep,
                                                                                                                   NoOrdnance);
                             ShipsFaction.MessageLog.Add(NewMessage);
                         }
@@ -2694,7 +2694,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="CurrentSecond">Tick the ship is ordered to fire.</param>
         /// <param name="RNG">RNG passed from further up the food chain since I can't generate random results except by having a "global" rng.</param>
-        public bool ShipFireWeapons(int CurrentYear, int CurrentSecond, Random RNG)
+        public bool ShipFireWeapons(Random RNG)
         {
             bool fired = false;
             for (int loop = 0; loop < ShipBFC.Count; loop++)
@@ -2708,25 +2708,8 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         if (ShipsTaskGroup.Contact.Position.System == ShipBFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System)
                         {
-                            /// <summary>
-                            /// This should all be precalculated by the sensor distance checker
-                            /// </summary>
-                            int targetID = ShipBFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System.SystemContactList.IndexOf(ShipBFC[loop].target.ship.ShipsTaskGroup.Contact);
-
-                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
-                            {
-                                /// <summary>
-                                /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
-                                /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
-                                ShipsFaction.MessageLog.Add(Entry);
-
-
-                                return false;
-                            }
-
-                            float distance = ShipsTaskGroup.Contact.DistanceTable[targetID];
+                            float distance;
+                            ShipsTaskGroup.Contact.DistTable.GetDistance(ShipBFC[loop].target.ship.ShipsTaskGroup.Contact, out distance);
 
                             int track = ShipsFaction.BaseTracking;
                             if (CurrentSpeed > ShipsFaction.BaseTracking)
@@ -2749,25 +2732,8 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         if (ShipsTaskGroup.Contact.Position.System == ShipBFC[loop].target.missileGroup.contact.Position.System)
                         {
-                            /// <summary>
-                            /// This should all be precalculated by the sensor distance checker
-                            /// </summary>
-                            int targetID = ShipBFC[loop].target.missileGroup.contact.Position.System.SystemContactList.IndexOf(ShipBFC[loop].target.missileGroup.contact);
-
-                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
-                            {
-                                /// <summary>
-                                /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
-                                /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
-                                ShipsFaction.MessageLog.Add(Entry);
-
-
-                                return false;
-                            }
-
-                            float distance = ShipsTaskGroup.Contact.DistanceTable[targetID];
+                            float distance;
+                            ShipsTaskGroup.Contact.DistTable.GetDistance(ShipBFC[loop].target.missileGroup.contact, out distance);
 
                             int track = ShipsFaction.BaseTracking;
                             if (CurrentSpeed > ShipsFaction.BaseTracking)
@@ -2793,53 +2759,12 @@ namespace Pulsar4X.Entities
             {
                 if (ShipMFC[loop].openFire == true && ShipMFC[loop].isDestroyed == false && ShipMFC[loop].target != null)
                 {
-                    if (ShipMFC[loop].target.targetType == StarSystemEntityType.TaskGroup)
+                    /// <summary>
+                    /// Sanity Check. Make sure both are in the same system before firing.
+                    /// </summary>
+                    if (ShipsTaskGroup.Contact.Position.System == ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System)
                     {
-                        /// <summary>
-                        /// Sanity Check. Make sure both are in the same system before checking distance. This, and an AU checker are probably going to have to go into another function.
-                        /// </summary>
-                        if (ShipsTaskGroup.Contact.Position.System == ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System)
-                        {
-
-                            int targetID = ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System.SystemContactList.IndexOf(ShipMFC[loop].target.ship.ShipsTaskGroup.Contact);
-
-                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
-                            {
-                                /// <summary>
-                                /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
-                                /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
-                                ShipsFaction.MessageLog.Add(Entry);
-
-                                return false;
-                            }
-
-                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
-                        }
-                    }
-                    else if (ShipMFC[loop].target.targetType == StarSystemEntityType.Missile)
-                    {
-                        /// <summary>
-                        /// Similar sanity check to above
-                        if (ShipsTaskGroup.Contact.Position.System == ShipMFC[loop].target.missileGroup.contact.Position.System)
-                        {
-                            int targetID = ShipMFC[loop].target.missileGroup.contact.Position.System.SystemContactList.IndexOf(ShipMFC[loop].target.missileGroup.contact);
-
-                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
-                            {
-                                /// <summary>
-                                /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
-                                /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
-                                ShipsFaction.MessageLog.Add(Entry);
-
-                                return false;
-                            }
-
-                            fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
-                        }
+                        fired = ShipMFC[loop].FireWeapons(ShipsTaskGroup, this);
                     }
                 }
             }
@@ -2902,7 +2827,7 @@ namespace Pulsar4X.Entities
                 Charge = String.Format("{0} {1} points", Charge, ShieldRecharge);
 
                 MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ShieldRecharge, this.ShipsTaskGroup.Contact.Position.System, this.ShipsTaskGroup.Contact, GameState.Instance.GameDateTime,
-                                                     (GameState.SE.CurrentSecond - GameState.SE.lastTick), Charge);
+                                                     GameState.Instance.LastTimestep, Charge);
 
                 ShipsFaction.MessageLog.Add(NMsg);
             }

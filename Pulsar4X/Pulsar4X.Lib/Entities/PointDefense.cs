@@ -75,13 +75,10 @@ namespace Pulsar4X.Entities
                                         /// </summary>
                                         float dist = -1;
 
-                                        int MissileID = CurrentSystem.SystemContactList.IndexOf(Missile.missileGroup.contact);
-                                        int TGID = CurrentSystem.SystemContactList.IndexOf(Ship.ShipsTaskGroup.Contact);
-
                                         /// <summary>
                                         /// dist is in AU.
                                         /// </summary>
-                                        dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
+                                        Missile.missileGroup.contact.DistTable.GetDistance(Ship.ShipsTaskGroup.Contact, out dist);
 
                                         /// <summary>
                                         /// if distance is less than the 10k km threshold attempt to intercept at Point blank range.
@@ -206,15 +203,9 @@ namespace Pulsar4X.Entities
                             /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
                             /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
                             /// </summary>
-                            float dist = -1;
+                            float dist;
 
-                            int MissileID = CurrentSystem.SystemContactList.IndexOf(DetectedMissileGroup.contact);
-                            int TGID = CurrentSystem.SystemContactList.IndexOf(Ship.ShipsTaskGroup.Contact);
-
-                            /// <summary>
-                            /// dist is in AU.
-                            /// </summary>
-                            dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
+                            DetectedMissileGroup.contact.DistTable.GetDistance(Ship.ShipsTaskGroup.Contact, out dist);
 
                             /// <summary>
                             /// Only bother with checks here that are within the maximum beam distance.
@@ -365,15 +356,9 @@ namespace Pulsar4X.Entities
                             /// Do a distance check on pair.Value vs the missile itself. if that checks out to be less than 10k km(or equal to zero), then
                             /// check to see if the FC can shoot down said missile. This should never be run before a sensor sweep
                             /// </summary>
-                            float dist = -1;
+                            float dist;
 
-                            int MissileID = CurrentSystem.SystemContactList.IndexOf(DetectedMissileGroup.contact);
-                            int TGID = CurrentSystem.SystemContactList.IndexOf(Ship.ShipsTaskGroup.Contact);
-
-                            /// <summary>
-                            /// dist is in AU.
-                            /// </summary>
-                            dist = CurrentSystem.SystemContactList[MissileID].DistanceTable[TGID];
+                            DetectedMissileGroup.contact.DistTable.GetDistance(Ship.ShipsTaskGroup.Contact, out dist);
 
 
                             float MFCEngageDistKm = ShipMissileFC.mFCSensorDef.maxRange;

@@ -85,7 +85,7 @@ namespace Pulsar4X.Entities
         public bool NewOrders { get; set; }
 
         /// <summary>
-        /// Total Distance ship will travel under current orders in AUs.
+        /// Total distance ship will travel under current orders in AUs.
         /// </summary>
         public double TotalOrderDistance { get; set; }
 
@@ -471,9 +471,9 @@ namespace Pulsar4X.Entities
         /// Adds a ship to a taskgroup, will call sorting and sensor handling.
         /// </summary>
         /// <param name="shipDef">definition of the ship to be added.</param>
-        public void AddShip(ShipClassTN shipDef, int CurrentTimeSlice)
+        public void AddShip(ShipClassTN shipDef)
         {
-            ShipTN ship = new ShipTN(shipDef, Ships.Count, CurrentTimeSlice, this, TaskGroupFaction);
+            ShipTN ship = new ShipTN(shipDef, Ships.Count, GameState.Instance.CurrentSecond, this, TaskGroupFaction);
             Ships.Add(ship);
 
             /// <summary>
@@ -1623,7 +1623,7 @@ namespace Pulsar4X.Entities
                             {
                                 String Entry = String.Format("Ship Error, no TaskGroupsOrdered found for TG {0} in Faction {1}, {2} has completed an order to move.", TaskGroupOrders[0].taskGroup.Name,
                                     TaskGroupOrders[0].taskGroup.TaskGroupFaction.Name, Name);
-                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.YearTickValue, Entry);
+                                MessageEntry NME = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact, GameState.Instance.GameDateTime, GameState.Instance.CurrentSecond, Entry);
                                 TaskGroupFaction.MessageLog.Add(NME);
                             }
                         }
@@ -2808,21 +2808,14 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if (pair.Value.active == true)
                     {
-                        int ID = pair.Key.ShipsTaskGroup.Contact.Position.System.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+                        float dist;
 
-                        /// <summary>
-                        /// No ship has been examined yet, so this one is the "closest".
-                        /// </summary>
-                        if (min == null || minDist == -1.0f)
-                        {
+                        Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out dist);
 
-                            min = pair.Key;
-                            minDist = Contact.DistanceTable[ID];
-                        }
-                        else if (Contact.DistanceTable[ID] < minDist)
+                        if (dist < minDist)
                         {
                             min = pair.Key;
-                            minDist = Contact.DistanceTable[ID];
+                            minDist = dist;
                         }
                     }
                 }
