@@ -85,7 +85,7 @@ namespace Pulsar4X.Entities
         public bool NewOrders { get; set; }
 
         /// <summary>
-        /// Total Distance ship will travel under current orders in AUs.
+        /// Total distance ship will travel under current orders in AUs.
         /// </summary>
         public double TotalOrderDistance { get; set; }
 
@@ -2808,21 +2808,14 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if (pair.Value.active == true)
                     {
-                        int ID = pair.Key.ShipsTaskGroup.Contact.Position.System.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+                        float dist;
 
-                        /// <summary>
-                        /// No ship has been examined yet, so this one is the "closest".
-                        /// </summary>
-                        if (min == null || minDist == -1.0f)
-                        {
+                        Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out dist);
 
-                            min = pair.Key;
-                            minDist = Contact.DistanceTable[ID];
-                        }
-                        else if (Contact.DistanceTable[ID] < minDist)
+                        if (dist < minDist)
                         {
                             min = pair.Key;
-                            minDist = Contact.DistanceTable[ID];
+                            minDist = dist;
                         }
                     }
                 }

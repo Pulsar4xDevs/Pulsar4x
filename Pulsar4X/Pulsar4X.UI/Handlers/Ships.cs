@@ -807,11 +807,8 @@ namespace Pulsar4X.UI.Handlers
                     {
                         foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedContacts)
                         {
-                            StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
-                            int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
-                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
-
-                            float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                            float distance;
+                            _CurrnetShip.ShipsTaskGroup.Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out distance);
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
 
@@ -855,11 +852,8 @@ namespace Pulsar4X.UI.Handlers
                         {
                             foreach (KeyValuePair<OrdnanceGroupTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedMissileContacts)
                             {
-                                StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
-                                int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
-                                int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.contact);
-
-                                float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                                float distance;
+                                _CurrnetShip.ShipsTaskGroup.Contact.DistTable.GetDistance(pair.Key.contact, out distance);
                                 int MSP = (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size);
                                 int sig = -1;
                                 int detectFactor = -1;
@@ -1768,11 +1762,9 @@ namespace Pulsar4X.UI.Handlers
                     {
                         foreach (KeyValuePair<ShipTN, FactionContact> pair in _CurrnetFaction.DetectedContactLists[_CurrnetShip.ShipsTaskGroup.Contact.Position.System].DetectedContacts)
                         {
-                            StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
-                            int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
-                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
+                            float distance;
+                            _CurrnetShip.ShipsTaskGroup.Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out distance);
 
-                            float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
 
@@ -1814,11 +1806,8 @@ namespace Pulsar4X.UI.Handlers
                                 continue;
                             }
 
-                            StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
-                            int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
-                            int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.contact);
-
-                            float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
+                            float distance;
+                            _CurrnetShip.ShipsTaskGroup.Contact.DistTable.GetDistance(pair.Key.contact, out distance);
 
                             int MSP = (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size);
                             int sig = -1;

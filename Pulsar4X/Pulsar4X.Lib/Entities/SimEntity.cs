@@ -211,7 +211,8 @@ namespace Pulsar4X.Entities
                 int TGID1 = CurrentSystem.SystemContactList.IndexOf(FleetIntercept1.Contact);
                 int TGID2 = CurrentSystem.SystemContactList.IndexOf(FleetIntercept2.Contact);
 
-                float dist = CurrentSystem.SystemContactList[TGID1].DistanceTable[TGID2];
+                float dist;
+                FleetIntercept1.Contact.DistTable.GetDistance(FleetIntercept2.Contact, out dist);
 
                 int sig1 = Large1.TotalCrossSection - 1;
                 int sig2 = Large2.TotalCrossSection - 1;

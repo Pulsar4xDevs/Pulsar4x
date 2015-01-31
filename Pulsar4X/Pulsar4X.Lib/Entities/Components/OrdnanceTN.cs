@@ -391,7 +391,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Distance in KM secondaries are to be released.
+        /// distance in KM secondaries are to be released.
         /// </summary>
         private float SubReleaseDistance;
         public float subReleaseDistance
@@ -951,6 +951,8 @@ namespace Pulsar4X.Entities.Components
             /// <summary>
             /// Range check the target.
             /// </summary>
+  
+            float distance;
             switch (TGT.targetType)
             {
                 case StarSystemEntityType.TaskGroup:
@@ -978,12 +980,7 @@ namespace Pulsar4X.Entities.Components
                         return false;
                     }
 
-                    int targetIndex = Sys.SystemContactList.IndexOf(TGT.ship.ShipsTaskGroup.Contact);
-
-                    /// <summary>
-                    /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
-                    /// </summary>
-                    float Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
+                    FiringShip.ShipsTaskGroup.Contact.DistTable.GetDistance(TGT.ship.ShipsTaskGroup.Contact, out distance);
 
                     int sig = TGT.ship.TotalCrossSection - 1;
                     if (sig > Constants.ShipTN.ResolutionMax - 1)
@@ -994,7 +991,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
                     /// </summary>
-                    bool Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Distance, TargettingRange);
+                    bool Detected = missileGroup.ordnanceGroupFaction.LargeDetection(distance, TargettingRange);
 
                     if (Detected == false)
                         return false;
@@ -1008,13 +1005,10 @@ namespace Pulsar4X.Entities.Components
                     if (TGT.missileGroup.missilesDestroyed == TGT.missileGroup.missiles.Count)
                         return false;
 
-                    Sys = FiringShip.ShipsTaskGroup.Contact.Position.System;
-                    targetIndex = Sys.SystemContactList.IndexOf(TGT.missileGroup.contact);
-
                     /// <summary>
                     /// Distances were calculated last tick, and missiles move before ships, so this should still be good data.
                     /// </summary>
-                    Distance = FiringShip.ShipsTaskGroup.Contact.DistanceTable[targetIndex];
+                    FiringShip.ShipsTaskGroup.Contact.DistTable.GetDistance(TGT.missileGroup.contact, out distance);
 
                     int MSP = (int)Math.Ceiling(TGT.missileGroup.missiles[0].missileDef.size);
                     sig = -1;
@@ -1043,7 +1037,7 @@ namespace Pulsar4X.Entities.Components
                     /// <summary>
                     /// I need to call the sensor model large detection function here because MFCs can have a very very long range.
                     /// </summary>
-                    Detected = missileGroup.ordnanceGroupFaction.LargeDetection(Distance, TargettingRange);
+                    Detected = missileGroup.ordnanceGroupFaction.LargeDetection(distance, TargettingRange);
 
                     if (Detected == false)
                         return false;
@@ -1127,7 +1121,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Distance X component.
+        /// distance X component.
         /// </summary>
         private float dX;
         public float dx
@@ -1136,7 +1130,7 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
-        /// Distance Y component.
+        /// distance Y component.
         /// </summary>
         private float dY;
         public float dy
@@ -1544,8 +1538,8 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Check if TG is still in range.
                         /// </summary>
-                        int TGID = Contact.Position.System.SystemContactList.IndexOf(Missiles[0].target.ship.ShipsTaskGroup.Contact);
-                        float dist = Contact.DistanceTable[TGID];
+                        float dist;
+                        Contact.DistTable.GetDistance(Missiles[0].target.ship.ShipsTaskGroup.Contact, out dist);
 
                         if (missiles[0].missileDef.aSD == null)
                         {
@@ -1571,8 +1565,8 @@ namespace Pulsar4X.Entities.Components
                         /// <summary>
                         /// Check if missile is still in range.
                         /// </summary>
-                        int TGID = Contact.Position.System.SystemContactList.IndexOf(Missiles[0].target.missileGroup.contact);
-                        float dist = Contact.DistanceTable[TGID];
+                        float dist;
+                        Contact.DistTable.GetDistance(Missiles[0].target.missileGroup.contact, out dist);
                         int detection = -1;
 
                         if (missiles[0].missileDef.aSD == null)
@@ -1943,8 +1937,8 @@ namespace Pulsar4X.Entities.Components
                         /// </summary>
                         if (pair.Value.active == true && pair.Key.missilesDestroyed != pair.Key.Missiles.Count)
                         {
-                            int TGID = Contact.Position.System.SystemContactList.IndexOf(pair.Key.contact);
-                            float dist = Contact.DistanceTable[TGID];
+                            float dist;
+                            Contact.DistTable.GetDistance(pair.Key.contact, out dist);
                             int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(0, (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size));
                             bool det = ordnanceGroupFaction.LargeDetection(dist, detection);
 
@@ -1980,8 +1974,8 @@ namespace Pulsar4X.Entities.Components
                         /// </summary>
                         if (pair.Value.active == true && pair.Key.IsDestroyed == false)
                         {
-                            int TGID = Contact.Position.System.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
-                            float dist = Contact.DistanceTable[TGID];
+                            float dist;
+                            Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out dist);
                             int detection = missiles[0].missileDef.aSD.GetActiveDetectionRange(Missiles[0].target.ship.TotalCrossSection, -1);
                             bool det = ordnanceGroupFaction.LargeDetection(dist, detection);
 

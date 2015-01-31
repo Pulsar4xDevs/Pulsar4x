@@ -1195,33 +1195,11 @@ namespace Pulsar4X.Entities
                     if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond &&
                         System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond)
                     {
-                        float dist = -1.0f;
+                        float dist;
 
                         // Check to see if our distance table is updated for this contact.
-                        if (TaskGroups[loop].Contact.DistanceTable_LastUpdateYear[loop2] == GameState.Instance.CurrentYear && TaskGroups[loop].Contact.DistanceTable_LastUpdateSecond[loop2] == GameState.Instance.CurrentSecond)
+                        if (!TaskGroups[loop].Contact.DistTable.GetDistance(System.SystemContactList[loop2], out dist))
                         {
-                            dist = TaskGroups[loop].Contact.DistanceTable[loop2];
-                            // We assume since the table is up to date, that fleet interception
-                            // check has been completed.
-                        }
-                        else
-                        {
-                            // Distance table is out of date.
-                            float distX = (float)(TaskGroups[loop].Contact.Position.X - System.SystemContactList[loop2].Position.X);
-                            float distY = (float)(TaskGroups[loop].Contact.Position.Y - System.SystemContactList[loop2].Position.Y);
-                            dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
-
-                            // Update our distance table.
-                            TaskGroups[loop].Contact.DistanceTable[loop2] = dist;
-                            TaskGroups[loop].Contact.DistanceTable_LastUpdateSecond[loop2] = GameState.Instance.CurrentSecond;
-                            TaskGroups[loop].Contact.DistanceTable_LastUpdateYear[loop2] = GameState.Instance.CurrentYear;
-
-                            // Update their distance table to us.
-                            int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
-                            System.SystemContactList[loop2].DistanceTable[TGID] = dist;
-                            System.SystemContactList[loop2].DistanceTable_LastUpdateSecond[TGID] = GameState.Instance.CurrentSecond;
-                            System.SystemContactList[loop2].DistanceTable_LastUpdateYear[loop2] = GameState.Instance.CurrentYear;
-
                             /// <summary>
                             /// Handle fleet interception check here.
                             /// </summary>
@@ -1266,7 +1244,7 @@ namespace Pulsar4X.Entities
                                 }
 
                             } // /Fleet Interception Check
-                        } // Distance Table Update.
+                        } // distance Table Update.
 
                         /// <summary>
                         /// Now to find the biggest signature in the contact. The biggest for planets is just the planetary pop itself since
@@ -2005,27 +1983,8 @@ namespace Pulsar4X.Entities
                         System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond &&
                         (Missile.missileDef.thermalStr != 0.0f || Missile.missileDef.eMStr != 0.0f || Missile.missileDef.activeStr != 0.0f))
                     {
-                        float dist = -1.0f;
-                        if (TaskGroups[loop].Contact.DistanceTable_LastUpdateSecond[loop2] == GameState.Instance.CurrentSecond && TaskGroups[loop].Contact.DistanceTable_LastUpdateYear[loop2] == GameState.Instance.CurrentYear)
-                        {
-                            dist = MissileGroups[loop].contact.DistanceTable[loop2];
-                        }
-                        else
-                        {
-                            float distX = (float)(MissileGroups[loop].contact.Position.X - System.SystemContactList[loop2].Position.X);
-                            float distY = (float)(MissileGroups[loop].contact.Position.Y - System.SystemContactList[loop2].Position.Y);
-                            dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
-
-                            MissileGroups[loop].contact.DistanceTable[loop2] = dist;
-                            MissileGroups[loop].contact.DistanceTable_LastUpdateSecond[loop2] = GameState.Instance.CurrentSecond;
-                            MissileGroups[loop].contact.DistanceTable_LastUpdateYear[loop2] = GameState.Instance.CurrentYear;
-
-                            int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
-
-                            System.SystemContactList[loop2].DistanceTable[TGID] = dist;
-                            System.SystemContactList[loop2].DistanceTable_LastUpdateSecond[TGID] = GameState.Instance.CurrentSecond;
-                            System.SystemContactList[loop2].DistanceTable_LastUpdateYear[TGID] = GameState.Instance.CurrentYear;
-                        }
+                        float dist;
+                        TaskGroups[loop].Contact.DistTable.GetDistance(System.SystemContactList[loop2], out dist);
 
                         /// <summary>
                         /// Now to find the biggest thermal signature in the contact. The biggest for planets is just the planetary pop itself since
@@ -2730,7 +2689,7 @@ namespace Pulsar4X.Entities
                 double AUDetection = (double)detection / factor;
 
                 /// <summary>
-                /// Distance is in AU. If dist is greater, then no detection.
+                /// distance is in AU. If dist is greater, then no detection.
                 /// </summary>
                 if (dist < (float)AUDetection)
                 {

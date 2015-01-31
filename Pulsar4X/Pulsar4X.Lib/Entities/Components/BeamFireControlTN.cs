@@ -507,7 +507,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// The Fire control itself must determine if the target is in range of both itself and its weapons.
         /// </summary>
-        /// <param name="DistanceToTarget">Distance in KM to target.</param>
+        /// <param name="DistanceToTarget">distance in KM to target.</param>
         /// <param name="RNG">RNG passed to this function from source further up the chain.</param>
         /// <param name="track">Base empire tracking or ship speed ,whichever is higher. Turrets should set track to their tracking speed.</param>
         /// <returns>Whether or not a weapon was able to fire.</returns>
@@ -893,7 +893,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Get the accuracy at which this BFC can fire upon its target.
         /// </summary>
-        /// <param name="RangeIncrement">Distance to target</param>
+        /// <param name="RangeIncrement">distance to target</param>
         /// <param name="track">Tracking capability of beam weapon that accuracy is desired for.</param>
         /// <param name="Override">For FCs in PD mode, there will be no target, they should use override instead.</param>
         /// <returns>Firing accuracy.</returns>
