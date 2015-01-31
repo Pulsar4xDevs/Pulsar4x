@@ -73,6 +73,24 @@ namespace Pulsar4X.Entities
         {
             return GetDistanceBetween(this, otherPos);
         }
+
+        /// <summary>
+        /// Adds two SystemPositions together.
+        /// </summary>
+        /// <param name="posA"></param>
+        /// <param name="posB"></param>
+        /// <returns></returns>
+        public static SystemPosition operator +(SystemPosition posA, SystemPosition posB)
+        {
+            if (posA.System != posB.System)
+            {
+                throw new InvalidOperationException("Cannot add positions in different systems.");
+            }
+
+            posA.X += posB.X;
+            posA.Y += posB.Y;
+            return posA;
+        }
     }
 
     public abstract class StarSystemEntity : GameEntity
