@@ -1220,7 +1220,7 @@ namespace Pulsar4X.Entities
                             int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
                             System.SystemContactList[loop2].DistanceTable[TGID] = dist;
                             System.SystemContactList[loop2].DistanceTable_LastUpdateSecond[TGID] = CurrentSecond;
-                            System.SystemContactList[loop2].DistanceTable_LastUpdateYear[loop2] = CurrentYear;
+                            System.SystemContactList[loop2].DistanceTable_LastUpdateYear[TGID] = CurrentYear;
 
                             /// <summary>
                             /// Handle fleet interception check here.
