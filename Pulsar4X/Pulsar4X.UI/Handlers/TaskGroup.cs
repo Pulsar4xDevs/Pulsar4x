@@ -1115,17 +1115,24 @@ namespace Pulsar4X.UI.Handlers
 
                 if (dZ >= Constants.Units.MAX_KM_IN_AU)
                 {
+                    /// <summary>
+                    /// DeltaZ is calculated in astronomic units, but we want km here. First dZ needs to be checked to make sure it won't overflow.
+                    /// Count is the number of Max_KM_IN_AU present in dZ, so if dZ were ~144 AU, count would be around 10, meaning that there are around 20 B km in dZ.
+                    /// </summary>
                     double Count = dZ / Constants.Units.MAX_KM_IN_AU;
 
 #warning magic numbers in distance/time calculation for taskgroup
                     // What is this magic number 2.147483648?
                     // Please, if we're going to put number constants, at least explain what they mean.
                     // TODO: Update this with our Constants.TimeInSeconds calculations to keep things consistent.
+                    // 2.14783648 is 2^31 / 1B. or the signed 32 bit limit. count is the number of signed 32 bit int limit kms in dZ.
+                    //multiplying and dividing by 100 gets a fraction of the distance past the Math.Floor operator, so we can have 1.25 B km for example.
                     double newDistance = Math.Floor(2.147483648 * Count * 100.0);
                     newDistance = newDistance / 100.0;
 
                     DistanceString = "Distance: " + newDistance.ToString() + "B km";
 
+                    //if timeReq is bigger than this value then time shouldn't be calculated.
                     double maxTime = 2.147483648;
 
                     double timeReq = newDistance / (double)CurrentTaskGroup.CurrentSpeed;
@@ -1134,6 +1141,7 @@ namespace Pulsar4X.UI.Handlers
 
                     if (timeReq < maxTime)
                     {
+                        //TimeReq was divided by 1B, correct that here.
                         double TimeSeconds = Math.Floor(timeReq * 1000000000.0);
                         double TimeMinutes = Math.Floor(TimeSeconds / 60.0);
                         TimeSeconds = TimeSeconds - (TimeMinutes * 60.0);

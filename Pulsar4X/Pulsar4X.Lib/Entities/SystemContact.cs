@@ -21,12 +21,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// where the contact was on the last tick.
         /// </summary>
-        public SystemPosition LastPosition;
+        public SystemPosition LastPosition { get; set; }
 
         /// <summary>
         /// Bascking entity of this contact.
         /// </summary>
-        public StarSystemEntity Entity;
+        public StarSystemEntity Entity { get; set; }
 
         // TODO: Make distance table it's own class/struct, get it out of here.
 
