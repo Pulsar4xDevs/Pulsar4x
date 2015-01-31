@@ -1300,8 +1300,10 @@ namespace Pulsar4X
         /// </summary>
         public static class GameSettings
         {
-            // If true, allows a faction from using a non-friendly faction's JumpGate. (True = default aurora)
+            // If true, Allows a faction from using a non-friendly faction's JumpGate. (True = default aurora)
             // TODO: Not currently functional as false. Factions have no relationships with each other yet.
+            // Also Jump Construction modules and jump drives need to be implemented.
+            // Should gates be phsyical things that can be destroyed or captured with marines? or should they be capturable/destroyable with a jump construction module only?
             public static bool AllowHostileGateJump = true;
         }
     }
