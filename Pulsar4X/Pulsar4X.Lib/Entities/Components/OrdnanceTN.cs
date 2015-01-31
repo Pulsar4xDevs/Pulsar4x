@@ -1234,9 +1234,9 @@ namespace Pulsar4X.Entities.Components
 
             for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
             {
-                Missile.ThermalDetection.Add(GameState.SE.CurrentSecond);
-                Missile.EMDetection.Add(GameState.SE.CurrentSecond);
-                Missile.ActiveDetection.Add(GameState.SE.CurrentSecond);
+                Missile.ThermalDetection.Add(GameState.Instance.CurrentSecond);
+                Missile.EMDetection.Add(GameState.Instance.CurrentSecond);
+                Missile.ActiveDetection.Add(GameState.Instance.CurrentSecond);
             }
 
 
@@ -1276,9 +1276,9 @@ namespace Pulsar4X.Entities.Components
 
             for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
             {
-                Missile.ThermalDetection.Add(GameState.SE.CurrentSecond);
-                Missile.EMDetection.Add(GameState.SE.CurrentSecond);
-                Missile.ActiveDetection.Add(GameState.SE.CurrentSecond);
+                Missile.ThermalDetection.Add(GameState.Instance.CurrentSecond);
+                Missile.EMDetection.Add(GameState.Instance.CurrentSecond);
+                Missile.ActiveDetection.Add(GameState.Instance.CurrentSecond);
             }
 
             Missiles.Add(Missile);
@@ -1669,7 +1669,7 @@ namespace Pulsar4X.Entities.Components
                     Entry = String.Format("1x {0} Missile in Missile Group {1} has run out of fuel.", Missiles[0].Name, Name);
 
                 MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileOutOfFuel, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                   (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                   GameState.Instance.LastTimestep, Entry);
                 OrdnanceGroupFaction.MessageLog.Add(Msg);
 
                 /// <summary>
@@ -1705,7 +1705,7 @@ namespace Pulsar4X.Entities.Components
                         Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking,has no onboard sensor and will self destruct.", Missiles[0].Name, Name);
 
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                           GameState.Instance.LastTimestep, Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
 
                     MissilesDestroyed = Missiles.Count;
@@ -1719,7 +1719,7 @@ namespace Pulsar4X.Entities.Components
                         Entry = String.Format("1x {0} Missile in Missile Group {1} lost tracking and will switch to onboard sensors.", Missiles[0].Name, Name);
 
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileLostTracking, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                           GameState.Instance.LastTimestep, Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
 
@@ -1804,7 +1804,7 @@ namespace Pulsar4X.Entities.Components
                     {
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} shot down by point blank defensive fire", Missiles[loop].Name, loop, Name);
                         MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                           GameState.Instance.LastTimestep, Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
                     }
                     else
@@ -1812,7 +1812,7 @@ namespace Pulsar4X.Entities.Components
 
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Hit {3} for {4} damage.", Missiles[loop].Name, loop, Name, Missiles[loop].target.ship.Name, Missiles[loop].missileDef.warhead);
                         MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                           GameState.Instance.LastTimestep, Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
 
                         ushort Columns = Missiles[loop].target.ship.ShipArmor.armorDef.cNum;
@@ -1839,7 +1839,7 @@ namespace Pulsar4X.Entities.Components
                 {
                     String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.LastTimestep, Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
             }
@@ -1885,7 +1885,7 @@ namespace Pulsar4X.Entities.Components
                     {
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Intercepted an enemy missile and destroyed it.", Missiles[loop].Name, loop, Name);
                         MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.LastTimestep, Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
 
                         /// <summary>
@@ -1897,7 +1897,7 @@ namespace Pulsar4X.Entities.Components
                     {
                         String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Intercepted an enemy missile and failed to destroyed it.", Missiles[loop].Name, loop, Name);
                         MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileHit, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.LastTimestep, Entry);
                         OrdnanceGroupFaction.MessageLog.Add(Msg);
                     }
 
@@ -1915,7 +1915,7 @@ namespace Pulsar4X.Entities.Components
                 {
                     String Entry = String.Format("Missile {0} #{1} in Missile Group {2} Missed.", Missiles[loop].Name, loop, Name);
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.MissileMissed, Contact.Position.System, Contact, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.LastTimestep, Entry);
                     OrdnanceGroupFaction.MessageLog.Add(Msg);
                 }
             }

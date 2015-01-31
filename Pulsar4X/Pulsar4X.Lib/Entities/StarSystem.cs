@@ -227,7 +227,7 @@ namespace Pulsar4X.Entities
             {
                 String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
                 MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact,
-                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Entry2);
             }
         }

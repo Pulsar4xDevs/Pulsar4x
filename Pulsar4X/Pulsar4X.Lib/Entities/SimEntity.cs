@@ -40,21 +40,6 @@ namespace Pulsar4X.Entities
         public bool SimCreated { get; set; }
 
         /// <summary>
-        /// Current second in the current year.
-        /// </summary>
-        public int CurrentSecond { get; set; }
-
-        /// <summary>
-        /// Current year of the game.
-        /// </summary>
-        public int CurrentYear { get; set; }
-
-        /// <summary>
-        /// Tick the last time simEntity updated.
-        /// </summary>
-        public int lastTick { get; set; }
-
-        /// <summary>
         /// Should construction work be done?
         /// </summary>
         public int ConstructionTick { get; set; }
@@ -170,7 +155,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Last game tick I found that a fleet was within 5 days travel time of another factions fleet.
             /// </summary>
-            if (FleetInterceptionPreemptTick == CurrentSecond)
+            if (FleetInterceptionPreemptTick == GameState.Instance.CurrentSecond)
             {
                 if (desiredTimeInSeconds >= Constants.TimeInSeconds.Day)
                 {
@@ -179,7 +164,7 @@ namespace Pulsar4X.Entities
 #warning this goes in the SM Log.
                     String Entry = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
-                                                       (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       (GameState.Instance.LastTimestep), Entry);
                     GameState.Instance.Factions[0].MessageLog.Add(Msg);
                 }
             }
@@ -290,7 +275,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// A missile intercept preemption event has been detected.
             /// </summary>
-            if (MissileInterceptPreemptTick == CurrentSecond)
+            if (MissileInterceptPreemptTick == GameState.Instance.CurrentSecond)
             {
                 if (MissileTimeToHit <= desiredTimeInSeconds)
                 {
@@ -417,7 +402,7 @@ namespace Pulsar4X.Entities
 
                     /// <summary>
                     /// after advance sim is a missile intercept still in progress?
-                    if (MissileInterceptPreemptTick == CurrentSecond)
+                    if (MissileInterceptPreemptTick == GameState.Instance.CurrentSecond)
                     {
                         bool test = PreemptCheck((desiredTime - elapsedTime), out AdvanceTime, out Pulses);
 
@@ -432,12 +417,12 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// after running advance sim we find a potential fleet interception event occurred.
                     /// </summary>
-                    else if (FleetInterceptionPreemptTick == CurrentSecond)
+                    else if (FleetInterceptionPreemptTick == GameState.Instance.CurrentSecond)
                     {
 #warning this goes in the SM Log.
                         String Entry2 = String.Format("Subpulse shortened due to potential fleet interception. This should go in the SM Log when that exists.");
                         MessageEntry Msg2 = new MessageEntry(MessageEntry.MessageType.PotentialFleetInterception, null, null, GameState.Instance.GameDateTime,
-                                                           (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry2);
+                                                           GameState.Instance.LastTimestep, Entry2);
                         GameState.Instance.Factions[0].MessageLog.Add(Msg2);
 
                         return elapsedTime;
@@ -526,7 +511,7 @@ namespace Pulsar4X.Entities
 #warning SM log this
                 String Entry = String.Format("Subpulse Error with desiredTime {0}, sub pulse set to 5 seconds. This should go in the SM log eventually.", DesiredTime);
                 MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Error, null, null, GameState.Instance.GameDateTime,
-                                                   (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                   GameState.Instance.LastTimestep, Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Msg);
 
                 Advance = (int)Constants.TimeInSeconds.FiveSeconds;
@@ -548,19 +533,8 @@ namespace Pulsar4X.Entities
         /// <param name="deltaSeconds"></param>
         public void AdvanceSim(BindingList<Faction> P, Random RNG, int deltaSeconds)
         {
-            lastTick = CurrentSecond;
-            CurrentSecond += deltaSeconds;
+            GameState.Instance.CurrentSecond += deltaSeconds;
             ConstructionTick += deltaSeconds;
-
-            if (CurrentSecond > Constants.TimeInSeconds.Year)
-            {
-                CurrentSecond -= (int)Constants.TimeInSeconds.Year;
-                // Also subtract our lastTick. lastTick will now be negative.
-                // lastTick is often used for deltaTime, so CurrentSecond - lastTick needs to be positive.
-                lastTick -= (int)Constants.TimeInSeconds.Year;
-
-                CurrentYear++;
-            }
 
             foreach (StarSystem CurrentSystem in GameState.Instance.StarSystems)
             {
@@ -598,12 +572,12 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Handle missile interception sub pulse preemption here.
                     /// </summary>
-                    if (MissileInterceptPreemptTick != CurrentSecond)
+                    if (MissileInterceptPreemptTick != GameState.Instance.CurrentSecond)
                     {
-                        MissileInterceptPreemptTick = CurrentSecond;
+                        MissileInterceptPreemptTick = GameState.Instance.CurrentSecond;
                         MissileTimeToHit = (int)OrdnanceGroup.timeReq;
                     }
-                    else if (MissileInterceptPreemptTick == CurrentSecond && OrdnanceGroup.timeReq < MissileTimeToHit)
+                    else if (MissileInterceptPreemptTick == GameState.Instance.CurrentSecond && OrdnanceGroup.timeReq < MissileTimeToHit)
                     {
                         MissileTimeToHit = (int)OrdnanceGroup.timeReq;
                     }
@@ -671,7 +645,7 @@ namespace Pulsar4X.Entities
             /// </summary>
             foreach (Faction faction in P)
             {
-                faction.SensorSweep(CurrentYear, CurrentSecond);
+                faction.SensorSweep();
             }
 
             /// <summary>
@@ -731,7 +705,7 @@ namespace Pulsar4X.Entities
                                             /// </summary>
                                             if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts[Target].active == true)
                                             {
-                                                bool WF = ShipToFire.ShipFireWeapons(CurrentYear, CurrentSecond, RNG);
+                                                bool WF = ShipToFire.ShipFireWeapons(RNG);
 
                                                 /// <summary>
                                                 /// Update the recharge list since the target must be destroyed.
@@ -795,7 +769,7 @@ namespace Pulsar4X.Entities
                                             /// </summary>
                                             if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedMissileContacts[Target].active == true)
                                             {
-                                                bool WF = ShipToFire.ShipFireWeapons(CurrentYear, CurrentSecond, RNG);
+                                                bool WF = ShipToFire.ShipFireWeapons(RNG);
 
                                                 if (Target.missilesDestroyed != 0 && Target.ordnanceGroupFaction.MissileRemoveList.Contains(Target) == false)
                                                 {
@@ -1063,7 +1037,7 @@ namespace Pulsar4X.Entities
 
                             String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.", TaskGroupOrdered.Name);
                             MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.OrdersNotCompleted, TaskGroupOrdered.Contact.Position.System, TaskGroupOrdered.Contact,
-                                                                   GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                                   GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
                             TaskGroupOrdered.TaskGroupFaction.MessageLog.Add(Entry2);
 
                             int lastOrder = TaskGroupOrdered.TaskGroupOrders.Count - 1;
@@ -1105,7 +1079,7 @@ namespace Pulsar4X.Entities
 
                             String Entry = String.Format("Taskgroup {0} cannot find target, orders canceled.", TaskGroupOrdered.Name);
                             MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.OrdersNotCompleted, TaskGroupOrdered.Contact.Position.System, TaskGroupOrdered.Contact,
-                                                                   GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                                   GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
                             TaskGroupOrdered.TaskGroupFaction.MessageLog.Add(Entry2);
 
                             int lastOrder = TaskGroupOrdered.TaskGroupOrders.Count - 1;
@@ -1287,8 +1261,6 @@ namespace Pulsar4X.Entities
             MissileInterceptPreemptTick = -1;
             MissileTimeToHit = 0;
 
-            lastTick = 0;
-            CurrentSecond = 0;
             ConstructionTick = 0;
 
 #warning subpulse related magic numbers
