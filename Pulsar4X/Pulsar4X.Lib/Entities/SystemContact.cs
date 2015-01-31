@@ -28,15 +28,22 @@ namespace Pulsar4X.Entities
         /// </summary>
         public StarSystemEntity Entity;
 
+        // TODO: Make distance table it's own class/struct, get it out of here.
+
         /// <summary>
         /// Distance between this contact and the other contacts in the system in AU.
         /// </summary>
         public BindingList<float> DistanceTable { get; set; }
 
         /// <summary>
-        /// Last timeslice the distance Table was updated.
+        /// Second that the distance table was updated.
         /// </summary>
-        public BindingList<int> DistanceUpdate { get; set; }
+        public BindingList<int> DistanceTable_LastUpdateSecond { get; set; }
+
+        /// <summary>
+        /// Year that the distance table was updated.
+        /// </summary>
+        public List<int> DistanceTable_LastUpdateYear { get; set; }
         
         /// <summary>
         /// Creates a new system contact.
@@ -53,7 +60,8 @@ namespace Pulsar4X.Entities
             Entity = entity;
 
             DistanceTable = new BindingList<float>();
-            DistanceUpdate = new BindingList<int>();
+            DistanceTable_LastUpdateSecond = new BindingList<int>();
+            DistanceTable_LastUpdateYear = new List<int>();
 
             SSEntity = entity.SSEntity;
         }
@@ -93,26 +101,28 @@ namespace Pulsar4X.Entities
             Position.System = system;
 
             DistanceTable.Clear();
-            DistanceUpdate.Clear();
+            DistanceTable_LastUpdateSecond.Clear();
+            DistanceTable_LastUpdateYear.Clear();
 
             DistanceTable.RaiseListChangedEvents = false;
-            DistanceUpdate.RaiseListChangedEvents = false;
+            DistanceTable_LastUpdateSecond.RaiseListChangedEvents = false;
 
             for (int loop = 0; loop < Position.System.SystemContactList.Count; loop++)
             {
                 DistanceTable.Add(0.0f);
-                DistanceUpdate.Add(-1);
+                DistanceTable_LastUpdateSecond.Add(-1);
+                DistanceTable_LastUpdateYear.Add(-1);
             }
 
             DistanceTable.RaiseListChangedEvents = true;
-            DistanceUpdate.RaiseListChangedEvents = true;
+            DistanceTable_LastUpdateSecond.RaiseListChangedEvents = true;
 
             /// <summary>
             /// BindingLists apparently do a bunch of events every time they are changed.
             /// This has hopefully circumvented that, with just 1 event.
             /// </summary>
             DistanceTable.ResetBindings();
-            DistanceUpdate.ResetBindings();
+            DistanceTable_LastUpdateSecond.ResetBindings();
         }
     }
 }

@@ -671,7 +671,7 @@ namespace Pulsar4X.Entities
             /// </summary>
             foreach (Faction faction in P)
             {
-                faction.SensorSweep(CurrentSecond);
+                faction.SensorSweep(CurrentYear, CurrentSecond);
             }
 
             /// <summary>
@@ -731,7 +731,7 @@ namespace Pulsar4X.Entities
                                             /// </summary>
                                             if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedContacts[Target].active == true)
                                             {
-                                                bool WF = ShipToFire.ShipFireWeapons(CurrentSecond, RNG);
+                                                bool WF = ShipToFire.ShipFireWeapons(CurrentYear, CurrentSecond, RNG);
 
                                                 /// <summary>
                                                 /// Update the recharge list since the target must be destroyed.
@@ -795,7 +795,7 @@ namespace Pulsar4X.Entities
                                             /// </summary>
                                             if (ShipToFire.ShipsFaction.DetectedContactLists[CurSystem].DetectedMissileContacts[Target].active == true)
                                             {
-                                                bool WF = ShipToFire.ShipFireWeapons(CurrentSecond, RNG);
+                                                bool WF = ShipToFire.ShipFireWeapons(CurrentYear, CurrentSecond, RNG);
 
                                                 if (Target.missilesDestroyed != 0 && Target.ordnanceGroupFaction.MissileRemoveList.Contains(Target) == false)
                                                 {
