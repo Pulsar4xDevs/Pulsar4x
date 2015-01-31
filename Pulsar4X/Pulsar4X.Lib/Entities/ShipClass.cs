@@ -2321,7 +2321,6 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Builds the class summary.
         /// Geo/Grav values not handled yet. or present for that matter.
-        /// Missile related components not yet handled.
         /// many other components not handled either.
         /// Need to pass desired range/tracking for bfc adjustment.
         /// </summary>

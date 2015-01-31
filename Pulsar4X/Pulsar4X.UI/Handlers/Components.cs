@@ -88,12 +88,19 @@ namespace Pulsar4X.UI.Handlers
         private MissileEngineDefTN MissileEngineProject;
         private CIWSDefTN CloseInProject;
 
-        private IntPtr eventMask;
+        /// <summary>
+        /// This Code, along with the DllImport allows for halting and resuming message sending during ResizeBegin and ResizeEnd. It was an attempt to eliminate cpu usage on window moves that did not work
+        /// however. References in Components() must be uncommented for this to work, and the ResizeBegin and ResizeEnd functions must likewise have their contents uncommented.
+        /// </summary>
+        //private IntPtr eventMask;
+
+        //[DllImport("user32", CharSet = CharSet.Auto)]
+        //private extern static IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, IntPtr lParam);
 
         public Components()
         {
 
-            eventMask = IntPtr.Zero;
+            //eventMask = IntPtr.Zero;
 
             m_oComponentDesignPanel = new Panels.Component_Design();
 
