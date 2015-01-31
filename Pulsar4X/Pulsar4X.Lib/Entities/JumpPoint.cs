@@ -48,6 +48,14 @@ namespace Pulsar4X.Entities
         public Faction GateOwner { get; set; }
 
         /// <summary>
+        /// If set to false, along with Constants.GameSettings.AllowHostileGateJump,
+        /// then hostiles will not be able to use the JumpGate on this JumpPoint.
+        /// 
+        /// Note: This is intended to be a user-specific setting on specific JumpPoints.
+        /// </summary>
+        public bool AllowHostileJumps { get; set; }
+
+        /// <summary>
         /// The contact that this jumppoint is associated with.
         /// </summary>
         public SystemContact Contact { get; set; }
@@ -91,6 +99,7 @@ namespace Pulsar4X.Entities
             IsGated = true;
             GateOwner = F;
             Name = "(G) " + Name;
+            AllowHostileJumps = true; // Default setting for new JumpGates
         }
 
         /// <summary>
@@ -104,15 +113,16 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Handles exploring unconnected jump points.
+        /// Handles connecting unconnected jump points.
         /// This function only handles the connection of JumpPoints to new JumpPoints/Systems
+        /// Currently, we create and link top new systems only.
         /// 
         /// TODO: Implement connecting to existing systems.
         /// Design Questions: 
         /// How do we determine we want to connect to an existing system? (X% Chance?, X% Chance if we already have other connections?, Other?)
         /// How do we decide what system to connect to? (Random?, "System Proximity" based?, Other?)
         /// </summary>
-        public void ExploreJP()
+        public void CreateConnection()
         {
             // Generate a new system.
             StarSystem newSystem = GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
@@ -129,49 +139,16 @@ namespace Pulsar4X.Entities
             Connect.Name = Connect.Name + "(" + System.Name + ")";
         }
 
-        /// <summary>
-        /// Simple transits happen here. Civilian ships, and military ships that are simply travelling will use this function.
-        /// there is a higher penalty associated with a standard transit, ships appear directly on the JP, but there is no TG size limitation.
-        /// </summary>
-        /// <param name="TransitTG"> Transiting TG</param>
-        /// <returns>Success or failure of transit as an integer code.</returns>
-        public int StandardTransit(TaskGroupTN TransitTG)
-        {
-            // Check Jump Drive logic.
-            if (!CanJump(TransitTG, true))
-            {
-                return 0;
-            }
-
-            // Ensure we have a connection, if not create one.
-            if (Connect == null)
-            {
-                ExploreJP();
-            }
-
-            System.RemoveContact(TransitTG.Contact);
-            Connect.System.AddContact(TransitTG.Contact);
-
-            // Move us to the JP in the other system.
-            //TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
-            TransitTG.Contact.UpdateLocationAfterTransit(Connect.XSystem, Connect.YSystem);
-
-
-            // TODO: Set Standard transit penalties here
-
-            return 1;
-        }
-
-        /// <summary>
-        /// Military Squadron jumps into a system are handled here. Ships jump away from the jp, and have a lower transit penalty than a standard transit,
-        /// but only the squadron size may make the jump.
+        /// Ship Transits happen here.
+        /// Standard transits incure a higher penalty, but do not have TG size limitations.
         /// </summary>
         /// <param name="TransitTG">Transiting TG</param>
+        /// <param name="isSquadronTransit">Boolean indicating order type. True for Squadron transit.</param>
         /// <returns>Success or failure of transit as an integer code.</returns>
-        public int SquadronTransit(TaskGroupTN TransitTG)
+        public int Transit(TaskGroupTN TransitTG, bool isSquadronTransit)
         {
             // Check Jump Drive logic.
-            if (!CanJump(TransitTG, false))
+            if (!CanJump(TransitTG, isSquadronTransit))
             {
                 return 0;
             }
@@ -179,17 +156,16 @@ namespace Pulsar4X.Entities
             // Ensure we have a connection, if not create one.
             if (Connect == null)
             {
-                ExploreJP();
+                CreateConnection();
             }
 
             System.RemoveContact(TransitTG.Contact);
             Connect.System.AddContact(TransitTG.Contact);
 
             // Move us to the JP in the other system.
-            //TransitTG.Contact.UpdateLocationInSystem(Connect.XSystem, Connect.YSystem);
             TransitTG.Contact.UpdateLocationAfterTransit(Connect.XSystem, Connect.YSystem);
 
-            // TODO: Set Squadron transit penalties here
+            // TODO: Set transit penalties here
 
             return 1;
         }
@@ -214,18 +190,20 @@ namespace Pulsar4X.Entities
         {
             if (IsGated)
             {
-                // TODO: Add "Allow Friendly factions to use Gates"
-                //if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
-                //{
-                    // If nobody owns the gate, or we do, allow the jump.
+                if (Constants.GameSettings.AllowHostileGateJump || AllowHostileJumps)
+                {
+                    // Gate/Game settings are not setup to allow blocking of hostiles.
                     return true;
-                //}
+                }
+                if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
+                {
+                    // Nobody owns the gate, or we do, allow the jump.
+                    // TODO: Check if a friendly faction owns the gate, and allow.
+                    return true;
+                }
             }
             // TODO: Expand this to take into account JumpDrives.
             // Currently, JumpDrives don't exist, so how could we possibly jump? 
-            //    Gates aren't phsyical things, so they can't really be interdicted easily.
-            //    GateOwner is more of a display thing, your gates are yellow boxes, while all other gates are red boxes.
-            //    If we want to, we could change that, and make gates capturable, destructable,etc.
             return false; 
         }
     }

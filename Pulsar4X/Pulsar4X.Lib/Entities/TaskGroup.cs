@@ -2283,11 +2283,11 @@ namespace Pulsar4X.Entities
 
                     case (int)Constants.ShipTN.OrderType.StandardTransit:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
-                        (TaskGroupOrders[0].target as JumpPoint).StandardTransit(this);
+                        (TaskGroupOrders[0].target as JumpPoint).Transit(this, false);
                         break;
                     case (int)Constants.ShipTN.OrderType.SquadronTransit:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
-                        (TaskGroupOrders[0].target as JumpPoint).SquadronTransit(this);
+                        (TaskGroupOrders[0].target as JumpPoint).Transit(this, true);
                         break;
 
 
