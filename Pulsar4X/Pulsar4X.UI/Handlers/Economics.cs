@@ -353,10 +353,10 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Function to advance time for all buttons. this is all lifted from the system map time code.
         /// </summary>
-        /// <param name="TickValue"></param>
-        private void AdvanceTime(int TickValue)
+        /// <param name="deltaSeconds"></param>
+        private void AdvanceTime(int deltaSeconds)
         {
-            int elapsed = GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, TickValue);
+            int elapsed = GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, deltaSeconds);
 
             TimeSpan TS = new TimeSpan(0, 0, elapsed);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);

@@ -442,7 +442,7 @@ namespace Pulsar4X.UI.Handlers
                         {
                             String Error = String.Format("Star System {0} not found in point defense listing for {1} on {2}.", CurrentSystem, _CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip);
                             MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                             _CurrnetFaction.MessageLog.Add(MessageEnter);
                         }
                         else
@@ -469,7 +469,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     String Error = String.Format("Improper point defense state {0} assigned to BFC {1} on {2}", (PointDefenseState)index, _CurrnetFC, _CurrnetShip);
                     MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                     _CurrnetFaction.MessageLog.Add(MessageEnter);
                 }
             }
@@ -514,7 +514,7 @@ namespace Pulsar4X.UI.Handlers
 #warning leave this error message in for now
                             String Error = String.Format("Star System {0} not found in point defense listing for {1} on {2}. Not necessarily a bug.", CurrentSystem, _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip);
                             MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                                  GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                             _CurrnetFaction.MessageLog.Add(MessageEnter);
                         }
 
@@ -547,7 +547,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     String Error = String.Format("Improper point defense state {0} assigned to MFC {1} on {2}", (PointDefenseState)index, _CurrnetFC, _CurrnetShip);
                     MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                     _CurrnetFaction.MessageLog.Add(MessageEnter);
                 }
             }
@@ -1730,7 +1730,7 @@ namespace Pulsar4X.UI.Handlers
                             {
                                 String Error = String.Format("BuildContactList has an empty missileGroup in detectedMissileContacts.");
                                 MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                                 _CurrnetFaction.MessageLog.Add(MessageEnter);
                                 continue;
                             }
@@ -1752,7 +1752,7 @@ namespace Pulsar4X.UI.Handlers
                                 {
                                     String Error = String.Format("BuildContactList has a missile detected via EM that has no Active sensor(which is the only way it can be detected via EM)");
                                     MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                                          GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                                     _CurrnetFaction.MessageLog.Add(MessageEnter);
                                 }
 
@@ -1827,7 +1827,7 @@ namespace Pulsar4X.UI.Handlers
                             {
                                 String Error = String.Format("BuildContactList has an empty missileGroup in detectedMissileContacts.");
                                 MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                                 _CurrnetFaction.MessageLog.Add(MessageEnter);
                                 continue;
                             }
@@ -1895,7 +1895,7 @@ namespace Pulsar4X.UI.Handlers
                                     {
                                         String Error = String.Format("BuildContactList has a missile detected via EM that has no Active sensor(which is the only way it can be detected via EM)");
                                         MessageEntry MessageEnter = new MessageEntry(MessageEntry.MessageType.Error, _CurrnetShip.ShipsTaskGroup.Contact.Position.System, _CurrnetShip.ShipsTaskGroup.Contact,
-                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                                         _CurrnetFaction.MessageLog.Add(MessageEnter);
                                     }
 

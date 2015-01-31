@@ -100,7 +100,7 @@ namespace Pulsar4X.Entities
             /// Print to the message log.
             /// </summary>
             MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedShip.ShipsTaskGroup.Contact.Position.System, DetectedShip.ShipsTaskGroup.Contact,
-                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
 
@@ -148,7 +148,7 @@ namespace Pulsar4X.Entities
                 {
                     Contact = String.Format("Error with {0} : has EM signature but no active sensor.", Contact);
                     NMsg = new MessageEntry(MessageEntry.MessageType.Error, DetectedMissileGroup.contact.Position.System, DetectedMissileGroup.contact,
-                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Contact);
 
                     CurrentFaction.MessageLog.Add(NMsg);
                 }
@@ -165,7 +165,7 @@ namespace Pulsar4X.Entities
             /// print to the message log.
             /// </summary>
             NMsg = new MessageEntry(MessageEntry.MessageType.ContactNew, DetectedMissileGroup.contact.Position.System, DetectedMissileGroup.contact,
-                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
 
@@ -303,7 +303,7 @@ namespace Pulsar4X.Entities
                 SysCon = ship.ShipsTaskGroup.Contact;
 
             MessageEntry NMsg = new MessageEntry(type, SysCon.Position.System, SysCon,
-                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Contact);
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Contact);
 
             CurrentFaction.MessageLog.Add(NMsg);
 
@@ -1474,7 +1474,7 @@ namespace Pulsar4X.Entities
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial Thermal detect for TGs looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
                                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
@@ -1641,7 +1641,7 @@ namespace Pulsar4X.Entities
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial EM detect for TGs looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
                                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
@@ -1775,7 +1775,7 @@ namespace Pulsar4X.Entities
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial Active detect for TGs looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
                                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
@@ -1973,7 +1973,7 @@ namespace Pulsar4X.Entities
                 {
                     String ErrorMessage = string.Format("Missile group {0} has no missiles and is still in the list of missile groups.", MissileGroups[loop].Name);
                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                 GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
 
                     MessageLog.Add(NMsg);
                     continue;
@@ -2214,7 +2214,7 @@ namespace Pulsar4X.Entities
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial Thermal detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
                                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
@@ -2352,7 +2352,7 @@ namespace Pulsar4X.Entities
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial EM detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
                                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
@@ -2466,7 +2466,7 @@ namespace Pulsar4X.Entities
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial Active detect for missiles looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
                                                         MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
-                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), ErrorMessage);
+                                                                                             GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
                                                         break;
@@ -2770,6 +2770,5 @@ namespace Pulsar4X.Entities
 #warning baseTracking is a magic number here.
             BaseTracking = 25000;
         }
-
     }
 }

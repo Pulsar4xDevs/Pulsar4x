@@ -145,7 +145,7 @@ namespace Pulsar4X.Lib
 
                 String Entry = String.Format("TO:{0} E:{1} OF:{2}", theOrbit.Name, theOrbit.Eccentricity, orbitFraction);
                 MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
-                                                   (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                   (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Msg);
             }*/
 
@@ -187,14 +187,14 @@ namespace Pulsar4X.Lib
 
         }
 
-        public void UpdatePosition(OrbitingEntity theOrbit, long delta)
+        public void UpdatePosition(OrbitingEntity theOrbit, long deltaSeconds)
         {
             double x, y;
 
             /// <summary>
             /// Increment the second remainder counter, and then check to see if timeSinceApogee(days) should be incremented.
             /// </summary>
-            theOrbit.TimeSinceApogeeRemainder = theOrbit.TimeSinceApogeeRemainder + delta;
+            theOrbit.TimeSinceApogeeRemainder = theOrbit.TimeSinceApogeeRemainder + deltaSeconds;
 
             while (theOrbit.TimeSinceApogeeRemainder > Constants.TimeInSeconds.Day)
             {

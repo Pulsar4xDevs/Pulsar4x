@@ -128,7 +128,7 @@ namespace Pulsar4X.Entities
                                     String Entry = String.Format("Insufficent Conventional Industry to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
                                         CurrentConstruction.Name);
                                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                        GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                                        GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                                     CurrentFaction.MessageLog.Add(Msg);
                                     continue;
                                 }
@@ -144,7 +144,7 @@ namespace Pulsar4X.Entities
                                     String Entry = String.Format("Insufficent Mines to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
                                         CurrentConstruction.Name);
                                     MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksCI, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                        GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                                        GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                                     CurrentFaction.MessageLog.Add(Msg);
                                     continue;
                                 }
@@ -182,7 +182,7 @@ namespace Pulsar4X.Entities
                             String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
                                         CurrentConstruction.Name);
                             MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                                GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                             CurrentFaction.MessageLog.Add(Msg);
                             continue;
                         }
@@ -354,7 +354,7 @@ namespace Pulsar4X.Entities
                             String Entry = String.Format("Insufficent Minerals to continue build order on {0} for {1}x {2}", CurrentPopulation, CurrentConstruction.numToBuild,
                                         CurrentConstruction.Name);
                             MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                                GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                                GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                             CurrentFaction.MessageLog.Add(Msg);
                             continue;
                         }
@@ -493,7 +493,7 @@ namespace Pulsar4X.Entities
                     {
                         String Entry = String.Format("Insufficient Sorium on {0} to continue refining.", CurrentPopulation);
                         MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Contact.Position.System, CurrentPopulation.Contact,
-                                                            GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                            GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                         CurrentFaction.MessageLog.Add(Msg);
                     }
                 }

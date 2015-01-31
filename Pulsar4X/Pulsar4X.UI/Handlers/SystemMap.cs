@@ -242,7 +242,7 @@ namespace Pulsar4X.UI.Handlers
             /// Put the date time somewhere.
             /// </summary>
 #warning don't really need this debug info
-            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.SE.CurrentTick.ToString() + " " + GameState.SE.lastTick.ToString();
+            m_oControlsPanel.TabText = "SystemMap.cs Kludge(239): " + GameState.Instance.GameDateTime.ToString() + " " + Seconds.ToString() + " " + GameState.SE.CurrentSecond.ToString() + " " + GameState.SE.lastTick.ToString();
 
             MainFormReference.Text = "Pulsar4X - " + GameState.Instance.GameDateTime.ToString();
 

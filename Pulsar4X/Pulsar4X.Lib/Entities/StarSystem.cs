@@ -71,7 +71,6 @@ namespace Pulsar4X.Entities
 
         private bool contactsChanged;
 
-
         public StarSystem()
             : this(string.Empty)
         {
@@ -226,7 +225,7 @@ namespace Pulsar4X.Entities
             {
                 String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
                 MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact,
-                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Entry2);
             }
         }
@@ -262,6 +261,34 @@ namespace Pulsar4X.Entities
         private void ContactsChanged(object sender, ListChangedEventArgs e)
         {
             contactsChanged = true;
+        }
+
+        /// <summary>
+        /// Updates this StarSystem for the new time.
+        /// </summary>
+        /// <param name="deltaSeconds">Change in seconds since last update.</param>
+        public void Update(int deltaSeconds)
+        {
+            // Update the position of all planets. This should probably be in something like the construction tick in Aurora.
+            foreach (Star CurrentStar in Stars)
+            {
+                // The system primary will cause a divide by zero error currently as it has no orbit.
+                if (CurrentStar != Stars[0])
+                {
+                    CurrentStar.UpdatePosition(deltaSeconds);
+
+                    // Since the star moved, update the JumpPoint position.
+                    foreach (JumpPoint CurrentJumpPoint in JumpPoints)
+                    {
+                        CurrentJumpPoint.UpdatePosition();
+                    }
+                }
+
+                foreach (Planet CurrentPlanet in CurrentStar.Planets)
+                {
+                    CurrentPlanet.UpdatePosition(deltaSeconds);
+                }
+            }
         }
     }
 }
