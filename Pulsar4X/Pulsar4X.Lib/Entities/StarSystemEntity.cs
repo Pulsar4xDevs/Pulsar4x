@@ -98,7 +98,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Current System and Position of the entity.
         /// </summary>
-        public SystemPosition Position { get; set; }
+        public SystemPosition Position;
 
         /// <summary>
         /// Type of entity that is represented here.

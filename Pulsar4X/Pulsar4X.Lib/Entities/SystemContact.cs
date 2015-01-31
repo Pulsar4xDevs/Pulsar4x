@@ -21,7 +21,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// where the contact was on the last tick.
         /// </summary>
-        public SystemPosition LastPosition { get; set; }
+        public SystemPosition LastPosition;
 
         /// <summary>
         /// Bascking entity of this contact.
