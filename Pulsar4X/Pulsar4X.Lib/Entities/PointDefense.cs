@@ -27,7 +27,7 @@ namespace Pulsar4X.Entities
         public static bool FinalDefensiveFire(BindingList<Faction> P, OrdnanceTN Missile, Random RNG)
         {
             bool Intercept = false;
-            StarSystem CurrentSystem = Missile.missileGroup.contact.CurrentSystem;
+            StarSystem CurrentSystem = Missile.missileGroup.contact.Position.System;
             float PointBlank = 10000.0f / (float)Constants.Units.KM_PER_AU;
 
             /// <summary>
@@ -408,7 +408,7 @@ namespace Pulsar4X.Entities
 
                             int MFCRange = ShipMissileFC.mFCSensorDef.GetActiveDetectionRange(AltMSize, MSize);
 
-                            bool CanDetect = Fact.LargeDetection(CurrentSystem, dist, MFCRange);
+                            bool CanDetect = Fact.LargeDetection(dist, MFCRange);
 
                             /// <summary>
                             /// Can this MFC fire on the targetted missile?

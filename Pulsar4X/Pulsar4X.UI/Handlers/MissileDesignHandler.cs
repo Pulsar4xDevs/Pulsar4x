@@ -372,7 +372,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 String Error = String.Format("Faction {0} somehow has no default missile series \"No Series Selected\".", _CurrnetFaction.Name);
                 MessageEntry MessageEntry = new MessageEntry(MessageEntry.MessageType.Error, null, null,
-                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Error);
+                                                      GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Error);
                 _CurrnetFaction.MessageLog.Add(MessageEntry);
                 _CurrnetMissileSeries = null;
             }

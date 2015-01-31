@@ -1305,6 +1305,16 @@ namespace Pulsar4X
             // Also Jump Construction modules and jump drives need to be implemented.
             // Should gates be phsyical things that can be destroyed or captured with marines? or should they be capturable/destroyable with a jump construction module only?
             public static bool AllowHostileGateJump = true;
+
+            // Starting Build Points used for FastOOB.
+            public static decimal FactionStartingShipBP = 8000m;
+            public static decimal FactionStartingPDCBP = 4000m;
+
+            // Base tracking speed factions start writh.
+            public static int FactionBaseTrackingSpeed = 1250;
+
+            // Base chance for each planet to generate a JP.
+            public static int JumpPointGenerationChance = 10;
         }
     }
 }

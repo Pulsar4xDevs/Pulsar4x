@@ -19,43 +19,14 @@ namespace Pulsar4X.Entities
         public Faction faction { get; set; }
 
         /// <summary>
-        /// Which system is this contact in?
-        /// </summary>
-        public StarSystem CurrentSystem { get; set; }
-
-        /// <summary>
         /// where the contact was on the last tick.
         /// </summary>
-        public double LastXSystem { get; set; }
+        public SystemPosition LastPosition;
 
         /// <summary>
-        /// Where the contact was on the last tick.
+        /// Bascking entity of this contact.
         /// </summary>
-        public double LastYSystem { get; set; }
-
-        /// <summary>
-        /// Utterly useless Mass value included due to compiler demanding it.
-        /// </summary>
-        public override double Mass
-        {
-            get { return 0.0; }
-            set { value = 0.0; }
-        }
-
-        /// <summary>
-        /// If this contact is a planetary population it will be here.
-        /// </summary>
-        public Population Pop { get; set; }
-
-        /// <summary>
-        /// if the contact is a taskgroup it will be stored here.
-        /// </summary>
-        public TaskGroupTN TaskGroup { get; set; }
-
-        /// <summary>
-        /// If the contact is a missile, it goes here.
-        /// </summary>
-        public OrdnanceGroupTN MissileGroup { get; set; }
+        public StarSystemEntity Entity;
 
         /// <summary>
         /// Distance between this contact and the other contacts in the system in AU.
@@ -66,89 +37,25 @@ namespace Pulsar4X.Entities
         /// Last timeslice the distance Table was updated.
         /// </summary>
         public BindingList<int> DistanceUpdate { get; set; }
-
-        /// <summary>
-        /// Contact element state.
-        /// </summary>
-        public enum CEState
-        {
-            NotCreated,
-            Created,
-            Delete,
-            TypeCount
-        }
-
-        /// <summary>
-        /// Kludge to determine when contacts should be created or deleted.
-        /// </summary>
-        public CEState ContactElementCreated { get; set; }
-
-
+        
         /// <summary>
         /// Creates a new system contact.
         /// </summary>
         /// <param name="Fact">Faction of contact.</param>
-        /// <param name="body">Type of contact.</param>
-        public SystemContact(Faction Fact, Population pop)
+        /// <param name="entity">Backing entity of the contact.</param>
+        public SystemContact(Faction Fact, StarSystemEntity entity)
         {
             Id = Guid.NewGuid();
             faction = Fact;
-            XSystem = pop.Planet.XSystem;
-            YSystem = pop.Planet.YSystem;
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
+            Position = entity.Position;
+            LastPosition = Position;
 
-            Pop = pop;
-            SSEntity = StarSystemEntityType.Population;
+            Entity = entity;
 
             DistanceTable = new BindingList<float>();
             DistanceUpdate = new BindingList<int>();
 
-            ContactElementCreated = CEState.NotCreated;
-        }
-
-        /// <summary>
-        /// Creates a new system contact.
-        /// </summary>
-        /// <param name="Fact">Faction of contact.</param>
-        /// <param name="TG">Type of contact.</param>
-        public SystemContact(Faction Fact, TaskGroupTN TG)
-        {
-            Id = Guid.NewGuid();
-            faction = Fact;
-            XSystem = TG.XSystem;
-            YSystem = TG.YSystem;
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
-
-            TaskGroup = TG;
-            SSEntity = StarSystemEntityType.TaskGroup;
-            DistanceTable = new BindingList<float>();
-            DistanceUpdate = new BindingList<int>();
-
-            ContactElementCreated = CEState.NotCreated;
-        }
-
-        /// <summary>
-        /// Creates a new system contact.
-        /// </summary>
-        /// <param name="Fact">Faction of contact.</param>
-        /// <param name="MG">Type of contact.</param>
-        public SystemContact(Faction Fact, OrdnanceGroupTN MG)
-        {
-            Id = Guid.NewGuid();
-            faction = Fact;
-            XSystem = MG.XSystem;
-            YSystem = MG.YSystem;
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
-
-            MissileGroup = MG;
-            SSEntity = StarSystemEntityType.Missile;
-            DistanceTable = new BindingList<float>();
-            DistanceUpdate = new BindingList<int>();
-
-            ContactElementCreated = CEState.NotCreated;
+            SSEntity = entity.SSEntity;
         }
 
         /// <summary>
@@ -158,23 +65,23 @@ namespace Pulsar4X.Entities
         /// <param name="Y">Y Position in AU.</param>
         public void UpdateLocationInSystem(double X, double Y)
         {
-            LastXSystem = XSystem;
-            LastYSystem = YSystem;
-            XSystem = X;
-            YSystem = Y;
+            LastPosition.X = Position.X;
+            LastPosition.Y = Position.Y;
+            Position.X = X;
+            Position.Y = Y;
         }
 
         /// <summary>
-        /// Updates the contact after transiting a jump point, LastXSystem needs to be set to current position for the travel line.
+        /// Updates the contact after transiting a jump point, LastPosition.X needs to be set to current position for the travel line.
         /// </summary>
         /// <param name="X">X position in AU in the new system</param>
         /// <param name="Y">Y position in AU in the new system</param>
         public void UpdateLocationAfterTransit(double X, double Y)
         {
-            LastXSystem = X;
-            LastYSystem = Y;
-            XSystem = X;
-            YSystem = Y;
+            LastPosition.X = X;
+            LastPosition.Y = Y;
+            Position.X = X;
+            Position.Y = Y;
         }
 
         /// <summary>
@@ -183,7 +90,7 @@ namespace Pulsar4X.Entities
         /// <param name="system">new System.</param>
         public void UpdateSystem(StarSystem system)
         {
-            CurrentSystem = system;
+            Position.System = system;
 
             DistanceTable.Clear();
             DistanceUpdate.Clear();
@@ -191,7 +98,7 @@ namespace Pulsar4X.Entities
             DistanceTable.RaiseListChangedEvents = false;
             DistanceUpdate.RaiseListChangedEvents = false;
 
-            for (int loop = 0; loop < CurrentSystem.SystemContactList.Count; loop++)
+            for (int loop = 0; loop < Position.System.SystemContactList.Count; loop++)
             {
                 DistanceTable.Add(0.0f);
                 DistanceUpdate.Add(-1);

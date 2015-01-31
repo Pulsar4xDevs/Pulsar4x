@@ -53,10 +53,10 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Update the star's position and do any other work here
         /// </summary>
-        /// <param name="tickValue">Time to advance star position</param>
-        public void UpdatePosition(int tickValue)
+        /// <param name="deltaSeconds">Time to advance star position</param>
+        public void UpdatePosition(int deltaSeconds)
         {
-            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, tickValue);
+            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, deltaSeconds);
         }
     }
 }

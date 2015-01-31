@@ -353,10 +353,10 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Function to advance time for all buttons. this is all lifted from the system map time code.
         /// </summary>
-        /// <param name="TickValue"></param>
-        private void AdvanceTime(int TickValue)
+        /// <param name="deltaSeconds"></param>
+        private void AdvanceTime(int deltaSeconds)
         {
-            int elapsed = GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, TickValue);
+            int elapsed = GameState.SE.SubpulseHandler(GameState.Instance.Factions, GameState.RNG, deltaSeconds);
 
             TimeSpan TS = new TimeSpan(0, 0, elapsed);
             GameState.Instance.GameDateTime = GameState.Instance.GameDateTime.Add(TS);
@@ -3165,17 +3165,15 @@ namespace Pulsar4X.UI.Handlers
                             float BPRequirement = (float)Math.Floor(CBQ.numToBuild) * (float)CBQ.costPerItem;
                             float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
                             float YearsOfProduction = (BPRequirement / DevotedToThis);
-                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
-                            /// <summary>
-                            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
-                            /// </summary>
-#warning magic number here.
-                            if (DevotedToThis == 0.0f || YearsOfProduction > 5475852)
+
+                            // We'll hit TimeSpan.MaxValue before we'll hit int32 limits when it comes to measuring in seconds.
+                            if (DevotedToThis == 0.0f || YearsOfProduction * DaysInYear * Constants.TimeInSeconds.Day > TimeSpan.MaxValue.Seconds)
                             {
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
                             }
                             else
                             {
+                                int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
                                 DateTime EstTime = GameState.Instance.GameDateTime;
                                 TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
                                 EstTime = EstTime.Add(TS);

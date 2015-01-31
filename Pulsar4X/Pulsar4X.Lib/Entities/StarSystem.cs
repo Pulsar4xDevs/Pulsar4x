@@ -5,6 +5,7 @@ using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
+using Pulsar4X.Entities.Components;
 
 
 //using log4net.Config;
@@ -25,6 +26,21 @@ namespace Pulsar4X.Entities
         /// Each system has links to other systems.
         /// </summary>
         public BindingList<JumpPoint> JumpPoints { get; set; }
+
+        /// <summary>
+        /// A list of TaskGroups currently inside this system.
+        /// </summary>
+        public BindingList<TaskGroupTN> TaskGroups { get; set; }
+
+        /// <summary>
+        /// A list of Populations currently inside this system.
+        /// </summary>
+        public BindingList<Population> Populations { get; set; }
+
+        /// <summary>
+        /// A list of OrdnanceGroups (Missile Groups) currently inside this system.
+        /// </summary>
+        public BindingList<OrdnanceGroupTN> OrdnanceGroups { get; set; }
 
         /// <summary>
         /// Global List of all contacts within the system.
@@ -48,10 +64,12 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<FactionSystemDetection> FactionDetectionLists { get; set; }
 
-
+        /// <summary>
+        /// Random generation seed used to generate this system.
+        /// </summary>
         public int Seed { get; set; }
 
-        //public static readonly ILog logger = LogManager.GetLogger(typeof(StarSystem));
+        private bool contactsChanged;
 
         public StarSystem()
             : this(string.Empty)
@@ -69,6 +87,15 @@ namespace Pulsar4X.Entities
             SystemContactList = new BindingList<SystemContact>();
             FactionDetectionLists = new BindingList<FactionSystemDetection>();
 
+            TaskGroups = new BindingList<TaskGroupTN>();
+            Populations = new BindingList<Population>();
+            OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
+
+            // Subscribe to change events.
+            TaskGroups.ListChanged += ContactsChanged;
+            Populations.ListChanged += ContactsChanged;
+            OrdnanceGroups.ListChanged += ContactsChanged;
+
             ContactCreateList = new BindingList<SystemContact>();
             ContactDeleteList = new BindingList<SystemContact>();
         }
@@ -76,15 +103,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// This function adds a waypoint to the system waypoint list, it is called by SystemMap.cs and connects the UI waypoint to the back end waypoints.
         /// </summary>
-        /// <param name="XSystemAU">System Position X in AU</param>
-        /// <param name="YSystemAU">System Position Y in AU</param>
-        public void AddWaypoint(String Title, double XSystemAU, double YSystemAU, int FactionID)
+        /// <param name="X">System Position X in AU</param>
+        /// <param name="Y">System Position Y in AU</param>
+        public void AddWaypoint(String Title, double X, double Y, int FactionID)
         {
-            Waypoint NewWP = new Waypoint(Title, this, XSystemAU, YSystemAU, FactionID);
+            Waypoint NewWP = new Waypoint(Title, this, X, Y, FactionID);
             Waypoints.Add(NewWP);
-            //logger.Info("Waypoint added.");
-            //logger.Info(XSystemAU.ToString());
-            //logger.Info(YSystemAU.ToString());
         }
 
         /// <summary>
@@ -93,9 +117,6 @@ namespace Pulsar4X.Entities
         /// <param name="Remove"></param>
         public void RemoveWaypoint(Waypoint Remove)
         {
-            //logger.Info("Waypoint Removed.");
-            //logger.Info(Remove.XSystem.ToString());
-            //logger.Info(Remove.YSystem.ToString());
             if (Waypoints.Count == 1)
                 Waypoints.Clear();
             else
@@ -106,15 +127,16 @@ namespace Pulsar4X.Entities
         /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function. Perhaps there should be.
         /// </summary>
         /// <param name="parentStar">Star to attach this JP to.</param>
-        /// <param name="XSystemAU">X offset from Star Position</param>
-        /// <param name="YSystemAU">Y offset from Star Position.</param>
+        /// <param name="Position.XAU">X offset from Star Position</param>
+        /// <param name="Position.YAU">Y offset from Star Position.</param>
         /// <returns>Newly Created Jumpoint</returns>
-        public JumpPoint AddJumpPoint(Star parentStar, double XOffsetAU, double YOffsetAU)
+        public JumpPoint CreateJumpPoint(Star parentStar, double XOffsetAU, double YOffsetAU)
         {
             JumpPoint NewJP = new JumpPoint(this, parentStar, XOffsetAU, YOffsetAU);
             JumpPoints.Add(NewJP);
             return NewJP;
         }
+
         /// <summary>
         /// Systems have to store a global(or perhaps system wide) list of contacts. This function adds a contact in the event one is generated.
         /// Generation events include construction, hangar launches, missile launches, and Jump Point Entry into the System.
@@ -202,8 +224,8 @@ namespace Pulsar4X.Entities
             else
             {
                 String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
-                MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.CurrentSystem, Contact,
-                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentTick - GameState.SE.lastTick), Entry);
+                MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact,
+                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Entry2);
             }
         }
@@ -216,21 +238,57 @@ namespace Pulsar4X.Entities
         public int GetProtectionLevel(Faction fact)
         {
             int PPV = 0;
-            foreach (SystemContact Contact in SystemContactList)
+            foreach (TaskGroupTN TaskGroup in TaskGroups)
             {
-                if (Contact.SSEntity == StarSystemEntityType.TaskGroup)
+                if (TaskGroup.TaskGroupFaction == fact)
                 {
-                    if (Contact.TaskGroup.TaskGroupFaction == fact)
+                    foreach (ShipTN Ship in TaskGroup.Ships)
                     {
-                        foreach (ShipTN Ship in Contact.TaskGroup.Ships)
-                        {
-                            PPV = PPV + Ship.ShipClass.PlanetaryProtectionValue;
-                        }
+                        PPV = PPV + Ship.ShipClass.PlanetaryProtectionValue;
                     }
                 }
             }
 
             return PPV;
+        }
+
+        /// <summary>
+        /// Event raised when TaskGroups, Populations, or OrdnanceGroups are
+        /// added/removed from the system.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContactsChanged(object sender, ListChangedEventArgs e)
+        {
+            contactsChanged = true;
+        }
+
+        /// <summary>
+        /// Updates this StarSystem for the new time.
+        /// </summary>
+        /// <param name="deltaSeconds">Change in seconds since last update.</param>
+        public void Update(int deltaSeconds)
+        {
+            // Update the position of all planets. This should probably be in something like the construction tick in Aurora.
+            foreach (Star CurrentStar in Stars)
+            {
+                // The system primary will cause a divide by zero error currently as it has no orbit.
+                if (CurrentStar != Stars[0])
+                {
+                    CurrentStar.UpdatePosition(deltaSeconds);
+
+                    // Since the star moved, update the JumpPoint position.
+                    foreach (JumpPoint CurrentJumpPoint in JumpPoints)
+                    {
+                        CurrentJumpPoint.UpdatePosition();
+                    }
+                }
+
+                foreach (Planet CurrentPlanet in CurrentStar.Planets)
+                {
+                    CurrentPlanet.UpdatePosition(deltaSeconds);
+                }
+            }
         }
     }
 }

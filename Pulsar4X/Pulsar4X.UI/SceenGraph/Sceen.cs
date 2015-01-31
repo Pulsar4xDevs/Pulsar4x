@@ -10,6 +10,7 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -231,8 +232,8 @@ namespace Pulsar4X.UI.SceenGraph
                     //fAngle = MathHelper.DegreesToRadians(fAngle);
                     // double x, y;
                     Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oStar, 0);
-                    v3StarPos.X = (float)(oStar.XSystem); //(float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
-                    v3StarPos.Y = (float)(oStar.YSystem);    //(float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
+                    v3StarPos.X = (float)(oStar.Position.X); //(float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
+                    v3StarPos.Y = (float)(oStar.Position.Y);    //(float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
                     MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis);
                     oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar.Class), false);
 
@@ -277,9 +278,9 @@ namespace Pulsar4X.UI.SceenGraph
 
                     dPlanetOrbitRadius = oPlanet.SemiMajorAxis;
                     Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oPlanet, 0);
-                    v3PlanetPos = new Vector3((float)(oPlanet.XSystem), (float)(oPlanet.YSystem), 0) + v3StarPos; // offset Pos by parent star pos
-                    oPlanet.XSystem = oPlanet.XSystem + v3StarPos.X;
-                    oPlanet.YSystem = oPlanet.YSystem + v3StarPos.Y;
+                    v3PlanetPos = new Vector3((float)(oPlanet.Position.X), (float)(oPlanet.Position.Y), 0) + v3StarPos; // offset Pos by parent star pos
+                    oPlanet.Position.X = oPlanet.Position.X + v3StarPos.X;
+                    oPlanet.Position.Y = oPlanet.Position.Y + v3StarPos.Y;
 
                     fPlanetSize = (float)((oPlanet.Radius * 2.0) / Constants.Units.KM_PER_AU);
                     MaxOrbitDistTest(ref dMaxOrbitDist, dPlanetOrbitRadius);
@@ -326,9 +327,9 @@ namespace Pulsar4X.UI.SceenGraph
                         dMoonOrbitRadius = oMoon.SemiMajorAxis;
                         Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oMoon, 0);
                         fMoonSize = (float)((oMoon.Radius * 2.0) / Constants.Units.KM_PER_AU);
-                        v3MoonPos = new Vector3((float)(oMoon.XSystem), (float)(oMoon.YSystem), 0) + v3PlanetPos;
-                        oMoon.XSystem = oMoon.XSystem + v3PlanetPos.X;
-                        oMoon.YSystem = oMoon.YSystem + v3PlanetPos.Y;
+                        v3MoonPos = new Vector3((float)(oMoon.Position.X), (float)(oMoon.Position.Y), 0) + v3PlanetPos;
+                        oMoon.Position.X = oMoon.Position.X + v3PlanetPos.X;
+                        oMoon.Position.Y = oMoon.Position.Y + v3PlanetPos.Y;
 
                         GLUtilities.GLQuad oMoonQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                             v3MoonPos,                                    // offset Pos by parent planet pos
@@ -365,7 +366,7 @@ namespace Pulsar4X.UI.SceenGraph
                     SceenElement oJumpPointElement = new JumpPointElement(oJumpPoint);
                     oJumpPointElement.EntityID = oJumpPoint.Id;
 
-                    Vector3 v3JPPos = new Vector3((float)oJumpPoint.XSystem, (float)oJumpPoint.YSystem, 0.0f);
+                    Vector3 v3JPPos = new Vector3((float)oJumpPoint.Position.X, (float)oJumpPoint.Position.Y, 0.0f);
 
                     GLQuad oJPQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                     v3JPPos,
@@ -544,10 +545,11 @@ namespace Pulsar4X.UI.SceenGraph
             switch (oContact.SSEntity)
             {
                 case StarSystemEntityType.TaskGroup:
+                    TaskGroupTN TaskGroup = oContact.Entity as TaskGroupTN;
                     oContactElement = new ContactElement(a_oDefaultEffect, oContact);
                     oContactElement.EntityID = oContact.Id;
 
-                    v3ContactPos = new Vector3((float)oContact.TaskGroup.Contact.XSystem, (float)oContact.TaskGroup.Contact.YSystem, 0.0f);
+                    v3ContactPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
                     oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                     v3ContactPos,
@@ -556,7 +558,7 @@ namespace Pulsar4X.UI.SceenGraph
                                                                     UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
 
                     oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.TaskGroup.Name);
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, TaskGroup.Name);
 
                     oContactElement.Lable = oNameLable;
                     oContactElement.PrimaryPrimitive = oContactQuad;
@@ -566,10 +568,11 @@ namespace Pulsar4X.UI.SceenGraph
                     (oContactElement as ContactElement).ParentSceen = this;
                     break;
                 case StarSystemEntityType.Missile:
+                    OrdnanceGroupTN MissileGroup = oContact.Entity as OrdnanceGroupTN;
                     oContactElement = new ContactElement(a_oDefaultEffect, oContact);
                     oContactElement.EntityID = oContact.Id;
 
-                    v3ContactPos = new Vector3((float)oContact.MissileGroup.contact.XSystem, (float)oContact.MissileGroup.contact.YSystem, 0.0f);
+                    v3ContactPos = new Vector3((float)MissileGroup.contact.Position.X, (float)MissileGroup.contact.Position.Y, 0.0f);
 
                     oContactQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
                                                                 v3ContactPos,
@@ -578,7 +581,7 @@ namespace Pulsar4X.UI.SceenGraph
                                                                 UIConstants.Textures.DEFAULT_TASKGROUP_ICON);
 
                     oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3ContactPos,
-                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, oContact.MissileGroup.Name);
+                    UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, MissileGroup.Name);
 
                     oContactElement.Lable = oNameLable;
                     oContactElement.PrimaryPrimitive = oContactQuad;
@@ -589,7 +592,6 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
             }
 
-            oContact.ContactElementCreated = SystemContact.CEState.Created;
         }
 
         /// <summary>
@@ -608,7 +610,6 @@ namespace Pulsar4X.UI.SceenGraph
                 if (Ele.EntityID == oContact.Id)
                 {
                     m_lElements.Remove(Ele);
-                    oContact.ContactElementCreated = SystemContact.CEState.NotCreated;
                     break;
                 }
             }

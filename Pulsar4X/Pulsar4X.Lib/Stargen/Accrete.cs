@@ -681,8 +681,7 @@ namespace Pulsar4X.Stargen
             // Give a chance per planet to generate a JumpPoint
             foreach (Planet p in Star.Planets)
             {
-#warning Magic number for JumpPoint generation chance.
-                int chance = 10;
+                int chance = Constants.GameSettings.JumpPointGenerationChance;
                 if (p.IsMoon)
                     continue;
                 // Higher mass planets = higher chance.

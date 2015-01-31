@@ -17,15 +17,6 @@ namespace Pulsar4X.Entities
         /// </summary>
         public int FactionId;
 
-        /// <summary>
-        /// Mass is totally unnecessary here.
-        /// </summary>
-        public override double Mass
-        {
-            get { return 0.0; }
-            set { value = 0.0; }
-        }
-
         public Waypoint(String Title, StarSystem Sys, double X, double Y, int FactionID)
         {
             Name = Title;
@@ -37,11 +28,8 @@ namespace Pulsar4X.Entities
 
             FactionId = FactionID;
             System = Sys;
-            XSystem = X;
-            YSystem = Y;
-            ZSystem = 0.0;
-
-            SSEntity = StarSystemEntityType.Waypoint;
+            Position.X = X;
+            Position.Y = Y;
         }
     }
 }
