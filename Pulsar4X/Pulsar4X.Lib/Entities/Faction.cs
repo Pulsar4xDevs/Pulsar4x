@@ -1179,10 +1179,10 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Loop through all faction taskgroups.
             /// </summary>
-            for (int loop = 0; loop < TaskGroups.Count; loop++)
             #region Faction Taskgroup Loop
+            foreach(TaskGroupTN CurrentTaskGroup in TaskGroups)
             {
-                StarSystem System = TaskGroups[loop].Contact.Position.System;
+                StarSystem System = CurrentTaskGroup.Contact.Position.System;
                 /// <summary>
                 /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
                 /// </summary>
@@ -1198,26 +1198,26 @@ namespace Pulsar4X.Entities
                         float dist = -1.0f;
 
                         // Check to see if our distance table is updated for this contact.
-                        if (TaskGroups[loop].Contact.DistanceTable_LastUpdateYear[loop2] == CurrentYear && TaskGroups[loop].Contact.DistanceTable_LastUpdateSecond[loop2] == CurrentSecond)
+                        if (CurrentTaskGroup.Contact.DistanceTable_LastUpdateYear[loop2] == CurrentYear && CurrentTaskGroup.Contact.DistanceTable_LastUpdateSecond[loop2] == CurrentSecond)
                         {
-                            dist = TaskGroups[loop].Contact.DistanceTable[loop2];
+                            dist = CurrentTaskGroup.Contact.DistanceTable[loop2];
                             // We assume since the table is up to date, that fleet interception
                             // check has been completed.
                         }
                         else
                         {
                             // Distance table is out of date.
-                            float distX = (float)(TaskGroups[loop].Contact.Position.X - System.SystemContactList[loop2].Position.X);
-                            float distY = (float)(TaskGroups[loop].Contact.Position.Y - System.SystemContactList[loop2].Position.Y);
+                            float distX = (float)(CurrentTaskGroup.Contact.Position.X - System.SystemContactList[loop2].Position.X);
+                            float distY = (float)(CurrentTaskGroup.Contact.Position.Y - System.SystemContactList[loop2].Position.Y);
                             dist = (float)Math.Sqrt((double)((distX * distX) + (distY * distY)));
 
                             // Update our distance table.
-                            TaskGroups[loop].Contact.DistanceTable[loop2] = dist;
-                            TaskGroups[loop].Contact.DistanceTable_LastUpdateSecond[loop2] = CurrentSecond;
-                            TaskGroups[loop].Contact.DistanceTable_LastUpdateYear[loop2] = CurrentYear;
+                            CurrentTaskGroup.Contact.DistanceTable[loop2] = dist;
+                            CurrentTaskGroup.Contact.DistanceTable_LastUpdateSecond[loop2] = CurrentSecond;
+                            CurrentTaskGroup.Contact.DistanceTable_LastUpdateYear[loop2] = CurrentYear;
 
                             // Update their distance table to us.
-                            int TGID = System.SystemContactList.IndexOf(TaskGroups[loop].Contact);
+                            int TGID = System.SystemContactList.IndexOf(CurrentTaskGroup.Contact);
                             System.SystemContactList[loop2].DistanceTable[TGID] = dist;
                             System.SystemContactList[loop2].DistanceTable_LastUpdateSecond[TGID] = CurrentSecond;
                             System.SystemContactList[loop2].DistanceTable_LastUpdateYear[TGID] = CurrentYear;
@@ -1237,7 +1237,7 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// how far could this TG travel within a single day?
                                 /// </summary>
-                                float TaskGroupDistance = (TaskGroups[loop].CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;
+                                float TaskGroupDistance = (CurrentTaskGroup.CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;
 
 
 
@@ -1257,7 +1257,7 @@ namespace Pulsar4X.Entities
 #warning Update this fleet intercept list for planets/populations
                                     GameState.SE.FleetInterceptionPreemptTick = CurrentSecond;
 
-                                    GameState.SE.AddFleetToPreemptList(TaskGroups[loop]);
+                                    GameState.SE.AddFleetToPreemptList(CurrentTaskGroup);
                                     if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
                                     {
 
@@ -1282,7 +1282,7 @@ namespace Pulsar4X.Entities
                         {
                             Population Pop = System.SystemContactList[loop2].Entity as Population;
                             sig = Pop.ThermalSignature;
-                            detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                            detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
 
                             /// <summary>
                             /// LargeDetection handles determining if dist or detection go beyond INTMAX and acts accordingly.
@@ -1299,7 +1299,7 @@ namespace Pulsar4X.Entities
                             }
 
                             sig = Pop.EMSignature;
-                            detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                            detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
 
                             det = LargeDetection(dist, detection);
 
@@ -1313,7 +1313,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// The -1 is because a planet is most certainly not a missile.
                             /// </summary>
-                            detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+                            detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
                             /// <summary>
                             /// Do detection calculations here.
@@ -1354,9 +1354,9 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Check to make sure the taskgroup has a thermal sensor available, otherwise use the default.
                                     /// </summary>
-                                    if (TaskGroups[loop].BestThermalCount != 0)
+                                    if (CurrentTaskGroup.BestThermalCount != 0)
                                     {
-                                        detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                        detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
                                     }
                                     else
                                     {
@@ -1388,9 +1388,9 @@ namespace Pulsar4X.Entities
                                         /// <summary>
                                         /// Check to make sure the taskgroup has a thermal sensor available, otherwise use the default.
                                         /// </summary>
-                                        if (TaskGroups[loop].BestThermalCount != 0)
+                                        if (CurrentTaskGroup.BestThermalCount != 0)
                                         {
-                                            detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                            detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
                                         }
                                         else
                                         {
@@ -1440,9 +1440,9 @@ namespace Pulsar4X.Entities
                                                     if (scratch.ThermalDetection[FactionID] != CurrentSecond)
                                                     {
                                                         sig = scratch.CurrentThermalSignature;
-                                                        if (TaskGroups[loop].BestThermalCount != 0)
+                                                        if (CurrentTaskGroup.BestThermalCount != 0)
                                                         {
-                                                            detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
+                                                            detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
                                                         }
                                                         else
                                                         {
@@ -1475,7 +1475,7 @@ namespace Pulsar4X.Entities
                                                         /// This should not happen.
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial Thermal detect for TGs looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
-                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
+                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, CurrentTaskGroup.Contact.Position.System, CurrentTaskGroup.Contact,
                                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
@@ -1510,9 +1510,9 @@ namespace Pulsar4X.Entities
                                     /// Check to see if the taskgroup has an em sensor, and that said em sensor is not destroyed.
                                     /// otherwise use the default passive detection range.
                                     /// </summary>
-                                    if (TaskGroups[loop].BestEMCount > 0)
+                                    if (CurrentTaskGroup.BestEMCount > 0)
                                     {
-                                        detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                        detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
                                     }
                                     else
                                     {
@@ -1541,9 +1541,9 @@ namespace Pulsar4X.Entities
                                         /// <summary>
                                         /// once again we must check here to make sure that the taskgroup does have a passive suite, or else use the default one.
                                         /// </summary>
-                                        if (TaskGroups[loop].BestEMCount > 0)
+                                        if (CurrentTaskGroup.BestEMCount > 0)
                                         {
-                                            detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                            detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
                                         }
                                         else
                                         {
@@ -1610,9 +1610,9 @@ namespace Pulsar4X.Entities
                                                             break;
                                                         }
 
-                                                        if (TaskGroups[loop].BestEMCount > 0)
+                                                        if (CurrentTaskGroup.BestEMCount > 0)
                                                         {
-                                                            detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(sig);
+                                                            detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(sig);
                                                         }
                                                         else
                                                         {
@@ -1642,7 +1642,7 @@ namespace Pulsar4X.Entities
                                                         /// This should not happen.
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial EM detect for TGs looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
-                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
+                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, CurrentTaskGroup.Contact.Position.System, CurrentTaskGroup.Contact,
                                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
@@ -1661,7 +1661,7 @@ namespace Pulsar4X.Entities
 
                                 #region Ship Active Detection Code
 
-                                if (System.FactionDetectionLists[FactionID].Active[loop2] != CurrentSecond && TaskGroups[loop].ActiveSensorQue.Count > 0)
+                                if (System.FactionDetectionLists[FactionID].Active[loop2] != CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
                                 {
                                     noDetection = false;
                                     allDetection = false;
@@ -1676,7 +1676,7 @@ namespace Pulsar4X.Entities
                                     if (sig > Constants.ShipTN.ResolutionMax - 1)
                                         sig = Constants.ShipTN.ResolutionMax - 1;
 
-                                    detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+                                    detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
 
                                     bool det = LargeDetection(dist, detection);
@@ -1701,7 +1701,7 @@ namespace Pulsar4X.Entities
                                         if (sig > Constants.ShipTN.ResolutionMax - 1)
                                             sig = Constants.ShipTN.ResolutionMax - 1;
 
-                                        detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+                                        detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
                                         det = LargeDetection(dist, detection);
 
@@ -1751,7 +1751,7 @@ namespace Pulsar4X.Entities
                                                         if (sig > Constants.ShipTN.ResolutionMax - 1)
                                                             sig = Constants.ShipTN.ResolutionMax - 1;
 
-                                                        detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+                                                        detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
                                                         det = LargeDetection(dist, detection);
 
@@ -1776,7 +1776,7 @@ namespace Pulsar4X.Entities
                                                         /// This should not happen.
                                                         /// </summary>
                                                         String ErrorMessage = string.Format("Partial Active detect for TGs looped through every ship. {0} {1} {2} {3}", dist, detection, noDetection, allDetection);
-                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, MissileGroups[loop].contact.Position.System, MissileGroups[loop].contact,
+                                                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.Error, CurrentTaskGroup.Contact.Position.System, CurrentTaskGroup.Contact,
                                                                                              GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), ErrorMessage);
                                                         MessageLog.Add(NMsg);
                                                         done = true;
@@ -1814,9 +1814,9 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// Check to make sure the taskgroup has a thermal sensor available, otherwise use the default.
                                     /// </summary>
-                                    if (TaskGroups[loop].BestThermalCount != 0)
+                                    if (CurrentTaskGroup.BestThermalCount != 0)
                                     {
-                                        detection = TaskGroups[loop].BestThermal.pSensorDef.GetPassiveDetectionRange(ThermalSignature);
+                                        detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(ThermalSignature);
                                     }
                                     else
                                     {
@@ -1861,9 +1861,9 @@ namespace Pulsar4X.Entities
                                         /// Check to see if the taskgroup has an em sensor, and that said em sensor is not destroyed.
                                         /// otherwise use the default passive detection range.
                                         /// </summary>
-                                        if (TaskGroups[loop].BestEMCount > 0)
+                                        if (CurrentTaskGroup.BestEMCount > 0)
                                         {
-                                            detection = TaskGroups[loop].BestEM.pSensorDef.GetPassiveDetectionRange(EMSignature);
+                                            detection = CurrentTaskGroup.BestEM.pSensorDef.GetPassiveDetectionRange(EMSignature);
                                         }
                                         else
                                         {
@@ -1893,7 +1893,7 @@ namespace Pulsar4X.Entities
                                     }
                                 }
 
-                                if (System.FactionDetectionLists[FactionID].Active[loop2] != CurrentSecond && TaskGroups[loop].ActiveSensorQue.Count > 0)
+                                if (System.FactionDetectionLists[FactionID].Active[loop2] != CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
                                 {
                                     int TotalCrossSection_MSP = (int)Math.Ceiling(Missile.missileDef.size);
                                     sig = -1;
@@ -1909,7 +1909,7 @@ namespace Pulsar4X.Entities
                                         {
                                             sig = TotalCrossSection_MSP - 6;
                                         }
-                                        detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(0, sig);
+                                        detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(0, sig);
                                     }
                                     else
                                     {
@@ -1919,7 +1919,7 @@ namespace Pulsar4X.Entities
                                         /// </summary>
                                         sig = (int)Math.Ceiling((float)TotalCrossSection_MSP / 20.0f);
 
-                                        detection = TaskGroups[loop].ActiveSensorQue[TaskGroups[loop].TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
+                                        detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
                                     }
 
                                     bool det = LargeDetection(dist, detection);
