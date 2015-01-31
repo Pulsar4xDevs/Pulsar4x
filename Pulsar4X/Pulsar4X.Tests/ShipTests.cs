@@ -715,8 +715,8 @@ namespace Pulsar4X.Tests
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].EMDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].EMDetection[0]);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
 
-            PlayerFaction1.SensorSweep(5);
-            PlayerFaction2.SensorSweep(5);
+            PlayerFaction1.SensorSweep(0, 5);
+            PlayerFaction2.SensorSweep(0, 5);
 
             Console.WriteLine("Time: 5 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
@@ -726,8 +726,8 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, false);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, false);
 
-            PlayerFaction1.SensorSweep(10);
-            PlayerFaction2.SensorSweep(10);
+            PlayerFaction1.SensorSweep(0, 10);
+            PlayerFaction2.SensorSweep(0, 10);
 
             Console.WriteLine("Time: 10 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
@@ -746,8 +746,8 @@ namespace Pulsar4X.Tests
             System1.JumpPoints[0].CanJump(PlayerFaction1.TaskGroups[0], false);
             System1.JumpPoints[0].CanJump(PlayerFaction2.TaskGroups[0], true);
 
-            PlayerFaction1.SensorSweep(15);
-            PlayerFaction2.SensorSweep(15);
+            PlayerFaction1.SensorSweep(0, 15);
+            PlayerFaction2.SensorSweep(0, 15);
 
             Console.WriteLine("Time: 15 {0} {1}", PlayerFaction1.TaskGroups[0].Contact.Position.System.Name, PlayerFaction2.TaskGroups[0].Contact.Position.System.Name);
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ThermalDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ThermalDetection[0]);
@@ -1532,7 +1532,7 @@ namespace Pulsar4X.Tests
                                         {
                                             if (P[loop].TaskGroups[loop2].Ships[loop3].IsDestroyed == false)
                                             {
-                                                P[loop].TaskGroups[loop2].Ships[loop3].ShipFireWeapons(tick, RNG);
+                                                P[loop].TaskGroups[loop2].Ships[loop3].ShipFireWeapons(0, tick, RNG);
                                             }
                                         }
                                         else
@@ -1653,7 +1653,7 @@ namespace Pulsar4X.Tests
                 /// </summary>
                 for (int loop = 0; loop < factionCount; loop++)
                 {
-                    P[loop].SensorSweep(tick);
+                    P[loop].SensorSweep(0, tick);
                 }
 
 
@@ -2049,9 +2049,9 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0].openFire = true;
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            PlayerFaction1.SensorSweep(5);
+            PlayerFaction1.SensorSweep(0, 5);
 
-            PlayerFaction1.TaskGroups[0].Ships[0].ShipFireWeapons(5, RNG);
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipFireWeapons(0, 5, RNG);
 
             uint tick = 10;
 
@@ -2059,7 +2059,7 @@ namespace Pulsar4X.Tests
             while (!done)
             {
                 Console.WriteLine("{0}", tick);
-                PlayerFaction1.SensorSweep((int)tick);
+                PlayerFaction1.SensorSweep(0, (int)tick);
                 PlayerFaction1.MissileGroups[0].ProcessOrder(tick, RNG);
 
                 Console.WriteLine("{0} {1} {2} {3} {4} {5}", PlayerFaction1.MissileGroups[0].currentHeading, PlayerFaction1.MissileGroups[0].currentSpeedX,

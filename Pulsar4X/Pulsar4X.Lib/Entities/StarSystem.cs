@@ -150,7 +150,8 @@ namespace Pulsar4X.Entities
             for (int loop = 0; loop < SystemContactList.Count; loop++)
             {
                 SystemContactList[loop].DistanceTable.Add(0.0f);
-                SystemContactList[loop].DistanceUpdate.Add(-1);
+                SystemContactList[loop].DistanceTable_LastUpdateSecond.Add(-1);
+                SystemContactList[loop].DistanceTable_LastUpdateYear.Add(-1);
             }
 
 
@@ -207,7 +208,8 @@ namespace Pulsar4X.Entities
                 for (int loop = 0; loop < SystemContactList.Count; loop++)
                 {
                     SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
-                    SystemContactList[loop].DistanceUpdate.RemoveAt(SystemContactList.Count - 1);
+                    SystemContactList[loop].DistanceTable_LastUpdateSecond.RemoveAt(SystemContactList.Count - 1);
+                    SystemContactList[loop].DistanceTable_LastUpdateYear.RemoveAt(SystemContactList.Count - 1);
                 }
 
                 /// <summary>

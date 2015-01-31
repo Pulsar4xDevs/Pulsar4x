@@ -811,12 +811,6 @@ namespace Pulsar4X.UI.Handlers
                             int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
                             int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
 
-                            /// <summary>
-                            /// Validate tick here?
-                            /// </summary>
-                            int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
-
                             float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
@@ -864,12 +858,6 @@ namespace Pulsar4X.UI.Handlers
                                 StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
                                 int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
                                 int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.contact);
-
-                                /// <summary>
-                                /// Validate tick here?
-                                /// </summary>
-                                int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
 
                                 float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
                                 int MSP = (int)Math.Ceiling(pair.Key.missiles[0].missileDef.size);
@@ -1784,12 +1772,6 @@ namespace Pulsar4X.UI.Handlers
                             int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
                             int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.ShipsTaskGroup.Contact);
 
-                            /// <summary>
-                            /// Validate tick here?
-                            /// </summary>
-                            int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
-
                             float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
                             int TCS = pair.Key.TotalCrossSection;
                             int detectFactor = _CurrnetShip.ShipMFC[_CurrnetFC.componentIndex].mFCSensorDef.GetActiveDetectionRange(TCS, -1);
@@ -1835,12 +1817,6 @@ namespace Pulsar4X.UI.Handlers
                             StarSystem CurSystem = _CurrnetShip.ShipsTaskGroup.Contact.Position.System;
                             int MyID = CurSystem.SystemContactList.IndexOf(_CurrnetShip.ShipsTaskGroup.Contact);
                             int TargetID = CurSystem.SystemContactList.IndexOf(pair.Key.contact);
-
-                            /// <summary>
-                            /// Validate tick here?
-                            /// </summary>
-                            int Targettick = _CurrnetShip.ShipsTaskGroup.Contact.DistanceUpdate[TargetID];
-
 
                             float distance = _CurrnetShip.ShipsTaskGroup.Contact.DistanceTable[TargetID];
 

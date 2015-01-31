@@ -2694,7 +2694,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="CurrentSecond">Tick the ship is ordered to fire.</param>
         /// <param name="RNG">RNG passed from further up the food chain since I can't generate random results except by having a "global" rng.</param>
-        public bool ShipFireWeapons(int CurrentTick, Random RNG)
+        public bool ShipFireWeapons(int CurrentYear, int CurrentSecond, Random RNG)
         {
             bool fired = false;
             for (int loop = 0; loop < ShipBFC.Count; loop++)
@@ -2713,13 +2713,13 @@ namespace Pulsar4X.Entities
                             /// </summary>
                             int targetID = ShipBFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System.SystemContactList.IndexOf(ShipBFC[loop].target.ship.ShipsTaskGroup.Contact);
 
-                            if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
                             {
                                 /// <summary>
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
+                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
                                 ShipsFaction.MessageLog.Add(Entry);
 
 
@@ -2754,13 +2754,13 @@ namespace Pulsar4X.Entities
                             /// </summary>
                             int targetID = ShipBFC[loop].target.missileGroup.contact.Position.System.SystemContactList.IndexOf(ShipBFC[loop].target.missileGroup.contact);
 
-                            if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
                             {
                                 /// <summary>
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
+                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
                                 ShipsFaction.MessageLog.Add(Entry);
 
 
@@ -2803,13 +2803,13 @@ namespace Pulsar4X.Entities
 
                             int targetID = ShipMFC[loop].target.ship.ShipsTaskGroup.Contact.Position.System.SystemContactList.IndexOf(ShipMFC[loop].target.ship.ShipsTaskGroup.Contact);
 
-                            if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
                             {
                                 /// <summary>
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
+                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
                                 ShipsFaction.MessageLog.Add(Entry);
 
                                 return false;
@@ -2826,13 +2826,13 @@ namespace Pulsar4X.Entities
                         {
                             int targetID = ShipMFC[loop].target.missileGroup.contact.Position.System.SystemContactList.IndexOf(ShipMFC[loop].target.missileGroup.contact);
 
-                            if (CurrentTick != ShipsTaskGroup.Contact.DistanceUpdate[targetID])
+                            if (CurrentSecond != ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID] || CurrentYear != ShipsTaskGroup.Contact.DistanceTable_LastUpdateYear[targetID])
                             {
                                 /// <summary>
                                 /// Oops. How did we get here? We don't know if the ship can even detect its targets, so it had better not fire on them.
                                 /// </summary>
-                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentTick, ShipsTaskGroup.Contact.DistanceUpdate[targetID]);
-                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentTick, Fire);
+                                String Fire = String.Format("{0} : {1}.  Was sensor detection routine run this tick? see Ship.cs ShipFireWeapons().", CurrentSecond, ShipsTaskGroup.Contact.DistanceTable_LastUpdateSecond[targetID]);
+                                MessageEntry Entry = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact, GameState.Instance.GameDateTime, (int)CurrentSecond, Fire);
                                 ShipsFaction.MessageLog.Add(Entry);
 
                                 return false;
