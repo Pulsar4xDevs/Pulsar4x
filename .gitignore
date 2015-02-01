@@ -7,10 +7,10 @@ Pulsar4X/Pulsar4X.UI/obj
 Pulsar4X/Pulsar4X.UI/bin
 Pulsar4X/Pulsar4X.Tests/bin
 Pulsar4X/Pulsar4X.Tests/obj
-Pulsar4x/Pulsar4X.UI/bin
-Pulsar4x/Pulsar4X.UI/obj
 Pulsar4x/Pulsar4X.GTKForms/obj
 Pulsar4x/Pulsar4X.GTKForms/bin
+Pulsar4X/Pulsar4X.Installer/bin
+Pulsar4X/Pulsar4X.Installer/obj
 
 #C# Temp Files:
 *.db
@@ -40,6 +40,8 @@ _ReSharper.AuroraExtract
 *.log
 *.vspscc
 *.vssscc
+*.msi
+*.wixpdb
 
 # Visual Studio profiler
 *.psess
