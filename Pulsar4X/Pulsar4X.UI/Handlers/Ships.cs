@@ -431,6 +431,8 @@ namespace Pulsar4X.UI.Handlers
                         if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == false)
                         {
                             _CurrnetFaction.PointDefense[CurrentSystem].AddComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip, false);
+
+                            _CurrnetShip.ShipsTaskGroup.TaskGroupPDL.AddComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex], _CurrnetShip, false);
                         }
                     }
                     else
@@ -453,6 +455,8 @@ namespace Pulsar4X.UI.Handlers
                             if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]) == true)
                             {
                                 _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
+
+                                _CurrnetShip.ShipsTaskGroup.TaskGroupPDL.RemoveComponent(_CurrnetShip.ShipBFC[_CurrnetFC.componentIndex]);
                             }
 
                             /// <summary>
@@ -502,6 +506,8 @@ namespace Pulsar4X.UI.Handlers
                         if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == false)
                         {
                             _CurrnetFaction.PointDefense[CurrentSystem].AddComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip, true);
+
+                            _CurrnetShip.ShipsTaskGroup.TaskGroupPDL.AddComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex], _CurrnetShip, true);
                         }
                     }
                     else
@@ -528,6 +534,8 @@ namespace Pulsar4X.UI.Handlers
                                 if (_CurrnetFaction.PointDefense[CurrentSystem].PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
                                 {
                                     _CurrnetFaction.PointDefense[CurrentSystem].RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
+
+                                    _CurrnetShip.ShipsTaskGroup.TaskGroupPDL.RemoveComponent(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]);
                                 }
 
                                 /// <summary>
@@ -1692,7 +1700,7 @@ namespace Pulsar4X.UI.Handlers
                             String EM = "";
                             if (pair.Value.EM == true)
                             {
-                                EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
+                                EM = String.Format("[EM {0}]", pair.Value.EMSignature);
                             }
 
                             String ACT = "";
@@ -1781,7 +1789,7 @@ namespace Pulsar4X.UI.Handlers
                                 String EM = "";
                                 if (pair.Value.EM == true)
                                 {
-                                    EM = String.Format("[EM {0}]", pair.Key.CurrentEMSignature);
+                                    EM = String.Format("[EM {0}]", pair.Value.EMSignature);
                                 }
 
                                 String ACT = "";

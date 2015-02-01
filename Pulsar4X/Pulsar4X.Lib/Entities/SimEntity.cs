@@ -946,6 +946,10 @@ namespace Pulsar4X.Entities
                         foreach (Faction CurrentFaction in P)
                         {
                             StarSystem CurSystem = Ship.ShipsTaskGroup.Contact.Position.System;
+
+                            /// <summary>
+                            /// remove destroyed ships from the detected contacts list.
+                            /// </summary>
                             if (CurrentFaction.DetectedContactLists.ContainsKey(CurSystem) == true)
                             {
                                 if (CurrentFaction.DetectedContactLists[CurSystem].DetectedContacts.ContainsKey(Ship) == true)
@@ -954,9 +958,36 @@ namespace Pulsar4X.Entities
                                 }
                             }
 
+                            /// <summary>
+                            /// Remove destroyed ships from the faction detected ships list.
+                            /// </summary>
                             if (CurrentFaction.DetShipList.Contains(Ship) == true)
                             {
                                 CurrentFaction.DetShipList.Remove(Ship);
+                            }
+                        }
+
+                        /// <summary>
+                        /// This ship has PD FCs on board.
+                        /// </summary>
+                        if(Ship.ShipsTaskGroup.TaskGroupPDL.PointDefenseFC.ContainsValue(Ship) == true)
+                        {
+                            StarSystem CurSystem = Ship.ShipsTaskGroup.Position.System;
+                            foreach (KeyValuePair<ComponentTN, ShipTN> PDpair in Ship.ShipsTaskGroup.TaskGroupPDL.PointDefenseFC)
+                            {
+                                
+                                if (Ship.ShipsFaction.PointDefense.ContainsKey(CurSystem) == true)
+                                {
+                                    Ship.ShipsFaction.PointDefense[CurSystem].RemoveComponent(PDpair.Key);
+                                }
+                            }
+
+                            if (Ship.ShipsFaction.PointDefense.ContainsKey(CurSystem) == true)
+                            {
+                                if (Ship.ShipsFaction.PointDefense[CurSystem].PointDefenseFC.Count == 0)
+                                {
+                                    Ship.ShipsFaction.PointDefense.Remove(CurSystem);
+                                }
                             }
                         }
 

@@ -38,11 +38,15 @@ namespace Pulsar4X.Entities
         /// </summary>
         public uint thermalTick { get; set; }
 
-
         /// <summary>
         /// Detected via EM.
         /// </summary>
         public bool EM { get; set; }
+
+        /// <summary>
+        /// EM signature
+        /// </summary>
+        public int EMSignature { get; set; }
 
         /// <summary>
         /// Tick detected via EM.
@@ -68,12 +72,13 @@ namespace Pulsar4X.Entities
         /// <param name="em">Detection via EM?</param>
         /// <param name="Active">Active detection?</param>
         /// <param name="tick">What tick did this detection event occur on?</param>
-        public FactionContact(Faction CurrentFaction, ShipTN DetectedShip, bool Thermal, bool em, bool Active, uint tick)
+        public FactionContact(Faction CurrentFaction, ShipTN DetectedShip, bool Thermal, bool em, int EMSig, bool Active, uint tick)
         {
             ship = DetectedShip;
             missileGroup = null;
             thermal = Thermal;
             EM = em;
+            EMSignature = EMSig;
             active = Active;
 
             String Contact = "New contact detected:";
@@ -87,7 +92,7 @@ namespace Pulsar4X.Entities
             if (EM == true)
             {
                 EMTick = tick;
-                Contact = String.Format("{0} EM Signature {1}", Contact, DetectedShip.CurrentEMSignature);
+                Contact = String.Format("{0} EM Signature {1}", Contact, EMSignature);
             }
 
             if (active == true)
@@ -184,7 +189,7 @@ namespace Pulsar4X.Entities
         /// <param name="Em">Detected on EM?</param>
         /// <param name="Active">Detected by actives?</param>
         /// <param name="tick">Current tick.</param>
-        public void updateFactionContact(Faction CurrentFaction, bool Thermal, bool Em, bool Active, uint tick)
+        public void updateFactionContact(Faction CurrentFaction, bool Thermal, bool Em, int EMSig, bool Active, uint tick)
         {
             if (thermal == Thermal && EM == Em && active == Active)
             {
@@ -236,9 +241,11 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     EMTick = tick;
 
+                    EMSignature = EMSig;
+
 
                     if (ship != null)
-                        Contact = String.Format("{0} EM Signature {1}", Contact, ship.CurrentEMSignature);
+                        Contact = String.Format("{0} EM Signature {1}", Contact, EMSignature);
                     else if (missileGroup != null)
                     {
                         if (missileGroup.missiles[0].missileDef.aSD != null)
@@ -259,6 +266,7 @@ namespace Pulsar4X.Entities
                 }
                 if (EM == true && Em == false)
                 {
+                    EMSignature = -1;
                     /// <summary>
                     /// EM contact lost.
                     /// </summary>
@@ -547,6 +555,7 @@ namespace Pulsar4X.Entities
         /// as always, false = MFC, true = BFC.
         /// </summary>
         public Dictionary<ComponentTN, bool> PointDefenseType { get; set; }
+
 
         /// <summary>
         /// Constructor for PDList.
@@ -2189,7 +2198,13 @@ namespace Pulsar4X.Entities
 
                     if (inDict == true)
                     {
-                        DetectedContactLists[System].DetectedContacts[detectedShip].updateFactionContact(this, th, em, ac, (uint)GameState.Instance.CurrentSecond);
+                        int EMSig = -1;
+                        if (em == true)
+                        {
+                            EMSig = detectedShip.CurrentEMSignature;
+                        }
+
+                        DetectedContactLists[System].DetectedContacts[detectedShip].updateFactionContact(this, th, em, EMSig, ac, (uint)GameState.Instance.CurrentSecond);
 
                         if (th == false && em == false && ac == false)
                         {
@@ -2198,7 +2213,13 @@ namespace Pulsar4X.Entities
                     }
                     else if (inDict == false && (th == true || em == true || ac == true))
                     {
-                        FactionContact newContact = new FactionContact(this, detectedShip, th, em, ac, (uint)GameState.Instance.CurrentSecond);
+                        int EMSig = -1;
+                        if (em == true)
+                        {
+                            EMSig = detectedShip.CurrentEMSignature;
+                        }
+
+                        FactionContact newContact = new FactionContact(this, detectedShip, th, em, EMSig, ac, (uint)GameState.Instance.CurrentSecond);
                         DetectedContactLists[System].DetectedContacts.Add(detectedShip, newContact);
                     }
                 }
@@ -2230,7 +2251,7 @@ namespace Pulsar4X.Entities
 
                     if (inDict == true)
                     {
-                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, ac, (uint)GameState.Instance.CurrentSecond);
+                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, Missile.missileDef.aSD.gps,ac, (uint)GameState.Instance.CurrentSecond);
 
                         if (th == false && em == false && ac == false)
                         {

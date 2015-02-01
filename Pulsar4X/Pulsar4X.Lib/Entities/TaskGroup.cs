@@ -183,6 +183,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public byte DrawTravelLine { get; set; }
 
+        public PointDefenseList TaskGroupPDL { get; set; }
 
         /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
@@ -279,6 +280,8 @@ namespace Pulsar4X.Entities
             CurrentCryoStorage = 0;
 
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
+
+            TaskGroupPDL = new PointDefenseList();
 
         }
 
@@ -2272,12 +2275,14 @@ namespace Pulsar4X.Entities
                         {
                             TaskGroupOrders[0].orderTimeRequirement = 0;
 
+                            JumpPoint CurrentJP = TaskGroupOrders[0].target as JumpPoint;
+
                             // Check if we can jump.
-                            if ((TaskGroupOrders[0].target as JumpPoint).CanJump(this, false))
+                            if (CurrentJP.CanJump(this, false))
                             {
                                 // Handle the jump here.
                                 // TODO: Put jump transition in it's own function within TaskGroup.
-                                SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
+                                SystemPosition newPos = CurrentJP.Connect.Position;
 
                                 Position.System.RemoveContact(Contact);
                                 newPos.System.AddContact(Contact);
@@ -2285,6 +2290,34 @@ namespace Pulsar4X.Entities
                                 Position = newPos;
 
                                 Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
+
+                                /// <summary>
+                                /// Handle PDList stuff.
+                                /// </summary>
+                                foreach (KeyValuePair<ComponentTN, ShipTN> pair in TaskGroupPDL.PointDefenseFC)
+                                {
+                                    /// <summary>
+                                    /// If these aren't true... whoops.
+                                    /// </summary>
+                                    if(TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.System) == true)
+                                    {
+                                        if(TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseFC.ContainsKey(pair.Key) == true)
+                                        {
+                                            ShipTN Ship = pair.Value;
+                                            ComponentTN Comp = pair.Key;
+                                            bool type = TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseType[pair.Key];
+                                            TaskGroupFaction.PointDefense[CurrentJP.System].RemoveComponent(pair.Key);
+
+                                            if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Connect.System) == false)
+                                            {
+                                                PointDefenseList NewPDL = new PointDefenseList();
+                                                TaskGroupFaction.PointDefense.Add(CurrentJP.Connect.System, NewPDL);
+                                            }
+
+                                            TaskGroupFaction.PointDefense[CurrentJP.Connect.System].AddComponent(Comp, Ship,type);
+                                        }
+                                    }
+                                }
 
                                 // TODO: Set transit penalties here
                             }
@@ -2307,6 +2340,35 @@ namespace Pulsar4X.Entities
                                 Position = newPos;
 
                                 Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
+
+                                /// <summary>
+                                /// Handle PDList stuff.
+                                /// </summary>
+                                JumpPoint CurrentJP = TaskGroupOrders[0].target as JumpPoint;
+                                foreach (KeyValuePair<ComponentTN, ShipTN> pair in TaskGroupPDL.PointDefenseFC)
+                                {
+                                    /// <summary>
+                                    /// If these aren't true... whoops.
+                                    /// </summary>
+                                    if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.System) == true)
+                                    {
+                                        if (TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseFC.ContainsKey(pair.Key) == true)
+                                        {
+                                            ShipTN Ship = pair.Value;
+                                            ComponentTN Comp = pair.Key;
+                                            bool type = TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseType[pair.Key];
+                                            TaskGroupFaction.PointDefense[CurrentJP.System].RemoveComponent(pair.Key);
+
+                                            if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Connect.System) == false)
+                                            {
+                                                PointDefenseList NewPDL = new PointDefenseList();
+                                                TaskGroupFaction.PointDefense.Add(CurrentJP.Connect.System, NewPDL);
+                                            }
+
+                                            TaskGroupFaction.PointDefense[CurrentJP.Connect.System].AddComponent(Comp, Ship, type);
+                                        }
+                                    }
+                                }
 
                                 // TODO: Set transit penalties here
                             }

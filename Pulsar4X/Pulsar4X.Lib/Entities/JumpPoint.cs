@@ -144,7 +144,9 @@ namespace Pulsar4X.Entities
         /// TODO: Implement connecting to existing systems.
         /// Design Questions: 
         /// How do we determine we want to connect to an existing system? (X% Chance?, X% Chance if we already have other connections?, Other?)
+        ///    Aurora does it by 15% chance to connect back to the local group I think.
         /// How do we decide what system to connect to? (Random?, "System Proximity" based?, Other?)
+        ///    Aurora again does it by System Proximity in terms of where in the system list they both are.
         /// </summary>
         public void CreateConnection()
         {
