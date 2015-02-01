@@ -53,8 +53,13 @@ namespace Pulsar4X.UI
             oNewFaction.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction.Populations[0].ConventionalStart();
             GameState.Instance.Factions.Add(oNewFaction);
-            oNewFaction.AddNewContactList(otest);
-
+            /// <summary>
+            /// Add Contact lists.
+            /// </summary>
+            foreach (Entities.StarSystem CurSystem in GameState.Instance.StarSystems)
+            {
+                oNewFaction.AddNewContactList(CurSystem);
+            }
             Entities.Planet P1 = new Entities.Planet(otest.Stars[0], otest.Stars[0]);
             P1.Position.X = 10.0;
             P1.Position.Y = 10.0;
@@ -70,7 +75,14 @@ namespace Pulsar4X.UI
             oNewFaction2.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction2.Populations[0].ConventionalStart();
             GameState.Instance.Factions.Add(oNewFaction2);
-            oNewFaction2.AddNewContactList(otest);
+
+            /// <summary>
+            /// Add Contact lists.
+            /// </summary>
+            foreach (Entities.StarSystem CurSystem in GameState.Instance.StarSystems)
+            {
+                oNewFaction2.AddNewContactList(CurSystem);
+            }
 
             Entities.Planet P2 = new Entities.Planet(otest.Stars[0], otest.Stars[0]);
             P2.Position.X = -10.0;

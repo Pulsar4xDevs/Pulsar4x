@@ -1168,9 +1168,12 @@ namespace Pulsar4X.Entities
         /// <param name="system">Starsystem for the contacts.</param>
         public void AddNewContactList(StarSystem system)
         {
-            FactionSystemDetection NewContact = new FactionSystemDetection(this, system);
-            system.FactionDetectionLists.Add(NewContact);
-            SystemContacts.Add(system, NewContact);
+            if (SystemContacts.ContainsKey(system) == false)
+            {
+                FactionSystemDetection NewContact = new FactionSystemDetection(this, system);
+                system.FactionDetectionLists.Add(NewContact);
+                SystemContacts.Add(system, NewContact);
+            }
 
         }
 
