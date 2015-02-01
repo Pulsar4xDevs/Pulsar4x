@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+	<Product Id="*" Name="Pulsar4X.Installer" Language="1033" Version="1.0.0.0" Manufacturer="Pulsar4XDevs" UpgradeCode="c4c754bb-2d14-4674-9a6b-37eaf3b2e338">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate EmbedCab="yes" />
+    
+    <UIRef Id="WixUI_FeatureTree" />
+
+    <UIRef Id="WixUI_ErrorProgressText" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)MITLicense.rtf" />
+    
+    <Feature Id="FullInstall" Title="Game" Level="1" Display="expand" Description="Pulsar4X Game" ConfigurableDirectory="INSTALLFOLDER">
+			<ComponentGroupRef Id="Binaries" />
+      <ComponentGroupRef Id="Resources" />
+		</Feature>
+    <Feature Id="SourceCode" Title="Source Code" Level="1" Display="expand" Description="Pulsar4X C# Source Code" ConfigurableDirectory="SOURCEINSTALLFOLDER" >
+      <ComponentGroupRef Id="SourceCode" />
+    </Feature>
+	</Product>
+
+	<Fragment>
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="Pulsar4X">
+          <Directory Id="SOURCEINSTALLFOLDER" Name="Source"/>
+          <Directory Id="RESOURCEFOLDER" Name="Resources">
+            <Directory Id="SHADERSFOLDER" Name="Shaders" />
+            <Directory Id="TEXTURESFOLDER" Name="Textures" />
+            <Directory Id="FONTSFOLDER" Name="Fonts" />
+          </Directory>
+        </Directory>
+			</Directory>
+		</Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="Binaries" Directory="INSTALLFOLDER">
+      <Component>
+        <File Source="$(var.Pulsar4X.UI.TargetPath)" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.Pulsar4X.Lib.TargetPath)" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.SolutionDir)deps\DockPanelSuite\WeifenLuo.WinFormsUI.Docking.dll" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.SolutionDir)deps\Json45r8\bin\Net40\Newtonsoft.Json.dll" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.SolutionDir)deps\log4net-1.2.11\bin\net\4.0\release\log4net.dll" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.SolutionDir)deps\NUnit-2.6.1\bin\nunit.framework.dll" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.SolutionDir)deps\OpenTK-1.1\Bin\OpenTK.dll" KeyPath="yes" />
+      </Component>
+      <Component>
+        <File Source="$(var.SolutionDir)deps\OpenTK-1.1\Bin\OpenTK.GLControl.dll" KeyPath="yes" />
+      </Component>
+		</ComponentGroup>
+    <ComponentGroup Id ="Resources">
+      <Component Directory="FONTSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Fonts\DejaVuSansMonoBold.png"/>
+      </Component>
+      <Component Directory="FONTSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Fonts\DejaVuSansMonoBold.xml"/>
+      </Component>
+      <Component Directory="FONTSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Fonts\PulsarFont.png"/>
+      </Component>
+      <Component Directory="FONTSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Fonts\PulsarFont.xml"/>
+      </Component>
+      <Component Directory="SHADERSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Shaders\Basic20_Fragment_Shader.glsl"/>
+      </Component>
+      <Component Directory="SHADERSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Shaders\Basic20_Vertex_Shader.glsl"/>
+      </Component>
+      <Component Directory="SHADERSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Shaders\Basic30_Fragment_Shader.glsl"/>
+      </Component>
+      <Component Directory="SHADERSFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Shaders\Basic30_Vertex_Shader.glsl"/>
+      </Component>
+      <Component Directory="TEXTURESFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Textures\DefaultIcon.png"/>
+      </Component>
+      <Component Directory="TEXTURESFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Textures\DefaultJPIcon.png"/>
+      </Component>
+      <Component Directory="TEXTURESFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Textures\DefaultTexture.png"/>
+      </Component>
+      <Component Directory="TEXTURESFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Textures\DefaultTGIcon.png"/>
+      </Component>
+      <Component Directory="TEXTURESFOLDER">
+        <File Source="$(var.Pulsar4X.UI.ProjectDir)Resources\Textures\PulsarLogo.png"/>
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="SourceCode">
+      
+    </ComponentGroup>
+	</Fragment>
+</Wix>
