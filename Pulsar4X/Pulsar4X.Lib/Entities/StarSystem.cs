@@ -144,17 +144,6 @@ namespace Pulsar4X.Entities
         /// <param name="Contact">Contact to be added.</param>
         public void AddContact(SystemContact Contact)
         {
-            /// <summary>
-            /// Add a new entry to every distance table for every contact.
-            /// </summary>
-            for (int loop = 0; loop < SystemContactList.Count; loop++)
-            {
-                SystemContactList[loop].DistanceTable.Add(0.0f);
-                SystemContactList[loop].DistanceTable_LastUpdateSecond.Add(-1);
-                SystemContactList[loop].DistanceTable_LastUpdateYear.Add(-1);
-            }
-
-
             SystemContactList.Add(Contact);
             Contact.UpdateSystem(this);
 
@@ -202,14 +191,12 @@ namespace Pulsar4X.Entities
                 SystemContactList.Remove(Contact);
 
                 /// <summary>
-                /// Distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
+                /// distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
                 /// causes no issues with distance calculations.
                 /// </summary>
                 for (int loop = 0; loop < SystemContactList.Count; loop++)
                 {
-                    SystemContactList[loop].DistanceTable.RemoveAt(SystemContactList.Count - 1);
-                    SystemContactList[loop].DistanceTable_LastUpdateSecond.RemoveAt(SystemContactList.Count - 1);
-                    SystemContactList[loop].DistanceTable_LastUpdateYear.RemoveAt(SystemContactList.Count - 1);
+                    SystemContactList[loop].DistTable.Remove(Contact);
                 }
 
                 /// <summary>
@@ -227,7 +214,7 @@ namespace Pulsar4X.Entities
             {
                 String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
                 MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact,
-                                                       GameState.Instance.GameDateTime, (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                       GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Entry2);
             }
         }

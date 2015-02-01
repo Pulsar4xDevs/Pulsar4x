@@ -127,9 +127,9 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[1].BuildClassSummary();
 
 
-            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
-            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0], 0);
-            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[1], 0);
+            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0]);
+            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0]);
+            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[1]);
             oNewFaction.TaskGroups[0].Ships[0].Refuel(1000000.0f);
             oNewFaction.TaskGroups[0].Ships[1].Refuel(1000000.0f);
             oNewFaction.TaskGroups[0].Ships[2].Refuel(1000000.0f);
@@ -187,9 +187,9 @@ namespace Pulsar4X.UI
             oNewFaction2.ShipDesigns[1].IsLocked = true;
             oNewFaction2.ShipDesigns[1].BuildClassSummary();
 
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0], 0);
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0], 0);
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[1], 0);
+            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0]);
+            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0]);
+            oNewFaction2.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[1]);
             oNewFaction2.TaskGroups[0].Ships[0].Refuel(1000000.0f);
             oNewFaction2.TaskGroups[0].Ships[1].Refuel(1000000.0f);
             oNewFaction2.TaskGroups[0].Ships[2].Refuel(1000000.0f);

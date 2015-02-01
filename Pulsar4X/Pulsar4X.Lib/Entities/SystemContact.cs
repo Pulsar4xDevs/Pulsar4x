@@ -11,6 +11,85 @@ using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
+    public class DistanceTable
+    {
+        /// <summary>
+        /// Parent contact of this table.
+        /// </summary>
+        private SystemContact m_parent;
+
+        /// <summary>
+        /// Lookup referances for this table.
+        /// </summary>
+        private Dictionary<SystemContact, float> m_distances;
+        private Dictionary<SystemContact, int> m_lastUpdateSecond;
+        private Dictionary<SystemContact, int> m_lastUpdateYear;
+
+        /// <summary>
+        /// Calculates distance between the parent and the specified contact.
+        /// distance parameter is garenteed to be populated.
+        /// </summary>
+        /// <param name="contact"></param>
+        /// <param name="distance"></param>
+        /// <returns>true if distance was already in table. False if it distance was calculated.</returns>
+        public bool GetDistance(SystemContact contact, out float distance)
+        {
+            if (m_distances.TryGetValue(contact, out distance))
+            {
+                if (m_lastUpdateSecond[contact] == GameState.Instance.CurrentSecond && m_lastUpdateYear[contact] == GameState.Instance.CurrentYear)
+                {
+                    return true;
+                }
+            }
+            distance = m_parent.Position.GetDistanceTo(contact.Position);
+            UpdateDistance(contact, distance);
+            contact.DistTable.UpdateDistance(m_parent, distance);
+            return false;
+        }
+
+        /// <summary>
+        /// Public constructor.
+        /// </summary>
+        /// <param name="parent"></param>
+        public DistanceTable(SystemContact parent)
+        {
+            m_parent = parent;
+        }
+
+        /// <summary>
+        /// Updates/Adds the contact in the distance table with the correct distance/timestamp.
+        /// </summary>
+        /// <param name="contact"></param>
+        /// <param name="distance"></param>
+        private void UpdateDistance(SystemContact contact, float distance)
+        {
+            m_distances[contact] = distance;
+            m_lastUpdateSecond[contact] = GameState.Instance.CurrentSecond;
+            m_lastUpdateYear[contact] = GameState.Instance.CurrentYear;
+        }
+
+        /// <summary>
+        /// Clears the distance table.
+        /// </summary>
+        public void Clear()
+        {
+            m_distances.Clear();
+            m_lastUpdateSecond.Clear();
+            m_lastUpdateYear.Clear();
+        }
+
+        /// <summary>
+        /// Moves the specified contact from the distance table.
+        /// </summary>
+        /// <param name="contact"></param>
+        public void Remove(SystemContact contact)
+        {
+            m_distances.Remove(contact);
+            m_lastUpdateSecond.Remove(contact);
+            m_lastUpdateYear.Remove(contact);
+        }
+    }
+
     public class SystemContact : StarSystemEntity
     {
         /// <summary>
@@ -31,20 +110,10 @@ namespace Pulsar4X.Entities
         // TODO: Make distance table it's own class/struct, get it out of here.
 
         /// <summary>
-        /// Distance between this contact and the other contacts in the system in AU.
+        /// distance between this contact and the other contacts in the system in AU.
         /// </summary>
-        public BindingList<float> DistanceTable { get; set; }
+        public DistanceTable DistTable { get; set; }
 
-        /// <summary>
-        /// Second that the distance table was updated.
-        /// </summary>
-        public BindingList<int> DistanceTable_LastUpdateSecond { get; set; }
-
-        /// <summary>
-        /// Year that the distance table was updated.
-        /// </summary>
-        public List<int> DistanceTable_LastUpdateYear { get; set; }
-        
         /// <summary>
         /// Creates a new system contact.
         /// </summary>
@@ -59,9 +128,7 @@ namespace Pulsar4X.Entities
 
             Entity = entity;
 
-            DistanceTable = new BindingList<float>();
-            DistanceTable_LastUpdateSecond = new BindingList<int>();
-            DistanceTable_LastUpdateYear = new List<int>();
+            DistTable = new DistanceTable(this);
 
             SSEntity = entity.SSEntity;
         }
@@ -100,29 +167,7 @@ namespace Pulsar4X.Entities
         {
             Position.System = system;
 
-            DistanceTable.Clear();
-            DistanceTable_LastUpdateSecond.Clear();
-            DistanceTable_LastUpdateYear.Clear();
-
-            DistanceTable.RaiseListChangedEvents = false;
-            DistanceTable_LastUpdateSecond.RaiseListChangedEvents = false;
-
-            for (int loop = 0; loop < Position.System.SystemContactList.Count; loop++)
-            {
-                DistanceTable.Add(0.0f);
-                DistanceTable_LastUpdateSecond.Add(-1);
-                DistanceTable_LastUpdateYear.Add(-1);
-            }
-
-            DistanceTable.RaiseListChangedEvents = true;
-            DistanceTable_LastUpdateSecond.RaiseListChangedEvents = true;
-
-            /// <summary>
-            /// BindingLists apparently do a bunch of events every time they are changed.
-            /// This has hopefully circumvented that, with just 1 event.
-            /// </summary>
-            DistanceTable.ResetBindings();
-            DistanceTable_LastUpdateSecond.ResetBindings();
+            DistTable.Clear();
         }
     }
 }

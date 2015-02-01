@@ -364,8 +364,6 @@ namespace Pulsar4X.UI.Handlers
             int Seconds = GameState.Instance.GameDateTime.Second + (GameState.Instance.GameDateTime.Minute * 60) + (GameState.Instance.GameDateTime.Hour * 3600) +
                            (GameState.Instance.GameDateTime.DayOfYear * 86400) - 86400;
 
-            GameState.Instance.YearTickValue = Seconds;
-
             /// <summary>
             /// Put the date time on the main form.
             /// </summary>

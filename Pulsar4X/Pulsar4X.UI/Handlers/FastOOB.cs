@@ -201,7 +201,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Make the ship and subtract the appropriate amount from the faction Ship PB total.
                         /// </summary>
-                        m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass, GameState.Instance.YearTickValue);
+                        m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass);
                         m_oCurrnetFaction.ShipBPTotal = m_oCurrnetFaction.ShipBPTotal - m_oCurrnetShipClass.BuildPointCost;
 
                         /// <summary>

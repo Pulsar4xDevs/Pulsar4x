@@ -83,8 +83,11 @@ namespace Pulsar4X
         private GameState()
         {
             m_oStarSystemFactory = new Stargen.StarSystemFactory();
-            m_oGameDateTime = new DateTime(2025, 1, 1); // sets the date to 1 Jan 2025, just like aurora!!!
-            m_oYearTickValue = 0;
+
+            CurrentYear = 2025;
+            m_currentSecond = 0;
+
+            m_oGameDateTime = new DateTime(CurrentYear, 1, 1); // sets the date to 1 Jan 2025, just like aurora!!!
         }
 
         #endregion
@@ -132,14 +135,32 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Value of current tick on a year by year basis.
+        /// Current Second of the year.
         /// </summary>
-        private int m_oYearTickValue;
-        public int YearTickValue
+        private int m_currentSecond;
+        public int CurrentSecond
         {
-            get { return m_oYearTickValue; }
-            set { m_oYearTickValue = value; }
+            get { return m_currentSecond; }
+            set
+            {
+                while (value >= Constants.TimeInSeconds.Year)
+                {
+                    value -= (int)Constants.TimeInSeconds.Year;
+                    CurrentYear++;
+                }
+                m_currentSecond = value;
+            }
         }
+
+        /// <summary>
+        /// Current Year.
+        /// </summary>
+        public int CurrentYear { get; set; }
+
+        /// <summary>
+        /// deltaTime in seconds of the last update to the current update.
+        /// </summary>
+        public int LastTimestep { get; set; }
 
         #endregion
 

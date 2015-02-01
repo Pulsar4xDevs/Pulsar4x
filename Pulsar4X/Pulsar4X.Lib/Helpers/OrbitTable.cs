@@ -145,7 +145,7 @@ namespace Pulsar4X.Lib
 
                 String Entry = String.Format("TO:{0} E:{1} OF:{2}", theOrbit.Name, theOrbit.Eccentricity, orbitFraction);
                 MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
-                                                   (GameState.SE.CurrentSecond - GameState.SE.lastTick), Entry);
+                                                   GameState.Instance.LastTimestep, Entry);
                 GameState.Instance.Factions[0].MessageLog.Add(Msg);
             }*/
 
