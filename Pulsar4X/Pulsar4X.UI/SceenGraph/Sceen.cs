@@ -363,31 +363,57 @@ namespace Pulsar4X.UI.SceenGraph
                 iPlanetCounter = 0;
                 foreach (Pulsar4X.Entities.JumpPoint oJumpPoint in a_oStarSystem.JumpPoints)
                 {
-                    SceenElement oJumpPointElement = new JumpPointElement(oJumpPoint);
-                    oJumpPointElement.EntityID = oJumpPoint.Id;
-
-                    Vector3 v3JPPos = new Vector3((float)oJumpPoint.Position.X, (float)oJumpPoint.Position.Y, 0.0f);
-
-                    GLQuad oJPQuad = new GLUtilities.GLQuad(a_oDefaultEffect,
-                                                                    v3JPPos,
-                                                                    new Vector2(0.0001f, 0.0001f),                   // what size is a jump point anyway???
-                                                                    Color.Cyan,
-                                                                    UIConstants.Textures.DEFAULT_JUMPPOINT_ICON);
-
-                    oNameLable = new GLUtilities.GLFont(a_oDefaultEffect, v3JPPos,
-                    UIConstants.DEFAULT_TEXT_SIZE, Color.Cyan, UIConstants.Textures.DEFAULT_GLFONT2, oJumpPoint.Name);
-
-                    oJumpPointElement.Lable = oNameLable;
-                    oJumpPointElement.PrimaryPrimitive = oJPQuad;
-                    oJumpPointElement.AddPrimitive(oJPQuad);
-                    oJumpPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
-                    oCurrStar.AddChildElement(oJumpPointElement);
+                    CreateJumpPoint(oCurrStar, oJumpPoint);
                 }
+
                 iStarCounter++;
             }
 
+            a_oStarSystem.JumpPoints.ListChanged += JumpPoints_ListChanged;
+
             // Set Sceen Size basd on Max Orbit:
             m_v2SceenSize = new Vector2d(dMaxOrbitDist * 2, dMaxOrbitDist * 2);
+        }
+
+        private void JumpPoints_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            BindingList<JumpPoint> list = sender as BindingList<JumpPoint>;
+            if (e.ListChangedType == ListChangedType.ItemAdded)
+            {
+                JumpPoint jp = list[e.NewIndex];
+
+                foreach (SceenElement element in Elements)
+                {
+                    if (element.SceenEntity as Star == jp.Parent)
+                    {
+                        CreateJumpPoint(element, jp);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void CreateJumpPoint(SceenElement parent, JumpPoint oJumpPoint)
+        {
+            SceenElement oJumpPointElement = new JumpPointElement(oJumpPoint);
+            oJumpPointElement.EntityID = oJumpPoint.Id;
+
+            Vector3 v3JPPos = new Vector3((float)oJumpPoint.Position.X, (float)oJumpPoint.Position.Y, 0.0f);
+
+            GLQuad oJPQuad = new GLUtilities.GLQuad(SceenDefaultEffect,
+                                                            v3JPPos,
+                                                            new Vector2(0.0001f, 0.0001f),                   // what size is a jump point anyway???
+                                                            Color.Cyan,
+                                                            UIConstants.Textures.DEFAULT_JUMPPOINT_ICON);
+
+            GLUtilities.GLFont oNameLable = new GLUtilities.GLFont(SceenDefaultEffect, v3JPPos,
+            UIConstants.DEFAULT_TEXT_SIZE, Color.Cyan, UIConstants.Textures.DEFAULT_GLFONT2, oJumpPoint.Name);
+
+            oJumpPointElement.Lable = oNameLable;
+            oJumpPointElement.PrimaryPrimitive = oJPQuad;
+            oJumpPointElement.AddPrimitive(oJPQuad);
+            oJumpPointElement.RealSize = new Vector2(0.0001f, 0.0001f);
+            parent.AddChildElement(oJumpPointElement);
         }
 
         /// <summary>
