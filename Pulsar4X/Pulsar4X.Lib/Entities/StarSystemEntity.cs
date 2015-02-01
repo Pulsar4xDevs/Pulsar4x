@@ -61,7 +61,7 @@ namespace Pulsar4X.Entities
             float distX = (float)(posA.X - posB.X);
             float distY = (float)(posA.Y - posB.Y);
 
-            return (float)Math.Sqrt((distX * distX) - (distY * distY));
+            return (float)Math.Sqrt((distX * distX) + (distY * distY));
         }
 
         /// <summary>
