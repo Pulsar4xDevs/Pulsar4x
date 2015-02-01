@@ -953,6 +953,11 @@ namespace Pulsar4X.Entities
                                     CurrentFaction.DetectedContactLists[CurSystem].DetectedContacts.Remove(Ship);
                                 }
                             }
+
+                            if (CurrentFaction.DetShipList.Contains(Ship) == true)
+                            {
+                                CurrentFaction.DetShipList.Remove(Ship);
+                            }
                         }
 
                         bool nodeGone = Ship.OnDestroyed();
@@ -1224,6 +1229,11 @@ namespace Pulsar4X.Entities
                     {
                         faction.DetectedContactLists[CurSystem].DetectedMissileContacts.Remove(OGRemove);
                     }
+                }
+
+                if (faction.DetMissileList.Contains(OGRemove) == true)
+                {
+                    faction.DetMissileList.Remove(OGRemove);
                 }
             }
             OGRemove.missilesDestroyed = 0;
