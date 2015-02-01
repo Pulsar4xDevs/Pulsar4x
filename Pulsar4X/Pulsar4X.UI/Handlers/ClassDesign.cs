@@ -2758,7 +2758,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the crew quarters rows:
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "0")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Crew).ToString())
                         {
                             rowLine++;
                         }
@@ -2811,7 +2811,7 @@ namespace Pulsar4X.UI.Handlers
                         /// </summary>
                         int CQEnd = rowLine;
 
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "1")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Fuel).ToString())
                         {
                             rowLine++;
                         }
@@ -2864,7 +2864,7 @@ namespace Pulsar4X.UI.Handlers
                         /// </summary>
                         int FSEnd = rowLine;
 
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "2")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Engineering).ToString())
                         {
                             rowLine++;
                         }
@@ -2922,7 +2922,7 @@ namespace Pulsar4X.UI.Handlers
                         int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
                         int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
 
-                        while (out1 >= 3 && out2 <= 8)
+                        while (out1 >= ((int)ComponentTypeTN.Bridge) && out2 <= ((int)ComponentTypeTN.RecFacility))
                         {
                             rowLine++;
 
@@ -3010,7 +3010,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 10 or "Engine"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "10")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Engine).ToString())
                         {
                             rowLine++;
                         }
@@ -3068,7 +3068,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 16 or "BFC"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "16")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.BeamFireControl).ToString())
                         {
                             rowLine++;
                         }
@@ -3125,7 +3125,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 33 or "MFC"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "33")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.MissileFireControl).ToString())
                         {
                             rowLine++;
                         }
@@ -3209,7 +3209,7 @@ namespace Pulsar4X.UI.Handlers
                         int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out1);
                         int.TryParse((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value, out out2);
 
-                        while (out1 >= 17 && out2 <= 27)
+                        while (out1 >= ((int)ComponentTypeTN.Rail) && out2 <= ((int)ComponentTypeTN.AdvParticle))
                         {
                             rowLine++;
 
@@ -3291,7 +3291,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Advance through all the CIWS
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "34")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.CIWS).ToString())
                         {
                             rowLine++;
                         }
@@ -3348,7 +3348,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Advance through all the Turrets
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "35")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Turret).ToString())
                         {
                             rowLine++;
                         }
@@ -3429,7 +3429,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 31 or "Missile Launcher"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "31")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.MissileLauncher).ToString())
                         {
                             rowLine++;
                         }
@@ -3490,7 +3490,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 32 or "Magazines"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "32")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Magazine).ToString())
                         {
                             rowLine++;
                         }
@@ -3554,7 +3554,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 28 or "Reactor"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "28")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Reactor).ToString())
                         {
                             rowLine++;
                         }
@@ -3615,7 +3615,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 12 or "Active"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "12")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.ActiveSensor).ToString())
                         {
                             rowLine++;
                         }
@@ -3693,7 +3693,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 11 or "Passive"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "11")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.PassiveSensor).ToString())
                         {
                             rowLine++;
                         }
@@ -3754,7 +3754,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 29 or "Shield"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "29")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.Shield).ToString())
                         {
                             rowLine++;
                         }
@@ -3815,7 +3815,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 14 or "Cargo Handling System"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "14")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.CargoHandlingSystem).ToString())
                         {
                             rowLine++;
                         }
@@ -3871,7 +3871,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 13 or "Cargo Hold"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "13")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.CargoHold).ToString())
                         {
                             rowLine++;
                         }
@@ -3928,7 +3928,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Count the rows that are already filled with component type 15 or "Cryobay"
                         /// </summary>
-                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == "15")
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.CryoStorage).ToString())
                         {
                             rowLine++;
                         }

@@ -52,9 +52,21 @@ namespace Pulsar4X.Entities.Components
             get { return JumpDriveType; }
         }
 
-        public JumpEngineDefTN(string JEngName, float Efficiency, int SquadSize, int Radius, JDType JType)
+        /// <summary>
+        /// Constructor for the JumpEngine Definition
+        /// </summary>
+        /// <param name="JEngName">Name of the engine.</param>
+        /// <param name="Efficiency">How many HS of hull can 1 HS of JE support?</param>
+        /// <param name="SquadSize">How many craft cane use this JE in a squadron transit</param>
+        /// <param name="Radius">How far can this JE support jumping away from the Jump Point</param>
+        /// <param name="JType">Is this a military or commercial engine?</param>
+        public JumpEngineDefTN(string JEngName, int EfficiencyTech, int SquadSizeTech, int RadiusTech, JDType JType)
         {
+            /// <summary>
+            /// Everything needs a unique Id, or probably will if it doesn't already.
+            Id = Guid.NewGuid();
 
+            componentType = ComponentTypeTN.JumpEngine;
         }
     }
 
