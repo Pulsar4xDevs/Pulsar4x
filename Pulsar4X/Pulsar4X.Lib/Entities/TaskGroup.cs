@@ -2812,7 +2812,7 @@ namespace Pulsar4X.Entities
 
                         Contact.DistTable.GetDistance(pair.Key.ShipsTaskGroup.Contact, out dist);
 
-                        if (dist < minDist)
+                        if (dist < minDist || min == null)
                         {
                             min = pair.Key;
                             minDist = dist;
