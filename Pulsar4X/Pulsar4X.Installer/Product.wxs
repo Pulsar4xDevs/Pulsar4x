@@ -11,7 +11,7 @@
 
     <UIRef Id="WixUI_ErrorProgressText" />
 
-    <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)MITLicense.rtf" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)..\MITLicense.rtf" />
     
     <Feature Id="FullInstall" Title="Game" Level="1" Display="expand" Description="Pulsar4X Game" ConfigurableDirectory="INSTALLFOLDER">
 			<ComponentGroupRef Id="Binaries" />
