@@ -1240,7 +1240,7 @@ namespace Pulsar4X.Entities.Components
             OrdnanceGroupFaction = LaunchedFrom.TaskGroupFaction;
 
             Contact.Position.System = LaunchedFrom.Contact.Position.System;
-            LaunchedFrom.Contact.Position.System.AddContact(Contact);
+            LaunchedFrom.Position.System.SystemContactList.Add(Contact);
             DrawTravelLine = 0;
 
             ShipsTargetting = new BindingList<ShipTN>();

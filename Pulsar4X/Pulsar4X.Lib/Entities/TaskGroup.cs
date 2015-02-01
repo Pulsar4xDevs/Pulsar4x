@@ -217,7 +217,7 @@ namespace Pulsar4X.Entities
 
             Contact.Position = Position;
 
-            StartingSystem.AddContact(Contact);
+            StartingSystem.SystemContactList.Add(Contact);
             DrawTravelLine = 3;
 
             CurrentSpeed = 1;
@@ -2288,12 +2288,11 @@ namespace Pulsar4X.Entities
                                 // TODO: Put jump transition in it's own function within TaskGroup.
                                 SystemPosition newPos = CurrentJP.Connect.Position;
 
-                                Position.System.RemoveContact(Contact);
-                                newPos.System.AddContact(Contact);
+                                Position.System.SystemContactList.Remove(Contact);
+                                newPos.System.SystemContactList.Add(Contact);
 
                                 Position = newPos;
-
-                                Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
+                                Contact.UpdateLocationAfterTransit();
 
                                 /// <summary>
                                 /// Handle PDList stuff.
@@ -2338,12 +2337,11 @@ namespace Pulsar4X.Entities
                                 // TODO: Put jump transition in it's own function within TaskGroup.
                                 SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
 
-                                Position.System.RemoveContact(Contact);
-                                newPos.System.AddContact(Contact);
+                                Position.System.SystemContactList.Remove(Contact);
+                                newPos.System.SystemContactList.Add(Contact);
 
                                 Position = newPos;
-
-                                Contact.UpdateLocationAfterTransit(newPos.X, newPos.Y);
+                                Contact.UpdateLocationAfterTransit();
 
                                 /// <summary>
                                 /// Handle PDList stuff.

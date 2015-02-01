@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if LOG4NET_ENABLED
+using log4net.Config;
+using log4net;
+#endif
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,11 +15,8 @@ using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
+using Pulsar4X.Helpers;
 
-#if LOG4NET_ENABLED
-using log4net.Config;
-using log4net;
-#endif
 
 namespace Pulsar4X.UI.SceenGraph
 {
@@ -369,10 +370,30 @@ namespace Pulsar4X.UI.SceenGraph
                 iStarCounter++;
             }
 
+            foreach (Pulsar4X.Entities.SystemContact systemContact in a_oStarSystem.SystemContactList)
+            {
+                AddContactElement(SceenDefaultEffect, systemContact);
+            }
+
             a_oStarSystem.JumpPoints.ListChanged += JumpPoints_ListChanged;
+            a_oStarSystem.SystemContactList.ListChanging += SystemContactList_ListChanging;
 
             // Set Sceen Size basd on Max Orbit:
             m_v2SceenSize = new Vector2d(dMaxOrbitDist * 2, dMaxOrbitDist * 2);
+        }
+
+        private void SystemContactList_ListChanging(object sender, ListChangingEventArgs e)
+        {
+            VerboseBindingList<SystemContact> list = sender as VerboseBindingList<SystemContact>;
+            switch (e.ListChangedType)
+            {
+                case ListChangedType.ItemAdded:
+                    AddContactElement(SceenDefaultEffect, e.ChangingObject as SystemContact);
+                    break;
+                case ListChangedType.ItemDeleted:
+                    RemoveContactElement(SceenDefaultEffect, e.ChangingObject as SystemContact);
+                    break;
+            }
         }
 
         private void JumpPoints_ListChanged(object sender, ListChangedEventArgs e)
@@ -442,39 +463,6 @@ namespace Pulsar4X.UI.SceenGraph
         /// </summary>
         public void Refresh()
         {
-
-            /// <summary>
-            /// Kludge to create new contact elements to draw, or delete them as needed.
-            /// </summary>
-            StarSystem Sys = m_oSceenEntity as StarSystem;
-
-            /// <summary>
-            /// The display needs to create these contacts. clean up the contact create list on completion.
-            /// Does SystemContact.CEState.NotCreated play a role here? I don't believe so because contacts can be already created and transiting jump points.
-            /// </summary>
-            if (Sys.ContactCreateList.Count != 0)
-            {
-                foreach (SystemContact oContact in Sys.ContactCreateList)
-                {
-                    AddContactElement(SceenDefaultEffect, oContact);
-                }
-                Sys.ContactCreateList.Clear();
-            }
-
-            /// <summary>
-            /// The display needs to delete these contacts. clean up the contact delete list on completion.
-            /// Does SystemContact.CEState.Delete play a role here? I don't believe so, since contacts need to be deleted on jump transits in addition to destruction.
-            /// </summary>
-            if (Sys.ContactDeleteList.Count != 0)
-            {
-
-                foreach (SystemContact oContact in Sys.ContactDeleteList)
-                {
-                    RemoveContactElement(SceenDefaultEffect, oContact);
-                }
-                Sys.ContactDeleteList.Clear();
-            }
-
             foreach (SceenElement oElement in m_lElements)
             {
                 oElement.Refresh(m_fZoomScaler);

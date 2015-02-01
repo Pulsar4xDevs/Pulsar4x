@@ -150,25 +150,10 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Updates the contact after transiting a jump point, LastPosition.X needs to be set to current position for the travel line.
         /// </summary>
-        /// <param name="X">X position in AU in the new system</param>
-        /// <param name="Y">Y position in AU in the new system</param>
-        public void UpdateLocationAfterTransit(double X, double Y)
+        public void UpdateLocationAfterTransit()
         {
-            LastPosition.X = X;
-            LastPosition.Y = Y;
-            Position.X = X;
-            Position.Y = Y;
-        }
-
-        /// <summary>
-        /// Updates the system location of this contact. The 4 blocks of updates to the lists will, I hope, facilitate efficient updating of the binding list.
-        /// </summary>
-        /// <param name="system">new System.</param>
-        public void UpdateSystem(StarSystem system)
-        {
-            Position.System = system;
-
-            DistTable.Clear();
+            LastPosition = Entity.Position;
+            Position = Entity.Position;
         }
     }
 }

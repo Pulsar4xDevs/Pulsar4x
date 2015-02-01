@@ -1742,7 +1742,7 @@ namespace Pulsar4X.Tests
                                 if (P[loop].TaskGroups[loop2].Ships.Count == 0)
                                 {
                                     P[loop].TaskGroups[loop2].clearAllOrders();
-                                    P[loop].TaskGroups[loop2].Contact.Position.System.RemoveContact(P[loop].TaskGroups[loop2].Contact);
+                                    P[loop].TaskGroups[loop2].Contact.Position.System.SystemContactList.Remove(P[loop].TaskGroups[loop2].Contact);
                                     P[loop].TaskGroups.Remove(P[loop].TaskGroups[loop2]);
 
                                     TGDestroyed++;

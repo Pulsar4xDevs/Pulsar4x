@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
+using Pulsar4X.Helpers;
 
 
 //using log4net.Config;
@@ -45,17 +46,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Global List of all contacts within the system.
         /// </summary>
-        public BindingList<SystemContact> SystemContactList { get; set; }
-
-        /// <summary>
-        /// List of contacts that need to be created, this will be used by the system map/sceen display.
-        /// </summary>
-        public BindingList<SystemContact> ContactCreateList { get; set; }
-
-        /// <summary>
-        /// List of contacts that need to be deleted. this will be used by the system map/sceen display.
-        /// </summary>
-        public BindingList<SystemContact> ContactDeleteList { get; set; }
+        public VerboseBindingList<SystemContact> SystemContactList { get; set; }
 
         /// <summary>
         /// List of faction contact lists. Here is where context starts getting confusing. This is a list of the last time the SystemContactList was pinged.
@@ -86,7 +77,7 @@ namespace Pulsar4X.Entities
 
             Waypoints = new BindingList<Waypoint>();
             JumpPoints = new BindingList<JumpPoint>();
-            SystemContactList = new BindingList<SystemContact>();
+            SystemContactList = new VerboseBindingList<SystemContact>();
             FactionDetectionLists = new BindingList<FactionSystemDetection>();
 
             TaskGroups = new BindingList<TaskGroupTN>();
@@ -94,12 +85,11 @@ namespace Pulsar4X.Entities
             OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
 
             // Subscribe to change events.
+            SystemContactList.ListChanged += SystemContactList_ListChanged;
+
             TaskGroups.ListChanged += ContactsChanged;
             Populations.ListChanged += ContactsChanged;
             OrdnanceGroups.ListChanged += ContactsChanged;
-
-            ContactCreateList = new BindingList<SystemContact>();
-            ContactDeleteList = new BindingList<SystemContact>();
         }
 
         /// <summary>
@@ -139,85 +129,27 @@ namespace Pulsar4X.Entities
             return NewJP;
         }
 
-        /// <summary>
-        /// Systems have to store a global(or perhaps system wide) list of contacts. This function adds a contact in the event one is generated.
-        /// Generation events include construction, hangar launches, missile launches, and Jump Point Entry into the System.
-        /// </summary>
-        /// <param name="Contact">Contact to be added.</param>
-        public void AddContact(SystemContact Contact)
+        private void SystemContactList_ListChanged(object sender, ListChangedEventArgs e)
         {
-            SystemContactList.Add(Contact);
-            Contact.UpdateSystem(this);
+            BindingList<SystemContact> list = sender as BindingList<SystemContact>;
 
-            /// <summary>
-            /// Update all the faction contact lists with the new contact.
-            /// </summary>
-            for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+            switch (e.ListChangedType)
             {
-                FactionDetectionLists[loop].AddContact();
-            }
-
-            /// <summary>
-            /// Inform the systemmap/sceen that a new contact needs to be created.
-            /// </summary>
-            ContactCreateList.Add(Contact);
-
-            /// <summary>
-            /// In the event that this contact is in the delete list, it probably means that this contact travelled through this system, left, and is back in the system, without being drawn.
-            /// If so put it in the contactCreateList and take it out of the contactDeleteList.
-            /// </summary>
-            if (ContactDeleteList.Contains(Contact) == true)
-                ContactDeleteList.Remove(Contact);
-        }
-
-
-        /// <summary>
-        /// This function removes contacts from the system wide contact list when a contact deletion event occurs.
-        /// This happens whenever a ship is scrapped or otherwise destroyed, ships/fighters land on a hangar, missiles hit their target or run out of endurance, and jump point exits.
-        /// </summary>
-        /// <param name="Contact">Contact to be removed.</param>
-        public void RemoveContact(SystemContact Contact)
-        {
-            int index = SystemContactList.IndexOf(Contact);
-
-            if (index != -1)
-            {
-                /// <summary>
-                /// Remove the contact from each of the faction contact lists as well as the System contact list.
-                /// </summary>
-                for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
-                {
-                    FactionDetectionLists[loop].RemoveContact(index);
-                }
-
-                SystemContactList.Remove(Contact);
-
-                /// <summary>
-                /// distance Table is updated every tick, and doesn't care about last tick's info. so deleting simply the last entry
-                /// causes no issues with distance calculations.
-                /// </summary>
-                for (int loop = 0; loop < SystemContactList.Count; loop++)
-                {
-                    SystemContactList[loop].DistTable.Remove(Contact);
-                }
-
-                /// <summary>
-                /// inform the display that this contact needs to be deleted.
-                /// </summary>
-                ContactDeleteList.Add(Contact);
-
-                /// <summary>
-                /// also clean up the contact create list if this contact hasn't been created yet by the display.
-                /// </summary>
-                if (ContactCreateList.Contains(Contact) == true)
-                    ContactCreateList.Remove(Contact);
-            }
-            else
-            {
-                String Entry = String.Format("Index for the system contact list is {0} for system {1}", index, Name);
-                MessageEntry Entry2 = new MessageEntry(MessageEntry.MessageType.Error, Contact.Position.System, Contact,
-                                                       GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
-                GameState.Instance.Factions[0].MessageLog.Add(Entry2);
+                    // TODO: Find a better place to update the FactionDetectionLists
+                case ListChangedType.ItemAdded:
+                    // Update all the faction contact lists with the new contact.
+                    for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+                    {
+                        FactionDetectionLists[loop].AddContact();
+                    }
+                    break;
+                case ListChangedType.ItemDeleted:
+                    // Remove the contact from each of the faction contact lists as well as the System contact list.
+                    for (int loop = 0; loop < FactionDetectionLists.Count; loop++)
+                    {
+                        FactionDetectionLists[loop].RemoveContact(e.NewIndex);
+                    }
+                    break;
             }
         }
 

@@ -1131,7 +1131,7 @@ namespace Pulsar4X.Entities
             }
 
             Ship.ShipsTaskGroup.clearAllOrders();
-            Ship.ShipsTaskGroup.Contact.Position.System.RemoveContact(Ship.ShipsTaskGroup.Contact);
+            Ship.ShipsTaskGroup.Contact.Position.System.SystemContactList.Remove(Ship.ShipsTaskGroup.Contact);
             Ship.ShipsFaction.TaskGroups.Remove(Ship.ShipsTaskGroup);
         }
 
@@ -1273,7 +1273,7 @@ namespace Pulsar4X.Entities
             Faction Owner = OGRemove.ordnanceGroupFaction;
             StarSystem CurrentSystem = OGRemove.contact.Position.System;
 
-            CurrentSystem.RemoveContact(OGRemove.contact);
+            CurrentSystem.SystemContactList.Remove(OGRemove.contact);
             Owner.MissileGroups.Remove(OGRemove);
         }
         #endregion
