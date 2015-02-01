@@ -1186,26 +1186,26 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
                 /// </summary>
-                for (int loop2 = 0; loop2 < System.FactionDetectionLists[FactionID].Thermal.Count; loop2++)
+                for (int detListIterator = 0; detListIterator < System.FactionDetectionLists[FactionID].Thermal.Count; detListIterator++)
                 {
                     /// <summary>
                     /// I don't own loop2, and it hasn't been fully detected yet.
                     /// TODO: CHECK: ^ What does this mean?
                     /// </summary>
-                    if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond &&
-                        System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond)
+                    if (this != System.SystemContactList[detListIterator].faction && System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond &&
+                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond)
                     {
                         float dist;
 
                         // Check to see if our distance table is updated for this contact.
-                        if (!CurrentTaskGroup.Contact.DistTable.GetDistance(System.SystemContactList[loop2], out dist))
+                        if (!CurrentTaskGroup.Contact.DistTable.GetDistance(System.SystemContactList[detListIterator], out dist))
                         {
                             /// <summary>
                             /// Handle fleet interception check here.
                             /// </summary>
-                            if (GameState.SE.FleetInterceptionPreemptTick != GameState.Instance.CurrentSecond && System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
+                            if (GameState.SE.FleetInterceptionPreemptTick != GameState.Instance.CurrentSecond && System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
                             {
-                                TaskGroupTN TaskGroup = System.SystemContactList[loop2].Entity as TaskGroupTN;
+                                TaskGroupTN TaskGroup = System.SystemContactList[detListIterator].Entity as TaskGroupTN;
                                 /// <summary>
                                 /// player created empty taskgroups should not get checked here.
                                 /// </summary>
@@ -1236,7 +1236,7 @@ namespace Pulsar4X.Entities
                                     GameState.SE.FleetInterceptionPreemptTick = GameState.Instance.CurrentSecond;
 
                                     GameState.SE.AddFleetToPreemptList(CurrentTaskGroup);
-                                    if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
+                                    if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
                                     {
 
                                         GameState.SE.AddFleetToPreemptList(TaskGroup);
@@ -1256,9 +1256,9 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Handle population detection
                         /// </summary>
-                        if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.Population)
+                        if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.Population)
                         {
-                            Population Pop = System.SystemContactList[loop2].Entity as Population;
+                            Population Pop = System.SystemContactList[detListIterator].Entity as Population;
                             sig = Pop.ThermalSignature;
                             detection = CurrentTaskGroup.BestThermal.pSensorDef.GetPassiveDetectionRange(sig);
 
@@ -1273,7 +1273,7 @@ namespace Pulsar4X.Entities
                             if (det == true)
                             {
                                 Pop.ThermalDetection[FactionID] = GameState.Instance.CurrentSecond;
-                                System.FactionDetectionLists[FactionID].Thermal[loop2] = GameState.Instance.CurrentSecond;
+                                System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
                             }
 
                             sig = Pop.EMSignature;
@@ -1284,7 +1284,7 @@ namespace Pulsar4X.Entities
                             if (det == true)
                             {
                                 Pop.EMDetection[FactionID] = GameState.Instance.CurrentSecond;
-                                System.FactionDetectionLists[FactionID].EM[loop2] = GameState.Instance.CurrentSecond;
+                                System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
                             }
 
                             sig = Constants.ShipTN.ResolutionMax - 1;
@@ -1301,12 +1301,12 @@ namespace Pulsar4X.Entities
                             if (det == true)
                             {
                                 Pop.ActiveDetection[FactionID] = GameState.Instance.CurrentSecond;
-                                System.FactionDetectionLists[FactionID].Active[loop2] = GameState.Instance.CurrentSecond;
+                                System.FactionDetectionLists[FactionID].Active[detListIterator] = GameState.Instance.CurrentSecond;
                             }
                         }
-                        else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.TaskGroup)
+                        else if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
                         {
-                            TaskGroupTN TaskGroup = System.SystemContactList[loop2].Entity as TaskGroupTN;
+                            TaskGroupTN TaskGroup = System.SystemContactList[detListIterator].Entity as TaskGroupTN;
 
                             if (TaskGroup.Ships.Count != 0)
                             {
@@ -1319,7 +1319,7 @@ namespace Pulsar4X.Entities
 
                                 #region Ship Thermal Detection Code
 
-                                if (System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond)
+                                if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond)
                                 {
 
                                     /// <summary>
@@ -1396,7 +1396,7 @@ namespace Pulsar4X.Entities
                                                     DetShipList.Add(TaskGroup.Ships[loop3]);
                                                 }
                                             }
-                                            System.FactionDetectionLists[FactionID].Thermal[loop2] = GameState.Instance.CurrentSecond;
+                                            System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
 
 
                                         }
@@ -1472,7 +1472,7 @@ namespace Pulsar4X.Entities
 
                                 #region Ship EM Detection Code
 
-                                if (System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond)
+                                if (System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
                                 {
                                     noDetection = false;
                                     allDetection = false;
@@ -1546,7 +1546,7 @@ namespace Pulsar4X.Entities
                                                     DetShipList.Add(TaskGroup.Ships[loop3]);
                                                 }
                                             }
-                                            System.FactionDetectionLists[FactionID].EM[loop2] = GameState.Instance.CurrentSecond;
+                                            System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
                                         }
                                         else if (noDetection == false && allDetection == false)
                                         {
@@ -1583,7 +1583,7 @@ namespace Pulsar4X.Entities
                                                             /// </summary>
                                                             if (TaskGroup.Ships[node.Next.Value].EMDetection[FactionID] == GameState.Instance.CurrentSecond)
                                                             {
-                                                                System.FactionDetectionLists[FactionID].EM[loop2] = GameState.Instance.CurrentSecond;
+                                                                System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
                                                             }
                                                             break;
                                                         }
@@ -1640,7 +1640,7 @@ namespace Pulsar4X.Entities
 
                                 #region Ship Active Detection Code
 
-                                if (System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
+                                if (System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
                                 {
                                     noDetection = false;
                                     allDetection = false;
@@ -1705,7 +1705,7 @@ namespace Pulsar4X.Entities
                                             /// Be sure to erase the factionDetectionSystem entry first, to track down everywhere this overbloated thing is.
                                             /// update, not happening. FactionDetectionList is too important.
                                             /// </summary>
-                                            System.FactionDetectionLists[FactionID].Active[loop2] = GameState.Instance.CurrentSecond;
+                                            System.FactionDetectionLists[FactionID].Active[detListIterator] = GameState.Instance.CurrentSecond;
                                         }
                                         else if (noDetection == false && allDetection == false)
                                         {
@@ -1775,9 +1775,9 @@ namespace Pulsar4X.Entities
                             #endregion
 
                         }
-                        else if (System.SystemContactList[loop2].SSEntity == StarSystemEntityType.Missile)
+                        else if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.Missile)
                         {
-                            OrdnanceGroupTN MissileGroup = System.SystemContactList[loop2].Entity as OrdnanceGroupTN;
+                            OrdnanceGroupTN MissileGroup = System.SystemContactList[detListIterator].Entity as OrdnanceGroupTN;
 
                             if (MissileGroup.missiles.Count != 0)
                             {
@@ -1786,7 +1786,7 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 #region Missile Detection
                                 OrdnanceTN Missile = MissileGroup.missiles[0];
-                                if (System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond)
+                                if (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond)
                                 {
                                     int ThermalSignature = (int)Math.Ceiling(Missile.missileDef.totalThermalSignature);
                                     detection = -1;
@@ -1823,11 +1823,11 @@ namespace Pulsar4X.Entities
                                             DetMissileList.Add(MissileGroup);
                                         }
 
-                                        System.FactionDetectionLists[FactionID].Thermal[loop2] = GameState.Instance.CurrentSecond;
+                                        System.FactionDetectionLists[FactionID].Thermal[detListIterator] = GameState.Instance.CurrentSecond;
                                     }
                                 }
 
-                                if (System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond)
+                                if (System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
                                 {
                                     int EMSignature = 0;
                                     if (Missile.missileDef.activeStr != 0.0f)
@@ -1868,12 +1868,12 @@ namespace Pulsar4X.Entities
                                             }
 
 
-                                            System.FactionDetectionLists[FactionID].EM[loop2] = GameState.Instance.CurrentSecond;
+                                            System.FactionDetectionLists[FactionID].EM[detListIterator] = GameState.Instance.CurrentSecond;
                                         }
                                     }
                                 }
 
-                                if (System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
+                                if (System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond && CurrentTaskGroup.ActiveSensorQue.Count > 0)
                                 {
                                     int TotalCrossSection_MSP = (int)Math.Ceiling(Missile.missileDef.size);
                                     sig = -1;
@@ -1916,7 +1916,7 @@ namespace Pulsar4X.Entities
                                             DetMissileList.Add(MissileGroup);
                                         }
 
-                                        System.FactionDetectionLists[FactionID].Active[loop2] = GameState.Instance.CurrentSecond;
+                                        System.FactionDetectionLists[FactionID].Active[detListIterator] = GameState.Instance.CurrentSecond;
                                     }
                                 }
                                 #endregion
