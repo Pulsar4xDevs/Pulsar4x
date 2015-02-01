@@ -1315,6 +1315,12 @@ namespace Pulsar4X
 
             // Base chance for each planet to generate a JP.
             public static int JumpPointGenerationChance = 10;
+
+            // Base chance for a JP connection to loop to an already-generated system in it's local group.
+            public static int JumpPointLocalGroupConnectionChance = 15;
+
+            // Size of a LocalGroup.
+            public static int JumpPointLocalGroupSize = 10;
         }
     }
 }

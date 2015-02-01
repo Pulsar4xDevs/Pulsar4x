@@ -8,11 +8,6 @@ namespace Pulsar4X.Entities
     public class JumpPoint : StarSystemEntity
     {
         /// <summary>
-        /// StarSystem which originates this JP. Source side is never closed.
-        /// </summary>
-        public StarSystem System { get; set; }
-
-        /// <summary>
         /// Star that the JP is offset from.
         /// </summary>
         public Star Parent { get; set; }
@@ -59,7 +54,7 @@ namespace Pulsar4X.Entities
         /// <param name="Y">Y in AU offset from parent star.</param>
         public JumpPoint(StarSystem Sys, Star Par, double X, double Y)
         {
-            System = Sys;
+            Position.System = Sys;
             Parent = Par;
             XOffset = X;
             YOffset = Y;
@@ -142,28 +137,118 @@ namespace Pulsar4X.Entities
         /// Currently, we create and link top new systems only.
         /// 
         /// TODO: Implement connecting to existing systems.
-        /// Design Questions: 
-        /// How do we determine we want to connect to an existing system? (X% Chance?, X% Chance if we already have other connections?, Other?)
-        ///    Aurora does it by 15% chance to connect back to the local group I think.
-        /// How do we decide what system to connect to? (Random?, "System Proximity" based?, Other?)
-        ///    Aurora again does it by System Proximity in terms of where in the system list they both are.
         /// </summary>
         public void CreateConnection()
         {
-            // Generate a new system.
-            StarSystem newSystem = GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
-            GameState.Instance.StarSystems.Add(newSystem);
+            int systemIndex = -1;
+            StarSystem connectedSystem = null;
+
+            if (Constants.GameSettings.JumpPointLocalGroupConnectionChance >= GameState.RNG.Next(101))
+            {
+                do
+                {
+                    // We will connect to an 'existing system'
+                    // Note, existing system doesn't necessarily exist.
+                    systemIndex = Position.System.SystemIndex + GameState.RNG.Next(-Constants.GameSettings.JumpPointLocalGroupSize / 2, (Constants.GameSettings.JumpPointLocalGroupSize / 2) + 1);
+                    if (systemIndex < 0)
+                    {
+                        // Sorry, we gotta keep you positive.
+                        systemIndex = Math.Abs(systemIndex);
+                    }
+                }
+                // Prevent linking to self.
+                while (systemIndex == Position.System.SystemIndex);
+            }
+            else
+            {
+                // Generating a 'new system'
+                // Note, new system doesn't necessarily not exist.
+                systemIndex = GameState.Instance.StarSystemCurrentIndex;
+            }
+
+
+            if (systemIndex >= GameState.Instance.StarSystemCurrentIndex)
+            {
+                if (systemIndex == GameState.Instance.StarSystemCurrentIndex)
+                {
+                    // We're connecting to the next system on the list.
+                    // This system will be generated, so increase our current index.
+                    // This can happen with either 'existing system' or 'new system'
+                    // however, it is intended for 'new system' generation.
+                    GameState.Instance.StarSystemCurrentIndex++;
+                }
+
+                while (systemIndex > GameState.Instance.StarSystems.Count)
+                {
+                    // We're connecting to an 'existing system' that doesn't exist.
+                    // If systemIndex 15 was selected above, and we've only got 10 systems, fill in the gap with new systems.
+                    GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
+
+                    // Note, we didn't set our StarSystemCurrentIndex. This is intentional.
+                    // When we make another connection, and we RNG a 'new system' connection, we may have just made the 'new system' here.
+                    // Since we want 'existing system' to make 2 links once all JP's are explored, we ensure
+                    // the 'new system' connection will actually connect to the 'existing system'.
+                }
+            }
+
+            if (systemIndex == GameState.Instance.StarSystems.Count)
+            {
+                // Generate a new system.
+                connectedSystem = GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
+            }
+            else
+            {
+                connectedSystem = GameState.Instance.StarSystems[systemIndex];
+            }
 
             // Choose a random jump point in the new system.
-            int i = GameState.RNG.Next(newSystem.JumpPoints.Count - 1);
+            JumpPoint connectedJP = null;
+
+            List<JumpPoint> systemJumpPoints = new List<JumpPoint>();
+            systemJumpPoints.AddRange(connectedSystem.JumpPoints); // Deep copy so we don't ruin the connectedSystem.JumpPoints list.
+
+            while (systemJumpPoints.Count > 0)
+            {
+                int i = GameState.RNG.Next(systemJumpPoints.Count);
+                if (systemJumpPoints[i].Connect == null)
+                {
+                    connectedJP = systemJumpPoints[i];
+                    break;
+                }
+
+                systemJumpPoints.RemoveAt(i);
+            }
+            if (connectedJP == null)
+            {
+                // All JP's are already connected, create a new one.
+                Star selectedStar = connectedSystem.Stars[GameState.RNG.Next(connectedSystem.Stars.Count)];
+
+                double minDistance = double.MaxValue;
+                double maxDistance = double.MinValue;
+
+                foreach (Planet p in selectedStar.Planets)
+                {
+                    // Clamp Min/Max distances for JP
+                    if (p.SemiMajorAxis < minDistance)
+                    {
+                        minDistance = p.SemiMajorAxis;
+                    }
+                    if (p.SemiMajorAxis > maxDistance)
+                    {
+                        maxDistance = p.SemiMajorAxis;
+                    }
+                }
+
+                connectedJP = JumpPoint.CreateJumpPoint(connectedSystem, selectedStar, minDistance, maxDistance);
+            }
 
             // Connect us to them.
-            Connect = newSystem.JumpPoints[i];
-            Name = Name + "(" + Connect.System.Name + ")";
+            Connect = connectedJP;
+            Name = Name + "(" + Connect.Position.System.Name + ")";
 
             // Connect them to us.
             Connect.Connect = this;
-            Connect.Name = Connect.Name + "(" + System.Name + ")";
+            Connect.Name = Connect.Name + "(" + Position.System.Name + ")";
         }
 
         /// <summary>
@@ -173,6 +258,27 @@ namespace Pulsar4X.Entities
         {
             Position.X = Parent.Position.X + XOffset;
             Position.Y = Parent.Position.Y + YOffset;
+        }
+
+        public static JumpPoint CreateJumpPoint(StarSystem system, Star parent, double minDistance, double maxDistance)
+        {
+            // Determine a location for the new JP.
+            double offsetX = ((maxDistance - minDistance) * GameState.RNG.Next(76) / 100) + minDistance;
+            double offsetY = ((maxDistance - minDistance) * GameState.RNG.Next(76) / 100) + minDistance;
+
+            // Randomly flip the sign of the offsets.
+            if (GameState.RNG.Next(2) == 0)
+            {
+                offsetX = -offsetX;
+            }
+            if (GameState.RNG.Next(2) == 0)
+            {
+                offsetY = -offsetY;
+            }
+
+            JumpPoint newJumpPoint = new JumpPoint(system, parent, offsetX, offsetY);
+            system.JumpPoints.Add(newJumpPoint);
+            return newJumpPoint;
         }
     }
 }

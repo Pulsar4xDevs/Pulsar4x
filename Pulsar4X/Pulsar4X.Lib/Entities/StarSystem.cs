@@ -64,6 +64,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<FactionSystemDetection> FactionDetectionLists { get; set; }
 
+        public int SystemIndex;
+
         /// <summary>
         /// Random generation seed used to generate this system.
         /// </summary>

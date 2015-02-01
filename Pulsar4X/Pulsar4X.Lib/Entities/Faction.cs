@@ -1048,6 +1048,13 @@ namespace Pulsar4X.Entities
             /// </summary>
             DetShipList = new BindingList<ShipTN>();
             DetMissileList = new BindingList<OrdnanceGroupTN>();
+
+            GameState.Instance.Factions.Add(this);
+
+            foreach (StarSystem system in GameState.Instance.StarSystems)
+            {
+                AddNewContactList(system);
+            }
         }
 
         /// <summary>
@@ -1142,6 +1149,13 @@ namespace Pulsar4X.Entities
             /// </summary>
             DetShipList = new BindingList<ShipTN>();
             DetMissileList = new BindingList<OrdnanceGroupTN>();
+
+            GameState.Instance.Factions.Add(this);
+
+            foreach (StarSystem system in GameState.Instance.StarSystems)
+            {
+                AddNewContactList(system);
+            }
         }
 
         /// <summary>
