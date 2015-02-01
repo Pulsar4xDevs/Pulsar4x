@@ -53,6 +53,9 @@ namespace Pulsar4X.Entities
         /// <param name="parent"></param>
         public DistanceTable(SystemContact parent)
         {
+            m_distances = new Dictionary<SystemContact, float>();
+            m_lastUpdateSecond = new Dictionary<SystemContact, int>();
+            m_lastUpdateYear = new Dictionary<SystemContact, int>();
             m_parent = parent;
         }
 
