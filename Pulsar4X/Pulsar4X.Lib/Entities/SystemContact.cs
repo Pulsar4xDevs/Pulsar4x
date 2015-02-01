@@ -110,8 +110,6 @@ namespace Pulsar4X.Entities
         /// </summary>
         public StarSystemEntity Entity { get; set; }
 
-        // TODO: Make distance table it's own class/struct, get it out of here.
-
         /// <summary>
         /// distance between this contact and the other contacts in the system in AU.
         /// </summary>

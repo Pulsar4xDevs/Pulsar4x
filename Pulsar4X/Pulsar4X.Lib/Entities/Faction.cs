@@ -1215,10 +1215,7 @@ namespace Pulsar4X.Entities
                 for (int detListIterator = 0; detListIterator < System.FactionDetectionLists[FactionID].Thermal.Count; detListIterator++)
                 {
                     /// <summary>
-                    /// I don't own detListIterator, and it hasn't been fully detected yet.
-                    /// TODO: CHECK: ^ What does this mean?
-                    ///                |
-                    /// It means that \|/
+                    /// Check if System.SystemContactList[detListIterator] is in the same faction, and it hasn't been fully detected yet.
                     /// </summary>
                     if (this != System.SystemContactList[detListIterator].faction && System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond &&
                         System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond)
