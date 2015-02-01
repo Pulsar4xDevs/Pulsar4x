@@ -46,6 +46,9 @@ namespace Pulsar4X.Stargen
             var accrete = new Accrete(_minimumStellarAge, _maximumStellarAge, _generateMoons, rnd);
             var ss = accrete.Create(name);
 
+            ss.SystemIndex = GameState.Instance.StarSystems.Count;
+            GameState.Instance.StarSystems.Add(ss);
+
             // save seed to star system:
             ss.Seed = seed;
 

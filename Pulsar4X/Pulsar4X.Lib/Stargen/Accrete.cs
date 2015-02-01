@@ -713,30 +713,15 @@ namespace Pulsar4X.Stargen
                 }
             }
 
+            if (Star.Parent != null)
+            {
+                //We need the Star to have a valid position to offset from.
+                Star.UpdatePosition(1);
+            }
+
             while (numJumpPoints-- > 0)
             {
-                // Determine a location for the new JP.
-                double offsetX = ((maxDistance - minDistance) * rnd.Next(76) / 100) + minDistance;
-                double offsetY = ((maxDistance - minDistance) * rnd.Next(76) / 100) + minDistance;
-
-                // Randomly flip the sign of the offsets.
-                if (rnd.Next(2) == 0)
-                {
-                    offsetX = -offsetX;
-                }
-                if (rnd.Next(2) == 0)
-                {
-                    offsetY = -offsetY;
-                }
-
-                if (Star.Parent != null)
-                {
-                    //We need the Star to have a valid position to offset from.
-                    Star.UpdatePosition(1);
-                }
-
-                JumpPoint newJumpPoint = new JumpPoint(Star.StarSystem, Star, offsetX, offsetY);
-                Star.StarSystem.JumpPoints.Add(newJumpPoint);
+                JumpPoint.CreateJumpPoint(Star.StarSystem, Star, minDistance, maxDistance);
             }
         }
 

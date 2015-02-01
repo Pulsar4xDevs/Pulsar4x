@@ -38,7 +38,7 @@ namespace Pulsar4X.Tests
 
             var ssf = new StarSystemFactory(true);
             var ss = ssf.Create("Test Sol");
-            _gameState.StarSystems.Add(ss);
+            GameState.Instance.StarSystemCurrentIndex++;
             ss.Stars.ToList().ForEach(x => _gameState.Stars.Add(x));
             ss.Stars.ToList().SelectMany(x => x.Planets).ToList().ForEach(p => _gameState.Planets.Add(p));
 

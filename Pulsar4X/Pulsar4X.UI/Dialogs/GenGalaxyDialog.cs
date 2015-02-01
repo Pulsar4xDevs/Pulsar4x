@@ -36,7 +36,8 @@ namespace Pulsar4X.UI.Dialogs
 
             for (int i = 0; i < iNoOfSystemsToGenerate; ++i)
             {
-                GameState.Instance.StarSystems.Add(ssf.Create(GalaxyNameTextBox.Text + i.ToString()));
+                ssf.Create(GalaxyNameTextBox.Text + i.ToString());
+                GameState.Instance.StarSystemCurrentIndex++;
                 GenProgressBar.Value = i;
             }
 

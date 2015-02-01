@@ -134,7 +134,8 @@ namespace Pulsar4X.UI.Handlers
             if (InpuDialog.DialogResult == DialogResult.OK)
             {
                 m_iNumberOfNewSystemsGened++;
-                GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Gened System " + m_iNumberOfNewSystemsGened.ToString(), InpuDialog.InputInt));
+                GameState.Instance.StarSystemFactory.Create("Gened System " + m_iNumberOfNewSystemsGened.ToString(), InpuDialog.InputInt);
+                GameState.Instance.StarSystemCurrentIndex++;
             }
             // cleanup input box:
             InpuDialog.Close();

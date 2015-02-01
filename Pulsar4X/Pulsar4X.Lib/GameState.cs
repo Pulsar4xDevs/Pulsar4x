@@ -87,6 +87,8 @@ namespace Pulsar4X
             CurrentYear = 2025;
             m_currentSecond = 0;
 
+            StarSystemCurrentIndex = 0;
+
             m_oGameDateTime = new DateTime(CurrentYear, 1, 1); // sets the date to 1 Jan 2025, just like aurora!!!
         }
 
@@ -210,6 +212,8 @@ namespace Pulsar4X
             }
             set { _starsystems = value; }
         }
+
+        public int StarSystemCurrentIndex;
 
         private BindingList<Star> _stars;
         public BindingList<Star> Stars

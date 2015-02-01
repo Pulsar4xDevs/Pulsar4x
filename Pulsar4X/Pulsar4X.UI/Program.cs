@@ -32,9 +32,11 @@ namespace Pulsar4X.UI
 
             // gen star system:
             Entities.StarSystem otest = GameState.Instance.StarSystemFactory.Create("Test");
-            GameState.Instance.StarSystems.Add(otest);
-            GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Foo"));
-            GameState.Instance.StarSystems.Add(GameState.Instance.StarSystemFactory.Create("Bar"));
+            GameState.Instance.StarSystemCurrentIndex++;
+            GameState.Instance.StarSystemFactory.Create("Foo");
+            GameState.Instance.StarSystemCurrentIndex++;
+            GameState.Instance.StarSystemFactory.Create("Bar");
+            GameState.Instance.StarSystemCurrentIndex++;
 
 
 

@@ -22,6 +22,7 @@ namespace Pulsar4X.Tests
             for (int i = 0; i < 200; i++)
             {
                 ss = ssf.Create("Proxima");
+                GameState.Instance.StarSystemCurrentIndex++;
 
                 Assert.IsNotNull(ss);
                 Assert.AreEqual("Proxima", ss.Name);
@@ -40,6 +41,7 @@ namespace Pulsar4X.Tests
             for (int i = 0; i < 200; i++)
             {
                 ss = ssf.Create("Proxima");
+                GameState.Instance.StarSystemCurrentIndex++;
 
                 Assert.IsNotNull(ss);
                 Assert.AreEqual("Proxima", ss.Name);
@@ -56,6 +58,7 @@ namespace Pulsar4X.Tests
             var ssf = new StarSystemFactory(true);
 
             var ss = ssf.Create("");
+            GameState.Instance.StarSystemCurrentIndex++;
 
             Assert.IsNotNull(ss);
             Assert.AreEqual("", ss.Name);

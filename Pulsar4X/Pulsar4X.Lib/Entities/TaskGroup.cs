@@ -208,11 +208,15 @@ namespace Pulsar4X.Entities
 
             Contact = new SystemContact(TaskGroupFaction, this);
 
-            Contact.Position.X = OrbitingBody.Position.X;
-            Contact.Position.Y = OrbitingBody.Position.Y;
+            Position.System = StartingSystem;
+            Position.X = OrbitingBody.Position.X;
+            Position.Y = OrbitingBody.Position.Y;
+
             Contact.LastPosition.X = Contact.Position.X;
             Contact.LastPosition.Y = Contact.Position.Y;
-            Contact.Position.System = StartingSystem;
+
+            Contact.Position = Position;
+
             StartingSystem.AddContact(Contact);
             DrawTravelLine = 3;
 
@@ -2299,22 +2303,22 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// If these aren't true... whoops.
                                     /// </summary>
-                                    if(TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.System) == true)
+                                    if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Position.System) == true)
                                     {
-                                        if(TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseFC.ContainsKey(pair.Key) == true)
+                                        if (TaskGroupFaction.PointDefense[CurrentJP.Position.System].PointDefenseFC.ContainsKey(pair.Key) == true)
                                         {
                                             ShipTN Ship = pair.Value;
                                             ComponentTN Comp = pair.Key;
-                                            bool type = TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseType[pair.Key];
-                                            TaskGroupFaction.PointDefense[CurrentJP.System].RemoveComponent(pair.Key);
+                                            bool type = TaskGroupFaction.PointDefense[CurrentJP.Position.System].PointDefenseType[pair.Key];
+                                            TaskGroupFaction.PointDefense[CurrentJP.Position.System].RemoveComponent(pair.Key);
 
-                                            if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Connect.System) == false)
+                                            if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Connect.Position.System) == false)
                                             {
                                                 PointDefenseList NewPDL = new PointDefenseList();
-                                                TaskGroupFaction.PointDefense.Add(CurrentJP.Connect.System, NewPDL);
+                                                TaskGroupFaction.PointDefense.Add(CurrentJP.Connect.Position.System, NewPDL);
                                             }
 
-                                            TaskGroupFaction.PointDefense[CurrentJP.Connect.System].AddComponent(Comp, Ship,type);
+                                            TaskGroupFaction.PointDefense[CurrentJP.Connect.Position.System].AddComponent(Comp, Ship, type);
                                         }
                                     }
                                 }
@@ -2350,22 +2354,22 @@ namespace Pulsar4X.Entities
                                     /// <summary>
                                     /// If these aren't true... whoops.
                                     /// </summary>
-                                    if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.System) == true)
+                                    if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Position.System) == true)
                                     {
-                                        if (TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseFC.ContainsKey(pair.Key) == true)
+                                        if (TaskGroupFaction.PointDefense[CurrentJP.Position.System].PointDefenseFC.ContainsKey(pair.Key) == true)
                                         {
                                             ShipTN Ship = pair.Value;
                                             ComponentTN Comp = pair.Key;
-                                            bool type = TaskGroupFaction.PointDefense[CurrentJP.System].PointDefenseType[pair.Key];
-                                            TaskGroupFaction.PointDefense[CurrentJP.System].RemoveComponent(pair.Key);
+                                            bool type = TaskGroupFaction.PointDefense[CurrentJP.Position.System].PointDefenseType[pair.Key];
+                                            TaskGroupFaction.PointDefense[CurrentJP.Position.System].RemoveComponent(pair.Key);
 
-                                            if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Connect.System) == false)
+                                            if (TaskGroupFaction.PointDefense.ContainsKey(CurrentJP.Connect.Position.System) == false)
                                             {
                                                 PointDefenseList NewPDL = new PointDefenseList();
-                                                TaskGroupFaction.PointDefense.Add(CurrentJP.Connect.System, NewPDL);
+                                                TaskGroupFaction.PointDefense.Add(CurrentJP.Connect.Position.System, NewPDL);
                                             }
 
-                                            TaskGroupFaction.PointDefense[CurrentJP.Connect.System].AddComponent(Comp, Ship, type);
+                                            TaskGroupFaction.PointDefense[CurrentJP.Connect.Position.System].AddComponent(Comp, Ship, type);
                                         }
                                     }
                                 }
