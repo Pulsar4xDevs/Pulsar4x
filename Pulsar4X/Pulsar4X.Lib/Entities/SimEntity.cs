@@ -934,6 +934,31 @@ namespace Pulsar4X.Entities
                     }
 
                     /// <summary>
+                    /// Handle jump drive recharging here.
+                    /// </summary>
+                    if ((value & (int)Faction.RechargeStatus.JumpRecharge) == (int)Faction.RechargeStatus.JumpRecharge)
+                    {
+                        bool DidCharge = false;
+                        foreach (JumpEngineTN JE in Ship.ShipJumpEngine)
+                        {
+                            DidCharge = JE.Recharge(TimeValue);
+                        }
+
+                        if (DidCharge == false)
+                        {
+                            faction.RechargeList[Ship] = faction.RechargeList[Ship] - (int)Faction.RechargeStatus.JumpRecharge;
+                        }
+
+                        if (faction.RechargeList[Ship] == 0)
+                        {
+                            faction.RechargeList.Remove(Ship);
+                            factionIterator--;
+                            loopBreak = true;
+                            break;
+                        }
+                    }
+
+                    /// <summary>
                     /// Ship destruction, very involving.
                     /// All Taskgroups ordered to move to the destroyed ship have to have their orders canceled.
                     /// System detected contacts have to be updated. this includes both the detected list and the FactionSystemDetection map as a whole. 

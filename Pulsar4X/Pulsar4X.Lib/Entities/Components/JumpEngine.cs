@@ -195,6 +195,22 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Recharge this jumpdrive.
+        /// </summary>
+        /// <param name="TimeValue">time value in seconds to subtract from the recharge.</param>
+        public bool Recharge(uint TimeValue)
+        {
+            if (JumpTimer == 0)
+                return false;
+
+            JumpTimer = JumpTimer - (int)TimeValue;
+            if (JumpTimer < 0)
+                JumpTimer = 0;
+
+            return true;
+        }
+
+        /// <summary>
         /// This engine has supported a transit so set its jump timer. Also the ship it is on should be put in the recharge list for Jump Recharge. And the taskgroup as a whole for transit sickness.
         /// </summary>
         public void Transit()
