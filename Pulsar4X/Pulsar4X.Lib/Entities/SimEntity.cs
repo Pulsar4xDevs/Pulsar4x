@@ -959,6 +959,27 @@ namespace Pulsar4X.Entities
                     }
 
                     /// <summary>
+                    /// Handle jump sickness here.
+                    /// </summary>
+                    if ((value & (int)Faction.RechargeStatus.JumpSickness) == (int)Faction.RechargeStatus.JumpSickness)
+                    {
+                        bool reducedSickness = Ship.ReduceSickness(TimeValue);
+
+                        if (reducedSickness == false)
+                        {
+                            faction.RechargeList[Ship] = faction.RechargeList[Ship] - (int)Faction.RechargeStatus.JumpSickness;
+                        }
+
+                        if (faction.RechargeList[Ship] == 0)
+                        {
+                            faction.RechargeList.Remove(Ship);
+                            factionIterator--;
+                            loopBreak = true;
+                            break;
+                        }
+                    }
+
+                    /// <summary>
                     /// Ship destruction, very involving.
                     /// All Taskgroups ordered to move to the destroyed ship have to have their orders canceled.
                     /// System detected contacts have to be updated. this includes both the detected list and the FactionSystemDetection map as a whole. 

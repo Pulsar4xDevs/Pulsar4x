@@ -63,6 +63,12 @@ namespace Pulsar4X.Entities
                                     ShipTN Ship = pair.Value;
 
                                     /// <summary>
+                                    /// Ship jump sickness will prevent point defense from operating.
+                                    /// </summary>
+                                    if (Ship.IsJumpSick())
+                                        continue;
+
+                                    /// <summary>
                                     /// Only want BFCs in FDF mode for now.
                                     /// </summary>
                                     if (faction.PointDefense[CurrentSystem].PointDefenseType[pair.Key] == false && pair.Value.ShipBFC[pair.Key.componentIndex].pDState == PointDefenseState.FinalDefensiveFire)
@@ -180,6 +186,12 @@ namespace Pulsar4X.Entities
                     /// The firing ship.
                     /// </summary>
                     ShipTN Ship = pair2.Value;
+
+                    /// <summary>
+                    /// Ship jump sickness will prevent point defense from operating.
+                    /// </summary>
+                    if (Ship.IsJumpSick())
+                        continue;
 
                     /// <summary>
                     /// BFC set to Area defense mode

@@ -419,6 +419,11 @@ namespace Pulsar4X.Entities
         public BindingList<JumpEngineTN> ShipJumpEngine { get; set; }
 
         /// <summary>
+        /// If this ship has just transitted then it will be unable to use its sensors or weapons for a period of time.
+        /// </summary>
+        public int JumpSickness { get; set; }
+
+        /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
         /// </summary>
         public bool IsDestroyed { get; set; }
@@ -904,6 +909,7 @@ namespace Pulsar4X.Entities
                     ShipComponents.Add(JumpEngine);
                 }
             }
+            JumpSickness = 0;
 
             IsDestroyed = false;
 
@@ -2723,13 +2729,20 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// This function iterates through every beam fire control(and later mfcs will be added), and orders them to attempt to fire.
+        /// This function iterates through every fire control, and orders them to attempt to fire.
         /// Sensor detection should be run before this every tick, or else we don't know if we can target a particular ship.
+        /// Jump sickness will prevent firing.
         /// </summary>
         /// <param name="CurrentSecond">Tick the ship is ordered to fire.</param>
         /// <param name="RNG">RNG passed from further up the food chain since I can't generate random results except by having a "global" rng.</param>
         public bool ShipFireWeapons(Random RNG)
         {
+            /// <summary>
+            /// Can we perform this action or will jump sickness interfere?
+            /// </summary>
+            if (IsJumpSick())
+                return false;
+
             bool fired = false;
             for (int loop = 0; loop < ShipBFC.Count; loop++)
             {
@@ -3031,6 +3044,12 @@ namespace Pulsar4X.Entities
         public bool InterceptMissile(Random RNG, OrdnanceTN Ordnance)
         {
             /// <summary>
+            /// Can we perform this action or will jump sickness interfere?
+            /// </summary>
+            if (IsJumpSick())
+                return false;
+
+            /// <summary>
             /// Personal Point defense(CIWS/FDF(Self)/FDF) here
             /// </summary>
 
@@ -3129,6 +3148,35 @@ namespace Pulsar4X.Entities
             return TotalExpendedShots;
         }
         #endregion
+
+        /// <summary>
+        /// Reduce the jump sickness of this ship. if it is zero the ship is no longer sick
+        /// </summary>
+        /// <param name="TimeValue">Time to reduce jump sickness by.</param>
+        /// <returns>Whether or not jumpsickness was reduced. if this is false, this ship should be taken out of the jump sick recharge list</returns>
+        public bool ReduceSickness(uint TimeValue)
+        {
+            if (JumpSickness == 0)
+                return false;
+
+            JumpSickness = JumpSickness - (int)TimeValue;
+            if (JumpSickness < 0)
+                JumpSickness = 0;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Is this craft currently suffering from jump sickness?
+        /// </summary>
+        /// <returns>bool based on if condition is met(true = ship is jumpsick)</returns>
+        public bool IsJumpSick()
+        {
+            if (JumpSickness > 0)
+                return true;
+            else
+                return false;
+        }
     }
     /// <summary>
     /// End of ShipTN class

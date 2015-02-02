@@ -1227,6 +1227,13 @@ namespace Pulsar4X.Entities
             #region Faction Taskgroup Loop
             foreach(TaskGroupTN CurrentTaskGroup in TaskGroups)
             {
+                /// <summary>
+                /// This Taskgroup can't perform a sensor sweep until jump sickness is gone. It stands to reason that if ship[0] is sick they all will be, but clever taskgroup reorganizing
+                /// may thwart that. I'd recommend just banning taskgroup reorganization while jumpsick.
+                /// </summary>
+                if (CurrentTaskGroup.Ships[0].IsJumpSick() == true)
+                    continue;
+
                 StarSystem System = CurrentTaskGroup.Contact.Position.System;
                 /// <summary>
                 /// Loop through the global contacts list for the system. thermal.Count is equal to SystemContacts.Count. or should be.
