@@ -56,7 +56,7 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// When will this item finish?
+        /// When will this item finish? This is an estimate, actual time completion is based on game ticks(seconds).
         /// </summary>
         private DateTime m_CompletionDate;
         public DateTime completionDate

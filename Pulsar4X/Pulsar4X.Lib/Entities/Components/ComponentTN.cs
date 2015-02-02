@@ -36,14 +36,14 @@ namespace Pulsar4X.Entities.Components
 
         Engine,
 
-        PassiveSensor,
-        ActiveSensor,
+        PassiveSensor, //isElectronic
+        ActiveSensor,  //isElectronic
 
         CargoHold,
         CargoHandlingSystem,
         CryoStorage,
 
-        BeamFireControl,
+        BeamFireControl, //isElectronic
 
         /// <summary>
         /// As with Bridge and RecFacility, don't change around beam weapons without changing BuildComponentDataGrid. That function expects Rail to be the first, and AdvParticle to be the last.
@@ -68,7 +68,7 @@ namespace Pulsar4X.Entities.Components
 
         MissileLauncher,
         Magazine,
-        MissileFireControl,
+        MissileFireControl, //isElectronic
 
         CIWS,
         Turret,
@@ -86,8 +86,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Crew requirement for the component, some components have a crew requirement of 0.
         /// </summary>
-        private byte m_oCrew;
-        public byte crew
+        private int m_oCrew;
+        public int crew
         {
             get { return m_oCrew; }
             set { m_oCrew = value; }

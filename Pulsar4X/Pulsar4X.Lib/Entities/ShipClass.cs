@@ -858,6 +858,45 @@ namespace Pulsar4X.Entities
         public BindingList<ushort> ShipTurretCount { get; set; }
         #endregion
 
+        #region Jump Engine
+        /// <summary>
+        /// each ship class can have several Jump drives and jump drive types.
+        /// </summary>
+        [DisplayName("Ship Jump Engine List"),
+        Category("Component Lists"),
+        Description("The model/type of this ships jump engines"),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<JumpEngineDefTN> ShipJumpEngineDef { get; set; }
+
+        [DisplayName("Jump Engine Count"),
+        Category("Component Counts"),
+        Description("Number of jump engines on this ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public BindingList<int> ShipJumpEngineCount { get; set; }
+
+        /// <summary>
+        /// How many ships can transit with this one(including this one) during a squadron transi.t
+        /// </summary>
+        [DisplayName("Squadron Jump Size"),
+        Category("Detials"),
+        Description("Maximum number of ships that may transit with this ship's best Jump Drive"),
+        Browsable(true),
+        ReadOnly(true)]
+        public int SquadronSize { get; set; }
+
+        /// <summary>
+        /// What is the circular area that this ship can arrive in during a squadron transit.
+        /// </summary>
+        [DisplayName("Squadron Jump Radius"),
+        Category("Detials"),
+        Description("Maximum jump distance from jumppoint during squadron transit"),
+        Browsable(true),
+        ReadOnly(true)]
+        public int JumpRadius { get; set; }
+        #endregion
+
         #endregion
 
         #region Constructor
@@ -996,6 +1035,11 @@ namespace Pulsar4X.Entities
 
             ShipTurretDef = new BindingList<TurretDefTN>();
             ShipTurretCount = new BindingList<ushort>();
+
+            ShipJumpEngineDef = new BindingList<JumpEngineDefTN>();
+            ShipJumpEngineCount = new BindingList<int>();
+            SquadronSize = 0;
+            JumpRadius = 0;
 
             ShipArmorDef = new ArmorDefTN("Conventional");
             NewArmor("Conventional", 2, 1);
@@ -2205,6 +2249,77 @@ namespace Pulsar4X.Entities
             UpdateClass(Turret, inc);
         }
 
+        /// <summary>
+        /// Function to add and subtract jump engines to this design.
+        /// </summary>
+        /// <param name="JumpEngine">Jump Engine to add or subtract.</param>
+        /// <param name="inc">number to add or subtract.</param>
+        public void AddJumpEngine(JumpEngineDefTN JumpEngine, short inc)
+        {
+            int JumpEngineIndex = ShipJumpEngineDef.IndexOf(JumpEngine);
+            if (JumpEngineIndex != -1)
+            {
+                ShipJumpEngineCount[JumpEngineIndex] = (ushort)((short)ShipJumpEngineCount[JumpEngineIndex] + inc);
+            }
+
+            if (JumpEngineIndex == -1 && inc >= 1)
+            {
+                ShipJumpEngineDef.Add(JumpEngine);
+                ShipJumpEngineCount.Add((ushort)inc);
+            }
+            else
+            {
+                if (JumpEngineIndex != -1)
+                {
+                    if (ShipJumpEngineCount[JumpEngineIndex] <= 0)
+                    {
+                        ShipJumpEngineCount.RemoveAt(JumpEngineIndex);
+                        ShipJumpEngineDef.RemoveAt(JumpEngineIndex);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Error here so return.
+                    /// </summary>
+                    return;
+                }
+            }
+
+            if (inc >= 1)
+            {
+                /// <summary>
+                /// Squadron size is I think preferable to see than jump radius if we have to sort by one.
+                /// </summary>
+                if (JumpEngine.squadronSize > SquadronSize)
+                {
+                    SquadronSize = JumpEngine.squadronSize;
+                    JumpRadius = JumpEngine.jumpRadius;
+                }
+            }
+            else
+            {
+                /// <summary>
+                /// This jump engine class is no longer part of the shipclass, so find the next Squadron size and jump radius.
+                /// </summary>
+                if (ShipJumpEngineDef.Contains(JumpEngine) == false)
+                {
+                    SquadronSize = 0;
+                    JumpRadius = 0;
+                    foreach (JumpEngineDefTN JDE in ShipJumpEngineDef)
+                    {
+                        if (JDE.squadronSize > SquadronSize)
+                        {
+                            SquadronSize = JDE.squadronSize;
+                            JumpRadius = JDE.jumpRadius;
+                        }
+                    }
+                }
+            }
+
+            UpdateClass(JumpEngine, inc);
+        }
+
 
         /// <summary>
         /// Set preferred ordnance adds or subtracts missiles from the preferred ordnance list of this class.
@@ -2357,8 +2472,8 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            Entry = String.Format("{0} km/s   Armour {1}-{2}   Shields {3}-{4}   Sensors {5}/{6}/{7}/{8}   Damage Control Rating {9}  PPV {10}\n", MaxSpeed,
-                                  ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating,
+            Entry = String.Format("{0} km/s    JR {0}-{1}     Armour {2}-{3}   Shields {4}-{5}   Sensors {6}/{7}/{8}/{9}   Damage Control Rating {10}  PPV {11}\n", MaxSpeed,
+                                  SquadronSize,JumpRadius, ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating,
                                   PlanetaryProtectionValue);
 
             Summary = String.Format("{0}{1}", Summary, Entry);
@@ -2381,7 +2496,14 @@ namespace Pulsar4X.Entities
             Summary = String.Format("{0}\n", Summary);
             #endregion
 
-            #region Engine Info
+            #region Engine and JumpEngine Info
+            foreach (JumpEngineDefTN JDE in ShipJumpEngineDef)
+            {
+                int dist = JDE.jumpRadius / 1000;
+                String Distance = String.Format("{0}k", dist);
+                Entry = String.Format("{0}     Max Ship Size {1} tons    Distance {2} km     Squadron Size {3}", JDE.Name, JDE.maxJumpRating, Distance, JDE.squadronSize);
+            }
+
             if (ShipEngineDef != null)
             {
                 float fuelCon = (float)Math.Floor(ShipEngineDef.fuelConsumptionMod * 100.0f);

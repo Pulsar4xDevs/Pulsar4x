@@ -413,6 +413,10 @@ namespace Pulsar4X.Entities
         public BindingList<TurretTN> ShipTurret { get; set; }
         #endregion
 
+        /// <summary>
+        /// All of the jump engines on this ship.
+        /// </summary>
+        public BindingList<JumpEngineTN> ShipJumpEngine { get; set; }
 
         /// <summary>
         /// If this ship has been destroyed. this will need more sophisticated handling.
@@ -880,6 +884,24 @@ namespace Pulsar4X.Entities
 
                     ShipTurret.Add(Turret);
                     ShipComponents.Add(Turret);
+                }
+            }
+
+            ShipJumpEngine = new BindingList<JumpEngineTN>();
+            for (int loop = 0; loop < ClassDefinition.ShipJumpEngineDef.Count; loop++)
+            {
+                index = ClassDefinition.ListOfComponentDefs.IndexOf(ClassDefinition.ShipJumpEngineDef[loop]);
+                ComponentDefIndex[index] = (ushort)ShipComponents.Count;
+                for (int loop2 = 0; loop2 < ClassDefinition.ShipJumpEngineCount[loop]; loop2++)
+                {
+                    JumpEngineTN JumpEngine = new JumpEngineTN(ClassDefinition.ShipJumpEngineDef[loop]);
+                    JumpEngine.componentIndex = ShipJumpEngine.Count;
+
+                    int JumpEngineIndex = loop2 + 1;
+                    JumpEngine.Name = JumpEngine.jumpEngineDef.Name + " #" + JumpEngineIndex.ToString();
+
+                    ShipJumpEngine.Add(JumpEngine);
+                    ShipComponents.Add(JumpEngine);
                 }
             }
 
@@ -1479,6 +1501,9 @@ namespace Pulsar4X.Entities
                                 case ComponentTypeTN.BeamFireControl:
                                     hardValue = ShipBFC[ComponentIndex].beamFireControlDef.hardening * 100.0f;
                                     break;
+                                case ComponentTypeTN.MissileFireControl:
+                                    hardValue = ShipMFC[ComponentIndex].mFCSensorDef.hardening * 100.0f;
+                                    break;
                             }
 
                             int DamageDone = -1;
@@ -1486,12 +1511,12 @@ namespace Pulsar4X.Entities
                             if (hardValue == -1)
                             {
                                 /// <summary>
-                                /// This is an error condition obviously.
+                                /// This is an error condition obviously. I likely forgot to put the component in above however.
                                 /// </summary>
-#warning faction message log this?
-#if LOG4NET_ENABLED
-                                logger.Debug("Unidentified electronic component in onDamaged().");
-#endif
+                                String ErrorString = String.Format("Unidentified electronic component in onDamaged() Type:{0}.", list.Key.componentType);
+                                MessageEntry EMsg = new MessageEntry(MessageEntry.MessageType.Error, ShipsTaskGroup.Contact.Position.System, ShipsTaskGroup.Contact,
+                                    GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, ErrorString);
+                                ShipsFaction.MessageLog.Add(EMsg);
                             }
                             else
                             {
@@ -2090,6 +2115,12 @@ namespace Pulsar4X.Entities
                     UnlinkWeapon(ShipTurret[ShipComponents[ID].componentIndex]);
                     ShipTurret[ShipComponents[ID].componentIndex].currentCapacitor = 0;
                     break;
+
+                case ComponentTypeTN.JumpEngine:
+                    /// <summary>
+                    /// Nothing special needs to be done to ship in this case.
+                    /// </summary>
+                    break;
             }
             return DamageReturn;
         }
@@ -2288,6 +2319,9 @@ namespace Pulsar4X.Entities
                     break;
 
                 case ComponentTypeTN.Turret:
+                    break;
+
+                case ComponentTypeTN.JumpEngine:
                     break;
             }
         }

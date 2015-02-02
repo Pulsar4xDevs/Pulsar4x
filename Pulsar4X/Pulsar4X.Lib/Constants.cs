@@ -1293,6 +1293,50 @@ namespace Pulsar4X
             public const int MissileResolutionMaximum = 14;
         }
 
+        public static class JumpEngineTN
+        {
+            /// <summary>
+            /// How many HS of ship does 1 HS of JumpEngine support.
+            /// </summary>
+            public static int[] JumpEfficiency = { 4,5,6,8,10,12,15,18,21,25 };
+
+            /// <summary>
+            /// How many ships can use this single jump engine.
+            /// </summary>
+            public static int[] SquadSize = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+
+            /// <summary>
+            /// How much bigger is this jump engine for allowing increased squadSize? size is JESize * this.
+            /// </summary>
+            public static float[] SquadSizeModifier = { 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f, 2.4f, 2.6f, 3.0f };
+
+            /// <summary>
+            /// How far from the jumppoint can a squadron transit go? multiply this by 10k km.
+            /// </summary>
+            public static int[] JumpRadius = { 5,10,25,50,75,100,150,200,250,300,400 };
+
+            /// <summary>
+            /// How much larger will this jumpengine be due to its jump radius tech?
+            /// </summary>
+            public static float[] JumpRadiusModifier = { 1.0f, 1.05f, 1.1f, 1.15f, 1.2f, 1.25f, 1.3f, 1.4f, 1.5f, 1.6f, 1.8f};
+
+            /// <summary>
+            /// How long does it take a jump engine to recharge?
+            /// </summary>
+            public const int JumpRechargeTime = (int)Constants.TimeInSeconds.FiveMinutes;
+
+            /// <summary>
+            /// Standard transit takes a while for jump effects to wear off.
+            /// </summary>
+            public const int StandardTransitPenalty = (int)Constants.TimeInSeconds.TwoMinutes;
+
+            /// <summary>
+            /// Squadrons recover very quickly.
+            /// </summary>
+            public const int SquadronTransitPenalty = (int)Constants.TimeInSeconds.ThirtySeconds;
+
+        }
+
         /// <summary>
         /// List of game-specific settings.
         /// Since we don't have save/load yet, I'm just sticking this here.

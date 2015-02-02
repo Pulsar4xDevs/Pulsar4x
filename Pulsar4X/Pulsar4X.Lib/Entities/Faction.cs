@@ -722,7 +722,9 @@ namespace Pulsar4X.Entities
             Weapons = 2,
             Destroyed = 4,
             CIWS = 8,
-            Count = 16
+            JumpRecharge = 16,
+            JumpSickness = 32,
+            Count = 64
         }
 
         /// <summary>
