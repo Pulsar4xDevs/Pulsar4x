@@ -3222,6 +3222,7 @@ namespace Pulsar4X.UI.Handlers
                                 DateTime EstTime = GameState.Instance.GameDateTime;
                                 TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
                                 EstTime = EstTime.Add(TS);
+                                CBQ.completionDate = EstTime;
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
                             }
 
@@ -3337,6 +3338,7 @@ namespace Pulsar4X.UI.Handlers
                                 DateTime EstTime = GameState.Instance.GameDateTime;
                                 TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
                                 EstTime = EstTime.Add(TS);
+                                MBQ.completionDate = EstTime;
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
                             }
                             //this item is being built
