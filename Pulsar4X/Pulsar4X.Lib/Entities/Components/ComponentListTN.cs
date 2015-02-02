@@ -123,6 +123,11 @@ namespace Pulsar4X.Entities.Components
         public BindingList<TurretDefTN> TurretDef { get; set; }
 
         /// <summary>
+        /// Jump engine definitions.
+        /// </summary>
+        public BindingList<JumpEngineDefTN> JumpEngineDef { get; set; }
+
+        /// <summary>
         /// Number of the total components this faction has for ship building purposes. MissileEngineDef and MissileDef are excluded from this.
         /// </summary>
         public int TotalComponents { get; set; }
@@ -166,6 +171,8 @@ namespace Pulsar4X.Entities.Components
             TurretableBeamDef = new BindingList<BeamDefTN>();
 
             TurretDef = new BindingList<TurretDefTN>();
+
+            JumpEngineDef = new BindingList<JumpEngineDefTN>();
 
             DefaultPassives = new PassiveSensorDefTN("Default, Don't display this one.", 1.0f, 1, PassiveSensorType.Thermal, 1.0f, 1);
         }
@@ -360,7 +367,7 @@ namespace Pulsar4X.Entities.Components
             TotalComponents = CrewQuarters.Count + FuelStorage.Count + EngineeringSpaces.Count + OtherComponents.Count + Engines.Count +
                               PassiveSensorDef.Count + ActiveSensorDef.Count + CargoHoldDef.Count + ColonyBayDef.Count + CargoHandleSystemDef.Count +
                               BeamFireControlDef.Count + BeamWeaponDef.Count + ReactorDef.Count + ShieldDef.Count + MLauncherDef.Count + MagazineDef.Count +
-                              MissileFireControlDef.Count + CIWSDef.Count + TurretDef.Count;
+                              MissileFireControlDef.Count + CIWSDef.Count + TurretDef.Count + JumpEngineDef.Count;
 
         }
     }

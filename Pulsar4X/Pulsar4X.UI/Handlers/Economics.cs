@@ -2310,7 +2310,7 @@ namespace Pulsar4X.UI.Handlers
                     }
                 }
                 #endregion
-                #region Engines
+                #region Engines and Jump Engines
                 else if (m_oSummaryPanel.InstallationTypeComboBox.SelectedIndex == (int)UIConstants.EconomicsPage.ConstructionID.EngineComponents)
                 {
                     int row = 0;
@@ -2360,6 +2360,53 @@ namespace Pulsar4X.UI.Handlers
                                 row++;
                                 BuildTabMaxRows++;
                             }
+                        }
+                    }
+
+                    /// <summary>
+                    /// Iterate through the Jump engines.
+                    foreach (JumpEngineDefTN JumpEngine in CurrentFaction.ComponentList.JumpEngineDef)
+                    {
+                        /// <summary>
+                        /// No obsolete components.
+                        /// </summary>
+                        if (JumpEngine.isObsolete == false)
+                        {
+                            /// <summary>
+                            /// if current row is less than the current max row count set the row to visible and put the name of the engine component into the cell.
+                            /// </summary>
+                            if (row < BuildTabMaxRows)
+                            {
+                                BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, JumpEngine);
+                                BuildLocationDisplayDict.Add(JumpEngine.Id, JumpEngine.Name);
+                                BuildLocationDict.Add(JumpEngine.Id, Temp);
+
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                                m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = JumpEngine.Name;
+                                row++;
+
+                            }
+                        }
+                        /// <summary>
+                        /// add a new row, and increment the current max row count.
+                        /// </summary>
+                        else
+                        {
+                            using (DataGridViewRow Row = new DataGridViewRow())
+                            {
+                                // setup row height. note that by default they are 22 pixels in height!
+                                Row.Height = 17;
+                                m_oSummaryPanel.BuildDataGrid.Rows.Add(Row);
+                            }// make new rows and add items.
+
+                            BuildListObject Temp = new BuildListObject(BuildListObject.ListEntityType.Component, JumpEngine);
+                            BuildLocationDisplayDict.Add(JumpEngine.Id, JumpEngine.Name);
+                            BuildLocationDict.Add(JumpEngine.Id, Temp);
+
+                            m_oSummaryPanel.BuildDataGrid.Rows[row].Visible = true;
+                            m_oSummaryPanel.BuildDataGrid.Rows[row].Cells[0].Value = JumpEngine.Name;
+                            row++;
+                            BuildTabMaxRows++;
                         }
                     }
 

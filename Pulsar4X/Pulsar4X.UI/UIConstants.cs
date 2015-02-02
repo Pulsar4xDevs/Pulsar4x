@@ -92,7 +92,7 @@ namespace Pulsar4X.UI
                 MaintenanceSupplies,
                 Count
             }
-            public static String[] ConstructionTypes = { "Installations", "Missiles", "Fighters", "Basic Components", "Electronic / Shield Components", "Engine Components", 
+            public static String[] ConstructionTypes = { "Installations", "Missiles", "Fighters", "Basic Components", "Electronic / Shield Components", "Engine / Jump Engine Components", 
                                                          "Sensor / Fire Control Components", "Transport / Industry Components", "Weapon / Support Components", 
                                                          "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };
         }

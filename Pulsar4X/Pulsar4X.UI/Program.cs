@@ -54,7 +54,6 @@ namespace Pulsar4X.UI
             oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
             oNewFaction.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction.Populations[0].ConventionalStart();
-            GameState.Instance.Factions.Add(oNewFaction);
             /// <summary>
             /// Add Contact lists.
             /// </summary>
@@ -76,7 +75,6 @@ namespace Pulsar4X.UI
             oNewFaction2.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction2));
             oNewFaction2.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction2.Populations[0].ConventionalStart();
-            GameState.Instance.Factions.Add(oNewFaction2);
 
             /// <summary>
             /// Add Contact lists.

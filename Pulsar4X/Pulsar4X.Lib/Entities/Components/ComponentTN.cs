@@ -11,9 +11,12 @@ namespace Pulsar4X.Entities.Components
     /// in Ship.cs OnDamaged() new electronic components need to be handled as well for microwave damage.
     /// in Shipclass.cs add the Add_Component() function, and update the class summary.
     /// when adding components in general do the declarations, at them to shipclass, add them to ship, work out their mechanics and place those appropriately.
-    /// In Class Design.cs, and Components.cs any new components need to be filled in for just about every component type switch(lots of them). also BuildDesignTab and GetListBoxComponent
+    /// In ComponentListTN.cs create a binding list, and update Sanity check.
+    /// In Components.cs do research and build work.
+    /// In ClassDesign.cs, and Components.cs any new components need to be filled in for just about every component type switch(lots of them). also BuildDesignTab and GetListBoxComponent
     ///    If editing this list, moving things around should be fine, except for Bridge, RecFacility,Rail, and Adv Particle. Those sections have to stay contiguous due to how 
     ///    BuildComponentDataGrid works.
+    ///    2 in double click handlers, buildDesignTab, getListBoxComponent, BuildComponentDataGrid, AddComponent, FindAddListBoxComponent
     /// In Economics.cs new components need to be handled for the build components list.
     /// </summary>
     public enum ComponentTypeTN

@@ -428,6 +428,9 @@ namespace Pulsar4X.UI.Handlers
                             case ComponentTypeTN.Turret:
                                 List.TurretDef[CIndex].isObsolete = true;
                                 break;
+                            case ComponentTypeTN.JumpEngine:
+                                List.JumpEngineDef[CIndex].isObsolete = true;
+                                break;
                         }
                         #endregion
 
@@ -512,6 +515,9 @@ namespace Pulsar4X.UI.Handlers
                                 break;
                             case ComponentTypeTN.Turret:
                                 List.TurretDef[CIndex].isObsolete = false;
+                                break;
+                            case ComponentTypeTN.JumpEngine:
+                                List.JumpEngineDef[CIndex].isObsolete = false;
                                 break;
                         }
                         #endregion
@@ -773,6 +779,7 @@ namespace Pulsar4X.UI.Handlers
                         if (ArmorTech > 12)
                             ArmorTech = 12;
 
+#warning move these to constants.UI at some point.
                         #region Armor Tech names
                         String Title = "N/A";
                         switch (ArmorTech)
@@ -941,7 +948,7 @@ namespace Pulsar4X.UI.Handlers
 
             if (ArmorTech > 12)
                 ArmorTech = 12;
-
+#warning more armor names to move to constants.UI
             #region Armor Tech names
             String Title = "N/A";
             switch (ArmorTech)
@@ -1324,17 +1331,27 @@ namespace Pulsar4X.UI.Handlers
                 Entry = "";
                 m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
 
-                if (CurrentShipClass.ShipEngineDef != null)
+                if (CurrentShipClass.ShipEngineDef != null || CurrentShipClass.ShipJumpEngineDef.Count != 0)
                 {
                     Entry = "Engines:";
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
 
-                    Entry = String.Format("{0}x {1}", CurrentShipClass.ShipEngineCount, CurrentShipClass.ShipEngineDef.Name);
-                    m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    if(CurrentShipClass.ShipEngineDef != null)
+                    {
+                        Entry = String.Format("{0}x {1}", CurrentShipClass.ShipEngineCount, CurrentShipClass.ShipEngineDef.Name);
+                        m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    }
+
+                    for(int ComponentIterator = 0; ComponentIterator < CurrentShipClass.ShipJumpEngineDef.Count; ComponentIterator++)
+                    {
+                        Entry = String.Format("{0}x {1}", CurrentShipClass.ShipJumpEngineCount[ComponentIterator], CurrentShipClass.ShipJumpEngineDef[ComponentIterator].Name);
+                        m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
+                    }
 
                     Entry = "";
                     m_oOptionsPanel.ComponentsListBox.Items.Add(Entry);
                 }
+
 
                 if (CurrentShipClass.ShipCargoDef.Count != 0 || CurrentShipClass.ShipColonyDef.Count != 0 || CurrentShipClass.ShipCHSDef.Count != 0)
                 {
@@ -1571,19 +1588,29 @@ namespace Pulsar4X.UI.Handlers
             }
             CurrentLine++;
 
-            if (CurrentShipClass.ShipEngineDef != null)
+            if (CurrentShipClass.ShipEngineDef != null || CurrentShipClass.ShipJumpEngineDef.Count != null)
             {
                 if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
                 {
                     return;
                 }
-                CurrentLine++;
 
                 if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
                 {
                     CType = (int)CurrentShipClass.ShipEngineDef.componentType;
                     CIndex = CurrentShipClass.ShipEngineDef.Id;
                     return;
+                }
+                CurrentLine++;
+
+                for (int ComponentIterator = 0; ComponentIterator < CurrentShipClass.ShipJumpEngineDef.Count; ComponentIterator++)
+                {
+                    if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
+                    {
+                        CType = (int)CurrentShipClass.ShipJumpEngineDef[ComponentIterator].componentType;
+                        CIndex = CurrentShipClass.ShipJumpEngineDef[ComponentIterator].Id;
+                        return;
+                    }
                 }
                 CurrentLine++;
 
@@ -1836,88 +1863,22 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.CrewQuarters.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.CrewQuarters.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.CrewQuarters[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Life Support";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.CrewQuarters[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CrewQuarters[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CrewQuarters[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CrewQuarters[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.CrewQuarters[ComponentIterator], row, "Life Support", (List.CrewQuarters[ComponentIterator].size * 50.0f).ToString(), ComponentIterator);
+                        row++;
                     }
 
-                    for (int loop = 0; loop < List.FuelStorage.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.FuelStorage.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.FuelStorage[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Litres of Fuel";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = (List.FuelStorage[loop].size * 50000.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.FuelStorage[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.FuelStorage[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.FuelStorage[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.FuelStorage[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.FuelStorage[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.FuelStorage[ComponentIterator], row, "Litres of Fuel", (List.FuelStorage[ComponentIterator].size * 50000.0f).ToString(), ComponentIterator);
+                        row++;
                     }
 
-                    for (int loop = 0; loop < List.EngineeringSpaces.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.EngineeringSpaces.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.EngineeringSpaces[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Failure Rate";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.EngineeringSpaces[loop].size;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.EngineeringSpaces[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.EngineeringSpaces[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.EngineeringSpaces[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.EngineeringSpaces[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.EngineeringSpaces[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.EngineeringSpaces[ComponentIterator], row, "Failure Rate", (List.EngineeringSpaces[ComponentIterator].size).ToString(), ComponentIterator);
+                        row++;
                     }
 
                     for (int loop = 0; loop < List.OtherComponents.Count; loop++)
@@ -1930,7 +1891,6 @@ namespace Pulsar4X.UI.Handlers
                             NewRow.Height = 18;
                             m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.OtherComponents[loop].Name;
                             switch (List.OtherComponents[loop].componentType)
                             {
                                 case ComponentTypeTN.Bridge:
@@ -1954,20 +1914,9 @@ namespace Pulsar4X.UI.Handlers
                                     Entry2 = "*********UNK*********";
                                     break;
                             }
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.OtherComponents[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.OtherComponents[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.OtherComponents[loop].crew;
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.OtherComponents[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.OtherComponents[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.OtherComponents[loop].isObsolete.ToString();
-
+                            PopulateComponentRow(List.OtherComponents[loop], row, Entry, Entry2, loop);
                             row++;
-                            TotalComponents = TotalComponents + 1;
                         }
                     }
                     #endregion
@@ -1992,34 +1941,17 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-
-
-                    for (int loop = 0; loop < List.Engines.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.Engines.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
+                        PopulateComponentRow(List.Engines[ComponentIterator], row, "Engine Power", List.Engines[ComponentIterator].enginePower.ToString(), ComponentIterator);
+                        row++;
+                    }
 
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.Engines[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Engine Power";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.Engines[loop].enginePower.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.Engines[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.Engines[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.Engines[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.Engines[loop]); ;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.Engines[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                    for(int ComponentIterator = 0; ComponentIterator < List.JumpEngineDef.Count; ComponentIterator++)
+                    {
+                        PopulateComponentRow(List.JumpEngineDef[ComponentIterator], row, "Max Ship Size", 
+                                             ((float)List.JumpEngineDef[ComponentIterator].maxJumpRating / Constants.ShipTN.TonsPerHS).ToString(), ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2045,79 +1977,32 @@ namespace Pulsar4X.UI.Handlers
                     }
 
 
-
-                    for (int loop = 0; loop < List.BeamFireControlDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.BeamFireControlDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.BeamFireControlDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "50% Acc. Distance";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.BeamFireControlDef[loop].range.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.BeamFireControlDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.BeamFireControlDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.BeamFireControlDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamFireControlDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.BeamFireControlDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.BeamFireControlDef[ComponentIterator], row, "50% Acc. Distance", List.BeamFireControlDef[ComponentIterator].range.ToString(), ComponentIterator);
+                        row++;
                     }
 
-                    for (int loop = 0; loop < List.MissileFireControlDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.MissileFireControlDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        if (List.MissileFireControlDef[ComponentIterator].maxRange >= 100000)
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.MissileFireControlDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Range km";
-
-
-                            if (List.MissileFireControlDef[loop].maxRange >= 100000)
-                            {
-                                float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100000.0f;
-                                Entry = String.Format("{0:N1}B", RNG);
-                            }
-                            else if (List.MissileFireControlDef[loop].maxRange >= 100)
-                            {
-                                float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100.0f;
-                                Entry = String.Format("{0:N1}M", RNG);
-                            }
-                            else
-                            {
-                                float RNG = (float)List.MissileFireControlDef[loop].maxRange;
-                                Entry = String.Format("{0:N1}K", RNG);
-                            }
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.MissileFireControlDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.MissileFireControlDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.MissileFireControlDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MissileFireControlDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.MissileFireControlDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
+                            float RNG = (float)(List.MissileFireControlDef[ComponentIterator].maxRange) / 100000.0f;
+                            Entry = String.Format("{0:N1}B", RNG);
                         }
+                        else if (List.MissileFireControlDef[ComponentIterator].maxRange >= 100)
+                        {
+                            float RNG = (float)(List.MissileFireControlDef[ComponentIterator].maxRange) / 100.0f;
+                            Entry = String.Format("{0:N1}M", RNG);
+                        }
+                        else
+                        {
+                            float RNG = (float)List.MissileFireControlDef[ComponentIterator].maxRange;
+                            Entry = String.Format("{0:N1}K", RNG);
+                        }
+
+                        PopulateComponentRow(List.MissileFireControlDef[ComponentIterator], row, "Range km", Entry, ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2142,141 +2027,69 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.BeamWeaponDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.BeamWeaponDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        switch (List.BeamWeaponDef[ComponentIterator].componentType)
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
+                            case ComponentTypeTN.Laser:
+                            case ComponentTypeTN.AdvLaser:
+                            case ComponentTypeTN.Plasma:
+                            case ComponentTypeTN.AdvPlasma:
+                            case ComponentTypeTN.Rail:
+                            case ComponentTypeTN.AdvRail:
+                            case ComponentTypeTN.Particle:
+                            case ComponentTypeTN.AdvParticle:
+                                Entry = "Damage";
+                                Entry2 = List.BeamWeaponDef[ComponentIterator].damage[0].ToString();
+                                break;
 
-                            switch (List.BeamWeaponDef[loop].componentType)
-                            {
-                                case ComponentTypeTN.Laser:
-                                case ComponentTypeTN.AdvLaser:
-                                case ComponentTypeTN.Plasma:
-                                case ComponentTypeTN.AdvPlasma:
-                                case ComponentTypeTN.Rail:
-                                case ComponentTypeTN.AdvRail:
-                                case ComponentTypeTN.Particle:
-                                case ComponentTypeTN.AdvParticle:
-                                    Entry = "Damage";
-                                    Entry2 = List.BeamWeaponDef[loop].damage[0].ToString();
-                                    break;
+                            case ComponentTypeTN.Meson:
+                            case ComponentTypeTN.Microwave:
+                                Entry = "Range";
+                                Entry2 = (List.BeamWeaponDef[ComponentIterator].range / 10000.0f).ToString();
+                                break;
 
-                                case ComponentTypeTN.Meson:
-                                case ComponentTypeTN.Microwave:
-                                    Entry = "Range";
-                                    Entry2 = (List.BeamWeaponDef[loop].range / 10000.0f).ToString();
-                                    break;
-
-                                case ComponentTypeTN.Gauss:
-                                    Entry = "Rate of Fire";
-                                    Entry2 = List.BeamWeaponDef[loop].shotCount.ToString();
-                                    break;
-                            }
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.BeamWeaponDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.BeamWeaponDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.BeamWeaponDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.BeamWeaponDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamWeaponDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.BeamWeaponDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
+                            case ComponentTypeTN.Gauss:
+                                Entry = "Rate of Fire";
+                                Entry2 = List.BeamWeaponDef[ComponentIterator].shotCount.ToString();
+                                break;
                         }
+
+                        PopulateComponentRow(List.BeamWeaponDef[ComponentIterator], row, Entry, Entry2, ComponentIterator);
+                        row++;
                     }
 
-                    /// <summary>
-                    /// CIWS is marked down as a gauss cannon for rating type and rating, but CIWS has 2x guns, so shotcount*2 is their rate of fire.
-                    /// </summary>
-                    for (int loop = 0; loop < List.CIWSDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.CIWSDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            Entry = "Damage";
-                            Entry2 = List.CIWSDef[loop].rOF.ToString();
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.CIWSDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.CIWSDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CIWSDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CIWSDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CIWSDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CIWSDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        Entry = "Damage";
+                        Entry2 = List.CIWSDef[ComponentIterator].rOF.ToString();
+                        PopulateComponentRow(List.CIWSDef[ComponentIterator], row, Entry, Entry2, ComponentIterator);
+                        row++;
                     }
 
-                    for (int loop = 0; loop < List.TurretDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.TurretDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        switch (List.TurretDef[ComponentIterator].baseBeamWeapon.componentType)
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
+                            case ComponentTypeTN.Laser:
+                            case ComponentTypeTN.AdvLaser:
+                               Entry = "Damage";
+                               Entry2 = List.TurretDef[ComponentIterator].baseBeamWeapon.damage[0].ToString();
+                            break;
 
-                            switch (List.TurretDef[loop].baseBeamWeapon.componentType)
-                            {
-                                case ComponentTypeTN.Laser:
-                                case ComponentTypeTN.AdvLaser:
-                                    Entry = "Damage";
-                                    Entry2 = List.TurretDef[loop].baseBeamWeapon.damage[0].ToString();
-                                    break;
+                            case ComponentTypeTN.Meson:
+                                Entry = "Range";
+                                Entry2 = (List.TurretDef[ComponentIterator].baseBeamWeapon.range / 10000.0f).ToString();
+                            break;
 
-                                case ComponentTypeTN.Meson:
-                                    Entry = "Range";
-                                    Entry2 = (List.TurretDef[loop].baseBeamWeapon.range / 10000.0f).ToString();
-                                    break;
-
-                                case ComponentTypeTN.Gauss:
-                                    Entry = "Rate of Fire";
-                                    Entry2 = List.TurretDef[loop].totalShotCount.ToString();
-                                    break;
-                            }
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.TurretDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.TurretDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.TurretDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.TurretDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.TurretDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.TurretDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.TurretDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
+                            case ComponentTypeTN.Gauss:
+                               Entry = "Rate of Fire";
+                               Entry2 = List.TurretDef[ComponentIterator].totalShotCount.ToString();
+                            break;
                         }
+                        PopulateComponentRow(List.TurretDef[ComponentIterator], row, Entry, Entry2, ComponentIterator);
+                        row++;
                     }
-
                     #endregion
 
                     #region Missile/Torpedo Launchers (Plasma torpedos not yet implemented)
@@ -2300,32 +2113,10 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.MLauncherDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.MLauncherDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.MLauncherDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Max Missile Size";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.MLauncherDef[loop].launchMaxSize.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.MLauncherDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.MLauncherDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.MLauncherDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MLauncherDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MLauncherDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.MLauncherDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.MLauncherDef[ComponentIterator], row, "Max Missile Size", List.MLauncherDef[ComponentIterator].launchMaxSize.ToString(), ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2350,32 +2141,10 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.MagazineDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.MagazineDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.MagazineDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Ordnance Storage";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.MagazineDef[loop].capacity.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.MagazineDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.MagazineDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.MagazineDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MagazineDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.MagazineDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.MagazineDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.MagazineDef[ComponentIterator], row, "Ordnance Storage", List.MagazineDef[ComponentIterator].capacity.ToString(), ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2424,32 +2193,10 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.ReactorDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.ReactorDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.ReactorDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Power Produced";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.ReactorDef[loop].powerGen.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.ReactorDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ReactorDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ReactorDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ReactorDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ReactorDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ReactorDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.ReactorDef[ComponentIterator], row, "Power Produced", List.ReactorDef[ComponentIterator].powerGen.ToString(), ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2474,49 +2221,29 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.ActiveSensorDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.ActiveSensorDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
+                        /// <summary>
+                        /// 1 Billion in 10k km increments test here. 100000 = 1B
+                        /// </summary>
+                        if (List.ActiveSensorDef[ComponentIterator].maxRange >= 100000)
                         {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.ActiveSensorDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Range km";
-
-                            if (List.ActiveSensorDef[loop].maxRange >= 100000)
-                            {
-                                float RNG = (float)(List.ActiveSensorDef[loop].maxRange) / 100000.0f;
-                                Entry = String.Format("{0:N1}B", RNG);
-                            }
-                            else if (List.ActiveSensorDef[loop].maxRange >= 100)
-                            {
-                                float RNG = (float)(List.ActiveSensorDef[loop].maxRange) / 100.0f;
-                                Entry = String.Format("{0:N1}M", RNG);
-                            }
-                            else
-                            {
-                                float RNG = (float)List.ActiveSensorDef[loop].maxRange;
-                                Entry = String.Format("{0:N1}K", RNG);
-                            }
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = Entry;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.ActiveSensorDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ActiveSensorDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ActiveSensorDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ActiveSensorDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ActiveSensorDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ActiveSensorDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
+                            float RNG = (float)(List.ActiveSensorDef[ComponentIterator].maxRange) / 100000.0f;
+                            Entry = String.Format("{0:N1}B", RNG);
                         }
+                        else if (List.ActiveSensorDef[ComponentIterator].maxRange >= 100)
+                        {
+                            float RNG = (float)(List.ActiveSensorDef[ComponentIterator].maxRange) / 100.0f;
+                            Entry = String.Format("{0:N1}M", RNG);
+                        }
+                        else
+                        {
+                            float RNG = (float)List.ActiveSensorDef[ComponentIterator].maxRange;
+                            Entry = String.Format("{0:N1}K", RNG);
+                        }
+
+                        PopulateComponentRow(List.ActiveSensorDef[ComponentIterator], row, "Range km", Entry, ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2541,32 +2268,10 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.PassiveSensorDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.PassiveSensorDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.PassiveSensorDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Sensor Strength";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.PassiveSensorDef[loop].rating.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.PassiveSensorDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.PassiveSensorDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.PassiveSensorDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.PassiveSensorDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.PassiveSensorDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.PassiveSensorDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.PassiveSensorDef[ComponentIterator], row, "Sensor Strength", List.PassiveSensorDef[ComponentIterator].rating.ToString(), ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2591,32 +2296,10 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.ShieldDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.ShieldDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.ShieldDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Shield Strength";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.ShieldDef[loop].shieldPool.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.ShieldDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ShieldDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ShieldDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ShieldDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ShieldDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ShieldDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.ShieldDef[ComponentIterator], row, "Shield Strength", List.ShieldDef[ComponentIterator].shieldPool.ToString(), ComponentIterator);
+                        row++;
                     }
                     #endregion
 
@@ -2641,92 +2324,29 @@ namespace Pulsar4X.UI.Handlers
                         row++;
                     }
 
-                    for (int loop = 0; loop < List.CargoHandleSystemDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.CargoHandleSystemDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.CargoHandleSystemDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Cargo Handling Multiplier";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.CargoHandleSystemDef[loop].tractorMultiplier.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.CargoHandleSystemDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CargoHandleSystemDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CargoHandleSystemDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHandleSystemDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHandleSystemDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHandleSystemDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.CargoHandleSystemDef[ComponentIterator], row, "Cargo Handling Multiplier", 
+                                             List.CargoHandleSystemDef[ComponentIterator].tractorMultiplier.ToString(), ComponentIterator);
+                        row++;
                     }
 
-                    for (int loop = 0; loop < List.CargoHoldDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.CargoHoldDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.CargoHoldDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Cargo Capacity";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.CargoHoldDef[loop].cargoCapacity.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.CargoHoldDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.CargoHoldDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.CargoHoldDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHoldDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHoldDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHoldDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.CargoHoldDef[ComponentIterator], row, "Cargo Capacity",
+                                             List.CargoHoldDef[ComponentIterator].cargoCapacity.ToString(), ComponentIterator);
+                        row++;
                     }
 
-                    for (int loop = 0; loop < List.ColonyBayDef.Count; loop++)
+                    for (int ComponentIterator = 0; ComponentIterator < List.ColonyBayDef.Count; ComponentIterator++)
                     {
-                        using (DataGridViewRow NewRow = new DataGridViewRow())
-                        {
-                            /// <summary>
-                            /// setup row height. note that by default they are 22 pixels in height!
-                            /// </summary>
-                            NewRow.Height = 18;
-                            m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = List.ColonyBayDef[loop].Name;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = "Colonist Capacity";
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = List.ColonyBayDef[loop].cryoBerths.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = List.ColonyBayDef[loop].cost.ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (List.ColonyBayDef[loop].size * 50.0f).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = List.ColonyBayDef[loop].crew;
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ColonyBayDef[loop]);
-
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)List.ColonyBayDef[loop].componentType).ToString();
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = loop;
-                            m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = List.ColonyBayDef[loop].isObsolete.ToString();
-
-                            row++;
-                            TotalComponents = TotalComponents + 1;
-                        }
+                        PopulateComponentRow(List.ColonyBayDef[ComponentIterator], row, "Colonist Capacity",
+                                             List.ColonyBayDef[ComponentIterator].cryoBerths.ToString(), ComponentIterator);
+                        row++;
                     }
 
                     /// <summary>
-                    /// Now for TypeCount
+                    /// Now for TypeCount. This is needed for behind the scenes reasons I believe.
                     /// </summary>
                     CompLocation.Add(row);
                     #endregion
@@ -2778,31 +2398,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = CQCount; loop <= (List.CrewQuarters.Count - 1); loop++)
+                        for (int ComponentIterator = CQCount; ComponentIterator <= (List.CrewQuarters.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CrewQuarters[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Life Support";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CrewQuarters[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CrewQuarters[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CrewQuarters[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CrewQuarters[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CrewQuarters[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CrewQuarters[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.CrewQuarters[ComponentIterator], rowLine, "Life Support", (List.CrewQuarters[ComponentIterator].size * 50.0f).ToString(), ComponentIterator,true);
                             rowLine++;
                         }
 
@@ -2831,31 +2429,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = FSCount; loop <= (List.FuelStorage.Count - 1); loop++)
+                        for (int ComponentIterator = FSCount; ComponentIterator <= (List.FuelStorage.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.FuelStorage[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Litres of Fuel";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = (List.FuelStorage[loop].size * 50000.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.FuelStorage[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.FuelStorage[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.FuelStorage[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.FuelStorage[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.FuelStorage[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.FuelStorage[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.FuelStorage[ComponentIterator], rowLine, "Litres of Fuel", (List.FuelStorage[ComponentIterator].size * 50000.0f).ToString(), ComponentIterator,true);
                             rowLine++;
                         }
 
@@ -2884,31 +2460,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = ESCount; loop <= (List.EngineeringSpaces.Count - 1); loop++)
+                        for (int ComponentIterator = ESCount; ComponentIterator <= (List.EngineeringSpaces.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.EngineeringSpaces[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Failure Rate";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.EngineeringSpaces[loop].size;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.EngineeringSpaces[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.EngineeringSpaces[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.EngineeringSpaces[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.EngineeringSpaces[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.EngineeringSpaces[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.EngineeringSpaces[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.EngineeringSpaces[ComponentIterator], rowLine, "Failure Rate", List.EngineeringSpaces[ComponentIterator].size.ToString(), ComponentIterator,true);
                             rowLine++;
                         }
 
@@ -2945,54 +2499,34 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = OCCount; loop <= (List.OtherComponents.Count - 1); loop++)
+                        for (int ComponentIterator = OCCount; ComponentIterator <= (List.OtherComponents.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
+
+                            switch (List.OtherComponents[ComponentIterator].componentType)
                             {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.OtherComponents[loop].Name;
-                                switch (List.OtherComponents[loop].componentType)
-                                {
-                                    case ComponentTypeTN.Bridge:
-                                        Entry = "CommandControl";
-                                        Entry2 = "1";
-                                        break;
-                                    case ComponentTypeTN.MaintenanceBay:
-                                        Entry = "MaintStorage";
-                                        Entry2 = "1000";
-                                        break;
-                                    case ComponentTypeTN.OrbitalHabitat:
-                                        Entry = "Worker Capacity";
-                                        Entry2 = "50000";
-                                        break;
-                                    case ComponentTypeTN.RecFacility:
-                                        Entry = "Crew Recreation";
-                                        Entry2 = "0";
-                                        break;
-                                    default:
-                                        Entry = "UNK Component";
-                                        Entry2 = "*********UNK*********";
-                                        break;
-                                }
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.OtherComponents[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.OtherComponents[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.OtherComponents[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.OtherComponents[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.OtherComponents[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.OtherComponents[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
+                                case ComponentTypeTN.Bridge:
+                                    Entry = "CommandControl";
+                                    Entry2 = "1";
+                                    break;
+                                case ComponentTypeTN.MaintenanceBay:
+                                    Entry = "MaintStorage";
+                                    Entry2 = "1000";
+                                    break;
+                                case ComponentTypeTN.OrbitalHabitat:
+                                    Entry = "Worker Capacity";
+                                    Entry2 = "50000";
+                                    break;
+                                case ComponentTypeTN.RecFacility:
+                                    Entry = "Crew Recreation";
+                                    Entry2 = "0";
+                                    break;
+                                default:
+                                    Entry = "UNK Component";
+                                    Entry2 = "*********UNK*********";
+                                    break;
                             }
+
+                            PopulateComponentRow(List.OtherComponents[ComponentIterator], rowLine, Entry, Entry2, ComponentIterator,true);
                             rowLine++;
                         }
                     }
@@ -3029,31 +2563,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = EngineCount; loop <= (List.Engines.Count - 1); loop++)
+                        for (int ComponentIterator = EngineCount; ComponentIterator <= (List.Engines.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.Engines[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Engine Power";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.Engines[loop].enginePower.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.Engines[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.Engines[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.Engines[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.Engines[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.Engines[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.Engines[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.Engines[ComponentIterator], rowLine, "Engine Power", List.Engines[ComponentIterator].enginePower.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3087,31 +2599,10 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = BFCCount; loop <= (List.BeamFireControlDef.Count - 1); loop++)
+                        for (int ComponentIterator = BFCCount; ComponentIterator <= (List.BeamFireControlDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.BeamFireControlDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "50% Acc. Distance";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.BeamFireControlDef[loop].range.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.BeamFireControlDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamFireControlDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamFireControlDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamFireControlDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamFireControlDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.BeamFireControlDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.BeamFireControlDef[ComponentIterator], rowLine, "50% Acc. Distance", 
+                                                 List.BeamFireControlDef[ComponentIterator].range.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
 
@@ -3144,49 +2635,25 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = MFCCount; loop <= (List.MissileFireControlDef.Count - 1); loop++)
+                        for (int ComponentIterator = MFCCount; ComponentIterator <= (List.MissileFireControlDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            if (List.MissileFireControlDef[ComponentIterator].maxRange >= 100000)
                             {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MissileFireControlDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Range km";
-
-
-                                if (List.MissileFireControlDef[loop].maxRange >= 100000)
-                                {
-                                    float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100000.0f;
-                                    Entry = String.Format("{0:N1}B", RNG);
-                                }
-                                else if (List.MissileFireControlDef[loop].maxRange >= 100)
-                                {
-                                    float RNG = (float)(List.MissileFireControlDef[loop].maxRange) / 100.0f;
-                                    Entry = String.Format("{0:N1}M", RNG);
-                                }
-                                else
-                                {
-                                    float RNG = (float)List.MissileFireControlDef[loop].maxRange;
-                                    Entry = String.Format("{0:N1}K", RNG);
-                                }
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MissileFireControlDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MissileFireControlDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MissileFireControlDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MissileFireControlDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MissileFireControlDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.MissileFireControlDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
+                                float RNG = (float)(List.MissileFireControlDef[ComponentIterator].maxRange) / 100000.0f;
+                                Entry = String.Format("{0:N1}B", RNG);
                             }
+                            else if (List.MissileFireControlDef[ComponentIterator].maxRange >= 100)
+                            {
+                                float RNG = (float)(List.MissileFireControlDef[ComponentIterator].maxRange) / 100.0f;
+                                Entry = String.Format("{0:N1}M", RNG);
+                            }
+                            else
+                            {
+                                float RNG = (float)List.MissileFireControlDef[ComponentIterator].maxRange;
+                                Entry = String.Format("{0:N1}K", RNG);
+                            }
+
+                            PopulateComponentRow(List.MissileFireControlDef[ComponentIterator], rowLine, "Range km", Entry, ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3232,57 +2699,35 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = BeamCount; loop <= (List.BeamWeaponDef.Count - 1); loop++)
+                        for (int ComponentIterator = BeamCount; ComponentIterator <= (List.BeamWeaponDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            switch (List.BeamWeaponDef[ComponentIterator].componentType)
                             {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+                                case ComponentTypeTN.Laser:
+                                case ComponentTypeTN.AdvLaser:
+                                case ComponentTypeTN.Plasma:
+                                case ComponentTypeTN.AdvPlasma:
+                                case ComponentTypeTN.Rail:
+                                case ComponentTypeTN.AdvRail:
+                                case ComponentTypeTN.Particle:
+                                case ComponentTypeTN.AdvParticle:
+                                    Entry = "Damage";
+                                    Entry2 = List.BeamWeaponDef[ComponentIterator].damage[0].ToString();
+                                    break;
 
-                                switch (List.BeamWeaponDef[loop].componentType)
-                                {
-                                    case ComponentTypeTN.Laser:
-                                    case ComponentTypeTN.AdvLaser:
-                                    case ComponentTypeTN.Plasma:
-                                    case ComponentTypeTN.AdvPlasma:
-                                    case ComponentTypeTN.Rail:
-                                    case ComponentTypeTN.AdvRail:
-                                    case ComponentTypeTN.Particle:
-                                    case ComponentTypeTN.AdvParticle:
-                                        Entry = "Damage";
-                                        Entry2 = List.BeamWeaponDef[loop].damage[0].ToString();
-                                        break;
+                                case ComponentTypeTN.Meson:
+                                case ComponentTypeTN.Microwave:
+                                    Entry = "Range";
+                                    Entry2 = (List.BeamWeaponDef[ComponentIterator].range / 10000.0f).ToString();
+                                    break;
 
-                                    case ComponentTypeTN.Meson:
-                                    case ComponentTypeTN.Microwave:
-                                        Entry = "Range";
-                                        Entry2 = (List.BeamWeaponDef[loop].range / 10000.0f).ToString();
-                                        break;
-
-                                    case ComponentTypeTN.Gauss:
-                                        Entry = "Rate of Fire";
-                                        Entry2 = List.BeamWeaponDef[loop].shotCount.ToString();
-                                        break;
-                                }
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.BeamWeaponDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.BeamWeaponDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.BeamWeaponDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.BeamWeaponDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.BeamWeaponDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.BeamWeaponDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.BeamWeaponDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
+                                case ComponentTypeTN.Gauss:
+                                    Entry = "Rate of Fire";
+                                    Entry2 = List.BeamWeaponDef[ComponentIterator].shotCount.ToString();
+                                    break;
                             }
+
+                            PopulateComponentRow(List.BeamWeaponDef[ComponentIterator], rowLine, Entry, Entry2, ComponentIterator, true);
                             rowLine++;
                         }
 
@@ -3311,34 +2756,11 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = CIWSCount; loop < List.CIWSDef.Count; loop++)
+                        for (int ComponentIterator = CIWSCount; ComponentIterator < List.CIWSDef.Count; ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                Entry = "Damage";
-                                Entry2 = List.CIWSDef[loop].rOF.ToString();
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CIWSDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CIWSDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CIWSDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CIWSDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CIWSDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CIWSDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CIWSDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            Entry = "Damage";
+                            Entry2 = List.CIWSDef[ComponentIterator].rOF.ToString();
+                            PopulateComponentRow(List.CIWSDef[ComponentIterator], rowLine, Entry, Entry2, ComponentIterator, true);
                             rowLine++;
                         }
 
@@ -3368,50 +2790,28 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = TurretCount; loop < List.TurretDef.Count; loop++)
+                        for (int ComponentIterator = TurretCount; ComponentIterator < List.TurretDef.Count; ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            switch (List.TurretDef[ComponentIterator].baseBeamWeapon.componentType)
                             {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
+                                case ComponentTypeTN.Laser:
+                                case ComponentTypeTN.AdvLaser:
+                                    Entry = "Damage";
+                                    Entry2 = List.TurretDef[ComponentIterator].baseBeamWeapon.damage[0].ToString();
+                                    break;
 
-                                switch (List.TurretDef[loop].baseBeamWeapon.componentType)
-                                {
-                                    case ComponentTypeTN.Laser:
-                                    case ComponentTypeTN.AdvLaser:
-                                        Entry = "Damage";
-                                        Entry2 = List.TurretDef[loop].baseBeamWeapon.damage[0].ToString();
-                                        break;
+                                case ComponentTypeTN.Meson:
+                                    Entry = "Range";
+                                    Entry2 = (List.TurretDef[ComponentIterator].baseBeamWeapon.range / 10000.0f).ToString();
+                                    break;
 
-                                    case ComponentTypeTN.Meson:
-                                        Entry = "Range";
-                                        Entry2 = (List.TurretDef[loop].baseBeamWeapon.range / 10000.0f).ToString();
-                                        break;
-
-                                    case ComponentTypeTN.Gauss:
-                                        Entry = "Rate of Fire";
-                                        Entry2 = List.TurretDef[loop].totalShotCount.ToString();
-                                        break;
-                                }
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.TurretDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = Entry;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry2;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.TurretDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.TurretDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.TurretDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.TurretDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.TurretDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.TurretDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
+                                case ComponentTypeTN.Gauss:
+                                    Entry = "Rate of Fire";
+                                    Entry2 = List.TurretDef[ComponentIterator].totalShotCount.ToString();
+                                    break;
                             }
+
+                            PopulateComponentRow(List.TurretDef[ComponentIterator], rowLine, Entry, Entry2, ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3448,32 +2848,10 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = MLauncherCount; loop <= (List.MLauncherDef.Count - 1); loop++)
+                        for (int ComponentIterator = MLauncherCount; ComponentIterator <= (List.MLauncherDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MLauncherDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Max Missile Size";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.MLauncherDef[loop].launchMaxSize.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MLauncherDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MLauncherDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MLauncherDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MLauncherDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MLauncherDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.MLauncherDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
-                            rowLine++;
+                            PopulateComponentRow(List.MLauncherDef[ComponentIterator], rowLine, "Max Missile Size", List.MLauncherDef[ComponentIterator].launchMaxSize.ToString(), ComponentIterator, true);
+                            rowLine++; 
                         }
                     }
                     #endregion
@@ -3509,31 +2887,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = MagazineCount; loop <= (List.MagazineDef.Count - 1); loop++)
+                        for (int ComponentIterator = MagazineCount; ComponentIterator <= (List.MagazineDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.MagazineDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Ordnance Storage";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.MagazineDef[loop].capacity.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.MagazineDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.MagazineDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.MagazineDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.MagazineDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.MagazineDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.MagazineDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.MagazineDef[ComponentIterator], rowLine, "Ordnance Storage", List.MagazineDef[ComponentIterator].capacity.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3573,31 +2929,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = ReactorCount; loop <= (List.ReactorDef.Count - 1); loop++)
+                        for (int ComponentIterator = ReactorCount; ComponentIterator <= (List.ReactorDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ReactorDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Power Produced";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.ReactorDef[loop].powerGen.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ReactorDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ReactorDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ReactorDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ReactorDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ReactorDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ReactorDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.ReactorDef[ComponentIterator], rowLine, "Power Produced", List.ReactorDef[ComponentIterator].powerGen.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3634,48 +2968,25 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = ActiveCount; loop <= (List.ActiveSensorDef.Count - 1); loop++)
+                        for (int ComponentIterator = ActiveCount; ComponentIterator <= (List.ActiveSensorDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
+                            if (List.ActiveSensorDef[ComponentIterator].maxRange >= 100000)
                             {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ActiveSensorDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Range km";
-
-                                if (List.ActiveSensorDef[loop].maxRange >= 100000)
-                                {
-                                    float RNG = (float)(List.ActiveSensorDef[loop].maxRange) / 100000.0f;
-                                    Entry = String.Format("{0:N1}B", RNG);
-                                }
-                                else if (List.ActiveSensorDef[loop].maxRange >= 100)
-                                {
-                                    float RNG = (float)(List.ActiveSensorDef[loop].maxRange) / 100.0f;
-                                    Entry = String.Format("{0:N1}M", RNG);
-                                }
-                                else
-                                {
-                                    float RNG = (float)List.ActiveSensorDef[loop].maxRange;
-                                    Entry = String.Format("{0:N1}K", RNG);
-                                }
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = Entry;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ActiveSensorDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ActiveSensorDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ActiveSensorDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ActiveSensorDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ActiveSensorDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ActiveSensorDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
+                                float RNG = (float)(List.ActiveSensorDef[ComponentIterator].maxRange) / 100000.0f;
+                                Entry = String.Format("{0:N1}B", RNG);
                             }
+                            else if (List.ActiveSensorDef[ComponentIterator].maxRange >= 100)
+                            {
+                                float RNG = (float)(List.ActiveSensorDef[ComponentIterator].maxRange) / 100.0f;
+                                Entry = String.Format("{0:N1}M", RNG);
+                            }
+                            else
+                            {
+                                float RNG = (float)List.ActiveSensorDef[ComponentIterator].maxRange;
+                                Entry = String.Format("{0:N1}K", RNG);
+                            }
+
+                            PopulateComponentRow(List.ActiveSensorDef[ComponentIterator], rowLine, "Range km", Entry, ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3712,31 +3023,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = PassiveCount; loop <= (List.PassiveSensorDef.Count - 1); loop++)
+                        for (int ComponentIterator = PassiveCount; ComponentIterator <= (List.PassiveSensorDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.PassiveSensorDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Sensor Strength";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.PassiveSensorDef[loop].rating.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.PassiveSensorDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.PassiveSensorDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.PassiveSensorDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.PassiveSensorDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.PassiveSensorDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.PassiveSensorDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.PassiveSensorDef[ComponentIterator], rowLine, "Sensor Strength", List.PassiveSensorDef[ComponentIterator].rating.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3773,31 +3062,9 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = ShieldCount; loop <= (List.ShieldDef.Count - 1); loop++)
+                        for (int ComponentIterator = ShieldCount; ComponentIterator <= (List.ShieldDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ShieldDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Shield Strength";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.ShieldDef[loop].shieldPool.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ShieldDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ShieldDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ShieldDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ShieldDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ShieldDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ShieldDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.ShieldDef[ComponentIterator], rowLine, "Shield Strength", List.ShieldDef[ComponentIterator].shieldPool.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }
@@ -3834,31 +3101,10 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = CHSCount; loop <= (List.CargoHandleSystemDef.Count - 1); loop++)
+                        for (int ComponentIterator = CHSCount; ComponentIterator <= (List.CargoHandleSystemDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CargoHandleSystemDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Cargo Handling Multiplier";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.CargoHandleSystemDef[loop].tractorMultiplier.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CargoHandleSystemDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CargoHandleSystemDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CargoHandleSystemDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHandleSystemDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHandleSystemDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHandleSystemDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.CargoHandleSystemDef[ComponentIterator], rowLine, "Cargo Handling Multiplier",
+                                                 List.CargoHandleSystemDef[ComponentIterator].tractorMultiplier.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
 
@@ -3891,31 +3137,10 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = CHCount; loop <= (List.CargoHoldDef.Count - 1); loop++)
+                        for (int ComponentIterator = CHCount; ComponentIterator <= (List.CargoHoldDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.CargoHoldDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Cargo Capacity";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.CargoHoldDef[loop].cargoCapacity.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.CargoHoldDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.CargoHoldDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.CargoHoldDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.CargoHoldDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.CargoHoldDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.CargoHoldDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
+                            PopulateComponentRow(List.CargoHoldDef[ComponentIterator], rowLine, "Cargo Capacity",
+                                                 List.CargoHoldDef[ComponentIterator].cargoCapacity.ToString(), ComponentIterator, true);
                             rowLine++;
                         }
 
@@ -3948,32 +3173,11 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// insert and fill in the rows where appropriate.
                         /// </summary>
-                        for (int loop = CBCount; loop <= (List.ColonyBayDef.Count - 1); loop++)
+                        for (int ComponentIterator = CBCount; ComponentIterator <= (List.ColonyBayDef.Count - 1); ComponentIterator++)
                         {
-                            using (DataGridViewRow NewRow = new DataGridViewRow())
-                            {
-                                /// <summary>
-                                /// setup row height. note that by default they are 22 pixels in height!
-                                /// </summary>
-                                NewRow.Height = 18;
-                                m_oOptionsPanel.ComponentDataGrid.Rows.Insert(rowLine, NewRow);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Name].Value = List.ColonyBayDef[loop].Name;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.RatingType].Value = "Colonist Capacity";
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Rating].Value = List.ColonyBayDef[loop].cryoBerths.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Cost].Value = List.ColonyBayDef[loop].cost.ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Size].Value = (List.ColonyBayDef[loop].size * 50.0f).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Crew].Value = List.ColonyBayDef[loop].crew;
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(List.ColonyBayDef[loop]);
-
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value = ((int)List.ColonyBayDef[loop].componentType).ToString();
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CIndex].Value = loop;
-                                m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.Obsolete].Value = List.ColonyBayDef[loop].isObsolete.ToString();
-
-                                TotalComponents = TotalComponents + 1;
-                            }
-                            rowLine++;
+                            PopulateComponentRow(List.ColonyBayDef[ComponentIterator], rowLine, "Colonist Capacity",
+                                                 List.ColonyBayDef[ComponentIterator].cryoBerths.ToString(), ComponentIterator, true);
+                            rowLine++; 
                         }
                     }
                     #endregion
@@ -3985,6 +3189,44 @@ namespace Pulsar4X.UI.Handlers
                     logger.Error("Something went wrong with updating rows for class design componentGrid screen...");
 #endif
                 }
+            }
+        }
+
+        /// <summary>
+        /// Fill in the information about this row given a component, row number, rating strings, and the component iterator
+        /// </summary>
+        /// <param name="Comp">Component to add.</param>
+        /// <param name="row">Row number.</param>
+        /// <param name="RateType">Rating Type string.</param>
+        /// <param name="RateValue">Rating Value String.</param>
+        /// <param name="ComponentIterator">Component iterator, its place in its respective list in ComponentListTN.cs</param>
+        private void PopulateComponentRow(ComponentDefTN Comp, int row, String RateType, String RateValue, int ComponentIterator, bool Insert = false)
+        {
+            using (DataGridViewRow NewRow = new DataGridViewRow())
+            {
+                /// <summary>
+                /// setup row height. note that by default they are 22 pixels in height!
+                /// </summary>
+                NewRow.Height = 18;
+                if(Insert == false)
+                    m_oOptionsPanel.ComponentDataGrid.Rows.Add(NewRow);
+                else
+                    m_oOptionsPanel.ComponentDataGrid.Rows.Insert(row, NewRow);
+
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Name].Value = Comp.Name;
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.RatingType].Value = RateType;
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Rating].Value = RateValue;
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Cost].Value = Comp.cost.ToString();
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Size].Value = (Comp.size * Constants.ShipTN.TonsPerHS).ToString();
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Crew].Value = Comp.crew;
+
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Materials].Value = BuildMineralCost(Comp);
+
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CType].Value = ((int)Comp.componentType).ToString();
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.CIndex].Value = ComponentIterator;
+                m_oOptionsPanel.ComponentDataGrid.Rows[row].Cells[(int)ComponentCell.Obsolete].Value = Comp.isObsolete.ToString();
+
+                TotalComponents = TotalComponents + 1;
             }
         }
 
@@ -4435,6 +3677,26 @@ namespace Pulsar4X.UI.Handlers
                     else
                         CurrentShipClass.AddTurret(List.TurretDef[CIndex], (short)CompAmt);
                     break;
+                case ComponentTypeTN.JumpEngine:
+                    if (CompAmt <= -1)
+                    {
+                        int Index = CurrentShipClass.ShipJumpEngineDef.IndexOf(List.JumpEngineDef[CIndex]);
+
+                        if (Index != -1)
+                        {
+                            int Cabs = CompAmt * -1;
+
+                            if (Cabs > CurrentShipClass.ShipJumpEngineCount[Index])
+                            {
+                                CompAmt = CurrentShipClass.ShipJumpEngineCount[Index] * -1;
+                            }
+
+                            CurrentShipClass.AddJumpEngine(List.JumpEngineDef[CIndex], (short)CompAmt);
+                        }
+                    }
+                    else
+                        CurrentShipClass.AddJumpEngine(List.JumpEngineDef[CIndex], (short)CompAmt);
+                    break;
             }
             #endregion
 
@@ -4653,6 +3915,16 @@ namespace Pulsar4X.UI.Handlers
                     for (int loop = 0; loop < List.TurretDef.Count; loop++)
                     {
                         if (List.TurretDef[loop].Id == CID)
+                        {
+                            AddComponent(CT, loop, CAmt);
+                            break;
+                        }
+                    }
+                    break;
+                case ComponentTypeTN.JumpEngine:
+                    for (int loop = 0; loop < List.JumpEngineDef.Count; loop++)
+                    {
+                        if (List.JumpEngineDef[loop].Id == CID)
                         {
                             AddComponent(CT, loop, CAmt);
                             break;
