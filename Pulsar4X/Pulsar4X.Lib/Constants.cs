@@ -1035,7 +1035,15 @@ namespace Pulsar4X
             /// </summary>
             public const uint ConstructionCycle = Constants.TimeInSeconds.FiveDays;
 
+            /// <summary>
+            /// How much fuel will one refined unit of Sorium yield?
+            /// </summary>
             public const float SoriumToFuel = 2000.0f;
+
+            /// <summary>
+            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
+            /// </summary>
+            public const int TimerYearMax = 5475852;
         }
 
         /// <summary>

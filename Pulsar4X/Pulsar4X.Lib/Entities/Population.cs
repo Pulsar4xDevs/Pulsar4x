@@ -81,11 +81,28 @@ namespace Pulsar4X.Entities
         /// <param name="BuildNum">Number to build</param>
         /// <param name="BuildPercent">Percent of industry to devote to production.</param>
         /// <param name="Production">Is this item paused?</param>
-        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production)
+        public void UpdateBuildQueueInfo(float BuildNum, float BuildPercent, bool Production, decimal Cost)
         {
             m_NumToBuild = BuildNum;
             m_BuildCapcity = BuildPercent;
             m_InProduction = true;
+
+            float BPRequirement = (float)Math.Floor(m_NumToBuild) * (float)Cost;
+            float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+            float YearsOfProduction = (BPRequirement / m_BuildCapcity);
+            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+
+            /// <summary>
+            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
+            /// </summary>
+#warning magic number here.
+            if (m_BuildCapcity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
+            {
+                DateTime EstTime = GameState.Instance.GameDateTime;
+                TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                EstTime = EstTime.Add(TS);
+                m_CompletionDate = EstTime;
+            }
         }
     }
 
@@ -835,7 +852,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddInstallation(Installation Install, float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(Install);
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,Install.Cost);
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -849,7 +866,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddComponent(ComponentDefTN ComponentDef, float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem(ComponentDef);
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true,ComponentDef.cost);
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -862,7 +879,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddMSP(float BuildAmt, float RequestedBuildPercentage)
         {
             ConstructionBuildQueueItem NewCBQItem = new ConstructionBuildQueueItem();
-            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+            NewCBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, Constants.Colony.MaintenanceSupplyCost);
 
             ConstructionBuildQueue.Add(NewCBQItem);
         }
@@ -876,7 +893,7 @@ namespace Pulsar4X.Entities
         public void BuildQueueAddMissile(OrdnanceDefTN MissileDef, float BuildAmt, float RequestedBuildPercentage)
         {
             MissileBuildQueueItem NewMBQItem = new MissileBuildQueueItem(MissileDef);
-            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true);
+            NewMBQItem.UpdateBuildQueueInfo(BuildAmt, RequestedBuildPercentage, true, MissileDef.cost);
 
             MissileBuildQueue.Add(NewMBQItem);
         }

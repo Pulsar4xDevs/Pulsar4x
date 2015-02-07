@@ -3206,24 +3206,20 @@ namespace Pulsar4X.UI.Handlers
 
                         if ((BuildPercentage + CBQ.buildCapacity) <= 100.0f)
                         {
+                            /// <summary>
+                            /// nothing is calculated here, but this logic determines how date should be presented.
+                            /// </summary>
                             BuildPercentage = BuildPercentage + CBQ.buildCapacity;
                             float BPRequirement = (float)Math.Floor(CBQ.numToBuild) * (float)CBQ.costPerItem;
-                            float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
                             float YearsOfProduction = (BPRequirement / DevotedToThis);
 
-                            // We'll hit TimeSpan.MaxValue before we'll hit int32 limits when it comes to measuring in seconds.
-                            if (DevotedToThis == 0.0f || YearsOfProduction * DaysInYear * Constants.TimeInSeconds.Day > TimeSpan.MaxValue.Seconds)
+                            if (DevotedToThis == 0.0f || YearsOfProduction > Constants.Colony.TimerYearMax)
                             {
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
                             }
                             else
                             {
-                                int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
-                                DateTime EstTime = GameState.Instance.GameDateTime;
-                                TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
-                                EstTime = EstTime.Add(TS);
-                                CBQ.completionDate = EstTime;
-                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = CBQ.completionDate.ToShortDateString();
                             }
 
                             //this item is being built
@@ -3320,28 +3316,25 @@ namespace Pulsar4X.UI.Handlers
                         {
                             BuildPercentage = BuildPercentage + MBQ.buildCapacity;
 
-                            float BPRequirement = (float)Math.Floor(MBQ.numToBuild) * (float)MBQ.costPerItem;
-                            float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
-                            float YearsOfProduction = (BPRequirement / DevotedToThis);
-                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
-
                             /// <summary>
-                            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
+                            /// nothing is calculated here, but this logic determines how date should be presented.
                             /// </summary>
-#warning magic number here.
-                            if (DevotedToThis == 0.0f || YearsOfProduction > 5475852)
+                            /// 
+                            float BPRequirement = (float)Math.Floor(MBQ.numToBuild) * (float)MBQ.costPerItem;
+                            float YearsOfProduction = (BPRequirement / DevotedToThis);
+
+                            if (DevotedToThis == 0.0f || YearsOfProduction > Constants.Colony.TimerYearMax)
                             {
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = "-";
                             }
                             else
                             {
-                                DateTime EstTime = GameState.Instance.GameDateTime;
-                                TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
-                                EstTime = EstTime.Add(TS);
-                                MBQ.completionDate = EstTime;
-                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = EstTime.ToShortDateString();
+                                m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[5].Value = MBQ.completionDate.ToShortDateString();
                             }
-                            //this item is being built
+
+                            /// <summary>
+                            /// this item is being built
+                            /// </summary>
                             if (MBQ.inProduction == true)
                             {
                                 m_oSummaryPanel.ConstructionDataGrid.Rows[CurrentRow].Cells[6].Value = "No";

@@ -51,6 +51,22 @@ namespace Pulsar4X.Entities
                         }
 
                         /// <summary>
+                        /// Calculate Completion Estimate:
+                        /// </summary>
+                        float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
+                        float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                        float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+
+                        if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
+                        {
+                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                            DateTime EstTime = GameState.Instance.GameDateTime;
+                            TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                            EstTime = EstTime.Add(TS);
+                            CurrentConstruction.completionDate = EstTime;
+                        }
+
+                        /// <summary>
                         /// This construction project is paused right now.
                         /// </summary>
                         if (CurrentConstruction.inProduction == false)
@@ -284,6 +300,22 @@ namespace Pulsar4X.Entities
                         else
                         {
                             break;
+                        }
+
+                        /// <summary>
+                        /// Calculate Completion Estimate:
+                        /// </summary>
+                        float BPRequirement = (float)Math.Floor(CurrentConstruction.numToBuild) * (float)CurrentConstruction.costPerItem;
+                        float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                        float YearsOfProduction = (BPRequirement / CurrentConstruction.buildCapacity);
+                        
+                        if (CurrentConstruction.buildCapacity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
+                        {
+                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                            DateTime EstTime = GameState.Instance.GameDateTime;
+                            TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                            EstTime = EstTime.Add(TS);
+                            CurrentConstruction.completionDate = EstTime;
                         }
 
                         /// <summary>
