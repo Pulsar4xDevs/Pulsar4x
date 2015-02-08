@@ -14,31 +14,53 @@ using log4net;
 #endif
 
 /*
-m_oIndustrialProjectGroupBox
-m_oIndustrialAllocationGroupBox
-m_oStockpileButton
-m_oConstructionLabel
-m_oOrdnanceLabel
-m_oFighterLabel
-m_oRefineriesLabel
-m_oFuelProductionLabel
-m_oFuelReservesLabel
-m_oShipCompListBox
-m_oMissileStockListBox
-m_oFighterListBox
-m_oPDCListBox
-m_oCreateButton
-m_oModifyButton
-m_oCancelButton
-m_oPauseButton
-m_oSMAddButton
- * m_oPriorityUpButton
- * m_oPriorityDownButton
- * m_oItemNumberTextBox
-m_oItemPercentTextBox
-m_oNewFighterTaskGroupComboBox
- * m_oInstallationCostListBox
-m_oInstallationTypeComboBox
+Shipyard work to be done: public accessors need to be created for these, and of course they have to all be implemented.
+Likewise construction cycle work will need to be done for shipyards.
+m_oShipyardListGroupBox
+m_oShipyardTaskGroupBox
+m_oShipyardCreateTaskGroupBox
+m_oSYActivityGroupBox
+
+m_oShipyardRequiredMaterialsListBox
+m_oShipRequiredMaterialsListBox
+
+m_oNewNameButton
+m_oRefitDetailsButton
+
+m_oAddTaskButton
+m_oDefaultFleetButton
+
+m_oSetActivityButton
+m_oDeleteActivityButton
+m_oPauseActivityButton
+m_oRenameSYButton
+m_oAutoRenameButton
+m_oSMSYButton
+m_oSYADeleteTaskButton
+m_oSYAPauseTaskButton
+m_oSYARaisePriorityButton
+m_oSYALowerPriorityButton
+m_oSYAScheduleButton
+m_oSYARenameShipButton
+
+m_oSYCBuildCostTextBox
+m_oSYCCompletionDateTextBox
+m_oSYTaskCostTextBox
+m_oSYTaskCompletionDateTextBox
+m_oSYShipNameTextBox
+
+m_oSYCTaskTypeComboBox
+m_oSYTaskTypeComboBox
+m_oSYNewClassComboBox
+m_oSYTaskGroupComboBox
+
+m_oCreateDefaultnameCheckBox
+
+
+m_oAnnualBuildRateLabel
+
+Text Label format for the SY Tasks tab: "Annual Ship Building Rate Per Slipway for 5000 ton ship: 111    Available Slipways: 1"
+
 */
 
 namespace Pulsar4X.UI.Handlers

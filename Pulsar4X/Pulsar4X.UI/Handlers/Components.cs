@@ -3715,17 +3715,6 @@ namespace Pulsar4X.UI.Handlers
 
                         Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (JumpEngineProject.cost * 50));
                         m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
-
-                        /*
-                         * Max Ship Size: 75 (3750 tons)     Max Squadron Size: 3     Max Jump Radius: 50
-Jump Engine Size: 15 HS    Efficiency: 5    Jump Engine HTK: 3
-Cost: 33    Crew: 30
-Materials Required: 6.6x Duranium  26.4x Sorium
-
-Development Cost for Project: 330RP
-                         * 
-                         * */
-
                     }
                     break;
                 #endregion

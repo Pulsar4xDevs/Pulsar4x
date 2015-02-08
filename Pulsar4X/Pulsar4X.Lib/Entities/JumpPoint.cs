@@ -173,7 +173,9 @@ namespace Pulsar4X.Entities
                 return true;
             }
             
-            // Currently, JumpDrives don't exist, so how could we possibly jump? 
+            /// <summary>
+            /// Something caused this jump to fail, will need to find out what for the faction messagelog though.
+            /// </summary>
             return false;
         }
 

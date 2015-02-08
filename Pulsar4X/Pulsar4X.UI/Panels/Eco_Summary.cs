@@ -78,6 +78,24 @@ namespace Pulsar4X.UI.Panels
                 return m_oMaintenanceDataGrid;
             }
         }
+
+        /// <summary>
+        /// Shipyard complexes datagrid
+        /// </summary>
+        private DataGridView m_oShipyardDataGrid;
+        public DataGridView ShipyardDataGrid
+        {
+            get { return m_oShipyardDataGrid; }
+        }
+
+        /// <summary>
+        /// Ships under construction datagrid.
+        /// </summary>
+        private DataGridView m_oShipyardTaskDataGrid;
+        public DataGridView ShipyardTaskDataGrid
+        {
+            get { return m_oShipyardTaskDataGrid; }
+        }
         #endregion
 
         public Eco_Summary()
@@ -150,6 +168,30 @@ namespace Pulsar4X.UI.Panels
             m_oMaintenanceDataGrid.ReadOnly = true;
             m_oMaintenanceDataGrid.Enabled = true;
             m_oMaintFacilityGroupBox.Controls.Add(m_oMaintenanceDataGrid);
+
+            m_oShipyardDataGrid = new DataGridView();
+            m_oShipyardDataGrid.Dock = DockStyle.Fill;
+            m_oShipyardDataGrid.AllowUserToAddRows = false;
+            m_oShipyardDataGrid.AllowUserToDeleteRows = false;
+            m_oShipyardDataGrid.AllowUserToOrderColumns = false;
+            m_oShipyardDataGrid.AllowUserToResizeColumns = false;
+            m_oShipyardDataGrid.AllowUserToResizeRows = false;
+            m_oShipyardDataGrid.MultiSelect = false;
+            m_oShipyardDataGrid.ReadOnly = true;
+            m_oShipyardDataGrid.Enabled = true;
+            m_oShipyardListGroupBox.Controls.Add(m_oShipyardDataGrid);
+
+            m_oShipyardTaskDataGrid = new DataGridView();
+            m_oShipyardTaskDataGrid.Dock = DockStyle.Fill;
+            m_oShipyardTaskDataGrid.AllowUserToAddRows = false;
+            m_oShipyardTaskDataGrid.AllowUserToDeleteRows = false;
+            m_oShipyardTaskDataGrid.AllowUserToOrderColumns = false;
+            m_oShipyardTaskDataGrid.AllowUserToResizeColumns = false;
+            m_oShipyardTaskDataGrid.AllowUserToResizeRows = false;
+            m_oShipyardTaskDataGrid.MultiSelect = false;
+            m_oShipyardTaskDataGrid.ReadOnly = true;
+            m_oShipyardTaskDataGrid.Enabled = true;
+            m_oSYActivityGroupBox.Controls.Add(m_oShipyardTaskDataGrid);
         }
     }
 }

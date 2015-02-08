@@ -122,7 +122,7 @@ namespace Pulsar4X.Entities.Components
             }
 
             /// <summary>
-            /// very small jump drives cannot take other vessesls with them.
+            /// very small jump drives cannot take other vessels with them.
             /// </summary>
             if (HS < Constants.JumpEngineTN.MinimumSize[MinTech])
             {
