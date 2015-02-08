@@ -723,8 +723,9 @@ namespace Pulsar4X.Entities
             Destroyed = 4,
             CIWS = 8,
             JumpRecharge = 16,
-            JumpSickness = 32,
-            Count = 64
+            JumpStandardSickness = 32,
+            JumpSquadronSickness = 64,
+            Count = 128
         }
 
         /// <summary>
@@ -1038,6 +1039,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize] = 0;
 
             ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
             PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;
@@ -1140,6 +1142,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize] = 0;
 
             ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
             PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;

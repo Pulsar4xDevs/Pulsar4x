@@ -959,15 +959,36 @@ namespace Pulsar4X.Entities
                     }
 
                     /// <summary>
-                    /// Handle jump sickness here.
+                    /// Handle standard jump sickness here.
                     /// </summary>
-                    if ((value & (int)Faction.RechargeStatus.JumpSickness) == (int)Faction.RechargeStatus.JumpSickness)
+                    if ((value & (int)Faction.RechargeStatus.JumpStandardSickness) == (int)Faction.RechargeStatus.JumpStandardSickness)
                     {
                         bool reducedSickness = Ship.ReduceSickness(TimeValue);
 
                         if (reducedSickness == false)
                         {
-                            faction.RechargeList[Ship] = faction.RechargeList[Ship] - (int)Faction.RechargeStatus.JumpSickness;
+                            faction.RechargeList[Ship] = faction.RechargeList[Ship] - (int)Faction.RechargeStatus.JumpStandardSickness;
+                        }
+
+                        if (faction.RechargeList[Ship] == 0)
+                        {
+                            faction.RechargeList.Remove(Ship);
+                            factionIterator--;
+                            loopBreak = true;
+                            break;
+                        }
+                    }
+
+                    /// <summary>
+                    /// Handle squadron jump sickness here.
+                    /// </summary>
+                    if ((value & (int)Faction.RechargeStatus.JumpSquadronSickness) == (int)Faction.RechargeStatus.JumpSquadronSickness)
+                    {
+                        bool reducedSickness = Ship.ReduceSickness(TimeValue);
+
+                        if (reducedSickness == false)
+                        {
+                            faction.RechargeList[Ship] = faction.RechargeList[Ship] - (int)Faction.RechargeStatus.JumpSquadronSickness;
                         }
 
                         if (faction.RechargeList[Ship] == 0)

@@ -164,6 +164,7 @@ namespace Pulsar4X.Entities.Components
             {
                 m_oMaxRange = m_oMaxRange * 3;
                 m_oGPS = 0;
+                isMilitary = true;
             }
 
             m_lLookUpST = new BindingList<int>();

@@ -46,6 +46,21 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// Jump Squadron Size
+        /// </summary>
+        public TextBox JumpRatingTextBox
+        {
+            get { return m_oJumpRatingTextBox; }
+        }
+        /// <summary>
+        /// Jump radius
+        /// </summary>
+        public TextBox JumpDistTextBox
+        {
+            get { return m_oJumpDistTextBox; }
+        }
+
+        /// <summary>
         /// Total Supplied power by ship reactors.
         /// </summary>
         public TextBox ReactorPowerTextBox

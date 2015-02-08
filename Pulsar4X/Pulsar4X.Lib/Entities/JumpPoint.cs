@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
@@ -104,15 +106,17 @@ namespace Pulsar4X.Entities
         /// <param name="TransitTG">TG requesting Transit.</param>
         /// <param name="IsStandardTransit">True if StandardTransit, False if SquadronTransit</param>
         /// <returns>True if TG is capable of doing this jump.</returns>
-        public bool CanJump(TaskGroupTN TransitTG, bool IsStandardTransit)
+        public bool CanJump(TaskGroupTN TransitTG, bool IsStandardTransit, out Dictionary<JumpEngineTN,ShipTN> usedJumpEngines)
         {
+            usedJumpEngines = null;
+
             // Ensure we have a connection, if not create one.
             if (Connect == null)
             {
                 CreateConnection();
             }
 
-            if (IsGated)
+            if (IsGated && IsStandardTransit == true)
             {
                 if (Constants.GameSettings.AllowHostileGateJump || AllowHostileJumps)
                 {
@@ -126,7 +130,49 @@ namespace Pulsar4X.Entities
                     return true;
                 }
             }
-            // TODO: Expand this to take into account JumpDrives.
+            
+            /// <summary>
+            /// jump Transit code:
+            /// </summary>
+            int ComCount = 0;
+            int MilCount = 0;
+            float ComMaxHS = 0;
+            float MilMaxHS = 0;
+            int MilAccom = 0;
+            int ComAccom = 0;
+            
+
+            /// <summary>
+            /// For every ship:
+            /// How many of each type of ship are there?
+            /// What are the largest ship sizes in HS?
+            /// Go through every jump engine
+            /// Is this jump engine ready?
+            /// Can this jump engine accomodate the other ships in the taskgroup?
+            /// </summary>
+            TransitTG.CountShips(out MilCount, out ComCount, out MilMaxHS, out ComMaxHS);
+
+            /// <summary>
+            /// if one ship can be accomodated all can be.
+            /// </summary>
+            if (IsStandardTransit == true)
+            {
+                if(MilCount > 1)
+                    MilCount = 1;
+                if(ComCount > 1)
+                    ComCount = 1;
+            }
+
+            TransitTG.GetJDAccom(MilMaxHS, MilCount, ComMaxHS, ComCount, out MilAccom, out ComAccom, out usedJumpEngines);
+
+            /// <summary>
+            /// This jump can happen.
+            /// </summary>
+            if (MilAccom >= MilCount && ComAccom >= ComCount)
+            {
+                return true;
+            }
+            
             // Currently, JumpDrives don't exist, so how could we possibly jump? 
             return false;
         }

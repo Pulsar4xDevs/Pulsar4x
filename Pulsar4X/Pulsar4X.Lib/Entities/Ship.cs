@@ -3177,6 +3177,22 @@ namespace Pulsar4X.Entities
             else
                 return false;
         }
+
+        /// <summary>
+        /// Set Standard transit jump sickness
+        /// </summary>
+        public void StandardTransit()
+        {
+            JumpSickness = Constants.JumpEngineTN.StandardTransitPenalty;
+        }
+
+        /// <summary>
+        /// Set Squadron transit jump sickness
+        /// </summary>
+        public void SquadronTransit()
+        {
+            JumpSickness = Constants.JumpEngineTN.SquadronTransitPenalty;
+        }
     }
     /// <summary>
     /// End of ShipTN class

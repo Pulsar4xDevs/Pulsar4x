@@ -13,7 +13,8 @@ namespace Pulsar4X.Entities.Components
         public enum JDType
         {
             Military,
-            Commercial
+            Commercial,
+            Count
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace Pulsar4X.Entities.Components
         /// <param name="RadiusTech">How far can this JE support jumping away from the Jump Point</param>
         /// <param name="JType">Is this a military or commercial engine?</param>
         /// <param name="size">Size in HS of this jump engine. Max of 1000, will run into issues with htk above that in any event.</param>
-        public JumpEngineDefTN(string title, int EfficiencyTech, int SquadSizeTech, int RadiusTech, JDType JType, int HS)
+        public JumpEngineDefTN(string title, int EfficiencyTech, int SquadSizeTech, int RadiusTech, int MinTech, JDType JType, int HS)
         {
             /// <summary>
             /// Everything needs a unique Id, or probably will if it doesn't already.
@@ -96,9 +97,9 @@ namespace Pulsar4X.Entities.Components
                 SquadronSize = Constants.JumpEngineTN.SquadSize[SquadSizeTech];
                 JumpRadius = Constants.JumpEngineTN.JumpRadius[RadiusTech] * 10000;
 
-                size = HS * Constants.JumpEngineTN.SquadSizeModifier[SquadSizeTech] * Constants.JumpEngineTN.JumpRadiusModifier[RadiusTech];
+                size = (float)Math.Round(HS * Constants.JumpEngineTN.SquadSizeModifier[SquadSizeTech] * Constants.JumpEngineTN.JumpRadiusModifier[RadiusTech]);
 
-                MaxJumpRating = (int)(size * JumpEngineEfficiency) * (int)Constants.ShipTN.TonsPerHS;
+                MaxJumpRating = (int)(HS * JumpEngineEfficiency) * (int)Constants.ShipTN.TonsPerHS;
 
                 isMilitary = true;
             }
@@ -113,11 +114,19 @@ namespace Pulsar4X.Entities.Components
                 SquadronSize = Constants.JumpEngineTN.SquadSize[SquadSizeTech] - 1;
                 JumpRadius = Constants.JumpEngineTN.JumpRadius[RadiusTech] * 5000;
 
-                size = HS * 10 * Constants.JumpEngineTN.SquadSizeModifier[SquadSizeTech] * Constants.JumpEngineTN.JumpRadiusModifier[RadiusTech];
+                size = (float)Math.Round(HS * 10 * Constants.JumpEngineTN.SquadSizeModifier[SquadSizeTech] * Constants.JumpEngineTN.JumpRadiusModifier[RadiusTech]);
 
                 MaxJumpRating = (int)Math.Round(JumpEngineEfficiency * HS) * 10 * (int)Constants.ShipTN.TonsPerHS;
 
                 isMilitary = false;
+            }
+
+            /// <summary>
+            /// very small jump drives cannot take other vessesls with them.
+            /// </summary>
+            if (HS < Constants.JumpEngineTN.MinimumSize[MinTech])
+            {
+                SquadronSize = 1;
             }
 
             /// <summary>

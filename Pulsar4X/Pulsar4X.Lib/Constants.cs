@@ -1307,11 +1307,13 @@ namespace Pulsar4X
             /// How many HS of ship does 1 HS of JumpEngine support.
             /// </summary>
             public static int[] JumpEfficiency = { 4,5,6,8,10,12,15,18,21,25 };
+            public const int JumpEfficiencyMax = 9;
 
             /// <summary>
             /// How many ships can use this single jump engine.
             /// </summary>
             public static int[] SquadSize = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            public const int SquadSizeMax = 9;
 
             /// <summary>
             /// How much bigger is this jump engine for allowing increased squadSize? size is JESize * this.
@@ -1322,11 +1324,18 @@ namespace Pulsar4X
             /// How far from the jumppoint can a squadron transit go? multiply this by 10k km.
             /// </summary>
             public static int[] JumpRadius = { 5,10,25,50,75,100,150,200,250,300,400 };
+            public const int JumpRadiusMax = 10; //can't just do JumpRadius.Count() - 1 here.
 
             /// <summary>
             /// How much larger will this jumpengine be due to its jump radius tech?
             /// </summary>
             public static float[] JumpRadiusModifier = { 1.0f, 1.05f, 1.1f, 1.15f, 1.2f, 1.25f, 1.3f, 1.4f, 1.5f, 1.6f, 1.8f};
+
+            /// <summary>
+            /// What is the minimum size a jump engine can be and still squadron transit with other craft?
+            /// </summary>
+            public static int[] MinimumSize = { 15,12,10,8,6,5,4,3,2 };
+            public const int MinimumSizeMax = 8;
 
             /// <summary>
             /// How long does it take a jump engine to recharge?

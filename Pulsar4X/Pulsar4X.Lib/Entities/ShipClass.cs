@@ -1154,6 +1154,8 @@ namespace Pulsar4X.Entities
 
                 if (MilitaryComponentCount > 0)
                     IsMilitary = true;
+                else
+                    IsMilitary = false;
             }
 
             /// <summary>
@@ -2472,8 +2474,8 @@ namespace Pulsar4X.Entities
                 }
             }
 
-            Entry = String.Format("{0} km/s    JR {0}-{1}     Armour {2}-{3}   Shields {4}-{5}   Sensors {6}/{7}/{8}/{9}   Damage Control Rating {10}  PPV {11}\n", MaxSpeed,
-                                  SquadronSize,JumpRadius, ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating,
+            Entry = String.Format("{0} km/s    JR {1}-{2}     Armour {3}-{4}   Shields {5}-{6}   Sensors {7}/{8}/{9}/{10}   Damage Control Rating {11}  PPV {12}\n", MaxSpeed,
+                                  SquadronSize, ((int)Math.Round((float)(JumpRadius / 1000))), ShipArmorDef.depth, ShipArmorDef.cNum, TotalShieldPool, ShieldR, BestThermalRating, BestEMRating, 0, 0, MaxDamageControlRating,
                                   PlanetaryProtectionValue);
 
             Summary = String.Format("{0}{1}", Summary, Entry);
@@ -2501,7 +2503,8 @@ namespace Pulsar4X.Entities
             {
                 int dist = JDE.jumpRadius / 1000;
                 String Distance = String.Format("{0}k", dist);
-                Entry = String.Format("{0}     Max Ship Size {1} tons    Distance {2} km     Squadron Size {3}", JDE.Name, JDE.maxJumpRating, Distance, JDE.squadronSize);
+                Entry = String.Format("{0}     Max Ship Size {1} tons    Distance {2} km     Squadron Size {3}\n", JDE.Name, JDE.maxJumpRating, Distance, JDE.squadronSize);
+                Summary = String.Format("{0}{1}", Summary, Entry);
             }
 
             if (ShipEngineDef != null)

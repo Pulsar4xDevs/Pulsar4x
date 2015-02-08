@@ -87,6 +87,7 @@ namespace Pulsar4X.UI.Handlers
         private MagazineDefTN MagazineProject;
         private MissileEngineDefTN MissileEngineProject;
         private CIWSDefTN CloseInProject;
+        private JumpEngineDefTN JumpEngineProject;
 
         /// <summary>
         /// This Code, along with the DllImport allows for halting and resuming message sending during ResizeBegin and ResizeEnd. It was an attempt to eliminate cpu usage on window moves that did not work
@@ -160,6 +161,7 @@ namespace Pulsar4X.UI.Handlers
             LauncherProject = null;
             MagazineProject = null;
             MissileEngineProject = null;
+            JumpEngineProject = null;
         }
 
         /// <summary>
@@ -408,6 +410,14 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Jump Engines
                 case ComponentsViewModel.Components.Jump:
+                    if (JumpEngineProject != null)
+                    {
+                        if (JumpEngineProject.Name != m_oComponentDesignPanel.TechNameTextBox.Text)
+                            JumpEngineProject.Name = m_oComponentDesignPanel.TechNameTextBox.Text;
+                        _CurrnetFaction.ComponentList.JumpEngineDef.Add(JumpEngineProject);
+
+                        set = true;
+                    }
                     break;
                 #endregion
 
@@ -582,6 +592,7 @@ namespace Pulsar4X.UI.Handlers
             }
             #endregion
 
+#warning UI modifies LIB here, rework addition to ComponentList?
             if (set == true)
                 _CurrnetFaction.ComponentList.TotalComponents = _CurrnetFaction.ComponentList.TotalComponents + 1;
         }
@@ -645,8 +656,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                             }
 
-                            if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                                m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                            SetSelectedIndex(1, 0);
                         }
 
                         /// <summary>
@@ -664,7 +674,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                             }
 
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                            SetSelectedIndex(2, 0);
                         }
 
                         /// <summary>
@@ -706,7 +716,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 9;
+                        SetSelectedIndex(3, 9);
 
                         /// <summary>
                         /// Resolution for sensor listing.
@@ -729,7 +739,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 35;
+                        SetSelectedIndex(4, 35);
 
                         /// <summary>
                         /// Electronic hardening tech listing.
@@ -746,12 +756,12 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
                             }
 
-                            m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+                            SetSelectedIndex(5, 0);
                         }
 
                         m_oComponentDesignPanel.TechComboBoxSix.Items.Add("Search Sensor");
                         m_oComponentDesignPanel.TechComboBoxSix.Items.Add("Missile Fire Control");
-                        m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = 0;
+                        SetSelectedIndex(6, 0);
 
 
                         break;
@@ -783,8 +793,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                             }
 
-                            if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                                m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                            SetSelectedIndex(1, 0);
                         }
 
                         /// <summary>
@@ -809,8 +818,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                             }
 
-                            if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                                m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                            SetSelectedIndex(2, 0);
                         }
 
                         /// <summary>
@@ -832,7 +840,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         Entry = "Fire Control 25% Size 25% Range";
                         m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         /// <summary>
                         /// Size vs Tracking Component:
@@ -851,7 +859,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
                         Entry = "Fire Control 4x Size 4x Tracking Speed";
                         m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        SetSelectedIndex(4, 0);
 
                         /// <summary>
                         /// Electronic hardening tech listing.
@@ -868,7 +876,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
                             }
 
-                            m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+                            SetSelectedIndex(5, 0);
                         }
 
                         /// <summary>
@@ -878,7 +886,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.TechComboBoxSix.Items.Add(Entry);
                         Entry = "PDC-based System";
                         m_oComponentDesignPanel.TechComboBoxSix.Items.Add(Entry);
-                        m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = 0;
+                        SetSelectedIndex(6, 0);
 
                         /// <summary>
                         /// Is this a fighter BFC?
@@ -887,7 +895,7 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.TechComboBoxSeven.Items.Add(Entry);
                         Entry = "Fighter Only";
                         m_oComponentDesignPanel.TechComboBoxSeven.Items.Add(Entry);
-                        m_oComponentDesignPanel.TechComboBoxSeven.SelectedIndex = 0;
+                        SetSelectedIndex(7, 0);
                         break;
                     #endregion
 
@@ -911,8 +919,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         /// <summary>
                         /// Beam Fire Control Range Section.
@@ -930,8 +937,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                             }
 
-                            if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                                m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                            SetSelectedIndex(2, 0);
                         }
 
                         /// <summary>
@@ -956,8 +962,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                             }
 
-                            if (m_oComponentDesignPanel.TechComboBoxThree.Items.Count != 0)
-                                m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                            SetSelectedIndex(3, 0);
                         }
 
                         /// <summary>
@@ -975,8 +980,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
                             }
 
-                            if (m_oComponentDesignPanel.TechComboBoxFour.Items.Count != 0)
-                                m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                            SetSelectedIndex(4, 0);
                         }
 
                         /// <summary>
@@ -997,8 +1001,7 @@ namespace Pulsar4X.UI.Handlers
                             Entry = String.Format("Turret Tracking Speed(10% Gear) {0} km/s", TrackForm);
                             m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
                         }
-                        if (m_oComponentDesignPanel.TechComboBoxFive.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+                        SetSelectedIndex(5, 0);
 
                         /// <summary>
                         /// ECCM
@@ -1016,8 +1019,7 @@ namespace Pulsar4X.UI.Handlers
                         Entry = "No ECCM";
                         m_oComponentDesignPanel.TechComboBoxSix.Items.Add(Entry);
 
-                        if (m_oComponentDesignPanel.TechComboBoxSix.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = 0;
+                        SetSelectedIndex(6, 0);
 
                         break;
                     #endregion
@@ -1060,7 +1062,7 @@ namespace Pulsar4X.UI.Handlers
                             }
 
 
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                            SetSelectedIndex(1, 0);
                         }
 
                         /// <summary>
@@ -1102,7 +1104,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 9;
+                        SetSelectedIndex(2, 9);
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.Hardening];
                         if (TechLevel >= 0)
@@ -1116,7 +1118,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                             }
 
-                            m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                            SetSelectedIndex(3, 0);
                         }
 
                         break;
@@ -1183,7 +1185,7 @@ namespace Pulsar4X.UI.Handlers
                         }
 
                         m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Conventional Engine Technology");
-                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         #endregion
 
@@ -1254,7 +1256,9 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
 
                             if (loop == 100)
-                                m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = Count;
+                            {
+                                SetSelectedIndex(2, Count);
+                            }
 
                             Count++;
                         }
@@ -1276,7 +1280,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Should atleast be 1 level of fuel con even for conventional starts.
                         /// </summary>
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         #endregion
 
@@ -1292,7 +1296,7 @@ namespace Pulsar4X.UI.Handlers
                             Entry = String.Format("Thermal Reduction: Signature {0}% Normal", (Constants.EngineTN.ThermalReduction[loop] * 100.0f));
                             m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
                         }
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        SetSelectedIndex(4, 0);
 
 
                         #endregion
@@ -1303,7 +1307,7 @@ namespace Pulsar4X.UI.Handlers
                             Entry = String.Format("{0} HS. Fuel Consumption -{0}%", loop);
                             m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
                         }
-                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 4;
+                        SetSelectedIndex(5, 4);
                         #endregion
 
                         #region HyperDrive
@@ -1321,7 +1325,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxSix.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = 0;
+                        SetSelectedIndex(6, 0);
 
                         #endregion
 
@@ -1348,8 +1352,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.GaussCannonVelocity];
 
@@ -1362,8 +1365,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
 
                         for (int loop = 0; loop < 10; loop++)
@@ -1372,7 +1374,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
 
                         break;
@@ -1403,8 +1405,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         for (int loop = MicroFocusTech; loop >= 0; loop--)
                         {
@@ -1412,8 +1413,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
@@ -1427,7 +1427,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         break;
                     #endregion
@@ -1442,6 +1442,78 @@ namespace Pulsar4X.UI.Handlers
                         m_oComponentDesignPanel.NotesLabel.Text = "Jump rating is equal to ship size, not jump engine rating. at 15KT ship with a 40K jump engine has a jump rating of 15K, not 40K." +
                                                                   " Commercial ships may use military jump engine tenders, but military vessels may not use commercial jump engine tenders." +
                                                                   " Self jump only applies to squadron transits, standard transits are uneffected.";
+
+                        int JumpEfficiencyTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.JumpEngineEfficiency];
+                        int SquadronSizeTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MaxSquadJumpSize]; 
+                        int JumpRadiusTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MaxSquadJumpRadius];
+                        int MinimumSizeTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize];
+
+                        if (JumpEfficiencyTech > Constants.JumpEngineTN.JumpEfficiencyMax)
+                            JumpEfficiencyTech = Constants.JumpEngineTN.JumpEfficiencyMax;
+                        if (SquadronSizeTech > Constants.JumpEngineTN.SquadSizeMax)
+                            SquadronSizeTech = Constants.JumpEngineTN.SquadSizeMax;
+                        if (JumpRadiusTech > Constants.JumpEngineTN.JumpRadiusMax)
+                            JumpRadiusTech = Constants.JumpEngineTN.JumpRadiusMax;
+                        if(MinimumSizeTech > Constants.JumpEngineTN.MinimumSizeMax)
+                            MinimumSizeTech = Constants.JumpEngineTN.MinimumSizeMax;
+
+
+                        for (int loop = JumpEfficiencyTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Jump Drive Efficiency {0}", Constants.JumpEngineTN.JumpEfficiency[loop]);
+                            m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
+                        }
+
+                        SetSelectedIndex(1, 0);
+
+                        for (int loop = SquadronSizeTech; loop >= 0; loop--)
+                        {
+                            Entry = String.Format("Max Jump Squadron Size {0}(size x {1:N1})", Constants.JumpEngineTN.SquadSize[loop], Constants.JumpEngineTN.SquadSizeModifier[loop]);
+                            m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
+                        }
+
+                        SetSelectedIndex(2, 0);
+
+                        for (int loop = JumpRadiusTech; loop >= 0; loop--)
+                        {
+                            int JR = Constants.JumpEngineTN.JumpRadius[loop] * 10;
+                            Entry = String.Format("Max Squadron Jump Radius {0}k(size x {1:N2})", JR, Constants.JumpEngineTN.JumpRadiusModifier[loop]);
+                            m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
+                        }
+
+                        SetSelectedIndex(3, 0);
+
+                        int sizeIterator = 1;
+                        while (sizeIterator <= 1000 )
+                        {
+                            if (sizeIterator >= Constants.JumpEngineTN.MinimumSize[MinimumSizeTech])
+                            {
+                                Entry = String.Format("{0}", sizeIterator);
+                            }
+                            else
+                            {
+                                Entry = String.Format("{0} Self-Jump Only", sizeIterator);
+                            }
+
+                            m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
+
+                            if (sizeIterator < 50)
+                                sizeIterator++;
+                            else if (sizeIterator < 100)
+                                sizeIterator += 5;
+                            else
+                                sizeIterator += 10;
+                        }
+
+                        SetSelectedIndex(4, 14);
+
+                        for (int typeIterator = 0; typeIterator < (int)JumpEngineDefTN.JDType.Count; typeIterator++)
+                        {
+                            Entry = String.Format("{0}", (JumpEngineDefTN.JDType)typeIterator);
+                            m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
+                        }
+
+                        SetSelectedIndex(5, 0);
 
                         break;
                     #endregion
@@ -1481,8 +1553,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         for (int loop = WaveTech; loop >= 0; loop--)
                         {
@@ -1529,8 +1600,7 @@ namespace Pulsar4X.UI.Handlers
                             }
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
@@ -1544,7 +1614,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.ReducedSizeLasers];
                         if (TechLevel > 1)
@@ -1567,7 +1637,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        SetSelectedIndex(4, 0);
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.SpinalMount];
                         if (TechLevel > 1)
@@ -1590,7 +1660,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+                        SetSelectedIndex(5, 0);
 
                         break;
                     #endregion
@@ -1621,7 +1691,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         for (int loop = EjectTech; loop >= 0; loop--)
                         {
@@ -1629,7 +1699,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
                         for (int loop = ArmourTech; loop >= 0; loop--)
                         {
@@ -1680,7 +1750,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         for (int loop = 1; loop <= 30; loop++)
                         {
@@ -1688,7 +1758,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxFour.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        SetSelectedIndex(4, 0);
 
                         for (int loop = 1; loop <= 10; loop++)
                         {
@@ -1696,7 +1766,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxFive.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = 0;
+                        SetSelectedIndex(5, 0);
 
                         break;
                     #endregion
@@ -1725,8 +1795,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         for (int loop = MesonFocusTech; loop >= 0; loop--)
                         {
@@ -1734,8 +1803,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
@@ -1749,7 +1817,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         break;
                     #endregion
@@ -1815,7 +1883,7 @@ namespace Pulsar4X.UI.Handlers
                         }
 
                         m_oComponentDesignPanel.TechComboBoxOne.Items.Add("Conventional Engine Technology");
-                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         #endregion
 
@@ -1886,7 +1954,9 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
 
                             if (loop == 100)
-                                m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = Count;
+                            {
+                                SetSelectedIndex(2, Count);
+                            }
 
                             Count++;
                         }
@@ -1910,7 +1980,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Should atleast be 1 level of fuel con even for conventional starts.
                         /// </summary>
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         #endregion
 
@@ -1931,7 +2001,7 @@ namespace Pulsar4X.UI.Handlers
 
                             size += 0.01;
                         }
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        SetSelectedIndex(4, 0);
                         #endregion
 
                         break;
@@ -1961,7 +2031,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         for (int loop = ReloadTech; loop >= 0; loop--)
                         {
@@ -1969,11 +2039,11 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
                         m_oComponentDesignPanel.TechComboBoxThree.Items.Add("Ship-based System");
                         m_oComponentDesignPanel.TechComboBoxThree.Items.Add("PDC-based System");
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
 
                         for (int loop = 0; loop <= minTech; loop++)
@@ -1995,7 +2065,7 @@ namespace Pulsar4X.UI.Handlers
                             }
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = 0;
+                        SetSelectedIndex(4, 0);
 
                         break;
                     #endregion
@@ -2046,8 +2116,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         for (int loop = PartRangeTech; loop >= 0; loop--)
                         {
@@ -2056,8 +2125,7 @@ namespace Pulsar4X.UI.Handlers
                             Entry = String.Format("Particle Beam Range {0}km", FormattedRange);
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
@@ -2071,7 +2139,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
                         break;
                     #endregion
 
@@ -2104,8 +2172,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
 
                         int CapTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
@@ -2119,7 +2186,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
                         break;
                     #endregion
@@ -2197,8 +2264,7 @@ namespace Pulsar4X.UI.Handlers
                                     break;
                             }
                         }
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
                         #endregion
 
                         #region Reactor Power Boost, again hard coded.
@@ -2241,7 +2307,7 @@ namespace Pulsar4X.UI.Handlers
                             }
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
                         #endregion
 
@@ -2257,7 +2323,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
                         #endregion
 
                         break;
@@ -2319,8 +2385,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
 
                         int RailVelTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.RailgunVelocity];
                         if (RailVelTech > 8)
@@ -2332,8 +2397,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
 
 
                         CapTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate];
@@ -2347,7 +2411,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         break;
                     #endregion
@@ -2421,8 +2485,7 @@ namespace Pulsar4X.UI.Handlers
                                     break;
                             }
                         }
-                        if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                        SetSelectedIndex(1, 0);
                         #endregion
 
 
@@ -2437,8 +2500,7 @@ namespace Pulsar4X.UI.Handlers
                             Entry = String.Format("Shield Regeneration Rate {0}", Constants.ShieldTN.ShieldBase[loop]);
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
-                        if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
-                            m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 0;
+                        SetSelectedIndex(2, 0);
                         #endregion
 
                         #region Fuel Consumption
@@ -2457,7 +2519,7 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Should atleast be 1 level of fuel con even for conventional starts.
                         /// </summary>
-                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                        SetSelectedIndex(3, 0);
 
                         #endregion
 
@@ -2489,7 +2551,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxOne.Items.Add(Entry);
                             }
 
-                            m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = 0;
+                            SetSelectedIndex(1, 0);
                         }
 
                         /// <summary>
@@ -2531,7 +2593,7 @@ namespace Pulsar4X.UI.Handlers
                             m_oComponentDesignPanel.TechComboBoxTwo.Items.Add(Entry);
                         }
 
-                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = 9;
+                        SetSelectedIndex(2, 9);
 
                         TechLevel = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.Hardening];
                         if (TechLevel >= 0)
@@ -2545,7 +2607,7 @@ namespace Pulsar4X.UI.Handlers
                                 m_oComponentDesignPanel.TechComboBoxThree.Items.Add(Entry);
                             }
 
-                            m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = 0;
+                            SetSelectedIndex(3, 0);
                         }
                         break;
                     #endregion
@@ -3561,6 +3623,110 @@ namespace Pulsar4X.UI.Handlers
 
                 #region Jump Engines
                 case ComponentsViewModel.Components.Jump:
+                    /// <summary>
+                    /// Sanity check.
+                    /// </summary>
+                    if (m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex != -1 && m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex != -1 &&
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex != -1)
+                    {
+                        int JumpEffTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.JumpEngineEfficiency];
+                        int SquadSizeTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MaxSquadJumpSize];
+                        int JumpRadiusTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MaxSquadJumpRadius];
+                        int MinSizeTech = _CurrnetFaction.FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize];
+
+                        if (JumpEffTech > Constants.JumpEngineTN.JumpEfficiencyMax)
+                            JumpEffTech = Constants.JumpEngineTN.JumpEfficiencyMax;
+                        if (SquadSizeTech > Constants.JumpEngineTN.SquadSizeMax)
+                            SquadSizeTech = Constants.JumpEngineTN.SquadSizeMax;
+                        if (JumpRadiusTech > Constants.JumpEngineTN.JumpRadiusMax)
+                            JumpRadiusTech = Constants.JumpEngineTN.JumpRadiusMax;
+                        if (MinSizeTech > Constants.JumpEngineTN.MinimumSizeMax)
+                            MinSizeTech = Constants.JumpEngineTN.MinimumSizeMax;
+
+                        int Eff = JumpEffTech - m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex;
+                        int SquadSize = SquadSizeTech - m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex;
+                        int JumpRadius = JumpRadiusTech - m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex;
+
+                        int JESize = 1;
+                        int Count = 0;
+                        while (JESize <= 1000)
+                        {
+                            if(Count == m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex)
+                            {
+                                break;
+                            }
+
+                            if (JESize < 50)
+                                JESize++;
+                            else if (JESize < 100)
+                                JESize += 5;
+                            else
+                                JESize += 10;
+
+                            Count++;
+                        }
+                        JumpEngineDefTN.JDType JumpType = (JumpEngineDefTN.JDType)m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex;
+
+                        JumpEngineProject = new JumpEngineDefTN("JumpEngine", Eff, SquadSize, JumpRadius, MinSizeTech, JumpType, JESize);
+
+                        if (JumpType == JumpEngineDefTN.JDType.Military)
+                        {
+                            int JR = (int)Math.Round((float)JumpEngineProject.jumpRadius / 1000.0f);
+                            Entry = String.Format("J{0}({1}-{2}) Military Jump Drive",JumpEngineProject.maxJumpRating, JumpEngineProject.squadronSize, JR);
+                            JumpEngineProject.Name = Entry;
+                        }
+                        else if (JumpType == JumpEngineDefTN.JDType.Commercial)
+                        {
+                            int CSize = (int)Math.Round((float)JumpEngineProject.maxJumpRating / 1000.0f);
+                            Entry = String.Format("JC{0}K Commerical Jump Drive", CSize);
+                            JumpEngineProject.Name = Entry;
+                        }
+                        m_oComponentDesignPanel.TechNameTextBox.Text = Entry;
+
+                        int SSize = JumpEngineProject.maxJumpRating / (int)Constants.ShipTN.TonsPerHS;
+                        int JRadius = (int)Math.Round((float)JumpEngineProject.jumpRadius / 1000.0f);
+                        Entry = String.Format("Max Ship Size: {0} ({1} tons)     Max Squadron Size: {2}     Max Jump Radius: {3}\n", SSize, JumpEngineProject.maxJumpRating, 
+                                              JumpEngineProject.squadronSize, JRadius );
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        if (m_oComponentDesignPanel.SizeTonsCheckBox.Checked == true)
+                            Entry = String.Format("Jump Engine Size: {0} Tons    Efficiency: {1}    Jump Engine HTK: {2}\n", JumpEngineProject.size * (int)Constants.ShipTN.TonsPerHS, 
+                                                  JumpEngineProject.jumpEngineEfficiency, JumpEngineProject.htk);
+                        else
+                            Entry = String.Format("Jump Engine Size: {0} HS    Efficiency: {1}    Jump Engine HTK: {2}\n", JumpEngineProject.size, JumpEngineProject.jumpEngineEfficiency,
+                                                  JumpEngineProject.htk);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Cost: {0}    Crew: {1}\n", JumpEngineProject.cost, JumpEngineProject.crew);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("Materials Required:");
+
+                        for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                        {
+                            if (JumpEngineProject.minerialsCost[mineralIterator] != 0)
+                            {
+                                Entry = String.Format("{0} {1:N1}x {2}", Entry, JumpEngineProject.minerialsCost[mineralIterator], (Constants.Minerals.MinerialNames)mineralIterator);
+                            }
+                        }
+                        Entry = String.Format("{0}\n", Entry);
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        Entry = String.Format("\nDevelopment Cost for Project: {0}RP\n", (JumpEngineProject.cost * 50));
+                        m_oComponentDesignPanel.ParametersTextBox.AppendText(Entry);
+
+                        /*
+                         * Max Ship Size: 75 (3750 tons)     Max Squadron Size: 3     Max Jump Radius: 50
+Jump Engine Size: 15 HS    Efficiency: 5    Jump Engine HTK: 3
+Cost: 33    Crew: 30
+Materials Required: 6.6x Duranium  26.4x Sorium
+
+Development Cost for Project: 330RP
+                         * 
+                         * */
+
+                    }
                     break;
                 #endregion
 
@@ -5007,6 +5173,48 @@ namespace Pulsar4X.UI.Handlers
             m_oComponentDesignPanel.TechLabelFive.Text = Five;
             m_oComponentDesignPanel.TechLabelSix.Text = Six;
             m_oComponentDesignPanel.TechLabelSeven.Text = Seven;
+        }
+
+        /// <summary>
+        /// Initialize the appropriate techbox to the selected index.
+        /// </summary>
+        /// <param name="TechBox">Techbox to initialize</param>
+        /// <param name="Index">Index to initialize the techbox to.</param>
+        private void SetSelectedIndex(int TechBox, int Index)
+        {
+            switch (TechBox)
+            {
+                case 1:
+                    if (m_oComponentDesignPanel.TechComboBoxOne.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxOne.SelectedIndex = Index;
+                    break;
+                case 2:
+                    if (m_oComponentDesignPanel.TechComboBoxTwo.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxTwo.SelectedIndex = Index;
+                    break;
+                case 3:
+                    if (m_oComponentDesignPanel.TechComboBoxThree.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxThree.SelectedIndex = Index;
+                    break;
+                case 4:
+                    if (m_oComponentDesignPanel.TechComboBoxFour.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxFour.SelectedIndex = Index;
+                    break;
+                case 5:
+                    if (m_oComponentDesignPanel.TechComboBoxFive.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxFive.SelectedIndex = Index;
+                    break;
+                case 6:
+                    if (m_oComponentDesignPanel.TechComboBoxSix.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxSix.SelectedIndex = Index;
+                    break;
+                case 7:
+                    if (m_oComponentDesignPanel.TechComboBoxSeven.Items.Count != 0)
+                        m_oComponentDesignPanel.TechComboBoxSeven.SelectedIndex = Index;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

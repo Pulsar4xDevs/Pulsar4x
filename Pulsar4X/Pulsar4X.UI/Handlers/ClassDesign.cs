@@ -1166,6 +1166,8 @@ namespace Pulsar4X.UI.Handlers
         {
             m_oOptionsPanel.EnginePowerTextBox.Text = CurrentShipClass.MaxEnginePower.ToString();
             m_oOptionsPanel.MaxSpeedTextBox.Text = CurrentShipClass.MaxSpeed.ToString();
+            m_oOptionsPanel.JumpRatingTextBox.Text = CurrentShipClass.SquadronSize.ToString();
+            m_oOptionsPanel.JumpDistTextBox.Text = ((int)Math.Round((float)(CurrentShipClass.JumpRadius/1000))).ToString();
             m_oOptionsPanel.ReactorPowerTextBox.Text = CurrentShipClass.TotalPowerGeneration.ToString();
             m_oOptionsPanel.RequiredPowerTextBox.Text = CurrentShipClass.TotalPowerRequirement.ToString();
         }
@@ -1588,12 +1590,13 @@ namespace Pulsar4X.UI.Handlers
             }
             CurrentLine++;
 
-            if (CurrentShipClass.ShipEngineDef != null || CurrentShipClass.ShipJumpEngineDef.Count != null)
+            if (CurrentShipClass.ShipEngineDef != null || CurrentShipClass.ShipJumpEngineDef.Count != 0)
             {
                 if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
                 {
                     return;
                 }
+                CurrentLine++;
 
                 if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
                 {
@@ -1611,8 +1614,8 @@ namespace Pulsar4X.UI.Handlers
                         CIndex = CurrentShipClass.ShipJumpEngineDef[ComponentIterator].Id;
                         return;
                     }
+                    CurrentLine++;
                 }
-                CurrentLine++;
 
                 if (CurrentLine == m_oOptionsPanel.ComponentsListBox.SelectedIndex)
                 {
@@ -2534,9 +2537,9 @@ namespace Pulsar4X.UI.Handlers
 
                     #region Engine Addition
                     /// <summary>
-                    /// An engine was added to the component list.
+                    /// An Engine or JumpEngine was added to the component list.
                     /// </summary>
-                    if (CompLocation[(int)ComponentGroup.FireControl] != (List.Engines.Count + CompLocation[(int)ComponentGroup.Engines] + 1))
+                    if (CompLocation[(int)ComponentGroup.FireControl] != (List.Engines.Count + List.JumpEngineDef.Count + CompLocation[(int)ComponentGroup.Engines] + 1))
                     {
                         int rowLine = CompLocation[(int)ComponentGroup.Engines] + 1;
                         int EngineCount = 0;
@@ -2566,6 +2569,33 @@ namespace Pulsar4X.UI.Handlers
                         for (int ComponentIterator = EngineCount; ComponentIterator <= (List.Engines.Count - 1); ComponentIterator++)
                         {
                             PopulateComponentRow(List.Engines[ComponentIterator], rowLine, "Engine Power", List.Engines[ComponentIterator].enginePower.ToString(), ComponentIterator, true);
+                            rowLine++;
+                        }
+
+                        int EngEnd = rowLine;
+                        int JECount = 0;
+
+                        while ((string)m_oOptionsPanel.ComponentDataGrid.Rows[rowLine].Cells[(int)ComponentCell.CType].Value == ((int)ComponentTypeTN.JumpEngine).ToString())
+                        {
+                            rowLine++;
+                        }
+
+                        JECount = (rowLine - EngEnd);
+
+                        AddedRows = List.JumpEngineDef.Count - JECount;
+
+                        /// <summary>
+                        /// Increment all the component locations past the current one(Engine) by added rows count.
+                        /// </summary>
+                        for (int loop = (int)ComponentGroup.FireControl; loop <= (int)ComponentGroup.TypeCount; loop++)
+                        {
+                            CompLocation[loop] = CompLocation[loop] + AddedRows;
+                        }
+
+                        for (int ComponentIterator = JECount; ComponentIterator <= (List.JumpEngineDef.Count - 1); ComponentIterator++)
+                        {
+                            PopulateComponentRow(List.JumpEngineDef[ComponentIterator], rowLine, "Max Ship Size",
+                                             ((float)List.JumpEngineDef[ComponentIterator].maxJumpRating / Constants.ShipTN.TonsPerHS).ToString(), ComponentIterator, true);
                             rowLine++;
                         }
                     }

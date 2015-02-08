@@ -747,8 +747,9 @@ namespace Pulsar4X.Tests
             System1.JumpPoints[0].Connect = System2.JumpPoints[0];
             System2.JumpPoints[0].Connect = System1.JumpPoints[0];
 
-            System1.JumpPoints[0].CanJump(PlayerFaction1.TaskGroups[0], false);
-            System1.JumpPoints[0].CanJump(PlayerFaction2.TaskGroups[0], true);
+            Dictionary<JumpEngineTN, ShipTN> usedJumpEngines;
+            System1.JumpPoints[0].CanJump(PlayerFaction1.TaskGroups[0], false, out usedJumpEngines);
+            System1.JumpPoints[0].CanJump(PlayerFaction2.TaskGroups[0], true, out usedJumpEngines);
 
             GameState.Instance.CurrentSecond = 15;
 

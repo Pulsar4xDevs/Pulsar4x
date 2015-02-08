@@ -183,6 +183,9 @@ namespace Pulsar4X.Entities
         /// </summary>
         public byte DrawTravelLine { get; set; }
 
+        /// <summary>
+        /// Taskgroup has its own copy of what PD are active. Change this on transit, ship destruction, and taskgroup ship adding/subtracting.
+        /// </summary>
         public PointDefenseList TaskGroupPDL { get; set; }
 
         /// <summary>
@@ -2278,6 +2281,7 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
+                    #region Standard Transit
                     case (int)Constants.ShipTN.OrderType.StandardTransit:
                         {
                             TaskGroupOrders[0].orderTimeRequirement = 0;
@@ -2285,7 +2289,8 @@ namespace Pulsar4X.Entities
                             JumpPoint CurrentJP = TaskGroupOrders[0].target as JumpPoint;
 
                             // Check if we can jump.
-                            if (CurrentJP.CanJump(this, false))
+                            Dictionary<JumpEngineTN, ShipTN> usedJumpEngines;
+                            if (CurrentJP.CanJump(this, true, out usedJumpEngines))
                             {
                                 // Handle the jump here.
                                 // TODO: Put jump transition in it's own function within TaskGroup.
@@ -2325,16 +2330,66 @@ namespace Pulsar4X.Entities
                                     }
                                 }
 
-                                // TODO: Set transit penalties here
+                                /// <summary>
+                                /// No jump gate was used.
+                                /// Set the jump engines used to transit.
+                                /// Set the ship to undergo jump recharge.
+                                /// Set every ship to have jump sickness
+                                /// There should be at most one civ and one military in this situation. assuming a mixed group.
+                                /// </summary>
+                                if (usedJumpEngines != null)
+                                {
+                                    foreach (KeyValuePair<JumpEngineTN,ShipTN> JumpShipPair in usedJumpEngines)
+                                    {
+                                        JumpShipPair.Key.Transit();
+                                        if (TaskGroupFaction.RechargeList.ContainsKey(JumpShipPair.Value) == true)
+                                        {
+                                            if((TaskGroupFaction.RechargeList[JumpShipPair.Value] & (int)Faction.RechargeStatus.JumpRecharge) != (int)Faction.RechargeStatus.JumpRecharge)
+                                            {
+                                                TaskGroupFaction.RechargeList[JumpShipPair.Value] = TaskGroupFaction.RechargeList[JumpShipPair.Value] + (int)Faction.RechargeStatus.JumpRecharge;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            TaskGroupFaction.RechargeList.Add(JumpShipPair.Value, (int)Faction.RechargeStatus.JumpRecharge);
+                                            
+                                        }
+                                        
+                                    }
+                                }
+
+                                /// <summary>
+                                /// Set every ship as jump sick, this is done even if a gate is used.
+                                /// </summary>
+                                foreach (ShipTN CurrentShip in Ships)
+                                {
+                                    CurrentShip.StandardTransit();
+                                    if (TaskGroupFaction.RechargeList.ContainsKey(CurrentShip) == true)
+                                    {
+                                        if ((TaskGroupFaction.RechargeList[CurrentShip] & (int)Faction.RechargeStatus.JumpStandardSickness) != (int)Faction.RechargeStatus.JumpStandardSickness)
+                                        {
+                                            TaskGroupFaction.RechargeList[CurrentShip] = TaskGroupFaction.RechargeList[CurrentShip] + (int)Faction.RechargeStatus.JumpStandardSickness;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        TaskGroupFaction.RechargeList.Add(CurrentShip, (int)Faction.RechargeStatus.JumpStandardSickness);
+
+                                    }
+                                }
                             }
                         }
                         break;
+                    #endregion
+
+                    #region Squadron Transit
                     case (int)Constants.ShipTN.OrderType.SquadronTransit:
                         {
                             TaskGroupOrders[0].orderTimeRequirement = 0;
 
                             // Check if we can jump.
-                            if ((TaskGroupOrders[0].target as JumpPoint).CanJump(this, true))
+                            Dictionary<JumpEngineTN, ShipTN> usedJumpEngines;
+                            if ((TaskGroupOrders[0].target as JumpPoint).CanJump(this, false, out usedJumpEngines))
                             {
                                 // Handle the jump here.
                                 // TODO: Put jump transition in it's own function within TaskGroup.
@@ -2375,10 +2430,83 @@ namespace Pulsar4X.Entities
                                     }
                                 }
 
-                                // TODO: Set transit penalties here
+                                /// <summary>
+                                /// if Jump Engine is null here, it means there was a problem.
+                                /// Set the jump engines used to transit.
+                                /// Set the ship to undergo jump recharge.
+                                /// Set every ship to have jump sickness
+                                /// There should be at least one civ or one military in this situation. potentially more.
+                                /// </summary>
+                                int MinJumpRadius = -1;
+                                if (usedJumpEngines != null)
+                                {
+                                    foreach (KeyValuePair<JumpEngineTN, ShipTN> JumpShipPair in usedJumpEngines)
+                                    {
+                                        if (MinJumpRadius == -1 || JumpShipPair.Key.jumpEngineDef.jumpRadius < MinJumpRadius)
+                                        {
+                                            MinJumpRadius = JumpShipPair.Key.jumpEngineDef.jumpRadius;
+                                        }
+                                        JumpShipPair.Key.Transit();
+                                        if (TaskGroupFaction.RechargeList.ContainsKey(JumpShipPair.Value) == true)
+                                        {
+                                            if ((TaskGroupFaction.RechargeList[JumpShipPair.Value] & (int)Faction.RechargeStatus.JumpRecharge) != (int)Faction.RechargeStatus.JumpRecharge)
+                                            {
+                                                TaskGroupFaction.RechargeList[JumpShipPair.Value] = TaskGroupFaction.RechargeList[JumpShipPair.Value] + (int)Faction.RechargeStatus.JumpRecharge;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            TaskGroupFaction.RechargeList.Add(JumpShipPair.Value, (int)Faction.RechargeStatus.JumpRecharge);
+                                        }
+
+                                    }
+                                }
+                                else
+                                {
+                                    String STE = "Squadron transit happened with no jump engines.";
+                                    MessageEntry nMsg = new MessageEntry(MessageEntry.MessageType.Error, Position.System, this, GameState.Instance.GameDateTime,
+                                                   GameState.Instance.LastTimestep, STE);
+                                    TaskGroupFaction.MessageLog.Add(nMsg);
+                                }
+
+                                /// <summary>
+                                /// Set every ship as jump sick, this is done even if a gate is used.
+                                /// </summary>
+                                foreach (ShipTN CurrentShip in Ships)
+                                {
+                                    CurrentShip.SquadronTransit();
+                                    if (TaskGroupFaction.RechargeList.ContainsKey(CurrentShip) == true)
+                                    {
+                                        if ((TaskGroupFaction.RechargeList[CurrentShip] & (int)Faction.RechargeStatus.JumpSquadronSickness) != (int)Faction.RechargeStatus.JumpSquadronSickness)
+                                        {
+                                            TaskGroupFaction.RechargeList[CurrentShip] = TaskGroupFaction.RechargeList[CurrentShip] + (int)Faction.RechargeStatus.JumpSquadronSickness;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        TaskGroupFaction.RechargeList.Add(CurrentShip, (int)Faction.RechargeStatus.JumpSquadronSickness);
+
+                                    }
+                                }
+
+                                /// <summary>
+                                /// MinJumpRadius is the number of raw km this taskgroup should jump by.
+                                /// </summary>
+                                int degree = GameState.RNG.Next(0, 359);
+                                int Jump = GameState.RNG.Next((int)Math.Floor((float)MinJumpRadius * 0.75f), MinJumpRadius);
+                                double X = Jump * Math.Cos(degree * Constants.Units.RADIAN);
+                                double Y = Jump * Math.Sin(degree * Constants.Units.RADIAN);
+
+                                X = X / Constants.Units.KM_PER_AU;
+                                Y = Y / Constants.Units.KM_PER_AU;
+
+                                Position.X = Position.X + X;
+                                Position.Y = Position.Y + Y;
+                                Contact.UpdateLocationAfterTransit();
                             }
                         }
                         break;
+                    #endregion
 
 
 
@@ -2889,6 +3017,123 @@ namespace Pulsar4X.Entities
             }
 
             return min;
+        }
+        #endregion
+
+
+        #region Jump Transit taskgroup functions.
+        /// <summary>
+        /// This function counts the number of ships of each type in a taskgroup. Yes this can be hardcoded for efficiency on taskgroup formation, but then
+        /// must be tracked through taskgroup destruction.
+        /// </summary>
+        /// <param name="MilCount">Count of military craft</param>
+        /// <param name="ComCount">Count of commercial craft</param>
+        /// <param name="MilMaxHS">Largest military Ship to transit</param>
+        /// <param name="ComMaxHS">Largest commercial Ship to transit</param>
+        public void CountShips(out int MilCount, out int ComCount, out float MilMaxHS, out float ComMaxHS)
+        {
+            MilCount = 0;
+            ComCount = 0;
+            MilMaxHS = 0.0f;
+            ComMaxHS = 0.0f;
+            foreach (ShipTN Ship in Ships)
+            {
+                if (Ship.ShipClass.IsMilitary == true)
+                {
+                    MilCount++;
+
+                    if (Ship.ShipClass.SizeHS > MilMaxHS)
+                        MilMaxHS = Ship.ShipClass.SizeHS;
+                }
+                else
+                {
+                    ComCount++;
+
+                    if (Ship.ShipClass.SizeHS > ComMaxHS)
+                        ComMaxHS = Ship.ShipClass.SizeHS;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get the Commercial and military jump drive accomodation, and get the list of jump engines used.
+        /// </summary>
+        /// <param name="MilMaxHS">largest military hull to jump</param>
+        /// <param name="MilCount">military craft count</param>
+        /// <param name="ComMaxHS">largest commercial hull to jump</param>
+        /// <param name="ComCount">commercial craft count</param>
+        /// <param name="MilAccom">how many military ships can this taskgroup's jump engines accommodate</param>
+        /// <param name="ComAccom">how many commercial ships can this taskgroup's jump engines accommodate</param>
+        /// <param name="usedJumpEngines">jumpengines this will use.</param>
+        public void GetJDAccom(float MilMaxHS, int MilCount, float ComMaxHS, int ComCount, out int MilAccom, out int ComAccom, out Dictionary<JumpEngineTN,ShipTN> usedJumpEngines)
+        {
+            MilAccom = 0;
+            ComAccom = 0;
+            usedJumpEngines = new Dictionary<JumpEngineTN,ShipTN>();
+
+            foreach (ShipTN Ship in Ships)
+            {
+                if (Ship.ShipJumpEngine.Count != 0)
+                {
+                    foreach (JumpEngineTN JE in Ship.ShipJumpEngine)
+                    {
+                        /// <summary>
+                        /// Can't use this jump engine.
+                        /// </summary>
+                        if (JE.CanJump() == false)
+                            continue;
+
+                        /// <summary>
+                        /// if Ship size is less than max jump rating the max jump rating is shipsize.
+                        /// </summary>
+                        float JumpCap = 0;
+                        if (JE.jumpEngineDef.maxJumpRating > Ship.ShipClass.SizeTons)
+                        {
+                            JumpCap = Ship.ShipClass.SizeHS;
+                        }
+                        else
+                        {
+                            JumpCap = (float)JE.jumpEngineDef.maxJumpRating / Constants.ShipTN.TonsPerHS;
+                        }
+
+                        if (JE.jumpEngineDef.isMilitary == true)
+                        {
+                            /// <summary>
+                            /// This jump can accomodate the military craft in this taskgroup
+                            if (JumpCap >= MilMaxHS)
+                            {
+                                /// <summary>
+                                /// This many ships can make the jump.
+                                /// </summary>
+                                MilAccom = MilAccom + JE.jumpEngineDef.squadronSize;
+                                usedJumpEngines.Add(JE,Ship);
+
+                            }
+                        }
+                        else
+                        {
+                            if (JumpCap >= ComMaxHS)
+                            {
+                                ComAccom = ComAccom + JE.jumpEngineDef.squadronSize;
+                                usedJumpEngines.Add(JE,Ship);
+                            }
+                        }
+
+
+                        /// <summary>
+                        /// We're done here.
+                        /// </summary>
+                        if (MilAccom >= MilCount && ComAccom >= ComCount)
+                            break;
+                    }
+
+                    /// <summary>
+                    /// We're done here.
+                    /// </summary>
+                    if (MilAccom >= MilCount && ComAccom >= ComCount)
+                        break;
+                }
+            }
         }
         #endregion
 

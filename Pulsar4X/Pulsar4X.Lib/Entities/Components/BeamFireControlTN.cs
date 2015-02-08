@@ -237,7 +237,7 @@ namespace Pulsar4X.Entities.Components
             /// </summary>
             for (int RangeIncrementIterator = 1; RangeIncrementIterator < RangeIncrement; RangeIncrementIterator++)
             {
-                float MaxRange = RangeIncrementIterator * 2.0f;
+                float MaxRange = m_oRange * 2.0f;
                 float CurRange = RangeIncrementIterator * 10000.0f;
 
                 float Accuracy = (MaxRange - CurRange) / MaxRange;
