@@ -7,6 +7,7 @@ namespace Pulsar4X.Entities
 {
     public enum StarSystemEntityType
     {
+        Invalid,
         Body,
         Waypoint,
         JumpPoint,

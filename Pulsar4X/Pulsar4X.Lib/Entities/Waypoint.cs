@@ -30,6 +30,8 @@ namespace Pulsar4X.Entities
             System = Sys;
             Position.X = X;
             Position.Y = Y;
+
+            SSEntity = StarSystemEntityType.Waypoint;
         }
     }
 }

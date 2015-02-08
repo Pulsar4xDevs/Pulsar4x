@@ -1211,20 +1211,23 @@ namespace Pulsar4X.Entities
                 /// planets (and populations on planets) positions are stored relative to their star.
                 /// I'll need to change all of this AGAIN when moons get rolled out. Gah. do it right then.
                 /// </summary>
-                if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
+                switch (TaskGroupOrders[0].target.SSEntity)
                 {
-                    dX = Contact.Position.X - (TaskGroupOrders[0].target.Position.X + TaskGroupOrders[0].body.Primary.Position.X);
-                    dY = Contact.Position.Y - (TaskGroupOrders[0].target.Position.Y + TaskGroupOrders[0].body.Primary.Position.Y);
-                }
-                else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
-                {
-                    dX = Contact.Position.X - (TaskGroupOrders[0].target.Position.X + TaskGroupOrders[0].pop.Planet.Primary.Position.X);
-                    dY = Contact.Position.Y - (TaskGroupOrders[0].target.Position.Y + TaskGroupOrders[0].pop.Planet.Primary.Position.Y);
-                }
-                else
-                {
-                    dX = Contact.Position.X - TaskGroupOrders[0].target.Position.X;
-                    dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
+                    case StarSystemEntityType.Body:
+                        dX = Contact.Position.X - (TaskGroupOrders[0].target.Position.X + TaskGroupOrders[0].body.Primary.Position.X);
+                        dY = Contact.Position.Y - (TaskGroupOrders[0].target.Position.Y + TaskGroupOrders[0].body.Primary.Position.Y);
+                        break;
+                    case StarSystemEntityType.Population:
+                        dX = Contact.Position.X - (TaskGroupOrders[0].target.Position.X + TaskGroupOrders[0].pop.Planet.Primary.Position.X);
+                        dY = Contact.Position.Y - (TaskGroupOrders[0].target.Position.Y + TaskGroupOrders[0].pop.Planet.Primary.Position.Y);
+                        break;
+                    case StarSystemEntityType.Invalid:
+                        throw new InvalidOperationException("SSEntity Invalid");
+                        break;
+                    default:
+                        dX = Contact.Position.X - TaskGroupOrders[0].target.Position.X;
+                        dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
+                        break;
                 }
 
                 CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
