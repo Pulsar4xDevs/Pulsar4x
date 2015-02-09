@@ -751,9 +751,9 @@ namespace Pulsar4X.UI.Handlers
 
             SystemLocationDict.Clear();
             SystemLocationGuidDict.Clear();
-            AddPlanetsToList();
             AddJumpPointsToList();
-
+            AddPlanetsToList();
+            
             if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
                 AddContactsToList();
 
@@ -1009,6 +1009,7 @@ namespace Pulsar4X.UI.Handlers
 
         /// <summary>
         /// Time and distance or orders should be calculated here based on the radio button selection choices.
+        /// Update: as with the lib taskgroup orders, this function should not be using parent position anymore. all the if blocks are as a result unnecessary.
         /// </summary>
         private void CalculateTimeDistance()
         {
@@ -1027,13 +1028,13 @@ namespace Pulsar4X.UI.Handlers
                 {
                     if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                     {
-                        dX = CurrentTaskGroup.Contact.Position.X - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.X + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.Position.X);
-                        dY = CurrentTaskGroup.Contact.Position.Y - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[0].body.Primary.Position.Y);
+                        dX = CurrentTaskGroup.Contact.Position.X - CurrentTaskGroup.TaskGroupOrders[0].target.Position.X;
+                        dY = CurrentTaskGroup.Contact.Position.Y - CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y;
                     }
                     else if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     {
-                        dX = CurrentTaskGroup.Contact.Position.X - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.X + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.Position.X);
-                        dY = CurrentTaskGroup.Contact.Position.Y - (CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[0].pop.Planet.Primary.Position.Y);
+                        dX = CurrentTaskGroup.Contact.Position.X - CurrentTaskGroup.TaskGroupOrders[0].target.Position.X;
+                        dY = CurrentTaskGroup.Contact.Position.Y - CurrentTaskGroup.TaskGroupOrders[0].target.Position.Y;
                     }
                     else
                     {
@@ -1056,13 +1057,13 @@ namespace Pulsar4X.UI.Handlers
                     {
                         if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                         {
-                            dX = CurrentTaskGroup.Contact.Position.X - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.X);
-                            dY = CurrentTaskGroup.Contact.Position.Y - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.Y);
+                            dX = CurrentTaskGroup.Contact.Position.X - CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X;
+                            dY = CurrentTaskGroup.Contact.Position.Y - CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y;
                         }
                         else if (CurrentTaskGroup.TaskGroupOrders[loop].target.SSEntity == StarSystemEntityType.Population)
                         {
-                            dX = tX - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.X);
-                            dY = tY - (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.Y);
+                            dX = tX - CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X;
+                            dY = tY - CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y;
                         }
                         else
                         {
@@ -1078,13 +1079,13 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (CurrentTaskGroup.TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Body)
                             {
-                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.X);
-                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].body.Primary.Position.Y);
+                                tX = CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X;
+                                tY = CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y;
                             }
                             else if (CurrentTaskGroup.TaskGroupOrders[loop].target.SSEntity == StarSystemEntityType.Population)
                             {
-                                tX = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.X);
-                                tY = (CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y + CurrentTaskGroup.TaskGroupOrders[loop].pop.Planet.Primary.Position.Y);
+                                tX = CurrentTaskGroup.TaskGroupOrders[loop].target.Position.X;
+                                tY = CurrentTaskGroup.TaskGroupOrders[loop].target.Position.Y;
                             }
                             else
                             {
