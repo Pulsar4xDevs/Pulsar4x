@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 
 namespace Pulsar4X.Entities
 {
@@ -9,11 +10,11 @@ namespace Pulsar4X.Entities
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public List<NameEntry> NameEntries { get; set; }
+        public BindingList<NameEntry> NameEntries { get; set; }
 
         public CommanderNameTheme()
         {
-            NameEntries = new List<NameEntry>();
+            NameEntries = new BindingList<NameEntry>();
         }
     }
 
@@ -27,6 +28,7 @@ namespace Pulsar4X.Entities
     public enum NamePosition
     {
         FirstName,
-        LastName
+        LastName,
+        Any
     }
 }

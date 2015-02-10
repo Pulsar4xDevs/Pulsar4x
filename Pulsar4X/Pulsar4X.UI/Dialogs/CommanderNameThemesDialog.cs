@@ -43,10 +43,15 @@ namespace Pulsar4X.UI.Dialogs
             dgvNameEntries.AllowUserToResizeColumns = false;
             dgvNameEntries.ReadOnly = false;
             dgvNameEntries.AutoGenerateColumns = false;
-
+            
             SetupDataGridViewColumns();
 
             dgvNameEntries.DataSource = ViewModel.NameEntryBindingSource;
+
+            // Ugly hack to try and speed up filtering:
+            dgvNameEntries.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            dgvNameEntries.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dgvNameEntries.AutoSize = false;
         }
 
         private void SetupDataGridViewColumns()
@@ -100,6 +105,66 @@ namespace Pulsar4X.UI.Dialogs
             }
 
             ViewModel.SaveTheme();
+        }
+
+        private void btnFilter_Click(object sender, EventArgs e)
+        {
+            // ugly hack to try and speed up filtering:
+            dgvNameEntries.SuspendLayout();
+            dgvNameEntries.ClearSelection();
+            dgvNameEntries.CurrentCell = null;
+            dgvNameEntries.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvNameEntries.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvNameEntries.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+
+            string filterString = txtFilterText.Text.Trim().Replace("'", "''");
+
+            foreach (DataGridViewRow row in dgvNameEntries.Rows)
+            {
+                if (row.Cells[0].Value == null)
+                    continue;                   // skip null/empty values
+
+                string str = row.Cells[0].Value as string;
+
+                if (str.Contains(filterString))
+                {
+                    row.Visible = true;
+                }
+                else
+                {
+                    row.Visible = false;
+                }
+            }
+
+            // ugly hack to try and speed up filtering:
+            dgvNameEntries.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
+            dgvNameEntries.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
+            dgvNameEntries.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
+            dgvNameEntries.ResumeLayout();
+        }
+
+        private void btnClearFilter_Click(object sender, EventArgs e)
+        {
+            // ugly hack to try and speed up filtering:
+            dgvNameEntries.SuspendLayout();
+            dgvNameEntries.ClearSelection();
+            dgvNameEntries.CurrentCell = null;
+            dgvNameEntries.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvNameEntries.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvNameEntries.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+
+            foreach (DataGridViewRow row in dgvNameEntries.Rows)
+            {
+                row.Visible = true;
+            }
+
+            // ugly hack to try and speed up filtering:
+            dgvNameEntries.Columns[0].AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
+            dgvNameEntries.Columns[1].AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
+            dgvNameEntries.Columns[2].AutoSizeMode = DataGridViewAutoSizeColumnMode.NotSet;
+            dgvNameEntries.ResumeLayout();
+            dgvNameEntries.Enabled = true;
+            dgvNameEntries.Visible = true;
         }
     }
 }

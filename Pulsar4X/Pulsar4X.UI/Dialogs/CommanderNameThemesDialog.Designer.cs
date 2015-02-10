@@ -38,9 +38,14 @@
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.dgvNameEntries = new System.Windows.Forms.DataGridView();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.txtFilterText = new System.Windows.Forms.TextBox();
+            this.btnFilter = new System.Windows.Forms.Button();
+            this.btnClearFilter = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvNameEntries)).BeginInit();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -125,9 +130,9 @@
             // groupBox2
             // 
             this.groupBox2.Controls.Add(this.dgvNameEntries);
-            this.groupBox2.Location = new System.Drawing.Point(12, 113);
+            this.groupBox2.Location = new System.Drawing.Point(12, 170);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(351, 381);
+            this.groupBox2.Size = new System.Drawing.Size(351, 429);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Name Entries";
@@ -136,17 +141,57 @@
             // 
             this.dgvNameEntries.AllowUserToResizeRows = false;
             this.dgvNameEntries.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvNameEntries.Location = new System.Drawing.Point(7, 20);
+            this.dgvNameEntries.Location = new System.Drawing.Point(6, 19);
             this.dgvNameEntries.Name = "dgvNameEntries";
             this.dgvNameEntries.RowHeadersVisible = false;
-            this.dgvNameEntries.Size = new System.Drawing.Size(337, 355);
+            this.dgvNameEntries.Size = new System.Drawing.Size(337, 404);
             this.dgvNameEntries.TabIndex = 6;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.btnClearFilter);
+            this.groupBox3.Controls.Add(this.btnFilter);
+            this.groupBox3.Controls.Add(this.txtFilterText);
+            this.groupBox3.Location = new System.Drawing.Point(12, 113);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(351, 51);
+            this.groupBox3.TabIndex = 4;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Filter";
+            // 
+            // txtFilterText
+            // 
+            this.txtFilterText.Location = new System.Drawing.Point(9, 20);
+            this.txtFilterText.Name = "txtFilterText";
+            this.txtFilterText.Size = new System.Drawing.Size(173, 20);
+            this.txtFilterText.TabIndex = 0;
+            // 
+            // btnFilter
+            // 
+            this.btnFilter.Location = new System.Drawing.Point(189, 18);
+            this.btnFilter.Name = "btnFilter";
+            this.btnFilter.Size = new System.Drawing.Size(74, 23);
+            this.btnFilter.TabIndex = 1;
+            this.btnFilter.Text = "Filter";
+            this.btnFilter.UseVisualStyleBackColor = true;
+            this.btnFilter.Click += new System.EventHandler(this.btnFilter_Click);
+            // 
+            // btnClearFilter
+            // 
+            this.btnClearFilter.Location = new System.Drawing.Point(269, 18);
+            this.btnClearFilter.Name = "btnClearFilter";
+            this.btnClearFilter.Size = new System.Drawing.Size(74, 23);
+            this.btnClearFilter.TabIndex = 2;
+            this.btnClearFilter.Text = "Clear";
+            this.btnClearFilter.UseVisualStyleBackColor = true;
+            this.btnClearFilter.Click += new System.EventHandler(this.btnClearFilter_Click);
             // 
             // CommanderNameThemesDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(374, 506);
+            this.ClientSize = new System.Drawing.Size(374, 611);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -156,6 +201,8 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvNameEntries)).EndInit();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -172,5 +219,9 @@
         private System.Windows.Forms.DataGridView dgvNameEntries;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button btnClearFilter;
+        private System.Windows.Forms.Button btnFilter;
+        private System.Windows.Forms.TextBox txtFilterText;
     }
 }

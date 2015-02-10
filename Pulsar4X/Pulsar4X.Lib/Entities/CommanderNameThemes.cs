@@ -6,6 +6,9 @@ using Pulsar4X.Storage;
 
 namespace Pulsar4X.Entities
 {
+    /// <summary>
+    /// Singleton class which automatically loads (and stores) the commander name themes from disk when Pulsar is launched.
+    /// </summary>
     public class CommanderNameThemes
     {
         private static readonly CommanderNameThemes _instance = new CommanderNameThemes();
@@ -16,6 +19,7 @@ namespace Pulsar4X.Entities
         static CommanderNameThemes()
         {
         }
+
         private CommanderNameThemes()
         {
             var bootstrap = new Bootstrap();
