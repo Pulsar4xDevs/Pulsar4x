@@ -1382,6 +1382,12 @@ namespace Pulsar4X
 
             // Size of a LocalGroup.
             public static int JumpPointLocalGroupSize = 10;
+
+            // Determine if Gates are added to JP's on generation.
+            public static bool JumpGatesOnEveryJumpPoint = true;
+
+            // Chance for a null-owned jumpgate to be present on a newly generated JP.
+            public static int JumpPointGatedChance = 10;
         }
     }
 }

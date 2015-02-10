@@ -67,14 +67,23 @@ namespace Pulsar4X.Entities
 
             Id = Guid.NewGuid();
 
-            // JumpPoints won't start off connected, which means that any attempt to transit them must create a new system.
+            // Add ourselves to our system's list of JumpPoints.
+            Sys.JumpPoints.Add(this);
+
+            // JumpPoints won't start off connected, which means that any attempt to transit them must create a new connection.
             Connect = null;
 
-            // How should gate at startup be decided?
-            IsGated = true; // TODO: Make setting to determine if all JP's have gates.
+            Name = "JumpPoint #" + (Sys.JumpPoints.Count);
+
+            IsGated = false;
+            if (Constants.GameSettings.JumpGatesOnEveryJumpPoint || Constants.GameSettings.JumpPointGatedChance > GameState.RNG.Next(101))
+            {
+                IsGated = true;
+                Name = "(G)" + Name;
+            }
+
             GateOwner = null;
 
-            Name = "(G) JumpPoint #" + (Sys.JumpPoints.Count + 1); // Temp: Since all JP's have gates, add "(G)".
         }
 
         /// <summary>
@@ -182,9 +191,6 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Handles connecting unconnected jump points.
         /// This function only handles the connection of JumpPoints to new JumpPoints/Systems
-        /// Currently, we create and link top new systems only.
-        /// 
-        /// TODO: Implement connecting to existing systems.
         /// </summary>
         public void CreateConnection()
         {
@@ -210,7 +216,7 @@ namespace Pulsar4X.Entities
             else
             {
                 // Generating a 'new system'
-                // Note, new system doesn't necessarily not exist.
+                // Note, new system isn't necessarily non-existant.
                 systemIndex = GameState.Instance.StarSystemCurrentIndex;
             }
 
@@ -246,6 +252,7 @@ namespace Pulsar4X.Entities
             }
             else
             {
+                // Select an existing system.
                 connectedSystem = GameState.Instance.StarSystems[systemIndex];
             }
 
@@ -257,37 +264,24 @@ namespace Pulsar4X.Entities
 
             while (systemJumpPoints.Count > 0)
             {
+                // Select a random jump point.
                 int i = GameState.RNG.Next(systemJumpPoints.Count);
                 if (systemJumpPoints[i].Connect == null)
                 {
+                    // If selected JP doesn't have a connection, we use it.
                     connectedJP = systemJumpPoints[i];
                     break;
                 }
 
+                // If selected JP has a connection, remove it from the list, and select another.
                 systemJumpPoints.RemoveAt(i);
             }
+
             if (connectedJP == null)
             {
                 // All JP's are already connected, create a new one.
-                Star selectedStar = connectedSystem.Stars[GameState.RNG.Next(connectedSystem.Stars.Count)];
-
-                double minDistance = double.MaxValue;
-                double maxDistance = double.MinValue;
-
-                foreach (Planet p in selectedStar.Planets)
-                {
-                    // Clamp Min/Max distances for JP
-                    if (p.SemiMajorAxis < minDistance)
-                    {
-                        minDistance = p.SemiMajorAxis;
-                    }
-                    if (p.SemiMajorAxis > maxDistance)
-                    {
-                        maxDistance = p.SemiMajorAxis;
-                    }
-                }
-
-                connectedJP = JumpPoint.CreateJumpPoint(connectedSystem, selectedStar, minDistance, maxDistance);
+                Star parentStar = connectedSystem.Stars[GameState.RNG.Next(connectedSystem.Stars.Count)];
+                connectedJP = JumpPoint.CreateJumpPoint(connectedSystem, parentStar);
             }
 
             // Connect us to them.
@@ -308,9 +302,33 @@ namespace Pulsar4X.Entities
             Position.Y = Parent.Position.Y + YOffset;
         }
 
-        public static JumpPoint CreateJumpPoint(StarSystem system, Star parent, double minDistance, double maxDistance)
+        /// <summary>
+        /// Creates a new jump point in the designated system around the designated star.
+        /// </summary>
+        /// <param name="system">System the JumpPoint will be created in.</param>
+        /// <param name="parent">Star the JumpPoint will be created around.</param>
+        /// <returns>New JumpPoint for use.</returns>
+        public static JumpPoint CreateJumpPoint(StarSystem system, Star parent)
         {
+            double minDistance = double.MaxValue;
+            double maxDistance = double.MinValue;
+
+            // Find the Min/Max limits for JP creation.
+            foreach (Planet p in parent.Planets)
+            {
+                // Clamp Min/Max distances for JP
+                if (p.SemiMajorAxis < minDistance)
+                {
+                    minDistance = p.SemiMajorAxis;
+                }
+                if (p.SemiMajorAxis > maxDistance)
+                {
+                    maxDistance = p.SemiMajorAxis;
+                }
+            }
+
             // Determine a location for the new JP.
+            // Location will be between minDistance and 75% of maxDistance.
             double offsetX = ((maxDistance - minDistance) * GameState.RNG.Next(76) / 100) + minDistance;
             double offsetY = ((maxDistance - minDistance) * GameState.RNG.Next(76) / 100) + minDistance;
 
@@ -324,8 +342,9 @@ namespace Pulsar4X.Entities
                 offsetY = -offsetY;
             }
 
+            // Create the new jumpPoint and link it to it's parent system.
             JumpPoint newJumpPoint = new JumpPoint(system, parent, offsetX, offsetY);
-            system.JumpPoints.Add(newJumpPoint);
+
             return newJumpPoint;
         }
     }

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Pulsar4X.Helpers
 {
-    public class ListChangingEventArgs 
+    public class ListChangingEventArgs : EventArgs
     { 
         public ListChangedType ListChangedType;
         public object ChangingObject;
