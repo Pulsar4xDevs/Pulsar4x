@@ -17,9 +17,13 @@ To compile Pulsar4x you'll need either Visual Studio 2010/2012/2013 or the lates
 The project uses a custom premake4 build, source available [here.](https://bitbucket.org/antagonist/premake-stable). Note that there are pre-compiled versions of Premake as part of the Project Repo.
 
 Instructions:
+
 1. Clone the Git Repo.
+
 2. Run the version of premake appropriate for your platform (premake4.exe for windows, premake4.lin for linux and premake4.osx for Mac OS X). This will build the visual studio solution files (which are also used by MonoDevelop/SharpDevelop).
+
 3. Open the solution file "Pulsar4X\Pulsar4X.sln".
+
 4. Build the "Pulsar4X.UI" project. This will automatically build the Pulsar Library (containing the game logic) as well as the UI. You can find the compile program in "Pulsar4X\Pulsar4X.UI\bin\Debug" or "Pulsar4X\Pulsar4X.UI\bin\Release", depending on the build configuration.
 
 
