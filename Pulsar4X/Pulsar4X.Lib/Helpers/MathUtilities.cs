@@ -12,11 +12,6 @@ namespace Pulsar4X
             //Random = new Random();
         }
 
-        /*public static double About(double value, double variation)
-        {
-            return (value + (value * Random.NextDouble(-variation, variation)));
-        }*/
-
         /* function for 'soft limiting' temperatures */
         public static double Limit(double x)
         {

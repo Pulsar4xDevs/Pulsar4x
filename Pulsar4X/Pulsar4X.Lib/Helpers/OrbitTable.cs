@@ -130,61 +130,6 @@ namespace Pulsar4X.Lib
             theOrbit.TrueAnomaly = trueAnomaly;
 
             radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(trueAnomaly));
-
-            /*bool mirrorSide = false;
-			if( orbitFraction >= 0.5)
-			{
-				mirrorSide = true;
-				orbitFraction = 1.0 - orbitFraction;
-			}*/
-
-
-
-            /*if (theOrbit.Eccentricity >= 0.15)
-            {                
-
-                String Entry = String.Format("TO:{0} E:{1} OF:{2}", theOrbit.Name, theOrbit.Eccentricity, orbitFraction);
-                MessageEntry Msg = new MessageEntry(MessageEntry.MessageType.Count, null, null, GameState.Instance.GameDateTime,
-                                                   GameState.Instance.LastTimestep, Entry);
-                GameState.Instance.Factions[0].MessageLog.Add(Msg);
-            }*/
-
-
-            /*
-            /// <summary>
-            /// Floor and Ceiling of orbitFraction * node Count * 2. orbit fraction appears to be between 0.0 and 0.5
-            /// </summary>
-            int lowerA = (int)(orbitFraction * m_oNodes * 2);
-            int upperA = (int)Math.Ceiling(orbitFraction * m_oNodes * 2);
-
-            /// <summary>
-            /// Floor and ceiling of eccentricity * number of eccentricity steps. 
-            /// </summar>
-            int lowerE = (int)theOrbit.Eccentricity * m_oOrbits;
-            int upperE = (int)Math.Ceiling(theOrbit.Eccentricity * m_oOrbits);
-
-            double lowEA = m_lTable[lowerE, lowerA] + (m_lTable[lowerE, upperA] - m_lTable[lowerE, lowerA]) * (orbitFraction * m_oNodes * 2.0 - lowerA);
-            double highEA = m_lTable[upperE, lowerA] + (m_lTable[upperE, upperA] - m_lTable[upperE, lowerA]) * (orbitFraction * m_oNodes * 2.0 - lowerA);
-
-            angle = lowEA + (highEA - lowEA) * (theOrbit.Eccentricity * m_oOrbits - lowerE);
-
-			if(mirrorSide)
-				angle = Math.PI * 2 - angle;
-
-			//angle += theOrbit.LongitudeOfApogee;
-			//if(angle > Math.PI * 2)
-			//	angle -= Math.PI * 2;
-            */
-
-            /// <summary>
-            /// This is radius from true anomoaly, found a bug in the / part, changed 1 - theOrbit.Eccentricity to 1 + theOrbit.Eccentricity
-            /// r = a(1 – e^2)/(1 + e cos (phi)) phi being true anomaly in this
-            /// If we had the eccentric anomaly the equation would be r = a * (1 - (e * cos E)) E being the eccentric anomaly and e being eccentricity
-            /// (angle+theOrbit.LongitudeOfApogee) appears to be true anomaly
-            /// <summary>
-#warning did we mean / (1 - theOrbit.Eccentricity despite that being incorrect? also corrected all the ones further down.
-            //radius = theOrbit.SemiMajorAxis * (1 - theOrbit.Eccentricity * theOrbit.Eccentricity) / (1 + theOrbit.Eccentricity * Math.Cos(angle+theOrbit.LongitudeOfApogee));
-
         }
 
         public void UpdatePosition(OrbitingEntity theOrbit, long deltaSeconds)

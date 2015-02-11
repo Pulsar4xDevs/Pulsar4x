@@ -152,42 +152,6 @@ namespace Pulsar4X.Entities
             }
             return legalOrders;
         }
-        // The Below causes problems...
-        //public static bool operator ==(GameEntity a_oLeft, GameEntity a_oRight)
-        //{
-        //    if (a_oLeft.Id == a_oRight.Id)
-        //    {
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
-
-        //public static bool operator !=(object a_oLeft, object a_oRight)
-        //{
-        //    if (a_oLeft.Id != a_oRight.Id)
-        //    {
-        //        return true;
-        //    }
-
-        //    return false;
-        //}
-
-        //public override bool Equals(object obj)
-        //{
-        //    if (obj.GetType() != typeof(GameEntity))
-        //    {
-        //        return false;
-        //    }
-
-        //    GameEntity oGameEntity = (GameEntity)obj;
-        //    return oGameEntity == this;
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    return Id.GetHashCode();
-        //}
 
         public virtual void OnPropertyChanged(string propertyName)
         {
