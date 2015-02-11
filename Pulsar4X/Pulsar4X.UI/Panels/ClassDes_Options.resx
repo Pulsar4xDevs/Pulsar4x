@@ -117,4 +117,26 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="txtGlossary.Text" xml:space="preserve">
+    <value>Note, the Following was coppied from Aurora and should be changed to reflect Pulsar better.
+
+BP: Build Points. The cost of the class in both minerals and wealth
+TCS: Target Cross Section. The size (resolution) of the class for purposes of detection by active sensors
+TH: Thermal Signature. The thermal signature of the class at maximum speed. Used for detection by thermal sensors
+EM: EM Signature. The thermal signature of the class with maximum shields. Used for detection by EM sensors
+Armour: The depth and width of the armour belt
+Shields: The strength and recharge time in seconds of any shields
+Sensors: The thermal/EM/gravitational/geological sensor strengths
+Damage Control Rating: A multiplier to the speed at which damage control is carried out
+PPV: Planetary Protection Value. The value of this class in placating colonists concerned about military protection
+Maint Life: An estimate of how long the available MSP will last during continual operations without an overhaul
+MSP: The storage capacity for maintenance supplies
+AFR: Annual Failure Rate. The chance the ship will suffer a component failure over the course of one year
+IFR: Incremental Failure Rate. The chance the ship will suffer a component failure during a single 5-day increment
+MU1: An estimate of how many MSP will be used to repair component failure during the first year after an overhaul
+MU5: An estimate of how many MSP will be used to repair component failure during the first five years after an overhaul
+Max Repair: The maximum repair cost of any individual component. It is a good idea to have more MSP than this.
+
+Note that a class is the basis for all ships of that class. If you change a class after ships of that class have been created, the ships of that class will be changed as well. This is why the design is locked once a shipyard is tooled to build it. However, new players may wish to take advantage of this to unlock classes and fix unintended errors such as forgetting reactors for beam weapons</value>
+  </data>
 </root>

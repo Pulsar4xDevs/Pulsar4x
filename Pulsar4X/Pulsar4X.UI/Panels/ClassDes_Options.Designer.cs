@@ -417,6 +417,7 @@ namespace Pulsar4X.UI.Panels
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ClassDes_Options));
             this.m_oCivGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oShowCivilianDesignsCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oSortCostRadioButton = new System.Windows.Forms.RadioButton();
@@ -587,6 +588,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCrewBerthsTextBox = new System.Windows.Forms.TextBox();
             this.m_oSpareBerthsTextBox = new System.Windows.Forms.TextBox();
             this.m_oCryoBerthsTextBox = new System.Windows.Forms.TextBox();
+            this.txtGlossary = new System.Windows.Forms.TextBox();
             this.m_oCivGroupBox.SuspendLayout();
             this.m_oClassOptionsGroupBox.SuspendLayout();
             this.m_oButtonsGroupBox.SuspendLayout();
@@ -604,6 +606,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrdFightersTab.SuspendLayout();
             this.m_oPreferredStrikeGroupBox.SuspendLayout();
             this.m_oPreferredOrdnanceGroupBox.SuspendLayout();
+            this.m_oGlossaryTab.SuspendLayout();
             this.m_oGeneralInfoGroupBox.SuspendLayout();
             this.m_oBuildPointGroupBox.SuspendLayout();
             this.m_oBuildLoadGroupBox.SuspendLayout();
@@ -1079,9 +1082,9 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oClassDesignTabControl
             // 
-            this.m_oClassDesignTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oClassDesignTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oClassDesignTabControl.Controls.Add(this.m_oSummaryTab);
             this.m_oClassDesignTabControl.Controls.Add(this.m_oDesignTab);
             this.m_oClassDesignTabControl.Controls.Add(this.m_oOrdFightersTab);
@@ -1110,9 +1113,9 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oArmorGroupBox
             // 
-            this.m_oArmorGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oArmorGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oArmorGroupBox.Controls.Add(this.m_oClassSummaryGroupBox);
             this.m_oArmorGroupBox.Controls.Add(this.m_oTargetSpeedGroupBox);
             this.m_oArmorGroupBox.Controls.Add(this.m_oRangeBandsGroupBox);
@@ -1813,6 +1816,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oGlossaryTab
             // 
+            this.m_oGlossaryTab.Controls.Add(this.txtGlossary);
             this.m_oGlossaryTab.Location = new System.Drawing.Point(4, 22);
             this.m_oGlossaryTab.Name = "m_oGlossaryTab";
             this.m_oGlossaryTab.Size = new System.Drawing.Size(1026, 725);
@@ -2384,6 +2388,17 @@ namespace Pulsar4X.UI.Panels
             this.m_oCryoBerthsTextBox.TabIndex = 47;
             this.m_oCryoBerthsTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // txtGlossary
+            // 
+            this.txtGlossary.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtGlossary.Location = new System.Drawing.Point(0, 0);
+            this.txtGlossary.Multiline = true;
+            this.txtGlossary.Name = "txtGlossary";
+            this.txtGlossary.ReadOnly = true;
+            this.txtGlossary.Size = new System.Drawing.Size(1026, 725);
+            this.txtGlossary.TabIndex = 0;
+            this.txtGlossary.Text = resources.GetString("txtGlossary.Text");
+            // 
             // ClassDes_Options
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2426,6 +2441,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrdFightersTab.PerformLayout();
             this.m_oPreferredStrikeGroupBox.ResumeLayout(false);
             this.m_oPreferredOrdnanceGroupBox.ResumeLayout(false);
+            this.m_oGlossaryTab.ResumeLayout(false);
+            this.m_oGlossaryTab.PerformLayout();
             this.m_oGeneralInfoGroupBox.ResumeLayout(false);
             this.m_oGeneralInfoGroupBox.PerformLayout();
             this.m_oBuildPointGroupBox.ResumeLayout(false);
@@ -2614,5 +2631,6 @@ namespace Pulsar4X.UI.Panels
         private RadioButton m_o1xOFRadioButton;
         private Button m_oDeleteStrikeGroupButton;
         private Button m_oSMLoadShipsButton;
+        private TextBox txtGlossary;
     }
 }
