@@ -9,6 +9,17 @@ using System.Drawing;
 
 namespace Pulsar4X.Entities
 {
+    public enum StarSpectrum
+    {
+        O,
+        B,
+        A,
+        F,
+        G,
+        K,
+        M
+    }
+
     public class Star : OrbitingEntity
     {
         double XGalactic { get; set; }
