@@ -322,6 +322,50 @@ namespace Pulsar4X.UI.Panels
             }
         }
 
+
+        public ComboBox MiniumRankComboBox
+        {
+            get { return m_oMiniumRankComboBox; }
+        }
+
+        public TextBox ClassPriority
+        {
+            get { return m_oClassPriorityTextBox;  }
+        }
+
+        public Button SetRankInfoAndClassPriority
+        {
+            get { return m_oSetRankInfoButton;  }
+        }
+
+        /// <summary>
+        /// Allows the player to select a list of names this class will use.
+        /// </summary>
+        public ComboBox NameType
+        {
+            get { return m_oNameTypeComboBox;  }
+        }
+
+        public ComboBox RefitFromSelection
+        {
+            get { return m_oRefitCostFromSelectionComboBox; }
+        }
+
+        public TextBox RefitCostFrom
+        {
+            get { return m_oRefitCostFromTextBox;  }
+        }
+
+        public RichTextBox Notes
+        {
+            get { return m_oNotesRichTextBox; }
+        }
+
+        public Button SaveNotes
+        {
+            get { return m_oSaveNotesButton;  }
+        }
+
         #endregion
 
         /// <summary>
@@ -458,6 +502,7 @@ namespace Pulsar4X.UI.Panels
         }
 
         #endregion
+
 
     }
 }

@@ -589,6 +589,21 @@ namespace Pulsar4X.UI.Panels
             this.m_oSpareBerthsTextBox = new System.Windows.Forms.TextBox();
             this.m_oCryoBerthsTextBox = new System.Windows.Forms.TextBox();
             this.txtGlossary = new System.Windows.Forms.TextBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.m_oMiniumRankComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oClassPriorityTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSetRankInfoButton = new System.Windows.Forms.Button();
+            this.m_oNameTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oEligibleAdditionalClassesTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.m_oRefitCostFromSelectionComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oRefitCostFromTextBox = new System.Windows.Forms.TextBox();
+            this.m_oNotesRichTextBox = new System.Windows.Forms.RichTextBox();
+            this.m_oSaveNotesButton = new System.Windows.Forms.Button();
             this.m_oCivGroupBox.SuspendLayout();
             this.m_oClassOptionsGroupBox.SuspendLayout();
             this.m_oButtonsGroupBox.SuspendLayout();
@@ -606,6 +621,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrdFightersTab.SuspendLayout();
             this.m_oPreferredStrikeGroupBox.SuspendLayout();
             this.m_oPreferredOrdnanceGroupBox.SuspendLayout();
+            this.m_oDACRankInfoTab.SuspendLayout();
             this.m_oGlossaryTab.SuspendLayout();
             this.m_oGeneralInfoGroupBox.SuspendLayout();
             this.m_oBuildPointGroupBox.SuspendLayout();
@@ -613,6 +629,10 @@ namespace Pulsar4X.UI.Panels
             this.m_oPowerSystemGroupBox.SuspendLayout();
             this.m_oPassiveDefGroupBox.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oCivGroupBox
@@ -1798,6 +1818,11 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oDACRankInfoTab
             // 
+            this.m_oDACRankInfoTab.Controls.Add(this.groupBox6);
+            this.m_oDACRankInfoTab.Controls.Add(this.groupBox5);
+            this.m_oDACRankInfoTab.Controls.Add(this.groupBox3);
+            this.m_oDACRankInfoTab.Controls.Add(this.groupBox2);
+            this.m_oDACRankInfoTab.Controls.Add(this.groupBox1);
             this.m_oDACRankInfoTab.Location = new System.Drawing.Point(4, 22);
             this.m_oDACRankInfoTab.Name = "m_oDACRankInfoTab";
             this.m_oDACRankInfoTab.Size = new System.Drawing.Size(1026, 725);
@@ -2399,6 +2424,148 @@ namespace Pulsar4X.UI.Panels
             this.txtGlossary.TabIndex = 0;
             this.txtGlossary.Text = resources.GetString("txtGlossary.Text");
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.m_oSetRankInfoButton);
+            this.groupBox1.Controls.Add(this.m_oClassPriorityTextBox);
+            this.groupBox1.Controls.Add(this.m_oMiniumRankComboBox);
+            this.groupBox1.Location = new System.Drawing.Point(8, 4);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(354, 48);
+            this.groupBox1.TabIndex = 0;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Minium Rank and Class Priority";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.m_oNameTypeComboBox);
+            this.groupBox2.Location = new System.Drawing.Point(8, 54);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(353, 47);
+            this.groupBox2.TabIndex = 1;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Name Type";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.m_oRefitCostFromTextBox);
+            this.groupBox3.Controls.Add(this.m_oRefitCostFromSelectionComboBox);
+            this.groupBox3.Controls.Add(this.label1);
+            this.groupBox3.Controls.Add(this.m_oEligibleAdditionalClassesTextBox);
+            this.groupBox3.Location = new System.Drawing.Point(8, 107);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(354, 196);
+            this.groupBox3.TabIndex = 2;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Eligible Additional Classes if this is a primary class for a shipyard";
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.m_oSaveNotesButton);
+            this.groupBox5.Controls.Add(this.m_oNotesRichTextBox);
+            this.groupBox5.Location = new System.Drawing.Point(8, 309);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(354, 413);
+            this.groupBox5.TabIndex = 3;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Notes";
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Location = new System.Drawing.Point(367, 4);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(655, 718);
+            this.groupBox6.TabIndex = 4;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "Damage Allocation Chart";
+            // 
+            // m_oMiniumRankComboBox
+            // 
+            this.m_oMiniumRankComboBox.FormattingEnabled = true;
+            this.m_oMiniumRankComboBox.Location = new System.Drawing.Point(6, 16);
+            this.m_oMiniumRankComboBox.Name = "m_oMiniumRankComboBox";
+            this.m_oMiniumRankComboBox.Size = new System.Drawing.Size(194, 21);
+            this.m_oMiniumRankComboBox.TabIndex = 0;
+            // 
+            // m_oClassPriorityTextBox
+            // 
+            this.m_oClassPriorityTextBox.Location = new System.Drawing.Point(226, 17);
+            this.m_oClassPriorityTextBox.Name = "m_oClassPriorityTextBox";
+            this.m_oClassPriorityTextBox.Size = new System.Drawing.Size(54, 20);
+            this.m_oClassPriorityTextBox.TabIndex = 1;
+            this.m_oClassPriorityTextBox.Text = "0";
+            this.m_oClassPriorityTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSetRankInfoButton
+            // 
+            this.m_oSetRankInfoButton.Location = new System.Drawing.Point(296, 15);
+            this.m_oSetRankInfoButton.Name = "m_oSetRankInfoButton";
+            this.m_oSetRankInfoButton.Size = new System.Drawing.Size(51, 23);
+            this.m_oSetRankInfoButton.TabIndex = 2;
+            this.m_oSetRankInfoButton.Text = "Set";
+            this.m_oSetRankInfoButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oNameTypeComboBox
+            // 
+            this.m_oNameTypeComboBox.FormattingEnabled = true;
+            this.m_oNameTypeComboBox.Location = new System.Drawing.Point(6, 17);
+            this.m_oNameTypeComboBox.Name = "m_oNameTypeComboBox";
+            this.m_oNameTypeComboBox.Size = new System.Drawing.Size(341, 21);
+            this.m_oNameTypeComboBox.TabIndex = 0;
+            // 
+            // m_oEligibleAdditionalClassesTextBox
+            // 
+            this.m_oEligibleAdditionalClassesTextBox.Location = new System.Drawing.Point(7, 19);
+            this.m_oEligibleAdditionalClassesTextBox.Multiline = true;
+            this.m_oEligibleAdditionalClassesTextBox.Name = "m_oEligibleAdditionalClassesTextBox";
+            this.m_oEligibleAdditionalClassesTextBox.ReadOnly = true;
+            this.m_oEligibleAdditionalClassesTextBox.Size = new System.Drawing.Size(341, 142);
+            this.m_oEligibleAdditionalClassesTextBox.TabIndex = 0;
+            this.m_oEligibleAdditionalClassesTextBox.Text = "None";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 169);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(82, 13);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Refit Cost From:";
+            // 
+            // m_oRefitCostFromSelectionComboBox
+            // 
+            this.m_oRefitCostFromSelectionComboBox.FormattingEnabled = true;
+            this.m_oRefitCostFromSelectionComboBox.Location = new System.Drawing.Point(95, 166);
+            this.m_oRefitCostFromSelectionComboBox.Name = "m_oRefitCostFromSelectionComboBox";
+            this.m_oRefitCostFromSelectionComboBox.Size = new System.Drawing.Size(165, 21);
+            this.m_oRefitCostFromSelectionComboBox.TabIndex = 2;
+            // 
+            // m_oRefitCostFromTextBox
+            // 
+            this.m_oRefitCostFromTextBox.Location = new System.Drawing.Point(266, 167);
+            this.m_oRefitCostFromTextBox.Name = "m_oRefitCostFromTextBox";
+            this.m_oRefitCostFromTextBox.Size = new System.Drawing.Size(81, 20);
+            this.m_oRefitCostFromTextBox.TabIndex = 3;
+            this.m_oRefitCostFromTextBox.Text = "0";
+            this.m_oRefitCostFromTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oNotesRichTextBox
+            // 
+            this.m_oNotesRichTextBox.Location = new System.Drawing.Point(10, 15);
+            this.m_oNotesRichTextBox.Name = "m_oNotesRichTextBox";
+            this.m_oNotesRichTextBox.Size = new System.Drawing.Size(337, 358);
+            this.m_oNotesRichTextBox.TabIndex = 0;
+            this.m_oNotesRichTextBox.Text = "Notes";
+            // 
+            // m_oSaveNotesButton
+            // 
+            this.m_oSaveNotesButton.Location = new System.Drawing.Point(130, 380);
+            this.m_oSaveNotesButton.Name = "m_oSaveNotesButton";
+            this.m_oSaveNotesButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oSaveNotesButton.TabIndex = 1;
+            this.m_oSaveNotesButton.Text = "Save";
+            this.m_oSaveNotesButton.UseVisualStyleBackColor = true;
+            // 
             // ClassDes_Options
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -2441,6 +2608,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oOrdFightersTab.PerformLayout();
             this.m_oPreferredStrikeGroupBox.ResumeLayout(false);
             this.m_oPreferredOrdnanceGroupBox.ResumeLayout(false);
+            this.m_oDACRankInfoTab.ResumeLayout(false);
             this.m_oGlossaryTab.ResumeLayout(false);
             this.m_oGlossaryTab.PerformLayout();
             this.m_oGeneralInfoGroupBox.ResumeLayout(false);
@@ -2455,6 +2623,12 @@ namespace Pulsar4X.UI.Panels
             this.m_oPassiveDefGroupBox.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2632,5 +2806,20 @@ namespace Pulsar4X.UI.Panels
         private Button m_oDeleteStrikeGroupButton;
         private Button m_oSMLoadShipsButton;
         private TextBox txtGlossary;
+        private GroupBox groupBox6;
+        private GroupBox groupBox5;
+        private GroupBox groupBox3;
+        private GroupBox groupBox2;
+        private ComboBox m_oNameTypeComboBox;
+        private GroupBox groupBox1;
+        private Button m_oSetRankInfoButton;
+        private TextBox m_oClassPriorityTextBox;
+        private ComboBox m_oMiniumRankComboBox;
+        private Button m_oSaveNotesButton;
+        private RichTextBox m_oNotesRichTextBox;
+        private TextBox m_oRefitCostFromTextBox;
+        private ComboBox m_oRefitCostFromSelectionComboBox;
+        private Label label1;
+        private TextBox m_oEligibleAdditionalClassesTextBox;
     }
 }

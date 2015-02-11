@@ -925,6 +925,7 @@ namespace Pulsar4X.Entities
             IsLocked = false;
             MilitaryComponentCount = 0;
             PlanetaryProtectionValue = 0;
+            Notes = "None.";
 
             ListOfComponentDefs = new BindingList<ComponentDefTN>();
             ListOfComponentDefsCount = new BindingList<short>();

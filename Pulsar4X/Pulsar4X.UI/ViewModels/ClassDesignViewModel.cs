@@ -64,6 +64,17 @@ namespace Pulsar4X.UI.ViewModels
             }
         }
 
+        private string _CurrentShipClassNotes;
+        public string CurrentShipClassNotes
+        {
+            get { return _CurrentShipClassNotes; }
+            set
+            {
+                _CurrentShipClassNotes = value;
+                OnPropertyChanged(() => CurrentShipClassNotes);
+            }
+        }
+
         private BindingList<ShipClassTN> _ShipDesigns;
         public BindingList<ShipClassTN> ShipDesigns
         {
@@ -133,6 +144,9 @@ namespace Pulsar4X.UI.ViewModels
         {
             if (ShipClassChanged != null)
             {
+                // update VM properties:
+                _CurrentShipClassNotes = _CurrentShipClass.Notes;
+
                 ShipClassChanged(this, new EventArgs());
             }
         }

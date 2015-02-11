@@ -222,6 +222,8 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += (s, args) => m_oOptionsPanel.ClassComboBox.DataBindings["SelectedItem"].WriteValue();
             m_oOptionsPanel.ClassComboBox.SelectedIndexChanged += new EventHandler(ClassComboBox_SelectedIndexChanged);
 
+            m_oOptionsPanel.Notes.Bind(c => c.Text, VM, d => d.CurrentShipClassNotes);
+
             //if (VM.CurrentShipClass != null)
             //{
             //    m_oClassPropertiesPanel.ClassPropertyGrid.SelectedObject = VM.CurrentShipClass;
@@ -275,6 +277,7 @@ namespace Pulsar4X.UI.Handlers
             m_oOptionsPanel.NewArmorButton.Click += new EventHandler(NewArmorButton_Click);
             m_oOptionsPanel.DesignTechButton.Click += new EventHandler(DesignTechButton_Click);
             m_oOptionsPanel.RenameButton.Click += new EventHandler(RenameButton_Click);
+            m_oOptionsPanel.SaveNotes.Click += new EventHandler(SaveNotesButton_Click);
 
             /// <summary>
             /// Rename Class Button Handlers:
@@ -564,6 +567,19 @@ namespace Pulsar4X.UI.Handlers
                 m_oRenameClassPanel.ShowDialog();
                 m_oRenameClassPanel.RenameClassTextBox.Focus();
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+            }
+        }
+
+        /// <summary>
+        /// Saves changes to the class notes text box back to the class.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SaveNotesButton_Click(object sender, EventArgs e)
+        {
+            if (_CurrnetShipClass != null)
+            {
+                _CurrnetShipClass.Notes = VM.CurrentShipClassNotes;
             }
         }
 
@@ -1143,6 +1159,8 @@ namespace Pulsar4X.UI.Handlers
                 BuildOrdnanceFighterTab();
 
                 BuildErrorBox();
+
+                UpdateDACRankInfoTab();
             }
         }
 
@@ -4136,6 +4154,14 @@ namespace Pulsar4X.UI.Handlers
         {
             BuildMissileListBox();
             BuildMissileDataGrid();
+        }
+
+        /// <summary>
+        /// Updates the display on the DAC / Rank / Info tab
+        /// </summary>
+        private void UpdateDACRankInfoTab()
+        {
+            m_oOptionsPanel.Notes.Text = _CurrnetShipClass.Notes;
         }
 
         /// <summary>
