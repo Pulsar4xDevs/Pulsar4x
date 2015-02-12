@@ -463,11 +463,12 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupTabControl.MinimumSize = new System.Drawing.Size(600, 400);
             this.m_oTaskGroupTabControl.Name = "m_oTaskGroupTabControl";
             this.m_oTaskGroupTabControl.SelectedIndex = 0;
-            this.m_oTaskGroupTabControl.Size = new System.Drawing.Size(991, 425);
+            this.m_oTaskGroupTabControl.Size = new System.Drawing.Size(991, 455);
             this.m_oTaskGroupTabControl.TabIndex = 39;
             // 
             // m_oTaskGroupOrdersTabPage
             // 
+            this.m_oTaskGroupOrdersTabPage.AutoScroll = true;
             this.m_oTaskGroupOrdersTabPage.BackColor = System.Drawing.SystemColors.Control;
             this.m_oTaskGroupOrdersTabPage.Controls.Add(this.groupBox6);
             this.m_oTaskGroupOrdersTabPage.Controls.Add(this.groupBox5);
@@ -481,7 +482,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersTabPage.Location = new System.Drawing.Point(4, 22);
             this.m_oTaskGroupOrdersTabPage.Name = "m_oTaskGroupOrdersTabPage";
             this.m_oTaskGroupOrdersTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oTaskGroupOrdersTabPage.Size = new System.Drawing.Size(983, 399);
+            this.m_oTaskGroupOrdersTabPage.Size = new System.Drawing.Size(983, 429);
             this.m_oTaskGroupOrdersTabPage.TabIndex = 0;
             this.m_oTaskGroupOrdersTabPage.Text = "Task Group Orders";
             // 
@@ -509,17 +510,17 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oPlottedMoveListBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oActionsAvailableListBox);
             this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oSystemLocationsListBox);
-            this.m_oTaskGroupOrdersBox.Location = new System.Drawing.Point(165, 74);
+            this.m_oTaskGroupOrdersBox.Location = new System.Drawing.Point(165, 68);
             this.m_oTaskGroupOrdersBox.MinimumSize = new System.Drawing.Size(800, 205);
             this.m_oTaskGroupOrdersBox.Name = "m_oTaskGroupOrdersBox";
-            this.m_oTaskGroupOrdersBox.Size = new System.Drawing.Size(805, 316);
+            this.m_oTaskGroupOrdersBox.Size = new System.Drawing.Size(805, 355);
             this.m_oTaskGroupOrdersBox.TabIndex = 33;
             this.m_oTaskGroupOrdersBox.TabStop = false;
             // 
             // m_oRepeatOrdersTextBox
             // 
             this.m_oRepeatOrdersTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRepeatOrdersTextBox.Location = new System.Drawing.Point(765, 272);
+            this.m_oRepeatOrdersTextBox.Location = new System.Drawing.Point(765, 311);
             this.m_oRepeatOrdersTextBox.Name = "m_oRepeatOrdersTextBox";
             this.m_oRepeatOrdersTextBox.Size = new System.Drawing.Size(27, 20);
             this.m_oRepeatOrdersTextBox.TabIndex = 44;
@@ -529,7 +530,7 @@ namespace Pulsar4X.UI.Panels
             // m_oRepeatOrderButton
             // 
             this.m_oRepeatOrderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRepeatOrderButton.Location = new System.Drawing.Point(690, 270);
+            this.m_oRepeatOrderButton.Location = new System.Drawing.Point(690, 309);
             this.m_oRepeatOrderButton.Name = "m_oRepeatOrderButton";
             this.m_oRepeatOrderButton.Size = new System.Drawing.Size(61, 26);
             this.m_oRepeatOrderButton.TabIndex = 43;
@@ -541,7 +542,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCycleMovesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oCycleMovesCheckBox.AutoSize = true;
             this.m_oCycleMovesCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCycleMovesCheckBox.Location = new System.Drawing.Point(690, 240);
+            this.m_oCycleMovesCheckBox.Location = new System.Drawing.Point(690, 279);
             this.m_oCycleMovesCheckBox.MaximumSize = new System.Drawing.Size(102, 17);
             this.m_oCycleMovesCheckBox.MinimumSize = new System.Drawing.Size(102, 17);
             this.m_oCycleMovesCheckBox.Name = "m_oCycleMovesCheckBox";
@@ -553,7 +554,7 @@ namespace Pulsar4X.UI.Panels
             // m_oOrderDelayTextBox
             // 
             this.m_oOrderDelayTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oOrderDelayTextBox.Location = new System.Drawing.Point(597, 273);
+            this.m_oOrderDelayTextBox.Location = new System.Drawing.Point(597, 312);
             this.m_oOrderDelayTextBox.Name = "m_oOrderDelayTextBox";
             this.m_oOrderDelayTextBox.Size = new System.Drawing.Size(77, 20);
             this.m_oOrderDelayTextBox.TabIndex = 42;
@@ -564,7 +565,7 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oOrderDelayLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oOrderDelayLabel.AutoSize = true;
-            this.m_oOrderDelayLabel.Location = new System.Drawing.Point(528, 276);
+            this.m_oOrderDelayLabel.Location = new System.Drawing.Point(528, 315);
             this.m_oOrderDelayLabel.Name = "m_oOrderDelayLabel";
             this.m_oOrderDelayLabel.Size = new System.Drawing.Size(63, 13);
             this.m_oOrderDelayLabel.TabIndex = 41;
@@ -575,7 +576,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oAutoRouteCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oAutoRouteCheckBox.AutoSize = true;
             this.m_oAutoRouteCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(519, 240);
+            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(519, 279);
             this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(155, 17);
             this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(155, 17);
             this.m_oAutoRouteCheckBox.Name = "m_oAutoRouteCheckBox";
@@ -588,7 +589,7 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oLoadAmtTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oLoadAmtTextBox.Enabled = false;
-            this.m_oLoadAmtTextBox.Location = new System.Drawing.Point(437, 276);
+            this.m_oLoadAmtTextBox.Location = new System.Drawing.Point(437, 315);
             this.m_oLoadAmtTextBox.Name = "m_oLoadAmtTextBox";
             this.m_oLoadAmtTextBox.Size = new System.Drawing.Size(56, 20);
             this.m_oLoadAmtTextBox.TabIndex = 40;
@@ -598,7 +599,7 @@ namespace Pulsar4X.UI.Panels
             // m_oOrbitalDistanceTextBox
             // 
             this.m_oOrbitalDistanceTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oOrbitalDistanceTextBox.Location = new System.Drawing.Point(437, 247);
+            this.m_oOrbitalDistanceTextBox.Location = new System.Drawing.Point(437, 286);
             this.m_oOrbitalDistanceTextBox.Name = "m_oOrbitalDistanceTextBox";
             this.m_oOrbitalDistanceTextBox.Size = new System.Drawing.Size(56, 20);
             this.m_oOrbitalDistanceTextBox.TabIndex = 35;
@@ -610,7 +611,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oLoadLimitLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oLoadLimitLabel.AutoSize = true;
             this.m_oLoadLimitLabel.Enabled = false;
-            this.m_oLoadLimitLabel.Location = new System.Drawing.Point(273, 279);
+            this.m_oLoadLimitLabel.Location = new System.Drawing.Point(273, 318);
             this.m_oLoadLimitLabel.Name = "m_oLoadLimitLabel";
             this.m_oLoadLimitLabel.Size = new System.Drawing.Size(129, 13);
             this.m_oLoadLimitLabel.TabIndex = 39;
@@ -620,7 +621,7 @@ namespace Pulsar4X.UI.Panels
             // 
             this.m_oOrbitalDistanceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.m_oOrbitalDistanceLabel.AutoSize = true;
-            this.m_oOrbitalDistanceLabel.Location = new System.Drawing.Point(273, 250);
+            this.m_oOrbitalDistanceLabel.Location = new System.Drawing.Point(273, 289);
             this.m_oOrbitalDistanceLabel.Name = "m_oOrbitalDistanceLabel";
             this.m_oOrbitalDistanceLabel.Size = new System.Drawing.Size(114, 13);
             this.m_oOrbitalDistanceLabel.TabIndex = 38;
@@ -629,7 +630,7 @@ namespace Pulsar4X.UI.Panels
             // m_oRemoveAllButton
             // 
             this.m_oRemoveAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRemoveAllButton.Location = new System.Drawing.Point(173, 279);
+            this.m_oRemoveAllButton.Location = new System.Drawing.Point(173, 318);
             this.m_oRemoveAllButton.Name = "m_oRemoveAllButton";
             this.m_oRemoveAllButton.Size = new System.Drawing.Size(82, 31);
             this.m_oRemoveAllButton.TabIndex = 37;
@@ -639,7 +640,7 @@ namespace Pulsar4X.UI.Panels
             // m_oRemoveButton
             // 
             this.m_oRemoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRemoveButton.Location = new System.Drawing.Point(85, 279);
+            this.m_oRemoveButton.Location = new System.Drawing.Point(85, 318);
             this.m_oRemoveButton.Name = "m_oRemoveButton";
             this.m_oRemoveButton.Size = new System.Drawing.Size(82, 31);
             this.m_oRemoveButton.TabIndex = 36;
@@ -649,7 +650,7 @@ namespace Pulsar4X.UI.Panels
             // m_oAddMoveButton
             // 
             this.m_oAddMoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oAddMoveButton.Location = new System.Drawing.Point(1, 279);
+            this.m_oAddMoveButton.Location = new System.Drawing.Point(1, 318);
             this.m_oAddMoveButton.Name = "m_oAddMoveButton";
             this.m_oAddMoveButton.Size = new System.Drawing.Size(78, 31);
             this.m_oAddMoveButton.TabIndex = 35;
@@ -691,7 +692,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oPlottedMoveListBox.FormattingEnabled = true;
             this.m_oPlottedMoveListBox.Location = new System.Drawing.Point(517, 32);
             this.m_oPlottedMoveListBox.Name = "m_oPlottedMoveListBox";
-            this.m_oPlottedMoveListBox.Size = new System.Drawing.Size(276, 199);
+            this.m_oPlottedMoveListBox.Size = new System.Drawing.Size(276, 238);
             this.m_oPlottedMoveListBox.TabIndex = 3;
             // 
             // m_oActionsAvailableListBox
@@ -702,7 +703,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oActionsAvailableListBox.FormattingEnabled = true;
             this.m_oActionsAvailableListBox.Location = new System.Drawing.Point(259, 32);
             this.m_oActionsAvailableListBox.Name = "m_oActionsAvailableListBox";
-            this.m_oActionsAvailableListBox.Size = new System.Drawing.Size(245, 199);
+            this.m_oActionsAvailableListBox.Size = new System.Drawing.Size(245, 238);
             this.m_oActionsAvailableListBox.TabIndex = 2;
             // 
             // m_oSystemLocationsListBox
@@ -713,7 +714,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSystemLocationsListBox.FormattingEnabled = true;
             this.m_oSystemLocationsListBox.Location = new System.Drawing.Point(4, 32);
             this.m_oSystemLocationsListBox.Name = "m_oSystemLocationsListBox";
-            this.m_oSystemLocationsListBox.Size = new System.Drawing.Size(245, 238);
+            this.m_oSystemLocationsListBox.Size = new System.Drawing.Size(245, 277);
             this.m_oSystemLocationsListBox.TabIndex = 1;
             // 
             // m_oCopyOrdersGroupBox
@@ -722,7 +723,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncDefaultCheckBox);
             this.m_oCopyOrdersGroupBox.Controls.Add(this.checkBox1);
             this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oCopyOrdersButton);
-            this.m_oCopyOrdersGroupBox.Location = new System.Drawing.Point(751, 6);
+            this.m_oCopyOrdersGroupBox.Location = new System.Drawing.Point(751, 3);
             this.m_oCopyOrdersGroupBox.MaximumSize = new System.Drawing.Size(219, 68);
             this.m_oCopyOrdersGroupBox.MinimumSize = new System.Drawing.Size(219, 68);
             this.m_oCopyOrdersGroupBox.Name = "m_oCopyOrdersGroupBox";
@@ -1527,7 +1528,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSaveEscortsButton.Name = "m_oSaveEscortsButton";
             this.m_oSaveEscortsButton.Size = new System.Drawing.Size(70, 25);
             this.m_oSaveEscortsButton.TabIndex = 75;
-            this.m_oSaveEscortsButton.Text = "Save Escorts";
+            this.m_oSaveEscortsButton.Text = "Save";
             this.m_oSaveEscortsButton.UseVisualStyleBackColor = true;
             // 
             // m_oDetachButton
@@ -1549,7 +1550,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oRecallEscortsButton.Name = "m_oRecallEscortsButton";
             this.m_oRecallEscortsButton.Size = new System.Drawing.Size(70, 25);
             this.m_oRecallEscortsButton.TabIndex = 65;
-            this.m_oRecallEscortsButton.Text = "Recall Escorts";
+            this.m_oRecallEscortsButton.Text = "Recall";
             this.m_oRecallEscortsButton.UseVisualStyleBackColor = true;
             // 
             // m_oEscortButton
@@ -1571,7 +1572,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oDeployEscortsButton.Name = "m_oDeployEscortsButton";
             this.m_oDeployEscortsButton.Size = new System.Drawing.Size(70, 25);
             this.m_oDeployEscortsButton.TabIndex = 66;
-            this.m_oDeployEscortsButton.Text = "Deploy Escorts";
+            this.m_oDeployEscortsButton.Text = "Deploy";
             this.m_oDeployEscortsButton.UseVisualStyleBackColor = true;
             // 
             // groupBox2
@@ -1593,7 +1594,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oEqualizeMaintButton.Name = "m_oEqualizeMaintButton";
             this.m_oEqualizeMaintButton.Size = new System.Drawing.Size(70, 25);
             this.m_oEqualizeMaintButton.TabIndex = 62;
-            this.m_oEqualizeMaintButton.Text = "Maintenance";
+            this.m_oEqualizeMaintButton.Text = "Maint.";
             this.m_oEqualizeMaintButton.UseVisualStyleBackColor = true;
             // 
             // m_oEqualizeFuelButton
@@ -1658,7 +1659,9 @@ namespace Pulsar4X.UI.Panels
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(1008, 661);
+            this.AutoScrollMargin = new System.Drawing.Size(3, 3);
+            this.AutoScrollMinSize = new System.Drawing.Size(995, 680);
+            this.ClientSize = new System.Drawing.Size(1008, 691);
             this.Controls.Add(this.m_oButtonBox);
             this.Controls.Add(this.m_oTaskGroupTabControl);
             this.Controls.Add(this.m_oGeneralTGDetailsBox);
