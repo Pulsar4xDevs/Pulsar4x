@@ -468,7 +468,6 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oTaskGroupOrdersTabPage
             // 
-            this.m_oTaskGroupOrdersTabPage.AutoScroll = true;
             this.m_oTaskGroupOrdersTabPage.BackColor = System.Drawing.SystemColors.Control;
             this.m_oTaskGroupOrdersTabPage.Controls.Add(this.groupBox6);
             this.m_oTaskGroupOrdersTabPage.Controls.Add(this.groupBox5);
@@ -630,7 +629,7 @@ namespace Pulsar4X.UI.Panels
             // m_oRemoveAllButton
             // 
             this.m_oRemoveAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRemoveAllButton.Location = new System.Drawing.Point(173, 318);
+            this.m_oRemoveAllButton.Location = new System.Drawing.Point(172, 303);
             this.m_oRemoveAllButton.Name = "m_oRemoveAllButton";
             this.m_oRemoveAllButton.Size = new System.Drawing.Size(82, 31);
             this.m_oRemoveAllButton.TabIndex = 37;
@@ -640,7 +639,7 @@ namespace Pulsar4X.UI.Panels
             // m_oRemoveButton
             // 
             this.m_oRemoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRemoveButton.Location = new System.Drawing.Point(85, 318);
+            this.m_oRemoveButton.Location = new System.Drawing.Point(84, 303);
             this.m_oRemoveButton.Name = "m_oRemoveButton";
             this.m_oRemoveButton.Size = new System.Drawing.Size(82, 31);
             this.m_oRemoveButton.TabIndex = 36;
@@ -650,7 +649,7 @@ namespace Pulsar4X.UI.Panels
             // m_oAddMoveButton
             // 
             this.m_oAddMoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oAddMoveButton.Location = new System.Drawing.Point(1, 318);
+            this.m_oAddMoveButton.Location = new System.Drawing.Point(1, 303);
             this.m_oAddMoveButton.Name = "m_oAddMoveButton";
             this.m_oAddMoveButton.Size = new System.Drawing.Size(78, 31);
             this.m_oAddMoveButton.TabIndex = 35;
@@ -714,7 +713,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSystemLocationsListBox.FormattingEnabled = true;
             this.m_oSystemLocationsListBox.Location = new System.Drawing.Point(4, 32);
             this.m_oSystemLocationsListBox.Name = "m_oSystemLocationsListBox";
-            this.m_oSystemLocationsListBox.Size = new System.Drawing.Size(245, 277);
+            this.m_oSystemLocationsListBox.Size = new System.Drawing.Size(245, 264);
             this.m_oSystemLocationsListBox.TabIndex = 1;
             // 
             // m_oCopyOrdersGroupBox
@@ -1074,7 +1073,7 @@ namespace Pulsar4X.UI.Panels
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1170, 540);
+            this.tabPage1.Size = new System.Drawing.Size(983, 429);
             this.tabPage1.TabIndex = 4;
             this.tabPage1.Text = "Task Group Info";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -1649,7 +1648,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oNoConditionsButton.Location = new System.Drawing.Point(76, 13);
             this.m_oNoConditionsButton.Margin = new System.Windows.Forms.Padding(1, 3, 1, 3);
             this.m_oNoConditionsButton.Name = "m_oNoConditionsButton";
-            this.m_oNoConditionsButton.Size = new System.Drawing.Size(70, 25);
+            this.m_oNoConditionsButton.Size = new System.Drawing.Size(70, 54);
             this.m_oNoConditionsButton.TabIndex = 59;
             this.m_oNoConditionsButton.Text = "No Conditions";
             this.m_oNoConditionsButton.UseVisualStyleBackColor = true;
