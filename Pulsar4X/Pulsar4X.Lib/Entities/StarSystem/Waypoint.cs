@@ -8,11 +8,6 @@ namespace Pulsar4X.Entities
     public class Waypoint : StarSystemEntity
     {
         /// <summary>
-        /// Starsystem this waypoint resides in.
-        /// </summary>
-        public StarSystem System;
-
-        /// <summary>
         /// Which player set this waypoint?
         /// </summary>
         public int FactionId;
@@ -27,7 +22,7 @@ namespace Pulsar4X.Entities
             Id = Guid.NewGuid();
 
             FactionId = FactionID;
-            System = Sys;
+            Position.System = Sys;
             Position.X = X;
             Position.Y = Y;
 

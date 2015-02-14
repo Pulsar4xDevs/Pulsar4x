@@ -22,10 +22,6 @@ namespace Pulsar4X.Entities
 
     public class Star : OrbitingEntity
     {
-        double XGalactic { get; set; }
-        double YGalactic { get; set; }
-        double ZGalactic { get; set; }
-
         public override double Mass { get { return m_dMass; } set { m_dMass = value; } }
 
         //public double Luminosity { get; set; }
