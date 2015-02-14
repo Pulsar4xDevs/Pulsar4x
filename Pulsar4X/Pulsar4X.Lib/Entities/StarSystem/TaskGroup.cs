@@ -3148,6 +3148,21 @@ namespace Pulsar4X.Entities
                 }
             }
         }
+
+        /// <summary>
+        /// Checks if the TG is jump Sick.
+        /// </summary>
+        /// <returns>True if the TG is jump sick, false otherwise.</returns>
+        public bool IsJumpSick()
+        {
+            if (Ships != null && Ships.Count > 0)
+            {
+                return Ships.First().IsJumpSick();
+                ///< @todo do we need to check all ships or is just the one fine? Do some ships recover more slowly due to crew grade??
+            }
+
+            return false;
+        }
         #endregion
 
     }
