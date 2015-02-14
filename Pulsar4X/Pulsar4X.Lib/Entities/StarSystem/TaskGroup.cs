@@ -1695,7 +1695,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public uint PerformOrders(uint TimeSlice)
         {
-
+            Order currentOrder = TaskGroupOrders[0];
             /// <summary>
             /// Handle orbiting planets here. breaking orbits is done elsewhere.
             /// </summary>
@@ -2069,16 +2069,19 @@ namespace Pulsar4X.Entities
 
                     #region Refuel From Target Fleet
                     case (int)Constants.ShipTN.OrderType.RefuelFromTargetFleet:
-                        TaskGroupOrders[0].orderTimeRequirement = 0;
+                        currentOrder.orderTimeRequirement = 0;
                         FuelPlace = 0;
-                        for (int loop = 0; loop < TaskGroupOrders[0].taskGroup.Ships.Count; loop++)
-                        {
-                            if (TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.IsTanker == true)
-                            {
-                                float FuelCutoff = TaskGroupOrders[0].taskGroup.Ships[loop].ShipClass.TotalFuelCapacity / 10.0f;
-                                float AvailableFuel = TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel - FuelCutoff;
 
-                                for (int loop2 = FuelPlace; loop2 < Ships.Count; loop2++)
+                        TaskGroupTN targetTG = currentOrder.target as TaskGroupTN;
+
+                        foreach(ShipTN tankerShip in targetTG.Ships)
+                        {
+                            if (tankerShip.ShipClass.IsTanker)
+                            {
+                                float FuelCutoff = tankerShip.ShipClass.TotalFuelCapacity / 10.0f;
+                                float AvailableFuel = tankerShip.CurrentFuel - FuelCutoff;
+
+                                foreach (ShipTN myShip in this.Ships)
                                 {
                                     if (AvailableFuel <= 0.0f)
                                     {
@@ -2088,10 +2091,10 @@ namespace Pulsar4X.Entities
                                         break;
                                     }
 
-                                    AvailableFuel = Ships[loop2].Refuel(AvailableFuel);
+                                    AvailableFuel = myShip.Refuel(AvailableFuel);
                                     FuelPlace++;
                                 }
-                                TaskGroupOrders[0].taskGroup.Ships[loop].CurrentFuel = FuelCutoff + AvailableFuel;
+                                tankerShip.CurrentFuel = FuelCutoff + AvailableFuel;
                             }
                         }
 
