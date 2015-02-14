@@ -630,7 +630,7 @@ namespace Pulsar4X.Tests
 
             TaskGroup1.Ships[0].Refuel(200000.0f);
 
-            Orders TGOrder = new Orders(Constants.ShipTN.OrderType.MoveTo, -1, -1, 0, WP1);
+            Order TGOrder = new Order(Constants.ShipTN.OrderType.MoveTo, -1, -1, 0, WP1);
 
             TaskGroup1.IssueOrder(TGOrder);
 
@@ -857,8 +857,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets[0].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 3.0f;
             System1.Stars[0].Planets[1].Populations[0].Installations[(int)Installation.InstallationType.Infrastructure].Number = 0.0f;
 
-            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadInstallation, (int)Installation.InstallationType.Infrastructure, 1, 0, System1.Stars[0].Planets[0].Populations[0]);
-            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadInstallation, (int)Installation.InstallationType.Infrastructure, 1, 0, System1.Stars[0].Planets[1].Populations[0]);
+            Order Load = new Order(Constants.ShipTN.OrderType.LoadInstallation, (int)Installation.InstallationType.Infrastructure, 1, 0, System1.Stars[0].Planets[0].Populations[0]);
+            Order Unload = new Order(Constants.ShipTN.OrderType.UnloadInstallation, (int)Installation.InstallationType.Infrastructure, 1, 0, System1.Stars[0].Planets[1].Populations[0]);
 
             PlayerFaction1.TaskGroups[0].IssueOrder(Load);
             PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
@@ -928,8 +928,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets[0].Populations[0].CivilianPopulation = 5.0f;
             System1.Stars[0].Planets[1].Populations[0].CivilianPopulation = 1.0f;
 
-            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadColonists, -1, 9000, 0, System1.Stars[0].Planets[0].Populations[0]);
-            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadColonists, -1, 9000, 0, System1.Stars[0].Planets[1].Populations[0]);
+            Order Load = new Order(Constants.ShipTN.OrderType.LoadColonists, -1, 9000, 0, System1.Stars[0].Planets[0].Populations[0]);
+            Order Unload = new Order(Constants.ShipTN.OrderType.UnloadColonists, -1, 9000, 0, System1.Stars[0].Planets[1].Populations[0]);
 
             PlayerFaction1.TaskGroups[0].IssueOrder(Load);
             PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
@@ -1022,19 +1022,19 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[1].Contact.Position.X = 3.0;
             PlayerFaction1.TaskGroups[1].Contact.Position.Y = 0.0;
 
-            Orders RefuelFromColony = new Orders(Constants.ShipTN.OrderType.RefuelFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
+            Order RefuelFromColony = new Order(Constants.ShipTN.OrderType.RefuelFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(RefuelFromColony);
 
-            Orders RefuelFromTargetFleet = new Orders(Constants.ShipTN.OrderType.RefuelFromTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[1]);
+            Order RefuelFromTargetFleet = new Order(Constants.ShipTN.OrderType.RefuelFromTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[1]);
             PlayerFaction1.TaskGroups[0].IssueOrder(RefuelFromTargetFleet);
 
-            Orders RefuelTargetFleet = new Orders(Constants.ShipTN.OrderType.RefuelTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[2]);
+            Order RefuelTargetFleet = new Order(Constants.ShipTN.OrderType.RefuelTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[2]);
             PlayerFaction1.TaskGroups[0].IssueOrder(RefuelTargetFleet);
 
-            Orders RefuelFromOwnTankers = new Orders(Constants.ShipTN.OrderType.RefuelFromOwnTankers, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
+            Order RefuelFromOwnTankers = new Order(Constants.ShipTN.OrderType.RefuelFromOwnTankers, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(RefuelFromOwnTankers);
 
-            Orders UnloadFuelToPop = new Orders(Constants.ShipTN.OrderType.UnloadFuelToPlanet, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
+            Order UnloadFuelToPop = new Order(Constants.ShipTN.OrderType.UnloadFuelToPlanet, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(UnloadFuelToPop);
 
             uint tickCount = 0;
@@ -1139,19 +1139,19 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[1].Contact.Position.X = 3.0;
             PlayerFaction1.TaskGroups[1].Contact.Position.Y = 0.0;
 
-            Orders ResupplyFromColony = new Orders(Constants.ShipTN.OrderType.ResupplyFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
+            Order ResupplyFromColony = new Order(Constants.ShipTN.OrderType.ResupplyFromColony, -1, -1, -1, System1.Stars[0].Planets[0].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromColony);
 
-            Orders ResupplyFromTargetFleet = new Orders(Constants.ShipTN.OrderType.ResupplyFromTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[1]);
+            Order ResupplyFromTargetFleet = new Order(Constants.ShipTN.OrderType.ResupplyFromTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[1]);
             PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromTargetFleet);
 
-            Orders ResupplyTargetFleet = new Orders(Constants.ShipTN.OrderType.ResupplyTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[2]);
+            Order ResupplyTargetFleet = new Order(Constants.ShipTN.OrderType.ResupplyTargetFleet, -1, -1, -1, PlayerFaction1.TaskGroups[2]);
             PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyTargetFleet);
 
-            Orders ResupplyFromOwnSupplyShips = new Orders(Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
+            Order ResupplyFromOwnSupplyShips = new Order(Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(ResupplyFromOwnSupplyShips);
 
-            Orders UnloadSuppliesToPop = new Orders(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
+            Order UnloadSuppliesToPop = new Order(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet, -1, -1, -1, System1.Stars[0].Planets[1].Populations[0]);
             PlayerFaction1.TaskGroups[0].IssueOrder(UnloadSuppliesToPop);
 
             uint tickCount = 0;
@@ -1224,8 +1224,8 @@ namespace Pulsar4X.Tests
             /// <summary>
             /// The 1st 0 after the ordertype is for the ComponentStockpile[0] and CargoComponentList[0] index respectively.
             /// </summary>
-            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadShipComponent, 0, 0, 0, System1.Stars[0].Planets[0].Populations[0]);
-            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadShipComponent, 0, 0, 0, System1.Stars[0].Planets[1].Populations[0]);
+            Order Load = new Order(Constants.ShipTN.OrderType.LoadShipComponent, 0, 0, 0, System1.Stars[0].Planets[0].Populations[0]);
+            Order Unload = new Order(Constants.ShipTN.OrderType.UnloadShipComponent, 0, 0, 0, System1.Stars[0].Planets[1].Populations[0]);
 
             PlayerFaction1.TaskGroups[0].IssueOrder(Load);
             PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
@@ -1422,7 +1422,7 @@ namespace Pulsar4X.Tests
         /// <param name="factionCount"># of factions.</param>
         /// <param name="TGCount"># of tgs.</param>
         /// <param name="ShipCount"># of ships</param>
-        void initShips(BindingList<Faction> P, Orders MoveToCenter, int factionCount, int TGCount, int ShipCount)
+        void initShips(BindingList<Faction> P, Order MoveToCenter, int factionCount, int TGCount, int ShipCount)
         {
             for (int loop = 0; loop < factionCount; loop++)
             {
@@ -1485,7 +1485,7 @@ namespace Pulsar4X.Tests
 
                                 if (inOrderList == false)
                                 {
-                                    Orders MoveToTarget = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, newTarget.ShipsTaskGroup);
+                                    Order MoveToTarget = new Order(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, newTarget.ShipsTaskGroup);
                                     P[loop].TaskGroups[loop2].clearAllOrders();
                                     P[loop].TaskGroups[loop2].IssueOrder(MoveToTarget);
                                 }
@@ -1506,7 +1506,7 @@ namespace Pulsar4X.Tests
         /// <param name="RNG">"Global" random.</param>
         /// <param name="done">boolean that determines if the simulation is finished.</param>
         /// <returns></returns>
-        bool FireWeapons(BindingList<Faction> P, int factionCount, Orders MoveToCenter, int tick, Random RNG, bool done)
+        bool FireWeapons(BindingList<Faction> P, int factionCount, Order MoveToCenter, int tick, Random RNG, bool done)
         {
             for (int loop = 0; loop < factionCount; loop++)
             {
@@ -1627,7 +1627,7 @@ namespace Pulsar4X.Tests
             /// </summary>
             Waypoint Center = new Waypoint("WP Center", Sol, 0.0, 0.0, 0);
 
-            Orders MoveToCenter = new Orders(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, Center);
+            Order MoveToCenter = new Order(Constants.ShipTN.OrderType.MoveTo, 0, 0, 0, Center);
 
             initShips(P, MoveToCenter, factionCount, TGCount, ShipCount);
 
@@ -1901,8 +1901,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets[0].Populations[0].LoadMissileToStockpile(TestMissile, 4);
 
 
-            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadOrdnanceFromColony, -1, -1, 0, System1.Stars[0].Planets[0].Populations[0]);
-            Orders Unload = new Orders(Constants.ShipTN.OrderType.UnloadOrdnanceToColony, -1, -1, 0, System1.Stars[0].Planets[1].Populations[0]);
+            Order Load = new Order(Constants.ShipTN.OrderType.LoadOrdnanceFromColony, -1, -1, 0, System1.Stars[0].Planets[0].Populations[0]);
+            Order Unload = new Order(Constants.ShipTN.OrderType.UnloadOrdnanceToColony, -1, -1, 0, System1.Stars[0].Planets[1].Populations[0]);
 
             PlayerFaction1.TaskGroups[0].IssueOrder(Load);
             PlayerFaction1.TaskGroups[0].IssueOrder(Unload);
@@ -2034,7 +2034,7 @@ namespace Pulsar4X.Tests
 
             System1.Stars[0].Planets[0].Populations[0].LoadMissileToStockpile(TestMissile, 4);
 
-            Orders Load = new Orders(Constants.ShipTN.OrderType.LoadOrdnanceFromColony, -1, -1, 0, System1.Stars[0].Planets[0].Populations[0]);
+            Order Load = new Order(Constants.ShipTN.OrderType.LoadOrdnanceFromColony, -1, -1, 0, System1.Stars[0].Planets[0].Populations[0]);
 
             PlayerFaction1.TaskGroups[0].IssueOrder(Load);
 

@@ -1127,7 +1127,7 @@ namespace Pulsar4X.Entities
             {
                 for (int orderIterator = 0; orderIterator < TaskGroupOrdered.TaskGroupOrders.Count; orderIterator++)
                 {
-                    Orders TaskGroupOrder = TaskGroupOrdered.TaskGroupOrders[orderIterator];
+                    Order TaskGroupOrder = TaskGroupOrdered.TaskGroupOrders[orderIterator];
 
                     if (TaskGroupOrder.target.SSEntity == StarSystemEntityType.TaskGroup)
                     {
@@ -1169,7 +1169,7 @@ namespace Pulsar4X.Entities
             {
                 for (int orderIterator = 0; orderIterator < TaskGroupOrdered.TaskGroupOrders.Count; orderIterator++)
                 {
-                    Orders TaskGroupOrder = TaskGroupOrdered.TaskGroupOrders[orderIterator];
+                    Order TaskGroupOrder = TaskGroupOrdered.TaskGroupOrders[orderIterator];
 
                     if (TaskGroupOrder.target.SSEntity == StarSystemEntityType.TaskGroup)
                     {

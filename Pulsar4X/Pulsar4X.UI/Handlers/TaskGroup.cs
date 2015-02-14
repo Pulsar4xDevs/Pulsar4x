@@ -450,7 +450,7 @@ namespace Pulsar4X.UI.Handlers
             /// </summary>
             int PlaceIndex = m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex;
 
-            Orders NewOrder = null;
+            Order NewOrder = null;
 
             /// <summary>
             /// If AddMove is clicked with no system location it will bomb.
@@ -481,26 +481,26 @@ namespace Pulsar4X.UI.Handlers
 
                         case SystemListObject.ListEntityType.Contacts:
                             ShipTN shipcontact = (ShipTN)entity;//CurrentFaction.DetectedContactLists
-                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, shipcontact.ShipsTaskGroup); //the task group? what if the TG splits?
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, shipcontact.ShipsTaskGroup); //the task group? what if the TG splits?
                             shipcontact.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Planets:
                             Planet planet = (Planet)entity;
-                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, planet);
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, planet);
                             break;
                         case SystemListObject.ListEntityType.JumpPoint:
                             JumpPoint jp = (JumpPoint)entity;
-                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, jp);
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, jp);
                             break;
 
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
-                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, TargetOfOrder);
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, TargetOfOrder);
                             TargetOfOrder.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Waypoints:
                             Waypoint waypoint = (Waypoint)entity;
-                            NewOrder = new Orders(selected_ordertype, -1, -1, 0, waypoint);
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, waypoint);
                             break;
                     }
                     if (NewOrder != null)
@@ -809,7 +809,7 @@ namespace Pulsar4X.UI.Handlers
             GameEntity selectedEntity = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].Entity;
             SystemListObject.ListEntityType entityType = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].EntityType;
 
-            List<Orders> previousOrders = new List<Orders>();
+            List<Order> previousOrders = new List<Order>();
             int olistindex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
 
             if (CurrentTaskGroup.TaskGroupOrders.Count > 0 && olistindex >= 0)
@@ -834,7 +834,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="targetEntity"></param>
         /// <param name="previousOrders"></param>
         /// <returns></returns>
-        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Orders> previousOrders)
+        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Order> previousOrders)
         {
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = new List<Constants.ShipTN.OrderType>();
             List<Constants.ShipTN.OrderType> additionalOrders = new List<Constants.ShipTN.OrderType>();

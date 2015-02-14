@@ -5,7 +5,7 @@ using System.Text;
 using System.ComponentModel;
 namespace Pulsar4X.Entities
 {
-    public class Orders : GameEntity
+    public class Order
     {
         /// <summary>
         /// What order type is this
@@ -53,6 +53,8 @@ namespace Pulsar4X.Entities
 
             return enabledType;
         }
+
+        public string Name;
 
         /// <summary>
         /// What entity are those orders pointed at?
@@ -164,7 +166,7 @@ namespace Pulsar4X.Entities
         /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
         /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="TaskGroupOrder">The TaskGroup in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, TaskGroupTN TaskGroupOrder)
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, TaskGroupTN TaskGroupOrder)
         {
             TypeOf = TypeOrder;
             Target = TaskGroupOrder.Contact;
@@ -186,7 +188,7 @@ namespace Pulsar4X.Entities
         /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
         /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="PlanetOrder">The Planet in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Planet PlanetOrder)
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Planet PlanetOrder)
         {
             TypeOf = TypeOrder;
             Target = PlanetOrder;
@@ -208,7 +210,7 @@ namespace Pulsar4X.Entities
         /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
         /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="PopOrder">The Population in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Population PopOrder)
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Population PopOrder)
         {
             TypeOf = TypeOrder;
             Target = PopOrder.Planet;
@@ -231,7 +233,7 @@ namespace Pulsar4X.Entities
         /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
         /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="JPOrder">The Jump Point in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, JumpPoint JPOrder)
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, JumpPoint JPOrder)
         {
             TypeOf = TypeOrder;
             Target = JPOrder;
@@ -254,7 +256,7 @@ namespace Pulsar4X.Entities
         /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
         /// <param name="Delay">Delay in seconds before performing this order.</param>
         /// <param name="WPOrder">The Way Point in question.</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Waypoint WPOrder)
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Waypoint WPOrder)
         {
             TypeOf = TypeOrder;
             Target = WPOrder;
@@ -277,7 +279,7 @@ namespace Pulsar4X.Entities
         /// <param name="TertiaryOrder">Tertiary</param>
         /// <param name="Delay">Order delay</param>
         /// <param name="ShipsOrder">Ship target of order</param>
-        public Orders(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, ShipTN ShipsOrder)
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, ShipTN ShipsOrder)
         {
             TypeOf = TypeOrder;
             Target = ShipsOrder.ShipsTaskGroup.Contact;

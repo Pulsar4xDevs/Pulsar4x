@@ -72,7 +72,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Orders that this taskgroup is under.
         /// </summary>
-        public BindingList<Orders> TaskGroupOrders { get; set; }
+        public BindingList<Order> TaskGroupOrders { get; set; }
 
         /// <summary>
         /// What is the state of this taskgroup's ability to accept orders?
@@ -231,7 +231,7 @@ namespace Pulsar4X.Entities
             CurrentHeading = 0.0;
             TimeRequirement = 0;
 
-            TaskGroupOrders = new BindingList<Orders>();
+            TaskGroupOrders = new BindingList<Order>();
 
             TotalOrderDistance = 0.0;
 
@@ -1401,7 +1401,7 @@ namespace Pulsar4X.Entities
         /// <param name="Order">Order is the order to be carried out.</param>
         /// <param name="Destination">Destination of the waypoint/planet/TaskGroup we are moving towards.</param>
         /// <param name="Secondary">Secondary will be an enum ID for facility type,component,troop formation, or tractorable ship/shipyard. -1 if not present.</param>
-        public void IssueOrder(Orders OrderToTaskGroup, int index = -1)
+        public void IssueOrder(Order OrderToTaskGroup, int index = -1)
         {
             if (TaskGroupOrders.Count == 0)
             {
