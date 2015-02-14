@@ -1125,7 +1125,7 @@ namespace Pulsar4X.UI.Handlers
 #warning magic numbers in distance/time calculation for taskgroup
                     // What is this magic number 2.147483648?
                     // Please, if we're going to put number constants, at least explain what they mean.
-                    // TODO: Update this with our Constants.TimeInSeconds calculations to keep things consistent.
+                    ///< @todo Update this with our Constants.TimeInSeconds calculations to keep things consistent.
                     // 2.14783648 is 2^31 / 1B. or the signed 32 bit limit. count is the number of signed 32 bit int limit kms in dZ.
                     //multiplying and dividing by 100 gets a fraction of the distance past the Math.Floor operator, so we can have 1.25 B km for example.
                     double newDistance = Math.Floor(2.147483648 * Count * 100.0);

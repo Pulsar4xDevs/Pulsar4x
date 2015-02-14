@@ -260,7 +260,7 @@ namespace Pulsar4X.Entities.Components
             m_oType = NewtonianType.Engine;
         }
 
-        //TODO: Impliment Engine mechanics
+        ///< @todo Impliment Engine mechanics
     }
 
 

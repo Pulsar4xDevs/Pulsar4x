@@ -4,7 +4,7 @@ namespace Pulsar4X
 {
     public static class MathUtilities
     {
-        // TODO: This should be OUT of this class
+        ///< @todo This should be OUT of this class
         //public static Random Random;
 
         static MathUtilities()

@@ -701,8 +701,8 @@ namespace Pulsar4X.Stargen
                     guess2 = guess3;
             }
 
-            //TODO: find out why guess2 is used instead of life
-            //TODO: find calculation for this function and double check math
+            ///< @todo find out why guess2 is used instead of life
+            ///< @todo find calculation for this function and double check math
             life = GasLife(guess2, planet);
 
             return guess2;
@@ -861,7 +861,7 @@ namespace Pulsar4X.Stargen
         /// <returns></returns>
         public static Breathability Breathable(Planet planet)
         {
-            // TODO: Not all races breathe the same, each race should have a check, not one on the planet
+            ///< @todo Not all races breathe the same, each race should have a check, not one on the planet
             bool oxygenOk = false;
             int index;
 

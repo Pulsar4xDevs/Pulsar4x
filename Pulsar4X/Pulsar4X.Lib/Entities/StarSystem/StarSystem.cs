@@ -135,7 +135,7 @@ namespace Pulsar4X.Entities
 
             switch (e.ListChangedType)
             {
-                    // TODO: Find a better place to update the FactionDetectionLists
+                    ///< @todo Find a better place to update the FactionDetectionLists
                 case ListChangedType.ItemAdded:
                     // Update all the faction contact lists with the new contact.
                     for (int loop = 0; loop < FactionDetectionLists.Count; loop++)

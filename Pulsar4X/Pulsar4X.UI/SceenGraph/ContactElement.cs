@@ -32,7 +32,7 @@ namespace Pulsar4X.UI.SceenGraph
                     {
                         switch (m_oSystemContect.SSEntity)
                         {
-                                // TODO: Check if we really need these switches.
+                                ///< @todo Check if we really need these switches.
                             case StarSystemEntityType.TaskGroup:
                                 m_oSystemContect.Entity.PropertyChanged -= m_oSystemContect_PropertyChanged;
                                 break;

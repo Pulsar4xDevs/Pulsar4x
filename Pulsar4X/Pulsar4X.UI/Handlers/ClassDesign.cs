@@ -1118,12 +1118,12 @@ namespace Pulsar4X.UI.Handlers
 
         public void SMOn()
         {
-            // todo
+            ///< @todo
         }
 
         public void SMOff()
         {
-            // todo
+            ///< @todo
         }
 
         /// <summary>

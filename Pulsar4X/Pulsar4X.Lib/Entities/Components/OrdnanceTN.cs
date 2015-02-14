@@ -1407,7 +1407,7 @@ namespace Pulsar4X.Entities.Components
 
         /// <summary>
         /// I need to move everyone to their target in this function.
-        /// TODO:Upon missiles reaching a waypoint, or geo survey target travelline must be set to 1.
+        ////< @todoUpon missiles reaching a waypoint, or geo survey target travelline must be set to 1.
         /// likewise I need to make sure that waypoints and population targeting are handled differently.
         /// </summary>
         public void ProcessOrder(uint TimeSlice, Random RNG)

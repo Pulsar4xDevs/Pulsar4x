@@ -2303,7 +2303,7 @@ namespace Pulsar4X.Entities
                             if (CurrentJP.CanJump(this, true, out usedJumpEngines))
                             {
                                 // Handle the jump here.
-                                // TODO: Put jump transition in it's own function within TaskGroup.
+                                ///< @todo Put jump transition in it's own function within TaskGroup.
                                 SystemPosition newPos = CurrentJP.Connect.Position;
 
                                 Position.System.SystemContactList.Remove(Contact);
@@ -2402,7 +2402,7 @@ namespace Pulsar4X.Entities
                             if ((TaskGroupOrders[0].target as JumpPoint).CanJump(this, false, out usedJumpEngines))
                             {
                                 // Handle the jump here.
-                                // TODO: Put jump transition in it's own function within TaskGroup.
+                                ///< @todo Put jump transition in it's own function within TaskGroup.
                                 SystemPosition newPos = (TaskGroupOrders[0].target as JumpPoint).Connect.Position;
 
                                 Position.System.SystemContactList.Remove(Contact);

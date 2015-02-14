@@ -42,7 +42,7 @@ namespace Pulsar4X.Stargen
             //EcoSphereRadius = star.EcoSphereRadius;
             //DustLeft = true;
             CloudEccentricity = 0.2D;
-            DustRatio = 1.0D; //TODO: Parameterize this
+            DustRatio = 1.0D; ///< @todo Parameterize this
             DustDensityCoeff = Constants.Stargen.DUST_DENSITY_COEFF * DustRatio;
 
             //PlanetInnerBound = NearestPlanet;

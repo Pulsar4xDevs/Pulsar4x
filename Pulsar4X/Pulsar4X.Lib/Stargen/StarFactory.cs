@@ -72,8 +72,8 @@ namespace Pulsar4X.Stargen
                 var star = new Star();
 
                 star.Id = Guid.NewGuid();
-                //TODO: All of the variable generation below this can be redone to be more realistic or playable in the future.
-                //TODO: This is generated based on data scrapped from wikipedia on Star Spectrums and their distribution
+                ///< @todo All of the variable generation below this can be redone to be more realistic or playable in the future.
+                ///< @todo This is generated based on data scrapped from wikipedia on Star Spectrums and their distribution
                 star.Name = numberOfStars == 1 ? name : string.Format("{0} {1}", name, GetPostfix(i));
                 star.Spectrum = GenerateSpectrum();
                 star.Mass = GenerateMass(star.Spectrum); //MathUtilities.Random.NextDouble(_minimumMass, _maximumMass);
@@ -137,10 +137,10 @@ namespace Pulsar4X.Stargen
 
         private StarSpectrum GenerateSpectrum()
         {
-            //TODO: Remove, temporary hack to create more Sol-sized stars
+            ///< @todo Remove, temporary hack to create more Sol-sized stars
             //return StarSpectrum.G;
 
-            //TODO: Add support for age of galaxy if we want that, right now it just does medium age
+            ///< @todo Add support for age of galaxy if we want that, right now it just does medium age
             var chance = rnd.NextDouble(0.0, 100.0);
             if (chance < SpectrumOChance)
                 return StarSpectrum.O;

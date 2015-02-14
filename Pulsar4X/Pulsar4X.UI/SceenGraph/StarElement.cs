@@ -47,7 +47,7 @@ namespace Pulsar4X.UI.SceenGraph
             if (!a_bPrimary)
             {
                 // Do Non Primary Star Stuff here (e.g. orbit circle).
-                // Todo...
+                ///< @todo...
 
                 m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oStar, a_oColor);
 #warning As with planet, m_oOrbitCircle will not be added as a child.

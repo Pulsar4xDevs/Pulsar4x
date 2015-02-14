@@ -65,7 +65,7 @@ namespace Pulsar4X.Stargen
                         var starB = starSystem.Stars[j];
                         // Forbidden zone inner is 1/3 of the minimum seperation
                         // Forbidden zone outer is 3x the maximum seperation
-                        // TODO: Add in effect of eccentricities
+                        ///< @todo Add in effect of eccentricities
                         double minseperation, maxseperation;
                         if (star.SemiMajorAxis > starB.SemiMajorAxis)
                         {
@@ -552,7 +552,7 @@ namespace Pulsar4X.Stargen
                 else if ((planet.SurfacePressure > 6000.0) && (planet.MolecularWeightRetained <= 2.0))	// Retains Hydrogen
                 {
                     planet.PlanetType = PlanetTypes.GasDwarf;
-                    planet.Gases.Clear(); //TODO: Do we really want to clear the atmosphere just because it is a gas dwarf?
+                    planet.Gases.Clear(); ///< @todo Do we really want to clear the atmosphere just because it is a gas dwarf?
                 }
                 else
                 {	// Atmospheres:
@@ -622,14 +622,14 @@ namespace Pulsar4X.Stargen
 
                             GeneratePlanet(moon);
 
-                            //TODO: Look at adding atmosphere call to this
+                            ///< @todo Look at adding atmosphere call to this
                             var rocheLimit = 2.44 * planet.Radius * Math.Pow((planet.Density / moon.Density), (1.0 / 3.0)) / Constants.Units.KM_PER_AU;
 
                             //if ((rocheLimit * 3.0) < hillSphere)
                             if (moon.SemiMajorAxis < rocheLimit)
                             {
                                 // Moon too close.
-                                // TODO: Turn moon into rings
+                                ///< @todo Turn moon into rings
                                 planet.Moons.Remove(moon);
                                 pass = false;
                                 //return false;
@@ -882,7 +882,7 @@ namespace Pulsar4X.Stargen
 
                         var existingMoonMass = thePlanet.Moons.Sum(x => x.Mass);
 
-                        if (protoPlanet.Mass < criticalMass) //TODO: remove this check and see if this allows moons w/ atmosphere
+                        if (protoPlanet.Mass < criticalMass) ///< @todo remove this check and see if this allows moons w/ atmosphere
                         {
                             if ((protoPlanet.Mass * Constants.Sol.Sun.MASS_IN_EARTH_MASSES) < 2.5
                                 && (protoPlanet.Mass * Constants.Sol.Sun.MASS_IN_EARTH_MASSES) > .0001
@@ -1031,7 +1031,7 @@ namespace Pulsar4X.Stargen
         /// <param name="bandIndex"> </param>
         /*private double CollectDust(ProtoStar protoStar, ProtoPlanet protoPlanet, double lastMass, ref double newDust, ref double newGas, double critMass, int bandIndex)
         {
-            //TODO: Needs to be refactored, has more parameters than it needs
+            ///< @todo Needs to be refactored, has more parameters than it needs
             double gasDensity = 0.0;
             double nextDust = 0;
             double nextGas = 0;

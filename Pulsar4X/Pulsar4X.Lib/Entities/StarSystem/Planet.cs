@@ -57,7 +57,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool GeoTeamSurvey { get; set; }
 
-        //TODO: Currently Id is only unique in the star it belongs to, not unique across multiple stars
+        ///< @todo Currently Id is only unique in the star it belongs to, not unique across multiple stars
         public PlanetTypes PlanetType { get; set; }
         public bool IsGasGiant { get; set; }
         public override double Age { get; set; }

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace Pulsar4X
 {
-    // TODO: Prolly needs its own directory
+    ///< @todo Prolly needs its own directory
 
     public static class BindingHelper
     {

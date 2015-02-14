@@ -135,7 +135,7 @@ namespace Pulsar4X.Entities
                 if (GateOwner == null || GateOwner == TransitTG.TaskGroupFaction)
                 {
                     // Nobody owns the gate, or we do, allow the jump.
-                    // TODO: Check if a friendly faction owns the gate, and allow.
+                    ///< @todo Check if a friendly faction owns the gate, and allow.
                     return true;
                 }
             }

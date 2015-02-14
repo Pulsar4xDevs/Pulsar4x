@@ -130,7 +130,7 @@ namespace Pulsar4X.Entities
                 }
             }
 
-#warning todo: Determine fleet interception, check fire controls, jump transits into new systems, completed orders.
+            ///< @todo Determine fleet interception, check fire controls, jump transits into new systems, completed orders.
             /// <summary>
             /// right now all subpulses are doing is giving multiple finer time slices rather than one large time slice. interruptions are not yet handled.
             /// I want to interrupt not only the sub pulse timer, but also the loop when appropriate.
