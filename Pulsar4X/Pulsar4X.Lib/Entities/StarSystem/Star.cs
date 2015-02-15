@@ -41,7 +41,7 @@ namespace Pulsar4X.Entities
         public double Age { get; set; }
         public uint Temperature { get; set; } // Effective ("Photosphere") temperature in K.
         public float Luminosity { get; set; }
-        public string Class { get; set; } // TODO: Use enums to generate.
+        public string Class { get; set; } 
         public double EcoSphereRadius { get; set; } // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone
 
         public Star()
@@ -83,7 +83,7 @@ namespace Pulsar4X.Entities
         /// <returns></returns>
         public uint GetEffectiveTemp(double semiMajorAxis, double albedo)
         {
-            // <? todo: I'm pretty sure this code is wildly inaccurate.
+            ///< \todo: I'm pretty sure this code is wildly inaccurate.
             double S = (Radius / semiMajorAxis) * (2 * Constants.Science.σSB * Math.Pow(Temperature, 4));
             double Fa = S * (1 - albedo) / 4;
             uint Te = (uint)Math.Pow((Fa / Constants.Science.σSB), 0.25);
