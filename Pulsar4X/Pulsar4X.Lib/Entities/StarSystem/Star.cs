@@ -38,11 +38,11 @@ namespace Pulsar4X.Entities
     public class Star : OrbitingEntity
     {
         public BindingList<Planet> Planets { get; set; }
-        public double Age;
-        public uint Temperature; // Effective ("Photosphere") temperature in K.
-        public float Luminosity;
-        public string Class; // TODO: Use enums to generate.
-        public double EcoSphereRadius; // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone
+        public double Age { get; set; }
+        public uint Temperature { get; set; } // Effective ("Photosphere") temperature in K.
+        public float Luminosity { get; set; }
+        public string Class { get; set; } // TODO: Use enums to generate.
+        public double EcoSphereRadius { get; set; } // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone
 
         public Star()
             : base()
@@ -83,6 +83,7 @@ namespace Pulsar4X.Entities
         /// <returns></returns>
         public uint GetEffectiveTemp(double semiMajorAxis, double albedo)
         {
+            // <? todo: I'm pretty sure this code is wildly inaccurate.
             double S = (Radius / semiMajorAxis) * (2 * Constants.Science.σSB * Math.Pow(Temperature, 4));
             double Fa = S * (1 - albedo) / 4;
             uint Te = (uint)Math.Pow((Fa / Constants.Science.σSB), 0.25);
@@ -100,7 +101,7 @@ namespace Pulsar4X.Entities
             uint TempAt1AU = GetEffectiveTemp(1, 0);
             minRadius = Math.Pow(Constants.Science.TEMP_WATER_BOIL / TempAt1AU, -2);
             maxRadius = Math.Pow(Constants.Science.TEMP_WATER_FREEZE / TempAt1AU, -2);
-            return Math.Pow(288 / TempAt1AU, -2);
+            return Math.Pow(288F / TempAt1AU, -2);
         }
     }
 }
