@@ -21,6 +21,33 @@ namespace Pulsar4X
 
             StarSystem newSystem = new StarSystem(name, seed);
 
+            int noOfStars = RNG.Next(1, 5);
+            for (int i = 0; i < noOfStars; ++i)
+            {
+                // Generate star quick and dirty:
+                double radius = 0.00465475877 * 0.1 + RNG.NextDouble() * (0.00465475877 * 250 - 0.00465475877 * 0.1);
+                uint temp = (uint)RNG.Next(3500, 60000);
+                float luminosity = (float)(0.0001 + RNG.NextDouble() * (10000000.0 - 0.0001));
+
+                string starName = name + " ";
+                if (i == 0)
+                    starName += "A";
+                else if (i == 1)
+                    starName += "B";
+                else if (i == 2)
+                    starName += "C";
+                else if (i == 3)
+                    starName += "D";
+                else if (i == 4)
+                    starName += "E";
+
+                Star star = new Star(starName, radius, temp, luminosity, newSystem);
+
+                star.Age = (double)RNG.Next(10, 10000) * 1000000.0;
+
+                newSystem.Stars.Add(star);
+            }
+
             GameState.Instance.StarSystems.Add(newSystem);
             GameState.Instance.StarSystemCurrentIndex++;
             return newSystem;
@@ -30,7 +57,7 @@ namespace Pulsar4X
         {
             StarSystem Sol = new StarSystem("Sol", -1);
 
-            Star Sun = new Star("The Sun", 0.00465475877, 5778, 1, Sol);
+            Star Sun = new Star("Sol", 0.00465475877, 5778, 1, Sol);
             Sun.Age = 4.6E9;
             Sun.Class = "G2";
 

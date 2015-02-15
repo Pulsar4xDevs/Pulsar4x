@@ -11,7 +11,7 @@ namespace Pulsar4X.Entities
     {
 
         /// <summary>
-        /// equitorial radius (in km)
+        /// equitorial radius (in AU)
         /// </summary>
         public double Radius { get; set; }
 
