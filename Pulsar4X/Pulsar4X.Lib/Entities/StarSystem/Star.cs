@@ -7,9 +7,10 @@ using System.ComponentModel;
 using Newtonsoft.Json;
 using System.Drawing;
 
+
 namespace Pulsar4X.Entities
 {
-    public enum StarSpectrum
+    public enum SpectralType
     {
         O,
         B,
@@ -17,44 +18,52 @@ namespace Pulsar4X.Entities
         F,
         G,
         K,
-        M
+        M,
+        D,
+        C
+    }
+
+    public enum LuminosityClass
+    {
+        O,
+        I,
+        II,
+        III,
+        IV,
+        V,
+        sd,
+        D,
     }
 
     public class Star : OrbitingEntity
     {
-        public override double Mass { get { return m_dMass; } set { m_dMass = value; } }
-
-        //public double Luminosity { get; set; }
-        public double Life { get; set; }
-        public override double Age { get; set; }
-        public double Temperature { get; set; }
-        //public double Radius { get; set; }
-        public Color Color { get; set; }
-
-        //public double EcoSphereRadius { get; set; }
-        public int SpectrumAdjustment { get; set; }
-        public StarSpectrum Spectrum { get; set; }
-
-        //public double OrbitalRadius { get; set; }
-        public double EcoSphereRadius { get; set; }
-        public double Luminosity { get; set; }
-
         public BindingList<Planet> Planets { get; set; }
-        public StarSystem StarSystem { get; set; }
-
-        [JsonIgnore]
-        public string Class
-        {
-            get
-            {
-                return (Spectrum.ToString() + SpectrumAdjustment.ToString());
-            }
-        }
+        public double Age;
+        public uint Temperature; // Effective ("Photosphere") temperature in K.
+        public float Luminosity;
+        public string Class; // TODO: Use enums to generate.
+        public double EcoSphereRadius; // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone
 
         public Star()
             : base()
         {
             Planets = new BindingList<Planet>();
+        }
+
+        public Star(string name, double radius, uint temp, float luminosity, StarSystem system)
+        {
+            Name = name;
+            Position.System = system;
+            Position.X = 0;
+            Position.Y = 0;
+            Radius = radius;
+            Temperature = temp;
+            Luminosity = luminosity;
+
+            Planets = new BindingList<Planet>();
+
+            double minHabitableZone, maxHabitableZone;
+            EcoSphereRadius = GetHabitableZone(out minHabitableZone, out maxHabitableZone);
         }
 
         /// <summary>
@@ -64,6 +73,34 @@ namespace Pulsar4X.Entities
         public void UpdatePosition(int deltaSeconds)
         {
             Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, deltaSeconds);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="semiMajorAxis"></param>
+        /// <param name="albedo"></param>
+        /// <returns></returns>
+        public uint GetEffectiveTemp(double semiMajorAxis, double albedo)
+        {
+            double S = (Radius / semiMajorAxis) * (2 * Constants.Science.σSB * Math.Pow(Temperature, 4));
+            double Fa = S * (1 - albedo) / 4;
+            uint Te = (uint)Math.Pow((Fa / Constants.Science.σSB), 0.25);
+            return Te;
+        }
+
+        /// <summary>
+        /// Calculates the Habitable Zone of this star.
+        /// </summary>
+        /// <param name="minRadius">Minimum Habitable Zone (Effective Temp == Water Boiling)</param>
+        /// <param name="maxRadius">Maximum Habitable Zone (Effective Temp == Water Freezing)</param>
+        /// <returns>Earth Habitable Zone (Effective Temp == 288K (15C))</returns>
+        public double GetHabitableZone(out double minRadius, out double maxRadius)
+        {
+            uint TempAt1AU = GetEffectiveTemp(1, 0);
+            minRadius = Math.Pow(Constants.Science.TEMP_WATER_BOIL / TempAt1AU, -2);
+            maxRadius = Math.Pow(Constants.Science.TEMP_WATER_FREEZE / TempAt1AU, -2);
+            return Math.Pow(288 / TempAt1AU, -2);
         }
     }
 }

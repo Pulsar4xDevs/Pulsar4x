@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
-using Pulsar4X.Stargen;
 using Newtonsoft.Json;
 
 namespace Pulsar4X.UI.Handlers
@@ -134,8 +133,7 @@ namespace Pulsar4X.UI.Handlers
             if (InpuDialog.DialogResult == DialogResult.OK)
             {
                 m_iNumberOfNewSystemsGened++;
-                GameState.Instance.StarSystemFactory.Create("Gened System " + m_iNumberOfNewSystemsGened.ToString(), InpuDialog.InputInt);
-                GameState.Instance.StarSystemCurrentIndex++;
+                SystemGen.CreateSystem("Gened System " + m_iNumberOfNewSystemsGened.ToString(), InpuDialog.InputInt);
             }
             // cleanup input box:
             InpuDialog.Close();

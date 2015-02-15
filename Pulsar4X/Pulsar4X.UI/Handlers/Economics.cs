@@ -918,7 +918,7 @@ namespace Pulsar4X.UI.Handlers
 
                 foreach (Population Pop in m_oCurrnetFaction.Populations)
                 {
-                    StarSystem CurrentSystem = Pop.Planet.Primary.StarSystem;
+                    StarSystem CurrentSystem = Pop.Planet.Position.System;
 
                     if (m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.ContainsKey(CurrentSystem.Name) == false)
                     {
@@ -1065,7 +1065,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 foreach (Population Pop in m_oCurrnetFaction.Populations)
                 {
-                    StarSystem CurrentSystem = Pop.Planet.Primary.StarSystem;
+                    StarSystem CurrentSystem = Pop.Planet.Position.System;
 
                     if (m_oSummaryPanel.PopulationTreeView.Nodes[0].Nodes.ContainsKey(CurrentSystem.Name) == false)
                     {
@@ -1849,7 +1849,7 @@ namespace Pulsar4X.UI.Handlers
                         Entry = String.Format("{0:N0}", Math.Round(CurrentPopulation.CivilianPopulation / 5.5f));
                         m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[1].Value = Entry;
                         m_oSummaryPanel.SummaryDataGrid.Rows[14 + Adjust1].Cells[0].Value = "Actual Protection Level";
-                        m_oSummaryPanel.SummaryDataGrid.Rows[14 + Adjust1].Cells[1].Value = CurrentPopulation.Planet.Primary.StarSystem.GetProtectionLevel(CurrentFaction).ToString();
+                        m_oSummaryPanel.SummaryDataGrid.Rows[14 + Adjust1].Cells[1].Value = CurrentPopulation.Planet.Position.System.GetProtectionLevel(CurrentFaction).ToString();
                         Adjust1 = Adjust1 + 3;
                     }
 
@@ -1859,13 +1859,15 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[0].Value = "";
                     m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = "";
                     m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[0].Value = "Tectonics";
-                    m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[1].Value = CurrentPopulation.Planet.PlanetaryTectonics;
-                    if (CurrentPopulation.Planet.GeoTeamSurvey == true)
+                    m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[1].Value = null; //CurrentPopulation.Planet.PlanetaryTectonics;
+                    //if (CurrentPopulation.Planet.GeoTeamSurvey)
                     {
                         Entry = "Completed";
                     }
-                    else
+                    //else
+                    {
                         Entry = "No";
+                    }
                     m_oSummaryPanel.SummaryDataGrid.Rows[14 + Adjust1].Cells[0].Value = "Geological Team Survey Completed";
                     m_oSummaryPanel.SummaryDataGrid.Rows[14 + Adjust1].Cells[1].Value = Entry;
 

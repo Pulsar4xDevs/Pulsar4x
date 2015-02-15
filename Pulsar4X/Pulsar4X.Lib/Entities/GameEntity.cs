@@ -80,15 +80,6 @@ namespace Pulsar4X.Entities
                 if (!thisjp.IsGated)
                     legalOrders.Add(Constants.ShipTN.OrderType.BuildJumpGate);
             }
-            if (this is Planet)
-            {
-                Planet planet = (Planet)this;
-                if (planet.GeoSurveyList.ContainsKey(faction) == true)
-                {
-                    if (planet.GeoSurveyList[faction] == false)
-                        legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
-                }
-            }
             if (this is Population)
             {
                 Population pop = (Population)this;

@@ -430,52 +430,7 @@ namespace Pulsar4X.Entities
             {
                 foreach (Population CurrentPopulation in CurrentFaction.Populations)
                 {
-                    if (CurrentPopulation.Planet.GeoSurveyList.ContainsKey(CurrentFaction) == true)
-                    {
-                        /// <summary>
-                        /// see what I mean about superflous? going to keep it like this for right now however.
-                        /// </summary>
-                        if (CurrentPopulation.Planet.GeoSurveyList[CurrentFaction] == true)
-                        {
-                            /// <summary>
-                            /// Calculate the construction time cycle sliver of the year to use. all production is done annually so this must be adjusted here.
-                            /// Potential place to save some cpu cycles?
-                            /// </summary>
-                            float TimeAdjust = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
-                            float CurrentMining = CurrentPopulation.CalcTotalMining() * TimeAdjust;
-
-                            /// <summary>
-                            /// Don't run this loop if no mining can be done.
-                            /// </summary>
-                            if (CurrentMining > 0.0f)
-                            {
-                                for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
-                                {
-                                    float MineAmount = CurrentMining * CurrentPopulation.Planet.MinerialAccessibility[mineralIterator];
-
-                                    /// <summary>
-                                    /// no negative minerals. hopefully.
-                                    /// </summary>
-                                    if (CurrentPopulation.Planet.MinerialReserves[mineralIterator] < MineAmount)
-                                    {
-                                        MineAmount = CurrentPopulation.Planet.MinerialReserves[mineralIterator];
-                                    }
-
-                                    /// <summary>
-                                    /// Add to population stockpile and take from planetary reserves.
-                                    /// </summary>
-                                    CurrentPopulation.Minerials[mineralIterator] = CurrentPopulation.Minerials[mineralIterator] + MineAmount;
-                                    CurrentPopulation.Planet.MinerialReserves[mineralIterator] = CurrentPopulation.Planet.MinerialReserves[mineralIterator] - MineAmount;
-
-                                    /// <summary>
-                                    /// Ultra-paranoia check here.
-                                    /// </summary>
-                                    if (CurrentPopulation.Planet.MinerialReserves[mineralIterator] < 0.0f)
-                                        CurrentPopulation.Planet.MinerialReserves[mineralIterator] = 0.0f;
-                                }
-                            }
-                        }
-                    }
+                    // <? todo: Impliment Mining.
                 }
             }
         }

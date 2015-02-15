@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
 using System.ComponentModel;
-using Pulsar4X.Stargen;
 using Pulsar4X.UI.Helpers;
 using System.Linq.Expressions;
 using Pulsar4X.Entities.Components;

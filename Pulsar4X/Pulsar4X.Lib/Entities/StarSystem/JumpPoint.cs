@@ -236,7 +236,7 @@ namespace Pulsar4X.Entities
                 {
                     // We're connecting to an 'existing system' that doesn't exist.
                     // If systemIndex 15 was selected above, and we've only got 10 systems, fill in the gap with new systems.
-                    GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
+                    SystemGen.CreateSystem("Unexplored System S-" + GameState.Instance.StarSystems.Count);
 
                     // Note, we didn't set our StarSystemCurrentIndex. This is intentional.
                     // When we make another connection, and we RNG a 'new system' connection, we may have just made the 'new system' here.
@@ -248,7 +248,8 @@ namespace Pulsar4X.Entities
             if (systemIndex == GameState.Instance.StarSystems.Count)
             {
                 // Generate a new system.
-                connectedSystem = GameState.Instance.StarSystemFactory.Create("Unexplored System S-" + GameState.Instance.StarSystems.Count);
+
+                connectedSystem = SystemGen.CreateSystem("Unexplored System S-" + GameState.Instance.StarSystems.Count);
             }
             else
             {

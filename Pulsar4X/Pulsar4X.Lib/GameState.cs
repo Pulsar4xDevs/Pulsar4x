@@ -82,8 +82,6 @@ namespace Pulsar4X
 
         private GameState()
         {
-            m_oStarSystemFactory = new Stargen.StarSystemFactory();
-
             CurrentYear = 2025;
             m_currentSecond = 0;
 
@@ -93,15 +91,6 @@ namespace Pulsar4X
         }
 
         #endregion
-
-        private Stargen.StarSystemFactory m_oStarSystemFactory;
-        public Stargen.StarSystemFactory StarSystemFactory
-        {
-            get
-            {
-                return m_oStarSystemFactory;
-            }
-        }
 
         public void Load()
         {

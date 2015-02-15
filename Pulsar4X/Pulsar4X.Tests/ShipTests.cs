@@ -19,11 +19,9 @@ namespace Pulsar4X.Tests
             Faction newFaction = new Faction(0);
             ShipClassTN ts2 = new ShipClassTN("Test", newFaction);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -124,11 +122,9 @@ namespace Pulsar4X.Tests
 
             Faction newFaction = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -163,11 +159,9 @@ namespace Pulsar4X.Tests
 
             Faction newFaction = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -209,11 +203,9 @@ namespace Pulsar4X.Tests
 
             Faction newFaction = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -321,11 +313,9 @@ namespace Pulsar4X.Tests
 
             TestClass.AddCrewQuarters(CrewQ, 2);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -392,10 +382,9 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, ComponentTypeTN.Bridge);
 
             Faction FID = new Faction(0);
-            StarSystem System = new StarSystem();
-            Star S1 = new Star();
-            Planet planet = new Planet(S1, S1);
-
+            StarSystem System = SystemGen.CreateSol();
+            Planet planet = new Planet(System.Stars[0]);
+            System.Stars[0].Planets.Add(planet);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
 
@@ -480,9 +469,9 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, ComponentTypeTN.Bridge);
 
             Faction FID = new Faction(0);
-            StarSystem System = new StarSystem();
-            Star S1 = new Star();
-            Planet planet = new Planet(S1, S1);
+            StarSystem System = SystemGen.CreateSol();
+            Planet planet = new Planet(System.Stars[0]);
+            System.Stars[0].Planets.Add(planet);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
             for (int loop = 0; loop < 4; loop++)
@@ -528,9 +517,9 @@ namespace Pulsar4X.Tests
 
 
             Faction FID = new Faction(0);
-            StarSystem System = new StarSystem();
-            Star S1 = new Star();
-            Planet planet = new Planet(S1, S1);
+            StarSystem System = SystemGen.CreateSol();
+            Planet planet = new Planet(System.Stars[0]);
+            System.Stars[0].Planets.Add(planet);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
             for (int loop = 0; loop < 4; loop++)
@@ -605,10 +594,10 @@ namespace Pulsar4X.Tests
             GeneralComponentDefTN Bridge = new GeneralComponentDefTN("Bridge", 1.0f, 5, 10.0m, ComponentTypeTN.Bridge);
 
 
-            Faction FID = new Faction(0);
-            StarSystem System = new StarSystem();
-            Star S1 = new Star();
-            Planet planet = new Planet(S1, S1);
+            Faction FID = new Faction(0); 
+            StarSystem System = SystemGen.CreateSol();
+            Planet planet = new Planet(System.Stars[0]);
+            System.Stars[0].Planets.Add(planet);
 
 
             Waypoint WP1 = new Waypoint("WP TG Orders", System, 0.1, 0.1, 0);
@@ -652,19 +641,17 @@ namespace Pulsar4X.Tests
             Faction PlayerFaction1 = new Faction(0);
             Faction PlayerFaction2 = new Faction(1);
 
-            StarSystem System1 = new StarSystem("Sol");
-            Star S1 = new Star();
-            System1.Stars.Add(S1);
-            StarSystem System2 = new StarSystem("Alpha Centauri");
+            StarSystem System1 = SystemGen.CreateSol();
+            StarSystem System2 = SystemGen.CreateSystem("Alpha Centauri");
             Star S2 = new Star();
             System2.Stars.Add(S2);
 
-            Planet Start1 = new Planet(System1.Stars[0], System1.Stars[0]);
+            Planet Start1 = new Planet(System1.Stars[0]);
             Start1.Position.X = 1.0;
             Start1.Position.Y = 1.0;
 
 
-            Planet Start2 = new Planet(System2.Stars[0], System1.Stars[0]);
+            Planet Start2 = new Planet(System1.Stars[0]);
             Start2.Position.X = 1.0005;
             Start2.Position.Y = 1.0005;
 
@@ -741,7 +728,7 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            System1.CreateJumpPoint(S1, 0.1, 0.2);
+            System1.CreateJumpPoint(System1.Stars[0], 0.1, 0.2);
             System2.CreateJumpPoint(S2, 0.2, 0.1);
 
             System1.JumpPoints[0].Connect = System2.JumpPoints[0];
@@ -767,11 +754,8 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
-
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            StarSystem System1 = SystemGen.CreateSol();
+            Planet pl1 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
 
             System1.Stars[0].Planets[0].Position.X = 1.0;
@@ -819,12 +803,10 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -890,12 +872,10 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -953,13 +933,11 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            Planet pl3 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
+            Planet pl3 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
             System1.Stars[0].Planets.Add(pl3);
@@ -1065,13 +1043,11 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            Planet pl3 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
+            Planet pl3 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
             System1.Stars[0].Planets.Add(pl3);
@@ -1184,12 +1160,10 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1258,12 +1232,10 @@ namespace Pulsar4X.Tests
 
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1392,7 +1364,7 @@ namespace Pulsar4X.Tests
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    Planet Start = new Planet(Sol.Stars[0], Sol.Stars[0]);
+                    Planet Start = new Planet(Sol.Stars[0]);
                     Start.Position.X = wx;
                     Start.Position.Y = wy;
 
@@ -1609,7 +1581,7 @@ namespace Pulsar4X.Tests
             DamageValuesTN.init();
             Random RNG = new Random();
 
-            StarSystem Sol = new StarSystem();
+            StarSystem Sol = SystemGen.CreateSol();
 
             BindingList<Faction> P = new BindingList<Faction>();
             int factionCount = 16;
@@ -1771,12 +1743,10 @@ namespace Pulsar4X.Tests
 
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1858,12 +1828,10 @@ namespace Pulsar4X.Tests
         {
             Faction PlayerFaction1 = new Faction(0);
 
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
 
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1964,7 +1932,8 @@ namespace Pulsar4X.Tests
             /// <summary>
             /// No StarSystem no contacts!
             /// </summary>
-            StarSystem System1 = new StarSystem("Sol");
+            StarSystem System1 = SystemGen.CreateSol();
+
             PlayerFaction1.AddNewContactList(System1);
             PlayerFaction2.AddNewContactList(System1);
 
@@ -1976,10 +1945,8 @@ namespace Pulsar4X.Tests
             /// <summary>
             /// Planets and populations are needed for house keeping.
             /// </summary>
-            Star S1 = new Star();
-            Planet pl1 = new Planet(S1, S1);
-            Planet pl2 = new Planet(S1, S1);
-            System1.Stars.Add(S1);
+            Planet pl1 = new Planet(System1.Stars[0]);
+            Planet pl2 = new Planet(System1.Stars[0]);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 

@@ -7,7 +7,6 @@ using System.Drawing;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
-using Pulsar4X.Stargen;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -326,7 +325,7 @@ namespace Pulsar4X.UI.Handlers
         private void NewTaskGroupButton_Click(object sender, EventArgs e)
         {
             String Title = String.Format("New Taskgroup #{0}", m_oCurrnetFaction.TaskGroups.Count);
-            m_oCurrnetFaction.AddNewTaskGroup(Title, m_oCurrnetFaction.Capitol, m_oCurrnetFaction.Capitol.Primary.StarSystem);
+            m_oCurrnetFaction.AddNewTaskGroup(Title, m_oCurrnetFaction.Capitol, m_oCurrnetFaction.Capitol.Position.System);
 
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.SelectedIndex = (m_oTaskGroupPanel.TaskGroupSelectionComboBox.Items.Count - 1);
         }

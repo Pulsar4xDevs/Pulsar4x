@@ -8,14 +8,11 @@ using System.Text;
 using System.Windows.Forms;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
-using Pulsar4X.Stargen;
 
 namespace Pulsar4X.UI.Dialogs
 {
     public partial class GenGalaxyDialog : Form
     {
-        StarSystemFactory ssf = new StarSystemFactory(true);
-
         System.Diagnostics.Stopwatch m_oSW = new System.Diagnostics.Stopwatch();
 
         public GenGalaxyDialog()
@@ -36,8 +33,7 @@ namespace Pulsar4X.UI.Dialogs
 
             for (int i = 0; i < iNoOfSystemsToGenerate; ++i)
             {
-                ssf.Create(GalaxyNameTextBox.Text + i.ToString());
-                GameState.Instance.StarSystemCurrentIndex++;
+                SystemGen.CreateSystem(GalaxyNameTextBox.Text + i.ToString());
                 GenProgressBar.Value = i;
             }
 

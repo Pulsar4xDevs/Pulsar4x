@@ -37,16 +37,6 @@ namespace Pulsar4X.Entities
         public double OrbitalPeriod { get; set; }
 
         /// <summary>
-        /// The Star this object orbits.
-        /// </summary>
-        public Star Primary { get; set; }
-
-        /// <summary>
-        /// The Age of the body in Years
-        /// </summary>
-        public abstract double Age { get; set; }
-
-        /// <summary>
         /// The Parent Orbiting Body, for Planets and stars this is the same as Primary, for moons it will be a planet.
         /// </summary>
         public OrbitingEntity Parent { get; set; }
@@ -67,24 +57,19 @@ namespace Pulsar4X.Entities
         public long TimeSinceApogeeRemainder { get; set; }
 
         /// <summary>
-        /// angle counterclockwise from system 'north' to SemiMajorAxis at Apogee
+        /// angle counterclockwise from system 'north' to SemiMajorAxis at Periapsis
         /// </summary>
-        public double LongitudeOfApogee { get; set; }
+        public double LongitudeOfPeriapsis { get; set; }
 
         /// <summary>
         /// precise angle of where this orbiting entity is.
         /// </summary>
         public double TrueAnomaly { get; set; }
-
+        
         /// <summary>
-        /// Mass of the object.
+        /// Mass in KG
         /// </summary>
-        protected double m_dMass;
-
-        /// <summary>
-        /// Mass in solar masses.
-        /// </summary>
-        public virtual double Mass { get; set; }
+        public double Mass { get; set; }
 
         public OrbitingEntity()
             : base()

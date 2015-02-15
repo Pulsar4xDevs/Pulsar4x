@@ -8,7 +8,6 @@ using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
 using Pulsar4X.Entities;
-using Pulsar4X.Stargen;
 using Newtonsoft.Json;
 
 #if LOG4NET_ENABLED

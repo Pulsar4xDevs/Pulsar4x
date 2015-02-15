@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using Pulsar4X.Stargen;
 using Pulsar4X.Storage;
 using Pulsar4X.Entities;
 using System.ComponentModel;
@@ -36,8 +35,7 @@ namespace Pulsar4X.Tests
             var theme = new FactionTheme { Id = Guid.NewGuid(), Name = "Test Theme" };
             _gameState.Factions.Add(new Faction(0) { Id = Guid.NewGuid(), Name = "Test Faction", Species = species, Title = "Mighty Humans", FactionTheme = theme });
 
-            var ssf = new StarSystemFactory(true);
-            var ss = ssf.Create("Test Sol");
+            var ss = SystemGen.CreateSystem("Test Sol");
             GameState.Instance.StarSystemCurrentIndex++;
             ss.Stars.ToList().ForEach(x => _gameState.Stars.Add(x));
             ss.Stars.ToList().SelectMany(x => x.Planets).ToList().ForEach(p => _gameState.Planets.Add(p));

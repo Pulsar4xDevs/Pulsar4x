@@ -60,16 +60,10 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Random generation seed used to generate this system.
         /// </summary>
-        public int Seed { get; set; }
+        private int m_seed;
+        public int Seed { get { return m_seed; } }
 
-        private bool contactsChanged;
-
-        public StarSystem()
-            : this(string.Empty)
-        {
-        }
-
-        public StarSystem(string name)
+        public StarSystem(string name, int seed)
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -84,12 +78,10 @@ namespace Pulsar4X.Entities
             Populations = new BindingList<Population>();
             OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
 
+            m_seed = seed;
+
             // Subscribe to change events.
             SystemContactList.ListChanged += SystemContactList_ListChanged;
-
-            TaskGroups.ListChanged += ContactsChanged;
-            Populations.ListChanged += ContactsChanged;
-            OrdnanceGroups.ListChanged += ContactsChanged;
         }
 
         /// <summary>
@@ -173,17 +165,6 @@ namespace Pulsar4X.Entities
             }
 
             return PPV;
-        }
-
-        /// <summary>
-        /// Event raised when TaskGroups, Populations, or OrdnanceGroups are
-        /// added/removed from the system.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ContactsChanged(object sender, ListChangedEventArgs e)
-        {
-            contactsChanged = true;
         }
 
         /// <summary>
