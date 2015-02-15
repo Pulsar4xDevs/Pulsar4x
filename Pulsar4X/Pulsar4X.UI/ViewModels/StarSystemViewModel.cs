@@ -28,7 +28,11 @@ namespace Pulsar4X.UI.ViewModels
                 }
 
                 OnPropertyChanged(() => CurrentStarSystem);
-                CurrentStarSystemAge = _currentstarsystem.Stars[0].Age.ToString();
+
+                if (_currentstarsystem.Stars != null && _currentstarsystem.Stars.Count > 0)
+                    CurrentStarSystemAge = _currentstarsystem.Stars[0].Age.ToString();
+                else
+                    CurrentStarSystemAge = "N/A";
                 Seed = _currentstarsystem.Seed.ToString();
                 Stars = new BindingList<Star>(_currentstarsystem.Stars);
                 StarsSource.DataSource = Stars;
