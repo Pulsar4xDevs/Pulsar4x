@@ -49,6 +49,36 @@ namespace Pulsar4X
 
             Sol.Stars.Add(Sun);
 
+            Planet Mercury = new Planet(Sun);
+            Mercury.Name = "Mercury";
+            Mercury.Eccentricity = 0.205630;
+            Mercury.LongitudeOfPeriapsis = 29.124;
+            Mercury.IsMoon = false;
+            Mercury.Mass = 3.3022E23;
+            Mercury.OrbitalPeriod = 87.969;
+
+            Mercury.Radius = 2439.7;
+            Mercury.SemiMajorAxis = 0.387098;
+            Mercury.TimeSinceApogee = 0;
+            Mercury.TimeSinceApogeeRemainder = 0;
+
+            Sun.Planets.Add(Mercury);
+
+            Planet Venus = new Planet(Sun);
+            Venus.Name = "Venus";
+            Venus.Eccentricity = 0.00677323;
+            Venus.LongitudeOfPeriapsis = 131.53298;
+            Venus.IsMoon = false;
+            Venus.Mass = 4.8676E24;
+            Venus.OrbitalPeriod = 224.7;
+
+            Venus.Radius = 6051.8;
+            Venus.SemiMajorAxis = 0.72333199;
+            Venus.TimeSinceApogee = 0;
+            Venus.TimeSinceApogeeRemainder = 0;
+
+            Sun.Planets.Add(Venus);
+
             Planet Earth = new Planet(Sun);
 
             Earth.Name = "Earth";
