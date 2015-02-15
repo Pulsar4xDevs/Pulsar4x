@@ -137,7 +137,7 @@ namespace Pulsar4X
             {
                 // For fake star system we adjust the odds to give the player more G, F, A, B, O type stars. 
                 // the handwavium for this is that JPs like attaching to the biggest stars!
-                if (chance < 0.3333) // actual chance is 33%
+                if (chance < 0.3333) // actual chance is 33.33%
                     return SpectralType.M;
                 if (chance < 0.5833) // actual chace is 25%
                     return SpectralType.K;
@@ -155,7 +155,7 @@ namespace Pulsar4X
                 // Left 5% chance so we could have black wholes and suff :) at the moment it just flows to another M class star.
             }
 
-            ///< @todo Support Other Spectral Class types, such as C & D. also mabe things like Black holes??
+            ///< @todo Support Other Spectral Class types, such as C & D. also things like Black holes??
 
             return SpectralType.M; // if in doubt it's an M class, as they are most common.
         }
