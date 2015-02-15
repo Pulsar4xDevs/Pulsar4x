@@ -13,6 +13,19 @@ namespace Pulsar4X
         /// </summary>
         private static Random m_RNG;
 
+        /// <summary>
+        /// Conveinance Class used for passing around the generated data for a star before actually populating the star with this data.
+        /// </summary>
+        private struct StarData
+        {
+            public SpectralType _SpectralType;
+            public double _Radius;
+            public uint _Temp;
+            public float _Luminosity;
+            public double _Age;
+            public double _Mass;
+        }
+
         public static StarSystem CreateSystem(string name)
         {
             return CreateSystem(name, GalaxyGen.SeedRNG.Next());
@@ -43,7 +56,7 @@ namespace Pulsar4X
         {
             StarSystem Sol = new StarSystem("Sol", -1);
 
-            Star Sun = new Star("Sol", 0.00465475877, 5778, 1, Sol);
+            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, Sol);
             Sun.Age = 4.6E9;
             Sun.Class = "G2";
 
@@ -111,11 +124,8 @@ namespace Pulsar4X
         {
             // Generate star quick and dirty:
             SpectralType st = GenerateSpectralType();
-
-            double radius = 0.00465475877 * 0.1 + m_RNG.NextDouble() * (0.00465475877 * 250 - 0.00465475877 * 0.1);
-            uint temp = (uint)m_RNG.Next(3500, 60000);
-            float luminosity = (float)(0.0001 + m_RNG.NextDouble() * (10000000.0 - 0.0001));
-
+          
+            // generate the name:
             string starName = system.Name + " ";
             if (system.Stars.Count == 0)
                 starName += "A";
@@ -128,11 +138,7 @@ namespace Pulsar4X
             else if (system.Stars.Count == 4)
                 starName += "E";
 
-            Star star = new Star(starName, radius, temp, luminosity, system);
-
-            star.Age = (double)m_RNG.Next(10, 10000) * 1000000.0;
-            star.Class = st.ToString();
-
+            Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
             system.Stars.Add(star);
             return star;
         }
@@ -188,6 +194,121 @@ namespace Pulsar4X
             ///< @todo Support Other Spectral Class types, such as C & D. also things like Black holes??
 
             return SpectralType.M; // if in doubt it's an M class, as they are most common.
+        }
+
+        /// <summary>
+        /// Generates Data for a star based on its spectral type and populates it with the data.
+        /// \note Does not generate a name for the star.
+        /// \note This is not very scientific and that the numbers are sourced from Wikipedia. mostle here: http://en.wikipedia.org/wiki/Stellar_classification#Class_A
+        /// </summary>
+        /// <param name="spectralType"></param>
+        /// <param name="name"></param>
+        /// <param name="system"></param>
+        /// <returns></returns>
+        public static Star PopulateStarDataBasedOnSpectralType(SpectralType spectralType, string name, StarSystem system)
+        {
+            const double maxStarAgeO = 6000000;         // after 6 million years O types eiother go nova or become B type stars.
+            const double maxStarAgeB = 100000000;       // could not find any info on B type ages, so i made it between O and A (100 million).
+            const double maxStarAgeA = 350000000;       // A type stars are always young, typicall a few hundred million years..
+            const double maxStarAgeF = 3000000000;      // Could not find any info again, chose a number between B and G stars (3 billion)
+            const double maxStarAgeG = 10000000000;     // The life of a G class star is about 10 billion years.
+
+            // Max age of a star in the Milky Way is 13.2 billion years, the age of the milky way. A star could be older 
+            //(like 100 billion years older if not for the fact that the universion is only about 14 billion years old) but then it wouldn't be in the milky way.
+            // This is used for both K and M type stars both of which can easly out live the milky way).
+            const double maxStarAge = 13200000000;      
+
+            StarData data = new StarData();
+            data._SpectralType = spectralType;
+            switch (data._SpectralType)
+            {
+                case SpectralType.O:
+                    data._Radius = RNG_NextDoubleRange(6.6, 250.0, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(30000, 60000);
+                    data._Luminosity = (float)RNG_NextDoubleRange(30000, 1000000);
+                    data._Mass = RNG_NextDoubleRange(16.0, 265.0, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (265 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAgeO; // note the fiddle math at the start here is to make more massive stars younger stars younger.
+                    break;
+
+                case SpectralType.B:
+                    data._Radius = RNG_NextDoubleRange(1.8, 6.6, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(10000, 30000);
+                    data._Luminosity = (float)RNG_NextDoubleRange(25, 30000);
+                    data._Mass = RNG_NextDoubleRange(2.1, 16.0, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (16.0 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAgeB;
+                    break;
+
+                case SpectralType.A:
+                    data._Radius = RNG_NextDoubleRange(1.4, 1.8, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(7500, 10000);
+                    data._Luminosity = (float)RNG_NextDoubleRange(5, 25);
+                    data._Mass = RNG_NextDoubleRange(1.4, 2.1, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (2.1 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAgeA;
+                    break;
+
+                case SpectralType.F:
+                    data._Radius = RNG_NextDoubleRange(1.15, 1.4, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(6000, 7500);
+                    data._Luminosity = (float)RNG_NextDoubleRange(1.5, 5);
+                    data._Mass = RNG_NextDoubleRange(1.04, 1.4, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAgeF;
+                    break;
+
+                case SpectralType.G:
+                    data._Radius = RNG_NextDoubleRange(0.96, 1.15, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(5200, 6000);
+                    data._Luminosity = (float)RNG_NextDoubleRange(0.6, 1.5);
+                    data._Mass = RNG_NextDoubleRange(0.8, 1.04, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (1.04 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAgeG;
+                    break;
+
+                case SpectralType.K:
+                    data._Radius = RNG_NextDoubleRange(0.7, 0.96, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(3700, 5200);
+                    data._Luminosity = (float)RNG_NextDoubleRange(0.08, 0.6);
+                    data._Mass = RNG_NextDoubleRange(0.45, 0.8, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (0.8 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAge;
+                    break;
+
+                default: // SpectralType.M
+                    data._Radius = RNG_NextDoubleRange(0.12, 0.7, Constants.Units.SOLAR_RADIUS_IN_AU);
+                    data._Temp = (uint)m_RNG.Next(2400, 3700);
+                    data._Luminosity = (float)RNG_NextDoubleRange(0.0001, 0.08);
+                    data._Mass = RNG_NextDoubleRange(0.08, 0.45, Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+                    data._Age = (1 - data._Mass / (0.45 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS)) * maxStarAge;
+                    break;
+            }
+            
+            // create star and populate data:
+            Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, system);
+            star.Class = data._SpectralType.ToString();
+            star.Mass = data._Mass;
+            star.Age = data._Age;
+
+            return star;
+        }
+
+        #endregion
+
+        #region Until Functions
+
+        /// <summary>
+        /// Returns the next Double from m_RNG adjusted to be between the min and max range.
+        /// </summary>
+        public static double RNG_NextDoubleRange(double min, double max)
+        {
+            return min + m_RNG.NextDouble() * (max - min);
+        }
+
+        /// <summary>
+        /// Returns the next Double from m_RNG adjusted to be between the min and max range timesd by a constant value (e.g. a unit of some sort).
+        /// </summary>
+        /// <param name="constant"> A constant which will be multiplied agains min and max, use for units etc.</param>
+        /// <returns>Random value between min and max adjusted according to the constant value provided.</returns>
+        public static double RNG_NextDoubleRange(double min, double max, double constant)
+        {
+            min *= constant;
+            return min + m_RNG.NextDouble() * ((max * constant) - min);
         }
 
         #endregion
