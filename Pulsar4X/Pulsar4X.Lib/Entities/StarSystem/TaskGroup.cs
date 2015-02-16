@@ -1771,7 +1771,7 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 break;
                             }
-                            TaskGroupOrders[0].pop.MaintenanceSupplies = Ships[loop].Resupply(TaskGroupOrders[0].pop.MaintenanceSupplies);
+                            TaskGroupOrders[0].pop.MaintenanceSupplies = (float)Ships[loop].Resupply((int)Math.Floor(TaskGroupOrders[0].pop.MaintenanceSupplies));
                         }
                         break;
                     #endregion
@@ -2506,7 +2506,7 @@ namespace Pulsar4X.Entities
                                 /// MinJumpRadius is the number of raw km this taskgroup should jump by.
                                 /// </summary>
                                 int degree = GameState.RNG.Next(0, 359);
-                                int Jump = GameState.RNG.Next((int)Math.Floor((float)MinJumpRadius * 0.75f), MinJumpRadius);
+                                int Jump = GameState.RNG.Next((int)Math.Floor((float)MinJumpRadius * 0.95f), MinJumpRadius);
                                 double X = Jump * Math.Cos(degree * Constants.Units.RADIAN);
                                 double Y = Jump * Math.Sin(degree * Constants.Units.RADIAN);
 
@@ -3147,6 +3147,21 @@ namespace Pulsar4X.Entities
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if the TG is jump Sick.
+        /// </summary>
+        /// <returns>True if the TG is jump sick, false otherwise.</returns>
+        public bool IsJumpSick()
+        {
+            if (Ships != null && Ships.Count > 0)
+            {
+                return Ships.First().IsJumpSick();
+                ///< @todo do we need to check all ships or is just the one fine? Do some ships recover more slowly due to crew grade??
+            }
+
+            return false;
         }
         #endregion
 

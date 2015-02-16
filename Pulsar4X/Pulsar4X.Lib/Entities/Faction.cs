@@ -1234,7 +1234,7 @@ namespace Pulsar4X.Entities
                 /// This Taskgroup can't perform a sensor sweep until jump sickness is gone. It stands to reason that if ship[0] is sick they all will be, but clever taskgroup reorganizing
                 /// may thwart that. I'd recommend just banning taskgroup reorganization while jumpsick.
                 /// </summary>
-                if (CurrentTaskGroup.Ships[0].IsJumpSick() == true)
+                if (CurrentTaskGroup.IsJumpSick())
                     continue;
 
                 StarSystem System = CurrentTaskGroup.Contact.Position.System;

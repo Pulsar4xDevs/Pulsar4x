@@ -74,6 +74,9 @@ namespace Pulsar4X.UI
 
         public static class EconomicsPage
         {
+            /// <summary>
+            /// Construction ID and Types are for the industrial tab combo box. this should probably just be moved to Constants.cs proper and not be here.
+            /// </summary>
             public enum ConstructionID
             {
                 Installations,
@@ -94,7 +97,7 @@ namespace Pulsar4X.UI
             }
             public static String[] ConstructionTypes = { "Installations", "Missiles", "Fighters", "Basic Components", "Electronic / Shield Components", "Engine / Jump Engine Components", 
                                                          "Sensor / Fire Control Components", "Transport / Industry Components", "Weapon / Support Components", 
-                                                         "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };
+                                                         "Build PDC / Orbital Habitat", "Prefab PDC", "Assemble PDC", "Refit PDC", "Maintenance Supplies" };   
         }
 
     }

@@ -2981,7 +2981,7 @@ namespace Pulsar4X.Entities
                         /// AvailableSizeTotal is the total size of the available missiles.
                         /// missileSpaceReq is the number of missiles that will fit in the remaining space available.
                         /// </summary>
-                        int MissilesAvailable = pop.LoadMissileToStockpile(Series.missilesInSeries[loop], (MissileReq * -1));
+                        int MissilesAvailable = (int)Math.Floor(pop.LoadMissileToStockpile(Series.missilesInSeries[loop], (float)(MissileReq * -1.0f)));
                         int missileSpaceReq = (int)Math.Floor((double)SpaceAvailable / Math.Ceiling(Series.missilesInSeries[loop].size));
                         int load = 0;
                         if (missileSpaceReq >= MissilesAvailable)
