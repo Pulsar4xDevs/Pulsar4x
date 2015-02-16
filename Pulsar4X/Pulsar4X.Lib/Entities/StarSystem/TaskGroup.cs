@@ -2506,7 +2506,7 @@ namespace Pulsar4X.Entities
                                 /// MinJumpRadius is the number of raw km this taskgroup should jump by.
                                 /// </summary>
                                 int degree = GameState.RNG.Next(0, 359);
-                                int Jump = GameState.RNG.Next((int)Math.Floor((float)MinJumpRadius * 0.75f), MinJumpRadius);
+                                int Jump = GameState.RNG.Next((int)Math.Floor((float)MinJumpRadius * 0.95f), MinJumpRadius);
                                 double X = Jump * Math.Cos(degree * Constants.Units.RADIAN);
                                 double Y = Jump * Math.Sin(degree * Constants.Units.RADIAN);
 
