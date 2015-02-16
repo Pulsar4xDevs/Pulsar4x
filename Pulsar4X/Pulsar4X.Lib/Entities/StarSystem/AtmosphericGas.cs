@@ -55,6 +55,16 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -259.16,
                  BoilingPoint = -252.879,
                  GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Helium", 
+                 ChemicalSymbol = "He",
+                 IsToxic = false,
+                 MeltingPoint = -272.20,
+                 BoilingPoint = -268.928,
+                 GreenhouseEffect = 1
              }
         };
 
