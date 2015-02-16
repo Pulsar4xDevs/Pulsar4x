@@ -65,7 +65,67 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -272.20,
                  BoilingPoint = -268.928,
                  GreenhouseEffect = 1
-             }
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Methane", 
+                 ChemicalSymbol = "CH4",
+                 IsToxic = true,
+                 MeltingPoint = -182.5,
+                 BoilingPoint = -161.49,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Water", 
+                 ChemicalSymbol = "H2O",
+                 IsToxic = false,
+                 MeltingPoint = 0,
+                 BoilingPoint = 100,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Ammonia", 
+                 ChemicalSymbol = "NH3",
+                 IsToxic = true,
+                 MeltingPoint = -77.73,
+                 BoilingPoint = -33.34,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Neon", 
+                 ChemicalSymbol = "Ne",
+                 IsToxic = true,
+                 MeltingPoint = -248.59,
+                 BoilingPoint = -246.046,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Nitrogen", 
+                 ChemicalSymbol = "N",
+                 IsToxic = true,
+                 MeltingPoint = -210.00,
+                 BoilingPoint = -195.795,
+                 GreenhouseEffect = 0
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Carbon monoxide", 
+                 ChemicalSymbol = "CO",
+                 IsToxic = true,
+                 MeltingPoint = -205.02,
+                 BoilingPoint = -191.5,
+                 GreenhouseEffect = 0
+             },
         };
 
         /// <summary>
