@@ -42,6 +42,133 @@ namespace Pulsar4X.Entities
             InstallationCount
         }
 
+        public class ShipyardInformation
+        {
+            public class ShipyardTask
+            {
+                
+                /// <summary>
+                /// What is being done to this ship?
+                /// </summary>
+                public Constants.ShipyardInfo.Task CurrentTask { get; set; }
+
+                /// <summary>
+                /// What Ship is being built/repaired/refitted/scrapped
+                /// </summary>
+                public ShipTN CurrentShip { get; set; }
+
+                /// <summary>
+                /// How close to completion is this task?
+                /// </summary>
+                public decimal Progress { get; set; }
+
+                /// <summary>
+                /// What TG will this ship be placed into when finished. aside from scrapping operations of course.
+                /// </summary>
+                public TaskGroupTN AssignedTaskGroup { get; set; }
+
+                /// <summary>
+                /// Estimate of when this task will be completed.
+                /// </summary>
+                public DateTime CompletionDate { get; set; }
+
+                /// <summary>
+                /// What is the Annual Build Rate for this ship.
+                /// </summary>
+                public int ABR { get; set; }
+
+                /// <summary>
+                /// How should tasks be done in the event of a resource shortage. -1 = paused.
+                /// </summary>
+                public int Priority { get; set; }
+            }
+            /// <summary>
+            /// Name of this Shipyard. separate from the installation data type name.
+            /// </summary>
+            public String Name { get; set; }
+
+            /// <summary>
+            /// Shipyard tonnage.
+            /// </summary>
+            public int Tonnage { get; set; }
+
+            /// <summary>
+            /// Shipyard slipway count.
+            /// </summary>
+            public int Slipways { get; set; }
+
+            /// <summary>
+            /// What ships are being built at this shipyard. This should never exceed slipways.
+            /// </summary>
+            public BindingList<ShipyardTask> BuildingShips { get; set; }
+
+            /// <summary>
+            /// What shipclass are we set to build?
+            /// </summary>
+            public ShipClassTN AssignedClass { get; set; }
+
+            /// <summary>
+            /// What task is this shipyard currently set to accomplish.
+            /// </summary>
+            public Constants.ShipyardInfo.ShipyardActivity CurrentActivity { get; set; }
+
+            /// <summary>
+            /// How far along with our current activity is this shipyard?
+            /// </summary>
+            public decimal Progress { get; set; }
+
+            /// <summary>
+            /// Estimate of when this complex will finish its current task.
+            /// </summary>
+            public DateTime CompletionDate { get; set; }
+
+            /// <summary>
+            /// How quickly this shipyard complex can complete activities and construct ships. This may be modified by technology and governor bonuses.
+            /// ModRate = Base(240) * ((Size-1000)/1000) * 40
+            /// SY 560 is 1.4 * 400
+            /// </summary>
+            public int ModRate { get; set; }
+
+            /// <summary>
+            /// Expand capacity until this limit is reached.
+            /// </summary>
+            public int CapExpansionLimit { get; set; }
+
+            /// <summary>
+            /// What type of shipyard is this?
+            /// </summary>
+            public Constants.ShipyardInfo.SYType ShipyardType { get; set; }
+
+            public ShipyardInformation(Constants.ShipyardInfo.SYType Type)
+            {
+                ShipyardType = Type;
+                AssignedClass = null;
+            }
+
+            /// <summary>
+            /// Handle the retool preparation that will need to be done for this shipyard if any.
+            /// </summary>
+            /// <param name="NewShipClass"></param>
+            public void RetoolTo(ShipClassTN NewShipClass)
+            {
+                /// <summary>
+                /// One free retool. Hypothetically this shipyard was built with this shipclass in mind.
+                /// </summary>
+                if (AssignedClass == null)
+                {
+                    AssignedClass = NewShipClass;
+                }
+                /// <summary>
+                /// Lengthy retool process as the shipyard converts to build the new vessel.
+                /// </summary>
+                else
+                {
+
+                }
+
+            }
+        }
+
         public const int NO_OF_INSTALLATIONS = (int)InstallationType.InstallationCount;
 
         /// <summary>
@@ -75,14 +202,9 @@ namespace Pulsar4X.Entities
         public float EMSignature { get; set; }
 
         /// <summary>
-        /// Shipyard tonnage.
+        /// All of the information relating to the civilian and naval shipyards.
         /// </summary>
-        public BindingList<int> Tonnage { get; set; }
-
-        /// <summary>
-        /// Shipyard slipway count.
-        /// </summary>
-        public BindingList<int> Slipways { get; set; }
+        public BindingList<ShipyardInformation> SYInfo { get; set; }
 
         /// <summary>
         /// If this installation requires another to be built: CI Conversions and mine conversions. A value of InstallationCount means no required installation
@@ -152,8 +274,6 @@ namespace Pulsar4X.Entities
 
             Number = 0;
             Mass = 25000;
-            Tonnage = new BindingList<int>();
-            Slipways = new BindingList<int>();
             Type = a_eType;
             m_aiMinerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
             ThermalSignature = 0;
@@ -194,8 +314,7 @@ namespace Pulsar4X.Entities
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 1200;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = 1200;
                         Mass = 100000;
-                        Tonnage.Add(10000);
-                        Slipways.Add(1);
+                        SYInfo = new BindingList<ShipyardInformation>();
 
                         /// <summary>
                         /// For base
@@ -490,8 +609,8 @@ namespace Pulsar4X.Entities
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Duranium] = 1200;
                         m_aiMinerialsCost[(int)Constants.Minerals.MinerialNames.Neutronium] = 1200;
                         Mass = 100000;
-                        Tonnage.Add(1000);
-                        Slipways.Add(1);
+                        SYInfo = new BindingList<ShipyardInformation>();
+
                         /// <summary>
                         /// base signatures.
                         /// </summary>

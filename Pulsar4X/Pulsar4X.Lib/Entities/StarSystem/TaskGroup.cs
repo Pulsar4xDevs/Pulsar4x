@@ -1771,7 +1771,7 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 break;
                             }
-                            TaskGroupOrders[0].pop.MaintenanceSupplies = Ships[loop].Resupply(TaskGroupOrders[0].pop.MaintenanceSupplies);
+                            TaskGroupOrders[0].pop.MaintenanceSupplies = (float)Ships[loop].Resupply((int)Math.Floor(TaskGroupOrders[0].pop.MaintenanceSupplies));
                         }
                         break;
                     #endregion

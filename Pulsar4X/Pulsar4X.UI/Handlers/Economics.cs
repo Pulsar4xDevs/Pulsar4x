@@ -13,56 +13,6 @@ using log4net.Config;
 using log4net;
 #endif
 
-/*
-Shipyard work to be done: public accessors need to be created for these, and of course they have to all be implemented.
-Likewise construction cycle work will need to be done for shipyards.
-m_oShipyardListGroupBox
-m_oShipyardTaskGroupBox
-m_oShipyardCreateTaskGroupBox
-m_oSYActivityGroupBox
-
-m_oShipyardRequiredMaterialsListBox
-m_oShipRequiredMaterialsListBox
-
-m_oNewNameButton
-m_oRefitDetailsButton
-
-m_oAddTaskButton
-m_oDefaultFleetButton
-
-m_oSetActivityButton
-m_oDeleteActivityButton
-m_oPauseActivityButton
-m_oRenameSYButton
-m_oAutoRenameButton
-m_oSMSYButton
-m_oSYADeleteTaskButton
-m_oSYAPauseTaskButton
-m_oSYARaisePriorityButton
-m_oSYALowerPriorityButton
-m_oSYAScheduleButton
-m_oSYARenameShipButton
-
-m_oSYCBuildCostTextBox
-m_oSYCCompletionDateTextBox
-m_oSYTaskCostTextBox
-m_oSYTaskCompletionDateTextBox
-m_oSYShipNameTextBox
-
-m_oSYCTaskTypeComboBox
-m_oSYTaskTypeComboBox
-m_oSYNewClassComboBox
-m_oSYTaskGroupComboBox
-
-m_oCreateDefaultnameCheckBox
-
-
-m_oAnnualBuildRateLabel
-
-Text Label format for the SY Tasks tab: "Annual Ship Building Rate Per Slipway for 5000 ton ship: 111    Available Slipways: 1"
-
-*/
-
 namespace Pulsar4X.UI.Handlers
 {
     public class Economics
@@ -137,6 +87,16 @@ namespace Pulsar4X.UI.Handlers
                 if (value != m_oCurrnetPopulation)
                 {
                     m_oCurrnetPopulation = value;
+
+                    if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number >= 1.0f)
+                    {
+                        CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[0];
+                    }
+                    else if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number >= 1.0f)
+                    {
+                        CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
+                    }
+
                     RefreshPanels();
                 }
             }
@@ -183,6 +143,8 @@ namespace Pulsar4X.UI.Handlers
         /// GUID to displayed string dictionary
         /// </summary>
         private Dictionary<Guid, string> BuildLocationDisplayDict { get; set; }
+
+        private Installation.ShipyardInformation CurrentSYInfo { get; set; }
 
         public Economics()
         {
@@ -251,6 +213,7 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ConstructionDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
             m_oSummaryPanel.ConstructionDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ConstructionDataGrid.AutoGenerateColumns = false;
+            m_oSummaryPanel.ConstructionDataGrid.ColumnHeadersHeight = 34;
             SetupSummaryDataGrid();
             RefreshSummaryCells();
 
@@ -275,8 +238,31 @@ namespace Pulsar4X.UI.Handlers
 
             #region Mining Tab
             m_oSummaryPanel.MiningDataGrid.RowHeadersVisible = false;
+            m_oSummaryPanel.MiningDataGrid.ColumnHeadersHeight = 34;
             m_oSummaryPanel.MaintenanceDataGrid.RowHeadersVisible = false;
             SetupMiningTab();
+            #endregion
+
+            #region shipyard Tab
+            if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number >= 1.0f)
+            {
+                CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[0];
+            }
+            else if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number >= 1.0f)
+            {
+                CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
+            }
+
+            m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndexChanged += new EventHandler(SYCTaskTypeComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndexChanged += new EventHandler(SYTaskTypeComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.SetActivityButton.Click += new EventHandler(SetActivityButton_Click);
+            m_oSummaryPanel.ShipyardDataGrid.SelectionChanged += new EventHandler(ShipyardDataGrid_SelectionChanged);
+
+            m_oSummaryPanel.ShipyardDataGrid.RowHeadersVisible = false;
+            m_oSummaryPanel.ShipyardDataGrid.ColumnHeadersHeight = 34;
+            m_oSummaryPanel.ShipyardTaskDataGrid.RowHeadersVisible = false;
+            m_oSummaryPanel.ShipyardTaskDataGrid.ColumnHeadersHeight = 34;
+            Eco_ShipyardTabHandler.BuildShipyardTab(m_oSummaryPanel,m_oCurrnetFaction,m_oCurrnetPopulation);
             #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
@@ -287,33 +273,6 @@ namespace Pulsar4X.UI.Handlers
         }
 
         #region EventHandlers
-        #endregion
-
-        #region PublicMethods
-
-        public void ShowAllPanels(DockPanel a_oDockPanel)
-        {
-            ShowSummaryPanel(a_oDockPanel);
-        }
-
-        public void ShowSummaryPanel(DockPanel a_oDockPanel)
-        {
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
-            m_oSummaryPanel.Show(a_oDockPanel, DockState.Document);
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
-        }
-
-        public void ActivateSummaryPanel()
-        {
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
-            m_oSummaryPanel.Activate();
-            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
-        }
-
-        #endregion
-
-
-        #region PrivateMethods
 
         /// <summary>
         /// Handle Faction Changes here.
@@ -370,6 +329,191 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
         }
+
+        /// <summary>
+        /// If a Shipyard Complex tasktype is swapped, the UI needs to change to reflect this.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYCTaskTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex != -1)
+            {
+                if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.Retool)
+                {
+                    m_oSummaryPanel.SYCShipClassLabel.Text = "Ship Class";
+                    m_oSummaryPanel.SYCShipClassLabel.Visible = true;
+                    m_oSummaryPanel.NewShipClassComboBox.Visible = true;
+                    m_oSummaryPanel.ExpandCapUntilXTextBox.Visible = false;
+                }
+                else if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+                {
+                    m_oSummaryPanel.SYCShipClassLabel.Text = "Cap Limit";
+                    m_oSummaryPanel.SYCShipClassLabel.Visible = true;
+                    m_oSummaryPanel.NewShipClassComboBox.Visible = false;
+                    m_oSummaryPanel.ExpandCapUntilXTextBox.Visible = true;
+                }
+                else
+                {
+                    m_oSummaryPanel.SYCShipClassLabel.Text = "Ship Class";
+                    m_oSummaryPanel.SYCShipClassLabel.Visible = false;
+                    m_oSummaryPanel.NewShipClassComboBox.Visible = false;
+                    m_oSummaryPanel.ExpandCapUntilXTextBox.Visible = false;
+                }
+
+                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+            }
+        }
+
+        /// <summary>
+        /// If the shipyard task type is changed the UI will need to change to reflect this.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYTaskTypeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex != -1)
+            {
+                switch ((Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex)
+                {
+                    case Constants.ShipyardInfo.Task.Construction:
+                        m_oSummaryPanel.NewClassLabel.Visible = true;
+                        m_oSummaryPanel.SYNewClassComboBox.Visible = true;
+                        m_oSummaryPanel.SYShipNameTextBox.Visible = true;
+                        m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = false;
+                        m_oSummaryPanel.TaskGroupLabel.Visible = true;
+                        m_oSummaryPanel.SYTaskGroupComboBox.Visible = true;     
+                        break;
+                    case Constants.ShipyardInfo.Task.Repair:
+                        m_oSummaryPanel.NewClassLabel.Visible = false;
+                        m_oSummaryPanel.SYNewClassComboBox.Visible = false;
+                        m_oSummaryPanel.SYShipNameTextBox.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = true;
+                        m_oSummaryPanel.TaskGroupLabel.Visible = false;
+                        m_oSummaryPanel.SYTaskGroupComboBox.Visible = false;
+                        
+                        break;
+                    case Constants.ShipyardInfo.Task.Refit:
+                        m_oSummaryPanel.NewClassLabel.Visible = true;
+                        m_oSummaryPanel.SYNewClassComboBox.Visible = true;
+                        m_oSummaryPanel.SYShipNameTextBox.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = true;
+                        m_oSummaryPanel.TaskGroupLabel.Visible = false;
+                        m_oSummaryPanel.SYTaskGroupComboBox.Visible = false;
+                        break;
+                    case Constants.ShipyardInfo.Task.Scrap:
+                        m_oSummaryPanel.NewClassLabel.Visible = false;
+                        m_oSummaryPanel.SYNewClassComboBox.Visible = false;
+                        m_oSummaryPanel.SYShipNameTextBox.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = true;
+                        m_oSummaryPanel.TaskGroupLabel.Visible = false;
+                        m_oSummaryPanel.SYTaskGroupComboBox.Visible = false;
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Set the selected activity for the currently selected shipyard.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SetActivityButton_Click(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex != -1)
+            {
+                if (CurrentSYInfo.CurrentActivity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                {
+                    if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.Retool)
+                    {
+                        if (CurrentFaction.ShipDesigns.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
+                        {
+                            ShipClassTN RetoolTarget = CurrentFaction.ShipDesigns[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
+                            CurrentSYInfo.RetoolTo(RetoolTarget);
+                            
+                        }
+                    }
+                    else if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+                    {
+                        int NewCapLimit;
+                        bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
+                        if (r == true && NewCapLimit > CurrentSYInfo.Tonnage)
+                        {
+                            CurrentSYInfo.CapExpansionLimit = NewCapLimit;
+                            CurrentSYInfo.CurrentActivity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
+                        }
+                    }
+                    else
+                    {
+                        CurrentSYInfo.CurrentActivity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
+                    }
+
+                    
+                }
+                else
+                {
+                    //pop up prompt about overwriting current activity
+                }
+
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+            }
+        }
+
+        /// <summary>
+        /// What is the currently selected shipyard?
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ShipyardDataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ShipyardDataGrid.CurrentCell.RowIndex;
+                    
+
+                    if(index < (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number))
+                    {
+                        CurrentSYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[index];
+                    }
+                    else
+                    {
+                        index = index - (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+                        CurrentSYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[index];
+                    }
+
+                    Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+                }
+            }
+        }
+        #endregion
+
+        #region PublicMethods
+
+        public void ShowAllPanels(DockPanel a_oDockPanel)
+        {
+            ShowSummaryPanel(a_oDockPanel);
+        }
+
+        public void ShowSummaryPanel(DockPanel a_oDockPanel)
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oSummaryPanel.Show(a_oDockPanel, DockState.Document);
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        public void ActivateSummaryPanel()
+        {
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
+            m_oSummaryPanel.Activate();
+            Helpers.UIController.Instance.SuspendAutoPanelDisplay = false;
+        }
+
+        #endregion
+
+
+        #region PrivateMethods
 
         #region Time Advancement Buttons
         /// <summary>
@@ -557,27 +701,8 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ConstructionDataGrid_SelectionChanged(object sender, EventArgs e)
         {
-#warning when fighters are implemented This, and the next 4 functions need to be updated.
-            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
-            {
-                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
-                {
-                    int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
-                    if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
-                    {
-                        int RealIndex = index - 1;
-                        m_oSummaryPanel.ItemNumberTextBox.Text = CurrentPopulation.ConstructionBuildQueue[RealIndex].numToBuild.ToString();
-                        m_oSummaryPanel.ItemPercentTextBox.Text = CurrentPopulation.ConstructionBuildQueue[RealIndex].buildCapacity.ToString();
-                    }
-                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) &&
-                             index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
-                    {
-                        int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
-                        m_oSummaryPanel.ItemNumberTextBox.Text = CurrentPopulation.MissileBuildQueue[RealIndex].numToBuild.ToString();
-                        m_oSummaryPanel.ItemPercentTextBox.Text = CurrentPopulation.MissileBuildQueue[RealIndex].buildCapacity.ToString();
-                    }
-                }
-            }
+#warning when fighters are implemented This, and the next 4 functions need to be updated. Update to the update, make sure UpdateBuildTexts can handle fighters.
+            UpdateBuildTexts();
         }
 
         /// <summary>
@@ -807,6 +932,11 @@ namespace Pulsar4X.UI.Handlers
                 /// Mining Tab:
                 /// </summary>
                 RefreshMiningTab();
+
+                /// <summary>
+                /// Shipyard Tab:
+                /// </summary>
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo);
             }
         }
 
@@ -837,11 +967,17 @@ namespace Pulsar4X.UI.Handlers
                 /// </summary>
                 BuildConstructionLabel();
                 BuildRefiningLabel();
+                UpdateBuildTexts();
 
                 /// <summary>
                 /// Mining Tab:
                 /// </summary>
                 RefreshMiningTab();
+
+                /// <summary>
+                /// Shipyard Tab:
+                /// </summary>
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo);
             }
         }
 
@@ -1438,8 +1574,8 @@ namespace Pulsar4X.UI.Handlers
                     int iSlipways = 0;
                     for (int CSYIterator = 0; CSYIterator < (int)CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number; CSYIterator++)
                     {
-                        int slips = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Slipways[CSYIterator];
-                        int tons = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Tonnage[CSYIterator];
+                        int slips = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[CSYIterator].Slipways;
+                        int tons = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[CSYIterator].Tonnage;
                         iSlipways = iSlipways + slips;
 
                         /// <summary>
@@ -1450,9 +1586,9 @@ namespace Pulsar4X.UI.Handlers
 
                     for (int NSYIterator = 0; NSYIterator < (int)CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number; NSYIterator++)
                     {
-                        int slips = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Slipways[NSYIterator];
-                        int tons = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Tonnage[NSYIterator];
-                        iSlipways = iSlipways + CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Slipways[NSYIterator];
+                        int slips = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Slipways;
+                        int tons = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Tonnage;
+                        iSlipways = iSlipways + CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[NSYIterator].Slipways;
 
                         /// <summary>
                         /// Manpower requirement = 1,000,000 + num_slipways * capacity_per_slipway_in_tons * 100 / DIVISOR.  DIVISOR is 1 for military yards and 10 for commercial yards.  Thus, the flat 1,000,000 manpower required is not reduced for commercial yards, only the capacity-based component.
@@ -1996,6 +2132,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RefreshIndustryTab()
         {
+#warning Add an entry for Unused Construction, Unused Fighter Capacity, and Unused Ordnance Capacity here.
             /// <summary>
             /// Clear the dictionary for the build list grid
             /// </summary>
@@ -3013,6 +3150,8 @@ namespace Pulsar4X.UI.Handlers
             BuildConstructionLabel();
             BuildRefiningLabel();
 
+            UpdateBuildTexts();
+
             if (CurrentPopulation != null)
             {
                 if (CurrentPopulation.IsRefining == false)
@@ -3159,7 +3298,7 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.ShipCompListBox.Items.Add(Entry);
             }
 
-            foreach (KeyValuePair<OrdnanceDefTN, int> MissilePair in CurrentPopulation.MissileStockpile)
+            foreach (KeyValuePair<OrdnanceDefTN, float> MissilePair in CurrentPopulation.MissileStockpile)
             {
                 String Entry = String.Format("{0:N4}x {1}", MissilePair.Value, MissilePair.Key.Name);
                 m_oSummaryPanel.MissileStockListBox.Items.Add(Entry);
@@ -3417,6 +3556,9 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// Build the refining label to print various statistics about refining on the current population.
+        /// </summary>
         private void BuildRefiningLabel()
         {
             if (CurrentPopulation != null)
@@ -3431,6 +3573,50 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.RefineryLabel.Text = String.Format("Industry:{0}     Refineries:{1}", CI, RF);
                 m_oSummaryPanel.FuelProductionLabel.Text = String.Format("Annual Production:{0} Litres", FormattedProduction);
                 m_oSummaryPanel.FuelStockpileLabel.Text = String.Format("Fuel Reserves:{0} Litres", FormattedStockpile);
+            }
+        }
+
+        /// <summary>
+        /// Update the number and percent textboxes depending on What constructionDataGrid item is selected.
+        /// </summary>
+        private void UpdateBuildTexts()
+        {
+            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex;
+                    if (index > 0 && index <= CurrentPopulation.ConstructionBuildQueue.Count) // 1 to Count is CBQ Item
+                    {
+                        int RealIndex = index - 1;
+                        BuildIndustrialProjectGroupBoxText(RealIndex);
+
+                    }
+                    else if (index > (CurrentPopulation.ConstructionBuildQueue.Count + 2) &&
+                             index < ((CurrentPopulation.MissileBuildQueue.Count + CurrentPopulation.ConstructionBuildQueue.Count) + 3)) //Count + 2 to MBQ + CBQ = MBQ Item
+                    {
+                        int RealIndex = index - (CurrentPopulation.ConstructionBuildQueue.Count + 3);
+                        BuildIndustrialProjectGroupBoxText(RealIndex);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Build the number and percentage textboxes so that the user has current data without having to manually refresh this.
+        /// </summary>
+        /// <param name="RealIndex"></param>
+        private void BuildIndustrialProjectGroupBoxText(int RealIndex)
+        {
+            if (CurrentPopulation != null && RealIndex != -1)
+            {
+                m_oSummaryPanel.ItemNumberTextBox.Text = CurrentPopulation.ConstructionBuildQueue[RealIndex].numToBuild.ToString();
+                m_oSummaryPanel.ItemPercentTextBox.Text = CurrentPopulation.ConstructionBuildQueue[RealIndex].buildCapacity.ToString();
+            }
+            else
+            {
+                m_oSummaryPanel.ItemNumberTextBox.Text = "0";
+                m_oSummaryPanel.ItemPercentTextBox.Text = "100";
             }
         }
         #endregion
@@ -3587,6 +3773,7 @@ namespace Pulsar4X.UI.Handlers
         }
 
         #endregion
+
         #endregion
 
     }

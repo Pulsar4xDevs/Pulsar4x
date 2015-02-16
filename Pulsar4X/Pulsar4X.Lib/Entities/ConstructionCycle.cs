@@ -79,50 +79,6 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
                         float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
-                        int NumberBuilt = 0;
-
-
-                        /// <summary>
-                        /// Final bit of a construction project to complete.
-                        /// </summary>
-                        if (Completion >= CurrentConstruction.numToBuild)
-                        {
-                            NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
-                            Completion = CurrentConstruction.numToBuild;
-                        }
-                        /// <summary>
-                        /// This is a new build item.
-                        /// </summary>
-                        else if (Math.Floor(CurrentConstruction.numToBuild) == CurrentConstruction.numToBuild)
-                        {
-                            /// <summary>
-                            /// This colony will build or start to build this many items. charge for all of them.
-                            /// </summary>
-                            NumberBuilt = (int)Math.Ceiling(Completion);
-
-                            /// <summary>
-                            /// the colony can build everything in one go.
-                            /// </summary>
-                            if (NumberBuilt >= Math.Floor(CurrentConstruction.numToBuild))
-                            {
-                                NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
-                                Completion = CurrentConstruction.numToBuild;
-                            }
-                        }
-                        /// <summary>
-                        /// This is an inprogress item, new items will be started however.
-                        /// </summary>
-                        else if ((CurrentConstruction.numToBuild - Completion) < Math.Floor(CurrentConstruction.numToBuild))
-                        {
-                            /// <summary>
-                            /// Adjust out the current build fraction, and then calculate how many new items will be started.
-                            float CurBuildReq = (CurrentConstruction.numToBuild - (float)Math.Floor(CurrentConstruction.numToBuild));
-                            NumberBuilt = (int)Math.Ceiling(Completion - CurBuildReq);
-                            if (NumberBuilt > Math.Floor(CurrentConstruction.numToBuild))
-                            {
-                                NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
-                            }
-                        }
 
                         bool CIRequired = false;
                         bool MineRequired = false;
@@ -137,7 +93,7 @@ namespace Pulsar4X.Entities
                                (int)CurrentConstruction.installationBuild.Type <= (int)Installation.InstallationType.ConvertCIToOrdnanceFactory)
                             {
                                 CIRequired = true;
-                                CanBuild = CurrentPopulation.CIRequirement(NumberBuilt);
+                                CanBuild = CurrentPopulation.CIRequirement(Completion);
 
                                 if (CanBuild == false)
                                 {
@@ -153,7 +109,7 @@ namespace Pulsar4X.Entities
                             if ((int)CurrentConstruction.installationBuild.Type == (int)Installation.InstallationType.ConvertMineToAutomated)
                             {
                                 MineRequired = true;
-                                CanBuild = CurrentPopulation.MineRequirement(NumberBuilt);
+                                CanBuild = CurrentPopulation.MineRequirement(Completion);
 
                                 if (CanBuild == false)
                                 {
@@ -175,10 +131,10 @@ namespace Pulsar4X.Entities
                         {
 #warning PDC construction needs to be implemented here and slightly further down.
                             case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
-                                CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.installationBuild.MinerialsCost);
+                                CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.installationBuild.MinerialsCost, Completion);
                                 break;
                             case ConstructionBuildQueueItem.CBType.ShipComponent:
-                                CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.componentBuild.minerialsCost);
+                                CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.componentBuild.minerialsCost, Completion);
                                 break;
                             case ConstructionBuildQueueItem.CBType.PDCConstruction:
                                 break;
@@ -189,7 +145,7 @@ namespace Pulsar4X.Entities
                             case ConstructionBuildQueueItem.CBType.PDCRefit:
                                 break;
                             case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
-                                CanBuild = CurrentPopulation.MineralRequirement(Constants.Colony.MaintenanceMineralCost);
+                                CanBuild = CurrentPopulation.MineralRequirement(Constants.Colony.MaintenanceMineralCost, Completion);
                                 break;
                         }
 
@@ -207,29 +163,24 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Adjust number to build downward to reflect construction happening.
                         /// </summary>
-                        int CompletedItems = (int)Math.Ceiling(CurrentConstruction.numToBuild);
                         CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
-                        CompletedItems = CompletedItems - (int)Math.Ceiling(CurrentConstruction.numToBuild);
 
+                        /// <summary>
+                        /// Handle the cost and build the item.
+                        /// </summary>
                         switch (CurrentConstruction.buildType)
                         {
                             case ConstructionBuildQueueItem.CBType.PlanetaryInstallation:
-                                if (NumberBuilt != 0)
-                                {
-                                    if (CIRequired == false && MineRequired == false)
-                                        CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.installationBuild.MinerialsCost);
-                                    else if (CIRequired == true && MineRequired == false)
-                                        CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.installationBuild.MinerialsCost, NumberBuilt, -1);
-                                    else if (CIRequired == false && MineRequired == true)
-                                        CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.installationBuild.MinerialsCost, -1, NumberBuilt);
-                                }
+                                if (CIRequired == false && MineRequired == false)
+                                    CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion);
+                                else if (CIRequired == true && MineRequired == false)
+                                    CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
+                                else if (CIRequired == false && MineRequired == true)
+                                    CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.installationBuild.MinerialsCost, Completion, CIRequired, MineRequired);
                                 CurrentPopulation.AddInstallation(CurrentConstruction.installationBuild, Completion);
                                 break;
                             case ConstructionBuildQueueItem.CBType.ShipComponent:
-                                if (NumberBuilt != 0)
-                                {
-                                    CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.componentBuild.minerialsCost);
-                                }
+                                CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.componentBuild.minerialsCost, Completion);
                                 CurrentPopulation.AddComponentsToStockpile(CurrentConstruction.componentBuild, Completion);
                                 break;
                             case ConstructionBuildQueueItem.CBType.PDCConstruction:
@@ -241,11 +192,8 @@ namespace Pulsar4X.Entities
                             case ConstructionBuildQueueItem.CBType.PDCRefit:
                                 break;
                             case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
-                                if (NumberBuilt != 0)
-                                {
-                                    CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), Constants.Colony.MaintenanceMineralCost);
-                                }
-                                CurrentPopulation.AddMSP(CompletedItems);
+                                CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
+                                CurrentPopulation.AddMSP((int)Math.Round(Completion));
                                 break;
                         }
 
@@ -256,7 +204,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     for (int CBQIterator = 0; CBQIterator < CurrentPopulation.ConstructionBuildQueue.Count; CBQIterator++)
                     {
-                        if (CurrentPopulation.ConstructionBuildQueue[CBQIterator].numToBuild == 0.0f)
+                        if (CurrentPopulation.ConstructionBuildQueue[CBQIterator].numToBuild <= 0.0f)
                         {
                             CurrentPopulation.ConstructionBuildQueue.RemoveAt(CBQIterator);
                             CBQIterator--;
@@ -331,55 +279,11 @@ namespace Pulsar4X.Entities
                         /// </summary>
                         float DevotedIndustry = (CurrentConstruction.buildCapacity / 100.0f) * CurrentIndustry;
                         float Completion = DevotedIndustry / (float)CurrentConstruction.costPerItem;
-                        int NumberBuilt = 0;
-
-
-                        /// <summary>
-                        /// Final bit of a construction project to complete.
-                        /// </summary>
-                        if (Completion >= CurrentConstruction.numToBuild)
-                        {
-                            NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
-                            Completion = CurrentConstruction.numToBuild;
-                        }
-                        /// <summary>
-                        /// This is a new build item.
-                        /// </summary>
-                        else if (Math.Floor(CurrentConstruction.numToBuild) == CurrentConstruction.numToBuild)
-                        {
-                            /// <summary>
-                            /// This colony will build or start to build this many items. charge for all of them.
-                            /// </summary>
-                            NumberBuilt = (int)Math.Ceiling(Completion);
-
-                            /// <summary>
-                            /// the colony can build everything in one go.
-                            /// </summary>
-                            if (NumberBuilt >= Math.Floor(CurrentConstruction.numToBuild))
-                            {
-                                NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
-                                Completion = CurrentConstruction.numToBuild;
-                            }
-                        }
-                        /// <summary>
-                        /// This is an inprogress item, new items will be started however.
-                        /// </summary>
-                        else if ((CurrentConstruction.numToBuild - Completion) < Math.Floor(CurrentConstruction.numToBuild))
-                        {
-                            /// <summary>
-                            /// Adjust out the current build fraction, and then calculate how many new items will be started.
-                            float CurBuildReq = (CurrentConstruction.numToBuild - (float)Math.Floor(CurrentConstruction.numToBuild));
-                            NumberBuilt = (int)Math.Ceiling(Completion - CurBuildReq);
-                            if (NumberBuilt > Math.Floor(CurrentConstruction.numToBuild))
-                            {
-                                NumberBuilt = (int)Math.Floor(CurrentConstruction.numToBuild);
-                            }
-                        }
-
+                        
                         /// <summary>
                         /// Do I have the minerals to build this missile?
                         /// </summary>
-                        bool CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.ordnanceDef.minerialsCost);
+                        bool CanBuild = CurrentPopulation.MineralRequirement(CurrentConstruction.ordnanceDef.minerialsCost, Completion);
 
                         if (CanBuild == false)
                         {
@@ -395,13 +299,11 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Adjust number to build downward to reflect construction happening.
                         /// </summary>
-                        int CompletedItems = (int)Math.Ceiling(CurrentConstruction.numToBuild);
                         CurrentConstruction.numToBuild = CurrentConstruction.numToBuild - Completion;
-                        CompletedItems = CompletedItems - (int)Math.Ceiling(CurrentConstruction.numToBuild);
 
-                        CurrentPopulation.HandleBuildItemCost((CurrentConstruction.costPerItem * NumberBuilt), CurrentConstruction.ordnanceDef.minerialsCost);
+                        CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, CurrentConstruction.ordnanceDef.minerialsCost, Completion);
 
-                        CurrentPopulation.LoadMissileToStockpile(CurrentConstruction.ordnanceDef, CompletedItems);
+                        CurrentPopulation.LoadMissileToStockpile(CurrentConstruction.ordnanceDef, Completion);
                     }
 
                     /// <summary>
@@ -409,7 +311,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     for (int MBQIterator = 0; MBQIterator < CurrentPopulation.MissileBuildQueue.Count; MBQIterator++)
                     {
-                        if (CurrentPopulation.MissileBuildQueue[MBQIterator].numToBuild == 0.0f)
+                        if (CurrentPopulation.MissileBuildQueue[MBQIterator].numToBuild <= 0.0f)
                         {
                             CurrentPopulation.MissileBuildQueue.RemoveAt(MBQIterator);
                             MBQIterator--;

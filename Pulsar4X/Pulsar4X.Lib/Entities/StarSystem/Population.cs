@@ -353,7 +353,7 @@ namespace Pulsar4X.Entities
         public float CivilianPopulation { get; set; }
         public float PopulationGrowthRate { get; set; }
         public float FuelStockpile { get; set; }
-        public int MaintenanceSupplies { get; set; }
+        public float MaintenanceSupplies { get; set; }
 
         /// <summary>
         /// What is the situation of this colony.
@@ -459,7 +459,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Missiles at this colony
         /// </summary>
-        public Dictionary<OrdnanceDefTN, int> MissileStockpile { get; set; }
+        public Dictionary<OrdnanceDefTN, float> MissileStockpile { get; set; }
 
         /// <summary>
         /// Build queue for construction factories.
@@ -530,7 +530,7 @@ namespace Pulsar4X.Entities
             ComponentStockpile = new BindingList<ComponentDefTN>();
             ComponentStockpileCount = new BindingList<float>();
             ComponentStockpileLookup = new Dictionary<Guid, int>();
-            MissileStockpile = new Dictionary<OrdnanceDefTN, int>();
+            MissileStockpile = new Dictionary<OrdnanceDefTN, float>();
 
             OrbitalTerraformModules = 0.0f;
 
@@ -542,7 +542,7 @@ namespace Pulsar4X.Entities
             }
 
             FuelStockpile = 0.0f;
-            MaintenanceSupplies = 0;
+            MaintenanceSupplies = 0.0f;
             EMSignature = 0;
             ThermalSignature = 0;
             ModifierEconomicProduction = 1.0f;
@@ -569,11 +569,26 @@ namespace Pulsar4X.Entities
             Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number = 1.0f;
             Installations[(int)Installation.InstallationType.MilitaryAcademy].Number = 1.0f;
             Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number = 1.0f;
+
+            Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Constants.ShipyardInfo.SYType.Naval);
+            SYI.Name = "Naval Yard #1";
+            SYI.Tonnage = 1000;
+            SYI.Slipways = 1;
+            SYI.CurrentActivity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+            SYI.AssignedClass = null;
+            SYI.ModRate = Constants.Faction.BaseModRate;
+
+            /// <summary>
+            /// create this list so that this shipyard can store its orders for tasks(built ships)
+            /// </summary>
+            SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+
+            Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo.Add(SYI);
             Installations[(int)Installation.InstallationType.MaintenanceFacility].Number = 5.0f;
             Installations[(int)Installation.InstallationType.ResearchLab].Number = 5.0f;
 
             FuelStockpile = 0.0f;
-            MaintenanceSupplies = 2000;
+            MaintenanceSupplies = 2000.0f;
 
             CivilianPopulation = 500.0f;
 
@@ -649,6 +664,9 @@ namespace Pulsar4X.Entities
             int Index = (int)Inst.Type;
             switch (Inst.Type)
             {
+                    /// <summary>
+                    /// Conversions must be converted to the installation we are going to add. Subtraction should have been handled elsewhere.
+                    /// </summary>
                 case Installation.InstallationType.ConvertCIToConstructionFactory:
                     Index = (int)Installation.InstallationType.ConstructionFactory;
                     break;
@@ -667,6 +685,64 @@ namespace Pulsar4X.Entities
                 case Installation.InstallationType.ConvertMineToAutomated:
                     Index = (int)Installation.InstallationType.AutomatedMine;
                     break;
+
+
+                case Installation.InstallationType.NavalShipyardComplex:
+                    /// <summary>
+                    /// Shipyards must have a shipyard info created for them.
+                    /// </summary>
+                    float Adjustment = (float)Math.Floor(Installations[Index].Number + increment) - (float)Math.Floor(Installations[Index].Number);
+                    int Number = (int)Math.Floor(Installations[Index].Number);
+                    if (Number == 0)
+                        Number++;
+                    while (Adjustment >= 1.0f)
+                    {
+                        Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Constants.ShipyardInfo.SYType.Naval);
+                        SYI.Name = "Naval Yard #" + (Number++).ToString();
+                        SYI.Tonnage = 1000;
+                        SYI.Slipways = 1;
+                        SYI.CurrentActivity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+                        SYI.AssignedClass = null;
+                        SYI.ModRate = Constants.Faction.BaseModRate;
+
+                        /// <summary>
+                        /// create this list so that this shipyard can store its orders for tasks(built ships)
+                        /// </summary>
+                        SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+
+                        Installations[Index].SYInfo.Add(SYI);
+
+                        Adjustment = Adjustment - 1.0f;
+                    }
+                    break;
+                case Installation.InstallationType.CommercialShipyard:
+                    /// <summary>
+                    /// Shipyards must have a shipyard info created for them.
+                    /// </summary>
+                    Adjustment = (float)Math.Floor(Installations[Index].Number + increment) - (float)Math.Floor(Installations[Index].Number);
+                    Number = (int)Math.Floor(Installations[Index].Number);
+                    if (Number == 0)
+                        Number++;
+                    while (Adjustment >= 1.0f)
+                    {
+                        Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Constants.ShipyardInfo.SYType.Commercial);
+                        SYI.Name = "Commercial Yard #" + (Number++).ToString();
+                        SYI.Tonnage = 10000;
+                        SYI.Slipways = 1;
+                        SYI.CurrentActivity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+                        SYI.AssignedClass = null;
+                        SYI.ModRate = Constants.Faction.BaseModRate;
+
+                        /// <summary>
+                        /// create this list so that this shipyard can store its orders for tasks(built ships)
+                        /// </summary>
+                        SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+
+                        Installations[Index].SYInfo.Add(SYI);
+
+                        Adjustment = Adjustment - 1.0f;
+                    }
+                    break;
             }
             Installations[Index].Number = Installations[Index].Number + increment;
         }
@@ -675,7 +751,7 @@ namespace Pulsar4X.Entities
         /// Constructs maintenance supply parts at this population.
         /// </summary>
         /// <param name="increment">number to build.</param>
-        public void AddMSP(int increment)
+        public void AddMSP(float increment)
         {
             MaintenanceSupplies = MaintenanceSupplies + increment;
         }
@@ -724,7 +800,7 @@ namespace Pulsar4X.Entities
         /// <param name="Missile">Ordnance type to be loaded or unloaded.</param>
         /// <param name="inc">Amount to load or unload.</param>
         /// <returns>Missiles placed into stockpile or taken out of it.</returns>
-        public int LoadMissileToStockpile(OrdnanceDefTN Missile, int inc)
+        public float LoadMissileToStockpile(OrdnanceDefTN Missile, float inc)
         {
             if (inc > 0)
             {
@@ -749,7 +825,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Inc is negative here.
                     /// </summary>
-                    int retVal = MissileStockpile[Missile];
+                    float retVal = MissileStockpile[Missile];
                     MissileStockpile[Missile] = MissileStockpile[Missile] + inc;
 
                     if (MissileStockpile[Missile] <= 0)
@@ -780,7 +856,7 @@ namespace Pulsar4X.Entities
                     int SYCount = (int)Math.Floor(Inst.Number);
                     for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
                     {
-                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        int totalTons = Inst.SYInfo[SYIterator].Tonnage * Inst.SYInfo[SYIterator].Slipways;
                         signature = signature + ThermalBase + (int)Math.Round((float)totalTons / Constants.Colony.CommercialShipyardTonnageDivisor);
                     }
                 }
@@ -790,7 +866,7 @@ namespace Pulsar4X.Entities
                     int SYCount = (int)Math.Floor(Inst.Number);
                     for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
                     {
-                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        int totalTons = Inst.SYInfo[SYIterator].Tonnage * Inst.SYInfo[SYIterator].Slipways;
                         signature = signature + ThermalBase + (int)Math.Round((float)totalTons / Constants.Colony.NavalShipyardTonnageDivisor);
                     }
                 }
@@ -818,7 +894,7 @@ namespace Pulsar4X.Entities
                     int SYCount = (int)Math.Floor(Inst.Number);
                     for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
                     {
-                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        int totalTons = Inst.SYInfo[SYIterator].Tonnage * Inst.SYInfo[SYIterator].Slipways;
                         signature = signature + EMBase + (int)Math.Round((float)totalTons / Constants.Colony.CommercialShipyardTonnageDivisor);
                     }
                 }
@@ -828,7 +904,7 @@ namespace Pulsar4X.Entities
                     int SYCount = (int)Math.Floor(Inst.Number);
                     for (int SYIterator = 0; SYIterator < SYCount; SYIterator++)
                     {
-                        int totalTons = Inst.Tonnage[SYIterator] * Inst.Slipways[SYIterator];
+                        int totalTons = Inst.SYInfo[SYIterator].Tonnage * Inst.SYInfo[SYIterator].Slipways;
                         signature = signature + EMBase + (int)Math.Round((float)totalTons / Constants.Colony.NavalShipyardTonnageDivisor);
                     }
                 }
@@ -960,10 +1036,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="CIReq">Number to convert</param>
         /// <returns>Whether enough CI is present.</returns>
-        public bool CIRequirement(int CIReq)
+        public bool CIRequirement(float CIReq)
         {
             bool ret = false;
-            if (Math.Floor(Installations[(int)Installation.InstallationType.ConventionalIndustry].Number) >= CIReq)
+            if (Installations[(int)Installation.InstallationType.ConventionalIndustry].Number >= CIReq)
             {
                 ret = true;
             }
@@ -975,10 +1051,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="MineReq">Number to convert</param>
         /// <returns>Are enough present?</returns>
-        public bool MineRequirement(int MineReq)
+        public bool MineRequirement(float MineReq)
         {
             bool ret = false;
-            if (Math.Floor(Installations[(int)Installation.InstallationType.Mine].Number) >= MineReq)
+            if (Installations[(int)Installation.InstallationType.Mine].Number >= MineReq)
             {
                 ret = true;
             }
@@ -989,15 +1065,16 @@ namespace Pulsar4X.Entities
         /// Mineral Requirement checks to see if this population has enough of the specified mineral to commence building.
         /// </summary>
         /// <param name="MineralCost">Cost in minerals of this project.</param>
+        /// <param name="Completion">Completed items</param>
         /// <returns>Whether enough of said mineral is present.</returns>
-        public bool MineralRequirement(decimal[] MineralCost)
+        public bool MineralRequirement(decimal[] MineralCost, float Completion)
         {
             bool ret = true;
             for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
             {
                 if (MineralCost[(int)mineralIterator] != 0.0m)
                 {
-                    if (m_aiMinerials[mineralIterator] >= (float)MineralCost[(int)mineralIterator])
+                    if (m_aiMinerials[mineralIterator] >= ((float)MineralCost[(int)mineralIterator] * Completion))
                     {
                         ret = true;
                     }
@@ -1012,18 +1089,18 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// This function decrements CI and minerals as per the cost of the item being built.
+        /// HandleBuildItemCost decrements the mineral count by the cost of the item.
         /// </summary>
         /// <param name="CBQ">Construction Build Queue Item</param>
         /// <param name="numBuilt">Number built.</param>
         /// <param name="MineralCost">Mineral Requirement</param>
         /// <param name="CIConvAmt">CI if any required.</param>
-        public void HandleBuildItemCost(decimal ItemCost, decimal[] MineralCost, int CIConvAmt = -1, int MineConvAmt = -1)
+        public void HandleBuildItemCost(decimal ItemCost, decimal[] MineralCost, float Completion, bool CIConvReq = false, bool MineConvReq = false)
         {
             /// <summary>
-            /// Wealth cost adjustment.
+            /// Wealth cost adjustment. maybe these conversions can be handled better.
             /// </summary>
-            Faction.FactionWealth = Faction.FactionWealth - ItemCost;
+            Faction.FactionWealth = Faction.FactionWealth - (decimal)((float)ItemCost * Completion);
 
             /// <summary>
             /// Mineral Cost adjustment.
@@ -1032,24 +1109,24 @@ namespace Pulsar4X.Entities
             {
                 if (MineralCost[mineralIterator] != 0.0m)
                 {
-                    m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - (float)MineralCost[mineralIterator];
+                    m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - ((float)MineralCost[mineralIterator] * Completion);
                 }
             }
 
             /// <summary>
             /// CI Installation requirement adjustment. if CIConvAmt is -1 then no CI are required.
             /// </summary>
-            if (CIConvAmt != -1)
+            if (CIConvReq == true)
             {
-                Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = Installations[(int)Installation.InstallationType.ConventionalIndustry].Number - (float)CIConvAmt;
+                Installations[(int)Installation.InstallationType.ConventionalIndustry].Number = Installations[(int)Installation.InstallationType.ConventionalIndustry].Number - Completion;
             }
 
             /// <summary>
             /// Mine conversion adjustment. if MineConvAmt is -1 then no CI are required.
             /// </summary>
-            if (MineConvAmt != -1)
+            if (MineConvReq == true)
             {
-                Installations[(int)Installation.InstallationType.Mine].Number = Installations[(int)Installation.InstallationType.Mine].Number - (float)MineConvAmt;
+                Installations[(int)Installation.InstallationType.Mine].Number = Installations[(int)Installation.InstallationType.Mine].Number - Completion;
             }
         }
         #endregion

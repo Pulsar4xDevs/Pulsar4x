@@ -1338,8 +1338,9 @@ namespace Pulsar4X.Entities.Components
                     dY = (float)(Contact.Position.Y - Missiles[0].target.pop.Contact.Position.Y);
                     break;
                 case StarSystemEntityType.Body:
-                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.X + Missiles[0].target.body.Primary.Position.X);
-                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.Y + Missiles[0].target.body.Primary.Position.Y);
+#warning Primary is probably not needed anymore.
+                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.X /*+ Missiles[0].target.body.Primary.Position.X*/);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.Y /*+ Missiles[0].target.body.Primary.Position.Y*/);
                     break;
                 case StarSystemEntityType.Waypoint:
                     dX = (float)(Contact.Position.X - Missiles[0].target.wp.Position.X);

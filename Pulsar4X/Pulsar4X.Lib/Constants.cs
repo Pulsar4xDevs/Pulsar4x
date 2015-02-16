@@ -987,6 +987,16 @@ namespace Pulsar4X
             /// What should the starting wealth be?
             /// </summary>
             public const decimal StartingWealth = 100000.0m;
+
+            /// <summary>
+            /// Base ABR for 5KT ships unmodified by technology.
+            /// </summary>
+            public const decimal BaseShipBuildingRate = 400.0m;
+
+            /// <summary>
+            /// Basic SY modification rate unmodified itself by technology. Shipyard tech alters this by the same percentage that it does the building rate. 400-560 = 240-336
+            /// </summary>
+            public const int BaseModRate = 280;
         }
 
         /// <summary>
@@ -1044,6 +1054,79 @@ namespace Pulsar4X
             /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
             /// </summary>
             public const int TimerYearMax = 5475852;
+        }
+
+        public static class ShipyardInfo
+        {
+            /// <summary>
+            /// What is this shipyard complex doing.
+            /// </summary>
+            public enum ShipyardActivity
+            {
+                NoActivity,
+                AddSlipway,
+                Add500Tons,
+                Add1000Tons,
+                Add2000Tons,
+                Add5000Tons,
+                Add10000Tons,
+                Retool,
+                CapExpansion,
+                CapExpansionUntilX,
+                Count
+            }
+
+            /// <summary>
+            /// Strings used by shipyard activity
+            /// </summary>
+            public static String[] ShipyardTasks = { "No Activity", "Add Extra Slipway", "Add 500 Ton Capacity per Slipway", "Add 1000 Ton Capacity per Slipway", "Add 2000 Ton Capacity per Slipway",
+                                                     "Add 5000 Ton Capacity per Slipway", "Add 10000 Ton Capacity per Slipway", "Retool for Selected Class", "Continuous Capacity Expansion", 
+                                                     "Capacity Expansion Until X Tons"};
+
+            /// <summary>
+            /// What tasks are available at a Shipyard?
+            /// </summary>
+            public enum Task
+            {
+                Construction,
+                Repair,
+                Refit,
+                Scrap,
+                Count
+            }
+
+            /// <summary>
+            /// Strings used by Shipyard Task
+            /// </summary>
+            public static String[] ShipyardTaskType = { "Construction", "Repair", "Refit To", "Scrap" };
+
+            /// <summary>
+            /// Type of Shipyard
+            /// </summary>
+            public enum SYType
+            {
+                Naval,
+                Commercial,
+                Count
+            }
+
+            /// <summary>
+            /// Base cost unaffected by technology. The formula for cost is:
+            /// Value * (AmtTonnage / 500) * slipways. if naval * 10 if commercial AmtTonnage is AmtTonage/10
+            /// New slipway Cost is:
+            /// Value * (TotalTonnage/500) * slipways * 10 if Naval
+            /// </summary>
+            public static decimal[] MineralCostOfExpansion = { 6.0m, 6.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m };
+
+            /// <summary>
+            /// Base unit of mineral cost expansion is cost per 500 tons.
+            /// </summary>
+            public const int TonnageDenominator = 500;
+
+            /// <summary>
+            /// Naval shipyard complexes cost 10x what Commercial shipyard complexes cost.
+            /// </summary>
+            public const int NavalToCommercialRatio = 10;
         }
 
         /// <summary>

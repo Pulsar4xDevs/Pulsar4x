@@ -258,6 +258,131 @@ namespace Pulsar4X.UI.Panels
         }
         #endregion
 
+        #region Shipyard Tab
+        /// <summary>
+        /// Sets shipyard activity. This should bring up a prompt if there is another activity in progress.
+        /// </summary>
+        public Button SetActivityButton
+        {
+            get { return m_oSetActivityButton; }
+        }
+        /// <summary>
+        /// What task will this shipyard itself be undergoing(as opposed to what will an individual slipway be doing.
+        /// </summary>
+        public ComboBox SYCTaskTypeComboBox
+        {
+            get { return m_oSYCTaskTypeComboBox; }
+        }
+
+        /// <summary>
+        /// Should this Shipyard build/repair/refit, or scrap a ship?
+        /// </summary>
+        public ComboBox SYTaskTypeComboBox
+        {
+            get { return m_oSYTaskTypeComboBox; }
+        }
+
+        /// <summary>
+        /// Eligible class list combo box for construction and refit.
+        /// </summary>
+        public ComboBox NewClassComboBox
+        {
+            get { return m_oSYNewClassComboBox; }
+        }
+
+        /// <summary>
+        /// Retool target shipclass combo box
+        /// </summary>
+        public ComboBox NewShipClassComboBox
+        {
+            get { return m_oSYCNewShipClassComboBox; }
+        }
+
+        /// <summary>
+        /// Ship selector for repair, refit, or scrapping.
+        /// </summary>
+        public ComboBox RepairRefitScrapShipComboBox
+        {
+            get { return m_oRepairRefitScrapShipComboBox; }
+        }
+
+        /// <summary>
+        /// Eligible Ship class selector. the visibility of this will change based on user settings.
+        /// </summary>
+        public ComboBox SYNewClassComboBox
+        {
+            get { return m_oSYNewClassComboBox; }
+        }
+
+        /// <summary>
+        /// What taskgroup will newly constructed ships be placed into. The visibility of this will change.
+        /// </summary>
+        public ComboBox SYTaskGroupComboBox
+        {
+            get { return m_oSYTaskGroupComboBox; }
+        }
+
+        /// <summary>
+        /// This will be set to visible based on user UI selections.
+        /// </summary>
+        public Label SYCShipClassLabel
+        {
+            get { return m_oSYCShipClassLabel; }
+        }
+
+        /// <summary>
+        /// Need this for UI settings. Its visibility will change.
+        /// </summary>
+        public Label NewClassLabel
+        {
+            get { return m_oNewClassLabel; }
+        }
+
+        /// <summary>
+        /// Need this for UI settings. Its visibility will change.
+        /// </summary>
+        public Label TaskGroupLabel
+        {
+            get { return m_oTaskGroupLabel; }
+        }
+
+        /// <summary>
+        /// Shipyard complex required resources listbox.
+        /// </summary>
+        public ListBox SYCRequiredMaterialsListBox
+        {
+            get { return m_oSYCRequiredMaterialsListBox; }
+        }
+
+        /// <summary>
+        /// This textbox will display the name of the new ship to be built. Its visibility will also change.
+        /// </summary>
+        public TextBox SYShipNameTextBox
+        {
+            get { return m_oSYShipNameTextBox; }
+        }
+
+        /// <summary>
+        /// This textbox is where the user will input the desired capacity expansion size for a shipyard. Visibility will change.
+        /// </summary>
+        public TextBox ExpandCapUntilXTextBox
+        {
+            get { return m_oExpandCapUntilXTextBox; }
+        }
+
+        /// <summary>
+        /// Total cost of the selected shipyard complex activity.
+        /// </summary>
+        public TextBox SYCBuildCostTextBox
+        {
+            get { return m_oSYCBuildCostTextBox; }
+        }
+
+        #endregion
+
+        #region Shipyard Tasks Tab
+        #endregion
+
         #endregion
 
         /// <summary> 
@@ -369,10 +494,56 @@ namespace Pulsar4X.UI.Panels
             this.m_oMassDriverDestinationComboBox = new System.Windows.Forms.ComboBox();
             this.m_oShipyardTab = new System.Windows.Forms.TabPage();
             this.m_oShipyardCreateTaskGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oRepairRefitScrapShipComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSYShipNameTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSYTaskGroupComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSYNewClassComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oTaskGroupLabel = new System.Windows.Forms.Label();
+            this.m_oShipNameLabel = new System.Windows.Forms.Label();
+            this.m_oNewClassLabel = new System.Windows.Forms.Label();
+            this.m_oSYTaskTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oCreateDefaultnameCheckBox = new System.Windows.Forms.CheckBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.m_oSYTaskCompletionDateTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSYTaskCostTextBox = new System.Windows.Forms.TextBox();
+            this.m_oCompletionDateLabel2 = new System.Windows.Forms.Label();
+            this.m_oBuildCostLabel2 = new System.Windows.Forms.Label();
+            this.m_oTaskTypelabel2 = new System.Windows.Forms.Label();
+            this.m_oDefaultFleetButton = new System.Windows.Forms.Button();
+            this.m_oAddTaskButton = new System.Windows.Forms.Button();
+            this.m_oRefitDetailsButton = new System.Windows.Forms.Button();
+            this.m_oNewNameButton = new System.Windows.Forms.Button();
+            this.m_oReqMat2Label = new System.Windows.Forms.Label();
+            this.m_oShipRequiredMaterialsListBox = new System.Windows.Forms.ListBox();
             this.m_oShipyardTaskGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oCompletionDateLabel3 = new System.Windows.Forms.ListBox();
+            this.m_oExpandCapUntilXTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSYCNewShipClassComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSYCShipClassLabel = new System.Windows.Forms.Label();
+            this.m_oSYCTaskTypeComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oSYCBuildCostTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSYCCompletionDateTextBox = new System.Windows.Forms.TextBox();
+            this.m_oCompletionDateLabel = new System.Windows.Forms.Label();
+            this.m_oBuildCostLabel = new System.Windows.Forms.Label();
+            this.m_oTaskTypeLabel = new System.Windows.Forms.Label();
+            this.m_oSMSYButton = new System.Windows.Forms.Button();
+            this.m_oAutoRenameButton = new System.Windows.Forms.Button();
+            this.m_oRenameSYButton = new System.Windows.Forms.Button();
+            this.m_oPauseActivityButton = new System.Windows.Forms.Button();
+            this.m_oDeleteActivityButton = new System.Windows.Forms.Button();
+            this.m_oSetActivityButton = new System.Windows.Forms.Button();
+            this.m_oReqMatLabel = new System.Windows.Forms.Label();
+            this.m_oSYCRequiredMaterialsListBox = new System.Windows.Forms.ListBox();
             this.m_oShipyardListGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oShipyardTaskTab = new System.Windows.Forms.TabPage();
+            this.m_oAnnualBuildRateLabel = new System.Windows.Forms.Label();
+            this.m_oSYActivityButtonGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oSYARenameShipButton = new System.Windows.Forms.Button();
+            this.m_oSYAScheduleButton = new System.Windows.Forms.Button();
+            this.m_oSYALowerPriorityButton = new System.Windows.Forms.Button();
+            this.m_oSYARaisePriorityButton = new System.Windows.Forms.Button();
+            this.m_oSYAPauseTaskButton = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.m_oSYActivityGroupBox = new System.Windows.Forms.GroupBox();
             this.m_oResearchTab = new System.Windows.Forms.TabPage();
             this.m_oEnvironmentTab = new System.Windows.Forms.TabPage();
             this.m_oTeamsTab = new System.Windows.Forms.TabPage();
@@ -380,48 +551,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oGUTab = new System.Windows.Forms.TabPage();
             this.m_oGUTrainingTab = new System.Windows.Forms.TabPage();
             this.m_oWealthTab = new System.Windows.Forms.TabPage();
-            this.m_oReqMatLabel = new System.Windows.Forms.Label();
-            this.m_oShipRequiredMaterialsListBox = new System.Windows.Forms.ListBox();
-            this.m_oReqMat2Label = new System.Windows.Forms.Label();
-            this.m_oNewNameButton = new System.Windows.Forms.Button();
-            this.m_oRefitDetailsButton = new System.Windows.Forms.Button();
-            this.m_oAddTaskButton = new System.Windows.Forms.Button();
-            this.m_oDefaultFleetButton = new System.Windows.Forms.Button();
-            this.m_oSetActivityButton = new System.Windows.Forms.Button();
-            this.m_oDeleteActivityButton = new System.Windows.Forms.Button();
-            this.m_oPauseActivityButton = new System.Windows.Forms.Button();
-            this.m_oRenameSYButton = new System.Windows.Forms.Button();
-            this.m_oAutoRenameButton = new System.Windows.Forms.Button();
-            this.m_oSMSYButton = new System.Windows.Forms.Button();
-            this.m_oTaskTypeLabel = new System.Windows.Forms.Label();
-            this.m_oBuildCostLabel = new System.Windows.Forms.Label();
-            this.m_oCompletionDateLabel = new System.Windows.Forms.Label();
-            this.m_oSYCCompletionDateTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSYCBuildCostTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSYCTaskTypeComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oTaskTypelabel2 = new System.Windows.Forms.Label();
-            this.m_oBuildCostLabel2 = new System.Windows.Forms.Label();
-            this.m_oCompletionDateLabel2 = new System.Windows.Forms.Label();
-            this.m_oSYTaskCostTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSYTaskCompletionDateTextBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.m_oCreateDefaultnameCheckBox = new System.Windows.Forms.CheckBox();
-            this.m_oSYTaskTypeComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oNewClassLabel = new System.Windows.Forms.Label();
-            this.m_oShipNameLabel = new System.Windows.Forms.Label();
-            this.m_oTaskGroupLabel = new System.Windows.Forms.Label();
-            this.m_oSYNewClassComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oSYTaskGroupComboBox = new System.Windows.Forms.ComboBox();
-            this.m_oSYShipNameTextBox = new System.Windows.Forms.TextBox();
-            this.m_oSYActivityGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oSYActivityButtonGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oAnnualBuildRateLabel = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.m_oSYAPauseTaskButton = new System.Windows.Forms.Button();
-            this.m_oSYARaisePriorityButton = new System.Windows.Forms.Button();
-            this.m_oSYALowerPriorityButton = new System.Windows.Forms.Button();
-            this.m_oSYAScheduleButton = new System.Windows.Forms.Button();
-            this.m_oSYARenameShipButton = new System.Windows.Forms.Button();
             this.m_oEmpireGroupBox.SuspendLayout();
             this.m_oPopulationGroupBox.SuspendLayout();
             this.m_oIndustryControlGroupBox.SuspendLayout();
@@ -1328,6 +1457,7 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oShipyardCreateTaskGroupBox
             // 
+            this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oRepairRefitScrapShipComboBox);
             this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oSYShipNameTextBox);
             this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oSYTaskGroupComboBox);
             this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oSYNewClassComboBox);
@@ -1355,8 +1485,199 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardCreateTaskGroupBox.TabStop = false;
             this.m_oShipyardCreateTaskGroupBox.Text = "Create Task(Title)";
             // 
+            // m_oRepairRefitScrapShipComboBox
+            // 
+            this.m_oRepairRefitScrapShipComboBox.FormattingEnabled = true;
+            this.m_oRepairRefitScrapShipComboBox.Location = new System.Drawing.Point(393, 44);
+            this.m_oRepairRefitScrapShipComboBox.Name = "m_oRepairRefitScrapShipComboBox";
+            this.m_oRepairRefitScrapShipComboBox.Size = new System.Drawing.Size(216, 21);
+            this.m_oRepairRefitScrapShipComboBox.TabIndex = 28;
+            this.m_oRepairRefitScrapShipComboBox.Visible = false;
+            // 
+            // m_oSYShipNameTextBox
+            // 
+            this.m_oSYShipNameTextBox.Location = new System.Drawing.Point(393, 45);
+            this.m_oSYShipNameTextBox.Name = "m_oSYShipNameTextBox";
+            this.m_oSYShipNameTextBox.Size = new System.Drawing.Size(216, 20);
+            this.m_oSYShipNameTextBox.TabIndex = 27;
+            this.m_oSYShipNameTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSYTaskGroupComboBox
+            // 
+            this.m_oSYTaskGroupComboBox.FormattingEnabled = true;
+            this.m_oSYTaskGroupComboBox.Location = new System.Drawing.Point(393, 71);
+            this.m_oSYTaskGroupComboBox.Name = "m_oSYTaskGroupComboBox";
+            this.m_oSYTaskGroupComboBox.Size = new System.Drawing.Size(216, 21);
+            this.m_oSYTaskGroupComboBox.TabIndex = 26;
+            // 
+            // m_oSYNewClassComboBox
+            // 
+            this.m_oSYNewClassComboBox.FormattingEnabled = true;
+            this.m_oSYNewClassComboBox.Location = new System.Drawing.Point(393, 18);
+            this.m_oSYNewClassComboBox.Name = "m_oSYNewClassComboBox";
+            this.m_oSYNewClassComboBox.Size = new System.Drawing.Size(216, 21);
+            this.m_oSYNewClassComboBox.TabIndex = 25;
+            // 
+            // m_oTaskGroupLabel
+            // 
+            this.m_oTaskGroupLabel.AutoSize = true;
+            this.m_oTaskGroupLabel.Location = new System.Drawing.Point(324, 74);
+            this.m_oTaskGroupLabel.Name = "m_oTaskGroupLabel";
+            this.m_oTaskGroupLabel.Size = new System.Drawing.Size(63, 13);
+            this.m_oTaskGroupLabel.TabIndex = 24;
+            this.m_oTaskGroupLabel.Text = "Task Group";
+            // 
+            // m_oShipNameLabel
+            // 
+            this.m_oShipNameLabel.AutoSize = true;
+            this.m_oShipNameLabel.Location = new System.Drawing.Point(324, 48);
+            this.m_oShipNameLabel.Name = "m_oShipNameLabel";
+            this.m_oShipNameLabel.Size = new System.Drawing.Size(59, 13);
+            this.m_oShipNameLabel.TabIndex = 23;
+            this.m_oShipNameLabel.Text = "Ship Name";
+            // 
+            // m_oNewClassLabel
+            // 
+            this.m_oNewClassLabel.AutoSize = true;
+            this.m_oNewClassLabel.Location = new System.Drawing.Point(324, 21);
+            this.m_oNewClassLabel.Name = "m_oNewClassLabel";
+            this.m_oNewClassLabel.Size = new System.Drawing.Size(57, 13);
+            this.m_oNewClassLabel.TabIndex = 22;
+            this.m_oNewClassLabel.Text = "New Class";
+            // 
+            // m_oSYTaskTypeComboBox
+            // 
+            this.m_oSYTaskTypeComboBox.FormattingEnabled = true;
+            this.m_oSYTaskTypeComboBox.Location = new System.Drawing.Point(75, 19);
+            this.m_oSYTaskTypeComboBox.Name = "m_oSYTaskTypeComboBox";
+            this.m_oSYTaskTypeComboBox.Size = new System.Drawing.Size(213, 21);
+            this.m_oSYTaskTypeComboBox.TabIndex = 19;
+            // 
+            // m_oCreateDefaultnameCheckBox
+            // 
+            this.m_oCreateDefaultnameCheckBox.AutoSize = true;
+            this.m_oCreateDefaultnameCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCreateDefaultnameCheckBox.Checked = true;
+            this.m_oCreateDefaultnameCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.m_oCreateDefaultnameCheckBox.Location = new System.Drawing.Point(162, 73);
+            this.m_oCreateDefaultnameCheckBox.Name = "m_oCreateDefaultnameCheckBox";
+            this.m_oCreateDefaultnameCheckBox.Size = new System.Drawing.Size(126, 17);
+            this.m_oCreateDefaultnameCheckBox.TabIndex = 21;
+            this.m_oCreateDefaultnameCheckBox.Text = "Create default names";
+            this.m_oCreateDefaultnameCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 108);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(30, 13);
+            this.label1.TabIndex = 20;
+            this.label1.Text = "Date";
+            // 
+            // m_oSYTaskCompletionDateTextBox
+            // 
+            this.m_oSYTaskCompletionDateTextBox.Location = new System.Drawing.Point(75, 97);
+            this.m_oSYTaskCompletionDateTextBox.Name = "m_oSYTaskCompletionDateTextBox";
+            this.m_oSYTaskCompletionDateTextBox.ReadOnly = true;
+            this.m_oSYTaskCompletionDateTextBox.Size = new System.Drawing.Size(534, 20);
+            this.m_oSYTaskCompletionDateTextBox.TabIndex = 19;
+            // 
+            // m_oSYTaskCostTextBox
+            // 
+            this.m_oSYTaskCostTextBox.Location = new System.Drawing.Point(75, 71);
+            this.m_oSYTaskCostTextBox.Name = "m_oSYTaskCostTextBox";
+            this.m_oSYTaskCostTextBox.ReadOnly = true;
+            this.m_oSYTaskCostTextBox.Size = new System.Drawing.Size(69, 20);
+            this.m_oSYTaskCostTextBox.TabIndex = 19;
+            this.m_oSYTaskCostTextBox.Text = "0";
+            this.m_oSYTaskCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oCompletionDateLabel2
+            // 
+            this.m_oCompletionDateLabel2.AutoSize = true;
+            this.m_oCompletionDateLabel2.Location = new System.Drawing.Point(6, 94);
+            this.m_oCompletionDateLabel2.Name = "m_oCompletionDateLabel2";
+            this.m_oCompletionDateLabel2.Size = new System.Drawing.Size(59, 13);
+            this.m_oCompletionDateLabel2.TabIndex = 19;
+            this.m_oCompletionDateLabel2.Text = "Completion";
+            // 
+            // m_oBuildCostLabel2
+            // 
+            this.m_oBuildCostLabel2.AutoSize = true;
+            this.m_oBuildCostLabel2.Location = new System.Drawing.Point(6, 74);
+            this.m_oBuildCostLabel2.Name = "m_oBuildCostLabel2";
+            this.m_oBuildCostLabel2.Size = new System.Drawing.Size(54, 13);
+            this.m_oBuildCostLabel2.TabIndex = 19;
+            this.m_oBuildCostLabel2.Text = "Build Cost";
+            // 
+            // m_oTaskTypelabel2
+            // 
+            this.m_oTaskTypelabel2.AutoSize = true;
+            this.m_oTaskTypelabel2.Location = new System.Drawing.Point(6, 22);
+            this.m_oTaskTypelabel2.Name = "m_oTaskTypelabel2";
+            this.m_oTaskTypelabel2.Size = new System.Drawing.Size(58, 13);
+            this.m_oTaskTypelabel2.TabIndex = 19;
+            this.m_oTaskTypelabel2.Text = "Task Type";
+            // 
+            // m_oDefaultFleetButton
+            // 
+            this.m_oDefaultFleetButton.Location = new System.Drawing.Point(95, 141);
+            this.m_oDefaultFleetButton.Name = "m_oDefaultFleetButton";
+            this.m_oDefaultFleetButton.Size = new System.Drawing.Size(78, 23);
+            this.m_oDefaultFleetButton.TabIndex = 6;
+            this.m_oDefaultFleetButton.Text = "Default Fleet";
+            this.m_oDefaultFleetButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAddTaskButton
+            // 
+            this.m_oAddTaskButton.Location = new System.Drawing.Point(6, 141);
+            this.m_oAddTaskButton.Name = "m_oAddTaskButton";
+            this.m_oAddTaskButton.Size = new System.Drawing.Size(78, 23);
+            this.m_oAddTaskButton.TabIndex = 5;
+            this.m_oAddTaskButton.Text = "&Add Task";
+            this.m_oAddTaskButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oRefitDetailsButton
+            // 
+            this.m_oRefitDetailsButton.Location = new System.Drawing.Point(651, 141);
+            this.m_oRefitDetailsButton.Name = "m_oRefitDetailsButton";
+            this.m_oRefitDetailsButton.Size = new System.Drawing.Size(78, 23);
+            this.m_oRefitDetailsButton.TabIndex = 4;
+            this.m_oRefitDetailsButton.Text = "Refit Details";
+            this.m_oRefitDetailsButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oNewNameButton
+            // 
+            this.m_oNewNameButton.Location = new System.Drawing.Point(735, 141);
+            this.m_oNewNameButton.Name = "m_oNewNameButton";
+            this.m_oNewNameButton.Size = new System.Drawing.Size(78, 23);
+            this.m_oNewNameButton.TabIndex = 3;
+            this.m_oNewNameButton.Text = "New Na&mes";
+            this.m_oNewNameButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReqMat2Label
+            // 
+            this.m_oReqMat2Label.AutoSize = true;
+            this.m_oReqMat2Label.Location = new System.Drawing.Point(648, 15);
+            this.m_oReqMat2Label.Name = "m_oReqMat2Label";
+            this.m_oReqMat2Label.Size = new System.Drawing.Size(95, 13);
+            this.m_oReqMat2Label.TabIndex = 2;
+            this.m_oReqMat2Label.Text = "Required Materials";
+            // 
+            // m_oShipRequiredMaterialsListBox
+            // 
+            this.m_oShipRequiredMaterialsListBox.FormattingEnabled = true;
+            this.m_oShipRequiredMaterialsListBox.Location = new System.Drawing.Point(651, 32);
+            this.m_oShipRequiredMaterialsListBox.Name = "m_oShipRequiredMaterialsListBox";
+            this.m_oShipRequiredMaterialsListBox.Size = new System.Drawing.Size(162, 95);
+            this.m_oShipRequiredMaterialsListBox.TabIndex = 0;
+            // 
             // m_oShipyardTaskGroupBox
             // 
+            this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oExpandCapUntilXTextBox);
+            this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSYCNewShipClassComboBox);
+            this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSYCShipClassLabel);
             this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSYCTaskTypeComboBox);
             this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSYCBuildCostTextBox);
             this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSYCCompletionDateTextBox);
@@ -1370,7 +1691,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oDeleteActivityButton);
             this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSetActivityButton);
             this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oReqMatLabel);
-            this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oCompletionDateLabel3);
+            this.m_oShipyardTaskGroupBox.Controls.Add(this.m_oSYCRequiredMaterialsListBox);
             this.m_oShipyardTaskGroupBox.Location = new System.Drawing.Point(6, 373);
             this.m_oShipyardTaskGroupBox.Name = "m_oShipyardTaskGroupBox";
             this.m_oShipyardTaskGroupBox.Size = new System.Drawing.Size(819, 135);
@@ -1378,13 +1699,157 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardTaskGroupBox.TabStop = false;
             this.m_oShipyardTaskGroupBox.Text = "Shipyard Complex Activity(Title)";
             // 
-            // m_oCompletionDateLabel3
+            // m_oExpandCapUntilXTextBox
             // 
-            this.m_oCompletionDateLabel3.FormattingEnabled = true;
-            this.m_oCompletionDateLabel3.Location = new System.Drawing.Point(651, 34);
-            this.m_oCompletionDateLabel3.Name = "m_oCompletionDateLabel3";
-            this.m_oCompletionDateLabel3.Size = new System.Drawing.Size(162, 95);
-            this.m_oCompletionDateLabel3.TabIndex = 0;
+            this.m_oExpandCapUntilXTextBox.Location = new System.Drawing.Point(393, 31);
+            this.m_oExpandCapUntilXTextBox.Name = "m_oExpandCapUntilXTextBox";
+            this.m_oExpandCapUntilXTextBox.Size = new System.Drawing.Size(216, 20);
+            this.m_oExpandCapUntilXTextBox.TabIndex = 21;
+            this.m_oExpandCapUntilXTextBox.Text = "0";
+            this.m_oExpandCapUntilXTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.m_oExpandCapUntilXTextBox.Visible = false;
+            // 
+            // m_oSYCNewShipClassComboBox
+            // 
+            this.m_oSYCNewShipClassComboBox.FormattingEnabled = true;
+            this.m_oSYCNewShipClassComboBox.Location = new System.Drawing.Point(393, 31);
+            this.m_oSYCNewShipClassComboBox.Name = "m_oSYCNewShipClassComboBox";
+            this.m_oSYCNewShipClassComboBox.Size = new System.Drawing.Size(216, 21);
+            this.m_oSYCNewShipClassComboBox.TabIndex = 20;
+            // 
+            // m_oSYCShipClassLabel
+            // 
+            this.m_oSYCShipClassLabel.AutoSize = true;
+            this.m_oSYCShipClassLabel.Location = new System.Drawing.Point(324, 34);
+            this.m_oSYCShipClassLabel.Name = "m_oSYCShipClassLabel";
+            this.m_oSYCShipClassLabel.Size = new System.Drawing.Size(56, 13);
+            this.m_oSYCShipClassLabel.TabIndex = 19;
+            this.m_oSYCShipClassLabel.Text = "Ship Class";
+            // 
+            // m_oSYCTaskTypeComboBox
+            // 
+            this.m_oSYCTaskTypeComboBox.FormattingEnabled = true;
+            this.m_oSYCTaskTypeComboBox.Location = new System.Drawing.Point(75, 31);
+            this.m_oSYCTaskTypeComboBox.Name = "m_oSYCTaskTypeComboBox";
+            this.m_oSYCTaskTypeComboBox.Size = new System.Drawing.Size(213, 21);
+            this.m_oSYCTaskTypeComboBox.TabIndex = 18;
+            // 
+            // m_oSYCBuildCostTextBox
+            // 
+            this.m_oSYCBuildCostTextBox.Location = new System.Drawing.Point(75, 71);
+            this.m_oSYCBuildCostTextBox.Name = "m_oSYCBuildCostTextBox";
+            this.m_oSYCBuildCostTextBox.ReadOnly = true;
+            this.m_oSYCBuildCostTextBox.Size = new System.Drawing.Size(69, 20);
+            this.m_oSYCBuildCostTextBox.TabIndex = 17;
+            this.m_oSYCBuildCostTextBox.Text = "0";
+            this.m_oSYCBuildCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oSYCCompletionDateTextBox
+            // 
+            this.m_oSYCCompletionDateTextBox.Location = new System.Drawing.Point(254, 71);
+            this.m_oSYCCompletionDateTextBox.Name = "m_oSYCCompletionDateTextBox";
+            this.m_oSYCCompletionDateTextBox.ReadOnly = true;
+            this.m_oSYCCompletionDateTextBox.Size = new System.Drawing.Size(355, 20);
+            this.m_oSYCCompletionDateTextBox.TabIndex = 16;
+            // 
+            // m_oCompletionDateLabel
+            // 
+            this.m_oCompletionDateLabel.AutoSize = true;
+            this.m_oCompletionDateLabel.Location = new System.Drawing.Point(162, 74);
+            this.m_oCompletionDateLabel.Name = "m_oCompletionDateLabel";
+            this.m_oCompletionDateLabel.Size = new System.Drawing.Size(85, 13);
+            this.m_oCompletionDateLabel.TabIndex = 15;
+            this.m_oCompletionDateLabel.Text = "Completion Date";
+            // 
+            // m_oBuildCostLabel
+            // 
+            this.m_oBuildCostLabel.AutoSize = true;
+            this.m_oBuildCostLabel.Location = new System.Drawing.Point(6, 74);
+            this.m_oBuildCostLabel.Name = "m_oBuildCostLabel";
+            this.m_oBuildCostLabel.Size = new System.Drawing.Size(54, 13);
+            this.m_oBuildCostLabel.TabIndex = 14;
+            this.m_oBuildCostLabel.Text = "Build Cost";
+            // 
+            // m_oTaskTypeLabel
+            // 
+            this.m_oTaskTypeLabel.AutoSize = true;
+            this.m_oTaskTypeLabel.Location = new System.Drawing.Point(6, 34);
+            this.m_oTaskTypeLabel.Name = "m_oTaskTypeLabel";
+            this.m_oTaskTypeLabel.Size = new System.Drawing.Size(58, 13);
+            this.m_oTaskTypeLabel.TabIndex = 13;
+            this.m_oTaskTypeLabel.Text = "Task Type";
+            // 
+            // m_oSMSYButton
+            // 
+            this.m_oSMSYButton.Location = new System.Drawing.Point(561, 106);
+            this.m_oSMSYButton.Name = "m_oSMSYButton";
+            this.m_oSMSYButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSMSYButton.TabIndex = 12;
+            this.m_oSMSYButton.Text = "SM SY Mod";
+            this.m_oSMSYButton.UseVisualStyleBackColor = true;
+            this.m_oSMSYButton.Visible = false;
+            // 
+            // m_oAutoRenameButton
+            // 
+            this.m_oAutoRenameButton.Location = new System.Drawing.Point(399, 106);
+            this.m_oAutoRenameButton.Name = "m_oAutoRenameButton";
+            this.m_oAutoRenameButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oAutoRenameButton.TabIndex = 11;
+            this.m_oAutoRenameButton.Text = "Auto-Rename";
+            this.m_oAutoRenameButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oRenameSYButton
+            // 
+            this.m_oRenameSYButton.Location = new System.Drawing.Point(304, 106);
+            this.m_oRenameSYButton.Name = "m_oRenameSYButton";
+            this.m_oRenameSYButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oRenameSYButton.TabIndex = 10;
+            this.m_oRenameSYButton.Text = "Rename SY";
+            this.m_oRenameSYButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPauseActivityButton
+            // 
+            this.m_oPauseActivityButton.Location = new System.Drawing.Point(204, 106);
+            this.m_oPauseActivityButton.Name = "m_oPauseActivityButton";
+            this.m_oPauseActivityButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oPauseActivityButton.TabIndex = 9;
+            this.m_oPauseActivityButton.Text = "Pause Activity";
+            this.m_oPauseActivityButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oDeleteActivityButton
+            // 
+            this.m_oDeleteActivityButton.Location = new System.Drawing.Point(105, 106);
+            this.m_oDeleteActivityButton.Name = "m_oDeleteActivityButton";
+            this.m_oDeleteActivityButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oDeleteActivityButton.TabIndex = 8;
+            this.m_oDeleteActivityButton.Text = "Delete Activity";
+            this.m_oDeleteActivityButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSetActivityButton
+            // 
+            this.m_oSetActivityButton.Location = new System.Drawing.Point(6, 106);
+            this.m_oSetActivityButton.Name = "m_oSetActivityButton";
+            this.m_oSetActivityButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSetActivityButton.TabIndex = 7;
+            this.m_oSetActivityButton.Text = "Set Activity";
+            this.m_oSetActivityButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oReqMatLabel
+            // 
+            this.m_oReqMatLabel.AutoSize = true;
+            this.m_oReqMatLabel.Location = new System.Drawing.Point(648, 16);
+            this.m_oReqMatLabel.Name = "m_oReqMatLabel";
+            this.m_oReqMatLabel.Size = new System.Drawing.Size(95, 13);
+            this.m_oReqMatLabel.TabIndex = 1;
+            this.m_oReqMatLabel.Text = "Required Materials";
+            // 
+            // m_oSYCRequiredMaterialsListBox
+            // 
+            this.m_oSYCRequiredMaterialsListBox.FormattingEnabled = true;
+            this.m_oSYCRequiredMaterialsListBox.Location = new System.Drawing.Point(651, 34);
+            this.m_oSYCRequiredMaterialsListBox.Name = "m_oSYCRequiredMaterialsListBox";
+            this.m_oSYCRequiredMaterialsListBox.Size = new System.Drawing.Size(162, 95);
+            this.m_oSYCRequiredMaterialsListBox.TabIndex = 0;
             // 
             // m_oShipyardListGroupBox
             // 
@@ -1407,6 +1872,93 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardTaskTab.TabIndex = 4;
             this.m_oShipyardTaskTab.Text = "Shipyard Tasks";
             this.m_oShipyardTaskTab.UseVisualStyleBackColor = true;
+            // 
+            // m_oAnnualBuildRateLabel
+            // 
+            this.m_oAnnualBuildRateLabel.AutoSize = true;
+            this.m_oAnnualBuildRateLabel.Location = new System.Drawing.Point(211, 25);
+            this.m_oAnnualBuildRateLabel.Name = "m_oAnnualBuildRateLabel";
+            this.m_oAnnualBuildRateLabel.Size = new System.Drawing.Size(405, 13);
+            this.m_oAnnualBuildRateLabel.TabIndex = 2;
+            this.m_oAnnualBuildRateLabel.Text = "Annual Ship Building Rate Per Slipway for 5000 ton ship: 111    Available Slipway" +
+                "s: 1";
+            // 
+            // m_oSYActivityButtonGroupBox
+            // 
+            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYARenameShipButton);
+            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYAScheduleButton);
+            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYALowerPriorityButton);
+            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYARaisePriorityButton);
+            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYAPauseTaskButton);
+            this.m_oSYActivityButtonGroupBox.Controls.Add(this.button1);
+            this.m_oSYActivityButtonGroupBox.Location = new System.Drawing.Point(6, 622);
+            this.m_oSYActivityButtonGroupBox.Name = "m_oSYActivityButtonGroupBox";
+            this.m_oSYActivityButtonGroupBox.Size = new System.Drawing.Size(819, 62);
+            this.m_oSYActivityButtonGroupBox.TabIndex = 1;
+            this.m_oSYActivityButtonGroupBox.TabStop = false;
+            // 
+            // m_oSYARenameShipButton
+            // 
+            this.m_oSYARenameShipButton.Location = new System.Drawing.Point(510, 26);
+            this.m_oSYARenameShipButton.Name = "m_oSYARenameShipButton";
+            this.m_oSYARenameShipButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSYARenameShipButton.TabIndex = 14;
+            this.m_oSYARenameShipButton.Text = "Rename Ship";
+            this.m_oSYARenameShipButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSYAScheduleButton
+            // 
+            this.m_oSYAScheduleButton.Location = new System.Drawing.Point(408, 26);
+            this.m_oSYAScheduleButton.Name = "m_oSYAScheduleButton";
+            this.m_oSYAScheduleButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSYAScheduleButton.TabIndex = 13;
+            this.m_oSYAScheduleButton.Text = "Schedule";
+            this.m_oSYAScheduleButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSYALowerPriorityButton
+            // 
+            this.m_oSYALowerPriorityButton.Location = new System.Drawing.Point(307, 26);
+            this.m_oSYALowerPriorityButton.Name = "m_oSYALowerPriorityButton";
+            this.m_oSYALowerPriorityButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSYALowerPriorityButton.TabIndex = 12;
+            this.m_oSYALowerPriorityButton.Text = "Lower Priority";
+            this.m_oSYALowerPriorityButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSYARaisePriorityButton
+            // 
+            this.m_oSYARaisePriorityButton.Location = new System.Drawing.Point(208, 26);
+            this.m_oSYARaisePriorityButton.Name = "m_oSYARaisePriorityButton";
+            this.m_oSYARaisePriorityButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSYARaisePriorityButton.TabIndex = 11;
+            this.m_oSYARaisePriorityButton.Text = "Higher Priority";
+            this.m_oSYARaisePriorityButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSYAPauseTaskButton
+            // 
+            this.m_oSYAPauseTaskButton.Location = new System.Drawing.Point(106, 26);
+            this.m_oSYAPauseTaskButton.Name = "m_oSYAPauseTaskButton";
+            this.m_oSYAPauseTaskButton.Size = new System.Drawing.Size(84, 23);
+            this.m_oSYAPauseTaskButton.TabIndex = 10;
+            this.m_oSYAPauseTaskButton.Text = "Pause Task";
+            this.m_oSYAPauseTaskButton.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(6, 26);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(84, 23);
+            this.button1.TabIndex = 9;
+            this.button1.Text = "De&lete Task";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // m_oSYActivityGroupBox
+            // 
+            this.m_oSYActivityGroupBox.Location = new System.Drawing.Point(9, 56);
+            this.m_oSYActivityGroupBox.Name = "m_oSYActivityGroupBox";
+            this.m_oSYActivityGroupBox.Size = new System.Drawing.Size(811, 548);
+            this.m_oSYActivityGroupBox.TabIndex = 0;
+            this.m_oSYActivityGroupBox.TabStop = false;
+            this.m_oSYActivityGroupBox.Text = "Shipyard Activity(1 Slipways)";
             // 
             // m_oResearchTab
             // 
@@ -1477,385 +2029,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oWealthTab.TabIndex = 11;
             this.m_oWealthTab.Text = "Wealth / Trade";
             this.m_oWealthTab.UseVisualStyleBackColor = true;
-            // 
-            // m_oReqMatLabel
-            // 
-            this.m_oReqMatLabel.AutoSize = true;
-            this.m_oReqMatLabel.Location = new System.Drawing.Point(648, 16);
-            this.m_oReqMatLabel.Name = "m_oReqMatLabel";
-            this.m_oReqMatLabel.Size = new System.Drawing.Size(95, 13);
-            this.m_oReqMatLabel.TabIndex = 1;
-            this.m_oReqMatLabel.Text = "Required Materials";
-            // 
-            // m_oShipRequiredMaterialsListBox
-            // 
-            this.m_oShipRequiredMaterialsListBox.FormattingEnabled = true;
-            this.m_oShipRequiredMaterialsListBox.Location = new System.Drawing.Point(651, 32);
-            this.m_oShipRequiredMaterialsListBox.Name = "m_oShipRequiredMaterialsListBox";
-            this.m_oShipRequiredMaterialsListBox.Size = new System.Drawing.Size(162, 95);
-            this.m_oShipRequiredMaterialsListBox.TabIndex = 0;
-            // 
-            // m_oReqMat2Label
-            // 
-            this.m_oReqMat2Label.AutoSize = true;
-            this.m_oReqMat2Label.Location = new System.Drawing.Point(648, 15);
-            this.m_oReqMat2Label.Name = "m_oReqMat2Label";
-            this.m_oReqMat2Label.Size = new System.Drawing.Size(95, 13);
-            this.m_oReqMat2Label.TabIndex = 2;
-            this.m_oReqMat2Label.Text = "Required Materials";
-            // 
-            // m_oNewNameButton
-            // 
-            this.m_oNewNameButton.Location = new System.Drawing.Point(735, 141);
-            this.m_oNewNameButton.Name = "m_oNewNameButton";
-            this.m_oNewNameButton.Size = new System.Drawing.Size(78, 23);
-            this.m_oNewNameButton.TabIndex = 3;
-            this.m_oNewNameButton.Text = "New Na&mes";
-            this.m_oNewNameButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oRefitDetailsButton
-            // 
-            this.m_oRefitDetailsButton.Location = new System.Drawing.Point(651, 141);
-            this.m_oRefitDetailsButton.Name = "m_oRefitDetailsButton";
-            this.m_oRefitDetailsButton.Size = new System.Drawing.Size(78, 23);
-            this.m_oRefitDetailsButton.TabIndex = 4;
-            this.m_oRefitDetailsButton.Text = "Refit Details";
-            this.m_oRefitDetailsButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oAddTaskButton
-            // 
-            this.m_oAddTaskButton.Location = new System.Drawing.Point(6, 141);
-            this.m_oAddTaskButton.Name = "m_oAddTaskButton";
-            this.m_oAddTaskButton.Size = new System.Drawing.Size(78, 23);
-            this.m_oAddTaskButton.TabIndex = 5;
-            this.m_oAddTaskButton.Text = "&Add Task";
-            this.m_oAddTaskButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oDefaultFleetButton
-            // 
-            this.m_oDefaultFleetButton.Location = new System.Drawing.Point(95, 141);
-            this.m_oDefaultFleetButton.Name = "m_oDefaultFleetButton";
-            this.m_oDefaultFleetButton.Size = new System.Drawing.Size(78, 23);
-            this.m_oDefaultFleetButton.TabIndex = 6;
-            this.m_oDefaultFleetButton.Text = "Default Fleet";
-            this.m_oDefaultFleetButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSetActivityButton
-            // 
-            this.m_oSetActivityButton.Location = new System.Drawing.Point(6, 106);
-            this.m_oSetActivityButton.Name = "m_oSetActivityButton";
-            this.m_oSetActivityButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSetActivityButton.TabIndex = 7;
-            this.m_oSetActivityButton.Text = "Set Activity";
-            this.m_oSetActivityButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oDeleteActivityButton
-            // 
-            this.m_oDeleteActivityButton.Location = new System.Drawing.Point(105, 106);
-            this.m_oDeleteActivityButton.Name = "m_oDeleteActivityButton";
-            this.m_oDeleteActivityButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oDeleteActivityButton.TabIndex = 8;
-            this.m_oDeleteActivityButton.Text = "Delete Activity";
-            this.m_oDeleteActivityButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oPauseActivityButton
-            // 
-            this.m_oPauseActivityButton.Location = new System.Drawing.Point(204, 106);
-            this.m_oPauseActivityButton.Name = "m_oPauseActivityButton";
-            this.m_oPauseActivityButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oPauseActivityButton.TabIndex = 9;
-            this.m_oPauseActivityButton.Text = "Pause Activity";
-            this.m_oPauseActivityButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oRenameSYButton
-            // 
-            this.m_oRenameSYButton.Location = new System.Drawing.Point(304, 106);
-            this.m_oRenameSYButton.Name = "m_oRenameSYButton";
-            this.m_oRenameSYButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oRenameSYButton.TabIndex = 10;
-            this.m_oRenameSYButton.Text = "Rename SY";
-            this.m_oRenameSYButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oAutoRenameButton
-            // 
-            this.m_oAutoRenameButton.Location = new System.Drawing.Point(399, 106);
-            this.m_oAutoRenameButton.Name = "m_oAutoRenameButton";
-            this.m_oAutoRenameButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oAutoRenameButton.TabIndex = 11;
-            this.m_oAutoRenameButton.Text = "Auto-Rename";
-            this.m_oAutoRenameButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSMSYButton
-            // 
-            this.m_oSMSYButton.Location = new System.Drawing.Point(561, 106);
-            this.m_oSMSYButton.Name = "m_oSMSYButton";
-            this.m_oSMSYButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSMSYButton.TabIndex = 12;
-            this.m_oSMSYButton.Text = "SM SY Mod";
-            this.m_oSMSYButton.UseVisualStyleBackColor = true;
-            this.m_oSMSYButton.Visible = false;
-            // 
-            // m_oTaskTypeLabel
-            // 
-            this.m_oTaskTypeLabel.AutoSize = true;
-            this.m_oTaskTypeLabel.Location = new System.Drawing.Point(6, 34);
-            this.m_oTaskTypeLabel.Name = "m_oTaskTypeLabel";
-            this.m_oTaskTypeLabel.Size = new System.Drawing.Size(58, 13);
-            this.m_oTaskTypeLabel.TabIndex = 13;
-            this.m_oTaskTypeLabel.Text = "Task Type";
-            // 
-            // m_oBuildCostLabel
-            // 
-            this.m_oBuildCostLabel.AutoSize = true;
-            this.m_oBuildCostLabel.Location = new System.Drawing.Point(6, 74);
-            this.m_oBuildCostLabel.Name = "m_oBuildCostLabel";
-            this.m_oBuildCostLabel.Size = new System.Drawing.Size(54, 13);
-            this.m_oBuildCostLabel.TabIndex = 14;
-            this.m_oBuildCostLabel.Text = "Build Cost";
-            // 
-            // m_oCompletionDateLabel
-            // 
-            this.m_oCompletionDateLabel.AutoSize = true;
-            this.m_oCompletionDateLabel.Location = new System.Drawing.Point(162, 74);
-            this.m_oCompletionDateLabel.Name = "m_oCompletionDateLabel";
-            this.m_oCompletionDateLabel.Size = new System.Drawing.Size(85, 13);
-            this.m_oCompletionDateLabel.TabIndex = 15;
-            this.m_oCompletionDateLabel.Text = "Completion Date";
-            // 
-            // m_oSYCCompletionDateTextBox
-            // 
-            this.m_oSYCCompletionDateTextBox.Location = new System.Drawing.Point(254, 71);
-            this.m_oSYCCompletionDateTextBox.Name = "m_oSYCCompletionDateTextBox";
-            this.m_oSYCCompletionDateTextBox.Size = new System.Drawing.Size(355, 20);
-            this.m_oSYCCompletionDateTextBox.TabIndex = 16;
-            // 
-            // m_oSYCBuildCostTextBox
-            // 
-            this.m_oSYCBuildCostTextBox.Location = new System.Drawing.Point(75, 71);
-            this.m_oSYCBuildCostTextBox.Name = "m_oSYCBuildCostTextBox";
-            this.m_oSYCBuildCostTextBox.Size = new System.Drawing.Size(69, 20);
-            this.m_oSYCBuildCostTextBox.TabIndex = 17;
-            this.m_oSYCBuildCostTextBox.Text = "0";
-            this.m_oSYCBuildCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSYCTaskTypeComboBox
-            // 
-            this.m_oSYCTaskTypeComboBox.FormattingEnabled = true;
-            this.m_oSYCTaskTypeComboBox.Location = new System.Drawing.Point(75, 31);
-            this.m_oSYCTaskTypeComboBox.Name = "m_oSYCTaskTypeComboBox";
-            this.m_oSYCTaskTypeComboBox.Size = new System.Drawing.Size(213, 21);
-            this.m_oSYCTaskTypeComboBox.TabIndex = 18;
-            // 
-            // m_oTaskTypelabel2
-            // 
-            this.m_oTaskTypelabel2.AutoSize = true;
-            this.m_oTaskTypelabel2.Location = new System.Drawing.Point(6, 22);
-            this.m_oTaskTypelabel2.Name = "m_oTaskTypelabel2";
-            this.m_oTaskTypelabel2.Size = new System.Drawing.Size(58, 13);
-            this.m_oTaskTypelabel2.TabIndex = 19;
-            this.m_oTaskTypelabel2.Text = "Task Type";
-            // 
-            // m_oBuildCostLabel2
-            // 
-            this.m_oBuildCostLabel2.AutoSize = true;
-            this.m_oBuildCostLabel2.Location = new System.Drawing.Point(6, 74);
-            this.m_oBuildCostLabel2.Name = "m_oBuildCostLabel2";
-            this.m_oBuildCostLabel2.Size = new System.Drawing.Size(54, 13);
-            this.m_oBuildCostLabel2.TabIndex = 19;
-            this.m_oBuildCostLabel2.Text = "Build Cost";
-            // 
-            // m_oCompletionDateLabel2
-            // 
-            this.m_oCompletionDateLabel2.AutoSize = true;
-            this.m_oCompletionDateLabel2.Location = new System.Drawing.Point(6, 94);
-            this.m_oCompletionDateLabel2.Name = "m_oCompletionDateLabel2";
-            this.m_oCompletionDateLabel2.Size = new System.Drawing.Size(59, 13);
-            this.m_oCompletionDateLabel2.TabIndex = 19;
-            this.m_oCompletionDateLabel2.Text = "Completion";
-            // 
-            // m_oSYTaskCostTextBox
-            // 
-            this.m_oSYTaskCostTextBox.Location = new System.Drawing.Point(75, 71);
-            this.m_oSYTaskCostTextBox.Name = "m_oSYTaskCostTextBox";
-            this.m_oSYTaskCostTextBox.Size = new System.Drawing.Size(69, 20);
-            this.m_oSYTaskCostTextBox.TabIndex = 19;
-            this.m_oSYTaskCostTextBox.Text = "0";
-            this.m_oSYTaskCostTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSYTaskCompletionDateTextBox
-            // 
-            this.m_oSYTaskCompletionDateTextBox.Location = new System.Drawing.Point(75, 97);
-            this.m_oSYTaskCompletionDateTextBox.Name = "m_oSYTaskCompletionDateTextBox";
-            this.m_oSYTaskCompletionDateTextBox.Size = new System.Drawing.Size(534, 20);
-            this.m_oSYTaskCompletionDateTextBox.TabIndex = 19;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 108);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(30, 13);
-            this.label1.TabIndex = 20;
-            this.label1.Text = "Date";
-            // 
-            // m_oCreateDefaultnameCheckBox
-            // 
-            this.m_oCreateDefaultnameCheckBox.AutoSize = true;
-            this.m_oCreateDefaultnameCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCreateDefaultnameCheckBox.Checked = true;
-            this.m_oCreateDefaultnameCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.m_oCreateDefaultnameCheckBox.Location = new System.Drawing.Point(162, 73);
-            this.m_oCreateDefaultnameCheckBox.Name = "m_oCreateDefaultnameCheckBox";
-            this.m_oCreateDefaultnameCheckBox.Size = new System.Drawing.Size(126, 17);
-            this.m_oCreateDefaultnameCheckBox.TabIndex = 21;
-            this.m_oCreateDefaultnameCheckBox.Text = "Create default names";
-            this.m_oCreateDefaultnameCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oSYTaskTypeComboBox
-            // 
-            this.m_oSYTaskTypeComboBox.FormattingEnabled = true;
-            this.m_oSYTaskTypeComboBox.Location = new System.Drawing.Point(75, 19);
-            this.m_oSYTaskTypeComboBox.Name = "m_oSYTaskTypeComboBox";
-            this.m_oSYTaskTypeComboBox.Size = new System.Drawing.Size(213, 21);
-            this.m_oSYTaskTypeComboBox.TabIndex = 19;
-            // 
-            // m_oNewClassLabel
-            // 
-            this.m_oNewClassLabel.AutoSize = true;
-            this.m_oNewClassLabel.Location = new System.Drawing.Point(324, 21);
-            this.m_oNewClassLabel.Name = "m_oNewClassLabel";
-            this.m_oNewClassLabel.Size = new System.Drawing.Size(57, 13);
-            this.m_oNewClassLabel.TabIndex = 22;
-            this.m_oNewClassLabel.Text = "New Class";
-            // 
-            // m_oShipNameLabel
-            // 
-            this.m_oShipNameLabel.AutoSize = true;
-            this.m_oShipNameLabel.Location = new System.Drawing.Point(324, 48);
-            this.m_oShipNameLabel.Name = "m_oShipNameLabel";
-            this.m_oShipNameLabel.Size = new System.Drawing.Size(59, 13);
-            this.m_oShipNameLabel.TabIndex = 23;
-            this.m_oShipNameLabel.Text = "Ship Name";
-            // 
-            // m_oTaskGroupLabel
-            // 
-            this.m_oTaskGroupLabel.AutoSize = true;
-            this.m_oTaskGroupLabel.Location = new System.Drawing.Point(324, 74);
-            this.m_oTaskGroupLabel.Name = "m_oTaskGroupLabel";
-            this.m_oTaskGroupLabel.Size = new System.Drawing.Size(63, 13);
-            this.m_oTaskGroupLabel.TabIndex = 24;
-            this.m_oTaskGroupLabel.Text = "Task Group";
-            // 
-            // m_oSYNewClassComboBox
-            // 
-            this.m_oSYNewClassComboBox.FormattingEnabled = true;
-            this.m_oSYNewClassComboBox.Location = new System.Drawing.Point(393, 18);
-            this.m_oSYNewClassComboBox.Name = "m_oSYNewClassComboBox";
-            this.m_oSYNewClassComboBox.Size = new System.Drawing.Size(216, 21);
-            this.m_oSYNewClassComboBox.TabIndex = 25;
-            // 
-            // m_oSYTaskGroupComboBox
-            // 
-            this.m_oSYTaskGroupComboBox.FormattingEnabled = true;
-            this.m_oSYTaskGroupComboBox.Location = new System.Drawing.Point(393, 71);
-            this.m_oSYTaskGroupComboBox.Name = "m_oSYTaskGroupComboBox";
-            this.m_oSYTaskGroupComboBox.Size = new System.Drawing.Size(216, 21);
-            this.m_oSYTaskGroupComboBox.TabIndex = 26;
-            // 
-            // m_oSYShipNameTextBox
-            // 
-            this.m_oSYShipNameTextBox.Location = new System.Drawing.Point(393, 45);
-            this.m_oSYShipNameTextBox.Name = "m_oSYShipNameTextBox";
-            this.m_oSYShipNameTextBox.Size = new System.Drawing.Size(216, 20);
-            this.m_oSYShipNameTextBox.TabIndex = 27;
-            this.m_oSYShipNameTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oSYActivityGroupBox
-            // 
-            this.m_oSYActivityGroupBox.Location = new System.Drawing.Point(9, 56);
-            this.m_oSYActivityGroupBox.Name = "m_oSYActivityGroupBox";
-            this.m_oSYActivityGroupBox.Size = new System.Drawing.Size(811, 548);
-            this.m_oSYActivityGroupBox.TabIndex = 0;
-            this.m_oSYActivityGroupBox.TabStop = false;
-            this.m_oSYActivityGroupBox.Text = "Shipyard Activity(1 Slipways)";
-            // 
-            // m_oSYActivityButtonGroupBox
-            // 
-            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYARenameShipButton);
-            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYAScheduleButton);
-            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYALowerPriorityButton);
-            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYARaisePriorityButton);
-            this.m_oSYActivityButtonGroupBox.Controls.Add(this.m_oSYAPauseTaskButton);
-            this.m_oSYActivityButtonGroupBox.Controls.Add(this.button1);
-            this.m_oSYActivityButtonGroupBox.Location = new System.Drawing.Point(6, 622);
-            this.m_oSYActivityButtonGroupBox.Name = "m_oSYActivityButtonGroupBox";
-            this.m_oSYActivityButtonGroupBox.Size = new System.Drawing.Size(819, 62);
-            this.m_oSYActivityButtonGroupBox.TabIndex = 1;
-            this.m_oSYActivityButtonGroupBox.TabStop = false;
-            // 
-            // m_oAnnualBuildRateLabel
-            // 
-            this.m_oAnnualBuildRateLabel.AutoSize = true;
-            this.m_oAnnualBuildRateLabel.Location = new System.Drawing.Point(211, 25);
-            this.m_oAnnualBuildRateLabel.Name = "m_oAnnualBuildRateLabel";
-            this.m_oAnnualBuildRateLabel.Size = new System.Drawing.Size(405, 13);
-            this.m_oAnnualBuildRateLabel.TabIndex = 2;
-            this.m_oAnnualBuildRateLabel.Text = "Annual Ship Building Rate Per Slipway for 5000 ton ship: 111    Available Slipway" +
-                "s: 1";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(6, 26);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(84, 23);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "De&lete Task";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // m_oSYAPauseTaskButton
-            // 
-            this.m_oSYAPauseTaskButton.Location = new System.Drawing.Point(106, 26);
-            this.m_oSYAPauseTaskButton.Name = "m_oSYAPauseTaskButton";
-            this.m_oSYAPauseTaskButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSYAPauseTaskButton.TabIndex = 10;
-            this.m_oSYAPauseTaskButton.Text = "Pause Task";
-            this.m_oSYAPauseTaskButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSYARaisePriorityButton
-            // 
-            this.m_oSYARaisePriorityButton.Location = new System.Drawing.Point(208, 26);
-            this.m_oSYARaisePriorityButton.Name = "m_oSYARaisePriorityButton";
-            this.m_oSYARaisePriorityButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSYARaisePriorityButton.TabIndex = 11;
-            this.m_oSYARaisePriorityButton.Text = "Higher Priority";
-            this.m_oSYARaisePriorityButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSYALowerPriorityButton
-            // 
-            this.m_oSYALowerPriorityButton.Location = new System.Drawing.Point(307, 26);
-            this.m_oSYALowerPriorityButton.Name = "m_oSYALowerPriorityButton";
-            this.m_oSYALowerPriorityButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSYALowerPriorityButton.TabIndex = 12;
-            this.m_oSYALowerPriorityButton.Text = "Lower Priority";
-            this.m_oSYALowerPriorityButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSYAScheduleButton
-            // 
-            this.m_oSYAScheduleButton.Location = new System.Drawing.Point(408, 26);
-            this.m_oSYAScheduleButton.Name = "m_oSYAScheduleButton";
-            this.m_oSYAScheduleButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSYAScheduleButton.TabIndex = 13;
-            this.m_oSYAScheduleButton.Text = "Schedule";
-            this.m_oSYAScheduleButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSYARenameShipButton
-            // 
-            this.m_oSYARenameShipButton.Location = new System.Drawing.Point(510, 26);
-            this.m_oSYARenameShipButton.Name = "m_oSYARenameShipButton";
-            this.m_oSYARenameShipButton.Size = new System.Drawing.Size(84, 23);
-            this.m_oSYARenameShipButton.TabIndex = 14;
-            this.m_oSYARenameShipButton.Text = "Rename Ship";
-            this.m_oSYARenameShipButton.UseVisualStyleBackColor = true;
             // 
             // Eco_Summary
             // 
@@ -2006,7 +2179,7 @@ namespace Pulsar4X.UI.Panels
         private ComboBox m_oMassDriverDestinationComboBox;
         private GroupBox m_oShipyardCreateTaskGroupBox;
         private GroupBox m_oShipyardTaskGroupBox;
-        private ListBox m_oCompletionDateLabel3;
+        private ListBox m_oSYCRequiredMaterialsListBox;
         private GroupBox m_oShipyardListGroupBox;
         private Label m_oReqMatLabel;
         private Button m_oRefitDetailsButton;
@@ -2050,5 +2223,9 @@ namespace Pulsar4X.UI.Panels
         private Button m_oSYAPauseTaskButton;
         private Button button1;
         private GroupBox m_oSYActivityGroupBox;
+        private Label m_oSYCShipClassLabel;
+        private ComboBox m_oSYCNewShipClassComboBox;
+        private ComboBox m_oRepairRefitScrapShipComboBox;
+        private TextBox m_oExpandCapUntilXTextBox;
     }
 }
