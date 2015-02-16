@@ -1091,10 +1091,11 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// HandleBuildItemCost decrements the mineral count by the cost of the item.
         /// </summary>
-        /// <param name="CBQ">Construction Build Queue Item</param>
-        /// <param name="numBuilt">Number built.</param>
+        /// <param name="Item Cost">Wealth cost of item</param>
         /// <param name="MineralCost">Mineral Requirement</param>
-        /// <param name="CIConvAmt">CI if any required.</param>
+        /// <param name="Completion">number of item to be built. This will be multiplied against wealth and minerals.</param>
+        /// <param name="CIConvReq">Will CI be required?</param>
+        /// <param name="MineConvReq">Will a mine be required?</param>
         public void HandleBuildItemCost(decimal ItemCost, decimal[] MineralCost, float Completion, bool CIConvReq = false, bool MineConvReq = false)
         {
             /// <summary>
