@@ -48,6 +48,7 @@ namespace Pulsar4X.Entities
             : base()
         {
             Planets = new BindingList<Planet>();
+            SupportsPopulations = false;
         }
 
         public Star(string name, double radius, uint temp, float luminosity, StarSystem system)
@@ -61,6 +62,7 @@ namespace Pulsar4X.Entities
             Luminosity = luminosity;
 
             Planets = new BindingList<Planet>();
+            SupportsPopulations = false;
 
             double minHabitableZone, maxHabitableZone;
             EcoSphereRadius = GetHabitableZone(out minHabitableZone, out maxHabitableZone);

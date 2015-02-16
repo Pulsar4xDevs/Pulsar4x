@@ -17,8 +17,18 @@ namespace Pulsar4X
         public  static Random SeedRNG = new Random();
 
         /// <summary>
-        /// indicates weither We shoudl generate a Real Star System or a more gamey one.
+        /// Indicates weither We shoudl generate a Real Star System or a more gamey one.
         /// </summary>
         public static bool RealStarSystems = true;
+
+        /// <summary>
+        /// The chance of a Non-player Race being generated on a suitable planet.
+        /// </summary>
+        public static double NPRGenerationChance = 0.3333;
+
+        /// <summary>
+        /// Minium number of comets each system will have. All systems will be guaranteed to have a least this many comets.
+        /// </summary>
+        public static int MiniumCometsPerSystem = 0;
     }
 }

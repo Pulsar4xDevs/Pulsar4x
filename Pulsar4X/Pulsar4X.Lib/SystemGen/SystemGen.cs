@@ -52,12 +52,15 @@ namespace Pulsar4X
             return newSystem;
         }
 
+        #region Create Sol
+
         public static StarSystem CreateSol()
         {
             StarSystem Sol = new StarSystem("Sol", -1);
 
             Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, Sol);
             Sun.Age = 4.6E9;
+            Sun.Mass = Constants.Units.SOLAR_MASS_IN_KILOGRAMS;
             Sun.Class = "G2";
 
             Sol.Stars.Add(Sun);
@@ -113,14 +116,16 @@ namespace Pulsar4X
             return Sol;
         }
 
-        #region System Body Generation Functions
+        #endregion
+
+        #region Star Generation Functions
 
         /// <summary>
         /// Generates a new star and adds it to the provided Star System.
         /// </summary>
         /// <param name="System">The Star System the new Star belongs to.</param>
         /// <returns>A reference to the new Star (in case you need it)</returns>
-        public static Star GenerateStar(StarSystem system)
+        private static Star GenerateStar(StarSystem system)
         {
             // Generate star quick and dirty:
             SpectralType st = GenerateSpectralType();
@@ -147,7 +152,7 @@ namespace Pulsar4X
         /// Generates a Spectral Class for a star, See http://en.wikipedia.org/wiki/Stellar_classification
         /// </summary>
         /// <returns>A randomly generated Spectral type.</returns>
-        public static SpectralType GenerateSpectralType()
+        private static SpectralType GenerateSpectralType()
         {
             double chance = m_RNG.NextDouble();
 
@@ -236,7 +241,7 @@ namespace Pulsar4X
         /// <param name="name">The Stars Name.</param>
         /// <param name="system">The Star System the star belongs to.</param>
         /// <returns>A star Populated with data generated based on Spectral Type provided.</returns>
-        public static Star PopulateStarDataBasedOnSpectralType(SpectralType spectralType, string name, StarSystem system)
+        private static Star PopulateStarDataBasedOnSpectralType(SpectralType spectralType, string name, StarSystem system)
         {
             const double maxStarAgeO = 6000000;         // after 6 million years O types eiother go nova or become B type stars.
             const double maxStarAgeB = 100000000;       // could not find any info on B type ages, so i made it between O and A (100 million).
@@ -318,6 +323,30 @@ namespace Pulsar4X
 
             return star;
         }
+
+        #endregion
+
+        #region Planet Generation Functions
+
+        ///< @todo Generate Planets.
+
+        #endregion
+
+        #region Asteriod Generation Functions
+
+        ///< @todo Generate Asteriods.
+
+        #endregion
+
+        #region Comet Generation Functions
+
+        ///< @todo Generate Comets.
+
+        #endregion
+
+        #region NPR Generation Functions
+
+        ///< @todo Generate NPRs.
 
         #endregion
 

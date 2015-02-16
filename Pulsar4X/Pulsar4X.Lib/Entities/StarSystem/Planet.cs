@@ -14,6 +14,16 @@ namespace Pulsar4X.Entities
 {
     public class Planet : OrbitingEntity
     {
+        public enum PlanetType
+        {
+            Terrestrial,    // Like Earth/Mars/Venus/etc.
+            GasGiant,       // Like Jupiter/Saturn
+            IceGiant,       // Like Uranus/Neptune
+            DwarfPlanet,    // Pluto!
+            GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
+            ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron Planet (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+        }
+        
 
 #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
@@ -29,6 +39,8 @@ namespace Pulsar4X.Entities
         /// Entry for whether or not this planet has ruins on it.
         /// </summary>
         public Ruins PlanetaryRuins { get; set; }
+
+        ///< @todo Add Research Anomalies.
 
         /// <summary>
         /// What mineral resources does this planet have to be mined?
@@ -72,8 +84,8 @@ namespace Pulsar4X.Entities
 
             TaskGroupsInOrbit = new BindingList<TaskGroupTN>();
 
-#warning planet generation needs minerals, anomalies, and ruins generation.
-            PlanetaryRuins = new Ruins();
+            ///< @todo Planet generation needs minerals, anomalies, and ruins generation.
+            PlanetaryRuins = new Ruins();  // Should this happen here??
 
             /// <summary>
             /// Default mineral amount is zero.

@@ -71,6 +71,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double Mass { get; set; }
 
+        /// <summary>
+        /// Indicates weither the system body supports populations and can be settled by Plaerys/NPRs..
+        /// </summary>
+        public bool SupportsPopulations { get; set; }
+
         public OrbitingEntity()
             : base()
         {
