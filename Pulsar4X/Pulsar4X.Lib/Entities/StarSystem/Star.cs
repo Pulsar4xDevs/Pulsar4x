@@ -57,7 +57,6 @@ namespace Pulsar4X.Entities
             Position.System = system;
             Position.X = 0;
             Position.Y = 0;
-            Radius = radius;
             Temperature = temp;
             Luminosity = luminosity;
 
@@ -74,7 +73,11 @@ namespace Pulsar4X.Entities
         /// <param name="deltaSeconds">Time to advance star position</param>
         public void UpdatePosition(int deltaSeconds)
         {
-            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, deltaSeconds);
+            double x, y;
+            Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+
+            Position.X = x;
+            Position.Y = y;
         }
 
         /// <summary>

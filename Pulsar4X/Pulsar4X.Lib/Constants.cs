@@ -26,6 +26,9 @@ namespace Pulsar4X
             public static float TEMP_WATER_FREEZE = 273;
             public static float TEMP_WATER_BOIL = 373;
 
+			// Gravitation Constant
+			public static double GRAVITATIONAL_CONSTANT = 6.67384E-11;
+
         }
 
         /// <summary>
@@ -36,11 +39,11 @@ namespace Pulsar4X
             /// <summary>
             /// Mass in grams of one solar mass
             /// </summary>
-            public const double SOLAR_MASS_IN_GRAMS = 1.989E33;
+            public const double SOLAR_MASS_IN_GRAMS = 1.9885E33;
 
             public const double SOLAR_MASS_IN_KILOGRAMS = Constants.Units.SOLAR_MASS_IN_GRAMS / 1000;
 
-            public const double EARTH_MASS_IN_GRAMS = 5.977E27;
+            public const double EARTH_MASS_IN_GRAMS = 5.9726E27;
 
             public const double SUN_MASS_IN_EARTH_MASSES = SOLAR_MASS_IN_GRAMS / EARTH_MASS_IN_GRAMS;
 

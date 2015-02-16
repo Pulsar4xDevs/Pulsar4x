@@ -1,4 +1,5 @@
 ﻿using Pulsar4X.Entities;
+using Pulsar4X.Lib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -63,51 +64,77 @@ namespace Pulsar4X
             Sun.Mass = Constants.Units.SOLAR_MASS_IN_KILOGRAMS;
             Sun.Class = "G2";
 
+            Sun.Radius = 696000 / Constants.Units.KM_PER_AU;
+
             Sol.Stars.Add(Sun);
+
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
 
             Planet Mercury = new Planet(Sun);
             Mercury.Name = "Mercury";
-            Mercury.Eccentricity = 0.205630;
-            Mercury.LongitudeOfPeriapsis = 29.124;
-            Mercury.IsMoon = false;
             Mercury.Mass = 3.3022E23;
-            Mercury.OrbitalPeriod = 87.969;
+            Mercury.Orbit.SemiMajorAxis = 0.387098; 
+            Mercury.Orbit.Eccentricity = 0.205630;
+            Mercury.Orbit.LongitudeOfAscendingNode = 48.33167;
+            Mercury.Orbit.ArgumentOfPeriapsis = Orbit.LongitudeOfPeriapsisToArgumentOfPeriapsis(29.124, Mercury.Orbit.LongitudeOfAscendingNode);
+            Mercury.Orbit.MeanAnomaly = Orbit.MeanLongitudeToMeanAnomaly(252.25084, Mercury.Orbit.LongitudeOfAscendingNode, Mercury.Orbit.ArgumentOfPeriapsis);
+            Mercury.Orbit.Epoch = J2000;
+            Mercury.Orbit.ParentBody = Sun;
+            Mercury.Orbit.ThisEntity = Mercury;
 
-            Mercury.Radius = 2439.7;
-            Mercury.SemiMajorAxis = 0.387098;
-            Mercury.TimeSinceApogee = 0;
-            Mercury.TimeSinceApogeeRemainder = 0;
+            Mercury.Radius = 2439.7 / Constants.Units.KM_PER_AU;
+
+            double x, y;
+            Mercury.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+
+            Mercury.Position.System = Sol;
+            Mercury.Position.X = x;
+            Mercury.Position.Y = y;
 
             Sun.Planets.Add(Mercury);
 
             Planet Venus = new Planet(Sun);
             Venus.Name = "Venus";
-            Venus.Eccentricity = 0.00677323;
-            Venus.LongitudeOfPeriapsis = 131.53298;
-            Venus.IsMoon = false;
             Venus.Mass = 4.8676E24;
-            Venus.OrbitalPeriod = 224.7;
+            Venus.Orbit.SemiMajorAxis = 0.72333199;
+            Venus.Orbit.Eccentricity = 0.00677323;
+            Venus.Orbit.LongitudeOfAscendingNode = 76.68069;
+            Venus.Orbit.ArgumentOfPeriapsis = Orbit.LongitudeOfPeriapsisToArgumentOfPeriapsis(131.53298, Venus.Orbit.LongitudeOfAscendingNode);
+            Venus.Orbit.MeanAnomaly = Orbit.MeanLongitudeToMeanAnomaly(181.97973, Venus.Orbit.LongitudeOfAscendingNode, Venus.Orbit.ArgumentOfPeriapsis);
+            Venus.Orbit.Epoch = J2000;
+            Venus.Orbit.ParentBody = Sun;
+            Venus.Orbit.ThisEntity = Venus;
 
-            Venus.Radius = 6051.8;
-            Venus.SemiMajorAxis = 0.72333199;
-            Venus.TimeSinceApogee = 0;
-            Venus.TimeSinceApogeeRemainder = 0;
+            Venus.Radius = 6051.8 / Constants.Units.KM_PER_AU;
+
+            Venus.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+
+            Venus.Position.System = Sol;
+            Venus.Position.X = x;
+            Venus.Position.Y = y;
+
 
             Sun.Planets.Add(Venus);
 
             Planet Earth = new Planet(Sun);
-
             Earth.Name = "Earth";
-            Earth.Eccentricity = 1.671022E-2;
-            Earth.LongitudeOfPeriapsis = 102.94719;
-            Earth.IsMoon = false;
-            Earth.Mass = 5.97219E24;
-            Earth.OrbitalPeriod = 365;
+            Earth.Mass = 5.9726E24;
+            Earth.Orbit.SemiMajorAxis = 1.00000011;
+            Earth.Orbit.Eccentricity = 0.01671022;
+            Earth.Orbit.LongitudeOfAscendingNode = -11.26064 * Math.PI / 180;
+            Earth.Orbit.ArgumentOfPeriapsis = Orbit.LongitudeOfPeriapsisToArgumentOfPeriapsis(102.94719 * Math.PI / 180, Earth.Orbit.LongitudeOfAscendingNode);
+            Earth.Orbit.MeanAnomaly = Orbit.MeanLongitudeToMeanAnomaly(100.46435 * Math.PI / 180, Earth.Orbit.LongitudeOfAscendingNode, Earth.Orbit.ArgumentOfPeriapsis);
+			Earth.Orbit.Epoch = new DateTime(2000, 1, 1, 12, 0, 0);
+			Earth.Orbit.ParentBody = Sun;
+			Earth.Orbit.ThisEntity = Earth;
 
-            Earth.Radius = 6378.1;
-            Earth.SemiMajorAxis = 1;
-            Earth.TimeSinceApogee = 0;
-            Earth.TimeSinceApogeeRemainder = 0;
+            Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
+
+            Earth.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+
+            Earth.Position.System = Sol;
+            Earth.Position.X = x;
+            Earth.Position.Y = y;
 
             Sun.Planets.Add(Earth);
 

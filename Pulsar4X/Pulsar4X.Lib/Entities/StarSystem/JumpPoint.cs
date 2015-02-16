@@ -318,13 +318,13 @@ namespace Pulsar4X.Entities
             foreach (Planet p in parent.Planets)
             {
                 // Clamp Min/Max distances for JP
-                if (p.SemiMajorAxis < minDistance)
+                if (p.Orbit.SemiMajorAxis < minDistance)
                 {
-                    minDistance = p.SemiMajorAxis;
+                    minDistance = p.Orbit.SemiMajorAxis;
                 }
-                if (p.SemiMajorAxis > maxDistance)
+                if (p.Orbit.SemiMajorAxis > maxDistance)
                 {
-                    maxDistance = p.SemiMajorAxis;
+                    maxDistance = p.Orbit.SemiMajorAxis;
                 }
             }
 

@@ -229,22 +229,10 @@ namespace Pulsar4X.UI.SceenGraph
                 else
                 {
                     Random rnd = new Random();
-                    //float fAngle = 0.0f; // rnd.Next(0, 360);
-                    //fAngle = MathHelper.DegreesToRadians(fAngle);
-                    // double x, y;
-                    Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oStar, 0);
-                    v3StarPos.X = (float)(oStar.Position.X); //(float)(Math.Cos(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
-                    v3StarPos.Y = (float)(oStar.Position.Y);    //(float)(Math.Sin(fAngle) * oStar.SemiMajorAxis * dKMperAUdevby10);
-                    MaxOrbitDistTest(ref dMaxOrbitDist, oStar.SemiMajorAxis);
+                    v3StarPos.X = (float)(oStar.Position.X);
+                    v3StarPos.Y = (float)(oStar.Position.Y);    
+                    MaxOrbitDistTest(ref dMaxOrbitDist, oStar.Orbit.SemiMajorAxis);
                     oCurrStar = new StarElement(oStar, a_oDefaultEffect, v3StarPos, Pulsar4X.Constants.StarColor.LookupColor(oStar.Class), false);
-
-                    // create orbit circle
-                    /*GLUtilities.GLCircle oStarOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
-                        Vector3.Zero,                                                                      // base around parent star pos.
-                        oStar, //(float)(oStar.SemiMajorAxis * dKMperAUdevby10) / 2,
-                        Pulsar4X.Constants.StarColor.LookupColor(oStar.Class),
-                        UIConstants.Textures.DEFAULT_TEXTURE);
-                    oCurrStar.AddPrimitive(oStarOrbitCirc);*/
                 }
 
 
@@ -274,14 +262,12 @@ namespace Pulsar4X.UI.SceenGraph
 
                     if (iPlanetCounter == 0)
                     {
-                        oCurrStar.SmallestOrbit = (float)(oPlanet.SemiMajorAxis * 2);
+                        oCurrStar.SmallestOrbit = (float)(oPlanet.Orbit.SemiMajorAxis * 2);
                     }
+                    dPlanetOrbitRadius = oPlanet.Orbit.SemiMajorAxis;
 
-                    dPlanetOrbitRadius = oPlanet.SemiMajorAxis;
-                    Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oPlanet, 0);
-                    v3PlanetPos = new Vector3((float)(oPlanet.Position.X), (float)(oPlanet.Position.Y), 0) + v3StarPos; // offset Pos by parent star pos
-                    oPlanet.Position.X = oPlanet.Position.X + v3StarPos.X;
-                    oPlanet.Position.Y = oPlanet.Position.Y + v3StarPos.Y;
+                    oPlanet.Position.X = oPlanet.Position.X;
+                    oPlanet.Position.Y = oPlanet.Position.Y;
 
                     fPlanetSize = (float)((oPlanet.Radius * 2.0) / Constants.Units.KM_PER_AU);
                     MaxOrbitDistTest(ref dMaxOrbitDist, dPlanetOrbitRadius);
@@ -292,20 +278,12 @@ namespace Pulsar4X.UI.SceenGraph
                         Color.FromArgb(255, 0, 255, 0),  // lime green
                         UIConstants.Textures.DEFAULT_PLANET_ICON);
 
-                    /*GLUtilities.GLCircle oPlanetOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
-                        v3StarPos,                                                                      // base around parent star pos.
-                        oPlanet, //(float)dPlanetOrbitRadius / 2,
-                        Color.FromArgb(255, 0, 205, 0),  // lime green
-                        UIConstants.Textures.DEFAULT_TEXTURE);*/
-
                     // create name lable:
                     GLUtilities.GLFont oPlanetNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                         new Vector3((float)(v3PlanetPos.X), (float)(v3PlanetPos.Y - (oPlanet.Radius / Constants.Units.KM_PER_AU)), 0),
                         UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT2, oPlanet.Name);
 
                     oPlanetElement.AddPrimitive(oPlanetQuad);
-
-                    //oPlanetElement.AddPrimitive(oPlanetOrbitCirc);
 
                     oPlanetElement.Lable = oPlanetNameLable;
                     oPlanetElement.PrimaryPrimitive = oPlanetQuad;
@@ -322,13 +300,12 @@ namespace Pulsar4X.UI.SceenGraph
 
                         if (iMoonCounter == 0)
                         {
-                            oPlanetElement.SmallestOrbit = (float)(oMoon.SemiMajorAxis);
+                            oPlanetElement.SmallestOrbit = (float)(oMoon.Orbit.SemiMajorAxis);
                         }
 
-                        dMoonOrbitRadius = oMoon.SemiMajorAxis;
-                        Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(oMoon, 0);
+                        dMoonOrbitRadius = oMoon.Orbit.SemiMajorAxis;
                         fMoonSize = (float)((oMoon.Radius * 2.0) / Constants.Units.KM_PER_AU);
-                        v3MoonPos = new Vector3((float)(oMoon.Position.X), (float)(oMoon.Position.Y), 0) + v3PlanetPos;
+                        v3MoonPos = new Vector3((float)(oMoon.Position.X), (float)(oMoon.Position.Y), 0);
                         oMoon.Position.X = oMoon.Position.X + v3PlanetPos.X;
                         oMoon.Position.Y = oMoon.Position.Y + v3PlanetPos.Y;
 
@@ -338,19 +315,11 @@ namespace Pulsar4X.UI.SceenGraph
                             Color.FromArgb(255, 0, 205, 0),  // lime green
                             UIConstants.Textures.DEFAULT_PLANET_ICON);
 
-                        /*GLUtilities.GLCircle oMoonOrbitCirc = new GLUtilities.GLCircle(a_oDefaultEffect,
-                            v3PlanetPos,                                                                      // base around parent planet pos.
-                            oMoon, //(float)dMoonOrbitRadius / 2,
-                            Color.FromArgb(255, 0, 205, 0),  // lime green
-                            UIConstants.Textures.DEFAULT_TEXTURE);*/
-
                         GLUtilities.GLFont oMoonNameLable = new GLUtilities.GLFont(a_oDefaultEffect,
                         new Vector3((float)(v3MoonPos.X), (float)(v3MoonPos.Y - (oMoon.Radius / Constants.Units.KM_PER_AU)), 0),
                         UIConstants.DEFAULT_TEXT_SIZE, Color.AntiqueWhite, UIConstants.Textures.DEFAULT_GLFONT2, oMoon.Name);
 
                         oMoonElement.AddPrimitive(oMoonQuad);
-
-                        //oMoonElement.AddPrimitive(oMoonOrbitCirc);
 
                         oMoonElement.Lable = oMoonNameLable;
                         oMoonElement.PrimaryPrimitive = oMoonQuad;

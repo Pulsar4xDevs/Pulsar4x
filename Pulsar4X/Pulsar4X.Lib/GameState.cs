@@ -140,13 +140,28 @@ namespace Pulsar4X
                     CurrentYear++;
                 }
                 m_currentSecond = value;
+
+                CurrentDate = new DateTime(CurrentYear, 1, 1);
+                CurrentDate += TimeSpan.FromSeconds(value);
             }
         }
 
         /// <summary>
         /// Current Year.
         /// </summary>
-        public int CurrentYear { get; set; }
+        private int m_currentYear;
+        public int CurrentYear 
+        {
+            get { return m_currentYear; }
+            set 
+            { 
+                m_currentYear = value;
+                CurrentDate = new DateTime(value, 1, 1);
+                CurrentDate += TimeSpan.FromSeconds(CurrentSecond);
+            }
+        }
+
+        public DateTime CurrentDate { get; set; }
 
         /// <summary>
         /// deltaTime in seconds of the last update to the current update.

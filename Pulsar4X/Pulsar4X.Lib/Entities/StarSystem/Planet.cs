@@ -106,13 +106,11 @@ namespace Pulsar4X.Entities
         /// <param name="tickValue"></param>
         public void UpdatePosition(int tickValue)
         {
-            Pulsar4X.Lib.OrbitTable.Instance.UpdatePosition(this, tickValue);
+            double x, y;
+            Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
 
-            /// <summary>
-            /// Adjust planet position based on the primary. Right now Position.X and Position.Y assume orbiting around 0,0. secondary stars, and eventually moons will have this issue.
-            /// </summary>
-            Position.X = Position.X + Parent.Position.X;
-            Position.Y = Position.Y + Parent.Position.Y;
+            Position.X = x;
+            Position.Y = y;
 
             /// <summary>
             /// Update all the moons.
