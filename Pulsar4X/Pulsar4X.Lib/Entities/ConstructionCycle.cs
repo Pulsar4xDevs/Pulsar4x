@@ -193,7 +193,7 @@ namespace Pulsar4X.Entities
                                 break;
                             case ConstructionBuildQueueItem.CBType.MaintenanceSupplies:
                                 CurrentPopulation.HandleBuildItemCost(CurrentConstruction.costPerItem, Constants.Colony.MaintenanceMineralCost, Completion);
-                                CurrentPopulation.AddMSP((int)Math.Round(Completion));
+                                CurrentPopulation.AddMSP(Completion);
                                 break;
                         }
 
