@@ -109,6 +109,51 @@ namespace Pulsar4X.Entities
         public StarSystemEntity()
             : base()
         {
+
+            //default leagal orders.
+            _legalOrders = new List<Constants.ShipTN.OrderType>
+            {
+                (Constants.ShipTN.OrderType.MoveTo),
+                (Constants.ShipTN.OrderType.ExtendedOrbit),
+                (Constants.ShipTN.OrderType.Picket),
+                (Constants.ShipTN.OrderType.SendMessage),
+                (Constants.ShipTN.OrderType.EqualizeFuel),
+                (Constants.ShipTN.OrderType.EqualizeMSP),
+                (Constants.ShipTN.OrderType.ActivateTransponder),
+                (Constants.ShipTN.OrderType.DeactivateTransponder),
+                (Constants.ShipTN.OrderType.ActivateSensors),
+                (Constants.ShipTN.OrderType.DeactivateSensors),
+                (Constants.ShipTN.OrderType.ActivateShields),
+                (Constants.ShipTN.OrderType.DeactivateShields),
+                (Constants.ShipTN.OrderType.DivideFleetToSingleShips),
+                (Constants.ShipTN.OrderType.DetachNonGeoSurvey),
+                (Constants.ShipTN.OrderType.DetachNonGravSurvey),
+                (Constants.ShipTN.OrderType.RefuelFromOwnTankers),
+                (Constants.ShipTN.OrderType.DetachTankers),
+                (Constants.ShipTN.OrderType.ResupplyFromOwnSupplyShips),
+                (Constants.ShipTN.OrderType.DetachSupplyShips),
+                (Constants.ShipTN.OrderType.ReloadFromOwnColliers),
+                (Constants.ShipTN.OrderType.DetachColliers),
+                (Constants.ShipTN.OrderType.ReleaseAt),
+            };
+        }
+
+        /// <summary>      
+        /// generic orders a selected tg targeting anything will have all these options if the selecteed tg can do these.
+        /// </summary>
+        protected List<Constants.ShipTN.OrderType> _legalOrders;
+
+        /// <summary>
+        /// list of legal orders a taskgroup or unit can use againsed this entity ie when this entity is the target.
+        /// </summary>
+        /// <param name="faction"></param>
+        /// <returns></returns>
+        public virtual List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
+        {
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.AddRange(_legalOrders);
+
+            return legalOrders;
         }
     }
 }
