@@ -132,6 +132,9 @@ namespace Pulsar4X.Entities
             DistTable = new DistanceTable(this);
 
             SSEntity = entity.SSEntity;
+
+            //add legal orders to list
+            _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
         }
 
         /// <summary>

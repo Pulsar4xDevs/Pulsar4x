@@ -558,6 +558,41 @@ namespace Pulsar4X.Entities
             IsRefining = false;
         }
 
+        public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
+        {
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.AddRange(_legalOrders);
+            if (faction == this.Faction)
+            {
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadCrewFromColony);
+                if (this.FuelStockpile > 0)
+                    legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromColony);
+                if (this.MaintenanceSupplies > 0)
+                    legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromColony);
+                if (Array.Exists(this.Installations, x => x.Type == Installation.InstallationType.MaintenanceFacility))
+                    legalOrders.Add(Constants.ShipTN.OrderType.BeginOverhaul);
+                if (this.Installations.Count() > 0)
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadInstallation);
+                if (this.ComponentStockpile.Count() > 0)
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadShipComponent);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadAllMinerals);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadAllMinerals);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadMineralWhenX);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrUnloadMineralsToReserve);
+                if (this.CivilianPopulation > 0)
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadColonists);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadColonists);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadFuelToPlanet);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadSuppliesToPlanet);
+                if (Array.Exists(this.Installations, x => x.Type == Installation.InstallationType.OrdnanceFactory) || this.MissileStockpile.Count > 0)
+                    legalOrders.Add(Constants.ShipTN.OrderType.LoadMineral);
+                legalOrders.Add(Constants.ShipTN.OrderType.LoadOrdnanceFromColony);
+                legalOrders.Add(Constants.ShipTN.OrderType.UnloadOrdnanceToColony);
+            }
+            return legalOrders;
+        }
 
         #region starting options and debug
         /// <summary>

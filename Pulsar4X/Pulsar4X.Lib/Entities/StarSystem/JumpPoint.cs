@@ -84,6 +84,24 @@ namespace Pulsar4X.Entities
 
             GateOwner = null;
 
+            _legalOrders.Add(Constants.ShipTN.OrderType.StandardTransit);
+            _legalOrders.Add(Constants.ShipTN.OrderType.TransitAndDivide);
+            _legalOrders.Add(Constants.ShipTN.OrderType.SquadronTransit);
+
+        }
+
+        /// <summary>
+        /// list of legal orders a taskgroup or unit can use againsed this entity ie when this entity is the target.
+        /// </summary>
+        /// <param name="faction"></param>
+        /// <returns></returns>
+        public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
+        {
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.AddRange(_legalOrders);
+            if (!this.IsGated)
+                legalOrders.Add(Constants.ShipTN.OrderType.BuildJumpGate);
+            return legalOrders;           
         }
 
         /// <summary>

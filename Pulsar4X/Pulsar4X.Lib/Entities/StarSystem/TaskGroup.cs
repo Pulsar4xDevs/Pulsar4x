@@ -290,6 +290,38 @@ namespace Pulsar4X.Entities
 
             TaskGroupPDL = new PointDefenseList();
 
+            //add default legal order for targeting TGs.
+            _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
+            _legalOrders.Add(Constants.ShipTN.OrderType.Join);
+            _legalOrders.Add(Constants.ShipTN.OrderType.Absorb);
+            _legalOrders.Add(Constants.ShipTN.OrderType.RefuelTargetFleet);
+            _legalOrders.Add(Constants.ShipTN.OrderType.ResupplyTargetFleet);
+            _legalOrders.Add(Constants.ShipTN.OrderType.ReloadTargetFleet);
+
+
+
+            _legalOrders.Add(Constants.ShipTN.OrderType.LandOnAssignedMothership);
+            _legalOrders.Add(Constants.ShipTN.OrderType.LandOnMotherShipNoAssign);
+            _legalOrders.Add(Constants.ShipTN.OrderType.LandOnMothershipAssign);
+            _legalOrders.Add(Constants.ShipTN.OrderType.TractorSpecifiedShip);
+            _legalOrders.Add(Constants.ShipTN.OrderType.TractorSpecifiedShipyard);
+
+
+        }
+
+
+        public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
+        {
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.AddRange(_legalOrders);
+            ShipTN[] shipsArray = this.Ships.ToArray();
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsTanker)) //if this fleet is targeted and has a IsTanker.
+                legalOrders.Add(Constants.ShipTN.OrderType.RefuelFromTargetFleet);
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsSupply))//if this fleet is targeted and has a IsSupply.
+                legalOrders.Add(Constants.ShipTN.OrderType.ResupplyFromTargetFleet);
+            if (Array.Exists(shipsArray, x => x.ShipClass.IsCollier))//if this fleet is targeted and has a IsCollier.
+                legalOrders.Add(Constants.ShipTN.OrderType.ReloadFromTargetFleet);
+            return legalOrders;
         }
 
         /// <summary>

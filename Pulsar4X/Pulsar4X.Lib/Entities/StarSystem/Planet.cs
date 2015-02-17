@@ -153,6 +153,19 @@ namespace Pulsar4X.Entities
             }
         }
 
+
+        public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
+        {
+            List<Constants.ShipTN.OrderType> legalOrders = new List<Constants.ShipTN.OrderType>();
+            legalOrders.AddRange(_legalOrders);
+            if (this.GeoSurveyList.ContainsKey(faction) == true)
+            {
+                if (this.GeoSurveyList[faction] == false)
+                    legalOrders.Add(Constants.ShipTN.OrderType.GeoSurvey);
+            }
+            return legalOrders;
+        }
+
         /// <summary>
         /// Update the planet's position, Parent positions must be updated in sequence obviously.
         /// </summary>
