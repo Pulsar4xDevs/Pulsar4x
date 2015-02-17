@@ -129,9 +129,9 @@ namespace Pulsar4X
         /// <summary>
         /// The chance Planets will be generated around a given star. A number between 0 and 1 (e.g. a 33% chance would be 0.33).
         /// </summary>
-        public static const double PlanetGenerationChance = 0.8;
+        public const double PlanetGenerationChance = 0.8;
 
-        public static const int MaxNoOfPlanets = 20;
+        public const int MaxNoOfPlanets = 20;
 
         /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
