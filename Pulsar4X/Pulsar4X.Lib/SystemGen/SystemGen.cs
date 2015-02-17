@@ -61,8 +61,7 @@ namespace Pulsar4X
 
             Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, SpectralType.G, Sol);
             Sun.Age = 4.6E9;
-            Sun.Mass = Constants.Units.SOLAR_MASS_IN_KILOGRAMS;
-            Sun.Orbit = Orbit.FromStationary();
+            Sun.Orbit = Orbit.FromStationary(Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
             Sun.Class = "G2";
 
             Sun.Radius = 696000 / Constants.Units.KM_PER_AU;
@@ -73,8 +72,7 @@ namespace Pulsar4X
 
             Planet Mercury = new Planet(Sun);
             Mercury.Name = "Mercury";
-            Mercury.Mass = 3.3022E23;
-            Mercury.Orbit = Orbit.FromMajorPlanetFormat(Mercury.Mass, Sun.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, J2000);
+            Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, J2000);
 
             Mercury.Radius = 2439.7 / Constants.Units.KM_PER_AU;
 
@@ -89,8 +87,7 @@ namespace Pulsar4X
 
             Planet Venus = new Planet(Sun);
             Venus.Name = "Venus";
-            Venus.Mass = 4.8676E24;
-            Venus.Orbit = Orbit.FromMajorPlanetFormat(Venus.Mass, Sun.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, J2000);
+            Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, J2000);
 
             Venus.Radius = 6051.8 / Constants.Units.KM_PER_AU;
 
@@ -105,8 +102,7 @@ namespace Pulsar4X
 
             Planet Earth = new Planet(Sun);
             Earth.Name = "Earth";
-            Earth.Mass = 5.9726E24;
-            Earth.Orbit = Orbit.FromMajorPlanetFormat(Earth.Mass, Sun.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, J2000);
+            Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, J2000);
 
             Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
 
@@ -120,8 +116,7 @@ namespace Pulsar4X
 
             Planet Moon = new Planet(Earth);
             Moon.Name = "Moon";
-            Moon.Mass = 0.073E24;
-            Moon.Orbit = Orbit.FromAsteroidFormat(Moon.Mass, Earth.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, J2000);
+            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, J2000);
 
             Moon.Radius = 1738.14 / Constants.Units.KM_PER_AU;
 
@@ -166,7 +161,9 @@ namespace Pulsar4X
                 starName += "E";
 
             Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
-            star.Orbit = Orbit.FromStationary();
+
+            // <@ todo: Generate orbits for stars in multi-star systems.
+
             system.Stars.Add(star);
             return star;
         }
@@ -278,8 +275,11 @@ namespace Pulsar4X
 
             // create star and populate data:
             Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
-            star.Mass = data._Mass;
             star.Age = data._Age;
+
+            // Temporary orbit to store mass.
+            // Calculate real orbit later.
+            star.Orbit = Orbit.FromStationary(data._Mass);
 
             return star;
         }
@@ -327,7 +327,7 @@ namespace Pulsar4X
             // The system age thing lines up with the age of the different star classes so these two thing should compond each other.
 
 
-            double starMassRatio = Clamp01(star.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));        // heavy star = more material.
+            double starMassRatio = Clamp01(star.Orbit.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));        // heavy star = more material.
             double starSpecralTypeRatio =  GalaxyGen.StarSpecralTypePlanetGenerationRatio[star.SpectralType];
 
             double starLuminosityRatio = 1;

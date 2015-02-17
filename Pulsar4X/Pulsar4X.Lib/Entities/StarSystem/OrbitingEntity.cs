@@ -21,11 +21,6 @@ namespace Pulsar4X.Entities
         /// equitorial radius (in AU)
         /// </summary>
         public double Radius { get; set; }
-        
-        /// <summary>
-        /// Mass in KG
-        /// </summary>
-        public double Mass { get; set; }
 
         /// <summary>
         /// Indicates weither the system body supports populations and can be settled by Plaerys/NPRs..

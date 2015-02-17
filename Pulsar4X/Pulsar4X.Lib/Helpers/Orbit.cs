@@ -127,16 +127,17 @@ namespace Pulsar4X.Lib
         /// Creates an orbit that never moves.
         /// Kinda a hack for stationary stars.
         /// </summary>
-        public static Orbit FromStationary()
+        public static Orbit FromStationary(double mass)
         {
-            return new Orbit();
+            return new Orbit(mass);
         }
 
         /// <summary>
         /// Constructor for stationary orbits.
         /// </summary>
-        private Orbit()
+        private Orbit(double mass)
         {
+            m_mass = mass;
             m_isStationary = true;
         }
 
