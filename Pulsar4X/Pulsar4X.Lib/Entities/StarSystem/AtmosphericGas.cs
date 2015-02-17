@@ -64,7 +64,7 @@ namespace Pulsar4X.Entities
                  IsToxic = false,
                  MeltingPoint = -272.20,
                  BoilingPoint = -268.928,
-                 GreenhouseEffect = 1
+                 GreenhouseEffect = 0
              },
 
              new AtmosphericGas()
@@ -101,17 +101,17 @@ namespace Pulsar4X.Entities
              { 
                  Name = "Neon", 
                  ChemicalSymbol = "Ne",
-                 IsToxic = true,
+                 IsToxic = false,
                  MeltingPoint = -248.59,
                  BoilingPoint = -246.046,
-                 GreenhouseEffect = 1
+                 GreenhouseEffect = 0
              },
 
              new AtmosphericGas()
              { 
                  Name = "Nitrogen", 
                  ChemicalSymbol = "N",
-                 IsToxic = true,
+                 IsToxic = false,
                  MeltingPoint = -210.00,
                  BoilingPoint = -195.795,
                  GreenhouseEffect = 0
@@ -124,8 +124,138 @@ namespace Pulsar4X.Entities
                  IsToxic = true,
                  MeltingPoint = -205.02,
                  BoilingPoint = -191.5,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Nitrogen oxide", 
+                 ChemicalSymbol = "NO",
+                 IsToxic = false,
+                 MeltingPoint = -164,
+                 BoilingPoint = -152,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Oxygen", 
+                 ChemicalSymbol = "O",
+                 IsToxic = false,
+                 MeltingPoint = -218.79,
+                 BoilingPoint = -182.962,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Hydrogen sulfide", 
+                 ChemicalSymbol = "H2S",
+                 IsToxic = true,
+                 MeltingPoint = -82,
+                 BoilingPoint = -60,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Argon", 
+                 ChemicalSymbol = "Ar",
+                 IsToxic = false,
+                 MeltingPoint = -189.34,
+                 BoilingPoint = -185.848,
                  GreenhouseEffect = 0
              },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Carbon dioxide", 
+                 ChemicalSymbol = "CO2",
+                 IsToxic = false,
+                 MeltingPoint = -56.6,
+                 BoilingPoint = -56.6,  // no boiling point on Wikipedia!!
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Nitrogen dioxide", 
+                 ChemicalSymbol = "NO2",
+                 IsToxic = false,
+                 MeltingPoint = -11.2,
+                 BoilingPoint = 21.2,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Sulfur dioxide", 
+                 ChemicalSymbol = "SO2",
+                 IsToxic = false,
+                 MeltingPoint = -72,
+                 BoilingPoint = -10,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Chlorine", 
+                 ChemicalSymbol = "Cl",
+                 IsToxic = true,
+                 MeltingPoint = -101.5,
+                 BoilingPoint = -34.04,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Fluorine", 
+                 ChemicalSymbol = "F",
+                 IsToxic = true,
+                 MeltingPoint = -219.67,
+                 BoilingPoint = -188.11,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Bromine", 
+                 ChemicalSymbol = "Br",
+                 IsToxic = true,
+                 MeltingPoint = -7.2,
+                 BoilingPoint = 58.8,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Iodine", 
+                 ChemicalSymbol = "I",
+                 IsToxic = true,
+                 MeltingPoint = 113.7,
+                 BoilingPoint = 184.3,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Safe Greenhouse Gas", 
+                 ChemicalSymbol = "SGG",
+                 IsToxic = false,
+                 MeltingPoint = 0,
+                 BoilingPoint = 100,
+                 GreenhouseEffect = 1
+             },
+
+             new AtmosphericGas()
+             { 
+                 Name = "Anti-Greenhouse Gas", 
+                 ChemicalSymbol = "AGG",
+                 IsToxic = false,
+                 MeltingPoint = 0,
+                 BoilingPoint = 100,
+                 GreenhouseEffect = -1
+             }
         };
 
         /// <summary>
