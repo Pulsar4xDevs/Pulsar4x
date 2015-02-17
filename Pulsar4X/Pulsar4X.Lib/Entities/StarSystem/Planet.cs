@@ -29,6 +29,13 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// dictionary listing of which faction has surveyed this planetary body. dictionary might be superfluous, and this could merely be
+        /// accomplished by a bindinglist of factions, since only factions present will have surveyed the body.
+        /// < @todo: Get this moved to faction code, where it belongs.
+        /// </summary>
+        public Dictionary<Faction, bool> GeoSurveyList { get; set; }
+
+        /// <summary>
         /// @todo How is ColonyCost calculated in Aurora.
         /// </summary>
         public float ColonyCost { get; set; }
@@ -139,6 +146,8 @@ namespace Pulsar4X.Entities
 
             ///< @todo Planet generation needs minerals, anomalies, and ruins generation.
             PlanetaryRuins = new Ruins();  // Should this happen here??
+
+            GeoSurveyList = new Dictionary<Faction, bool>();
 
             /// <summary>
             /// Default mineral amount is zero.
