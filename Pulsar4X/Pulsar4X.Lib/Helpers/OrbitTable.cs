@@ -51,7 +51,7 @@ namespace Pulsar4X.Lib
 			}
 
             double meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3));
-			double CurrentMeanAnomaly = MeanAnomaly + (meanMotion * timeSinceEpoch.TotalDays);
+			double CurrentMeanAnomaly = MeanAnomaly + (meanMotion * timeSinceEpoch.TotalSeconds);
 			double EccentricAnomaly = GetEccentricAnomaly(CurrentMeanAnomaly);
 			double TrueAnomaly = GetTrueAnomaly(Eccentricity, EccentricAnomaly);
 
@@ -146,7 +146,7 @@ namespace Pulsar4X.Lib
 				 * 
 				 * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
 				*/
-				E.Add(E[i] - ((E[i] - Eccentricity * Math.Sin(E[i]) - MeanAnomaly) / (1 - Eccentricity * Math.Cos(E[i]))));
+				E.Add(E[i] - ((E[i] - Eccentricity * Math.Sin(E[i]) - meanAnomaly) / (1 - Eccentricity * Math.Cos(E[i]))));
 				i++;
 			} while (Math.Abs(E[i] - E[i - 1]) > Epsilon && i < 1000);
 
