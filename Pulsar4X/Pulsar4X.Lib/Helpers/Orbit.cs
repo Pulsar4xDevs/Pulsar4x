@@ -7,6 +7,10 @@ using Pulsar4X.Entities;
 
 namespace Pulsar4X.Lib
 {
+    /// <summary>
+    /// Calculates and handles orbits for bodies.
+    /// All angles stored in Degrees, but calculated in Radians.
+    /// </summary>
 	public class Orbit
 	{
         /// <summary>

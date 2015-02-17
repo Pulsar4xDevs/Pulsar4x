@@ -39,7 +39,7 @@ namespace Pulsar4X
             /// <summary>
             /// Mass in grams of one solar mass
             /// </summary>
-            public const double SOLAR_MASS_IN_GRAMS = 1.9885E33;
+            public const double SOLAR_MASS_IN_GRAMS = 1.98855E33;
 
             public const double SOLAR_MASS_IN_KILOGRAMS = Constants.Units.SOLAR_MASS_IN_GRAMS / 1000;
 
