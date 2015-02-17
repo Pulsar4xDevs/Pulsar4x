@@ -75,7 +75,7 @@ namespace Pulsar4X.Lib
         private TimeSpan m_orbitalPeriod;
 
         /// <summary>
-        /// Mean Motion of orbit. Stored as Radians/Sec.
+        /// Mean Motion of orbit. Stored as Degrees/Sec.
         /// </summary>
         public double MeanMotion { get { return m_meanMotion; } }
         private double m_meanMotion;
@@ -168,7 +168,7 @@ namespace Pulsar4X.Lib
             m_orbitalPeriod = TimeSpan.FromSeconds(2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3) / (GravitationalParameter)));
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3));
+            m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3)) * 180 / Math.PI;
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Pulsar4X.Lib
             // Convert MeanAnomaly to radians.
             double currentMeanAnomaly = MeanAnomaly * Math.PI / 180; 
             // Add nT
-			currentMeanAnomaly += (MeanMotion * timeSinceEpoch.TotalSeconds);
+			currentMeanAnomaly += ((MeanMotion * Math.PI / 180) * timeSinceEpoch.TotalSeconds);
 
 			double EccentricAnomaly = GetEccentricAnomaly(currentMeanAnomaly);
 			double TrueAnomaly = GetTrueAnomaly(Eccentricity, EccentricAnomaly);
