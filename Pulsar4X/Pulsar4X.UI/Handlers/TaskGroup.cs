@@ -39,10 +39,10 @@ namespace Pulsar4X.UI.Handlers
             Count,
         }
 
-        public GameEntity Entity { get; private set; }
+        public StarSystemEntity Entity { get; private set; }
         public ListEntityType EntityType { get; private set; }
 
-        public SystemListObject(ListEntityType entityType, GameEntity entity)
+        public SystemListObject(ListEntityType entityType, StarSystemEntity entity)
         {
             Entity = entity;
             EntityType = entityType;
@@ -753,7 +753,7 @@ namespace Pulsar4X.UI.Handlers
             SystemLocationGuidDict.Clear();
             AddJumpPointsToList();
             AddPlanetsToList();
-            
+
             if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
                 AddContactsToList();
 
@@ -806,7 +806,7 @@ namespace Pulsar4X.UI.Handlers
                 return;
 
 
-            GameEntity selectedEntity = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].Entity;
+            StarSystemEntity selectedEntity = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].Entity;
             SystemListObject.ListEntityType entityType = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].EntityType;
 
             List<Order> previousOrders = new List<Order>();
@@ -834,7 +834,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="targetEntity"></param>
         /// <param name="previousOrders"></param>
         /// <returns></returns>
-        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Order> previousOrders)
+        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, StarSystemEntity targetEntity, List<Order> previousOrders)
         {
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = new List<Constants.ShipTN.OrderType>();
             List<Constants.ShipTN.OrderType> additionalOrders = new List<Constants.ShipTN.OrderType>();
@@ -903,7 +903,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
                     string keyName = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
-                    GameEntity entObj = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
+                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
                     SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
                     SystemListObject valueObj = new SystemListObject(entType, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
@@ -916,7 +916,7 @@ namespace Pulsar4X.UI.Handlers
         {
             foreach (JumpPoint jp in CurrentTaskGroup.Contact.Position.System.JumpPoints)
             {
-                GameEntity entObj = jp;
+                StarSystemEntity entObj = jp;
                 SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
                 SystemListObject valueObj = new SystemListObject(entType, entObj);
                 SystemLocationGuidDict.Add(entObj.Id, jp.Name);
@@ -978,7 +978,7 @@ namespace Pulsar4X.UI.Handlers
                     {
                         //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup);
                         string keyName = TaskGroup.Name;
-                        GameEntity entObj = TaskGroup;
+                        StarSystemEntity entObj = TaskGroup;
                         SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.TaskGroups, entObj);
                         SystemLocationGuidDict.Add(entObj.Id, keyName);
                         SystemLocationDict.Add(entObj.Id, valueObj);
@@ -998,7 +998,7 @@ namespace Pulsar4X.UI.Handlers
                 if (CurrentTaskGroup.Contact.Position.System.Waypoints[loop].FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
                 {    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Waypoints[loop]);
                     string keyName = CurrentTaskGroup.Contact.Position.System.Waypoints[loop].Name;
-                    GameEntity entObj = CurrentTaskGroup.Contact.Position.System.Waypoints[loop];
+                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Waypoints[loop];
 
                     SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Waypoints, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);

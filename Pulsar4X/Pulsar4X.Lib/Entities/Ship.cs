@@ -14,7 +14,7 @@ using log4net;
 
 namespace Pulsar4X.Entities
 {
-    public class ShipTN : GameEntity
+    public class ShipTN : StarSystemEntity
     {
         /// <summary>
         /// Ships may be standard crewed vessels, organic lifeforms, or completely machine run solid state vessels.
