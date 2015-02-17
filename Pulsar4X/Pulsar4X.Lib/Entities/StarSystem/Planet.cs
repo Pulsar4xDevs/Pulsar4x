@@ -14,6 +14,10 @@ namespace Pulsar4X.Entities
 {
     public class Planet : OrbitingEntity
     {
+#if LOG4NET_ENABLED
+        public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
+#endif
+
         public enum PlanetType
         {
             Terrestrial,    // Like Earth/Mars/Venus/etc.
@@ -23,13 +27,62 @@ namespace Pulsar4X.Entities
             GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
             ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron Planet (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
         }
-        
 
-#if LOG4NET_ENABLED
-        public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
-#endif
+        /// <summary>
+        /// @todo How is ColonyCost calculated in Aurora.
+        /// </summary>
+        public float ColonyCost { get; set; }
+
+        /// <summary>
+        /// Measure on the gravity of a planet at its surface.
+        /// In Earth Gravities (Gs).
+        /// </summary>
+        public float SurfaceGravity { get; set; }
+
+        public TimeSpan LengthOfDay { get; set; }
+
+        /// <summary>
+        /// The Axial Tilt of this body.
+        /// Measured in degrees.
+        /// </summary>
+        public float AxialTilt { get; set; }
+
+        /// <summary>
+        /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
+        /// measured in something i don't know about yet.
+        /// </summary>
+        public float MagneticFeild { get; set; }
+
+        /// <summary>
+        /// How much light the body reflects. Affects temp.
+        /// @todo found out what units this should be in and how to calculate it.
+        /// </summary>
+        public float Albedo { get; set; }
+
+        /// <summary>
+        /// Temperature of the planet BEFORE greenhouse effects are taken into considuration. 
+        /// This is mostly a factor of how much light reaches the planet nad is calculated at generation time.
+        /// In Degrees C.
+        /// </summary>
+        public float BaseTemperature { get; set; }
+
+        /// <summary>
+        /// Temperature of the planet AFTER greenhouse effects are taken into considuration. 
+        /// This is a factor of the base temp and Green House effects.
+        /// In Degrees C.
+        /// </summary>
+        public float Temperature { get; set; }
+
+        // the following will be used for ground combat effects:
+        /// <summary>
+        /// < @todo Decide if we want RadiationLevel and AtmosphericDust game play features.
+        /// </summary>
+        public float RadiationLevel { get; set; }
+        public float AtmosphericDust { get; set; }
+
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
         public BindingList<Population> Populations { get; set; } // list of Populations (colonies) on this planet.
+
         /// <summary>
         /// Are any taskgroups orbiting with this body?
         /// </summary>
