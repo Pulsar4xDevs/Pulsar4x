@@ -19,7 +19,7 @@ namespace Pulsar4X.Lib
 		public double Inclination { get; set; }
 		public double LongitudeOfAscendingNode { get; set; } // Radians
 		public double ArgumentOfPeriapsis { get; set; } //  Radians
-		public double MeanAnomaly { get; set; }
+		public double MeanAnomaly { get; set; } // Radians
 		public DateTime Epoch { get; set; }
 
         /// <summary>

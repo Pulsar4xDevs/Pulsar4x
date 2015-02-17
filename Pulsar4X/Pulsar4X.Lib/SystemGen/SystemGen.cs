@@ -138,6 +138,27 @@ namespace Pulsar4X
 
             Sun.Planets.Add(Earth);
 
+            Planet Moon = new Planet(Earth);
+            Moon.Name = "Moon";
+            Moon.Mass = 0.073E24;
+            Moon.Orbit.SemiMajorAxis = 384748 / Constants.Units.KM_PER_AU;
+            Moon.Orbit.Eccentricity = 0.0549006;
+            Moon.Orbit.ArgumentOfPeriapsis = 0;
+            Moon.Orbit.MeanAnomaly = 0;
+            Moon.Orbit.Epoch = new DateTime(2000, 1, 1, 12, 0, 0);
+            Moon.Orbit.ParentBody = Earth;
+            Moon.Orbit.ThisEntity = Moon;
+
+            Moon.Radius = 1738.14 / Constants.Units.KM_PER_AU;
+
+            Moon.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+
+            Moon.Position.System = Sol;
+            Moon.Position.X = x;
+            Moon.Position.Y = y;
+
+            Earth.Moons.Add(Moon);
+
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
             return Sol;

@@ -266,9 +266,6 @@ namespace Pulsar4X.UI.SceenGraph
                     }
                     dPlanetOrbitRadius = oPlanet.Orbit.SemiMajorAxis;
 
-                    oPlanet.Position.X = oPlanet.Position.X;
-                    oPlanet.Position.Y = oPlanet.Position.Y;
-
                     fPlanetSize = (float)((oPlanet.Radius * 2.0) / Constants.Units.KM_PER_AU);
                     MaxOrbitDistTest(ref dMaxOrbitDist, dPlanetOrbitRadius);
 
