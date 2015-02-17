@@ -39,17 +39,17 @@ namespace Pulsar4X.UI.Handlers
             Count,
         }
 
-        public GameEntity Entity { get; private set; }
+        public StarSystemEntity Entity { get; private set; }
         public ListEntityType EntityType { get; private set; }
 
-        public SystemListObject(ListEntityType entityType, GameEntity entity)
+        public SystemListObject(ListEntityType entityType, StarSystemEntity entity)
         {
             Entity = entity;
             EntityType = entityType;
         }
     }
 
-    public class TaskGroup
+    public class TaskGroup : HandlerBase
     {
         public enum StratCells
         {
@@ -83,41 +83,9 @@ namespace Pulsar4X.UI.Handlers
         Panels.TaskGroup_Panel m_oTaskGroupPanel;
         Panels.ClassDes_RenameClass m_oRenameTaskGroupPanel;
 
-        /// <summary>
-        /// Misspelling intentional to keep this in line with systemMap's misspelling.
-        /// </summary>
-        private Pulsar4X.Entities.TaskGroupTN m_oCurrnetTaskGroup;
-        public Pulsar4X.Entities.TaskGroupTN CurrentTaskGroup
-        {
-            get { return m_oCurrnetTaskGroup; }
-            set
-            {
-                if (value != m_oCurrnetTaskGroup)
-                {
-                    m_oCurrnetTaskGroup = value;
-                    RefreshTGPanel();
-                }
-            }
-        }
 
-        /// <summary>
-        /// Current faction
-        /// </summary>
-        private Pulsar4X.Entities.Faction m_oCurrnetFaction;
-        public Pulsar4X.Entities.Faction CurrentFaction
-        {
-            get { return m_oCurrnetFaction; }
-            set
-            {
-                if (value != m_oCurrnetFaction)
-                {
-                    m_oCurrnetFaction = value;
-                    m_oCurrnetTaskGroup = m_oCurrnetFaction.TaskGroups[0];
-                    RefreshTGPanel();
-                }
-            }
 
-        }
+
 
         /// <summary>
         /// The view model this handler uses.
@@ -165,13 +133,13 @@ namespace Pulsar4X.UI.Handlers
             /// <summary>
             /// Set up the faction bindings. FactionSelectionComboBox is in the TaskGroup_Panel.designer.cs file.
             /// </summary>
-            m_oTaskGroupPanel.FactionSelectionComboBox.Bind(c => c.DataSource, VM, d => d.Factions);
-            m_oTaskGroupPanel.FactionSelectionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
-            m_oTaskGroupPanel.FactionSelectionComboBox.DisplayMember = "Name";
-            VM.FactionChanged += (s, args) => CurrentFaction = VM.CurrentFaction;
-            CurrentFaction = VM.CurrentFaction;
-            m_oTaskGroupPanel.FactionSelectionComboBox.SelectedIndexChanged += (s, args) => m_oTaskGroupPanel.FactionSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
-            m_oTaskGroupPanel.FactionSelectionComboBox.SelectedIndexChanged += new EventHandler(FactionSelectComboBox_SelectedIndexChanged);
+            //m_oTaskGroupPanel.FactionSelectionComboBox.Bind(c => c.DataSource, VM, d => d.Factions);
+            //m_oTaskGroupPanel.FactionSelectionComboBox.Bind(c => c.SelectedItem, VM, d => d.CurrentFaction, DataSourceUpdateMode.OnPropertyChanged);
+            //m_oTaskGroupPanel.FactionSelectionComboBox.DisplayMember = "Name";
+            //VM.FactionChanged += (s, args) => CurrentFaction = VM.CurrentFaction;
+            //CurrentFaction = VM.CurrentFaction;
+            //m_oTaskGroupPanel.FactionSelectionComboBox.SelectedIndexChanged += (s, args) => m_oTaskGroupPanel.FactionSelectionComboBox.DataBindings["SelectedItem"].WriteValue();
+            //m_oTaskGroupPanel.FactionSelectionComboBox.SelectedIndexChanged += new EventHandler(FactionSelectComboBox_SelectedIndexChanged);
 
 
             /// <summary>
@@ -227,7 +195,7 @@ namespace Pulsar4X.UI.Handlers
             m_oRenameTaskGroupPanel.CancelRenameButton.Click += new EventHandler(CancelRenameButton_Click);
             m_oRenameTaskGroupPanel.RenameClassTextBox.KeyPress += new KeyPressEventHandler(RenameClassTextBox_KeyPress);
 
-            RefreshTGPanel();
+            Refresh();
         }
 
         /// <summary>
@@ -237,7 +205,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void FactionSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RefreshTGPanel();
+            Refresh();
         }
 
         /// <summary>
@@ -247,7 +215,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void TaskGroupSelectComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            RefreshTGPanel();
+            Refresh();
         }
 
         /// <summary>
@@ -325,8 +293,8 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void NewTaskGroupButton_Click(object sender, EventArgs e)
         {
-            String Title = String.Format("New Taskgroup #{0}", m_oCurrnetFaction.TaskGroups.Count);
-            m_oCurrnetFaction.AddNewTaskGroup(Title, m_oCurrnetFaction.Capitol, m_oCurrnetFaction.Capitol.Primary.StarSystem);
+            String Title = String.Format("New Taskgroup #{0}", CurrentFaction.TaskGroups.Count);
+            CurrentFaction.AddNewTaskGroup(Title, CurrentFaction.Capitol, CurrentFaction.Capitol.Primary.StarSystem);
 
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.SelectedIndex = (m_oTaskGroupPanel.TaskGroupSelectionComboBox.Items.Count - 1);
         }
@@ -339,10 +307,10 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RenameTaskGroupButton_Click(object sender, EventArgs e)
         {
-            if (m_oCurrnetTaskGroup != null)
+            if (CurrentTaskGroup != null)
             {
 
-                m_oRenameTaskGroupPanel.RenameClassTextBox.Text = m_oCurrnetTaskGroup.Name;
+                m_oRenameTaskGroupPanel.RenameClassTextBox.Text = CurrentTaskGroup.Name;
 
                 Helpers.UIController.Instance.SuspendAutoPanelDisplay = true;
                 m_oRenameTaskGroupPanel.ShowDialog();
@@ -400,7 +368,7 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private void RenameTaskGroup()
         {
-            m_oCurrnetTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
+            CurrentTaskGroup.Name = m_oRenameTaskGroupPanel.RenameClassTextBox.Text;
         }
 
         #endregion
@@ -575,7 +543,7 @@ namespace Pulsar4X.UI.Handlers
         {
             ShowViewPortPanel(a_oDockPanel);
 
-            RefreshTGPanel();
+            Refresh();
         }
 
         /// <summary>
@@ -627,14 +595,14 @@ namespace Pulsar4X.UI.Handlers
         private void RefreshShipCells()
         {
             m_oTaskGroupPanel.TaskGroupDataGrid.Rows.Clear();
-            if (m_oCurrnetTaskGroup != null && m_oTaskGroupPanel.TaskGroupDataGrid.Columns.Count != 0)
+            if (CurrentTaskGroup != null && m_oTaskGroupPanel.TaskGroupDataGrid.Columns.Count != 0)
             {
                 try
                 {
                     /// <summary>
                     /// Add Rows:
                     /// </summary>
-                    for (int loop = 0; loop < m_oCurrnetTaskGroup.Ships.Count; loop++)
+                    for (int loop = 0; loop < CurrentTaskGroup.Ships.Count; loop++)
                     {
                         using (DataGridViewRow row = new DataGridViewRow())
                         {
@@ -685,54 +653,54 @@ namespace Pulsar4X.UI.Handlers
         {
             try
             {
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Name].Value = m_oCurrnetTaskGroup.Ships[row].Name;
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.ShipClass].Value = m_oCurrnetTaskGroup.Ships[row].ShipClass.Name;
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Name].Value = CurrentTaskGroup.Ships[row].Name;
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.ShipClass].Value = CurrentTaskGroup.Ships[row].ShipClass.Name;
 
-                float fuelPercent = (m_oCurrnetTaskGroup.Ships[row].CurrentFuel / m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalFuelCapacity) * 100.0f;
+                float fuelPercent = (CurrentTaskGroup.Ships[row].CurrentFuel / CurrentTaskGroup.Ships[row].ShipClass.TotalFuelCapacity) * 100.0f;
                 fuelPercent = (float)Math.Floor(fuelPercent);
 
                 m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Fuel].Value = fuelPercent.ToString() + "%";
 
                 String Ammo;
-                if (m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity == 0)
+                if (CurrentTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity == 0)
                 {
                     Ammo = "N/A";
                 }
-                else if (m_oCurrnetTaskGroup.Ships[row].ShipClass.ShipMagazineDef.Count != 0)
+                else if (CurrentTaskGroup.Ships[row].ShipClass.ShipMagazineDef.Count != 0)
                 {
-                    float AmmoPercent = (float)Math.Round(((float)m_oCurrnetTaskGroup.Ships[row].CurrentMagazineCapacity / (float)m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity) * 100.0f);
+                    float AmmoPercent = (float)Math.Round(((float)CurrentTaskGroup.Ships[row].CurrentMagazineCapacity / (float)CurrentTaskGroup.Ships[row].ShipClass.TotalMagazineCapacity) * 100.0f);
                     Ammo = String.Format("{0}%", AmmoPercent);
                 }
                 else
                 {
                     int missileCount = 0;
-                    foreach (KeyValuePair<Pulsar4X.Entities.Components.OrdnanceDefTN, int> pair in m_oCurrnetTaskGroup.Ships[row].ShipOrdnance)
+                    foreach (KeyValuePair<Pulsar4X.Entities.Components.OrdnanceDefTN, int> pair in CurrentTaskGroup.Ships[row].ShipOrdnance)
                     {
                         missileCount = missileCount + pair.Value;
                     }
-                    float AmmoPercent = (float)Math.Round(((float)missileCount / (float)m_oCurrnetTaskGroup.Ships[row].ShipClass.LauncherCount) * 100.0f);
+                    float AmmoPercent = (float)Math.Round(((float)missileCount / (float)CurrentTaskGroup.Ships[row].ShipClass.LauncherCount) * 100.0f);
                     Ammo = String.Format("{0}%", AmmoPercent);
                 }
                 m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Ammo].Value = Ammo;
 
                 String Shield;
-                if (m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalShieldPool == 0.0f)
+                if (CurrentTaskGroup.Ships[row].ShipClass.TotalShieldPool == 0.0f)
                 {
                     Shield = "N/A";
                 }
                 else
                 {
-                    Shield = m_oCurrnetTaskGroup.Ships[row].CurrentShieldPool.ToString() + "/" + m_oCurrnetTaskGroup.Ships[row].ShipClass.TotalShieldPool.ToString();
+                    Shield = CurrentTaskGroup.Ships[row].CurrentShieldPool.ToString() + "/" + CurrentTaskGroup.Ships[row].ShipClass.TotalShieldPool.ToString();
                 }
                 m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Shields].Value = Shield;
 
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Thermal].Value = m_oCurrnetTaskGroup.Ships[row].CurrentThermalSignature.ToString();
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.MaintSup].Value = m_oCurrnetTaskGroup.Ships[row].CurrentMSP.ToString() + "/" + m_oCurrnetTaskGroup.Ships[row].CurrentMSPCapacity.ToString();
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.MaintClock].Value = m_oCurrnetTaskGroup.Ships[row].MaintenanceClock.ToString();
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Crew].Value = m_oCurrnetTaskGroup.Ships[row].CurrentDeployment.ToString();
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Morale].Value = m_oCurrnetTaskGroup.Ships[row].Morale.ToString();
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Grade].Value = m_oCurrnetTaskGroup.Ships[row].ShipGrade.ToString();
-                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Training].Value = m_oCurrnetTaskGroup.Ships[row].TFTraining.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Thermal].Value = CurrentTaskGroup.Ships[row].CurrentThermalSignature.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.MaintSup].Value = CurrentTaskGroup.Ships[row].CurrentMSP.ToString() + "/" + CurrentTaskGroup.Ships[row].CurrentMSPCapacity.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.MaintClock].Value = CurrentTaskGroup.Ships[row].MaintenanceClock.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Crew].Value = CurrentTaskGroup.Ships[row].CurrentDeployment.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Morale].Value = CurrentTaskGroup.Ships[row].Morale.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Grade].Value = CurrentTaskGroup.Ships[row].ShipGrade.ToString();
+                m_oTaskGroupPanel.TaskGroupDataGrid.Rows[row].Cells[(int)StratCells.Training].Value = CurrentTaskGroup.Ships[row].TFTraining.ToString();
             }
             catch
             {
@@ -806,7 +774,7 @@ namespace Pulsar4X.UI.Handlers
                 return;
 
 
-            GameEntity selectedEntity = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].Entity;
+            StarSystemEntity selectedEntity = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].Entity;
             SystemListObject.ListEntityType entityType = SystemLocationDict[GID[m_oTaskGroupPanel.SystemLocationsListBox.SelectedIndex]].EntityType;
 
             List<Order> previousOrders = new List<Order>();
@@ -834,7 +802,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="targetEntity"></param>
         /// <param name="previousOrders"></param>
         /// <returns></returns>
-        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, GameEntity targetEntity, List<Order> previousOrders)
+        private List<Constants.ShipTN.OrderType> legalOrders(TaskGroupTN thisTG, StarSystemEntity targetEntity, List<Order> previousOrders)
         {
             List<Constants.ShipTN.OrderType> thisTGLegalOrders = new List<Constants.ShipTN.OrderType>();
             List<Constants.ShipTN.OrderType> additionalOrders = new List<Constants.ShipTN.OrderType>();
@@ -903,7 +871,7 @@ namespace Pulsar4X.UI.Handlers
                 {
                     //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
                     string keyName = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
-                    GameEntity entObj = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
+                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
                     SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
                     SystemListObject valueObj = new SystemListObject(entType, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
@@ -916,7 +884,7 @@ namespace Pulsar4X.UI.Handlers
         {
             foreach (JumpPoint jp in CurrentTaskGroup.Contact.Position.System.JumpPoints)
             {
-                GameEntity entObj = jp;
+                StarSystemEntity entObj = jp;
                 SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
                 SystemListObject valueObj = new SystemListObject(entType, entObj);
                 SystemLocationGuidDict.Add(entObj.Id, jp.Name);
@@ -978,7 +946,7 @@ namespace Pulsar4X.UI.Handlers
                     {
                         //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup);
                         string keyName = TaskGroup.Name;
-                        GameEntity entObj = TaskGroup;
+                        StarSystemEntity entObj = TaskGroup;
                         SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.TaskGroups, entObj);
                         SystemLocationGuidDict.Add(entObj.Id, keyName);
                         SystemLocationDict.Add(entObj.Id, valueObj);
@@ -998,7 +966,7 @@ namespace Pulsar4X.UI.Handlers
                 if (CurrentTaskGroup.Contact.Position.System.Waypoints[loop].FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
                 {    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Waypoints[loop]);
                     string keyName = CurrentTaskGroup.Contact.Position.System.Waypoints[loop].Name;
-                    GameEntity entObj = CurrentTaskGroup.Contact.Position.System.Waypoints[loop];
+                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Waypoints[loop];
 
                     SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Waypoints, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
@@ -1213,10 +1181,14 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Refresh the TG page.
         /// </summary>
-        private void RefreshTGPanel()
+        public override void Refresh()
         {
             if (CurrentTaskGroup != null)
             {
+                if (CurrentTaskGroup.TaskGroupFaction != CurrentFaction && CurrentFaction != null)
+                {
+                    CurrentTaskGroup = CurrentFaction.TaskGroups[0];
+                }
                 m_oTaskGroupPanel.TaskGroupLocationTextBox.Text = CurrentTaskGroup.Contact.Position.System.Name;
                 m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
                 m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
