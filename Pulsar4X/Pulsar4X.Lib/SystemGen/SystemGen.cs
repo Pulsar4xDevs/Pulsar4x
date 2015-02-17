@@ -350,8 +350,109 @@ namespace Pulsar4X
 
             }
         }
-        
 
+        private static void GeneratePlanet(Star star, double planetGenerationChance, double minOrbitDist)
+        {
+            // we'll start by determining the planet type:
+            double planetTypeChance = m_RNG.NextDouble();
+            Planet.PlanetType pt = Planet.PlanetType.Terrestrial;  // init planet type for safty.
+
+            double dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.GasGiant];
+            if (planetTypeChance < dist)
+                pt = Planet.PlanetType.GasGiant;
+
+            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.IceGiant];
+            if (planetTypeChance < dist)
+                pt = Planet.PlanetType.IceGiant;
+
+            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.GasDwarf];
+            if (planetTypeChance < dist)
+                pt = Planet.PlanetType.GasDwarf;
+
+            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.Terrestrial];
+            if (planetTypeChance < dist)
+                pt = Planet.PlanetType.Terrestrial;
+
+            // now that we know the planet type we can generate the correct type:
+            switch (pt)
+            {
+                case Planet.PlanetType.GasGiant:
+                    GenerateGasGiant(star, planetGenerationChance);
+                    break;
+
+                case Planet.PlanetType.IceGiant:
+                    GenerateIceGiant(star, planetGenerationChance);
+                    break;
+
+                case Planet.PlanetType.GasDwarf:
+                    GenerateGasDwarf(star, planetGenerationChance);
+                    break;
+
+                case Planet.PlanetType.Terrestrial:
+                default:
+                    GenerateTerrestrial(star, planetGenerationChance);
+                    break;
+            }
+        }
+
+        private static Planet GenerateGasGiant(Star star, double planetGenerationChance)
+        {
+
+            return new Planet(star);
+        }
+
+        private static Planet GenerateIceGiant(Star star, double planetGenerationChance)
+        {
+
+            return new Planet(star);
+        }
+
+        private static Planet GenerateGasDwarf(Star star, double planetGenerationChance)
+        {
+
+            return new Planet(star);
+        }
+
+        private static Planet GenerateTerrestrial(Star star, double planetGenerationChance)
+        {
+            
+            // things i need to calc... in rough order:
+            // mass
+            // radius (for radius mass relationship see  http://iopscience.iop.org/0004-637X/669/2/1279/fulltext/71144.text.html
+            //          At Last HARD Science!!
+            // orbit
+            //  -- SemiMajorAxis Average distance of orbit from center.
+            //  -- Eccentricity Shape of the orbit. 0 = perfectly circular, 1 = parabolic. 
+            //  -- Inclination Angle between the orbit and the flat referance plane.
+            //  -- LongitudeOfAscendingNode   ???
+            //  -- ArgumentOfPeriapsis fom 0 to 2Pi
+            //  -- MeanAnomaly random angle fom 0 to 2PI
+
+            // surface gravity (calculate from mass and radius?)
+            // LengthOfDay
+            // Axial Tilt
+            // Base Temp (affected by SemiMajorAxis and star lumosity??)
+            // Magnetic Feild (affect ammount of atmosphere??)
+            // 
+            // Atmosphere (i'm thinking Atmosphere should be its own thing like Orbit is.)
+            //  -- presure
+            //  -- Hydrosphere
+            //      -- Hydrosphere extent
+            //  -- Greenhouse Factor
+            // Albedo (affected by Hydrosphere how exactly?)
+            // Temp. (based on base temp + greehhouse factor + Albedo).
+            // Techtonics
+            // 
+            //
+            // 
+            // PlanetaryRuins
+            // Minerials.
+            // Moons.
+
+            
+
+            return new Planet(star);
+        }
 
         #endregion
 

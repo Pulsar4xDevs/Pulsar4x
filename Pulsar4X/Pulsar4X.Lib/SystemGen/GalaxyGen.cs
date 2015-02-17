@@ -147,6 +147,19 @@ namespace Pulsar4X
                 { SpectralType.M, 0.25 },
             };
 
+        /// <summary>
+        /// Values which determin the distrubution of planet types in a star system.
+        /// these are largly arbritary based on the planets in our solar system.
+        /// Dwarf planets are excluded because they are generated with asteroids
+        /// rather then with planets (on account of not having cleared their orbits).
+        /// </summary>
+        public static Dictionary<Planet.PlanetType, double> PlanetTypeDisrubution = new Dictionary<Planet.PlanetType, double>()
+            {
+                { Planet.PlanetType.GasGiant, 0.2 },
+                { Planet.PlanetType.IceGiant, 0.2 },
+                { Planet.PlanetType.GasDwarf, 0.1 },
+                { Planet.PlanetType.Terrestrial, 0.5 },
+            };
        
 
         #endregion
