@@ -154,8 +154,8 @@ namespace Pulsar4X
             Moon.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
 
             Moon.Position.System = Sol;
-            Moon.Position.X = x;
-            Moon.Position.Y = y;
+            Moon.Position.X = Earth.Position.X + x;
+            Moon.Position.Y = Earth.Position.Y + y;
 
             Earth.Moons.Add(Moon);
 
