@@ -80,6 +80,9 @@ namespace Pulsar4X.Lib
         public double MeanMotion { get { return m_meanMotion; } }
         private double m_meanMotion;
 
+        /// <summary>
+        /// Stationary orbits don't have all of the data to update. They always return (0, 0).
+        /// </summary>
         private bool m_isStationary;
 
         /// <summary>
@@ -94,7 +97,6 @@ namespace Pulsar4X.Lib
         /// <param name="longitudeOfPeriapsis">Longitude of periapsis in degrees.</param>
         /// <param name="meanLongitude">Longitude of object at epoch in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        /// <returns>Orbit</returns>
         public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
@@ -115,7 +117,6 @@ namespace Pulsar4X.Lib
         /// <param name="argumentOfPeriapsis">Argument of periapsis in degrees.</param>
         /// <param name="meanAnomaly">Mean Anomaly in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        /// <returns>Orbit</returns>
         public static Orbit FromAsteroidFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
@@ -126,7 +127,6 @@ namespace Pulsar4X.Lib
         /// Creates an orbit that never moves.
         /// Kinda a hack for stationary stars.
         /// </summary>
-        /// <returns></returns>
         public static Orbit FromStationary()
         {
             return new Orbit();
@@ -173,9 +173,6 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Converts longitude of periapsis to argument of periapsis
         /// </summary>
-        /// <param name="longitudeOfPeriapsis"></param>
-        /// <param name="longitudeOfAscendingNode"></param>
-        /// <returns></returns>
         private static double GetArgumentOfPeriapsisFromLongitudeOfPeriapsis(double longitudeOfPeriapsis, double longitudeOfAscendingNode)
         {
             // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
@@ -185,10 +182,6 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Converts mean longitude to mean anomaly.
         /// </summary>
-        /// <param name="meanLongitude"></param>
-        /// <param name="longitudeOfAscendingNode"></param>
-        /// <param name="argumentOfPeriapsis"></param>
-        /// <returns></returns>
         private static double GetMeanAnomalyFromMeanLongitude(double meanLongitude, double longitudeOfAscendingNode, double argumentOfPeriapsis)
         {
             // http://en.wikipedia.org/wiki/Mean_longitude
@@ -198,9 +191,6 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Calculates the parent-relative cartesian coordinate of an orbit for a given time.
         /// </summary>
-        /// <param name="time"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
         public void GetPosition(DateTime time, out double x, out double y)
 		{
             if (m_isStationary)
@@ -235,9 +225,7 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
         /// </summary>
-        /// <param name="TrueAnomaly">True Anomaly angle in Radians.</param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
+        /// <param name="TrueAnomaly">Angle in Radians.</param>
         public void GetPosition(double TrueAnomaly, out double x, out double y)
         {
             if (m_isStationary)
@@ -263,7 +251,7 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Calculates the current radius given the input angle.
         /// </summary>
-        /// <param name="TrueAnomaly">True Anomaly in Radians.</param>
+        /// <param name="TrueAnomaly">Angle in Radians.</param>
         /// <returns>Current Radius of an orbit in KM.</returns>
         private double GetRadius(double TrueAnomaly)
         {
@@ -286,10 +274,6 @@ namespace Pulsar4X.Lib
 		/// <summary>
 		/// Calculates the current Eccentric Anomaly given certain orbital parameters.
 		/// </summary>
-		/// <param name="SemiMajorAxis"></param>
-		/// <param name="Eccentricity"></param>
-		/// <param name="MeanAnomaly"></param>
-		/// <returns>Eccentric Anomaly</returns>
 		private double GetEccentricAnomaly(double currentMeanAnomaly)
 		{
 			//Kepler's Equation
