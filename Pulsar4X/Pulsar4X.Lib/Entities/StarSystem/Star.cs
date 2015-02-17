@@ -78,6 +78,14 @@ namespace Pulsar4X.Entities
 
             Position.X = x;
             Position.Y = y;
+
+            if (Parent != null)
+            {
+                // Position is absolute system coordinates, while
+                // coordinates returned from GetPosition are relative to it's parent.
+                Position.X += Parent.Position.X;
+                Position.Y += Parent.Position.Y;
+            }
         }
 
         /// <summary>

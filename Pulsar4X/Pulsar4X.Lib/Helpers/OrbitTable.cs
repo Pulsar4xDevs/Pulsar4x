@@ -60,7 +60,7 @@ namespace Pulsar4X.Lib
 
 
         /// <summary>
-        /// Calculates the absolute cartesian coordinates of an orbit for a given angle.
+        /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
         /// </summary>
         /// <param name="TrueAnomaly">True Anomaly angle in Radians.</param>
         /// <param name="x"></param>
@@ -76,13 +76,6 @@ namespace Pulsar4X.Lib
             // Polar to Cartesian
             x = radius * Math.Cos(TrueAnomaly);
             y = radius * Math.Sin(TrueAnomaly);
-
-            if (ParentBody != null)
-            {
-                // Convert relative coordinates to absolute.
-                x += ParentBody.Position.X;
-                y += ParentBody.Position.Y;
-            }
         }
 
         /// <summary>
