@@ -155,7 +155,7 @@ namespace Pulsar4X.Lib
             m_mass = mass;
             m_parentMass = parentMass;
             SemiMajorAxis = semiMajorAxis;
-            Eccentricity = eccentricity;
+            Eccentricity = Math.Min(eccentricity, 0.8D); // Max eccentricity is 0.8 Orbit code has issues at higher eccentricity. (Note: If restriction lifed, fix code in GetEccentricAnomaly)
             Inclination = inclination;
             LongitudeOfAscendingNode = longitudeOfAscendingNode;
             ArgumentOfPeriapsis = argumentOfPeriapsis;
@@ -240,10 +240,10 @@ namespace Pulsar4X.Lib
                 return;
             }
 
-            // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
-            TrueAnomaly += (ArgumentOfPeriapsis * Math.PI / 180);
-
             double radius = GetRadius(TrueAnomaly);
+
+            // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
+            TrueAnomaly += ArgumentOfPeriapsis * Math.PI / 180;
 
             // Convert KM to AU
             radius /= Constants.Units.KM_PER_AU;
@@ -284,10 +284,12 @@ namespace Pulsar4X.Lib
 			//Kepler's Equation
 			List<double> E = new List<double>();
 			double Epsilon = 1E-12; // Plenty of accuracy.
-			if (Eccentricity > 0.8)
+			/* Eccentricity is currently clamped @ 0.8
+            if (Eccentricity > 0.8)
 			{
 				E.Add(Math.PI);
 			} else
+            */
 			{
 				E.Add(currentMeanAnomaly);
 			}
@@ -307,7 +309,7 @@ namespace Pulsar4X.Lib
 				i++;
 			} while (Math.Abs(E[i] - E[i - 1]) > Epsilon && i < 1000);
 
-			if (i < 1000)
+			if (i > 1000)
 			{
 				// <? todo: Flag an error about non-convergence of Newton's method.
 			}
