@@ -59,7 +59,7 @@ namespace Pulsar4X
         {
             StarSystem Sol = new StarSystem("Sol", -1);
 
-            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, Sol);
+            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, SpectralType.G, Sol);
             Sun.Age = 4.6E9;
             Sun.Mass = Constants.Units.SOLAR_MASS_IN_KILOGRAMS;
             Sun.Orbit = Orbit.FromStationary();
@@ -339,8 +339,7 @@ namespace Pulsar4X
             }
             
             // create star and populate data:
-            Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, system);
-            star.Class = data._SpectralType.ToString();
+            Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
             star.Mass = data._Mass;
             star.Age = data._Age;
 
@@ -351,7 +350,49 @@ namespace Pulsar4X
 
         #region Planet Generation Functions
 
-        ///< @todo Generate Planets.
+        private static void GeneratePlanetsForStar(Star star)
+        {
+            // lets start by determining if planets will be generated at all:
+            if (m_RNG.NextDouble() > GalaxyGen.PlanetGenerationChance)
+                return;  // nope, this star has no planets.
+
+            // now lets try and work out how many planets there should be.
+            // My "common knowladge" science tells me that in general terms
+            // the bigger the star the more material there was in its general 
+            // vacinity when it formed (had to be for the star to get that big in the first place).
+            // But the REALLY big stars (types O and B) that the blow away any 
+            // left over material very quickly after fusion starts due to massive solar winds.
+            // so we want to generate very few planets for smaller and Huge stars 
+            // and quite a lot for stars more like our own (type G).
+            // given this planet generation is balanced as follows:
+            // A/B/O (0.8% chance of occuring in real stars) will have:
+            //      -- A medium number of planets. Favoring Gass Giants.
+            //      -- Lots of resources on planets.
+            //      -- High chance of a body having a research anomly (say 10%).
+            //      -- low chance for ruins (say 1%).
+            //      -- Lowest chace for NPR races (or even habital planets) are in these systems.
+            // F/G/K (~23% generation chance in RS) will have
+            //      -- a large number of all planet types,
+            //      -- moderate resources on planets.
+            //      -- a small chance for research anomlies (say 1%).
+            //      -- a moderate chance for ruins (say 5%).
+            //      -- Best chance for NPR races is in these systems.
+            // M (~76% generation chance in RS) will have
+            //      -- a small number of planets. Favoring Gas Dwarfs.
+            //      -- Low resources
+            //      -- a low chance for anomlies (say 0.2%)
+            //      -- High chance of ruins (say 10%)
+            //
+            // of course the other major factor in this would be system age:
+            //      -- Young systems have lower Ruins/NPR chances, higher Anomly chances and More resources.
+            //      -- older systems would have less resources and a lower Anomly chance but higher NPR/Ruins chances.
+            // The system age thing lines up with the age of the different star classes so these two thing should compond each other.
+
+            
+
+        }
+        
+
 
         #endregion
 
@@ -364,6 +405,12 @@ namespace Pulsar4X
         #region Comet Generation Functions
 
         ///< @todo Generate Comets.
+
+        #endregion
+
+        #region Jump Point Generation functions
+
+        ///< @todo Generate JHump Points.
 
         #endregion
 

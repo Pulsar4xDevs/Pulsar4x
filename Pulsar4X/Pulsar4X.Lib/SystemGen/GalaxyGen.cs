@@ -30,5 +30,16 @@ namespace Pulsar4X
         /// Minium number of comets each system will have. All systems will be guaranteed to have a least this many comets.
         /// </summary>
         public static int MiniumCometsPerSystem = 0;
+
+
+        #region Advanced Planet Generation Parameters
+
+        /// <summary>
+        /// The chance Planets will be generated around a given star. A number between 0 and 1 (e.g. a 33% chance would be 0.33).
+        /// </summary>
+        public static double PlanetGenerationChance = 0.8;
+        
+
+        #endregion
     }
 }

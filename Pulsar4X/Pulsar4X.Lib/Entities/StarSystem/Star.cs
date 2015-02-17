@@ -44,6 +44,8 @@ namespace Pulsar4X.Entities
         public string Class { get; set; } 
         public double EcoSphereRadius { get; set; } // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone
 
+        public SpectralType SpectralType { get; set; }
+
         public Star()
             : base()
         {
@@ -51,7 +53,7 @@ namespace Pulsar4X.Entities
             SupportsPopulations = false;
         }
 
-        public Star(string name, double radius, uint temp, float luminosity, StarSystem system)
+        public Star(string name, double radius, uint temp, float luminosity, SpectralType spectralType, StarSystem system)
         {
             Name = name;
             Position.System = system;
@@ -59,6 +61,9 @@ namespace Pulsar4X.Entities
             Position.Y = 0;
             Temperature = temp;
             Luminosity = luminosity;
+            SpectralType = spectralType;
+
+            Class = SpectralType.ToString();
 
             Planets = new BindingList<Planet>();
             SupportsPopulations = false;
