@@ -62,6 +62,7 @@ namespace Pulsar4X
             Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, Sol);
             Sun.Age = 4.6E9;
             Sun.Mass = Constants.Units.SOLAR_MASS_IN_KILOGRAMS;
+            Sun.Orbit = Orbit.FromStationary();
             Sun.Class = "G2";
 
             Sun.Radius = 696000 / Constants.Units.KM_PER_AU;
@@ -73,14 +74,7 @@ namespace Pulsar4X
             Planet Mercury = new Planet(Sun);
             Mercury.Name = "Mercury";
             Mercury.Mass = 3.3022E23;
-            Mercury.Orbit.SemiMajorAxis = 0.387098; 
-            Mercury.Orbit.Eccentricity = 0.205630;
-            Mercury.Orbit.LongitudeOfAscendingNode = 48.33167;
-            Mercury.Orbit.ArgumentOfPeriapsis = Orbit.LongitudeOfPeriapsisToArgumentOfPeriapsis(29.124, Mercury.Orbit.LongitudeOfAscendingNode);
-            Mercury.Orbit.MeanAnomaly = Orbit.MeanLongitudeToMeanAnomaly(252.25084, Mercury.Orbit.LongitudeOfAscendingNode, Mercury.Orbit.ArgumentOfPeriapsis);
-            Mercury.Orbit.Epoch = J2000;
-            Mercury.Orbit.ParentBody = Sun;
-            Mercury.Orbit.ThisEntity = Mercury;
+            Mercury.Orbit = Orbit.FromMajorPlanetFormat(Mercury.Mass, Sun.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, J2000);
 
             Mercury.Radius = 2439.7 / Constants.Units.KM_PER_AU;
 
@@ -96,14 +90,7 @@ namespace Pulsar4X
             Planet Venus = new Planet(Sun);
             Venus.Name = "Venus";
             Venus.Mass = 4.8676E24;
-            Venus.Orbit.SemiMajorAxis = 0.72333199;
-            Venus.Orbit.Eccentricity = 0.00677323;
-            Venus.Orbit.LongitudeOfAscendingNode = 76.68069;
-            Venus.Orbit.ArgumentOfPeriapsis = Orbit.LongitudeOfPeriapsisToArgumentOfPeriapsis(131.53298, Venus.Orbit.LongitudeOfAscendingNode);
-            Venus.Orbit.MeanAnomaly = Orbit.MeanLongitudeToMeanAnomaly(181.97973, Venus.Orbit.LongitudeOfAscendingNode, Venus.Orbit.ArgumentOfPeriapsis);
-            Venus.Orbit.Epoch = J2000;
-            Venus.Orbit.ParentBody = Sun;
-            Venus.Orbit.ThisEntity = Venus;
+            Venus.Orbit = Orbit.FromMajorPlanetFormat(Venus.Mass, Sun.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, J2000);
 
             Venus.Radius = 6051.8 / Constants.Units.KM_PER_AU;
 
@@ -119,14 +106,7 @@ namespace Pulsar4X
             Planet Earth = new Planet(Sun);
             Earth.Name = "Earth";
             Earth.Mass = 5.9726E24;
-            Earth.Orbit.SemiMajorAxis = 1.00000011;
-            Earth.Orbit.Eccentricity = 0.01671022;
-            Earth.Orbit.LongitudeOfAscendingNode = -11.26064 * Math.PI / 180;
-            Earth.Orbit.ArgumentOfPeriapsis = Orbit.LongitudeOfPeriapsisToArgumentOfPeriapsis(102.94719 * Math.PI / 180, Earth.Orbit.LongitudeOfAscendingNode);
-            Earth.Orbit.MeanAnomaly = Orbit.MeanLongitudeToMeanAnomaly(100.46435 * Math.PI / 180, Earth.Orbit.LongitudeOfAscendingNode, Earth.Orbit.ArgumentOfPeriapsis);
-			Earth.Orbit.Epoch = new DateTime(2000, 1, 1, 12, 0, 0);
-			Earth.Orbit.ParentBody = Sun;
-			Earth.Orbit.ThisEntity = Earth;
+            Earth.Orbit = Orbit.FromMajorPlanetFormat(Earth.Mass, Sun.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, J2000);
 
             Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
 
@@ -141,13 +121,7 @@ namespace Pulsar4X
             Planet Moon = new Planet(Earth);
             Moon.Name = "Moon";
             Moon.Mass = 0.073E24;
-            Moon.Orbit.SemiMajorAxis = 384748 / Constants.Units.KM_PER_AU;
-            Moon.Orbit.Eccentricity = 0.0549006;
-            Moon.Orbit.ArgumentOfPeriapsis = 0;
-            Moon.Orbit.MeanAnomaly = 0;
-            Moon.Orbit.Epoch = new DateTime(2000, 1, 1, 12, 0, 0);
-            Moon.Orbit.ParentBody = Earth;
-            Moon.Orbit.ThisEntity = Moon;
+            Moon.Orbit = Orbit.FromAsteroidFormat(Moon.Mass, Earth.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, J2000);
 
             Moon.Radius = 1738.14 / Constants.Units.KM_PER_AU;
 
@@ -192,6 +166,7 @@ namespace Pulsar4X
                 starName += "E";
 
             Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
+            star.Orbit = Orbit.FromStationary();
             system.Stars.Add(star);
             return star;
         }

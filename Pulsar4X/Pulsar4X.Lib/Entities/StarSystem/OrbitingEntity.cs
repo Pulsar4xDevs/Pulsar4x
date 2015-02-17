@@ -35,7 +35,6 @@ namespace Pulsar4X.Entities
         public OrbitingEntity()
             : base()
         {
-            Orbit = new Orbit();
         }
     }
 }
