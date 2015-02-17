@@ -148,8 +148,8 @@ namespace Pulsar4X.UI.GLUtilities
                 double x, y;
                 a_oOrbitEntity.Orbit.GetPosition(dAngle, out x, out y);
 
-                m_aoVerticies[i].m_v4Position.X = (float)(x);
-                m_aoVerticies[i].m_v4Position.Y = (float)(y);
+                m_aoVerticies[i].m_v4Position.X = (float)(x / a_oOrbitEntity.Orbit.SemiMajorAxis);
+                m_aoVerticies[i].m_v4Position.Y = (float)(y / a_oOrbitEntity.Orbit.SemiMajorAxis);
                 m_aoVerticies[i].m_v4Position.Z = 0;
                 m_aoVerticies[i].SetColor(a_oColor);
                 m_auiIndicies[i] = (ushort)i;

@@ -47,7 +47,6 @@ namespace Pulsar4X.Lib
 			while (orbitalPeriod < timeSinceEpoch)
 			{
                 // Move our epoch and don't try to calculate many orbits ahead.
-                Epoch += orbitalPeriod;
 				timeSinceEpoch -= orbitalPeriod;
 			}
 
@@ -68,6 +67,7 @@ namespace Pulsar4X.Lib
         /// <param name="y"></param>
         public void GetPosition(double TrueAnomaly, out double x, out double y)
         {
+            TrueAnomaly += ArgumentOfPeriapsis;
             double radius = GetRadius(TrueAnomaly);
 
             // Convert KM to AU
@@ -102,7 +102,7 @@ namespace Pulsar4X.Lib
 
         public static double MeanLongitudeToMeanAnomaly(double meanLongitude, double longitudeOfAscendingNode, double argumentOfPeriapsis)
         {
-            return meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
+            return meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis) * Math.PI / 180;
         }
 
 		/// <summary>
