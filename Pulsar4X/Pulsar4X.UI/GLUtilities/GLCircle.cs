@@ -132,7 +132,7 @@ namespace Pulsar4X.UI.GLUtilities
             // Save some stuff to member vars:
             //double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
             m_v3Position = a_v3Pos;
-            m_v2Size.X = (float)(a_oOrbitEntity.Orbit.SemiMajorAxis);
+            m_v2Size.X = 1;
 
             // set verts to 360, looks good at any zoom.
             int iNumOfVerts = 360;
@@ -148,8 +148,8 @@ namespace Pulsar4X.UI.GLUtilities
                 double x, y;
                 a_oOrbitEntity.Orbit.GetPosition(dAngle, out x, out y);
 
-                m_aoVerticies[i].m_v4Position.X = (float)(x / a_oOrbitEntity.Orbit.SemiMajorAxis);
-                m_aoVerticies[i].m_v4Position.Y = (float)(y / a_oOrbitEntity.Orbit.SemiMajorAxis);
+                m_aoVerticies[i].m_v4Position.X = (float)x;
+                m_aoVerticies[i].m_v4Position.Y = (float)y;
                 m_aoVerticies[i].m_v4Position.Z = 0;
                 m_aoVerticies[i].SetColor(a_oColor);
                 m_auiIndicies[i] = (ushort)i;
@@ -159,7 +159,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_auiIndicies[iNumOfVerts] = 0;
 
             // Setup Matrix:
-            m_m4ModelMatrix = Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);
+            m_m4ModelMatrix = Matrix4.Identity * Matrix4.CreateTranslation(a_v3Pos);
 
             // Set our shader program:
             m_oEffect = a_oEffect;
