@@ -333,47 +333,52 @@ namespace Pulsar4X
 
         #region Planet Generation Functions
 
+        /// <summary>
+        /// This function Works out how many planets to generate for a given star.
+        /// </summary>
+        /// <remarks>
+        /// Now lets try and work out how many planets there should be.
+        /// My "common knowladge" science tells me that in general terms
+        /// the bigger the star the more material there was in its general 
+        /// vacinity when it formed (had to be for the star to get that big in the first place).
+        /// But the REALLY big stars (types O, B and A) blow away any left over 
+        /// material very quickly after fusion starts due to massive solar winds.
+        /// so we want to generate very few planets for smaller and Huge stars 
+        /// and quite a lot for stars more like our own (type G).
+        /// given this planet generation is balanced somthing like this:
+        /// A/B/O (0.8% chance of occuring in real stars) will have:
+        ///      -- A medium number of planets. Favoring Gass Giants.
+        ///      -- Lots of resources on planets.
+        ///      -- High chance of a body having a research anomly (say 10%).
+        ///      -- low chance for ruins (say 1%).
+        ///      -- Lowest chace for NPR races (or even habital planets) are in these systems.
+        /// F/G/K (~23% generation chance in RS) will have
+        ///      -- a large number of all planet types,
+        ///      -- moderate resources on planets.
+        ///      -- a small chance for research anomlies (say 1%).
+        ///      -- a moderate chance for ruins (say 5%).
+        ///      -- Best chance for NPR races is in these systems.
+        /// M (~76% generation chance in RS) will have
+        ///      -- a small number of planets. Favoring Gas Dwarfs.
+        ///      -- Low resources
+        ///      -- a low chance for anomlies (say 0.2%)
+        ///      -- High chance of ruins (say 10%)
+        ///      
+        /// (see GalaxyGen.StarSpecralTypePlanetGenerationRatio for a tweakalbe for no. of Planets).
+        /// 
+        /// Of course the other major factor in this would be system age:
+        ///      -- Young systems have lower Ruins/NPR chances, higher Anomly chances and More resources.
+        ///      -- older systems would have less resources and a lower Anomly chance but higher NPR/Ruins chances.
+        /// The system age thing lines up with the age of the different star classes so these two thing should compond each other.
+        /// </remarks>
         private static void GeneratePlanetsForStar(Star star)
         {
             // lets start by determining if planets will be generated at all:
             if (m_RNG.NextDouble() > GalaxyGen.PlanetGenerationChance)
                 return;  // nope, this star has no planets.
 
-            // now lets try and work out how many planets there should be.
-            // My "common knowladge" science tells me that in general terms
-            // the bigger the star the more material there was in its general 
-            // vacinity when it formed (had to be for the star to get that big in the first place).
-            // But the REALLY big stars (types O and B) that the blow away any 
-            // left over material very quickly after fusion starts due to massive solar winds.
-            // so we want to generate very few planets for smaller and Huge stars 
-            // and quite a lot for stars more like our own (type G).
-            // given this planet generation is balanced as follows:
-            // A/B/O (0.8% chance of occuring in real stars) will have:
-            //      -- A medium number of planets. Favoring Gass Giants.
-            //      -- Lots of resources on planets.
-            //      -- High chance of a body having a research anomly (say 10%).
-            //      -- low chance for ruins (say 1%).
-            //      -- Lowest chace for NPR races (or even habital planets) are in these systems.
-            // F/G/K (~23% generation chance in RS) will have
-            //      -- a large number of all planet types,
-            //      -- moderate resources on planets.
-            //      -- a small chance for research anomlies (say 1%).
-            //      -- a moderate chance for ruins (say 5%).
-            //      -- Best chance for NPR races is in these systems.
-            // M (~76% generation chance in RS) will have
-            //      -- a small number of planets. Favoring Gas Dwarfs.
-            //      -- Low resources
-            //      -- a low chance for anomlies (say 0.2%)
-            //      -- High chance of ruins (say 10%)
-            //
-            // of course the other major factor in this would be system age:
-            //      -- Young systems have lower Ruins/NPR chances, higher Anomly chances and More resources.
-            //      -- older systems would have less resources and a lower Anomly chance but higher NPR/Ruins chances.
-            // The system age thing lines up with the age of the different star classes so these two thing should compond each other.
-
-
-            double starMassRatio = Clamp01(star.Orbit.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));        // heavy star = more material.
-            double starSpecralTypeRatio =  GalaxyGen.StarSpecralTypePlanetGenerationRatio[star.SpectralType];
+            double starMassRatio = Clamp01(star.Orbit.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));   // heavy star = more material.
+            double starSpecralTypeRatio =  GalaxyGen.StarSpecralTypePlanetGenerationRatio[star.SpectralType];    // tweakble
 
             double starLuminosityRatio = 1;
             if (star.Luminosity > GalaxyGen.StarLuminosityBySpectralType[SpectralType.F]._max)
@@ -396,6 +401,10 @@ namespace Pulsar4X
             }
         }
 
+        /// <summary>
+        /// Works out what type of planet to generate based on the distrabution in GalaxyGen.PlanetTypeDisrubution.
+        /// It then calls a more type specific function to complete generation of the planet.
+        /// </summary>
         private static void GeneratePlanet(Star star, double planetGenerationChance, int number)
         {
             // we'll start by determining the planet type:
@@ -445,46 +454,118 @@ namespace Pulsar4X
             star.Planets.Add(newPlanet);
         }
 
+       /// <summary>
+       /// Do we Need this???
+       /// </summary>
         private static Planet GenerateGasGiant(Star star, double planetGenerationChance)
         {
 
             return new Planet(star);
         }
 
+        /// <summary>
+        /// Do we Need this???
+        /// </summary>
         private static Planet GenerateIceGiant(Star star, double planetGenerationChance)
         {
 
             return new Planet(star);
         }
 
+        /// <summary>
+        /// Do we Need this???
+        /// </summary>
         private static Planet GenerateGasDwarf(Star star, double planetGenerationChance)
         {
 
             return new Planet(star);
         }
 
+        /// <summary>
+        /// Generates a Terrestrial Planet.
+        /// @todo I think we can make this a general function to generate any type of system body that is not a star!!
+        /// </summary>
+        /// <remarks>
+        /// Quite a lot of data goes into making a planet. What follows is a list of the different data
+        /// points which need to be either randomly generated or infered through previously generated data.
+        /// The List is in the required order of generation.
+        /// <list type="Bullet">
+        /// <item>
+        /// <b>Mass:</b> Randomly selected based on a range for the given planet type, see GalaxyGen.PlanetMassByType.
+        /// </item>
+        /// <item>
+        /// <b>Density:</b> Randomly selected based on a range for the given planet type, see GalaxyGen.PlanetDensityByType.
+        /// </item>
+        /// <item>
+        /// <b>Radius:</b> Inferd from mass and densitiy using the formular: r = ((3M)/(4pD))^(1/3), where p = PI, D = Density, and M = Mass.
+        /// </item>
+        /// <item>
+        /// <b>Surface Gravity:</b> Is calculated with the following formular: g = (G * M) / r^2, where G = Gravatational Constant, M = Mass and r = radius.
+        /// </item>
+        /// <item>
+        /// <b>Axial Tilt:</b> A random value between 0 and GalaxyGen.MaxPlanetInclination is generated.
+        /// </item>
+        /// <item>
+        /// <b>Orbit:</b> To create the orbit of a planet 6 seperate values must first be generated:
+        ///     <list type="Bullet">
+        ///     <item>
+        ///     <b>SemiMajorAxis:</b> Randomly selected based on a range for the given star type, see: GalaxyGen.OrbitalDistanceByStarSpectralType.
+        ///     @note This should probably be change so we generate the closest planets first, Rather then just dropping there any old where.
+        ///     </item>
+        ///     <item>
+        ///     <b>Eccentricity:</b> A random value between 0 and 1.0 (currently 0.8 due to bugs!!) is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Inclination:</b> A random value between 0 and GalaxyGen.MaxPlanetInclination is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Argument Of Periapsis:</b> A random value between 0 and 360 is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Mean Anomaly:</b> A random value between 0 and 360 is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Longitude Of Ascending Node:</b> A random value between 0 and 360 is generated.
+        ///     </item>
+        ///     </list>
+        /// </item>
+        /// <item>
+        /// <b>Length Of Day:</b> Randomly generated TimeSpan with a range of 6 hours to the year length of the body (tho never less than 6 hours).
+        /// </item>
+        /// <item>
+        /// <b>Base Temperature:</b> This is calculated using the Stefan–Boltzmann law, See http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+        /// </item>
+        /// <item>
+        /// <b>Techtonics:</b> This is both randomly generated and infered from mass and age. 
+        /// First every body has 50/50 odds of being a dead world. If it is not dead then
+        /// a techtonics chance is calculated using the following formular:
+        /// techtonicsChance = M / star.Age, where M is the planets Mass in Earth Masses.
+        /// techtonicsChance is then clamped to a number between 0 and 1. 
+        /// For earth this process results in a number of 0.217... 
+        /// This is then used to select one of the possible TechtonicActivity values.
+        /// </item>
+        /// <item>
+        /// <b>Magnetic Feild:</b> Randomly selected based on a range for the given planet type, see GalaxyGen.PlanetMagneticFieldByType.
+        /// If the planet does not have some type of Plate Techtonics (i.e. it is a dead world) then the magnectic field is reduced in strength by a factor of 10.
+        /// </item>
+        /// <item>
+        /// <b>Atmosphere:</b> TODO
+        /// </item>
+        /// <item>
+        /// <b>Planetary Ruins:</b> TODO
+        /// </item>
+        /// <item>
+        /// <b>Minerials:</b> Currently an ugly hace of using homworld minerials. Note that minerial generation 
+        /// functions should be part of the Planet class as the player will likly want to re-generate them.
+        /// </item>
+        /// </tem>
+        /// <b>Moons:</b> Might be dove via some indirect recursive calling of a generilised version of this function.
+        /// </item>
+        /// </list>
+        /// </remarks>
         private static Planet GenerateTerrestrial(Star star, double planetGenerationChance)
         {
-            
-            // things i need to calc... in rough order:
-            // Density = by planet type
-            // mass = valid value for planet type.
-            // radius = r = ((3M)/4pD)^(1/3)
-            // orbit
-            //  -- SemiMajorAxis Average distance of orbit from center.
-            //  -- Eccentricity Shape of the orbit. 0 = perfectly circular, 0.8 = parabolic. 
-            //  -- Inclination Angle between the orbit and the flat referance plane.
-            //  -- LongitudeOfAscendingNode from 0 to 360
-            //  -- ArgumentOfPeriapsis from 0 to 360
-            //  -- MeanAnomaly random angle from 0 to 360
-
-            // surface gravity (calculate from mass and radius?)
-            // LengthOfDay
-            // Axial Tilt
-            // Base Temp (affected by SemiMajorAxis and star lumosity??)
-            // Techtonics
-            // Magnetic Feild (affect ammount of atmosphere??)
-            // 
+            // still need to move the following into remarks above:
             // Atmosphere (i'm thinking Atmosphere should be its own thing like Orbit is.)
             //  -- presure
             //  -- Hydrosphere
@@ -492,47 +573,47 @@ namespace Pulsar4X
             //  -- Greenhouse Factor
             //  -- Albedo (affected by Hydrosphere how exactly?)
             //  -- surface Temp. (based on base temp + greehhouse factor + Albedo).
-            // 
-            // PlanetaryRuins
-            // Minerials.
-            // Moons.
 
+            // Create the Planet:
             Planet planet = new Planet(star);
             planet.Type = Planet.PlanetType.Terrestrial;
 
+            // Creat some of the basic stats:
             double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]._min, GalaxyGen.PlanetMassByType[planet.Type]._max);
-            double density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]._min, GalaxyGen.PlanetDensityByType[planet.Type]._max); ;
+            planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]._min, GalaxyGen.PlanetDensityByType[planet.Type]._max); ;
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * density), (1 / 3));
-            radius = radius / 1000 / Constants.Units.KM_PER_AU;     // comvert from meters to AU.
+            radius = radius / 1000 / Constants.Units.KM_PER_AU;     // comvert from meters to AU, also keep the temp var as it is easer to read then planet.Radius.
+            planet.Radius = radius;
+            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
+            planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
-
+            // Create the orbital values:
             double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min, GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max);
             double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
-
             double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
             double meanAnomaly = m_RNG.NextDouble() * 360;
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
 
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+            // now Create the orbit:
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
             planet.Orbit = Orbit.FromAsteroidFormat(mass, star.Orbit.Mass, smeiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
-            planet.Density = density;
-            planet.Radius = radius;
-
-            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
+            
+            // generate the planets day length:
+            ///< @todo Move some of these length of day magic numbers into GalaxyGen
+            ///< @todo Should we do Tidle Locked bodies??? iirc bodies trend toward being tidaly locked over time...
             planet.LengthOfDay = new TimeSpan(m_RNG.Next(0, planet.Orbit.OrbitalPeriod.Days), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
             if (planet.LengthOfDay < TimeSpan.FromHours(6))
                 planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It' pull itself apart!!
 
-            planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
-
-            // to calculate temp: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
-            // note that base temp does not take into account albedo or atmosphere.
+            // to calculate base temp see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+            // Note that base temp does not take into account albedo or atmosphere.
             double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to owkr in kelvin here.
             double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * smeiMajorAxis));
             planetTemp += Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
             planet.BaseTemperature = (float)planetTemp;
 
+            // generate Plate techtonics
             if (m_RNG.Next(0,1) == 0)
             {
                 // this planet has some plate techtonics:
@@ -551,6 +632,7 @@ namespace Pulsar4X
                     planet.Techtonics = Planet.TechtonicActivity.Major;
             }
 
+            // Generate Magnetic field:
             planet.MagneticFeild = (float)(RNG_NextDoubleRange(GalaxyGen.PlanetMagneticFieldByType[planet.Type]._min,
                                                     GalaxyGen.PlanetMagneticFieldByType[planet.Type]._min));
             if (planet.Techtonics == Planet.TechtonicActivity.Dead)
