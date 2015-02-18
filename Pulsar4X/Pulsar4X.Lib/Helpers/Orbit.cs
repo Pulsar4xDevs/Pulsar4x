@@ -89,6 +89,9 @@ namespace Pulsar4X.Lib
         /// </summary>
         private bool m_isStationary;
 
+        public double Apoapsis { get { return (1 + Eccentricity) * SemiMajorAxis; } }
+        public double Periapsis { get { return (1 - Eccentricity) * SemiMajorAxis; } }
+
         /// <summary>
         /// Returns an orbit representing the defined parameters.
         /// </summary>
