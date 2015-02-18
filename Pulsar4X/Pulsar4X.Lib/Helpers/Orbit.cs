@@ -210,8 +210,6 @@ namespace Pulsar4X.Lib
             while (timeSinceEpoch > m_orbitalPeriod)
 			{
                 // Don't attempt to calculate large timeframes.
-                // This will cause orbital drift, but not orbital degradation.
-                // dift == "Hmm, that planet is 20 seconds ahead of where it should be"
 				timeSinceEpoch -= m_orbitalPeriod;
 			}
 
