@@ -72,7 +72,7 @@ namespace Pulsar4X
 
             Random RNG = new Random();
 
-            for (int i = 0; i < 125000; i++)
+            for (int i = 0; i < 500; i++)
             {
                 i++;
                 Planet newPlanet = new Planet(Sun);
