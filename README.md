@@ -1,4 +1,4 @@
-# Pulsar4x
+# Pulsar4x										{#mainpage}
 
 A Fan work recreation of Aurora, a 4x space sim created by Steve Walmsley. Pulsar4x is being develop in in C# and is intended to be cross platform. The long term goal of the project is to produce a feature complete clone of [Aurora](http://aurora2.pentarch.org/index.php).
 
