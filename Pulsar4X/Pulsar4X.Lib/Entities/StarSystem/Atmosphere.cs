@@ -14,7 +14,7 @@ namespace Pulsar4X.Entities
     {
         /// <summary>
         /// Atmospheric Presure
-        /// Units to be decided.
+        /// In Earth Atmospheres (atm).
         /// </summary>
         public float Pressure { get; set; }
         
@@ -32,5 +32,44 @@ namespace Pulsar4X.Entities
         /// A measure of the greenhouse factor provided by this Atmosphere.
         /// </summary>
         public float GreenhouseFactor { get; set; }
+
+        /// <summary>
+        /// How much light the body reflects. Affects temp.
+        /// @todo found out what units this should be in and how to calculate it.
+        /// </summary>
+        public float Albedo { get; set; }
+
+        /// <summary>
+        /// Temperature of the planet AFTER greenhouse effects are taken into considuration. 
+        /// This is a factor of the base temp and Green House effects.
+        /// In Degrees C.
+        /// </summary>
+        public float SurfaceTemperature { get; set; }
+
+        private Dictionary<AtmosphericGas, float> _composition = new Dictionary<AtmosphericGas, float>();
+        /// <summary>
+        /// The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
+        /// In Earth Atmospheres (atm).
+        /// </summary>
+        public Dictionary<AtmosphericGas, float> Composition { get; }
+
+        /// <summary>
+        /// Returns true if The atmosphere exists (i.e. there are any gases in it), else it return false.
+        /// </summary>
+        public bool Exists 
+        {
+            get
+            {
+                if (_composition.Count > 0)
+                    return true;
+
+                return false;
+            } 
+        }
+
+        public Atmosphere()
+        {
+
+        }
     }
 }

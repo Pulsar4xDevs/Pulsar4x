@@ -58,13 +58,7 @@ namespace Pulsar4X.Entities
         /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
         /// measured in something i don't know about yet.
         /// </summary>
-        public float MagneticFeild { get; set; }
-
-        /// <summary>
-        /// How much light the body reflects. Affects temp.
-        /// @todo found out what units this should be in and how to calculate it.
-        /// </summary>
-        public float Albedo { get; set; }
+        public float MagneticFeild { get; set; }        
 
         /// <summary>
         /// Temperature of the planet BEFORE greenhouse effects are taken into considuration. 
@@ -72,13 +66,6 @@ namespace Pulsar4X.Entities
         /// In Degrees C.
         /// </summary>
         public float BaseTemperature { get; set; }
-
-        /// <summary>
-        /// Temperature of the planet AFTER greenhouse effects are taken into considuration. 
-        /// This is a factor of the base temp and Green House effects.
-        /// In Degrees C.
-        /// </summary>
-        public float Temperature { get; set; }
 
         // the following will be used for ground combat effects:
         /// <summary>
