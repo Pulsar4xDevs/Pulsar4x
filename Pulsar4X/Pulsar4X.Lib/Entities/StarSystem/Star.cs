@@ -39,7 +39,7 @@ namespace Pulsar4X.Entities
     {
         public BindingList<Planet> Planets { get; set; }
         public double Age { get; set; }
-        public uint Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
+        public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
         public float Luminosity { get; set; }
         public string Class { get; set; } 
         public double EcoSphereRadius { get; set; } // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone

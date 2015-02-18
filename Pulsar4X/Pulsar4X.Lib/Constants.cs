@@ -59,6 +59,16 @@ namespace Pulsar4X
 
             public const double KM_PER_AU = CM_PER_AU / CM_PER_KM; //149597870.7
 
+            /// <summary>
+            /// Add to Kelvin to get degrees c.
+            /// </summary>
+            public const double DEGREES_C_TO_KELVIN = 273.15;
+
+            /// <summary>
+            /// Add to degrees c to get kelvin.
+            /// </summary>
+            public const double KELVIN_TO_DEGREES_C = -273.15;
+
 
             /// <summary>
             /// For anyone worried, these are only to check to see if the large distance model needs to be used or not, we aren't constrained to 32 bit limitations with regards to distances.
@@ -142,7 +152,7 @@ namespace Pulsar4X
             public const double ROCKY_ALBEDO = 0.15;
             public const double ROCKY_AIRLESS_ALBEDO = 0.07;
             public const double WATER_ALBEDO = 0.04;
-
+            
             public const double INCREDIBLY_LARGE_NUMBER = 9.9999E37;
         }
         

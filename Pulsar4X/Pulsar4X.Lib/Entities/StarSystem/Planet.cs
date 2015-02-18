@@ -26,7 +26,22 @@ namespace Pulsar4X.Entities
             DwarfPlanet,    // Pluto!
             GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
             ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron Planet (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+            Moon,
+            IceMoon,
+            Asteriod,
+            Comet
         }
+
+        public enum TechtonicActivity
+        {
+            Dead,
+            Minor,
+            EarthLike,
+            Major,
+            NA
+        }
+
+        public PlanetType Type { get; set; }
 
         /// <summary>
         /// dictionary listing of which faction has surveyed this planetary body. dictionary might be superfluous, and this could merely be
@@ -36,9 +51,14 @@ namespace Pulsar4X.Entities
         public Dictionary<Faction, bool> GeoSurveyList { get; set; }
 
         /// <summary>
-        /// @todo How is ColonyCost calculated in Aurora.
+        /// @todo How is ColonyCost calculated in Aurora??
         /// </summary>
         public float ColonyCost { get; set; }
+
+        /// <summary>
+        /// The Atmosphere of the planet.
+        /// </summary>
+        public Atmosphere Atmosphere { get; set; }
 
         /// <summary>
         /// Measure on the gravity of a planet at its surface.
@@ -60,8 +80,14 @@ namespace Pulsar4X.Entities
         public float AxialTilt { get; set; }
 
         /// <summary>
+        /// Plate techtonics. Ammount of activity depends on age vs mass.
+        /// Influences magnitic feild.
+        /// </summary>
+        public TechtonicActivity Techtonics { get; set; }
+
+        /// <summary>
         /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
-        /// measured in something i don't know about yet.
+        /// In Microtesla (uT)
         /// </summary>
         public float MagneticFeild { get; set; }        
 

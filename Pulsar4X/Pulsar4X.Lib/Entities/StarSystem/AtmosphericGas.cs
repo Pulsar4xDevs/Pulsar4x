@@ -10,7 +10,7 @@ namespace Pulsar4X.Entities
     /// Ths class repesents a Gas Which can make upo part of aplanetes Atmosphere. 
     /// @note While we refere to the as gases they could be in a liquid state or even frozen on a planets surface (or both). It will depend on the planet.
     /// </summary>
-    class AtmosphericGas
+    public class AtmosphericGas
     {
         public string Name { get; set; }
         public string ChemicalSymbol { get; set; }

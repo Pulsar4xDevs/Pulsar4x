@@ -10,7 +10,7 @@ namespace Pulsar4X.Entities
     /// The Atmosphere of a Planet or Moon.
     /// @todo Make this a generic component.
     /// </summary>
-    class Atmosphere
+    public class Atmosphere
     {
         /// <summary>
         /// Atmospheric Presure
@@ -35,7 +35,7 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// How much light the body reflects. Affects temp.
-        /// @todo found out what units this should be in and how to calculate it.
+        /// a number from 0 to 1.
         /// </summary>
         public float Albedo { get; set; }
 
@@ -67,9 +67,35 @@ namespace Pulsar4X.Entities
             } 
         }
 
-        public Atmosphere()
-        {
+        private Planet _parentBody;
 
+        /// <summary>
+        /// The body this atmosphere belong to.
+        /// </summary>
+        public Planet ParentBody { get { return _parentBody; } }
+
+        public Atmosphere(Planet parentBody)
+        {
+            _parentBody = parentBody;
+        }
+
+        /// <summary>
+        /// Updates the state of the bodies atmosphere. Run this after adding removing gasses or modifing albedo.
+        /// </summary>
+        public void UpdateState()
+        {
+            if (Exists)
+            {
+                ///< @todo Update Atmospheric pressure
+                ///< @todo Calc Hydrosphere changes & update albedo accordingly.
+                ///< @todo Calc greehouse effect based on atmosphere and apply it + albedo to surface temp. 
+            }
+            else
+            {
+                // simpye apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+                Pressure = 0;
+                SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
+            }
         }
     }
 }

@@ -101,7 +101,7 @@ namespace Pulsar4X
         {
             StarSystem Sol = new StarSystem("Sol", -1);
 
-            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, SpectralType.G, Sol);
+            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5505, 1, SpectralType.G, Sol);
             Sun.Age = 4.6E9;
             Sun.Orbit = Orbit.FromStationary(Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
             Sun.Class = "G2";
@@ -474,9 +474,9 @@ namespace Pulsar4X
             //  -- SemiMajorAxis Average distance of orbit from center.
             //  -- Eccentricity Shape of the orbit. 0 = perfectly circular, 0.8 = parabolic. 
             //  -- Inclination Angle between the orbit and the flat referance plane.
-            //  -- LongitudeOfAscendingNode   ???
-            //  -- ArgumentOfPeriapsis fom 0 to 2Pi
-            //  -- MeanAnomaly random angle fom 0 to 2PI
+            //  -- LongitudeOfAscendingNode from 0 to 360
+            //  -- ArgumentOfPeriapsis from 0 to 360
+            //  -- MeanAnomaly random angle from 0 to 360
 
             // surface gravity (calculate from mass and radius?)
             // LengthOfDay
@@ -498,9 +498,10 @@ namespace Pulsar4X
             // Moons.
 
             Planet planet = new Planet(star);
+            planet.Type = Planet.PlanetType.Terrestrial;
 
-            double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[Planet.PlanetType.Terrestrial]._min, GalaxyGen.PlanetMassByType[Planet.PlanetType.Terrestrial]._max);
-            double density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[Planet.PlanetType.Terrestrial]._min, GalaxyGen.PlanetDensityByType[Planet.PlanetType.Terrestrial]._max); ;
+            double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]._min, GalaxyGen.PlanetMassByType[planet.Type]._max);
+            double density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]._min, GalaxyGen.PlanetDensityByType[planet.Type]._max); ;
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * density), (1 / 3));
             radius = radius / 1000 / Constants.Units.KM_PER_AU;     // comvert from meters to AU.
 
@@ -518,7 +519,86 @@ namespace Pulsar4X
             planet.Density = density;
             planet.Radius = radius;
 
+            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
+            planet.LengthOfDay = new TimeSpan(m_RNG.Next(0, planet.Orbit.OrbitalPeriod.Days), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
+            if (planet.LengthOfDay < TimeSpan.FromHours(6))
+                planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It' pull itself apart!!
+
+            planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
+
+            // to calculate temp: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+            // note that base temp does not take into account albedo or atmosphere.
+            double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to owkr in kelvin here.
+            double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * smeiMajorAxis));
+            planetTemp += Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
+            planet.BaseTemperature = (float)planetTemp;
+
+            if (m_RNG.Next(0,1) == 0)
+            {
+                // this planet has some plate techtonics:
+                // this should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
+                ///< @todo make techtonics generation tweakable.
+                double techtonicsChance = mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age;  
+                techtonicsChance = Clamp01(techtonicsChance);
+
+                if (techtonicsChance < 0.01)
+                    planet.Techtonics = Planet.TechtonicActivity.Dead;
+                if (techtonicsChance < 0.02)
+                    planet.Techtonics = Planet.TechtonicActivity.Minor;
+                if (techtonicsChance < 0.04)
+                    planet.Techtonics = Planet.TechtonicActivity.EarthLike;
+                else
+                    planet.Techtonics = Planet.TechtonicActivity.Major;
+            }
+
+            planet.MagneticFeild = (float)(RNG_NextDoubleRange(GalaxyGen.PlanetMagneticFieldByType[planet.Type]._min,
+                                                    GalaxyGen.PlanetMagneticFieldByType[planet.Type]._min));
+            if (planet.Techtonics == Planet.TechtonicActivity.Dead)
+                planet.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
+            
+            // now lets generate the atmosphere:
+            planet.Atmosphere = GenerateAtmosphere(planet);
+
+            ///< @todo Generate Ruins
+            
+            ///< @todo Generate Minerials Properly instead of this ugle hack:
+            planet.HomeworldMineralGeneration();
+
+            // generate moons:
+            GenerateMoons(planet);
+
+            // force the planet to have the correct position for it and any of its moons:
+            planet.UpdatePosition(0);  ///< @todo wrap this in an if so it cannot be called in moons??
+
             return planet;
+        }
+
+        private static Atmosphere GenerateAtmosphere(Planet planet)
+        {
+            Atmosphere atmo = new Atmosphere(planet);
+
+            // calc albedo:
+            atmo.Albedo = (float)RNG_NextDoubleRange(GalaxyGen.PlanetAlbedoByType[planet.Type]._min, GalaxyGen.PlanetAlbedoByType[planet.Type]._max);
+
+            double atmoChance = Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
+            if (m_RNG.NextDouble() > atmoChance)
+            {
+                // Generate an Atmosphere
+                ///< @todo Gen Atmosphere
+            }
+
+            // now calc data resulting from above:
+            atmo.UpdateState();
+
+            return atmo;
+        }
+
+        /// <summary>
+        /// @todo I'm thinking the GenerateTerrestrial() function could be generlised. If so then this would just loop for a suitable count and call it to generate the moons.
+        /// </summary>
+        private static void GenerateMoons(Planet planet)
+        {
+            ///< @todo moon Generation.
         }
 
         #endregion

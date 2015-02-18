@@ -131,7 +131,14 @@ namespace Pulsar4X
 
         public const int MaxNoOfPlanets = 25;
 
-        public const double MaxPlanetInclination = 45; // degrees. 
+        public const double MaxPlanetInclination = 45; // degrees. used for orbits and axial tilt.
+
+        /// <summary>
+        /// This is the maximum possible base temp.
+        /// the minium is absolute 0. 
+        /// It is in kelvin because that makes the generation of the number better
+        /// </summary>
+        public const double BaseTemperature = 700;    // the max temp of Mercury
 
         /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
@@ -190,6 +197,33 @@ namespace Pulsar4X
                 { SpectralType.G, new MinMaxStruct() { _min = 0.3, _max = 50 }  },
                 { SpectralType.K, new MinMaxStruct() { _min = 0.2, _max = 30 }  },
                 { SpectralType.M, new MinMaxStruct() { _min = 0.1, _max = 10 }  },
+            };
+
+        // these are largly made up by based on the albedo of bodies in our solar system.
+        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetAlbedoByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+            {
+                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 0.5, _max = 0.7 }  },
+                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 0.5, _max = 0.7 }  },
+                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 0.3, _max = 0.7 }  },
+                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05, _max = 0.5 }  },
+            };
+
+        // these are largly made up by based on the magnecit fields of bodies in our solar system. In microtesla (uT)
+        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetMagneticFieldByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+            {
+                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 10, _max = 2000 }  },
+                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 5, _max = 50 }  },
+                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 0.1, _max = 20 }  },
+                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.0001, _max = 45 }  },
+            };
+
+        // this is multiplied by (Planet Mass / Max Mass for Planet Type) to get the chance of an atmosphere
+        public static Dictionary<Planet.PlanetType, double> AtmosphereGenerationModifier = new Dictionary<Planet.PlanetType, double>()
+            {
+                { Planet.PlanetType.GasGiant, 100000000 },
+                { Planet.PlanetType.IceGiant, 100000000  },
+                { Planet.PlanetType.GasDwarf, 100000000  },
+                { Planet.PlanetType.Terrestrial, 1.5  },
             };
        
 
