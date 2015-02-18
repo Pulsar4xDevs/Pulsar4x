@@ -790,7 +790,7 @@ namespace Pulsar4X
                 numJumpPoints = (int)starList.TotalWeight;
             }
 
-            numJumpPoints = numJumpPoints * Constants.GameSettings.JumpPointConnectivity;
+            numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointConnectivity);
 
             int jumpPointsGenerated = 0;
             while (jumpPointsGenerated < numJumpPoints)
