@@ -1,5 +1,6 @@
 ﻿using Pulsar4X.Entities;
 using Pulsar4X.Lib;
+using Pulsar4X.Helpers.GameMath;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +33,7 @@ namespace Pulsar4X
             return CreateSystem(name, GalaxyGen.SeedRNG.Next());
         }
 
-        public static StarSystem CreateSystem(string name, int seed)
+        public static StarSystem CreateSystem(string name, int seed, int numJumpPoints = -1)
         {
             // create new RNG with Seed.
             m_RNG = new Random(seed);
@@ -42,8 +43,12 @@ namespace Pulsar4X
             int noOfStars = m_RNG.Next(1, 5);
             for (int i = 0; i < noOfStars; ++i)
             {
-                GenerateStar(newSystem);
+                Star newStar = GenerateStar(newSystem);
+
+                GeneratePlanetsForStar(newStar);
             }
+
+            GenerateJumpPoints(newSystem, numJumpPoints);
 
             // Clean up cached RNG:
             m_RNG = null;
@@ -99,7 +104,10 @@ namespace Pulsar4X
 
         public static StarSystem CreateSol()
         {
-            StarSystem Sol = new StarSystem("Sol", -1);
+            StarSystem Sol = new StarSystem("Sol", GalaxyGen.SeedRNG.Next());
+
+            // Used for JumpPoint generation.
+            m_RNG = new Random(Sol.Seed);
 
             Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5505, 1, SpectralType.G, Sol);
             Sun.Age = 4.6E9;
@@ -169,6 +177,11 @@ namespace Pulsar4X
             Moon.Position.Y = Earth.Position.Y + y;
 
             Earth.Moons.Add(Moon);
+
+            GenerateJumpPoints(Sol);
+
+            // Clean up cached RNG:
+            m_RNG = null;
 
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
@@ -322,9 +335,6 @@ namespace Pulsar4X
             // Temporary orbit to store mass.
             // Calculate real orbit later.
             star.Orbit = Orbit.FromStationary(data._Mass);
-
-            // create planets for the star:
-            GeneratePlanetsForStar(star);
 
             return star;
         }
@@ -626,7 +636,7 @@ namespace Pulsar4X
             double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]._min, GalaxyGen.PlanetMassByType[planet.Type]._max);
             planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]._min, GalaxyGen.PlanetDensityByType[planet.Type]._max); ;
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * planet.Density), (1 / 3));
-            radius = radius / 1000 / Constants.Units.KM_PER_AU;     // comvert from meters to AU, also keep the temp var as it is easer to read then planet.Radius.
+            radius = radius / 1000 / Constants.Units.KM_PER_AU;     // convert from meters to AU, also keep the temp var as it is easer to read then planet.Radius.
             planet.Radius = radius;
             planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
@@ -652,7 +662,7 @@ namespace Pulsar4X
 
             // to calculate base temp see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
             // Note that base temp does not take into account albedo or atmosphere.
-            double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to owkr in kelvin here.
+            double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
             double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * smeiMajorAxis));
             planetTemp += Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
             planet.BaseTemperature = (float)planetTemp;
@@ -743,7 +753,128 @@ namespace Pulsar4X
 
         #region Jump Point Generation functions
 
-        ///< @todo Generate JHump Points.
+        /// <summary>
+        /// Generates a jump points in the designated system.
+        /// Used by JumpPoint class when connecting an a existing system
+        /// with no unconnected jump points.
+        /// </summary>
+        public static JumpPoint GenerateJumpPoint(StarSystem system)
+        {
+            Star luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+
+            return GenerateJumpPoint(luckyStar);
+        }
+
+        /// <summary>
+        /// Generates Jump Points for this system.
+        /// If numJumpPoints is not specified, we will generate the "Natural" amount
+        /// based on GetNaturalJumpPointGeneration(Star)
+        /// </summary>
+        /// <param name="system">System to generate JumpPoints in.</param>
+        /// <param name="numJumpPoints">Specific number of jump points to create.</param>
+        private static void GenerateJumpPoints(StarSystem system, int numJumpPoints = -1)
+        {
+            WeightedList<Star> starList = new WeightedList<Star>();
+
+            foreach (Star currentStar in system.Stars)
+            {
+                // Build our weighted list based on how many JP's the star naturally
+                // wants to generate.
+                starList.Add(GetNaturalJumpPointGeneration(currentStar), currentStar);
+            }
+
+            // If numJumpPoints wasn't specified by the systemGen,
+            // then just make as many jumpPoints as our stars cumulatively want to make.
+            if (numJumpPoints == -1)
+            {
+                numJumpPoints = (int)starList.TotalWeight;
+            }
+
+            numJumpPoints = numJumpPoints * Constants.GameSettings.JumpPointConnectivity;
+
+            int jumpPointsGenerated = 0;
+            while (jumpPointsGenerated < numJumpPoints)
+            {
+                double rnd = m_RNG.NextDouble();
+
+                // Generate a jump point on a star from the weighted list.
+                GenerateJumpPoint(starList.Select(rnd));
+
+                jumpPointsGenerated++;
+            }
+
+        }
+
+        private static int GetNaturalJumpPointGeneration(Star star)
+        {
+            int numJumpPoints = 1; // Each star always generates a JP.
+
+            // Give a chance per planet to generate a JumpPoint
+            foreach (Planet p in star.Planets)
+            {
+                int chance = Constants.GameSettings.JumpPointGenerationChance;
+
+                // Higher mass planets = higher chance.
+                double planetEarthMass = p.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
+                if (planetEarthMass > 1)
+                {
+                    chance = chance + 2;
+                    if (planetEarthMass > 3)
+                    {
+                        chance = chance + 3;
+                    }
+                    if (planetEarthMass > 5)
+                    {
+                        chance = chance + 5;
+                    }
+                }
+                if (chance >= m_RNG.Next(101))
+                {
+                    numJumpPoints++;
+                }
+            }
+
+            return numJumpPoints;
+        }
+
+        private static JumpPoint GenerateJumpPoint(Star star)
+        {
+            double minRadius = double.MaxValue;
+            double maxRadius = double.MinValue;
+
+            // Clamp generation to within the planetary system.
+            foreach (Planet currentPlanet in star.Planets)
+            {
+                if (minRadius > currentPlanet.Orbit.Periapsis)
+                {
+                    minRadius = currentPlanet.Orbit.Periapsis;
+                }
+                if (maxRadius < currentPlanet.Orbit.Apoapsis)
+                {
+                    maxRadius = currentPlanet.Orbit.Apoapsis;
+                }
+            }
+
+            // Determine a location for the new JP.
+            // Location will be between minDistance and 75% of maxDistance.
+            double offsetX = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
+            double offsetY = (maxRadius - minRadius) * RNG_NextDoubleRange(0.0d, 0.75d) + minRadius;
+
+            // Randomly flip the sign of the offsets.
+            if (m_RNG.NextDouble() >= 0.5)
+            {
+                offsetX = -offsetX;
+            }
+            if (m_RNG.NextDouble() >= 0.5)
+            {
+                offsetY = -offsetY;
+            }
+
+            // Create the new jumpPoint and link it to it's parent system.
+            JumpPoint newJumpPoint = new JumpPoint(star, offsetX, offsetY);
+
+            return newJumpPoint;
+        }
 
         #endregion
 
@@ -753,7 +884,7 @@ namespace Pulsar4X
 
         #endregion
 
-        #region Until Functions
+        #region Util Functions
 
         /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range.
@@ -764,7 +895,7 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Returns the next Double from m_RNG adjusted to be between the min and max range timesd by a constant value (e.g. a unit of some sort).
+        /// Returns the next Double from m_RNG adjusted to be between the min and max range times by a constant value (e.g. a unit of some sort).
         /// </summary>
         /// <param name="constant"> A constant which will be multiplied agains min and max, use for units etc.</param>
         /// <returns>Random value between min and max adjusted according to the constant value provided.</returns>

@@ -728,8 +728,8 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            System1.CreateJumpPoint(System1.Stars[0], 0.1, 0.2);
-            System2.CreateJumpPoint(S2, 0.2, 0.1);
+            SystemGen.GenerateJumpPoint(System1);
+            SystemGen.GenerateJumpPoint(System2);
 
             System1.JumpPoints[0].Connect = System2.JumpPoints[0];
             System2.JumpPoints[0].Connect = System1.JumpPoints[0];

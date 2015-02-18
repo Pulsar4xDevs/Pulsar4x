@@ -987,6 +987,9 @@ namespace Pulsar4X
             // Base tracking speed factions start writh.
             public static int FactionBaseTrackingSpeed = 1250;
 
+            // How connected universe is. Multiplier for number of JP's generated.
+            public static decimal JumpPointConnectivity = 1;
+
             // Base chance for each planet to generate a JP.
             public static int JumpPointGenerationChance = 10;
 

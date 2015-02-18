@@ -107,20 +107,6 @@ namespace Pulsar4X.Entities
                 Waypoints.Remove(Remove);
         }
 
-        /// <summary>
-        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function. Perhaps there should be.
-        /// </summary>
-        /// <param name="parentStar">Star to attach this JP to.</param>
-        /// <param name="Position.XAU">X offset from Star Position</param>
-        /// <param name="Position.YAU">Y offset from Star Position.</param>
-        /// <returns>Newly Created Jumpoint</returns>
-        public JumpPoint CreateJumpPoint(Star parentStar, double XOffsetAU, double YOffsetAU)
-        {
-            JumpPoint NewJP = new JumpPoint(this, parentStar, XOffsetAU, YOffsetAU);
-            JumpPoints.Add(NewJP);
-            return NewJP;
-        }
-
         private void SystemContactList_ListChanged(object sender, ListChangedEventArgs e)
         {
             BindingList<SystemContact> list = sender as BindingList<SystemContact>;
