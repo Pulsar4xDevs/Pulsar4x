@@ -625,7 +625,7 @@ namespace Pulsar4X
             // Creat some of the basic stats:
             double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]._min, GalaxyGen.PlanetMassByType[planet.Type]._max);
             planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]._min, GalaxyGen.PlanetDensityByType[planet.Type]._max); ;
-            double radius = Math.Pow((3 * mass) / (4 * Math.PI * density), (1 / 3));
+            double radius = Math.Pow((3 * mass) / (4 * Math.PI * planet.Density), (1 / 3));
             radius = radius / 1000 / Constants.Units.KM_PER_AU;     // comvert from meters to AU, also keep the temp var as it is easer to read then planet.Radius.
             planet.Radius = radius;
             planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
