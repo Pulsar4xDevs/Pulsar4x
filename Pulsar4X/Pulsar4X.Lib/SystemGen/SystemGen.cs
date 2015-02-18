@@ -55,6 +55,48 @@ namespace Pulsar4X
 
         #region Create Sol
 
+        public static StarSystem CreateStressTest()
+        {
+            StarSystem Sol= new StarSystem("StressTest", -1);
+
+            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, SpectralType.G, Sol);
+            Sun.Age = 4.6E9;
+            Sun.Orbit = Orbit.FromStationary(Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+            Sun.Class = "G2";
+
+            Sun.Radius = 696000 / Constants.Units.KM_PER_AU;
+
+            Sol.Stars.Add(Sun);
+
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+
+            Random RNG = new Random();
+
+            for (int i = 0; i < 125000; i++)
+            {
+                i++;
+                Planet newPlanet = new Planet(Sun);
+                newPlanet.Name = "New Planet " + i;
+
+                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, J2000);
+
+                double x, y;
+
+                newPlanet.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
+
+                newPlanet.Position.System = Sol;
+
+                newPlanet.Position.X = x;
+                newPlanet.Position.Y = y;
+
+                Sun.Planets.Add(newPlanet);
+            }
+
+            GameState.Instance.StarSystems.Add(Sol);
+            GameState.Instance.StarSystemCurrentIndex++;
+            return Sol;
+        }
+
         public static StarSystem CreateSol()
         {
             StarSystem Sol = new StarSystem("Sol", -1);

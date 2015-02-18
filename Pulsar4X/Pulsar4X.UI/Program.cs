@@ -31,6 +31,7 @@ namespace Pulsar4X.UI
 
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();
+            SystemGen.CreateStressTest();
             SystemGen.CreateSystem("Test");
             SystemGen.CreateSystem("Foo");
             SystemGen.CreateSystem("Bar");
