@@ -140,10 +140,10 @@ namespace Pulsar4X
         /// </summary>
         public static Dictionary<SpectralType, double> StarSpecralTypePlanetGenerationRatio = new Dictionary<SpectralType, double>()
             {
-                { SpectralType.O, 0.8 },
-                { SpectralType.B, 0.8 },
-                { SpectralType.A, 1 },
-                { SpectralType.F, 1.2 },
+                { SpectralType.O, 0.6 },
+                { SpectralType.B, 0.7 },
+                { SpectralType.A, 0.9 },
+                { SpectralType.F, 0.9 },
                 { SpectralType.G, 2.1 },
                 { SpectralType.K, 2.4 },
                 { SpectralType.M, 1.8 },
