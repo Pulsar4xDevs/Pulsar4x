@@ -266,7 +266,7 @@ namespace Pulsar4X
         /// <summary>
         /// Generates Data for a star based on it's spectral type and populates it with the data.
         /// \note Does not generate a name for the star.
-        /// \note This is not very scientific and that 'magic' the numbers are sourced from Wikipedia. mostly here: http://en.wikipedia.org/wiki/Stellar_classification
+        /// \note This is not very scientific and that the 'magic' numbers are sourced from Wikipedia, mostly here: http://en.wikipedia.org/wiki/Stellar_classification
         /// </summary>
         /// <remarks>
         /// This function randomly generates the Radius, Temperature, Luminosity, Mass and Age of a star and then returns a star populated with those generated values.
@@ -346,29 +346,73 @@ namespace Pulsar4X
         /// so we want to generate very few planets for smaller and Huge stars 
         /// and quite a lot for stars more like our own (type G).
         /// given this planet generation is balanced somthing like this:
+        /// 
         /// A/B/O (0.8% chance of occuring in real stars) will have:
-        ///      -- A medium number of planets. Favoring Gass Giants.
-        ///      -- Lots of resources on planets.
-        ///      -- High chance of a body having a research anomly (say 10%).
-        ///      -- low chance for ruins (say 1%).
-        ///      -- Lowest chace for NPR races (or even habital planets) are in these systems.
-        /// F/G/K (~23% generation chance in RS) will have
-        ///      -- a large number of all planet types,
-        ///      -- moderate resources on planets.
-        ///      -- a small chance for research anomlies (say 1%).
-        ///      -- a moderate chance for ruins (say 5%).
-        ///      -- Best chance for NPR races is in these systems.
+        /// <list type="Bullet">
+        /// <item>
+        /// A medium number of planets. Favoring Gass Giants.
+        /// </item>
+        /// <item>
+        /// Lots of resources on planets.
+        /// </item>
+        /// <item>
+        /// High chance of a body having a research anomly (say 10%).
+        /// </item>
+        /// <item>
+        /// low chance for ruins (say 1%).
+        /// </item>
+        /// <item>
+        /// Lowest chace for NPR races (or even habital planets) are in these systems.
+        /// </item>
+        /// </list>
+        /// 
+        /// F/G/K (~23% generation chance in RS) will have:
+        /// <list type="Bullet">
+        /// <item>
+        /// A large number of all planet types.
+        /// </item>
+        /// <item>
+        /// moderate resources on planets.
+        /// </item>
+        /// <item>
+        /// a small chance for research anomlies (say 1%).
+        /// </item>
+        /// <item>
+        /// a moderate chance for ruins (say 5%).
+        /// </item>
+        /// <item>
+        /// Best chance for NPR races is in these systems.
+        /// </item>
+        /// </list>
+        ///
         /// M (~76% generation chance in RS) will have
-        ///      -- a small number of planets. Favoring Gas Dwarfs.
-        ///      -- Low resources
-        ///      -- a low chance for anomlies (say 0.2%)
-        ///      -- High chance of ruins (say 10%)
+        /// <list type="Bullet">
+        /// <item>
+        /// a small number of planets. Favoring Gas Dwarfs.
+        /// </item>
+        /// <item>
+        /// Low resources
+        /// </item>
+        /// <item>
+        /// a low chance for anomlies (say 0.2%)
+        /// </item>
+        /// <item>
+        /// High chance of ruins (say 10%)
+        /// </item>
+        /// </list>
         ///      
         /// (see GalaxyGen.StarSpecralTypePlanetGenerationRatio for a tweakalbe for no. of Planets).
         /// 
         /// Of course the other major factor in this would be system age:
-        ///      -- Young systems have lower Ruins/NPR chances, higher Anomly chances and More resources.
-        ///      -- older systems would have less resources and a lower Anomly chance but higher NPR/Ruins chances.
+        /// <list type="Bullet">
+        /// <item>
+        /// Young systems have lower Ruins/NPR chances, higher Anomly chances and More resources.
+        /// </item>
+        /// <item>
+        /// Older systems would have less resources and a lower Anomly chance but higher NPR/Ruins chances.
+        /// </item>
+        /// </list>
+        ///
         /// The system age thing lines up with the age of the different star classes so these two thing should compond each other.
         /// </remarks>
         private static void GeneratePlanetsForStar(Star star)
@@ -510,7 +554,7 @@ namespace Pulsar4X
         ///     <list type="Bullet">
         ///     <item>
         ///     <b>SemiMajorAxis:</b> Randomly selected based on a range for the given star type, see: GalaxyGen.OrbitalDistanceByStarSpectralType.
-        ///     @note This should probably be change so we generate the closest planets first, Rather then just dropping there any old where.
+        ///     @note This should probably be change so we generate the closest planets first, Rather then just dropping them any old where.
         ///     </item>
         ///     <item>
         ///     <b>Eccentricity:</b> A random value between 0 and 1.0 (currently 0.8 due to bugs!!) is generated.
