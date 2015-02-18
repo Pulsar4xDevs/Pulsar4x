@@ -281,6 +281,9 @@ namespace Pulsar4X
             // Calculate real orbit later.
             star.Orbit = Orbit.FromStationary(data._Mass);
 
+            // create planets for the star:
+            GeneratePlanetsForStar(star);
+
             return star;
         }
 
@@ -338,7 +341,7 @@ namespace Pulsar4X
 
             // final 'chance' for number of planets generated. take into consideration star mass, solar wind (via luminosity)
             // and balance decisions for star class.
-            double finalGenerationChance = starMassRatio * starLuminosityRatio * starSpecralTypeRatio;
+            double finalGenerationChance = Clamp01(starMassRatio * starLuminosityRatio * starSpecralTypeRatio);
 
             // using the planet generation chance we will calculate the number of additional 
             // planets over and above the minium of 1. 
@@ -347,11 +350,11 @@ namespace Pulsar4X
             // now loop and generate the planets:
             for (int i = 0; i < noOfPlanetsToGenerate; ++i)
             {
-
+                GeneratePlanet(star, finalGenerationChance, i + 1);
             }
         }
 
-        private static void GeneratePlanet(Star star, double planetGenerationChance, double minOrbitDist)
+        private static void GeneratePlanet(Star star, double planetGenerationChance, int number)
         {
             // we'll start by determining the planet type:
             double planetTypeChance = m_RNG.NextDouble();
@@ -374,25 +377,30 @@ namespace Pulsar4X
                 pt = Planet.PlanetType.Terrestrial;
 
             // now that we know the planet type we can generate the correct type:
+            Planet newPlanet = null;
             switch (pt)
             {
                 case Planet.PlanetType.GasGiant:
-                    GenerateGasGiant(star, planetGenerationChance);
+                    newPlanet = GenerateGasGiant(star, planetGenerationChance);
                     break;
 
                 case Planet.PlanetType.IceGiant:
-                    GenerateIceGiant(star, planetGenerationChance);
+                    newPlanet = GenerateIceGiant(star, planetGenerationChance);
                     break;
 
                 case Planet.PlanetType.GasDwarf:
-                    GenerateGasDwarf(star, planetGenerationChance);
+                    newPlanet = GenerateGasDwarf(star, planetGenerationChance);
                     break;
 
                 case Planet.PlanetType.Terrestrial:
                 default:
-                    GenerateTerrestrial(star, planetGenerationChance);
+                    newPlanet = GenerateTerrestrial(star, planetGenerationChance);
                     break;
             }
+
+            newPlanet.Name = star.Name + " - " + number.ToString();
+
+            star.Planets.Add(newPlanet);
         }
 
         private static Planet GenerateGasGiant(Star star, double planetGenerationChance)
@@ -417,12 +425,12 @@ namespace Pulsar4X
         {
             
             // things i need to calc... in rough order:
-            // mass
-            // radius (for radius mass relationship see  http://iopscience.iop.org/0004-637X/669/2/1279/fulltext/71144.text.html
-            //          At Last HARD Science!!
+            // Density = by planet type
+            // mass = valid value for planet type.
+            // radius = r = ((3M)/4pD)^(1/3)
             // orbit
             //  -- SemiMajorAxis Average distance of orbit from center.
-            //  -- Eccentricity Shape of the orbit. 0 = perfectly circular, 1 = parabolic. 
+            //  -- Eccentricity Shape of the orbit. 0 = perfectly circular, 0.8 = parabolic. 
             //  -- Inclination Angle between the orbit and the flat referance plane.
             //  -- LongitudeOfAscendingNode   ???
             //  -- ArgumentOfPeriapsis fom 0 to 2Pi
@@ -432,6 +440,7 @@ namespace Pulsar4X
             // LengthOfDay
             // Axial Tilt
             // Base Temp (affected by SemiMajorAxis and star lumosity??)
+            // Techtonics
             // Magnetic Feild (affect ammount of atmosphere??)
             // 
             // Atmosphere (i'm thinking Atmosphere should be its own thing like Orbit is.)
@@ -439,19 +448,35 @@ namespace Pulsar4X
             //  -- Hydrosphere
             //      -- Hydrosphere extent
             //  -- Greenhouse Factor
-            // Albedo (affected by Hydrosphere how exactly?)
-            // Temp. (based on base temp + greehhouse factor + Albedo).
-            // Techtonics
-            // 
-            //
+            //  -- Albedo (affected by Hydrosphere how exactly?)
+            //  -- surface Temp. (based on base temp + greehhouse factor + Albedo).
             // 
             // PlanetaryRuins
             // Minerials.
             // Moons.
 
-            
+            Planet planet = new Planet(star);
 
-            return new Planet(star);
+            double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[Planet.PlanetType.Terrestrial]._min, GalaxyGen.PlanetMassByType[Planet.PlanetType.Terrestrial]._max);
+            double density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[Planet.PlanetType.Terrestrial]._min, GalaxyGen.PlanetDensityByType[Planet.PlanetType.Terrestrial]._max); ;
+            double radius = Math.Pow((3 * mass) / (4 * Math.PI * density), (1 / 3));
+            radius = radius / 1000 / Constants.Units.KM_PER_AU;     // comvert from meters to AU.
+
+
+            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min, GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max);
+            double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
+
+            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
+            double meanAnomaly = m_RNG.NextDouble() * 360;
+            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
+
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+            planet.Orbit = Orbit.FromAsteroidFormat(mass, star.Orbit.Mass, smeiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+            planet.Density = density;
+            planet.Radius = radius;
+
+            return planet;
         }
 
         #endregion
@@ -500,19 +525,30 @@ namespace Pulsar4X
             min *= constant;
             return min + m_RNG.NextDouble() * ((max * constant) - min);
         }
+        
+
+        /// <summary>
+        /// Clamps a value between the provided man and max.
+        /// </summary>
+        public static double Clamp(double value, double min, double max)
+        {
+            if (value > max)
+                return max;
+            else if (value < min)
+                return min;
+
+            return value;
+        }
+
 
         /// <summary>
         /// Clamps a number between 0 and 1.
         /// </summary>
         public static double Clamp01(double value)
         {
-            if (value > 1)
-                return 1;
-            else if (value < 0)
-                return 0;
-
-            return value;
+            return Clamp(value, 0, 1);
         }
+        
 
         #endregion
     }

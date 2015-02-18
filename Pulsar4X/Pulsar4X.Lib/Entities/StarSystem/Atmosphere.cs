@@ -51,7 +51,7 @@ namespace Pulsar4X.Entities
         /// The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
         /// In Earth Atmospheres (atm).
         /// </summary>
-        public Dictionary<AtmosphericGas, float> Composition { get; }
+        public Dictionary<AtmosphericGas, float> Composition { get { return _composition; } }
 
         /// <summary>
         /// Returns true if The atmosphere exists (i.e. there are any gases in it), else it return false.

@@ -46,6 +46,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public float SurfaceGravity { get; set; }
 
+        /// <summary>
+        /// The density of the body in g/cm^3
+        /// </summary>
+        public double Density { get; set; } 
+
         public TimeSpan LengthOfDay { get; set; }
 
         /// <summary>

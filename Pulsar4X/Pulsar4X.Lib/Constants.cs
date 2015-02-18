@@ -43,7 +43,9 @@ namespace Pulsar4X
 
             public const double SOLAR_MASS_IN_KILOGRAMS = Constants.Units.SOLAR_MASS_IN_GRAMS / 1000;
 
-            public const double EARTH_MASS_IN_GRAMS = 5.9726E27;
+            public const double EARTH_MASS_IN_GRAMS = 5.97219E27;
+
+            public const double EARTH_MASS_IN_KILOGRAMS = EARTH_MASS_IN_GRAMS / 1000;
 
             public const double SUN_MASS_IN_EARTH_MASSES = SOLAR_MASS_IN_GRAMS / EARTH_MASS_IN_GRAMS;
 

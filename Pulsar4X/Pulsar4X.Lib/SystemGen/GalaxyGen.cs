@@ -21,7 +21,7 @@ namespace Pulsar4X
         /// <summary>
         /// Indicates weither We shoudl generate a Real Star System or a more gamey one.
         /// </summary>
-        public static bool RealStarSystems = true;
+        public static bool RealStarSystems = false;
 
         /// <summary>
         /// The chance of a Non-player Race being generated on a suitable planet.
@@ -33,6 +33,10 @@ namespace Pulsar4X
         /// </summary>
         public static int MiniumCometsPerSystem = 0;
 
+        /// <summary>
+        /// Small helper struct to make all these min/max dicts. nicer.
+        /// </summary>
+        public struct MinMaxStruct { public double _min, _max; }
 
         
         #region Advanced Star Generation Parameters
@@ -41,12 +45,6 @@ namespace Pulsar4X
         // these values SHOULD NOT be Modified if you weant sane star generation.
         // Also note that thile these are constants they were not added to the 
         // constants file because they are only used for star gen.
-
-
-        /// <summary>
-        /// Small helper struct to make all these min/max dicts. nicer.
-        /// </summary>
-        public struct MinMaxStruct { public double _min, _max; }
 
         /// <summary>
         /// This Dictionary holds the minium and maximum radius values (in AU) for a Star given its spectral type.
@@ -131,20 +129,24 @@ namespace Pulsar4X
         /// </summary>
         public const double PlanetGenerationChance = 0.8;
 
-        public const int MaxNoOfPlanets = 20;
+        public const int MaxNoOfPlanets = 25;
+
+        public const double MaxPlanetInclination = 45; // degrees. 
 
         /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
+        /// Note that other factors such as the stars lumosoty and mass are also taken into account. 
+        /// So these numbers may not make a whole lot of sense on the surface.
         /// </summary>
         public static Dictionary<SpectralType, double> StarSpecralTypePlanetGenerationRatio = new Dictionary<SpectralType, double>()
             {
-                { SpectralType.O, 0.2 },
-                { SpectralType.B, 0.25 },
-                { SpectralType.A, 0.4 },
-                { SpectralType.F, 0.8 },
-                { SpectralType.G, 0.9 },
-                { SpectralType.K, 0.75 },
-                { SpectralType.M, 0.25 },
+                { SpectralType.O, 0.8 },
+                { SpectralType.B, 0.8 },
+                { SpectralType.A, 1 },
+                { SpectralType.F, 1.2 },
+                { SpectralType.G, 2.1 },
+                { SpectralType.K, 2.4 },
+                { SpectralType.M, 1.8 },
             };
 
         /// <summary>
@@ -159,6 +161,35 @@ namespace Pulsar4X
                 { Planet.PlanetType.IceGiant, 0.2 },
                 { Planet.PlanetType.GasDwarf, 0.1 },
                 { Planet.PlanetType.Terrestrial, 0.5 },
+            };
+
+
+        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetMassByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+            {
+                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 1, _max = 1 } },
+                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 1, _max = 1 }  },
+                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1, _max = 1 }  },
+                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS }  },
+            };
+
+        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetDensityByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+            {
+                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 1, _max = 1 }  },
+                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 1, _max = 1 }  },
+                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1, _max = 1 }  },
+                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 3, _max = 8 }  },
+            };
+
+        // these are largly made up by based on orbits of bodies in the solar system. in AU
+        public static Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+            {
+                { SpectralType.O, new MinMaxStruct() { _min = 2, _max = 100 } },
+                { SpectralType.B, new MinMaxStruct() { _min = 1, _max = 85 }  },
+                { SpectralType.A, new MinMaxStruct() { _min = 0.5, _max = 70 }  },
+                { SpectralType.F, new MinMaxStruct() { _min = 0.35, _max = 60 }  },
+                { SpectralType.G, new MinMaxStruct() { _min = 0.3, _max = 50 }  },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.2, _max = 30 }  },
+                { SpectralType.M, new MinMaxStruct() { _min = 0.1, _max = 10 }  },
             };
        
 
