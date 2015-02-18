@@ -9,7 +9,7 @@ namespace Pulsar4X
 {
     /// <summary>
     /// Galaxy Gen holds some information used by the SystemGen Class when generating Stars.
-    /// It does not actually Generate anything on its own, but rahter guids the generation of each star system to make a consistand Galaxy.
+    /// It does not actually Generate anything on its own, but rahter guides the generation of each star system to make a consistent Galaxy.
     /// </summary>
     public static class GalaxyGen
     {
