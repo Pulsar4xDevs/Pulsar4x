@@ -805,6 +805,10 @@ namespace Pulsar4X
 
         }
 
+        /// <summary>
+        /// Returns the number of JumpPoints that this star wants to generate.
+        /// Currently based exclusivly on the mass of the planets around the star.
+        /// </summary>
         private static int GetNaturalJumpPointGeneration(Star star)
         {
             int numJumpPoints = 1; // Each star always generates a JP.
@@ -837,6 +841,11 @@ namespace Pulsar4X
             return numJumpPoints;
         }
 
+        /// <summary>
+        /// Generates a JumpPoint on the designated star.
+        /// Clamps JumpPoint generation to be within the planetary
+        /// field of the star.
+        /// </summary>
         private static JumpPoint GenerateJumpPoint(Star star)
         {
             double minRadius = double.MaxValue;

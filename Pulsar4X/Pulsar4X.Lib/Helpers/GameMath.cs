@@ -16,7 +16,7 @@ namespace Pulsar4X.Helpers.GameMath
     /// Weighted list used for selecting values with a random number generator.
     /// </summary>
     /// <remarks>
-    /// This is a weighted list. Eeight input values do not need to add up to 1.
+    /// This is a weighted list. Input values do not need to add up to 1.
     /// </remarks>
     /// <example>
     /// <code>
