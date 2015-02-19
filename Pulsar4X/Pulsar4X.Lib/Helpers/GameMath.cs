@@ -5,6 +5,13 @@ using System.Text;
 
 namespace Pulsar4X.Helpers.GameMath
 {
+    public class WeightedValue<T>
+    {
+        public double Weight { get; set; }
+        public T Value { get; set; }
+    }
+
+
     /// <summary>
     /// Weighted list used for selecting values with a random number generator.
     /// </summary>
@@ -46,14 +53,8 @@ namespace Pulsar4X.Helpers.GameMath
     /// </code>
     /// </example>
     /// 
-    public class WeightedList<T>
+    public class WeightedList<T> : IEnumerable<WeightedValue<T>>
     {
-        private class WeightedValue<T>
-        {
-            public double Weight { get; set; }
-            public T Value { get; set; }
-        }
-
         List<WeightedValue<T>> m_valueList;
 
         /// <summary>
@@ -80,6 +81,16 @@ namespace Pulsar4X.Helpers.GameMath
             m_valueList.Add(listEntry);
 
             m_totalWeight += weight;
+        }
+
+        public IEnumerator<WeightedValue<T>> GetEnumerator() 
+        {
+            return m_valueList.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
         }
 
         /// <summary>

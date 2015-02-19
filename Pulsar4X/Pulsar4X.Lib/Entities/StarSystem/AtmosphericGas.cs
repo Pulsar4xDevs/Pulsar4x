@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Entities
 {
@@ -43,11 +44,13 @@ namespace Pulsar4X.Entities
             GreenhouseEffect = greenhouseEffect;
         }
 
-        // Create and populate a hard coded list of Atmospheric Gases. This is a hack, it shoul be loadded fom disk.
-        ///< @todo Read AtmosphericGases in from json!
-        private static BindingList<AtmosphericGas> _atmosphericGases = new BindingList<AtmosphericGas>()
+        /// <summary>
+        /// Create and populate a hard coded Weighted list of Atmospheric Gases. This is a hack, it shoul be loadded fom disk.
+        /// @todo Read AtmosphericGases in from json!
+        /// </summary>
+        private static WeightedList<AtmosphericGas> _atmosphericGases = new WeightedList<AtmosphericGas>()
         {
-             new AtmosphericGas()
+             { 100, new AtmosphericGas()
              { 
                  Name = "Hydrogen", 
                  ChemicalSymbol = "H",
@@ -55,9 +58,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -259.16,
                  BoilingPoint = -252.879,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 100, new AtmosphericGas()
              { 
                  Name = "Helium", 
                  ChemicalSymbol = "He",
@@ -65,9 +68,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -272.20,
                  BoilingPoint = -268.928,
                  GreenhouseEffect = 0
-             },
+             }},
 
-             new AtmosphericGas()
+             { 10, new AtmosphericGas()
              { 
                  Name = "Methane", 
                  ChemicalSymbol = "CH4",
@@ -75,9 +78,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -182.5,
                  BoilingPoint = -161.49,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 10, new AtmosphericGas()
              { 
                  Name = "Water", 
                  ChemicalSymbol = "H2O",
@@ -85,9 +88,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = 0,
                  BoilingPoint = 100,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 10, new AtmosphericGas()
              { 
                  Name = "Ammonia", 
                  ChemicalSymbol = "NH3",
@@ -95,9 +98,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -77.73,
                  BoilingPoint = -33.34,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 5, new AtmosphericGas()
              { 
                  Name = "Neon", 
                  ChemicalSymbol = "Ne",
@@ -105,9 +108,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -248.59,
                  BoilingPoint = -246.046,
                  GreenhouseEffect = 0
-             },
+             }},
 
-             new AtmosphericGas()
+             { 25, new AtmosphericGas()
              { 
                  Name = "Nitrogen", 
                  ChemicalSymbol = "N",
@@ -115,9 +118,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -210.00,
                  BoilingPoint = -195.795,
                  GreenhouseEffect = 0
-             },
+             }},
 
-             new AtmosphericGas()
+             { 10, new AtmosphericGas()
              { 
                  Name = "Carbon monoxide", 
                  ChemicalSymbol = "CO",
@@ -125,9 +128,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -205.02,
                  BoilingPoint = -191.5,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Nitrogen oxide", 
                  ChemicalSymbol = "NO",
@@ -135,9 +138,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -164,
                  BoilingPoint = -152,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 10, new AtmosphericGas()
              { 
                  Name = "Oxygen", 
                  ChemicalSymbol = "O",
@@ -145,9 +148,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -218.79,
                  BoilingPoint = -182.962,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Hydrogen sulfide", 
                  ChemicalSymbol = "H2S",
@@ -155,9 +158,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -82,
                  BoilingPoint = -60,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 3, new AtmosphericGas()
              { 
                  Name = "Argon", 
                  ChemicalSymbol = "Ar",
@@ -165,9 +168,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -189.34,
                  BoilingPoint = -185.848,
                  GreenhouseEffect = 0
-             },
+             }},
 
-             new AtmosphericGas()
+             { 5, new AtmosphericGas()
              { 
                  Name = "Carbon dioxide", 
                  ChemicalSymbol = "CO2",
@@ -175,9 +178,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -56.6,
                  BoilingPoint = -56.6,  // no boiling point on Wikipedia!!
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Nitrogen dioxide", 
                  ChemicalSymbol = "NO2",
@@ -185,9 +188,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -11.2,
                  BoilingPoint = 21.2,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Sulfur dioxide", 
                  ChemicalSymbol = "SO2",
@@ -195,9 +198,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -72,
                  BoilingPoint = -10,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Chlorine", 
                  ChemicalSymbol = "Cl",
@@ -205,9 +208,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -101.5,
                  BoilingPoint = -34.04,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Fluorine", 
                  ChemicalSymbol = "F",
@@ -215,9 +218,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -219.67,
                  BoilingPoint = -188.11,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Bromine", 
                  ChemicalSymbol = "Br",
@@ -225,9 +228,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = -7.2,
                  BoilingPoint = 58.8,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 1, new AtmosphericGas()
              { 
                  Name = "Iodine", 
                  ChemicalSymbol = "I",
@@ -235,9 +238,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = 113.7,
                  BoilingPoint = 184.3,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 0, new AtmosphericGas()
              { 
                  Name = "Safe Greenhouse Gas", 
                  ChemicalSymbol = "SGG",
@@ -245,9 +248,9 @@ namespace Pulsar4X.Entities
                  MeltingPoint = 0,
                  BoilingPoint = 100,
                  GreenhouseEffect = 1
-             },
+             }},
 
-             new AtmosphericGas()
+             { 0, new AtmosphericGas()
              { 
                  Name = "Anti-Greenhouse Gas", 
                  ChemicalSymbol = "AGG",
@@ -255,13 +258,13 @@ namespace Pulsar4X.Entities
                  MeltingPoint = 0,
                  BoilingPoint = 100,
                  GreenhouseEffect = -1
-             }
+             }}
         };
 
         /// <summary>
         /// Static list that holds a reference to each instance/type of AtmosphericGas.
         /// </summary>
-        public static BindingList<AtmosphericGas> AtmosphericGases
+        public static WeightedList<AtmosphericGas> AtmosphericGases
         {
             get { return _atmosphericGases; }
         }
