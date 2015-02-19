@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using Pulsar4X.Entities;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Lib
 {
@@ -175,7 +176,8 @@ namespace Pulsar4X.Lib
             m_orbitalPeriod = TimeSpan.FromSeconds(2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3) / (GravitationalParameter)));
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3)) * 180 / Math.PI;
+            m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3)); // Calculated in radians.
+            m_meanMotion = Angle.ToDegrees(m_meanMotion); // Stored in degrees.
         }
 
         /// <summary>
@@ -218,9 +220,9 @@ namespace Pulsar4X.Lib
 
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
             // Convert MeanAnomaly to radians.
-            double currentMeanAnomaly = MeanAnomaly * Math.PI / 180; 
+            double currentMeanAnomaly = Angle.ToRadians(MeanAnomaly); 
             // Add nT
-			currentMeanAnomaly += ((MeanMotion * Math.PI / 180) * timeSinceEpoch.TotalSeconds);
+			currentMeanAnomaly += Angle.ToRadians(MeanMotion) * timeSinceEpoch.TotalSeconds;
 
 			double EccentricAnomaly = GetEccentricAnomaly(currentMeanAnomaly);
 			double TrueAnomaly = GetTrueAnomaly(Eccentricity, EccentricAnomaly);
@@ -244,7 +246,7 @@ namespace Pulsar4X.Lib
             double radius = GetRadius(TrueAnomaly);
 
             // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
-            TrueAnomaly += ArgumentOfPeriapsis * Math.PI / 180;
+            TrueAnomaly += Angle.ToRadians(ArgumentOfPeriapsis);
 
             // Convert KM to AU
             radius /= Constants.Units.KM_PER_AU;

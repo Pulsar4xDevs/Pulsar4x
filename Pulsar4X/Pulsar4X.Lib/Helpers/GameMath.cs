@@ -5,12 +5,24 @@ using System.Text;
 
 namespace Pulsar4X.Helpers.GameMath
 {
+    public static class Angle
+    {
+        public static double ToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180;
+        }
+
+        public static double ToDegrees(double radians)
+        {
+            return radians * 180 / Math.PI;
+        }
+    }
+
     public class WeightedValue<T>
     {
         public double Weight { get; set; }
         public T Value { get; set; }
     }
-
 
     /// <summary>
     /// Weighted list used for selecting values with a random number generator.
