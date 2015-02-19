@@ -179,6 +179,8 @@ namespace Pulsar4X
         /// </summary>
         public const double MaxPlanetInclination = 45; // degrees. used for orbits and axial tilt.
 
+        public const double MaxMoonMassRelativeToParentBody = 04;
+
         /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
         /// @note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.

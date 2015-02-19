@@ -574,42 +574,41 @@ namespace Pulsar4X
         private static Planet GenerateSystemBody(Star star, string name, Planet.PlanetType planetType, Planet parent = null, Orbit referenceOrbit = null)
         {
             // Create the Planet:
-            Planet planet = new Planet(star);
+            Planet planet = null;
+            if (IsMoon(planetType))
+                planet = new Planet(parent);
+            else
+                planet = new Planet(star);
+
             planet.Type = Planet.PlanetType.Terrestrial;
             planet.Name = name;
 
             // Creat some of the basic stats:
-            double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]);
+            double mass = GenerateSystemBodyMass(planet, parent); // RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]);
             planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]);
-            double radius = Math.Pow((3 * mass) / (4 * Math.PI * planet.Density), (1 / 3));
-            radius = radius / 1000 / Constants.Units.KM_PER_AU;     // convert from meters to AU, also keep the temp var as it is easer to read then planet.Radius.
+            double radius = Math.Pow((3 * mass) / (4 * Math.PI * (planet.Density / 1000 )), 0.33333333);  // planet.Density / 1000 changes it mfrom g/cm2 to Kg/cm2, needed because mass in is KG. oh and 0.3333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.33333333
+            radius = radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU, also keep the temp var as it is easer to read then planet.Radius.
             planet.Radius = radius;
             planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
-            // Create the orbital values:
-            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]);
-            double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
-            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
-            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
-            double meanAnomaly = m_RNG.NextDouble() * 360;
-            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
-
-            // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
-            planet.Orbit = Orbit.FromAsteroidFormat(mass, star.Orbit.Mass, smeiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+           // Generate orbit:
+            if (IsMoon(planetType) == false || parent == null)
+                GenerateSystemBodyOrbit(star, planet, mass);        // not a moon
+            else
+                GenerateSystemBodyOrbit(parent, planet, mass);
             
             // generate the planets day length:
             ///< @todo Move some of these length of day magic numbers into GalaxyGen
             ///< @todo Should we do Tidle Locked bodies??? iirc bodies trend toward being tidaly locked over time...
             planet.LengthOfDay = new TimeSpan(m_RNG.Next(0, planet.Orbit.OrbitalPeriod.Days), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
             if (planet.LengthOfDay < TimeSpan.FromHours(6))
-                planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It' pull itself apart!!
+                planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
 
             // to calculate base temp see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
             // Note that base temp does not take into account albedo or atmosphere.
             double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
-            double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * smeiMajorAxis));
+            double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * planet.Orbit.SemiMajorAxis));
             planetTemp += Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
             planet.BaseTemperature = (float)planetTemp;
 
@@ -646,16 +645,84 @@ namespace Pulsar4X
             planet.HomeworldMineralGeneration();
 
             // generate moons if required for this body type:
-            if (planet.Type == Planet.PlanetType.Terrestrial
-                || planet.Type == Planet.PlanetType.GasDwarf
-                || planet.Type == Planet.PlanetType.GasGiant
-                || planet.Type == Planet.PlanetType.IceGiant)
+            if (IsPlanet(planetType))
                 GenerateMoons(star, planet);
 
             // force the planet to have the correct position for it and any of its moons:
             planet.UpdatePosition(0);  ///< @todo wrap this in an if so it cannot be called in moons??
 
             return planet;
+        }
+
+        /// <summary>
+        /// Generates the Mass for the system body by selecting it randomly 
+        /// from the range specified in GalaxyGen.PlanetMassByType.
+        /// Some extra logic is run for moon to prevent them being larger then the planet they orbit.
+        /// the maximum mass of a moon relative to the parent body is controlled by GalaxyGen.MaxMoonMassRelativeToParentBody.
+        /// </summary>
+        /// <param name="body"></param>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        private static double GenerateSystemBodyMass(Planet body, Planet parent)
+        {
+            if (IsMoon(body.Type))
+            {
+                // quick safty check:
+                if (parent == null)
+                    throw new System.ArgumentException("Parent cannot be null when generating the mass of a moon.");
+
+                // these bodies have special mass limits over and above whats in PlanetMassByType.
+                double min, max;
+                min = GalaxyGen.PlanetMassByType[body.Type]._min;
+                max = GalaxyGen.PlanetMassByType[body.Type]._min;
+
+                if (max > parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody)
+                    max = parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody;
+                if (min > max)
+                    min = max;      // just to make sure we get sane values.
+
+                return RNG_NextDoubleRange(min, max);
+            }
+
+            return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[body.Type]);
+        }
+
+        private static void GenerateSystemBodyOrbit(Star parent, Planet child, double childMass)
+        {
+            // Create the orbital values:
+            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
+            double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
+            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
+            double meanAnomaly = m_RNG.NextDouble() * 360;
+            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
+
+            // now Create the orbit:
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination, 
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+        }
+
+        private static void GenerateSystemBodyOrbit(Planet parent, Planet child, double childMass)
+        {
+            // Create smeiMajorAxis:
+            // this need to have sane min/max values given the radius of the two bodies:
+            double min, max;
+            min = (parent.Radius + child.Radius) * 3; ///< @todo move this magic number into GalaxyGen.
+            max = (parent.Radius + child.Radius) * 10000; ///< @todo move this magic number into GalaxyGen, also make it better??.
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);
+
+            // Create the other orbital values:
+            double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
+            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
+            double meanAnomaly = m_RNG.NextDouble() * 360;
+            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
+
+            // now Create the orbit:
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
         }
 
         /// <summary>
@@ -1024,6 +1091,38 @@ namespace Pulsar4X
         #endregion
 
         #region Util Functions
+
+        private static bool IsMoon(Planet.PlanetType pt)
+        {
+            if (pt == Planet.PlanetType.Moon
+                || pt == Planet.PlanetType.IceMoon)
+                return true;
+
+            return false;
+        }
+
+        private static bool IsPlanet(Planet.PlanetType pt)
+        {
+            if (pt == Planet.PlanetType.Terrestrial
+                || pt == Planet.PlanetType.GasDwarf
+                || pt == Planet.PlanetType.GasGiant
+                || pt == Planet.PlanetType.IceGiant)
+                return true;
+
+            return false;
+        }
+
+        private static bool IsPlanetOrDwarfPlanet(Planet.PlanetType pt)
+        {
+            if (pt == Planet.PlanetType.Terrestrial
+                || pt == Planet.PlanetType.GasDwarf
+                || pt == Planet.PlanetType.GasGiant
+                || pt == Planet.PlanetType.IceGiant
+                || pt == Planet.PlanetType.DwarfPlanet)
+                return true;
+
+            return false;
+        }
 
         /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range.
