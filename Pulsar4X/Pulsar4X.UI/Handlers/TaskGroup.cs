@@ -509,6 +509,7 @@ namespace Pulsar4X.UI.Handlers
             if (SelectedOrderIndex != -1 && SelectedOrderIndex < CurrentTaskGroup.TaskGroupOrders.Count)
                 SelectedOrderIndex += 1;
             BuildPlottedMoveList();
+            BuildSystemLocationList();
             CalculateTimeDistance();
         }
 
@@ -741,13 +742,46 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+
+        /// <summary>
+        /// finds target system for updating systemlocationlist
+        /// </summary>
+        /// <returns></returns>
+        private StarSystem GetTargetSystem()
+        {
+            StarSystem targetsys = CurrentTaskGroup.Position.System;
+            BindingList<Order> borders = CurrentTaskGroup.TaskGroupOrders;
+            
+            List<Order> orders = CurrentTaskGroup.TaskGroupOrders.ToList();
+            Constants.ShipTN.OrderType stdtrans = Constants.ShipTN.OrderType.StandardTransit;
+            Constants.ShipTN.OrderType sqdtrans = Constants.ShipTN.OrderType.SquadronTransit;
+            Constants.ShipTN.OrderType tndtrans = Constants.ShipTN.OrderType.TransitAndDivide;
+
+            if (orders.Any(o => o.typeOf == stdtrans) || orders.Any(o => o.typeOf == sqdtrans) || orders.Any(o => o.typeOf == tndtrans))
+            {
+                int index;
+                if (SelectedOrderIndex == -1)
+                    index = orders.Count -1;
+                else
+                    index = SelectedOrderIndex;
+                while (index >= 0)
+                {
+                    if (orders[index].typeOf == stdtrans || orders[index].typeOf == sqdtrans || orders[index].typeOf == tndtrans)
+                        if (orders[index].jumpPoint.Connect != null)
+                            targetsys = orders[index].jumpPoint.Connect.Position.System;
+                    index--;
+                }
+            }
+            return targetsys;
+        }
+
         /// <summary>
         /// Build the Total System Location List here.
         /// </summary>
         private void BuildSystemLocationList()
         {
             //m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
-            StarSystem targetsystem = CurrentTaskGroup.Contact.Position.System;
+            StarSystem targetsystem = GetTargetSystem();
 
             SystemLocationDict.Clear();
             SystemLocationGuidDict.Clear();
@@ -877,9 +911,9 @@ namespace Pulsar4X.UI.Handlers
             int prevIndex = SelectedOrderIndex;
             SelectedOrderIndex = -1;
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
-            for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
+            foreach(Order order in CurrentTaskGroup.TaskGroupOrders)// (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
             {
-                m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(CurrentTaskGroup.TaskGroupOrders[loop].Name);
+                m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(order.Name);
             }
 
             if (prevIndex < CurrentTaskGroup.TaskGroupOrders.Count)
@@ -1217,13 +1251,10 @@ namespace Pulsar4X.UI.Handlers
                 m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
                 m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
 
-                RefreshShipCells();
-
-                BuildSystemLocationList();
+                RefreshShipCells();               
                 ClearActionList();
-
                 BuildPlottedMoveList();
-
+                BuildSystemLocationList();
                 CalculateTimeDistance();
             }
         }
