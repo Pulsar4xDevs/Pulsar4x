@@ -741,12 +741,7 @@ namespace Pulsar4X
 
                         // next get a random number/ammount of trace gases:
                         noOfTraceGases = m_RNG.Next(1, 4);
-                        for (int i = 0; i < noOfTraceGases; ++i)
-                        {
-                            currATM = (float)RNG_NextDoubleRange(0, 0.005);
-                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.Select(m_RNG.NextDouble()), currATM);   // up to max half a percent.  
-                            totalATM += currATM;
-                        }
+                        totalATM += AddTraceGases(atmo, noOfTraceGases);
 
                         // now make the remaining amount Hydrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
@@ -816,13 +811,8 @@ namespace Pulsar4X
 
                         // next get a random number/ammount of trace gases:
                         noOfTraceGases = m_RNG.Next(1, 4);
-                        for (int i = 0; i < noOfTraceGases; ++i)
-                        {
-                            currATM = (float)RNG_NextDoubleRange(0, 0.005);
-                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.Select(m_RNG.NextDouble()), currATM * planetsATM);   // up to max half a percent.  
-                            totalATM += currATM;
-                        }
-
+                        totalATM += AddTraceGases(atmo, noOfTraceGases, planetsATM);
+                        
                         // now make the remaining amount Nitrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
                         atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(6), currATM * planetsATM);
@@ -841,6 +831,23 @@ namespace Pulsar4X
             atmo.UpdateState();
 
             return atmo;
+        }
+
+
+        private static float AddTraceGases(Atmosphere atmo, int number, float scaler = 1)
+        {
+            float totalATMAdded = 0;
+            for (int i = 0; i < number; ++i)
+            {
+                float currATM = (float)RNG_NextDoubleRange(0, 0.005);
+                var gas = AtmosphericGas.AtmosphericGases.Select(m_RNG.NextDouble());
+                if (atmo.Composition.ContainsKey(gas))
+                    continue;           // just skip it.
+                atmo.Composition.Add(gas, currATM * scaler);   // up to max half a percent.  
+                totalATMAdded += currATM;
+            }
+
+            return totalATMAdded;
         }
 
         /// <summary>
