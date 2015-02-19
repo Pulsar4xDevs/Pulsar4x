@@ -24,6 +24,9 @@ Instructions:
 
 3. Open the solution file "Pulsar4X\Pulsar4X.sln".
 
-4. Build the "Pulsar4X.UI" project. This will automatically build the Pulsar Library (containing the game logic) as well as the UI. You can find the compile program in "Pulsar4X\Pulsar4X.UI\bin\Debug" or "Pulsar4X\Pulsar4X.UI\bin\Release", depending on the build configuration.
+4. Build the "Pulsar4X.UI" project. This will automatically build the Pulsar Library (containing the game logic) as well as the UI. You can find the compile program in "Pulsar4X\Pulsar4X.UI\bin\Debug" or "Pulsar4X\Pulsar4X.UI\bin\Release", depending on the build configuration.  
+
+5. If Visual Studio shows "Attach" instead of "Start" for the debugging button, right click the Pulsar4x.UI project in the Solution Explorer and select "Set as StartUp Project" click saveall.  
+
 
 
