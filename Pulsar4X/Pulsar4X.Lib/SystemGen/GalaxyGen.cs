@@ -139,11 +139,6 @@ namespace Pulsar4X
         public const int MaxNoOfPlanets = 25;
 
         /// <summary>
-        /// The maximum number of moons a planet can have. The bigger the planets the more moons it can have.
-        /// </summary>
-        public const int MaxNoOfMoons = 20;
-
-        /// <summary>
         /// The maximum number of asteriods a system can have. Period.
         /// </summary>
         public const int MaxNoOfAsteroids = 300;
@@ -302,7 +297,7 @@ namespace Pulsar4X
             };
 
         /// <summary>
-        /// This valueis multiplied by (Planet Mass / Max Mass for Planet Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
+        /// This value is multiplied by (Planet Mass / Max Mass for Planet Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
         /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
         /// </summary>
         public static Dictionary<Planet.PlanetType, double> AtmosphereGenerationModifier = new Dictionary<Planet.PlanetType, double>()
@@ -317,6 +312,34 @@ namespace Pulsar4X
                 { Planet.PlanetType.Asteriod, 0 },
                 { Planet.PlanetType.Comet, 0 },
             };
+
+        /// <summary>
+        /// This value is used to determin if a planet gets moons. if a random number between 0 and 1 is less then this number then the planet geets moons.
+        /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
+        /// </summary>
+        public static Dictionary<Planet.PlanetType, double> MoonGenerationChanceByPlanetType = new Dictionary<Planet.PlanetType, double>()
+            {
+                { Planet.PlanetType.GasGiant, 0.99999999 },
+                { Planet.PlanetType.IceGiant, 0.99999999 },
+                { Planet.PlanetType.GasDwarf, 0.99 },
+                { Planet.PlanetType.Terrestrial, 0.5 },
+                { Planet.PlanetType.DwarfPlanet, 0.0001 },
+            };
+
+
+        /// <summary>
+        /// The maximum number of moons a planet of a given type can have. 
+        /// The bigger the planets the more moons it can have and the closer it will get to having the maximum number.
+        /// @note Given the way the calculation for max moons is done it is unlikly that any planet will ever have the maximum number of moon, so pad as desired.
+        /// </summary>
+        public static Dictionary<Planet.PlanetType, double> MaxNoOfMoonsByPlanetType = new Dictionary<Planet.PlanetType, double>()
+        {
+                { Planet.PlanetType.GasGiant, 20 },
+                { Planet.PlanetType.IceGiant, 20 },
+                { Planet.PlanetType.GasDwarf, 10 },
+                { Planet.PlanetType.Terrestrial, 5 },
+                { Planet.PlanetType.DwarfPlanet, 1 },
+        };
 
         #endregion
     }

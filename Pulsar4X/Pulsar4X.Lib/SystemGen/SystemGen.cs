@@ -483,61 +483,14 @@ namespace Pulsar4X
                 pt = Planet.PlanetType.Terrestrial;
 
             // now that we know the planet type we can generate the correct type:
-            Planet newPlanet = null;
-            switch (pt)
-            {
-                case Planet.PlanetType.GasGiant:
-                    newPlanet = GenerateGasGiant(star, planetGenerationChance);
-                    break;
-
-                case Planet.PlanetType.IceGiant:
-                    newPlanet = GenerateIceGiant(star, planetGenerationChance);
-                    break;
-
-                case Planet.PlanetType.GasDwarf:
-                    newPlanet = GenerateGasDwarf(star, planetGenerationChance);
-                    break;
-
-                case Planet.PlanetType.Terrestrial:
-                default:
-                    newPlanet = GenerateTerrestrial(star, planetGenerationChance);
-                    break;
-            }
-
-            newPlanet.Name = star.Name + " - " + number.ToString();
+            string planetName = star.Name + " - " + number.ToString();
+            Planet newPlanet = GenerateSystemBody(star, planetName, pt);
 
             star.Planets.Add(newPlanet);
         }
 
-       /// <summary>
-       /// Do we Need this???
-       /// </summary>
-        private static Planet GenerateGasGiant(Star star, double planetGenerationChance)
-        {
-
-            return new Planet(star);
-        }
-
         /// <summary>
-        /// Do we Need this???
-        /// </summary>
-        private static Planet GenerateIceGiant(Star star, double planetGenerationChance)
-        {
-
-            return new Planet(star);
-        }
-
-        /// <summary>
-        /// Do we Need this???
-        /// </summary>
-        private static Planet GenerateGasDwarf(Star star, double planetGenerationChance)
-        {
-
-            return new Planet(star);
-        }
-
-        /// <summary>
-        /// Generates a Terrestrial Planet.
+        /// Generates a solar system body based on type.
         /// @todo I think we can make this a general function to generate any type of system body that is not a star!!
         /// </summary>
         /// <remarks>
@@ -613,25 +566,17 @@ namespace Pulsar4X
         /// <b>Minerials:</b> Currently an ugly hace of using homworld minerials. Note that minerial generation 
         /// functions should be part of the Planet class as the player will likly want to re-generate them.
         /// </item>
-        /// </tem>
+        /// <item>
         /// <b>Moons:</b> Might be dove via some indirect recursive calling of a generilised version of this function.
         /// </item>
         /// </list>
         /// </remarks>
-        private static Planet GenerateTerrestrial(Star star, double planetGenerationChance)
+        private static Planet GenerateSystemBody(Star star, string name, Planet.PlanetType planetType, Planet parent = null, Orbit referenceOrbit = null)
         {
-            // still need to move the following into remarks above:
-            // Atmosphere (i'm thinking Atmosphere should be its own thing like Orbit is.)
-            //  -- presure
-            //  -- Hydrosphere
-            //      -- Hydrosphere extent
-            //  -- Greenhouse Factor
-            //  -- Albedo (affected by Hydrosphere how exactly?)
-            //  -- surface Temp. (based on base temp + greehhouse factor + Albedo).
-
             // Create the Planet:
             Planet planet = new Planet(star);
             planet.Type = Planet.PlanetType.Terrestrial;
+            planet.Name = name;
 
             // Creat some of the basic stats:
             double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]);
@@ -700,8 +645,12 @@ namespace Pulsar4X
             ///< @todo Generate Minerials Properly instead of this ugly hack:
             planet.HomeworldMineralGeneration();
 
-            // generate moons:
-            GenerateMoons(planet);
+            // generate moons if required for this body type:
+            if (planet.Type == Planet.PlanetType.Terrestrial
+                || planet.Type == Planet.PlanetType.GasDwarf
+                || planet.Type == Planet.PlanetType.GasGiant
+                || planet.Type == Planet.PlanetType.IceGiant)
+                GenerateMoons(star, planet);
 
             // force the planet to have the correct position for it and any of its moons:
             planet.UpdatePosition(0);  ///< @todo wrap this in an if so it cannot be called in moons??
@@ -711,6 +660,14 @@ namespace Pulsar4X
 
         /// <summary>
         /// Generates an atmosphere for the provided planet based on its type.
+        /// Atmosphere needs to gen:
+        /// -- Albedo (affected by Hydrosphere how exactly?)  
+        /// -- presure
+        /// -- Hydrosphere
+        /// -- Hydrosphere extent
+        /// And the following are worked out by the Atmosphere:
+        /// -- Greenhouse Factor
+        /// -- surface Temp. (based on base temp, greehhouse factor and Albedo).
         /// </summary>
         private static Atmosphere GenerateAtmosphere(Planet planet)
         {
@@ -870,11 +827,44 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// @todo I'm thinking the GenerateTerrestrial() function could be generlised. If so then this would just loop for a suitable count and call it to generate the moons.
+        /// Calls GenerateSystemBody to generate the required moons.
         /// </summary>
-        private static void GenerateMoons(Planet planet)
+        private static void GenerateMoons(Star star, Planet parent)
         {
-            ///< @todo moon Generation.
+            // first lets see if this planet gets moons:
+            if (m_RNG.NextDouble() > GalaxyGen.MoonGenerationChanceByPlanetType[parent.Type])
+                return; // no moons for you :(
+            
+            // Okay lets work out the number of moons based on:
+            // The mass of the parent in proportion to the maximum mass for a planet of that type.
+            // The MaxNoOfMoonsByPlanetType
+            // And a random number for randomness.
+            double massRatioOfParent = parent.Orbit.Mass / GalaxyGen.PlanetMassByType[parent.Type]._max;
+            double moonGenChance = massRatioOfParent * m_RNG.NextDouble() * GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type];
+            moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type]);
+            int noOfMoons = (int)Math.Round(moonGenChance);
+
+            ///< @todo Get had coded numbers out of here... again...
+            // now we need to work out the moon type
+            // we will do this by looking at the base temp of the parent.
+            // if the base temp of the planet / 200K is  > 1 then it will always be terrestrial.
+            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / 200;
+            Planet.PlanetType pt = Planet.PlanetType.Moon;
+
+            // esle if a random number is > tempRatio it will be an ice moon:
+            for (int i = 0; i < noOfMoons; ++i)
+            {
+                if (tempRatio < 1)
+                {
+                    // get random type:
+                    if (m_RNG.NextDouble() > tempRatio)
+                        pt = Planet.PlanetType.IceMoon;
+                }
+                
+                string name = parent.Name + " - Moon " + i.ToString();
+                Planet newMoon = GenerateSystemBody(star, name, pt, parent);
+                parent.Moons.Add(newMoon);
+            }
         }
 
         #endregion
@@ -1073,29 +1063,3 @@ namespace Pulsar4X
         #endregion
     }
 }
-
-
-/*
-            switch (star.SpectralType)
-            {
-                case SpectralType.O:
-                    break;
-
-                case SpectralType.B:
-                    break;
-
-                case SpectralType.A:
-                    break;
-
-                case SpectralType.F:
-                    break;
-
-                case SpectralType.G:
-                    break;
-
-                case SpectralType.K:
-                    break;
-
-                default: // SpectralType.M
-                    break;
-            } */
