@@ -67,6 +67,18 @@ namespace Pulsar4X.Entities
             } 
         }
 
+        public bool CanModify
+        {
+            get
+            {
+                if (ParentBody.Type == Planet.PlanetType.Terrestrial
+                    || ParentBody.Type == Planet.PlanetType.Moon)
+                    return true;  // only these bodies have atmospheres that can be terraformed.
+
+                return false;
+            }
+        }
+
         private Planet _parentBody;
 
         /// <summary>
@@ -86,16 +98,50 @@ namespace Pulsar4X.Entities
         {
             if (Exists)
             {
+                if (ParentBody.Type == Planet.PlanetType.GasDwarf 
+                    || ParentBody.Type == Planet.PlanetType.GasGiant
+                    || ParentBody.Type == Planet.PlanetType.IceGiant)
+                {
+                    Pressure = 1;       // because thats the deffenition of the surface of these planets, when 
+                    // atmosphereic pressure = the pressure of earths atmosphere at its surface (what we call 1 atm).
+                }
+
                 ///< @todo Update Atmospheric pressure
                 ///< @todo Calc Hydrosphere changes & update albedo accordingly.
                 ///< @todo Calc greehouse effect based on atmosphere and apply it + albedo to surface temp. 
             }
             else
             {
-                // simpye apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+                // simply apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                 Pressure = 0;
                 SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
             }
+        }
+
+        /// <summary>
+        /// Use this when adding gass for terrforming.
+        /// @note System gen does not use this function, instead it adds gasses directly to the Composition.
+        /// </summary>
+        /// <param name="gas">The gass to add.</param>
+        /// <param name="ammount">The ammount of gass to add in atm. Provide a negative number to remove gas.</param>
+        public void AddGas(AtmosphericGas gas, float ammount)
+        {
+            if (CanModify == false)
+                return; // we dont care!!
+
+            if (_composition.ContainsKey(gas))
+            {
+                _composition[gas] += ammount;
+
+                if (_composition[gas] <= 0)
+                    _composition.Remove(gas);  // if there is none left, remove it.
+            }
+            else if (ammount > 0)               // only add new gas if it is actuall adding (i.e. ammount is positive).
+            {
+                _composition.Add(gas, ammount);
+            }
+
+            UpdateState();                  // update other state to reflect the new gas ammount.
         }
     }
 }

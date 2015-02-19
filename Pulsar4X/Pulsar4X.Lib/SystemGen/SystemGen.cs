@@ -716,11 +716,125 @@ namespace Pulsar4X
             // calc albedo:
             atmo.Albedo = (float)RNG_NextDoubleRange(GalaxyGen.PlanetAlbedoByType[planet.Type]._min, GalaxyGen.PlanetAlbedoByType[planet.Type]._max);
 
+            // some safe defaults:
+            atmo.HydrosphereExtent = 0;
+            atmo.Hydrosphere = false;
+
             double atmoChance = Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
             if (m_RNG.NextDouble() > atmoChance)
             {
+                // we uses these to keep a running tally of how much gass we have generated.
+                float totalATM = 0;
+                float currATM = 0;
+                int noOfTraceGases = 0;
+
                 // Generate an Atmosphere
-                ///< @todo Gen Atmosphere
+                ///< @todo Remove some of this hard coding:
+                switch (planet.Type)
+                {
+                    case Planet.PlanetType.GasDwarf:
+                    case Planet.PlanetType.GasGiant:
+                        // Start with the ammount of heilum:
+                        currATM = (float)RNG_NextDoubleRange(0.05, 0.3);
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
+                        totalATM += currATM;
+
+                        // next get a random number/ammount of trace gases:
+                        noOfTraceGases = m_RNG.Next(1, 4);
+                        for (int i = 0; i < noOfTraceGases; ++i)
+                        {
+                            currATM = (float)RNG_NextDoubleRange(0, 0.005);
+                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.Select(m_RNG.NextDouble()), currATM);   // up to max half a percent.  
+                            totalATM += currATM;
+                        }
+
+                        // now make the remaining amount Hydrogen:
+                        currATM = 1 - totalATM; // get the remaining ATM.
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                        break;
+
+                    case Planet.PlanetType.IceGiant:
+                        // Start with the ammount of heilum:
+                        currATM = (float)RNG_NextDoubleRange(0.1, 0.25);
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
+                        totalATM += currATM;
+
+                        // next add a small amount of Methane:
+                        currATM = (float)RNG_NextDoubleRange(0.01, 0.03);
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM); 
+                        totalATM += currATM;
+
+                        // Next some water and ammonia:
+                        currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(3), currATM); 
+                        totalATM += currATM;
+                        currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(4), currATM); 
+                        totalATM += currATM;
+
+                         // now make the remaining amount Hydrogen:
+                        currATM = 1 - totalATM; // get the remaining ATM.
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                        break;
+
+                    case Planet.PlanetType.Moon:
+                    case Planet.PlanetType.Terrestrial:
+                        // Terrestrial Planets can have very large ammount of ATM.
+                        // so we will generate a number to act as the total:
+                        float planetsATM = (float)RNG_NextDoubleRange(0.1, 100); 
+                        // reduce my mass ratio relative to earth (so really small bodies cannot have massive atmos:
+                        double massRatio = planet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
+                        planetsATM = (float)Clamp((double)planetsATM * massRatio, 0.01, 200);
+
+                        // Start with the ammount of Oxygen or Carbin Di-oxide or methane:
+                        int atmoTypeChance = m_RNG.Next(0, 2);
+                        if (atmoTypeChance == 0)            // methane
+                        {
+                            currATM = (float)RNG_NextDoubleRange(0.05, 0.40);
+                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM * planetsATM);
+                            totalATM += currATM;
+                        }
+                        else if (atmoTypeChance == 1)   // Carbon Di-Oxide
+                        {
+                            currATM = (float)RNG_NextDoubleRange(0.05, 0.90);
+                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM * planetsATM);
+                            totalATM += currATM;
+                        }
+                        else                        // oxygen
+                        {
+                            currATM = (float)RNG_NextDoubleRange(0.05, 0.40);
+                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(9), currATM * planetsATM);
+                            totalATM += currATM;
+
+                            // Gen Hydrosphere for these planets:
+                            if (m_RNG.Next(0, 1) == 0)
+                            {
+                                atmo.Hydrosphere = true;
+                                atmo.HydrosphereExtent = (short)Math.Round(m_RNG.NextDouble() * 100);
+                            }
+                        }
+
+                        // next get a random number/ammount of trace gases:
+                        noOfTraceGases = m_RNG.Next(1, 4);
+                        for (int i = 0; i < noOfTraceGases; ++i)
+                        {
+                            currATM = (float)RNG_NextDoubleRange(0, 0.005);
+                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.Select(m_RNG.NextDouble()), currATM * planetsATM);   // up to max half a percent.  
+                            totalATM += currATM;
+                        }
+
+                        // now make the remaining amount Nitrogen:
+                        currATM = 1 - totalATM; // get the remaining ATM.
+                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(6), currATM * planetsATM);
+                        break;
+
+                    case Planet.PlanetType.IceMoon:
+                    case Planet.PlanetType.DwarfPlanet:
+                    case Planet.PlanetType.Asteriod:
+                    case Planet.PlanetType.Comet:
+                    default:
+                        break; // none
+                }
             }
 
             // now calc data resulting from above:

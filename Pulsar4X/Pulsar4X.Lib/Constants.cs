@@ -60,6 +60,17 @@ namespace Pulsar4X
             public const double KM_PER_AU = CM_PER_AU / CM_PER_KM; //149597870.7
 
             /// <summary>
+            /// Note that this is = to 1 ATM.
+            /// </summary>
+            public const double EARTH_ATMOSPHERE_IN_KPA = 101.325;
+
+            /// <summary>
+            ///  The total mass of the earths atmosphere in Kgs.
+            /// </summary>
+            public const double EARTH_ATMOSPHERE_TOTAL_MASS = 5.3E18;
+
+
+            /// <summary>
             /// Add to Kelvin to get degrees c.
             /// </summary>
             public const double DEGREES_C_TO_KELVIN = 273.15;

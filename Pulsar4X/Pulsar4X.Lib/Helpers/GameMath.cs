@@ -125,5 +125,13 @@ namespace Pulsar4X.Helpers.GameMath
             }
             throw new InvalidOperationException("Failed to choose a random value.");
         }
+
+        /// <summary>
+        /// Selects the value at the specified index.
+        /// </summary>
+        public T SelectAt(int index)
+        {
+            return m_valueList[index].Value;
+        }
     }
 }
