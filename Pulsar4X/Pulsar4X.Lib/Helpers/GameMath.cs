@@ -134,4 +134,31 @@ namespace Pulsar4X.Helpers.GameMath
             return m_valueList[index].Value;
         }
     }
+
+    /// <summary>
+    /// Just a container for some general math functions.
+    /// </summary>
+    public class GMath
+    {
+        /// <summary>
+        /// Clamps a value between the provided man and max.
+        /// </summary>
+        public static double Clamp(double value, double min, double max)
+        {
+            if (value > max)
+                return max;
+            else if (value < min)
+                return min;
+
+            return value;
+        }
+
+        /// <summary>
+        /// Clamps a number between 0 and 1.
+        /// </summary>
+        public static double Clamp01(double value)
+        {
+            return Clamp(value, 0, 1);
+        }
+    }
 }

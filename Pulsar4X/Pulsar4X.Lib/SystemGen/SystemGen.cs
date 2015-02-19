@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X
 {
@@ -322,10 +323,10 @@ namespace Pulsar4X
 
             StarData data = new StarData();
             data._SpectralType = spectralType;
-            data._Radius = RNG_NextDoubleRange(GalaxyGen.StarRadiusBySpectralType[spectralType]._min, GalaxyGen.StarRadiusBySpectralType[spectralType]._max);
+            data._Radius = RNG_NextDoubleRange(GalaxyGen.StarRadiusBySpectralType[spectralType]);
             data._Temp = (uint)m_RNG.Next((int)GalaxyGen.StarTemperatureBySpectralType[spectralType]._min, (int)GalaxyGen.StarTemperatureBySpectralType[spectralType]._max);
-            data._Luminosity = (float)RNG_NextDoubleRange(GalaxyGen.StarLuminosityBySpectralType[spectralType]._min, GalaxyGen.StarLuminosityBySpectralType[spectralType]._max);
-            data._Mass = RNG_NextDoubleRange(GalaxyGen.StarMassBySpectralType[spectralType]._min, GalaxyGen.StarMassBySpectralType[spectralType]._max);
+            data._Luminosity = (float)RNG_NextDoubleRange(GalaxyGen.StarLuminosityBySpectralType[spectralType]);
+            data._Mass = RNG_NextDoubleRange(GalaxyGen.StarMassBySpectralType[spectralType]);
             data._Age = (1 - data._Mass / GalaxyGen.StarMassBySpectralType[spectralType]._max) * maxStarAge; // note the fiddle math at the start here is to make more massive stars younger.
 
             // create star and populate data:
@@ -431,18 +432,18 @@ namespace Pulsar4X
             if (m_RNG.NextDouble() > GalaxyGen.PlanetGenerationChance)
                 return;  // nope, this star has no planets.
 
-            double starMassRatio = Clamp01(star.Orbit.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));   // heavy star = more material.
+            double starMassRatio = GMath.Clamp01(star.Orbit.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));   // heavy star = more material.
             double starSpecralTypeRatio =  GalaxyGen.StarSpecralTypePlanetGenerationRatio[star.SpectralType];    // tweakble
 
             double starLuminosityRatio = 1;
             if (star.Luminosity > GalaxyGen.StarLuminosityBySpectralType[SpectralType.F]._max)
-                starLuminosityRatio = 1 - Clamp01(star.Luminosity / GalaxyGen.StarLuminosityBySpectralType[SpectralType.O]._max);   // really bright stars blow away material.
+                starLuminosityRatio = 1 - GMath.Clamp01(star.Luminosity / GalaxyGen.StarLuminosityBySpectralType[SpectralType.O]._max);   // really bright stars blow away material.
             else
-                starLuminosityRatio = Clamp01(star.Luminosity / GalaxyGen.StarLuminosityBySpectralType[SpectralType.F]._max);       // realy dim stars don't.
+                starLuminosityRatio = GMath.Clamp01(star.Luminosity / GalaxyGen.StarLuminosityBySpectralType[SpectralType.F]._max);       // realy dim stars don't.
 
             // final 'chance' for number of planets generated. take into consideration star mass, solar wind (via luminosity)
             // and balance decisions for star class.
-            double finalGenerationChance = Clamp01(starMassRatio * starLuminosityRatio * starSpecralTypeRatio);
+            double finalGenerationChance = GMath.Clamp01(starMassRatio * starLuminosityRatio * starSpecralTypeRatio);
 
             // using the planet generation chance we will calculate the number of additional 
             // planets over and above the minium of 1. 
@@ -633,8 +634,8 @@ namespace Pulsar4X
             planet.Type = Planet.PlanetType.Terrestrial;
 
             // Creat some of the basic stats:
-            double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]._min, GalaxyGen.PlanetMassByType[planet.Type]._max);
-            planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]._min, GalaxyGen.PlanetDensityByType[planet.Type]._max); ;
+            double mass = RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]);
+            planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]);
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * planet.Density), (1 / 3));
             radius = radius / 1000 / Constants.Units.KM_PER_AU;     // convert from meters to AU, also keep the temp var as it is easer to read then planet.Radius.
             planet.Radius = radius;
@@ -642,7 +643,7 @@ namespace Pulsar4X
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
             // Create the orbital values:
-            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min, GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max);
+            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]);
             double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
             double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
@@ -673,8 +674,8 @@ namespace Pulsar4X
                 // this planet has some plate techtonics:
                 // this should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
                 ///< @todo make techtonics generation tweakable.
-                double techtonicsChance = mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age;  
-                techtonicsChance = Clamp01(techtonicsChance);
+                double techtonicsChance = mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age;
+                techtonicsChance = GMath.Clamp01(techtonicsChance);
 
                 if (techtonicsChance < 0.01)
                     planet.Techtonics = Planet.TechtonicActivity.Dead;
@@ -687,8 +688,7 @@ namespace Pulsar4X
             }
 
             // Generate Magnetic field:
-            planet.MagneticFeild = (float)(RNG_NextDoubleRange(GalaxyGen.PlanetMagneticFieldByType[planet.Type]._min,
-                                                    GalaxyGen.PlanetMagneticFieldByType[planet.Type]._min));
+            planet.MagneticFeild = (float)RNG_NextDoubleRange(GalaxyGen.PlanetMagneticFieldByType[planet.Type]);
             if (planet.Techtonics == Planet.TechtonicActivity.Dead)
                 planet.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
             
@@ -697,7 +697,7 @@ namespace Pulsar4X
 
             ///< @todo Generate Ruins
             
-            ///< @todo Generate Minerials Properly instead of this ugle hack:
+            ///< @todo Generate Minerials Properly instead of this ugly hack:
             planet.HomeworldMineralGeneration();
 
             // generate moons:
@@ -717,13 +717,13 @@ namespace Pulsar4X
             Atmosphere atmo = new Atmosphere(planet);
 
             // calc albedo:
-            atmo.Albedo = (float)RNG_NextDoubleRange(GalaxyGen.PlanetAlbedoByType[planet.Type]._min, GalaxyGen.PlanetAlbedoByType[planet.Type]._max);
+            atmo.Albedo = (float)RNG_NextDoubleRange(GalaxyGen.PlanetAlbedoByType[planet.Type]);
 
             // some safe defaults:
             atmo.HydrosphereExtent = 0;
             atmo.Hydrosphere = false;
 
-            double atmoChance = Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
+            double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
             if (m_RNG.NextDouble() > atmoChance)
             {
                 // we uses these to keep a running tally of how much gass we have generated.
@@ -782,7 +782,7 @@ namespace Pulsar4X
                         float planetsATM = (float)RNG_NextDoubleRange(0.1, 100); 
                         // reduce my mass ratio relative to earth (so really small bodies cannot have massive atmos:
                         double massRatio = planet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
-                        planetsATM = (float)Clamp((double)planetsATM * massRatio, 0.01, 200);
+                        planetsATM = (float)GMath.Clamp((double)planetsATM * massRatio, 0.01, 200);
 
                         // Start with the ammount of Oxygen or Carbin Di-oxide or methane:
                         int atmoTypeChance = m_RNG.Next(0, 2);
@@ -1044,6 +1044,14 @@ namespace Pulsar4X
         }
 
         /// <summary>
+        /// Version of RNG_NextDoubleRange(double min, double max) that takes GalaxyGen.MinMaxStruct directly.
+        /// </summary>
+        public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax)
+        {
+            return RNG_NextDoubleRange(minMax._min, minMax._max);
+        }
+
+        /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range times by a constant value (e.g. a unit of some sort).
         /// </summary>
         /// <param name="constant"> A constant which will be multiplied agains min and max, use for units etc.</param>
@@ -1053,31 +1061,15 @@ namespace Pulsar4X
             min *= constant;
             return min + m_RNG.NextDouble() * ((max * constant) - min);
         }
-        
 
         /// <summary>
-        /// Clamps a value between the provided man and max.
+        /// Version of RNG_NextDoubleRange(double min, double max, double constant) that takes GalaxyGen.MinMaxStruct directly.
         /// </summary>
-        public static double Clamp(double value, double min, double max)
+        public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax, double constant)
         {
-            if (value > max)
-                return max;
-            else if (value < min)
-                return min;
-
-            return value;
-        }
-
-
-        /// <summary>
-        /// Clamps a number between 0 and 1.
-        /// </summary>
-        public static double Clamp01(double value)
-        {
-            return Clamp(value, 0, 1);
+            return RNG_NextDoubleRange(minMax._min, minMax._max, constant);
         }
         
-
         #endregion
     }
 }
