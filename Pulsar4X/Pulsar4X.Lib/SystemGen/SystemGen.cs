@@ -691,7 +691,7 @@ namespace Pulsar4X
         {
             // Create the orbital values:
             double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
-            double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
+            double eccentricity =  Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
             double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
             double meanAnomaly = m_RNG.NextDouble() * 360;
@@ -713,7 +713,7 @@ namespace Pulsar4X
             double smeiMajorAxis = RNG_NextDoubleRange(min, max);
 
             // Create the other orbital values:
-            double eccentricity = m_RNG.NextDouble() * 0.8; // get random eccentricity needs better distrubution.
+            double eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 2); // get random eccentricity needs better distrubution.
             double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
             double meanAnomaly = m_RNG.NextDouble() * 360;
