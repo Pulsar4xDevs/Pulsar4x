@@ -709,6 +709,9 @@ namespace Pulsar4X
             return planet;
         }
 
+        /// <summary>
+        /// Generates an atmosphere for the provided planet based on its type.
+        /// </summary>
         private static Atmosphere GenerateAtmosphere(Planet planet)
         {
             Atmosphere atmo = new Atmosphere(planet);
@@ -833,7 +836,9 @@ namespace Pulsar4X
             return atmo;
         }
 
-
+        /// <summary>
+        /// Just adds the specified ammount of gas to the specified atmosphere safely.
+        /// </summary>
         private static void AddGasToAtmoSafely(Atmosphere atmo, AtmosphericGas gas, float ammount)
         {
             if (atmo.Composition.ContainsKey(gas))
@@ -842,6 +847,12 @@ namespace Pulsar4X
                 atmo.Composition.Add(gas, ammount);
         }
 
+        /// <summary>
+        /// A small helper function for GenerateAtmosphere. It generates up to the specified number of
+        /// "trace" gases and adds them to the atmosphere.
+        /// </summary>
+        /// <param name="scaler">The ammount of gass added is multiplyed by this before being added to the Atmosphere.</param>
+        /// <returns>The ammount of gas added in ATMs (pre scaler)</returns>
         private static float AddTraceGases(Atmosphere atmo, int number, float scaler = 1)
         {
             float totalATMAdded = 0;
