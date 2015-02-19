@@ -9,6 +9,8 @@ namespace Pulsar4X.Entities
     /// <summary>
     /// The Atmosphere of a Planet or Moon.
     /// @todo Make this a generic component.
+    /// @todo Add a ToString overload which will retunr a string like this: 
+    /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
     /// </summary>
     public class Atmosphere
     {
