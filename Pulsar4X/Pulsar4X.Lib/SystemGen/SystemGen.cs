@@ -745,7 +745,7 @@ namespace Pulsar4X
 
                         // now make the remaining amount Hydrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                        AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
                         break;
 
                     case Planet.PlanetType.IceGiant:
@@ -815,7 +815,7 @@ namespace Pulsar4X
                         
                         // now make the remaining amount Nitrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(6), currATM * planetsATM);
+                        AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(6), currATM * planetsATM);
                         break;
 
                     case Planet.PlanetType.IceMoon:
@@ -833,6 +833,14 @@ namespace Pulsar4X
             return atmo;
         }
 
+
+        private static void AddGasToAtmoSafely(Atmosphere atmo, AtmosphericGas gas, float ammount)
+        {
+            if (atmo.Composition.ContainsKey(gas))
+                atmo.Composition[gas] += ammount;
+            else
+                atmo.Composition.Add(gas, ammount);
+        }
 
         private static float AddTraceGases(Atmosphere atmo, int number, float scaler = 1)
         {
