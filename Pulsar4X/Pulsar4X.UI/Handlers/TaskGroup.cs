@@ -747,20 +747,21 @@ namespace Pulsar4X.UI.Handlers
         private void BuildSystemLocationList()
         {
             //m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
+            StarSystem targetsystem = CurrentTaskGroup.Contact.Position.System;
 
             SystemLocationDict.Clear();
             SystemLocationGuidDict.Clear();
-            AddJumpPointsToList();
-            AddPlanetsToList();
+            AddJumpPointsToList(targetsystem);
+            AddPlanetsToList(targetsystem);
 
             if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
-                AddContactsToList();
+                AddContactsToList(targetsystem);
 
             if (m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.Checked == true)
-                AddTaskGroupsToList();
+                AddTaskGroupsToList(targetsystem);
 
             if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
-                AddWaypointsToList();
+                AddWaypointsToList(targetsystem);
 
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
@@ -893,16 +894,15 @@ namespace Pulsar4X.UI.Handlers
         /// Add every planet in the system that this TG is in to the list.
         /// Eventually jump orders will modify this. to be the system at the end of the order stack.
         /// </summary>
-        private void AddPlanetsToList()
+        private void AddPlanetsToList(StarSystem starsystem)
         {
-
-            for (int loop = 0; loop < CurrentTaskGroup.Contact.Position.System.Stars.Count; loop++)
+            foreach (Star star in starsystem.Stars)
             {
-                for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets.Count; loop2++)
+                foreach (Planet planet in star.Planets)
                 {
                     //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
-                    string keyName = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
-                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
+                    string keyName = planet.Name;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
+                    StarSystemEntity entObj = planet;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
                     SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
                     SystemListObject valueObj = new SystemListObject(entType, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
@@ -911,9 +911,9 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        private void AddJumpPointsToList()
+        private void AddJumpPointsToList(StarSystem starsystem)
         {
-            foreach (JumpPoint jp in CurrentTaskGroup.Contact.Position.System.JumpPoints)
+            foreach (JumpPoint jp in starsystem.JumpPoints)
             {
                 StarSystemEntity entObj = jp;
                 SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
@@ -926,10 +926,10 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Adds any detected ships to the system location box.
         /// </summary>
-        private void AddContactsToList()
+        private void AddContactsToList(StarSystem starsystem)
         {
 
-            if (CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.Position.System) == true)
+            if (CurrentFaction.DetectedContactLists.ContainsKey(starsystem) == true)
             {
                 foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.Position.System].DetectedContacts)
                 {
@@ -965,14 +965,13 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Adds friendly taskgroups to the system location box
         /// </summary>
-        private void AddTaskGroupsToList()
-        {
-
-            for (int loop = 0; loop < CurrentTaskGroup.Contact.Position.System.SystemContactList.Count; loop++)
+        private void AddTaskGroupsToList(StarSystem starsystem)
+        {           
+            foreach(SystemContact contact in starsystem.SystemContactList)
             {
-                if (CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
+                if (contact.SSEntity == StarSystemEntityType.TaskGroup)
                 {
-                    TaskGroupTN TaskGroup = CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].Entity as TaskGroupTN;
+                    TaskGroupTN TaskGroup = contact.Entity as TaskGroupTN;
                     if (CurrentTaskGroup != TaskGroup && TaskGroup.TaskGroupFaction == CurrentFaction)
                     {
                         //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup);
@@ -989,16 +988,14 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Adds user generated waypoints to the location list.
         /// </summary>
-        private void AddWaypointsToList()
+        private void AddWaypointsToList(StarSystem starsystem)
         {
-
-            for (int loop = 0; loop < CurrentTaskGroup.Contact.Position.System.Waypoints.Count; loop++)
+            foreach (Waypoint waypoint in starsystem.Waypoints)
             {
-                if (CurrentTaskGroup.Contact.Position.System.Waypoints[loop].FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
-                {    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Waypoints[loop]);
-                    string keyName = CurrentTaskGroup.Contact.Position.System.Waypoints[loop].Name;
-                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Waypoints[loop];
-
+                if (waypoint.FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
+                {   
+                    string keyName = waypoint.Name;
+                    StarSystemEntity entObj = waypoint;
                     SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Waypoints, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
                     SystemLocationDict.Add(entObj.Id, valueObj);
