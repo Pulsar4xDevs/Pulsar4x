@@ -18,6 +18,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// The Parent Orbiting Body, for Planets and stars this is the same as Primary, for moons it will be a planet.
         /// </summary>
+        [System.ComponentModel.Browsable(false)]
         public OrbitingEntity Parent { get; set; }
 
         /// <summary>

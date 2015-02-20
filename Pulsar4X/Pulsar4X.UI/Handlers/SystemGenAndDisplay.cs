@@ -61,17 +61,17 @@ namespace Pulsar4X.UI.Handlers
             m_oDataPanel.StarDataGrid.SelectionChanged += new EventHandler(StarsDataGrid_SelectionChanged);
 
             // Setup the Planet Data Grid
-            //m_oDataPanel.PlanetsDataGrid.AutoGenerateColumns = false;
-            m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
+            m_oDataPanel.PlanetsDataGrid.AutoGenerateColumns = false;
+            //m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
 
             m_oDataPanel.PlanetsDataGrid.RowHeadersVisible = false;
             m_oDataPanel.PlanetsDataGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             m_oDataPanel.PlanetsDataGrid.Bind(c => c.AllowUserToAddRows, VM, d => d.isSM);
             m_oDataPanel.PlanetsDataGrid.Bind(c => c.AllowUserToDeleteRows, VM, d => d.isSM);
             m_oDataPanel.PlanetsDataGrid.Bind(c => c.ReadOnly, VM, d => d.isNotSM);
-            //AddColumnsToPlanetDataGrid();
+            AddColumnsToPlanetDataGrid();
 
-            //m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
+            m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
             m_oDataPanel.PlanetsDataGrid.SelectionChanged += new EventHandler(PlanetsDataGrid_SelectionChanged);
 
             // Setup Event handlers for Controls panel buttons:
