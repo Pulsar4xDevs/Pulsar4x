@@ -236,7 +236,7 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "ViewMass";
+                col.DataPropertyName = "Orbit_Mass";
                 col.HeaderText = "Mass";
                 col.DefaultCellStyle.Format = "N4";
                 m_oDataPanel.StarDataGrid.Columns.Add(col);
@@ -264,7 +264,7 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "ViewSemiMajorAxis";
+                col.DataPropertyName = "Orbit_SemiMajorAxis";
                 col.HeaderText = "Orbital Radius (AU)";
                 col.DefaultCellStyle.Format = "N4";
                 m_oDataPanel.StarDataGrid.Columns.Add(col);
@@ -297,7 +297,7 @@ namespace Pulsar4X.UI.Handlers
             //}
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "SurfaceGravityTest";
+                col.DataPropertyName = "SurfaceGravity";
                 col.HeaderText = "Surface Gravity";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;

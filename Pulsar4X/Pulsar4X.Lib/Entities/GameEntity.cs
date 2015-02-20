@@ -11,7 +11,6 @@ namespace Pulsar4X.Entities
     /// </summary>
     public class GameEntity : INotifyPropertyChanged
     {
-        [System.ComponentModel.Browsable(false)]
         public Guid Id { get; set; }
 
         private string _name;

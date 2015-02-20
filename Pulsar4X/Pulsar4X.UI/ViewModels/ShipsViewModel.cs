@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
-using Pulsar4X.Lib;
 using Pulsar4X.UI.Helpers;
 using System.ComponentModel;
 using System.Collections.ObjectModel;

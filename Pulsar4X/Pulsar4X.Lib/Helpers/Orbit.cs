@@ -5,8 +5,10 @@ using System.Text;
 using Newtonsoft.Json;
 using Pulsar4X.Entities;
 using Pulsar4X.Helpers.GameMath;
+using Pulsar4X.Helpers;
+using System.ComponentModel;
 
-namespace Pulsar4X.Lib
+namespace Pulsar4X.Entities
 {
     /// <summary>
     /// Calculates and handles orbits for bodies.
@@ -17,7 +19,6 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public double Mass { get { return m_mass; } }
         private double m_mass;
 
@@ -31,7 +32,6 @@ namespace Pulsar4X.Lib
         /// Semimajor Axis of orbit stored in AU.
         /// Average distance of orbit from center.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
 		public double SemiMajorAxis { get; set; } 
 
         /// <summary>
@@ -78,7 +78,6 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Orbital Period of orbit.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public TimeSpan OrbitalPeriod { get { return m_orbitalPeriod; } }
         private TimeSpan m_orbitalPeriod;
 
@@ -325,5 +324,50 @@ namespace Pulsar4X.Lib
 			return E[i - 1];
 		}
     }
-}
 
+    #region Data Binding
+
+    /// <summary>
+    /// Used for databinding, see here: http://blogs.msdn.com/b/msdnts/archive/2007/01/19/how-to-bind-a-datagridview-column-to-a-second-level-property-of-a-data-source.aspx
+    /// </summary>
+    public class OrbitTypeDescriptor : CustomTypeDescriptor
+    {
+        public OrbitTypeDescriptor(ICustomTypeDescriptor parent)
+            : base(parent)
+        { }
+
+        public override PropertyDescriptorCollection GetProperties()
+        {
+            PropertyDescriptorCollection cols = base.GetProperties();
+            PropertyDescriptor addressPD = cols["Orbit"];
+            PropertyDescriptorCollection Orbit_child = addressPD.GetChildProperties();
+            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 3];
+
+            cols.CopyTo(array, 0);
+            array[cols.Count] = new SubPropertyDescriptor(addressPD, Orbit_child["Mass"], "Orbit_Mass");
+            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Orbit_child["SemiMajorAxis"], "Orbit_SemiMajorAxis");
+            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Orbit_child["OrbitalPeriod"], "Orbit_OrbitalPeriod");
+
+            PropertyDescriptorCollection newcols = new PropertyDescriptorCollection(array);
+            return newcols;
+        }
+
+        public override PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+        {
+            PropertyDescriptorCollection cols = base.GetProperties(attributes);
+            PropertyDescriptor addressPD = cols["Orbit"];
+            PropertyDescriptorCollection Orbit_child = addressPD.GetChildProperties();
+            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 3];
+
+            cols.CopyTo(array, 0);
+            array[cols.Count] = new SubPropertyDescriptor(addressPD, Orbit_child["Mass"], "Orbit_Mass");
+            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Orbit_child["SemiMajorAxis"], "Orbit_SemiMajorAxis");
+            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Orbit_child["OrbitalPeriod"], "Orbit_OrbitalPeriod");
+
+            PropertyDescriptorCollection newcols = new PropertyDescriptorCollection(array);
+            return newcols;
+        }
+    }
+
+    #endregion
+}

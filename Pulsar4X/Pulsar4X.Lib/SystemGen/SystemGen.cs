@@ -1,11 +1,9 @@
 ﻿using Pulsar4X.Entities;
-using Pulsar4X.Lib;
 using Pulsar4X.Helpers.GameMath;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X
 {
@@ -582,7 +580,7 @@ namespace Pulsar4X
             else
                 planet = new Planet(star);
 
-            planet.Type = Planet.PlanetType.Terrestrial;
+            planet.Type = planetType;
             planet.Name = name;
 
             // Creat some of the basic stats:

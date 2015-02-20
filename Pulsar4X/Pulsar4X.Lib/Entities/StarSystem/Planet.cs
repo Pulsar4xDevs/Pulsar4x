@@ -12,7 +12,7 @@ using log4net;
 
 namespace Pulsar4X.Entities
 {
-    //[TypeDescriptionProvider(typeof(OrbitingEntityTypeDescriptionProvider))]
+    [TypeDescriptionProvider(typeof(PlanetTypeDescriptionProvider))]
     public class Planet : OrbitingEntity
     {
 #if LOG4NET_ENABLED
@@ -42,7 +42,6 @@ namespace Pulsar4X.Entities
             NA
         }
 
-        [System.ComponentModel.Browsable(true)]
         public PlanetType Type { get; set; }
 
         /// <summary>
@@ -55,55 +54,42 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// @todo How is ColonyCost calculated in Aurora??
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public float ColonyCost { get; set; }
 
         /// <summary>
         /// The Atmosphere of the planet.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public Atmosphere Atmosphere { get; set; }
 
         /// <summary>
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public float SurfaceGravity { get; set; }
-
-        public string SurfaceGravityTest
-        {
-            get { return SurfaceGravity.ToString(); }
-        }
 
         /// <summary>
         /// The density of the body in g/cm^3
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public double Density { get; set; }
 
-        [System.ComponentModel.Browsable(true)]
         public TimeSpan LengthOfDay { get; set; }
 
         /// <summary>
         /// The Axial Tilt of this body.
         /// Measured in degrees.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public float AxialTilt { get; set; }
 
         /// <summary>
         /// Plate techtonics. Ammount of activity depends on age vs mass.
         /// Influences magnitic feild.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public TechtonicActivity Techtonics { get; set; }
 
         /// <summary>
         /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
         /// In Microtesla (uT)
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public float MagneticFeild { get; set; }        
 
         /// <summary>
@@ -111,16 +97,13 @@ namespace Pulsar4X.Entities
         /// This is mostly a factor of how much light reaches the planet nad is calculated at generation time.
         /// In Degrees C.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public float BaseTemperature { get; set; }
 
         // the following will be used for ground combat effects:
         /// <summary>
         /// < @todo Decide if we want RadiationLevel and AtmosphericDust game play features.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public float RadiationLevel { get; set; }
-        [System.ComponentModel.Browsable(true)]
         public float AtmosphericDust { get; set; }
 
         public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
@@ -134,7 +117,6 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Entry for whether or not this planet has ruins on it.
         /// </summary>
-        [System.ComponentModel.Browsable(true)]
         public Ruins PlanetaryRuins { get; set; }
 
         ///< @todo Add Research Anomalies.
@@ -265,4 +247,35 @@ namespace Pulsar4X.Entities
             }
         }
     }
+
+    #region Data Binding
+
+    /// <summary>
+    /// Used for databinding, see here: http://blogs.msdn.com/b/msdnts/archive/2007/01/19/how-to-bind-a-datagridview-column-to-a-second-level-property-of-a-data-source.aspx
+    /// </summary>
+    public class PlanetTypeDescriptionProvider : TypeDescriptionProvider
+    {
+        private ICustomTypeDescriptor td;
+
+        public PlanetTypeDescriptionProvider()
+            : this(TypeDescriptor.GetProvider(typeof(Planet)))
+        { }
+
+        public PlanetTypeDescriptionProvider(TypeDescriptionProvider parent)
+            : base(parent)
+        { }
+
+        public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+        {
+            if (td == null)
+            {
+                td = base.GetTypeDescriptor(objectType, instance);
+                td = new OrbitTypeDescriptor(td);
+            }
+
+            return td;
+        }
+    }
+
+    #endregion
 }

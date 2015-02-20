@@ -22,19 +22,16 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// System currently in.
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         public StarSystem System { get; set; }
 
         /// <summary>
         /// System X coordinante in AU
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         public double X { get; set; }
 
         /// <summary>
         /// System Y coordinante in AU
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         public double Y { get; set; }
 
         /// <summary>
@@ -102,13 +99,11 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Current System and Position of the entity.
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         public SystemPosition Position;
 
         /// <summary>
         /// Type of entity that is represented here.
         /// </summary>
-        [System.ComponentModel.Browsable(false)]
         public StarSystemEntityType SSEntity { get; set; }
 
         public StarSystemEntity()

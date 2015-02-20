@@ -34,7 +34,7 @@ namespace Pulsar4X.Entities
         D,
     }
 
-    //[TypeDescriptionProvider(typeof(OrbitingEntityTypeDescriptionProvider))]
+    [TypeDescriptionProvider(typeof(StarTypeDescriptionProvider))]
     public class Star : OrbitingEntity
     {
         public BindingList<Planet> Planets { get; set; }
@@ -121,15 +121,36 @@ namespace Pulsar4X.Entities
             maxRadius = Math.Pow(Constants.Science.TEMP_WATER_FREEZE / TempAt1AU, -2);
             return Math.Pow(288F / TempAt1AU, -2);
         }
+    }
 
+    #region Data Binding
 
-        // the following are for the purpose of data binding:
-        public string ViewMass
-        { get { return Orbit.Mass.ToString(); } }
+    /// <summary>
+    /// Used for databinding, see here: http://blogs.msdn.com/b/msdnts/archive/2007/01/19/how-to-bind-a-datagridview-column-to-a-second-level-property-of-a-data-source.aspx
+    /// </summary>
+    public class StarTypeDescriptionProvider : TypeDescriptionProvider
+    {
+        private ICustomTypeDescriptor td;
 
-        public string ViewSemiMajorAxis
+        public StarTypeDescriptionProvider()
+            : this(TypeDescriptor.GetProvider(typeof(Star)))
+        { }
+
+        public StarTypeDescriptionProvider(TypeDescriptionProvider parent)
+            : base(parent)
+        { }
+
+        public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
         {
-            get { return Orbit.SemiMajorAxis.ToString(); }
+            if (td == null)
+            {
+                td = base.GetTypeDescriptor(objectType, instance);
+                td = new OrbitTypeDescriptor(td);
+            }
+
+            return td;
         }
     }
+
+    #endregion
 }
