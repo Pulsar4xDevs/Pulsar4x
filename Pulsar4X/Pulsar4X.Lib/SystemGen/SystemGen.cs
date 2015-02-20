@@ -691,6 +691,9 @@ namespace Pulsar4X
             return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[body.Type]);
         }
 
+        /// <summary>
+        /// Generates an orbit around a parent Star. 
+        /// </summary>
         private static void GenerateSystemBodyOrbit(Star parent, Planet child, double childMass)
         {
             // Create the orbital values:
@@ -713,6 +716,9 @@ namespace Pulsar4X
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
         }
 
+        /// <summary>
+        /// Generates an orbit around a parent System body. 
+        /// </summary>
         private static void GenerateSystemBodyOrbit(Planet parent, Planet child, double childMass)
         {
             // Create smeiMajorAxis:
@@ -735,6 +741,9 @@ namespace Pulsar4X
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
         }
 
+        /// <summary>
+        /// Generates an orbit for an Asteroid or Dwarf Planet. The orbit will be a slight deviation of the reference orbit provided.
+        /// </summary>
         private static void GenerateAsteroidBeltBodyOrbit(Star parent, Planet child, double childMass, Orbit referenceOrbit)
         {
             // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
@@ -988,6 +997,9 @@ namespace Pulsar4X
 
         #region Asteriod Generation Functions
 
+        /// <summary>
+        /// Generates a random number of asteroid belts around a star. This will include a number of Dwarf Planets.
+        /// </summary>
         private static void GenerateAsteroidBelts(Star star)
         {
             // First we will work how many asteriods belts this star has, from 0 - MaxNoOfAsteroidBelts.
@@ -1037,6 +1049,9 @@ namespace Pulsar4X
             }
         }
 
+        /// <summary>
+        /// Generates a non-functions reference orbit to be used for generating orbits for specific asteroids and dwarf planets.
+        /// </summary>
         private static Orbit GenerateAsteroidBeltReferenceOrbit(Star parent)
         {
             // create stationary orbit to hold data:
@@ -1057,6 +1072,9 @@ namespace Pulsar4X
 
         #region Comet Generation Functions
 
+        /// <summary>
+        /// Generates a random number of comets for a given star. The number of gererated will 
+        /// be at least GalaxyGen.MiniumCometsPerSystem and never more then GalaxyGen.MaxNoOfComets.
         private static void GenerateComets(Star star)
         {
             // first lets get a random number between our minium nad maximum number of comets:
