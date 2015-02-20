@@ -47,6 +47,8 @@ namespace Pulsar4X
                 Star newStar = GenerateStar(newSystem);
 
                 GeneratePlanetsForStar(newStar);
+                GenerateAsteroidBelts(newStar);
+                GenerateComets(newStar);
             }
 
             GenerateJumpPoints(newSystem, numJumpPoints);
@@ -593,11 +595,13 @@ namespace Pulsar4X
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
            // Generate orbit:
-            if (IsMoon(planetType) == false || parent == null)
-                GenerateSystemBodyOrbit(star, planet, mass);        // not a moon
+            if (IsMoon(planetType) && parent != null)
+                GenerateSystemBodyOrbit(parent, planet, mass);                          // must be a moon, treat it like one.
+            else if (referenceOrbit != null)                    
+                GenerateAsteroidBeltBodyOrbit(star, planet, mass, referenceOrbit);      // we have a reference orbit, use it.
             else
-                GenerateSystemBodyOrbit(parent, planet, mass);
-            
+                GenerateSystemBodyOrbit(star, planet, mass);                            // not a moon or asteriod/dwarf planet, just get an orbit around the star.
+                
             // generate the planets day length:
             ///< @todo Move some of these length of day magic numbers into GalaxyGen
             ///< @todo Should we do Tidle Locked bodies??? iirc bodies trend toward being tidaly locked over time...
@@ -691,7 +695,13 @@ namespace Pulsar4X
         {
             // Create the orbital values:
             double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
-            double eccentricity =  Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
+
+            double eccentricity = 0;
+            if (child.Type == Planet.PlanetType.Comet)
+                eccentricity = RNG_NextDoubleRange(0.6, 0.8);       ///< @todo more magic numbers.
+            else
+                eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
+
             double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
             double meanAnomaly = m_RNG.NextDouble() * 360;
@@ -719,6 +729,46 @@ namespace Pulsar4X
             double meanAnomaly = m_RNG.NextDouble() * 360;
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
 
+            // now Create the orbit:
+            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+        }
+
+        private static void GenerateAsteroidBeltBodyOrbit(Star parent, Planet child, double childMass, Orbit referenceOrbit)
+        {
+            // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
+
+            // Create smeiMajorAxis:
+            double min, max, deviation;
+            deviation = referenceOrbit.SemiMajorAxis * GalaxyGen.MaxAsteriodOrbitDeviation;
+            min = referenceOrbit.SemiMajorAxis - deviation;
+            max = referenceOrbit.SemiMajorAxis + deviation;
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);
+
+            deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyGen.MaxAsteriodOrbitDeviation, 2);
+            min = referenceOrbit.Eccentricity - deviation;
+            max = referenceOrbit.Eccentricity + deviation;
+            double eccentricity = RNG_NextDoubleRange(min, max); // get random eccentricity needs better distrubution.
+
+            deviation = referenceOrbit.Inclination * GalaxyGen.MaxAsteriodOrbitDeviation;
+            min = referenceOrbit.Inclination - deviation;
+            max = referenceOrbit.Inclination + deviation;
+            double inclination = RNG_NextDoubleRange(min, max); // doesn't do much at the moment but may as well be there. Neet better Dist.
+
+            deviation = referenceOrbit.ArgumentOfPeriapsis * GalaxyGen.MaxAsteriodOrbitDeviation;
+            min = referenceOrbit.ArgumentOfPeriapsis - deviation;
+            max = referenceOrbit.ArgumentOfPeriapsis + deviation;
+            double argumentOfPeriapsis = RNG_NextDoubleRange(min, max);
+
+            deviation = referenceOrbit.LongitudeOfAscendingNode * GalaxyGen.MaxAsteriodOrbitDeviation;
+            min = referenceOrbit.LongitudeOfAscendingNode - deviation;
+            max = referenceOrbit.LongitudeOfAscendingNode + deviation;
+            double longitudeOfAscendingNode = RNG_NextDoubleRange(min, max);
+
+            // Keep the starting point of the orbit completly random.
+            double meanAnomaly = m_RNG.NextDouble() * 360;      
+            
             // now Create the orbit:
             DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
@@ -938,13 +988,95 @@ namespace Pulsar4X
 
         #region Asteriod Generation Functions
 
-        ///< @todo Generate Asteriods.
+        private static void GenerateAsteroidBelts(Star star)
+        {
+            // First we will work how many asteriods belts this star has, from 0 - MaxNoOfAsteroidBelts.
+            int noOfBelts = m_RNG.Next(0, GalaxyGen.MaxNoOfAsteroidBelts + 1);
+
+            // now loop and create them:
+            int totalAsteroidsGenerated = 0;
+            for (int i = 0; i < noOfBelts; ++i)
+            {
+                // lets calculate how many asteriods in this belt:
+                int noOfAsteroids = (int)Math.Round(m_RNG.NextDouble() * GalaxyGen.MaxNoOfAsteroidsPerBelt);
+                totalAsteroidsGenerated += noOfAsteroids; // keep track of the total number.
+
+                // check to make sure we have not exceeded the maximum total number:
+                if (totalAsteroidsGenerated > GalaxyGen.MaxNoOfAsteroids)
+                {
+                    noOfAsteroids -= totalAsteroidsGenerated - GalaxyGen.MaxNoOfAsteroids; // keep us within the maximum.
+                    totalAsteroidsGenerated = GalaxyGen.MaxNoOfAsteroids;
+                }
+
+                // now lets create our reference orbit (i.e. the average orbit of the blet).
+                // note that we will just be using to hold data, it will not be a functioning orbit.
+                Orbit referenceOrbit = GenerateAsteroidBeltReferenceOrbit(star);
+
+                // Generate the asteriods:
+                for (int j = 0; j < noOfAsteroids; ++j)
+                {
+                    // generate name:
+                    string asteroidName = star.Name + " - Asteriod " + i.ToString() + "-" + j.ToString();
+                   
+                    // Generate the asteriod:
+                    Planet newAsteroid = GenerateSystemBody(star, asteroidName, Planet.PlanetType.Asteriod, null, referenceOrbit);
+                    star.Planets.Add(newAsteroid);
+                }
+
+                // now lets work out how many dwarf planets there should be:
+                int noOfDwarfPlanets = noOfAsteroids / GalaxyGen.NumberOfAsteroidsPerDwarfPlanet;
+                for (int j = 0; j < noOfDwarfPlanets; ++j)
+                {
+                    // generate name:
+                    string dwarfName = star.Name + " - Dwarf Planet" + i.ToString() + "-" + j.ToString();
+
+                    // Generate the asteriod:
+                    Planet newDwarf = GenerateSystemBody(star, dwarfName, Planet.PlanetType.DwarfPlanet, null, referenceOrbit);
+                    star.Planets.Add(newDwarf);
+                }
+            }
+        }
+
+        private static Orbit GenerateAsteroidBeltReferenceOrbit(Star parent)
+        {
+            // create stationary orbit to hold data:
+            Orbit referenceOrbit = Orbit.FromStationary(1);
+
+            // create values:
+            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
+            referenceOrbit.Eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
+            referenceOrbit.Inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            referenceOrbit.ArgumentOfPeriapsis = m_RNG.NextDouble() * 360;
+            referenceOrbit.MeanAnomaly = m_RNG.NextDouble() * 360;
+            referenceOrbit.LongitudeOfAscendingNode = m_RNG.NextDouble() * 360;
+
+            return referenceOrbit;
+        }
 
         #endregion
 
         #region Comet Generation Functions
 
-        ///< @todo Generate Comets.
+        private static void GenerateComets(Star star)
+        {
+            // first lets get a random number between our minium nad maximum number of comets:
+            int min = GalaxyGen.MiniumCometsPerSystem;
+            if (min > GalaxyGen.MaxNoOfComets)
+                min = GalaxyGen.MaxNoOfComets;
+
+            int noOfComets = m_RNG.Next(min, GalaxyGen.MaxNoOfComets + 1);
+            
+            // now lets create the comets:
+            for (int i = 0; i < noOfComets; ++i)
+            {
+                // generate name:
+                string cometName = star.Name + " - Comet" + i.ToString();
+
+                // Generate the Comet:
+                Planet newComet = GenerateSystemBody(star, cometName, Planet.PlanetType.Comet);
+                star.Planets.Add(newComet);
+            }
+        }
 
         #endregion
 
@@ -1157,6 +1289,18 @@ namespace Pulsar4X
         public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax, double constant)
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max, constant);
+        }
+
+        /// <summary>
+        /// Randomly reverses the current sign of the value, i.e. it will randomly make the number positive or negative.
+        /// </summary>
+        public static double RandomizeSign(double value)
+        {
+            // 50/50 odds of reversing the sign:
+            if (m_RNG.NextDouble() > 0.5)
+                return value * -1;
+
+            return value;
         }
         
         #endregion
