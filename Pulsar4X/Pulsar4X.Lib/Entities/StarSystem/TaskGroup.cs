@@ -10,6 +10,7 @@ using Pulsar4X;
 #if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+using Pulsar4X.Helpers.GameMath;
 #endif
 
 /// <summary>
@@ -1268,7 +1269,7 @@ namespace Pulsar4X.Entities
                         break;
                 }
 
-                CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
+                CurrentHeading = Angle.ToDegrees(Math.Atan(dY / dX));
             }
             else
                 CurrentHeading = 0.0;
