@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Pulsar4X
 {
@@ -976,6 +978,7 @@ namespace Pulsar4X
             Planet.PlanetType pt = Planet.PlanetType.Moon;
 
             // esle if a random number is > tempRatio it will be an ice moon:
+            List<Planet> sorted = new List<Planet>();
             for (int i = 0; i < noOfMoons; ++i)
             {
                 if (tempRatio < 1)
@@ -987,8 +990,17 @@ namespace Pulsar4X
                 
                 string name = parent.Name + " - Moon " + i.ToString();
                 Planet newMoon = GenerateSystemBody(star, name, pt, parent);
-                parent.Moons.Add(newMoon);
+                sorted.Add(newMoon); // we will sort this when we are done!
             }
+
+            // sort moons in decending order by semiMajorAxis:
+            //BindingList<Planet> sorted = parent.Moons;
+            sorted.Sort(delegate(Planet a, Planet b)
+                {
+                    return a.Orbit.SemiMajorAxis.CompareTo(b.Orbit.SemiMajorAxis);
+                });
+
+            parent.Moons = new BindingList<Planet>(sorted);  // now add the sorted list!!
         }
 
         #endregion
