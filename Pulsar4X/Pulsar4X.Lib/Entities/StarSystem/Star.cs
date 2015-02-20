@@ -7,7 +7,6 @@ using System.ComponentModel;
 using Newtonsoft.Json;
 using System.Drawing;
 
-
 namespace Pulsar4X.Entities
 {
     public enum SpectralType
@@ -35,6 +34,7 @@ namespace Pulsar4X.Entities
         D,
     }
 
+    //[TypeDescriptionProvider(typeof(OrbitingEntityTypeDescriptionProvider))]
     public class Star : OrbitingEntity
     {
         public BindingList<Planet> Planets { get; set; }
@@ -120,6 +120,16 @@ namespace Pulsar4X.Entities
             minRadius = Math.Pow(Constants.Science.TEMP_WATER_BOIL / TempAt1AU, -2);
             maxRadius = Math.Pow(Constants.Science.TEMP_WATER_FREEZE / TempAt1AU, -2);
             return Math.Pow(288F / TempAt1AU, -2);
+        }
+
+
+        // the following are for the purpose of data binding:
+        public string ViewMass
+        { get { return Orbit.Mass.ToString(); } }
+
+        public string ViewSemiMajorAxis
+        {
+            get { return Orbit.SemiMajorAxis.ToString(); }
         }
     }
 }

@@ -17,6 +17,7 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
+        [System.ComponentModel.Browsable(true)]
         public double Mass { get { return m_mass; } }
         private double m_mass;
 
@@ -30,6 +31,7 @@ namespace Pulsar4X.Lib
         /// Semimajor Axis of orbit stored in AU.
         /// Average distance of orbit from center.
         /// </summary>
+        [System.ComponentModel.Browsable(true)]
 		public double SemiMajorAxis { get; set; } 
 
         /// <summary>
@@ -76,6 +78,7 @@ namespace Pulsar4X.Lib
         /// <summary>
         /// Orbital Period of orbit.
         /// </summary>
+        [System.ComponentModel.Browsable(true)]
         public TimeSpan OrbitalPeriod { get { return m_orbitalPeriod; } }
         private TimeSpan m_orbitalPeriod;
 
