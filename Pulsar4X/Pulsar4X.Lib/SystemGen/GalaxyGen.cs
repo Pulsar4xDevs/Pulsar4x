@@ -146,12 +146,12 @@ namespace Pulsar4X
         /// <summary>
         /// Asteriods are generate in belts, this controls the max number per belt. It cannot be larger than MaxNoOfAsteroids.
         /// </summary>
-        public const int MaxNoOfAsteriodsPerBelt = 200;
+        public const int MaxNoOfAsteroidsPerBelt = 200;
 
         /// <summary>
         /// Asteriods are generated in belts. this controls the maximum number of belts.
         /// </summary>
-        public const int MaxNoOfAsteriodBelts = 3;
+        public const int MaxNoOfAsteroidBelts = 3;
 
         /// <summary>
         /// Used to compute the number of dwarf planets in a given steriod belt.
