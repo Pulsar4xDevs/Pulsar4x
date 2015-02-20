@@ -822,8 +822,9 @@ namespace Pulsar4X.UI.Handlers
                     m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
                     SelectedOrderIndex = -1;
                     m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
-                }
+                }                
             }
+            BuildSystemLocationList();
         }
 
         /// <summary>
