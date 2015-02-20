@@ -1107,6 +1107,7 @@ namespace Pulsar4X
         /// </summary>
         public static JumpPoint GenerateJumpPoint(StarSystem system)
         {
+            m_RNG = new Random(GalaxyGen.SeedRNG.Next()); // Is there a better way?
             Star luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
 
             return GenerateJumpPoint(luckyStar);

@@ -82,6 +82,12 @@ namespace Pulsar4X.Entities
 
             // Subscribe to change events.
             SystemContactList.ListChanged += SystemContactList_ListChanged;
+
+            // Create the faciton contact information for each faction.
+            foreach (Faction f in GameState.Instance.Factions)
+            {
+                f.AddNewContactList(this);
+            }
         }
 
         /// <summary>
