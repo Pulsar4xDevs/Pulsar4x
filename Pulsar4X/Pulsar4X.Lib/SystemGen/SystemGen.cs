@@ -49,6 +49,14 @@ namespace Pulsar4X
                 GeneratePlanetsForStar(newStar);
                 GenerateAsteroidBelts(newStar);
                 GenerateComets(newStar);
+
+                // sort the stars children:
+                List<Planet> sorted = new List<Planet>(newStar.Planets.ToArray());
+                sorted.Sort(delegate(Planet a, Planet b)
+                {
+                    return a.Orbit.SemiMajorAxis.CompareTo(b.Orbit.SemiMajorAxis);
+                });
+                newStar.Planets = new BindingList<Planet>(sorted);
             }
 
             GenerateJumpPoints(newSystem, numJumpPoints);
