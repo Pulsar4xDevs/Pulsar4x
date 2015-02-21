@@ -650,7 +650,8 @@ namespace Pulsar4X
             //double radius = Math.Pow((3 * mass) / (4 * Math.PI * (planet.Density / 1000 )), 0.33333333);  
             //radius = radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU, also keep the temp var as it is easer to read then planet.Radius.
             planet.Radius = CalculateRadiusOfBody(mass, planet.Density);
-            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (planet.Radius * planet.Radius));
+            double radiusSquaredInM = (planet.Radius * Constants.Units.M_PER_AU) * (planet.Radius * Constants.Units.M_PER_AU); // conver to m from au.
+            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / radiusSquaredInM); // see: http://nova.stanford.edu/projects/mod-x/ad-surfgrav.html
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
            // Generate orbit:

@@ -299,7 +299,7 @@ namespace Pulsar4X.UI.Handlers
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "SurfaceGravity";
-                col.HeaderText = "Surface Gravity";
+                col.HeaderText = "Gravity";
                 col.DefaultCellStyle.Format = "N2";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
