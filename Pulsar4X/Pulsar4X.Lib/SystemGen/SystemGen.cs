@@ -668,12 +668,11 @@ namespace Pulsar4X
             if (planet.LengthOfDay < TimeSpan.FromHours(6))
                 planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
 
-            // to calculate base temp see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
             // Note that base temp does not take into account albedo or atmosphere.
-            double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
-            double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * planet.Orbit.SemiMajorAxis));
-            planetTemp += Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
-            planet.BaseTemperature = (float)planetTemp;
+            if (IsMoon(planet.Type))
+                planet.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, parent.Orbit.SemiMajorAxis);
+            else
+                planet.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, planet.Orbit.SemiMajorAxis);
 
             // generate Plate techtonics
             if (m_RNG.Next(0,1) == 0)
@@ -1033,8 +1032,9 @@ namespace Pulsar4X
             ///< @todo Get had coded numbers out of here... again...
             // now we need to work out the moon type
             // we will do this by looking at the base temp of the parent.
-            // if the base temp of the planet / 200K is  > 1 then it will always be terrestrial.
-            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / 200;
+            // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
+            // i.e. a moon hotter then 150K will always by PlanetType.Moon.
+            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / 150;
             Planet.PlanetType pt = Planet.PlanetType.Moon;
 
             // esle if a random number is > tempRatio it will be an ice moon:
@@ -1442,6 +1442,20 @@ namespace Pulsar4X
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * (density / 1000)), 0.3333333333); // density / 1000 changes it from g/cm2 to Kg/cm3, needed because mass in is KG. 
                                                                                                    // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
             return radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU.
+        }
+
+        /// <summary>
+        /// Calculates the temperature of a body given its parent star and its distance from that star.
+        /// @note For info on how the Temp. is calculated see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+        /// </summary>
+        /// <param name="parentStar">The star this body is orbiting.</param>
+        /// <param name="distanceFromStar">the SemiMojorAxis of the body with regards to the star. (i.e. for moons it is the sma of its parent planet).</param>
+        /// <returns>Temperature in Degrees C</returns>
+        public static double CalculateBaseTemperatureOfBody(Star parentStar, double distanceFromStar)
+        {
+            double temp = (parentStar.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
+            temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
+            return temp + Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
         }
         
         #endregion
