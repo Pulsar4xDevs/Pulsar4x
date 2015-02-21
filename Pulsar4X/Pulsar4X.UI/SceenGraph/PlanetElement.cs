@@ -18,7 +18,6 @@ namespace Pulsar4X.UI.SceenGraph
 
         private Planet m_oPlanet;
 
-
         public override GameEntity SceenEntity
         {
             get
@@ -57,10 +56,9 @@ namespace Pulsar4X.UI.SceenGraph
                 oPrimitive.Render();
             }
 
-            /// <summary>
-            /// Putting this as a child means that it runs afoul of the "don't render children" check.
-            /// </summary>
-            m_oOrbitCircle.Render();
+            // Putting this as a child means that it runs afoul of the "don't render children" check.
+            if (m_oPlanet.Type != Planet.PlanetType.Asteriod)   // dont render for asteriods.
+                m_oOrbitCircle.Render();
 
             if (RenderChildren == true)
             {
@@ -70,7 +68,7 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
-            if (m_oLable != null)
+            if (m_oLable != null && m_oPlanet.Type != Planet.PlanetType.Asteriod)
             {
                 m_oLable.Render();
             }
