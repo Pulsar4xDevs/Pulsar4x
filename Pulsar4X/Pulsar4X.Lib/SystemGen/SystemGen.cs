@@ -769,8 +769,8 @@ namespace Pulsar4X
         private static void GenerateSystemBodyOrbit(Star parent, Planet child, double childMass)
         {
             // Create the orbital values:
-            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
-
+            double smeiMajorAxis =  RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
+                                                                          GalaxyGen.OrbitalDistanceDistributionByPlanetType[child.Type]);
             double eccentricity = 0;
             if (child.Type == Planet.PlanetType.Comet)
                 eccentricity = RNG_NextDoubleRange(0.6, 0.8);       ///< @todo more magic numbers.
@@ -798,7 +798,7 @@ namespace Pulsar4X
             double min, max;
             min = (parent.Radius + child.Radius) * 3; ///< @todo move this magic number into GalaxyGen.
             max = (parent.Radius + child.Radius) * 10000; ///< @todo move this magic number into GalaxyGen, also make it better??.
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // moon dont need to be raised to a power, they have a nice range :)
 
             // Create the other orbital values:
             double eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 2); // get random eccentricity needs better distrubution.
@@ -825,7 +825,7 @@ namespace Pulsar4X
             deviation = referenceOrbit.SemiMajorAxis * GalaxyGen.MaxAsteriodOrbitDeviation;
             min = referenceOrbit.SemiMajorAxis - deviation;
             max = referenceOrbit.SemiMajorAxis + deviation;
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // dont need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyGen.MaxAsteriodOrbitDeviation, 2);
             min = referenceOrbit.Eccentricity - deviation;
@@ -1140,7 +1140,8 @@ namespace Pulsar4X
             Orbit referenceOrbit = Orbit.FromStationary(1);
 
             // create values:
-            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
+            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
+                                                                         GalaxyGen.OrbitalDistanceDistributionByPlanetType[Planet.PlanetType.Asteriod]);
             referenceOrbit.Eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
             referenceOrbit.Inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             referenceOrbit.ArgumentOfPeriapsis = m_RNG.NextDouble() * 360;
@@ -1372,7 +1373,7 @@ namespace Pulsar4X
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max);
         }
-
+        
         /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range times by a constant value (e.g. a unit of some sort).
         /// </summary>
@@ -1382,6 +1383,22 @@ namespace Pulsar4X
         {
             min *= constant;
             return min + m_RNG.NextDouble() * ((max * constant) - min);
+        }
+
+        /// <summary>
+        /// Raises the random number generated to the power provided to produce a non-uniform selection from the range.
+        /// </summary>
+        public static double RNG_NextDoubleRangeDistributedByPower(double min, double max, double power)
+        {
+            return min + Math.Pow(m_RNG.NextDouble(), power) * (max - min);
+        }
+
+        /// <summary>
+        /// Version of RNG_NextDoubleRangeDistributedByPower(double min, double max, double power) that takes GalaxyGen.MinMaxStruct directly.
+        /// </summary>
+        public static double RNG_NextDoubleRangeDistributedByPower(GalaxyGen.MinMaxStruct minMax, double power)
+        {
+            return RNG_NextDoubleRangeDistributedByPower(minMax._min, minMax._max, power);
         }
 
         /// <summary>

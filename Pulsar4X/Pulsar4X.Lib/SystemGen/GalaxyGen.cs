@@ -270,6 +270,21 @@ namespace Pulsar4X
             };
 
         /// <summary>
+        /// This is used to adjust the orbital distances in the range of OrbitalDistanceByStarSpectralType for a given planet type.
+        /// This is done by raising the random number generated to select from the range to the power of this distribution number.
+        /// </summary>
+        public static Dictionary<Planet.PlanetType, double> OrbitalDistanceDistributionByPlanetType = new Dictionary<Planet.PlanetType, double>()
+            {
+                { Planet.PlanetType.GasGiant, 1.8 },
+                { Planet.PlanetType.IceGiant, 1.5 },
+                { Planet.PlanetType.GasDwarf, 2 },
+                { Planet.PlanetType.Terrestrial, 2.5 },
+                { Planet.PlanetType.DwarfPlanet, 1.2 },
+                { Planet.PlanetType.Asteriod, 1.2 },
+                { Planet.PlanetType.Comet, 1 },
+            };
+
+        /// <summary>
         /// The possible ranges for albedo for various planet types.
         /// @note These are WAGs roughly based on the albedo of bodies in our solar system. They couild be tweak for gameplay.
         /// </summary>
