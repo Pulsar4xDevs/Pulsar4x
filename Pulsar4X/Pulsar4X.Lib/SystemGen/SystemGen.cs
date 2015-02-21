@@ -236,19 +236,32 @@ namespace Pulsar4X
                 double orbitalDistance = CalcStarOrbitDistance(parentStar, childStar);
                 double otherDirection = CalcStarOrbitDistance(childStar, parentStar);
 
-                if (otherDirection > orbitalDistance)
+                if (orbitalDistance < otherDirection)
                 {
                     orbitalDistance = otherDirection;
                 }
 
-                childStar.Orbit = Orbit.FromAsteroidFormat(childStar.Orbit.Mass, primaryStar.Orbit.Mass, orbitalDistance, Math.Pow(m_RNG.NextDouble() * 0.8, 3), m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
+                // Let's add some PADDING to that face!
+                orbitalDistance = (orbitalDistance * ((m_RNG.NextDouble() / 3) + 1)) + parentStar.Orbit.Apoapsis;
+
+                double eccentricity = Math.Pow(m_RNG.NextDouble() * 0.8, 3);
+                double sma = orbitalDistance / (1 - eccentricity);
+
+                childStar.Orbit = Orbit.FromAsteroidFormat(childStar.Orbit.Mass, primaryStar.Orbit.Mass, sma, eccentricity, m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
                 childStar.Parent = primaryStar;
                 childStar.UpdatePosition(0);
             }
+            system.Stars = new BindingList<Star>(starList);
+
         }
 
         private static double CalcStarOrbitDistance(Star star1, Star star2)
         {
+            if (star1.Planets.Count == 0)
+            {
+                return 0;
+            }
+
             double maxApo = 0;
             double planetMass = 0;
             foreach (Planet p in star1.Planets)
@@ -1245,12 +1258,18 @@ namespace Pulsar4X
             int numJumpPoints = 1; // Each star always generates a JP.
 
             // Give a chance per planet to generate a JumpPoint
-            foreach (Planet p in star.Planets)
+            foreach (Planet currentPlanet in star.Planets)
             {
+                if (currentPlanet.Type == Planet.PlanetType.Comet || currentPlanet.Type == Planet.PlanetType.Asteriod)
+                {
+                    // Don't gen JP's around comets or asteroids.
+                    continue;
+                }
+
                 int chance = Constants.GameSettings.JumpPointGenerationChance;
 
                 // Higher mass planets = higher chance.
-                double planetEarthMass = p.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
+                double planetEarthMass = currentPlanet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
                 if (planetEarthMass > 1)
                 {
                     chance = chance + 2;
@@ -1285,6 +1304,12 @@ namespace Pulsar4X
             // Clamp generation to within the planetary system.
             foreach (Planet currentPlanet in star.Planets)
             {
+                if (currentPlanet.Type == Planet.PlanetType.Comet || currentPlanet.Type == Planet.PlanetType.Asteriod)
+                {
+                    // Don't gen JP's around comets or asteroids.
+                    continue;
+                }
+
                 if (minRadius > currentPlanet.Orbit.Periapsis)
                 {
                     minRadius = currentPlanet.Orbit.Periapsis;

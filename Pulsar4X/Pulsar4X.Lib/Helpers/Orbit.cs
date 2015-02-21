@@ -148,6 +148,8 @@ namespace Pulsar4X.Entities
         private Orbit(double mass)
         {
             m_mass = mass;
+            SemiMajorAxis = 0;
+            Eccentricity = 0;
             m_isStationary = true;
         }
 
@@ -175,7 +177,15 @@ namespace Pulsar4X.Entities
             m_gravitationalParameter = Constants.Science.GRAVITATIONAL_CONSTANT * (ParentMass + Mass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
 
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
-            m_orbitalPeriod = TimeSpan.FromSeconds(2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3) / (GravitationalParameter)));
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3) / (GravitationalParameter));
+            if (orbitalPeriod * 10000000 > Int64.MaxValue)
+            {
+                m_orbitalPeriod = TimeSpan.MaxValue;
+            }
+            else
+            {
+                m_orbitalPeriod = TimeSpan.FromSeconds(orbitalPeriod);
+            }
 
             // http://en.wikipedia.org/wiki/Mean_motion
             m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3)); // Calculated in radians.
