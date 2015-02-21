@@ -253,6 +253,14 @@ namespace Pulsar4X
             }
             system.Stars = new BindingList<Star>(starList);
 
+            char starLetter = 'A';
+
+            foreach (Star star in system.Stars)
+            {
+                star.Name = star.Name.Substring(0, star.Name.Length - 1); // Remove the last letter.
+                star.Name = star.Name + starLetter;
+                starLetter++; // YAY LETTER MATH! :D
+            }
         }
 
         private static double CalcStarOrbitDistance(Star star1, Star star2)
@@ -1204,7 +1212,12 @@ namespace Pulsar4X
         public static JumpPoint GenerateJumpPoint(StarSystem system)
         {
             m_RNG = new Random(GalaxyGen.SeedRNG.Next()); // Is there a better way?
-            Star luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+
+            Star luckyStar;
+            do
+            {
+                luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+            } while (luckyStar.Planets.Count != 0);
 
             return GenerateJumpPoint(luckyStar);
         }
@@ -1255,6 +1268,11 @@ namespace Pulsar4X
         /// </summary>
         private static int GetNaturalJumpPointGeneration(Star star)
         {
+            if (star.Planets.Count == 0)
+            {
+                return 0; // Don't generate JP's on planetless stars.
+            }
+
             int numJumpPoints = 1; // Each star always generates a JP.
 
             // Give a chance per planet to generate a JumpPoint
