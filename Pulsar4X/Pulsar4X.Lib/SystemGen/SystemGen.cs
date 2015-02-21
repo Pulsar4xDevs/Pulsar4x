@@ -420,6 +420,7 @@ namespace Pulsar4X
             // create star and populate data:
             Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
             star.Age = data._Age;
+            SetHabitableZone(star);     // calculate habitable zone
 
             // Temporary orbit to store mass.
             // Calculate real orbit later.
@@ -1524,7 +1525,20 @@ namespace Pulsar4X
             temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
             return temp + Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
         }
-        
+
+        /// <summary>
+        /// Calculates and sets the Habitable Zone of this star based on it Luminosity.
+        /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
+        /// </summary>
+        /// <returns>Average Habitable Zone</returns>
+        public static void SetHabitableZone(Star star)
+        {
+            star.MinHabitableRadius = Math.Sqrt(star.Luminosity / 1.1);
+            star.MaxHabitableRadius = Math.Sqrt(star.Luminosity / 0.53);
+            star.EcoSphereRadius = (star.MinHabitableRadius + star.MaxHabitableRadius) / 2; // our habital zone number is in the middle of out min/max values.
+        }
+
+
         #endregion
     }
 }
