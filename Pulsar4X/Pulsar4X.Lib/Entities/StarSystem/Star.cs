@@ -62,6 +62,7 @@ namespace Pulsar4X.Entities
             Temperature = temp;
             Luminosity = luminosity;
             SpectralType = spectralType;
+            Radius = radius;
 
             Class = SpectralType.ToString();
 
