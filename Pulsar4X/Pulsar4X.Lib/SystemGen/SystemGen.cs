@@ -227,6 +227,7 @@ namespace Pulsar4X
             );
 
             Star primaryStar = starList[0];
+            primaryStar.UpdatePosition(0);
 
             for (int i = 1; i < starList.Count; i++)
             {
@@ -251,6 +252,7 @@ namespace Pulsar4X
                 childStar.Parent = primaryStar;
                 childStar.UpdatePosition(0);
             }
+
             system.Stars = new BindingList<Star>(starList);
         }
 
@@ -735,9 +737,6 @@ namespace Pulsar4X
             // generate moons if required for this body type:
             if (IsPlanet(planetType))
                 GenerateMoons(star, planet);
-
-            // force the planet to have the correct position for it and any of its moons:
-            planet.UpdatePosition(0);  ///< @todo wrap this in an if so it cannot be called in moons??
 
             return planet;
         }
