@@ -214,11 +214,11 @@ namespace Pulsar4X
             starList.Sort(
                 (Star starA, Star starB) => 
                 { 
-                    if (starA.Orbit.Mass > starB.Orbit.Mass)
+                    if (starA.Orbit.Mass < starB.Orbit.Mass)
                     {
                         return 1;
                     }
-                    if (starA.Orbit.Mass < starB.Orbit.Mass)
+                    if (starA.Orbit.Mass > starB.Orbit.Mass)
                     {
                         return -1;
                     }

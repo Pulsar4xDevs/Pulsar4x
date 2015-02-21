@@ -168,11 +168,7 @@ namespace Pulsar4X.Entities
             // Update the position of all planets. This should probably be in something like the construction tick in Aurora.
             foreach (Star CurrentStar in Stars)
             {
-                // The system primary will cause a divide by zero error currently as it has no orbit.
-                if (CurrentStar != Stars[0])
-                {
-                    CurrentStar.UpdatePosition(deltaSeconds);
-                }
+                CurrentStar.UpdatePosition(deltaSeconds);
 
                 // Since the star moved, update the JumpPoint position.
                 foreach (JumpPoint CurrentJumpPoint in JumpPoints)
