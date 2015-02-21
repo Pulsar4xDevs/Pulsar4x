@@ -178,7 +178,10 @@ namespace Pulsar4X
         /// </summary>
         public const double MaxPlanetInclination = 45; // degrees. used for orbits and axial tilt.
 
-        public const double MaxMoonMassRelativeToParentBody = 04;
+        /// <summary>
+        /// This controls the maximum moon mass relative to the parent body.
+        /// </summary>
+        public const double MaxMoonMassRelativeToParentBody = 0.4;
 
         /// <summary>
         /// We want StarOrbitGravityFactor times less gravitational attraction from childStar to parentStar's furthest planet then parentStar to parentStar's furthest planet.
@@ -258,11 +261,11 @@ namespace Pulsar4X
         public static Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
             {
                 { SpectralType.O, new MinMaxStruct() { _min = 2, _max = 100 } },
-                { SpectralType.B, new MinMaxStruct() { _min = 1, _max = 85 } },
-                { SpectralType.A, new MinMaxStruct() { _min = 0.5, _max = 70 } },
-                { SpectralType.F, new MinMaxStruct() { _min = 0.35, _max = 60 } },
-                { SpectralType.G, new MinMaxStruct() { _min = 0.3, _max = 50 } },
-                { SpectralType.K, new MinMaxStruct() { _min = 0.2, _max = 30 } },
+                { SpectralType.B, new MinMaxStruct() { _min = 1, _max = 80 } },
+                { SpectralType.A, new MinMaxStruct() { _min = 0.4, _max = 60 } },
+                { SpectralType.F, new MinMaxStruct() { _min = 0.3, _max = 50 } },
+                { SpectralType.G, new MinMaxStruct() { _min = 0.2, _max = 40 } },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.15, _max = 25 } },
                 { SpectralType.M, new MinMaxStruct() { _min = 0.1, _max = 10 } },
             };
 
