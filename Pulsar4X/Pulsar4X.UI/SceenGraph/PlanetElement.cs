@@ -57,7 +57,7 @@ namespace Pulsar4X.UI.SceenGraph
             }
 
             // Putting this as a child means that it runs afoul of the "don't render children" check.
-            if (m_oPlanet.Type != Planet.PlanetType.Asteriod)   // dont render for asteriods.
+            if (m_oPlanet.Type != Planet.PlanetType.Asteriod && m_oPlanet.Type != Planet.PlanetType.Comet)   // dont render for asteriods or comets.
                 m_oOrbitCircle.Render();
 
             if (RenderChildren == true)
@@ -68,8 +68,8 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
-            ///< @todo Make drawing of Asteriod text and orbit circles a setting the player can toggle). or base it on zoom.
-            if (m_oLable != null && m_oPlanet.Type != Planet.PlanetType.Asteriod)
+            ///< @todo Make drawing of Asteriod/comet text and orbit circles a setting the player can toggle). or base it on zoom.
+            if (m_oLable != null && m_oPlanet.Type != Planet.PlanetType.Asteriod && m_oPlanet.Type != Planet.PlanetType.Comet)
             {
                 m_oLable.Render();
             }
