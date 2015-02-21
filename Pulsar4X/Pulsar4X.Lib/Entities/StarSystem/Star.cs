@@ -91,6 +91,11 @@ namespace Pulsar4X.Entities
                 Position.X += Parent.Position.X;
                 Position.Y += Parent.Position.Y;
             }
+
+            foreach (Planet CurrentPlanet in Planets)
+            {
+                CurrentPlanet.UpdatePosition(deltaSeconds);
+            }
         }
 
         /// <summary>

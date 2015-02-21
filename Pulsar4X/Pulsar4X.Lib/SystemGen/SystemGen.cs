@@ -2,6 +2,7 @@
 using Pulsar4X.Helpers.GameMath;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
@@ -58,6 +59,8 @@ namespace Pulsar4X
                 });
                 newStar.Planets = new BindingList<Planet>(sorted);
             }
+
+            GenerateStarOrbits(newSystem);
 
             GenerateJumpPoints(newSystem, numJumpPoints);
 
@@ -202,6 +205,67 @@ namespace Pulsar4X
         #endregion
 
         #region Star Generation Functions
+
+        private static void GenerateStarOrbits(StarSystem system)
+        {
+            List<Star> starList = system.Stars.ToList();
+
+            // Sort by mass.
+            starList.Sort(
+                (Star starA, Star starB) => 
+                { 
+                    if (starA.Orbit.Mass > starB.Orbit.Mass)
+                    {
+                        return 1;
+                    }
+                    if (starA.Orbit.Mass < starB.Orbit.Mass)
+                    {
+                        return -1;
+                    }
+                    return 0;
+                }
+            );
+
+            Star primaryStar = starList[0];
+
+            for (int i = 1; i < starList.Count; i++)
+            {
+                Star parentStar = starList[i - 1];
+                Star childStar = starList[i];
+
+                double orbitalDistance = CalcStarOrbitDistance(parentStar, childStar);
+                double otherDirection = CalcStarOrbitDistance(childStar, parentStar);
+
+                if (otherDirection > orbitalDistance)
+                {
+                    orbitalDistance = otherDirection;
+                }
+
+                childStar.Orbit = Orbit.FromAsteroidFormat(childStar.Orbit.Mass, primaryStar.Orbit.Mass, orbitalDistance, Math.Pow(m_RNG.NextDouble() * 0.8, 3), m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
+                childStar.Parent = primaryStar;
+                childStar.UpdatePosition(0);
+            }
+        }
+
+        private static double CalcStarOrbitDistance(Star star1, Star star2)
+        {
+            double maxApo = 0;
+            double planetMass = 0;
+            foreach (Planet p in star1.Planets)
+            {
+                if (p.Orbit.Apoapsis > maxApo)
+                {
+                    maxApo = p.Orbit.Apoapsis;
+                    planetMass = p.Orbit.Mass;
+                }
+            }
+            // http://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
+            double gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * star1.Orbit.Mass * planetMass / (maxApo * maxApo);
+
+            // Solve for distance to star2 with 10x less gravitational attraction than to star1.
+            // (Note, 10x less depends on a 0.1 value for GalaxyGen.StarOrbitGravityFactor
+            return Math.Sqrt(Constants.Science.GRAVITATIONAL_CONSTANT * star2.Orbit.Mass * planetMass / gravAttractionToParent * GalaxyGen.StarOrbitGravityFactor);
+        }
 
         /// <summary>
         /// Generates a new star and adds it to the provided Star System.

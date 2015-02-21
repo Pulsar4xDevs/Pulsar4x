@@ -181,6 +181,12 @@ namespace Pulsar4X
         public const double MaxMoonMassRelativeToParentBody = 04;
 
         /// <summary>
+        /// We want StarOrbitGravityFactor times less gravitational attraction from childStar to parentStar's furthest planet then parentStar to parentStar's furthest planet.
+        /// <? todo: Is this comment completely confusing?
+        /// </summary>
+        public static double StarOrbitGravityFactor = 10;
+
+        /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
         /// @note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.
         /// @note Other factors such as the stars lumosoty and mass are also taken into account. So these numbers may not make a whole lot of sense on the surface.
@@ -338,7 +344,6 @@ namespace Pulsar4X
                 { Planet.PlanetType.Terrestrial, 5 },
                 { Planet.PlanetType.DwarfPlanet, 1 },
         };
-
         #endregion
     }
 }

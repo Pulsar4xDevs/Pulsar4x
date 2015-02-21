@@ -172,17 +172,12 @@ namespace Pulsar4X.Entities
                 if (CurrentStar != Stars[0])
                 {
                     CurrentStar.UpdatePosition(deltaSeconds);
-
-                    // Since the star moved, update the JumpPoint position.
-                    foreach (JumpPoint CurrentJumpPoint in JumpPoints)
-                    {
-                        CurrentJumpPoint.UpdatePosition();
-                    }
                 }
 
-                foreach (Planet CurrentPlanet in CurrentStar.Planets)
+                // Since the star moved, update the JumpPoint position.
+                foreach (JumpPoint CurrentJumpPoint in JumpPoints)
                 {
-                    CurrentPlanet.UpdatePosition(deltaSeconds);
+                    CurrentJumpPoint.UpdatePosition();
                 }
             }
         }
