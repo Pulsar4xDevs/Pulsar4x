@@ -674,28 +674,12 @@ namespace Pulsar4X
             else
                 planet.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, planet.Orbit.SemiMajorAxis);
 
-            // generate Plate techtonics
-            if (m_RNG.Next(0,1) == 0)
-            {
-                // this planet has some plate techtonics:
-                // this should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
-                ///< @todo make techtonics generation tweakable.
-                double techtonicsChance = mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age;
-                techtonicsChance = GMath.Clamp01(techtonicsChance);
-
-                if (techtonicsChance < 0.01)
-                    planet.Techtonics = Planet.TechtonicActivity.Dead;
-                if (techtonicsChance < 0.02)
-                    planet.Techtonics = Planet.TechtonicActivity.Minor;
-                if (techtonicsChance < 0.04)
-                    planet.Techtonics = Planet.TechtonicActivity.EarthLike;
-                else
-                    planet.Techtonics = Planet.TechtonicActivity.Major;
-            }
+            // generate Plate tectonics
+            planet.Tectonics = GenerateTectonicActivity(star, planet);
 
             // Generate Magnetic field:
             planet.MagneticFeild = (float)RNG_NextDoubleRange(GalaxyGen.PlanetMagneticFieldByType[planet.Type]);
-            if (planet.Techtonics == Planet.TechtonicActivity.Dead)
+            if (planet.Tectonics == Planet.TectonicActivity.Dead)
                 planet.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
             
             // now lets generate the atmosphere:
@@ -744,6 +728,41 @@ namespace Pulsar4X
             }
 
             return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[body.Type]);
+        }
+
+        /// <summary>
+        /// Generate plate techtonics taking into consideration the mass of the planet and its age (via Star.Age).
+        /// </summary>
+        private static Planet.TectonicActivity GenerateTectonicActivity(Star star, Planet body)
+        {
+            if (body.Type != Planet.PlanetType.Terrestrial && body.Type != Planet.PlanetType.Terrestrial)
+            {
+                return Planet.TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
+            }
+            else if (m_RNG.NextDouble() < GalaxyGen.TerrestrialBodyTectonicActiviyChance)
+            {
+                // this planet has some plate tectonics:
+                // the following should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
+                // we conver age in billion years instead of years (otherwise we get tiny numbers).
+                double tectonicsChance = body.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age * 100000000; 
+                tectonicsChance = GMath.Clamp01(tectonicsChance);
+
+                Planet.TectonicActivity t = Planet.TectonicActivity.NA;
+
+                // step down the thresholds to get the correct activity:
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.Major])
+                    t = Planet.TectonicActivity.Major;
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.EarthLike])
+                    t = Planet.TectonicActivity.EarthLike;
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.Minor])
+                    t = Planet.TectonicActivity.Minor;
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.Dead])
+                    t = Planet.TectonicActivity.Dead;
+
+                return t;
+            }
+
+            return Planet.TectonicActivity.Dead;
         }
 
         /// <summary>

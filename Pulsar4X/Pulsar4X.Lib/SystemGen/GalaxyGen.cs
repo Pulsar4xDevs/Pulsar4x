@@ -191,6 +191,12 @@ namespace Pulsar4X
         public static double StarOrbitGravityFactor = 10;
 
         /// <summary>
+        /// The chance a Terrestrial body will have some form of Tectonic activity.
+        /// Note that very small/low mass bodies will still end up dead.
+        /// </summary>
+        public static double TerrestrialBodyTectonicActiviyChance = 0.5;
+
+        /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
         /// @note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.
         /// @note Other factors such as the stars lumosoty and mass are also taken into account. So these numbers may not make a whole lot of sense on the surface.
@@ -220,14 +226,6 @@ namespace Pulsar4X
             { 0.1, Planet.PlanetType.GasDwarf },
             { 0.5, Planet.PlanetType.Terrestrial }
         };
-
-        //public static Dictionary<Planet.PlanetType, double> PlanetTypeDisrubution = new Dictionary<Planet.PlanetType, double>()
-        //    {
-        //        { Planet.PlanetType.GasGiant, 0.2 },
-        //        { Planet.PlanetType.IceGiant, 0.2 },
-        //        { Planet.PlanetType.GasDwarf, 0.1 },
-        //        { Planet.PlanetType.Terrestrial, 0.5 },
-        //    };
 
         /// <summary>
         /// Limits of Planet masses based on type. Units are Kg.
@@ -372,6 +370,21 @@ namespace Pulsar4X
                 { Planet.PlanetType.Terrestrial, 5 },
                 { Planet.PlanetType.DwarfPlanet, 1 },
         };
+
+        /// <summary>
+        /// These are the maxinum thresholds fore each type of tectonic activity a planet can have.
+        /// Tectonic activity is calculated by Mass (in earth masses) / Star Age. 
+        /// Earth has a tectonic activity of 0.217 by this calculation.
+        /// So if the tectonic activing number is < the threshold of Earth like but greater than Minor then it will be Earth like.
+        /// </summary>
+        public static Dictionary<Planet.TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<Planet.TectonicActivity, double>()
+        {
+                { Planet.TectonicActivity.Dead , 0.01 },
+                { Planet.TectonicActivity.Minor , 0.2 },
+                { Planet.TectonicActivity.EarthLike , 0.4 },
+                { Planet.TectonicActivity.Major , 1 }          // Not used, just here for completness.
+        };
+
         #endregion
     }
 }

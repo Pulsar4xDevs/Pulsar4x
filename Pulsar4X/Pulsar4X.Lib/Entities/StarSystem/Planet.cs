@@ -33,7 +33,7 @@ namespace Pulsar4X.Entities
             Comet
         }
 
-        public enum TechtonicActivity
+        public enum TectonicActivity
         {
             Dead,
             Minor,
@@ -84,7 +84,7 @@ namespace Pulsar4X.Entities
         /// Plate techtonics. Ammount of activity depends on age vs mass.
         /// Influences magnitic feild.
         /// </summary>
-        public TechtonicActivity Techtonics { get; set; }
+        public TectonicActivity Tectonics { get; set; }
 
         /// <summary>
         /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
