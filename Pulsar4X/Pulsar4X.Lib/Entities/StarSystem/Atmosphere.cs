@@ -142,8 +142,8 @@ namespace Pulsar4X.Entities
 
                 foreach (var gas in _composition)
                 {
-                    _atmosphereDescriptionInATM += gas.Value.ToString() + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
-                    _atmosphereDescriptionInPercent += gas.Value.ToString() + "% " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
+                    _atmosphereDescriptionInATM += gas.Value.ToString("N2") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
+                    _atmosphereDescriptionInPercent += gas.Value.ToString("N2") + "% " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
 
                     Pressure += gas.Value;
                 }
