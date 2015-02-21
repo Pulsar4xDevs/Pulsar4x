@@ -170,9 +170,6 @@ namespace Pulsar4X.Entities
 
             TaskGroupsInOrbit = new BindingList<TaskGroupTN>();
 
-            ///< @todo Planet generation needs minerals, anomalies, and ruins generation.
-            PlanetaryRuins = new Ruins();  // Should this happen here??
-
             GeoSurveyList = new Dictionary<Faction, bool>();
 
             /// <summary>

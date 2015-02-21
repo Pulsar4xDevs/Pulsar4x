@@ -686,7 +686,8 @@ namespace Pulsar4X
             // now lets generate the atmosphere:
             planet.Atmosphere = GenerateAtmosphere(planet);
 
-            ///< @todo Generate Ruins
+            // Generate Ruins, note that it will only do so for suitable planets:
+            GenerateRuins(star, planet);
             
             ///< @todo Generate Minerials Properly instead of this ugly hack:
             planet.HomeworldMineralGeneration();
@@ -1083,6 +1084,44 @@ namespace Pulsar4X
             parent.Moons = new BindingList<Planet>(sorted);  // now add the sorted list!!
         }
 
+        /// <summary>
+        /// This function generate ruins for the specified system Body.
+        /// @todo Make tRuins Generation take star age/type into consideration??
+        /// </summary>
+        private static void GenerateRuins(Star star, Planet body)
+        {
+            // first we will check that this body type can have ruins on it:
+            if (body.Type != Planet.PlanetType.Terrestrial
+                || body.Type != Planet.PlanetType.Moon)
+            {
+                return; // wrong type.
+            }
+            else if (body.Atmosphere.Exists == false && (body.Atmosphere.Pressure > 2.5 || body.Atmosphere.Pressure < 0.01))
+            {
+                return; // no valid atmosphere!
+            }
+            else if (m_RNG.NextDouble() > 0.5)
+            {
+                return; // thats right... lucked out on this one.
+            }
+
+            // now if we have survived the guantlet lets gen some Ruins!!
+            Ruins ruins = new Ruins();
+
+            ruins.RuinSize = GalaxyGen.RuinsSizeDisrubution.Select(m_RNG.Next(0, 100));
+
+            int quality = GameState.RNG.Next(0, 100);
+            ruins.RuinQuality = GalaxyGen.RuinsQuilityDisrubution.Select(quality);
+            if (ruins.RuinSize == Ruins.RSize.City && quality >= 95)
+                    ruins.RuinQuality = Ruins.RQuality.MultipleIntact;  // special case!!
+
+            // Ruins count:
+            ruins.RuinCount = RNG_NextRange(GalaxyGen.RuinsCountRangeBySize[ruins.RuinSize]);    
+            ruins.RuinCount = (uint)Math.Round(GalaxyGen.RuinsQuilityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
+
+            body.PlanetaryRuins = ruins;
+        }
+
         #endregion
 
         #region Asteriod Generation Functions
@@ -1437,6 +1476,14 @@ namespace Pulsar4X
         public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax, double constant)
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max, constant);
+        }
+
+        /// <summary>
+        /// Returns a value between the min and max.
+        /// </summary>
+        public static uint RNG_NextRange(GalaxyGen.MinMaxStruct minMax)
+        {
+            return (uint)m_RNG.Next((int)minMax._min, (int)minMax._max);
         }
 
         /// <summary>

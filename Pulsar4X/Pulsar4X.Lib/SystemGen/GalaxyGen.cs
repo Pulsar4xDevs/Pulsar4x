@@ -386,5 +386,65 @@ namespace Pulsar4X
         };
 
         #endregion
+
+        #region Ruins Generation
+
+        /// <summary>
+        /// The chance that ruins will be generated on a suitable planet or moon.
+        /// @note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm. 
+        /// </summary>
+        public const double RuinsGenerationChance = 0.5;
+
+        /// <summary>
+        /// The chance of any given ruins size being generated.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static WeightedList<Ruins.RSize> RuinsSizeDisrubution = new WeightedList<Ruins.RSize>()
+        {
+            { 40, Ruins.RSize.Outpost },
+            { 30, Ruins.RSize.Settlement },
+            { 20, Ruins.RSize.Colony },
+            { 10, Ruins.RSize.City }
+        };
+
+        /// <summary>
+        /// The chance of any given ruins quility being generated. 
+        /// @note There is some special adiyional logic for Ruins.RQuality.MultipleIntact.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static WeightedList<Ruins.RQuality> RuinsQuilityDisrubution = new WeightedList<Ruins.RQuality>()
+        {
+            { 40, Ruins.RQuality.Destroyed },
+            { 30, Ruins.RQuality.Ruined },
+            { 15, Ruins.RQuality.PartiallyIntact },
+            { 15, Ruins.RQuality.Intact } 
+        };
+
+        /// <summary>
+        /// The ranges for the Ruins Count, by Ruins Size.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static Dictionary<Ruins.RSize, MinMaxStruct> RuinsCountRangeBySize = new Dictionary<Ruins.RSize, MinMaxStruct>()
+        {
+            { Ruins.RSize.Outpost, new MinMaxStruct() { _min = 15, _max = 50 } },
+            { Ruins.RSize.Settlement, new MinMaxStruct() { _min = 50, _max = 100 } },
+            { Ruins.RSize.Colony, new MinMaxStruct() { _min = 100, _max = 200 } },
+            { Ruins.RSize.City, new MinMaxStruct() { _min = 500, _max = 1000 } },
+        };
+
+        /// <summary>
+        /// The Quility modifiers. Final Ruins count is determined by RuinsCount * QuilityModifier.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static Dictionary<Ruins.RQuality, double> RuinsQuilityAdjustment = new Dictionary<Ruins.RQuality, double>()
+        {
+            { Ruins.RQuality.Destroyed, 1.25 },
+            { Ruins.RQuality.Ruined, 1.5 },
+            { Ruins.RQuality.PartiallyIntact, 1.75 },
+            { Ruins.RQuality.Intact, 2.0 },
+            { Ruins.RQuality.MultipleIntact, 3.0 }
+        };
+
+        #endregion
     }
 }
