@@ -296,6 +296,14 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
+                col.DataPropertyName = "ColonyCost";
+                col.HeaderText = "Colony Cost";
+                col.DefaultCellStyle.Format = "N2";
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
+            }
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
                 col.DataPropertyName = "Atmosphere_SurfaceTemperature";
                 col.HeaderText = "Temperature";
                 col.DefaultCellStyle.Format = "N1";

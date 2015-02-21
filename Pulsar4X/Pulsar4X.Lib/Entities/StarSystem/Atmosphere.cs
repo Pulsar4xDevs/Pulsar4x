@@ -149,11 +149,15 @@ namespace Pulsar4X.Entities
                 foreach (var gas in _composition)
                 {
                     _atmosphereDescriptionInATM += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
-
-                    // actual greenhouse pressure adjusted by gas GreenhouseEffect.
-                    // note that this produces the same affect as in aurora if all GreenhouseEffect bvalue are -1, 0 or 1.
-                    _greenhousePressure += (float)gas.Key.GreenhouseEffect * gas.Value;
                     Pressure += gas.Value;
+
+                    // only add a greenhouse gas if it is not frozen:
+                    if (SurfaceTemperature >= gas.Key.BoilingPoint)
+                    {
+                        // actual greenhouse pressure adjusted by gas GreenhouseEffect.
+                        // note that this produces the same affect as in aurora if all GreenhouseEffect bvalue are -1, 0 or 1.
+                        _greenhousePressure += (float)gas.Key.GreenhouseEffect * gas.Value;
+                    }
                 }
 
                 if (ParentBody.Type == Planet.PlanetType.GasDwarf
