@@ -717,7 +717,7 @@ namespace Pulsar4X
                 // these bodies have special mass limits over and above whats in PlanetMassByType.
                 double min, max;
                 min = GalaxyGen.PlanetMassByType[body.Type]._min;
-                max = GalaxyGen.PlanetMassByType[body.Type]._min;
+                max = GalaxyGen.PlanetMassByType[body.Type]._max;
 
                 if (max > parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody)
                     max = parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody;
