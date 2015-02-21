@@ -264,17 +264,17 @@ namespace Pulsar4X
         /// <summary>
         /// Orbital distance restrictions (i.e. SemiMajorAxis restrictions) for a planet based upon the type of star it is orbiting.
         /// Units are AU.
-        /// @note These numbers, with the exception of G class stars, are WAGs. They could be improved or tweaked for gameplay.
+        /// @note These numbers, with the exception of G class stars, are based on habital zone calculations. They could be tweaked for gameplay.
         /// </summary>
         public static Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
             {
-                { SpectralType.O, new MinMaxStruct() { _min = 2, _max = 100 } },
-                { SpectralType.B, new MinMaxStruct() { _min = 1, _max = 80 } },
-                { SpectralType.A, new MinMaxStruct() { _min = 0.4, _max = 60 } },
-                { SpectralType.F, new MinMaxStruct() { _min = 0.3, _max = 50 } },
-                { SpectralType.G, new MinMaxStruct() { _min = 0.2, _max = 40 } },
-                { SpectralType.K, new MinMaxStruct() { _min = 0.15, _max = 25 } },
-                { SpectralType.M, new MinMaxStruct() { _min = 0.1, _max = 10 } },
+                { SpectralType.O, new MinMaxStruct() { _min = 1, _max = 200 } },
+                { SpectralType.B, new MinMaxStruct() { _min = 0.5, _max = 100 } },
+                { SpectralType.A, new MinMaxStruct() { _min = 0.3, _max = 80 } },
+                { SpectralType.F, new MinMaxStruct() { _min = 0.2, _max = 60 } },
+                { SpectralType.G, new MinMaxStruct() { _min = 0.1, _max = 40 } },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.01, _max = 20 } },
+                { SpectralType.M, new MinMaxStruct() { _min = 0.005, _max = 8 } },
             };
 
         /// <summary>
