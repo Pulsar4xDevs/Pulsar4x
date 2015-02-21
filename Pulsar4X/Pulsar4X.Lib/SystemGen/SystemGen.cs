@@ -808,7 +808,7 @@ namespace Pulsar4X
             // this need to have sane min/max values given the radius of the two bodies:
             double min, max;
             min = (parent.Radius + child.Radius) * 3; ///< @todo move this magic number into GalaxyGen.
-            max = (parent.Radius + child.Radius) * 10000; ///< @todo move this magic number into GalaxyGen, also make it better??.
+            max = GMath.Clamp((parent.Radius + child.Radius) * 10000, min, parent.Orbit.Periapsis * 0.25); ///< @todo move this magic number into GalaxyGen, also make it better??.
             double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // moon dont need to be raised to a power, they have a nice range :)
 
             // Create the other orbital values:
