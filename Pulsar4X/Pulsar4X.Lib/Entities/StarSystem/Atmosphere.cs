@@ -55,6 +55,27 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Dictionary<AtmosphericGas, float> Composition { get { return _composition; } }
 
+        private string _atmosphereDescriptionInPercent;
+        /// <summary>
+        /// A sting describing the Atmosphere in Percentages, like this:
+        /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
+        /// By Default ToString return this.
+        /// </summary>
+        public string AtomsphereDescriptionInPercent
+        {
+            get { return _atmosphereDescriptionInPercent; }
+        }
+
+        private string _atmosphereDescriptionInATM;
+        /// <summary>
+        /// A sting describing the Atmosphere in Atmospheres (atm), like this:
+        /// "0.75atm Nitrogen (N), 0.21atm Oxygen (O), 0.03atm Carbon dioxide (CO2), 0.01atm Argon (Ar)"
+        /// </summary>
+        public string AtomsphereDescriptionATM
+        {
+            get { return _atmosphereDescriptionInATM; }
+        }
+
         /// <summary>
         /// Returns true if The atmosphere exists (i.e. there are any gases in it), else it return false.
         /// </summary>

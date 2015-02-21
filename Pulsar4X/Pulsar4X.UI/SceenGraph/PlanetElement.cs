@@ -68,6 +68,7 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
+            ///< @todo Make drawing of Asteriod text and orbit circles a setting the player can toggle). or base it on zoom.
             if (m_oLable != null && m_oPlanet.Type != Planet.PlanetType.Asteriod)
             {
                 m_oLable.Render();
