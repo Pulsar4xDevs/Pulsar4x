@@ -147,7 +147,7 @@ namespace Pulsar4X.Entities
                  IsToxic = false,
                  MeltingPoint = -218.79,
                  BoilingPoint = -182.962,
-                 GreenhouseEffect = 1
+                 GreenhouseEffect = 0
              }},
 
              { 1, new AtmosphericGas()

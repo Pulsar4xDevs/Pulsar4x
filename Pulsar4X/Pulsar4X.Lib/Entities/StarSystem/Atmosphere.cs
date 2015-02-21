@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using Pulsar4X.Helpers;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Entities
 {
@@ -33,6 +34,15 @@ namespace Pulsar4X.Entities
         /// A measure of the greenhouse factor provided by this Atmosphere.
         /// </summary>
         public float GreenhouseFactor { get; set; }
+
+        private float _greenhousePressure = 0;
+        /// <summary>
+        /// Pressure (in atm) of greenhouse gasses. but not really.
+        /// to get this figure for a given gass toy would take its pressure 
+        /// in the atmosphere and times it by the gasses GreenhouseEffect 
+        /// which is a number between 1 and -1 normally.
+        /// </summary>
+        public float GreenhousePressure { get { return _greenhousePressure; } }
 
         /// <summary>
         /// How much light the body reflects. Affects temp.
@@ -124,6 +134,7 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Updates the state of the bodies atmosphere. Run this after adding removing gasses or modifing albedo.
+        /// @todo Calc Hydrosphere changes & update albedo accordingly.
         /// </summary>
         public void UpdateState()
         {
@@ -133,28 +144,48 @@ namespace Pulsar4X.Entities
                 _atmosphereDescriptionInATM = "";
                 _atmosphereDescriptionInPercent = "";
                 Pressure = 0;
-
-                if (ParentBody.Type == Planet.PlanetType.GasDwarf 
-                    || ParentBody.Type == Planet.PlanetType.GasGiant
-                    || ParentBody.Type == Planet.PlanetType.IceGiant)
-                {
-                    Pressure = 1;       // because thats the deffenition of the surface of these planets, when 
-                    // atmosphereic pressure = the pressure of earths atmosphere at its surface (what we call 1 atm).
-                }
-
-                ///< @todo Update Atmospheric pressure
-                ///< @todo Calc Hydrosphere changes & update albedo accordingly.
-                ///< @todo Calc greehouse effect based on atmosphere and apply it + albedo to surface temp. 
+                _greenhousePressure = 0;
 
                 foreach (var gas in _composition)
                 {
-                    _atmosphereDescriptionInATM += gas.Value.ToString("N2") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
-                    _atmosphereDescriptionInPercent += gas.Value.ToString("N2") + "% " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
+                    _atmosphereDescriptionInATM += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
 
+                    // actual greenhouse pressure adjusted by gas GreenhouseEffect.
+                    // note that this produces the same affect as in aurora if all GreenhouseEffect bvalue are -1, 0 or 1.
+                    _greenhousePressure += (float)gas.Key.GreenhouseEffect * gas.Value;
                     Pressure += gas.Value;
                 }
 
-                SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
+                if (ParentBody.Type == Planet.PlanetType.GasDwarf
+                    || ParentBody.Type == Planet.PlanetType.GasGiant
+                    || ParentBody.Type == Planet.PlanetType.IceGiant)
+                {
+                    // special gas giant stuff, needed because we do not apply greenhouse factor to them:
+                    SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
+                    Pressure = 1;       // because thats the deffenition of the surface of these planets, when 
+                    // atmosphereic pressure = the pressure of earths atmosphere at its surface (what we call 1 atm).
+                }
+                else
+                {
+                    // From Aurora: Greenhouse Factor = 1 + (Atmospheric Pressure /10) + Greenhouse Pressure   (Maximum = 3.0)
+                    GreenhouseFactor = (Pressure * 0.1F) + GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
+                    GreenhouseFactor = (float)GMath.Clamp(GreenhouseFactor, -3.0, 3.0);
+
+                    // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
+                    SurfaceTemperature = (ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN) * GreenhouseFactor * (1 - Albedo);
+                    SurfaceTemperature += (float)Constants.Units.KELVIN_TO_DEGREES_C; // convert back to kelvin
+                }
+
+                // loop a second time to work out atmo percentages:
+                foreach (var gas in _composition)
+                {
+                    if (Pressure != 0)
+                        _atmosphereDescriptionInPercent += (gas.Value / Pressure).ToString("P0") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
+                }
+
+                // trim trailing", " from the strings.
+                _atmosphereDescriptionInATM = _atmosphereDescriptionInATM.Remove(_atmosphereDescriptionInATM.Length - 2);
+                _atmosphereDescriptionInPercent = _atmosphereDescriptionInPercent.Remove(_atmosphereDescriptionInPercent.Length - 2);
             }
             else
             {
