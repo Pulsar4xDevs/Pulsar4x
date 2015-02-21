@@ -17,9 +17,18 @@ namespace Pulsar4X.Entities
         public OrbitingEntity Parent { get; set; }
 
         /// <summary>
-        /// equitorial radius (in AU)
+        /// The Average Radius (in AU)
         /// </summary>
         public double Radius { get; set; }
+
+        /// <summary>
+        /// The Average Radius (in km)
+        /// </summary>
+        public double RadiusinKM
+        {
+            get { return Radius * Constants.Units.KM_PER_AU; }
+            set { Radius = value / Constants.Units.KM_PER_AU; }
+        }
 
         /// <summary>
         /// Indicates weither the system body supports populations and can be settled by Plaerys/NPRs..

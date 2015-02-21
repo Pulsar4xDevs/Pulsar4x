@@ -231,10 +231,10 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "Radius";
+                col.DataPropertyName = "RadiusinKM";
                 col.HeaderText = "Radius";
-                col.DefaultCellStyle.Format = "N4";
-                col.ToolTipText = "Radius in AU";
+                col.DefaultCellStyle.Format = "N0";
+                col.ToolTipText = "Radius in Km";
                 m_oDataPanel.StarDataGrid.Columns.Add(col);
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
@@ -345,9 +345,9 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "Radius";
+                col.DataPropertyName = "RadiusinKM";
                 col.HeaderText = "Radius";
-                col.DefaultCellStyle.Format = "N1";
+                col.DefaultCellStyle.Format = "N0";
                 col.ToolTipText = "Average Radius in Km";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
