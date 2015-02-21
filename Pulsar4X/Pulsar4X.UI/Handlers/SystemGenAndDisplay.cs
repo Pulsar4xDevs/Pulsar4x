@@ -287,14 +287,14 @@ namespace Pulsar4X.UI.Handlers
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
             }
-            //using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            //{
-            //    col.DataPropertyName = "SurfaceTemperatureView";
-            //    col.HeaderText = "Surface Temperature (K)";
-            //    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            //    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-            //    m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
-            //}
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Atmosphere_SurfaceTemperature";
+                col.HeaderText = "Surface Temperature (C)";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
+            }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "SurfaceGravity";
@@ -303,14 +303,14 @@ namespace Pulsar4X.UI.Handlers
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
             }
-            //using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
-            //{
-            //    col.DataPropertyName = "MassOfGasInEarthMassesView";
-            //    col.HeaderText = "Atmosphere (Earth Masses)";
-            //    col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-            //    col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-            //    m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
-            //}
+            using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
+            {
+                col.DataPropertyName = "Atmosphere_InPercent";
+                col.HeaderText = "Atmosphere";
+                col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
+                m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
+            }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "Orbit_SemiMajorAxis";
@@ -322,7 +322,7 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "SurfacePressureView";
+                col.DataPropertyName = "Atmosphere_Pressure";
                 col.HeaderText = "Surface Pressure (atm)";
                 //col.DefaultCellStyle.Format = "N4";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -340,7 +340,7 @@ namespace Pulsar4X.UI.Handlers
             }
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "HydrosphereCoverInPercent";
+                col.DataPropertyName = "Atmosphere_HydrosphereExtent";
                 col.HeaderText = "Hydrosphere Cover - Liquid (%)";
                 //col.DefaultCellStyle.Format = "N1";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
@@ -386,7 +386,7 @@ namespace Pulsar4X.UI.Handlers
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "Orbit_Mass";
-                col.HeaderText = "Mass (Earth Masses)";
+                col.HeaderText = "Mass (Kg)";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
@@ -419,7 +419,7 @@ namespace Pulsar4X.UI.Handlers
             //}
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
-                col.DataPropertyName = "Albedo";
+                col.DataPropertyName = "Atmosphere_Albedo";
                 col.HeaderText = "Albedo";
                 col.DefaultCellStyle.Format = "N4";
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;

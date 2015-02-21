@@ -270,6 +270,7 @@ namespace Pulsar4X.Entities
             if (td == null)
             {
                 td = base.GetTypeDescriptor(objectType, instance);
+                td = new AtmosphereTypeDescriptor(td);
                 td = new OrbitTypeDescriptor(td);
             }
 
