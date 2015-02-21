@@ -23,6 +23,16 @@ namespace Pulsar4X.Entities
         private double m_mass;
 
         /// <summary>
+        /// Mass in Earth Masses of this entity.
+        /// </summary>
+        public double MassRelativeToEarth { get { return m_mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS; } }
+
+        /// <summary>
+        /// Mass in Solar Masses of this entity.
+        /// </summary>
+        public double MassRelativeToSol { get { return m_mass / Constants.Units.SOLAR_MASS_IN_KILOGRAMS; } }
+
+        /// <summary>
         /// Mass in KG of parent (object this orbit orbits)
         /// </summary>
         public double ParentMass { get { return m_parentMass; } }
@@ -351,12 +361,14 @@ namespace Pulsar4X.Entities
             PropertyDescriptorCollection cols = base.GetProperties();
             PropertyDescriptor addressPD = cols["Orbit"];
             PropertyDescriptorCollection Orbit_child = addressPD.GetChildProperties();
-            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 3];
+            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 5];
 
             cols.CopyTo(array, 0);
             array[cols.Count] = new SubPropertyDescriptor(addressPD, Orbit_child["Mass"], "Orbit_Mass");
-            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Orbit_child["SemiMajorAxis"], "Orbit_SemiMajorAxis");
-            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Orbit_child["OrbitalPeriod"], "Orbit_OrbitalPeriod");
+            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Orbit_child["MassRelativeToEarth"], "Orbit_MassRelativeToEarth");
+            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Orbit_child["MassRelativeToSol"], "Orbit_MassRelativeToSol");
+            array[cols.Count + 3] = new SubPropertyDescriptor(addressPD, Orbit_child["SemiMajorAxis"], "Orbit_SemiMajorAxis");
+            array[cols.Count + 4] = new SubPropertyDescriptor(addressPD, Orbit_child["OrbitalPeriod"], "Orbit_OrbitalPeriod");
 
             PropertyDescriptorCollection newcols = new PropertyDescriptorCollection(array);
             return newcols;
@@ -367,12 +379,14 @@ namespace Pulsar4X.Entities
             PropertyDescriptorCollection cols = base.GetProperties(attributes);
             PropertyDescriptor addressPD = cols["Orbit"];
             PropertyDescriptorCollection Orbit_child = addressPD.GetChildProperties();
-            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 3];
+            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 5];
 
             cols.CopyTo(array, 0);
             array[cols.Count] = new SubPropertyDescriptor(addressPD, Orbit_child["Mass"], "Orbit_Mass");
-            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Orbit_child["SemiMajorAxis"], "Orbit_SemiMajorAxis");
-            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Orbit_child["OrbitalPeriod"], "Orbit_OrbitalPeriod");
+            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Orbit_child["MassRelativeToEarth"], "Orbit_MassRelativeToEarth");
+            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Orbit_child["MassRelativeToSol"], "Orbit_MassRelativeToSol");
+            array[cols.Count + 3] = new SubPropertyDescriptor(addressPD, Orbit_child["SemiMajorAxis"], "Orbit_SemiMajorAxis");
+            array[cols.Count + 4] = new SubPropertyDescriptor(addressPD, Orbit_child["OrbitalPeriod"], "Orbit_OrbitalPeriod");
 
             PropertyDescriptorCollection newcols = new PropertyDescriptorCollection(array);
             return newcols;
