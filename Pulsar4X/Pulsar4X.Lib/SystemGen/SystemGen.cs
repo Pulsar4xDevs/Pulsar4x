@@ -252,15 +252,6 @@ namespace Pulsar4X
                 childStar.UpdatePosition(0);
             }
             system.Stars = new BindingList<Star>(starList);
-
-            char starLetter = 'A';
-
-            foreach (Star star in system.Stars)
-            {
-                star.Name = star.Name.Substring(0, star.Name.Length - 1); // Remove the last letter.
-                star.Name = star.Name + starLetter;
-                starLetter++; // YAY LETTER MATH! :D
-            }
         }
 
         private static double CalcStarOrbitDistance(Star star1, Star star2)
