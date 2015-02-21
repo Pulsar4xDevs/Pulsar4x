@@ -10,11 +10,8 @@ namespace Pulsar4X.Entities
     
     /// <summary>
     /// The Atmosphere of a Planet or Moon.
-    /// @todo Make this a generic component.
-    /// @todo Add a ToString overload which will retunr a string like this: 
-    /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
     /// </summary>
-    public class Atmosphere
+    public class Atmosphere : GameEntity
     {
         /// <summary>
         /// Atmospheric Presure
@@ -105,15 +102,24 @@ namespace Pulsar4X.Entities
         }
 
         private Planet _parentBody;
-
         /// <summary>
         /// The body this atmosphere belong to.
         /// </summary>
         public Planet ParentBody { get { return _parentBody; } }
 
+
+        /// <summary>
+        /// Atmosphere Constructor
+        /// </summary>
         public Atmosphere(Planet parentBody)
+            : base()
         {
             _parentBody = parentBody;
+        }
+
+        public override string ToString()
+        {
+            return _atmosphereDescriptionInPercent;
         }
 
         /// <summary>
