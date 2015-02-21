@@ -540,41 +540,14 @@ namespace Pulsar4X
             // now loop and generate the planets:
             for (int i = 0; i < noOfPlanetsToGenerate; ++i)
             {
-                GeneratePlanet(star, finalGenerationChance, i + 1);
+                // we'll start by determining the planet type:
+                Planet.PlanetType pt = GalaxyGen.PlanetTypeDisrubution.Select(m_RNG.NextDouble());
+
+                string planetName = star.Name + " - " + (i + 1).ToString();
+                Planet newPlanet = GenerateSystemBody(star, planetName, pt);
+                
+                star.Planets.Add(newPlanet);
             }
-        }
-
-        /// <summary>
-        /// Works out what type of planet to generate based on the distrabution in GalaxyGen.PlanetTypeDisrubution.
-        /// It then calls a more type specific function to complete generation of the planet.
-        /// </summary>
-        private static void GeneratePlanet(Star star, double planetGenerationChance, int number)
-        {
-            // we'll start by determining the planet type:
-            double planetTypeChance = m_RNG.NextDouble();
-            Planet.PlanetType pt = Planet.PlanetType.Terrestrial;  // init planet type for safty.
-
-            double dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.GasGiant];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.GasGiant;
-
-            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.IceGiant];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.IceGiant;
-
-            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.GasDwarf];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.GasDwarf;
-
-            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.Terrestrial];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.Terrestrial;
-
-            // now that we know the planet type we can generate the correct type:
-            string planetName = star.Name + " - " + number.ToString();
-            Planet newPlanet = GenerateSystemBody(star, planetName, pt);
-
-            star.Planets.Add(newPlanet);
         }
 
         /// <summary>
@@ -889,63 +862,66 @@ namespace Pulsar4X
             atmo.HydrosphereExtent = 0;
             atmo.Hydrosphere = false;
 
-            double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
-            if (m_RNG.NextDouble() > atmoChance)
+            // we uses these to keep a running tally of how much gass we have generated.
+            float totalATM = 0;
+            float currATM = 0;
+            int noOfTraceGases = 0;
+
+            // Generate an Atmosphere
+            ///< @todo Remove some of this hard coding:
+            switch (planet.Type)
             {
-                // we uses these to keep a running tally of how much gass we have generated.
-                float totalATM = 0;
-                float currATM = 0;
-                int noOfTraceGases = 0;
+                case Planet.PlanetType.GasDwarf:
+                case Planet.PlanetType.GasGiant:
+                    // Start with the ammount of heilum:
+                    currATM = (float)RNG_NextDoubleRange(0.05, 0.3);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
+                    totalATM += currATM;
 
-                // Generate an Atmosphere
-                ///< @todo Remove some of this hard coding:
-                switch (planet.Type)
-                {
-                    case Planet.PlanetType.GasDwarf:
-                    case Planet.PlanetType.GasGiant:
-                        // Start with the ammount of heilum:
-                        currATM = (float)RNG_NextDoubleRange(0.05, 0.3);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
-                        totalATM += currATM;
+                    // next get a random number/ammount of trace gases:
+                    noOfTraceGases = m_RNG.Next(1, 4);
+                    totalATM += AddTraceGases(atmo, noOfTraceGases);
 
-                        // next get a random number/ammount of trace gases:
-                        noOfTraceGases = m_RNG.Next(1, 4);
-                        totalATM += AddTraceGases(atmo, noOfTraceGases);
+                    // now make the remaining amount Hydrogen:
+                    currATM = 1 - totalATM; // get the remaining ATM.
+                    AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                    break;
+
+                case Planet.PlanetType.IceGiant:
+                    // Start with the ammount of heilum:
+                    currATM = (float)RNG_NextDoubleRange(0.1, 0.25);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
+                    totalATM += currATM;
+
+                    // next add a small amount of Methane:
+                    currATM = (float)RNG_NextDoubleRange(0.01, 0.03);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM); 
+                    totalATM += currATM;
+
+                    // Next some water and ammonia:
+                    currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(3), currATM); 
+                    totalATM += currATM;
+                    currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(4), currATM); 
+                    totalATM += currATM;
 
                         // now make the remaining amount Hydrogen:
-                        currATM = 1 - totalATM; // get the remaining ATM.
-                        AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
-                        break;
+                    currATM = 1 - totalATM; // get the remaining ATM.
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                    break;
 
-                    case Planet.PlanetType.IceGiant:
-                        // Start with the ammount of heilum:
-                        currATM = (float)RNG_NextDoubleRange(0.1, 0.25);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
-                        totalATM += currATM;
+                case Planet.PlanetType.Moon:
+                case Planet.PlanetType.Terrestrial:
+                    // Only Terrestrial like planets have a limited chance of having an atmo:
+                    double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * 
+                                                        (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
 
-                        // next add a small amount of Methane:
-                        currATM = (float)RNG_NextDoubleRange(0.01, 0.03);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM); 
-                        totalATM += currATM;
-
-                        // Next some water and ammonia:
-                        currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(3), currATM); 
-                        totalATM += currATM;
-                        currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(4), currATM); 
-                        totalATM += currATM;
-
-                         // now make the remaining amount Hydrogen:
-                        currATM = 1 - totalATM; // get the remaining ATM.
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
-                        break;
-
-                    case Planet.PlanetType.Moon:
-                    case Planet.PlanetType.Terrestrial:
+                    if (m_RNG.NextDouble() > atmoChance)
+                    {
                         // Terrestrial Planets can have very large ammount of ATM.
                         // so we will generate a number to act as the total:
-                        float planetsATM = (float)RNG_NextDoubleRange(0.1, 100); 
+                        float planetsATM = (float)RNG_NextDoubleRange(0.1, 100);
                         // reduce my mass ratio relative to earth (so really small bodies cannot have massive atmos:
                         double massRatio = planet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
                         planetsATM = (float)GMath.Clamp((double)planetsATM * massRatio, 0.01, 200);
@@ -981,19 +957,20 @@ namespace Pulsar4X
                         // next get a random number/ammount of trace gases:
                         noOfTraceGases = m_RNG.Next(1, 4);
                         totalATM += AddTraceGases(atmo, noOfTraceGases, planetsATM);
-                        
+
                         // now make the remaining amount Nitrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
                         AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(6), currATM * planetsATM);
-                        break;
+                    }
+                    break;
 
-                    case Planet.PlanetType.IceMoon:
-                    case Planet.PlanetType.DwarfPlanet:
-                    case Planet.PlanetType.Asteriod:
-                    case Planet.PlanetType.Comet:
-                    default:
-                        break; // none
-                }
+                    // Everthing else has no atmosphere at all.
+                case Planet.PlanetType.IceMoon:
+                case Planet.PlanetType.DwarfPlanet:
+                case Planet.PlanetType.Asteriod:
+                case Planet.PlanetType.Comet:
+                default:
+                    break; // none
             }
 
             // now calc data resulting from above:

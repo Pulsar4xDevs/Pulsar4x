@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X
 {
@@ -211,13 +212,22 @@ namespace Pulsar4X
         /// Dwarf planets are excluded because they are generated with asteroids
         /// rather then with planets (on account of not having cleared their orbits).
         /// </summary>
-        public static Dictionary<Planet.PlanetType, double> PlanetTypeDisrubution = new Dictionary<Planet.PlanetType, double>()
-            {
-                { Planet.PlanetType.GasGiant, 0.2 },
-                { Planet.PlanetType.IceGiant, 0.2 },
-                { Planet.PlanetType.GasDwarf, 0.1 },
-                { Planet.PlanetType.Terrestrial, 0.5 },
-            };
+        /// 
+        public static WeightedList<Planet.PlanetType> PlanetTypeDisrubution = new WeightedList<Planet.PlanetType>()
+        {
+            { 0.2, Planet.PlanetType.GasGiant },
+            { 0.2, Planet.PlanetType.IceGiant },
+            { 0.1, Planet.PlanetType.GasDwarf },
+            { 0.5, Planet.PlanetType.Terrestrial }
+        };
+
+        //public static Dictionary<Planet.PlanetType, double> PlanetTypeDisrubution = new Dictionary<Planet.PlanetType, double>()
+        //    {
+        //        { Planet.PlanetType.GasGiant, 0.2 },
+        //        { Planet.PlanetType.IceGiant, 0.2 },
+        //        { Planet.PlanetType.GasDwarf, 0.1 },
+        //        { Planet.PlanetType.Terrestrial, 0.5 },
+        //    };
 
         /// <summary>
         /// Limits of Planet masses based on type. Units are Kg.
