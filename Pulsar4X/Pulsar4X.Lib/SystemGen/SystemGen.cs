@@ -647,10 +647,10 @@ namespace Pulsar4X
             // Creat some of the basic stats:
             double mass = GenerateSystemBodyMass(planet, parent); // RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]);
             planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]);
-            double radius = Math.Pow((3 * mass) / (4 * Math.PI * (planet.Density / 1000 )), 0.33333333);  // planet.Density / 1000 changes it mfrom g/cm2 to Kg/cm3, needed because mass in is KG. oh and 0.3333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.33333333
-            radius = radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU, also keep the temp var as it is easer to read then planet.Radius.
-            planet.Radius = radius;
-            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
+            //double radius = Math.Pow((3 * mass) / (4 * Math.PI * (planet.Density / 1000 )), 0.33333333);  
+            //radius = radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU, also keep the temp var as it is easer to read then planet.Radius.
+            planet.Radius = CalculateRadiusOfBody(mass, planet.Density);
+            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (planet.Radius * planet.Radius));
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
            // Generate orbit:
@@ -664,7 +664,7 @@ namespace Pulsar4X
             // generate the planets day length:
             ///< @todo Move some of these length of day magic numbers into GalaxyGen
             ///< @todo Should we do Tidle Locked bodies??? iirc bodies trend toward being tidaly locked over time...
-            planet.LengthOfDay = new TimeSpan(m_RNG.Next(0, planet.Orbit.OrbitalPeriod.Days), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
+            planet.LengthOfDay = new TimeSpan((int)Math.Round(RNG_NextDoubleRange(0, planet.Orbit.OrbitalPeriod.TotalDays)), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
             if (planet.LengthOfDay < TimeSpan.FromHours(6))
                 planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
 
@@ -1429,6 +1429,19 @@ namespace Pulsar4X
                 return value * -1;
 
             return value;
+        }
+
+        /// <summary>
+        /// Calculates the radius of a body.
+        /// </summary>
+        /// <param name="mass">The mass of the body in Kg</param>
+        /// <param name="density">The density in g/cm^2</param>
+        /// <returns>The radius in AU</returns>
+        public static double CalculateRadiusOfBody(double mass, double density)
+        {
+            double radius = Math.Pow((3 * mass) / (4 * Math.PI * (density / 1000)), 0.3333333333); // density / 1000 changes it from g/cm2 to Kg/cm3, needed because mass in is KG. 
+                                                                                                   // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
+            return radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU.
         }
         
         #endregion
