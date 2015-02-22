@@ -406,12 +406,13 @@ namespace Pulsar4X
             double maxStarAge = GalaxyGen.StarAgeBySpectralType[spectralType]._max;
 
             StarData data = new StarData();
+            double randomSelection = m_RNG.NextDouble(); // we will use the one random number to select from all the spectral type ranges. Should give us saner numbers for stars.
             data._SpectralType = spectralType;
-            data._Radius = RNG_NextDoubleRange(GalaxyGen.StarRadiusBySpectralType[spectralType]);
-            data._Temp = (uint)m_RNG.Next((int)GalaxyGen.StarTemperatureBySpectralType[spectralType]._min, (int)GalaxyGen.StarTemperatureBySpectralType[spectralType]._max);
-            data._Luminosity = (float)RNG_NextDoubleRange(GalaxyGen.StarLuminosityBySpectralType[spectralType]);
-            data._Mass = RNG_NextDoubleRange(GalaxyGen.StarMassBySpectralType[spectralType]);
-            data._Age = (1 - data._Mass / GalaxyGen.StarMassBySpectralType[spectralType]._max) * maxStarAge; // note the fiddle math at the start here is to make more massive stars younger.
+            data._Radius = SelectFromRange(GalaxyGen.StarRadiusBySpectralType[spectralType], randomSelection);
+            data._Temp = (uint)Math.Round(SelectFromRange(GalaxyGen.StarTemperatureBySpectralType[spectralType], randomSelection));
+            data._Luminosity = (float)SelectFromRange(GalaxyGen.StarLuminosityBySpectralType[spectralType], randomSelection);
+            data._Mass = SelectFromRange(GalaxyGen.StarMassBySpectralType[spectralType], randomSelection);
+            data._Age = (1 - data._Mass / GalaxyGen.StarMassBySpectralType[spectralType]._max) * maxStarAge; // note the fiddly math at the start here is to make more massive stars younger.
 
             // create star and populate data:
             Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
@@ -1462,17 +1463,6 @@ namespace Pulsar4X
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max);
         }
-        
-        /// <summary>
-        /// Returns the next Double from m_RNG adjusted to be between the min and max range times by a constant value (e.g. a unit of some sort).
-        /// </summary>
-        /// <param name="constant"> A constant which will be multiplied agains min and max, use for units etc.</param>
-        /// <returns>Random value between min and max adjusted according to the constant value provided.</returns>
-        public static double RNG_NextDoubleRange(double min, double max, double constant)
-        {
-            min *= constant;
-            return min + m_RNG.NextDouble() * ((max * constant) - min);
-        }
 
         /// <summary>
         /// Raises the random number generated to the power provided to produce a non-uniform selection from the range.
@@ -1491,19 +1481,19 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Version of RNG_NextDoubleRange(double min, double max, double constant) that takes GalaxyGen.MinMaxStruct directly.
-        /// </summary>
-        public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax, double constant)
-        {
-            return RNG_NextDoubleRange(minMax._min, minMax._max, constant);
-        }
-
-        /// <summary>
         /// Returns a value between the min and max.
         /// </summary>
         public static uint RNG_NextRange(GalaxyGen.MinMaxStruct minMax)
         {
             return (uint)m_RNG.Next((int)minMax._min, (int)minMax._max);
+        }
+
+        /// <summary>
+        /// Selects a number from a range based on the selection percentage provided.
+        /// </summary>
+        public static double SelectFromRange(GalaxyGen.MinMaxStruct minMax, double selection)
+        {
+            return minMax._min + selection * (minMax._max - minMax._min); ;
         }
 
         /// <summary>
