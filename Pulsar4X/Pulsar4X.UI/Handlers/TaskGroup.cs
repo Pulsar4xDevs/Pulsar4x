@@ -770,6 +770,8 @@ namespace Pulsar4X.UI.Handlers
                     {
                         if (orders[index].jumpPoint.Connect != null)
                             targetsys = orders[index].jumpPoint.Connect.Position.System;
+                        else
+                            targetsys = null; //jumping into an unknown system.
                         index = -1;
                     }
                         
@@ -789,18 +791,20 @@ namespace Pulsar4X.UI.Handlers
 
             SystemLocationDict.Clear();
             SystemLocationGuidDict.Clear();
-            AddJumpPointsToList(targetsystem);
-            AddPlanetsToList(targetsystem);
+            if (targetsystem != null)
+            {
+                AddJumpPointsToList(targetsystem);
+                AddPlanetsToList(targetsystem);
 
-            if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
-                AddContactsToList(targetsystem);
+                if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
+                    AddContactsToList(targetsystem);
 
-            if (m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.Checked == true)
-                AddTaskGroupsToList(targetsystem);
+                if (m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.Checked == true)
+                    AddTaskGroupsToList(targetsystem);
 
-            if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
-                AddWaypointsToList(targetsystem);
-
+                if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
+                    AddWaypointsToList(targetsystem);
+            }
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
 
