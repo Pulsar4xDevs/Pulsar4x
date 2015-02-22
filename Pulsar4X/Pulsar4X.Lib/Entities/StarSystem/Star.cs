@@ -24,14 +24,16 @@ namespace Pulsar4X.Entities
 
     public enum LuminosityClass
     {
-        O,
-        I,
-        II,
-        III,
-        IV,
-        V,
-        sd,
-        D,
+        O,          // Hypergiants
+        Ia,         // Luminous Supergiants
+        Iab,        // Intermediate Supergiants
+        Ib,         // Less Luminos Supergiants
+        II,         // Bright Giants
+        III,        // Giants
+        IV,         // Subgiants
+        V,          // Main-Sequence (like our sun)
+        sd,         // Subdwarfs
+        D,          // White Dwarfs
     }
 
     [TypeDescriptionProvider(typeof(StarTypeDescriptionProvider))]
@@ -47,6 +49,8 @@ namespace Pulsar4X.Entities
         public double MaxHabitableRadius { get; set; }  // in au
 
         public SpectralType SpectralType { get; set; }
+        public ushort SpectralSubDivision { get; set; }       // number from  0 (hottest) to 9 (coolest)
+        public LuminosityClass LuminosityClass {get; set; }
 
         public Star()
             : base()

@@ -421,12 +421,39 @@ namespace Pulsar4X
             Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
             star.Age = data._Age;
             SetHabitableZone(star);     // calculate habitable zone
+            CalculateFullSpectralClass(star);
 
-            // Temporary orbit to store mass.
-            // Calculate real orbit later.
+            // Temporary orbit to store mass, Calculate real orbit later
             star.Orbit = Orbit.FromStationary(data._Mass);
 
             return star;
+        }
+
+        /// <summary>
+        /// Calculates and sets the Habitable Zone of this star based on it Luminosity.
+        /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
+        /// </summary>
+        /// <returns>Average Habitable Zone</returns>
+        public static void SetHabitableZone(Star star)
+        {
+            star.MinHabitableRadius = Math.Sqrt(star.Luminosity / 1.1);
+            star.MaxHabitableRadius = Math.Sqrt(star.Luminosity / 0.53);
+            star.EcoSphereRadius = (star.MinHabitableRadius + star.MaxHabitableRadius) / 2; // our habital zone number is in the middle of our min/max values.
+        }
+
+        public static void CalculateFullSpectralClass(Star star)
+        {
+            // start by getting the sub-division, which is based on temp.
+            double sub = star.Temperature / GalaxyGen.StarTemperatureBySpectralType[star.SpectralType]._max;  // temp rang from 0 to 1.
+            star.SpectralSubDivision = (ushort)Math.Round( (1 - sub) * 10 );  // invert temp range as 0 is hottest, 9 is coolest.
+
+            // now get the luminosity class
+            ///< @todo For right now everthing is just main sequence. see http://en.wikipedia.org/wiki/Stellar_classification
+            /// on how this should be done. For right now tho class V is fine (its just flavor text).
+            star.LuminosityClass = LuminosityClass.V;
+
+            // finally add them all up to get the class string:
+            star.Class = star.SpectralType.ToString() + star.SpectralSubDivision.ToString() + "-" + star.LuminosityClass.ToString();
         }
 
         #endregion
@@ -1525,19 +1552,6 @@ namespace Pulsar4X
             temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
             return temp + Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
         }
-
-        /// <summary>
-        /// Calculates and sets the Habitable Zone of this star based on it Luminosity.
-        /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
-        /// </summary>
-        /// <returns>Average Habitable Zone</returns>
-        public static void SetHabitableZone(Star star)
-        {
-            star.MinHabitableRadius = Math.Sqrt(star.Luminosity / 1.1);
-            star.MaxHabitableRadius = Math.Sqrt(star.Luminosity / 0.53);
-            star.EcoSphereRadius = (star.MinHabitableRadius + star.MaxHabitableRadius) / 2; // our habital zone number is in the middle of out min/max values.
-        }
-
 
         #endregion
     }
