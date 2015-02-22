@@ -32,8 +32,8 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Survey typically.
         /// </summary>
-        private Planet Body;
-        public Planet body
+        private SystemBody Body;
+        public SystemBody body
         {
             get { return body; }
         }
@@ -81,7 +81,7 @@ namespace Pulsar4X.Entities.Components
         /// Constructor for planetary targets.
         /// </summary>
         /// <param name="BodyTarget">Body which is the target</param>
-        public TargetTN(Planet BodyTarget)
+        public TargetTN(SystemBody BodyTarget)
         {
             Id = Guid.NewGuid();
             TargetType = BodyTarget.SSEntity;

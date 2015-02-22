@@ -255,7 +255,7 @@ namespace Pulsar4X.UI.SceenGraph
                 this.AddElement(oCurrStar);
 
                 // now go though and add each planet to render list.
-                foreach (Pulsar4X.Entities.Planet oPlanet in oStar.Planets)
+                foreach (Pulsar4X.Entities.SystemBody oPlanet in oStar.Planets)
                 {
                     SceenElement oPlanetElement = new PlanetElement(a_oDefaultEffect, v3StarPos, oPlanet, Color.FromArgb(255, 0, 205, 0));
                     oPlanetElement.EntityID = oPlanet.Id;
@@ -290,7 +290,7 @@ namespace Pulsar4X.UI.SceenGraph
                     iPlanetCounter++;
 
                     // now again for the moons:
-                    foreach (Pulsar4X.Entities.Planet oMoon in oPlanet.Moons)
+                    foreach (Pulsar4X.Entities.SystemBody oMoon in oPlanet.Moons)
                     {
                         SceenElement oMoonElement = new PlanetElement(a_oDefaultEffect, v3PlanetPos, oMoon, Color.FromArgb(255, 0, 205, 0));
                         oMoonElement.EntityID = oMoon.Id;

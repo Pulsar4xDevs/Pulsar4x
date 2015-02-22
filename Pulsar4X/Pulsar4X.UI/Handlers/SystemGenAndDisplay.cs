@@ -14,7 +14,7 @@ namespace Pulsar4X.UI.Handlers
     public class SystemGenAndDisplay
     {
         /// <summary>
-        /// Panel that contains the Star and Planet Data grids.
+        /// Panel that contains the Star and SystemBody Data grids.
         /// </summary>
         Panels.SGaD_DataPanel m_oDataPanel;
 
@@ -60,7 +60,7 @@ namespace Pulsar4X.UI.Handlers
             m_oDataPanel.StarDataGrid.DataSource = VM.StarsSource;
             m_oDataPanel.StarDataGrid.SelectionChanged += new EventHandler(StarsDataGrid_SelectionChanged);
 
-            // Setup the Planet Data Grid
+            // Setup the SystemBody Data Grid
             m_oDataPanel.PlanetsDataGrid.AutoGenerateColumns = false;
             //m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
 
@@ -158,7 +158,7 @@ namespace Pulsar4X.UI.Handlers
             var sel = m_oDataPanel.PlanetsDataGrid.SelectedRows;
             if (sel.Count > 0)
             {
-                VM.CurrentPlanet = (Planet)sel[0].DataBoundItem;
+                VM.CurrentPlanet = (SystemBody)sel[0].DataBoundItem;
             }
         }
 

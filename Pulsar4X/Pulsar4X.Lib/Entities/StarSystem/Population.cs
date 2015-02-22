@@ -300,9 +300,9 @@ namespace Pulsar4X.Entities
         public Species Species { get; set; }
 
         /// <summary>
-        /// Planet the population is attached to
+        /// SystemBody the population is attached to
         /// </summary>
-        public Planet Planet { get; set; }
+        public SystemBody Planet { get; set; }
 
         /// <summary>
         /// Does this pop have an assigned governor?
@@ -483,7 +483,7 @@ namespace Pulsar4X.Entities
 
         #endregion
 
-        public Population(Planet a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
+        public Population(SystemBody a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
         {
             // initialise minerials:
             m_aiMinerials = new float[Constants.Minerals.NO_OF_MINERIALS];

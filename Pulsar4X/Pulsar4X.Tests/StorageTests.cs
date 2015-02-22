@@ -28,7 +28,7 @@ namespace Pulsar4X.Tests
             _gameState.Factions = new BindingList<Faction>();
             _gameState.StarSystems = new BindingList<StarSystem>();
             _gameState.Stars = new BindingList<Star>();
-            _gameState.Planets = new BindingList<Planet>();
+            _gameState.Planets = new BindingList<SystemBody>();
 
             var species = new Species { Id = Guid.NewGuid(), Name = "Test Humans" };
             _gameState.Species.Add(species);

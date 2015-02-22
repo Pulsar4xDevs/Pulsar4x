@@ -10,7 +10,7 @@ namespace Pulsar4X.Entities
 {
     
     /// <summary>
-    /// The Atmosphere of a Planet or Moon.
+    /// The Atmosphere of a SystemBody or Moon.
     /// </summary>
     public class Atmosphere : GameEntity
     {
@@ -103,25 +103,25 @@ namespace Pulsar4X.Entities
         {
             get
             {
-                if (ParentBody.Type == Planet.PlanetType.Terrestrial
-                    || ParentBody.Type == Planet.PlanetType.Moon)
+                if (ParentBody.Type == SystemBody.PlanetType.Terrestrial
+                    || ParentBody.Type == SystemBody.PlanetType.Moon)
                     return true;  // only these bodies have atmospheres that can be terraformed.
 
                 return false;
             }
         }
 
-        private Planet _parentBody;
+        private SystemBody _parentBody;
         /// <summary>
         /// The body this atmosphere belong to.
         /// </summary>
-        public Planet ParentBody { get { return _parentBody; } }
+        public SystemBody ParentBody { get { return _parentBody; } }
 
 
         /// <summary>
         /// Atmosphere Constructor
         /// </summary>
-        public Atmosphere(Planet parentBody)
+        public Atmosphere(SystemBody parentBody)
             : base()
         {
             _parentBody = parentBody;
@@ -160,9 +160,9 @@ namespace Pulsar4X.Entities
                     }
                 }
 
-                if (ParentBody.Type == Planet.PlanetType.GasDwarf
-                    || ParentBody.Type == Planet.PlanetType.GasGiant
-                    || ParentBody.Type == Planet.PlanetType.IceGiant)
+                if (ParentBody.Type == SystemBody.PlanetType.GasDwarf
+                    || ParentBody.Type == SystemBody.PlanetType.GasGiant
+                    || ParentBody.Type == SystemBody.PlanetType.IceGiant)
                 {
                     // special gas giant stuff, needed because we do not apply greenhouse factor to them:
                     SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);

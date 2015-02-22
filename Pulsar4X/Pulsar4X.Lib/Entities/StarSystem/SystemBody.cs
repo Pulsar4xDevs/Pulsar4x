@@ -13,10 +13,10 @@ using log4net;
 namespace Pulsar4X.Entities
 {
     [TypeDescriptionProvider(typeof(PlanetTypeDescriptionProvider))]
-    public class Planet : OrbitingEntity
+    public class SystemBody : OrbitingEntity
     {
 #if LOG4NET_ENABLED
-        public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
+        public static readonly ILog logger = LogManager.GetLogger(typeof(SystemBody));
 #endif
 
         public enum PlanetType
@@ -26,7 +26,7 @@ namespace Pulsar4X.Entities
             IceGiant,       // Like Uranus/Neptune
             DwarfPlanet,    // Pluto!
             GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
-            ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron Planet (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+            ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
             Moon,
             IceMoon,
             Asteriod,
@@ -113,7 +113,7 @@ namespace Pulsar4X.Entities
         public float RadiationLevel { get; set; }
         public float AtmosphericDust { get; set; }
 
-        public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
+        public BindingList<SystemBody> Moons { get; set; } //moons orbiting the planet
         public BindingList<Population> Populations { get; set; } // list of Populations (colonies) on this planet.
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public Planet(OrbitingEntity parent)
+        public SystemBody(OrbitingEntity parent)
             : base()
         {
             /// <summary>
@@ -160,7 +160,7 @@ namespace Pulsar4X.Entities
             /// </summary>
             Id = Guid.NewGuid();
 
-            Moons = new BindingList<Planet>();
+            Moons = new BindingList<SystemBody>();
             Populations = new BindingList<Population>();
 
             SSEntity = StarSystemEntityType.Body;
@@ -221,7 +221,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Update all the moons.
             /// </summary>
-            foreach (Planet CurrentMoon in Moons)
+            foreach (SystemBody CurrentMoon in Moons)
             {
                 CurrentMoon.UpdatePosition(tickValue);
             }
@@ -262,7 +262,7 @@ namespace Pulsar4X.Entities
         private ICustomTypeDescriptor td;
 
         public PlanetTypeDescriptionProvider()
-            : this(TypeDescriptor.GetProvider(typeof(Planet)))
+            : this(TypeDescriptor.GetProvider(typeof(SystemBody)))
         { }
 
         public PlanetTypeDescriptionProvider(TypeDescriptionProvider parent)

@@ -126,11 +126,11 @@ namespace Pulsar4X.UI.ViewModels
                 _currentstar = value;
                 //NotifyPropertyChanged("CurrentStar");
                 OnPropertyChanged(() => CurrentStar);
-                var planetslist = new SortableBindingList<Planet>();
-                foreach (Planet planet in CurrentStar.Planets)
+                var planetslist = new SortableBindingList<SystemBody>();
+                foreach (SystemBody planet in CurrentStar.Planets)
                 {
                     planetslist.Add(planet);
-                    foreach (Planet moon in planet.Moons)
+                    foreach (SystemBody moon in planet.Moons)
                     {
                         planetslist.Add(moon);
                     }
@@ -139,7 +139,7 @@ namespace Pulsar4X.UI.ViewModels
                 OnPropertyChanged(() => PlanetSource);
             }
         }
-        public Planet CurrentPlanet { get; set; }
+        public SystemBody CurrentPlanet { get; set; }
 
         public bool isSM { get; set; }
         public bool isNotSM { get { return !isSM; } set { isSM = !value; } }

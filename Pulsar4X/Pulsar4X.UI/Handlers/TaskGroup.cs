@@ -484,7 +484,7 @@ namespace Pulsar4X.UI.Handlers
                             shipcontact.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Planets:
-                            Planet planet = (Planet)entity;
+                            SystemBody planet = (SystemBody)entity;
                             NewOrder = new Order(selected_ordertype, -1, -1, 0, planet);
                             break;
                         case SystemListObject.ListEntityType.JumpPoint:
@@ -941,7 +941,7 @@ namespace Pulsar4X.UI.Handlers
         {
             foreach (Star star in starsystem.Stars)
             {
-                foreach (Planet planet in star.Planets)
+                foreach (SystemBody planet in star.Planets)
                 {
                     //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
                     string keyName = planet.Name;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;

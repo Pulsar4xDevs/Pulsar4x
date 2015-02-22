@@ -622,7 +622,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// For now this is a stub for where ships will be created.
         /// </summary>
-        public Planet Capitol { get; set; }
+        public SystemBody Capitol { get; set; }
 
         public FactionTheme FactionTheme { get; set; }
         public FactionCommanderTheme CommanderTheme { get; set; }

@@ -126,7 +126,7 @@ namespace Pulsar4X
         #endregion
 
 
-        #region Advanced Planet and other Body Generation Parameters
+        #region Advanced SystemBody and other Body Generation Parameters
 
         /// <summary>
         /// The chance Planets will be generated around a given star. A number between 0 and 1 (e.g. a 33% chance would be 0.33).
@@ -174,7 +174,7 @@ namespace Pulsar4X
         public const double MaxAsteriodOrbitDeviation = 0.05;
 
         /// <summary>
-        /// The maximum Planet orbit Inclination. Also used as the maximum orbital tilt.
+        /// The maximum SystemBody orbit Inclination. Also used as the maximum orbital tilt.
         /// Angle in degrees.
         /// </summary>
         public const double MaxPlanetInclination = 45; // degrees. used for orbits and axial tilt.
@@ -253,46 +253,46 @@ namespace Pulsar4X
         /// rather then with planets (on account of not having cleared their orbits).
         /// </summary>
         /// 
-        public static WeightedList<Planet.PlanetType> PlanetTypeDisrubution = new WeightedList<Planet.PlanetType>()
+        public static WeightedList<SystemBody.PlanetType> PlanetTypeDisrubution = new WeightedList<SystemBody.PlanetType>()
         {
-            { 0.2, Planet.PlanetType.GasGiant },
-            { 0.2, Planet.PlanetType.IceGiant },
-            { 0.1, Planet.PlanetType.GasDwarf },
-            { 0.5, Planet.PlanetType.Terrestrial }
+            { 0.2, SystemBody.PlanetType.GasGiant },
+            { 0.2, SystemBody.PlanetType.IceGiant },
+            { 0.1, SystemBody.PlanetType.GasDwarf },
+            { 0.5, SystemBody.PlanetType.Terrestrial }
         };
 
         /// <summary>
-        /// Limits of Planet masses based on type. Units are Kg.
+        /// Limits of SystemBody masses based on type. Units are Kg.
         /// @note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetMassByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> PlanetMassByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
-                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 500 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
-                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 30 * Constants.Units.EARTH_MASS_IN_KILOGRAMS} },
-                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
-                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS }  },
-                { Planet.PlanetType.Moon, new MinMaxStruct() { _min = 1E16, _max = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
-                { Planet.PlanetType.IceMoon, new MinMaxStruct() { _min = 1E16, _max = 5E22 } }, // note 1E16 is 1 nano earth mass.
-                { Planet.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 2E20 , _max = 5E23 } },
-                { Planet.PlanetType.Asteriod, new MinMaxStruct() { _min = 1E15, _max = 9E19 } },
-                { Planet.PlanetType.Comet, new MinMaxStruct() { _min = 1E13, _max = 9E14 } },
+                { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 500 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
+                { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 30 * Constants.Units.EARTH_MASS_IN_KILOGRAMS} },
+                { SystemBody.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
+                { SystemBody.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS }  },
+                { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 1E16, _max = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
+                { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 1E16, _max = 5E22 } }, // note 1E16 is 1 nano earth mass.
+                { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 2E20 , _max = 5E23 } },
+                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 1E15, _max = 9E19 } },
+                { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 1E13, _max = 9E14 } },
             };
 
         /// <summary>
         /// Limits of a Planets density based on its type, in g/cm3
         /// @note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetDensityByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> PlanetDensityByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
-                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 0.5, _max = 10 } },
-                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 1, _max = 5 } },
-                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1, _max = 8 } },
-                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 3, _max = 8 } },
-                { Planet.PlanetType.Moon, new MinMaxStruct() { _min = 1.4, _max = 5 } },
-                { Planet.PlanetType.IceMoon, new MinMaxStruct() { _min = 1, _max = 3 } },
-                { Planet.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 1, _max = 6 } },
-                { Planet.PlanetType.Asteriod, new MinMaxStruct() { _min = 1, _max = 6 } },
-                { Planet.PlanetType.Comet, new MinMaxStruct() { _min = 0.25, _max = 0.7 } },
+                { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 0.5, _max = 10 } },
+                { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 1, _max = 5 } },
+                { SystemBody.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1, _max = 8 } },
+                { SystemBody.PlanetType.Terrestrial, new MinMaxStruct() { _min = 3, _max = 8 } },
+                { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 1.4, _max = 5 } },
+                { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 1, _max = 3 } },
+                { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 1, _max = 6 } },
+                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 1, _max = 6 } },
+                { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 0.25, _max = 0.7 } },
             };
 
         /// <summary>
@@ -315,32 +315,32 @@ namespace Pulsar4X
         /// This is used to adjust the orbital distances in the range of OrbitalDistanceByStarSpectralType for a given planet type.
         /// This is done by raising the random number generated to select from the range to the power of this distribution number.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, double> OrbitalDistanceDistributionByPlanetType = new Dictionary<Planet.PlanetType, double>()
+        public static Dictionary<SystemBody.PlanetType, double> OrbitalDistanceDistributionByPlanetType = new Dictionary<SystemBody.PlanetType, double>()
             {
-                { Planet.PlanetType.GasGiant, 1.8 },
-                { Planet.PlanetType.IceGiant, 1.5 },
-                { Planet.PlanetType.GasDwarf, 2 },
-                { Planet.PlanetType.Terrestrial, 3 },
-                { Planet.PlanetType.DwarfPlanet, 1.2 },
-                { Planet.PlanetType.Asteriod, 1.2 },
-                { Planet.PlanetType.Comet, 0.5 },
+                { SystemBody.PlanetType.GasGiant, 1.8 },
+                { SystemBody.PlanetType.IceGiant, 1.5 },
+                { SystemBody.PlanetType.GasDwarf, 2 },
+                { SystemBody.PlanetType.Terrestrial, 3 },
+                { SystemBody.PlanetType.DwarfPlanet, 1.2 },
+                { SystemBody.PlanetType.Asteriod, 1.2 },
+                { SystemBody.PlanetType.Comet, 0.5 },
             };
 
         /// <summary>
         /// The possible ranges for albedo for various planet types.
         /// @note These are WAGs roughly based on the albedo of bodies in our solar system. They couild be tweak for gameplay.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetAlbedoByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> PlanetAlbedoByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
-                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 0.5, _max = 0.7 } },
-                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 0.5, _max = 0.7 } },
-                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 0.3, _max = 0.7 } },
-                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05, _max = 0.5 } },
-                { Planet.PlanetType.Moon, new MinMaxStruct() { _min = 0.05, _max = 0.5 } },
-                { Planet.PlanetType.IceMoon, new MinMaxStruct() { _min = 0.4, _max = 0.7 } },
-                { Planet.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 0.05, _max = 0.95 } },
-                { Planet.PlanetType.Asteriod, new MinMaxStruct() { _min = 0.05, _max = 0.15 } },
-                { Planet.PlanetType.Comet, new MinMaxStruct() { _min = 0.95, _max = 0.99 } },
+                { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 0.5, _max = 0.7 } },
+                { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 0.5, _max = 0.7 } },
+                { SystemBody.PlanetType.GasDwarf, new MinMaxStruct() { _min = 0.3, _max = 0.7 } },
+                { SystemBody.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05, _max = 0.5 } },
+                { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 0.05, _max = 0.5 } },
+                { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 0.4, _max = 0.7 } },
+                { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 0.05, _max = 0.95 } },
+                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 0.05, _max = 0.15 } },
+                { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 0.95, _max = 0.99 } },
             };
 
         /// <summary>
@@ -348,47 +348,47 @@ namespace Pulsar4X
         /// In microtesla (uT).
         /// @note @note These are WAGs roughly based on the Magnetosphere of bodies in our solar system. They couild be tweak for gameplay.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, MinMaxStruct> PlanetMagneticFieldByType = new Dictionary<Planet.PlanetType, MinMaxStruct>()
+        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> PlanetMagneticFieldByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
-                { Planet.PlanetType.GasGiant, new MinMaxStruct() { _min = 10, _max = 2000 } },
-                { Planet.PlanetType.IceGiant, new MinMaxStruct() { _min = 5, _max = 50 } },
-                { Planet.PlanetType.GasDwarf, new MinMaxStruct() { _min = 0.1, _max = 20 } },
-                { Planet.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.0001, _max = 45 } },
-                { Planet.PlanetType.Moon, new MinMaxStruct() { _min = 0.0001, _max = 1 } },
-                { Planet.PlanetType.IceMoon, new MinMaxStruct() { _min = 0.0001, _max = 0.001 } },
-                { Planet.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 0.00001, _max = 0.0001 } },
-                { Planet.PlanetType.Asteriod, new MinMaxStruct() { _min = 0.000001, _max = 0.00001 } },
-                { Planet.PlanetType.Comet, new MinMaxStruct() { _min = 0.0000001, _max = 0.000001 } },
+                { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 10, _max = 2000 } },
+                { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 5, _max = 50 } },
+                { SystemBody.PlanetType.GasDwarf, new MinMaxStruct() { _min = 0.1, _max = 20 } },
+                { SystemBody.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.0001, _max = 45 } },
+                { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 0.0001, _max = 1 } },
+                { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 0.0001, _max = 0.001 } },
+                { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 0.00001, _max = 0.0001 } },
+                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 0.000001, _max = 0.00001 } },
+                { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 0.0000001, _max = 0.000001 } },
             };
 
         /// <summary>
-        /// This value is multiplied by (Planet Mass / Max Mass for Planet Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
+        /// This value is multiplied by (SystemBody Mass / Max Mass for SystemBody Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
         /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, double> AtmosphereGenerationModifier = new Dictionary<Planet.PlanetType, double>()
+        public static Dictionary<SystemBody.PlanetType, double> AtmosphereGenerationModifier = new Dictionary<SystemBody.PlanetType, double>()
             {
-                { Planet.PlanetType.GasGiant, 100000000 },
-                { Planet.PlanetType.IceGiant, 100000000 },
-                { Planet.PlanetType.GasDwarf, 100000000 },
-                { Planet.PlanetType.Terrestrial, 1.4 },
-                { Planet.PlanetType.Moon, 0.3 },
-                { Planet.PlanetType.IceMoon, 0 },
-                { Planet.PlanetType.DwarfPlanet, 0 },
-                { Planet.PlanetType.Asteriod, 0 },
-                { Planet.PlanetType.Comet, 0 },
+                { SystemBody.PlanetType.GasGiant, 100000000 },
+                { SystemBody.PlanetType.IceGiant, 100000000 },
+                { SystemBody.PlanetType.GasDwarf, 100000000 },
+                { SystemBody.PlanetType.Terrestrial, 1.4 },
+                { SystemBody.PlanetType.Moon, 0.3 },
+                { SystemBody.PlanetType.IceMoon, 0 },
+                { SystemBody.PlanetType.DwarfPlanet, 0 },
+                { SystemBody.PlanetType.Asteriod, 0 },
+                { SystemBody.PlanetType.Comet, 0 },
             };
 
         /// <summary>
         /// This value is used to determin if a planet gets moons. if a random number between 0 and 1 is less then this number then the planet geets moons.
         /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, double> MoonGenerationChanceByPlanetType = new Dictionary<Planet.PlanetType, double>()
+        public static Dictionary<SystemBody.PlanetType, double> MoonGenerationChanceByPlanetType = new Dictionary<SystemBody.PlanetType, double>()
             {
-                { Planet.PlanetType.GasGiant, 0.99999999 },
-                { Planet.PlanetType.IceGiant, 0.99999999 },
-                { Planet.PlanetType.GasDwarf, 0.99 },
-                { Planet.PlanetType.Terrestrial, 0.5 },
-                { Planet.PlanetType.DwarfPlanet, 0.0001 },
+                { SystemBody.PlanetType.GasGiant, 0.99999999 },
+                { SystemBody.PlanetType.IceGiant, 0.99999999 },
+                { SystemBody.PlanetType.GasDwarf, 0.99 },
+                { SystemBody.PlanetType.Terrestrial, 0.5 },
+                { SystemBody.PlanetType.DwarfPlanet, 0.0001 },
             };
 
         /// <summary>
@@ -396,13 +396,13 @@ namespace Pulsar4X
         /// The bigger the planets the more moons it can have and the closer it will get to having the maximum number.
         /// @note Given the way the calculation for max moons is done it is unlikly that any planet will ever have the maximum number of moon, so pad as desired.
         /// </summary>
-        public static Dictionary<Planet.PlanetType, double> MaxNoOfMoonsByPlanetType = new Dictionary<Planet.PlanetType, double>()
+        public static Dictionary<SystemBody.PlanetType, double> MaxNoOfMoonsByPlanetType = new Dictionary<SystemBody.PlanetType, double>()
         {
-                { Planet.PlanetType.GasGiant, 20 },
-                { Planet.PlanetType.IceGiant, 15 },
-                { Planet.PlanetType.GasDwarf, 8 },
-                { Planet.PlanetType.Terrestrial, 4 },
-                { Planet.PlanetType.DwarfPlanet, 1 },
+                { SystemBody.PlanetType.GasGiant, 20 },
+                { SystemBody.PlanetType.IceGiant, 15 },
+                { SystemBody.PlanetType.GasDwarf, 8 },
+                { SystemBody.PlanetType.Terrestrial, 4 },
+                { SystemBody.PlanetType.DwarfPlanet, 1 },
         };
 
         /// <summary>
@@ -411,12 +411,12 @@ namespace Pulsar4X
         /// Earth has a tectonic activity of 0.217 by this calculation.
         /// So if the tectonic activing number is < the threshold of Earth like but greater than Minor then it will be Earth like.
         /// </summary>
-        public static Dictionary<Planet.TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<Planet.TectonicActivity, double>()
+        public static Dictionary<SystemBody.TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<SystemBody.TectonicActivity, double>()
         {
-                { Planet.TectonicActivity.Dead , 0.01 },
-                { Planet.TectonicActivity.Minor , 0.2 },
-                { Planet.TectonicActivity.EarthLike , 0.4 },
-                { Planet.TectonicActivity.Major , 1 }          // Not used, just here for completness.
+                { SystemBody.TectonicActivity.Dead , 0.01 },
+                { SystemBody.TectonicActivity.Minor , 0.2 },
+                { SystemBody.TectonicActivity.EarthLike , 0.4 },
+                { SystemBody.TectonicActivity.Major , 1 }          // Not used, just here for completness.
         };
 
         #endregion

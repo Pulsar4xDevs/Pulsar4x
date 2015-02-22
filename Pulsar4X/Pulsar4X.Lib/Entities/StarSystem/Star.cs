@@ -39,7 +39,7 @@ namespace Pulsar4X.Entities
     [TypeDescriptionProvider(typeof(StarTypeDescriptionProvider))]
     public class Star : OrbitingEntity
     {
-        public BindingList<Planet> Planets { get; set; }
+        public BindingList<SystemBody> Planets { get; set; }
         public double Age { get; set; }
         public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
         public float Luminosity { get; set; }
@@ -55,7 +55,7 @@ namespace Pulsar4X.Entities
         public Star()
             : base()
         {
-            Planets = new BindingList<Planet>();
+            Planets = new BindingList<SystemBody>();
             SupportsPopulations = false;
         }
 
@@ -72,7 +72,7 @@ namespace Pulsar4X.Entities
 
             Class = SpectralType.ToString();
 
-            Planets = new BindingList<Planet>();
+            Planets = new BindingList<SystemBody>();
             SupportsPopulations = false;
         }
 
@@ -96,7 +96,7 @@ namespace Pulsar4X.Entities
                 Position.Y += Parent.Position.Y;
             }
 
-            foreach (Planet CurrentPlanet in Planets)
+            foreach (SystemBody CurrentPlanet in Planets)
             {
                 CurrentPlanet.UpdatePosition(deltaSeconds);
             }
