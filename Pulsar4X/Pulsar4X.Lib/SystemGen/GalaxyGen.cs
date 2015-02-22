@@ -166,12 +166,12 @@ namespace Pulsar4X
         public const int MaxNoOfComets = 50;
 
         /// <summary>
-        /// Asteriods and Dwarf planets are generated in belts. To do this a single orbit is first generate as the 
-        /// basis for the whole belt. Asteriods then apply a small gitter of + or - a percentage of the original orbit 
+        /// Asteroids and Dwarf planets are generated in belts. To do this a single orbit is first generate as the 
+        /// basis for the whole belt. Asteroids then apply a small gitter of + or - a percentage of the original orbit 
         /// (except MeanAnomaly, which is the starting point on the orbit. that is random). 
         /// The value is a percentage as a number between 0 and 1, tho typically it should be less than 10% (or 0.1).
         /// </summary>
-        public const double MaxAsteriodOrbitDeviation = 0.05;
+        public const double MaxAsteroidOrbitDeviation = 0.05;
 
         /// <summary>
         /// The maximum SystemBody orbit Inclination. Also used as the maximum orbital tilt.
@@ -274,7 +274,7 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 1E16, _max = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
                 { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 1E16, _max = 5E22 } }, // note 1E16 is 1 nano earth mass.
                 { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 2E20 , _max = 5E23 } },
-                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 1E15, _max = 9E19 } },
+                { SystemBody.PlanetType.Asteroid, new MinMaxStruct() { _min = 1E15, _max = 9E19 } },
                 { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 1E13, _max = 9E14 } },
             };
 
@@ -291,7 +291,7 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 1.4, _max = 5 } },
                 { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 1, _max = 3 } },
                 { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 1, _max = 6 } },
-                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 1, _max = 6 } },
+                { SystemBody.PlanetType.Asteroid, new MinMaxStruct() { _min = 1, _max = 6 } },
                 { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 0.25, _max = 0.7 } },
             };
 
@@ -322,7 +322,7 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.GasDwarf, 2 },
                 { SystemBody.PlanetType.Terrestrial, 3 },
                 { SystemBody.PlanetType.DwarfPlanet, 1.2 },
-                { SystemBody.PlanetType.Asteriod, 1.2 },
+                { SystemBody.PlanetType.Asteroid, 1.2 },
                 { SystemBody.PlanetType.Comet, 0.5 },
             };
 
@@ -339,7 +339,7 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 0.05, _max = 0.5 } },
                 { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 0.4, _max = 0.7 } },
                 { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 0.05, _max = 0.95 } },
-                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 0.05, _max = 0.15 } },
+                { SystemBody.PlanetType.Asteroid, new MinMaxStruct() { _min = 0.05, _max = 0.15 } },
                 { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 0.95, _max = 0.99 } },
             };
 
@@ -357,7 +357,7 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 0.0001, _max = 1 } },
                 { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 0.0001, _max = 0.001 } },
                 { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 0.00001, _max = 0.0001 } },
-                { SystemBody.PlanetType.Asteriod, new MinMaxStruct() { _min = 0.000001, _max = 0.00001 } },
+                { SystemBody.PlanetType.Asteroid, new MinMaxStruct() { _min = 0.000001, _max = 0.00001 } },
                 { SystemBody.PlanetType.Comet, new MinMaxStruct() { _min = 0.0000001, _max = 0.000001 } },
             };
 
@@ -374,7 +374,7 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.Moon, 0.3 },
                 { SystemBody.PlanetType.IceMoon, 0 },
                 { SystemBody.PlanetType.DwarfPlanet, 0 },
-                { SystemBody.PlanetType.Asteriod, 0 },
+                { SystemBody.PlanetType.Asteroid, 0 },
                 { SystemBody.PlanetType.Comet, 0 },
             };
 

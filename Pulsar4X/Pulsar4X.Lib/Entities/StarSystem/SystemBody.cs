@@ -29,7 +29,7 @@ namespace Pulsar4X.Entities
             ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
             Moon,
             IceMoon,
-            Asteriod,
+            Asteroid,
             Comet
         }
 
@@ -152,13 +152,15 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public SystemBody(OrbitingEntity parent)
+        public SystemBody(OrbitingEntity parent, PlanetType type)
             : base()
         {
             /// <summary>
             /// create these or else anything that relies on a unique global id will break.
             /// </summary>
             Id = Guid.NewGuid();
+
+            Type = type; // set the type ASAP in case anthing needs to know it.
 
             Moons = new BindingList<SystemBody>();
             Populations = new BindingList<Population>();
