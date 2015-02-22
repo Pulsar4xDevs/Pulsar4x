@@ -1,11 +1,12 @@
 ﻿using Pulsar4X.Entities;
-using Pulsar4X.Lib;
 using Pulsar4X.Helpers.GameMath;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
-using Pulsar4X.Helpers.GameMath;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 
 namespace Pulsar4X
 {
@@ -49,7 +50,17 @@ namespace Pulsar4X
                 GeneratePlanetsForStar(newStar);
                 GenerateAsteroidBelts(newStar);
                 GenerateComets(newStar);
+
+                // sort the stars children:
+                List<Planet> sorted = new List<Planet>(newStar.Planets.ToArray());
+                sorted.Sort(delegate(Planet a, Planet b)
+                {
+                    return a.Orbit.SemiMajorAxis.CompareTo(b.Orbit.SemiMajorAxis);
+                });
+                newStar.Planets = new BindingList<Planet>(sorted);
             }
+
+            GenerateStarOrbits(newSystem);
 
             GenerateJumpPoints(newSystem, numJumpPoints);
 
@@ -76,8 +87,6 @@ namespace Pulsar4X
 
             Sol.Stars.Add(Sun);
 
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
-
             Random RNG = new Random();
 
             for (int i = 0; i < 500; i++)
@@ -86,7 +95,7 @@ namespace Pulsar4X
                 Planet newPlanet = new Planet(Sun);
                 newPlanet.Name = "New Planet " + i;
 
-                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, J2000);
+                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, GalaxyGen.J2000);
 
                 double x, y;
 
@@ -121,11 +130,9 @@ namespace Pulsar4X
 
             Sol.Stars.Add(Sun);
 
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
-
             Planet Mercury = new Planet(Sun);
             Mercury.Name = "Mercury";
-            Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, J2000);
+            Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, GalaxyGen.J2000);
 
             Mercury.Radius = 2439.7 / Constants.Units.KM_PER_AU;
 
@@ -140,7 +147,7 @@ namespace Pulsar4X
 
             Planet Venus = new Planet(Sun);
             Venus.Name = "Venus";
-            Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, J2000);
+            Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, GalaxyGen.J2000);
 
             Venus.Radius = 6051.8 / Constants.Units.KM_PER_AU;
 
@@ -155,7 +162,7 @@ namespace Pulsar4X
 
             Planet Earth = new Planet(Sun);
             Earth.Name = "Earth";
-            Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, J2000);
+            Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, GalaxyGen.J2000);
 
             Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
 
@@ -169,7 +176,7 @@ namespace Pulsar4X
 
             Planet Moon = new Planet(Earth);
             Moon.Name = "Moon";
-            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, J2000);
+            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);
 
             Moon.Radius = 1738.14 / Constants.Units.KM_PER_AU;
 
@@ -194,6 +201,81 @@ namespace Pulsar4X
         #endregion
 
         #region Star Generation Functions
+
+        private static void GenerateStarOrbits(StarSystem system)
+        {
+            List<Star> starList = system.Stars.ToList();
+
+            // Sort by mass.
+            starList.Sort(
+                (Star starA, Star starB) => 
+                { 
+                    if (starA.Orbit.Mass < starB.Orbit.Mass)
+                    {
+                        return 1;
+                    }
+                    if (starA.Orbit.Mass > starB.Orbit.Mass)
+                    {
+                        return -1;
+                    }
+                    return 0;
+                }
+            );
+
+            Star primaryStar = starList[0];
+            primaryStar.UpdatePosition(0);
+
+            for (int i = 1; i < starList.Count; i++)
+            {
+                Star parentStar = starList[i - 1];
+                Star childStar = starList[i];
+
+                double orbitalDistance = CalcStarOrbitDistance(parentStar, childStar);
+                double otherDirection = CalcStarOrbitDistance(childStar, parentStar);
+
+                if (orbitalDistance < otherDirection)
+                {
+                    orbitalDistance = otherDirection;
+                }
+
+                // Let's add some PADDING to that face!
+                orbitalDistance = (orbitalDistance * ((m_RNG.NextDouble() / 3) + 1)) + parentStar.Orbit.Apoapsis;
+
+                double eccentricity = Math.Pow(m_RNG.NextDouble() * 0.8, 3);
+                double sma = orbitalDistance / (1 - eccentricity);
+
+                childStar.Orbit = Orbit.FromAsteroidFormat(childStar.Orbit.Mass, primaryStar.Orbit.Mass, sma, eccentricity, m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
+                childStar.Parent = primaryStar;
+                childStar.UpdatePosition(0);
+            }
+
+            system.Stars = new BindingList<Star>(starList);
+        }
+
+        private static double CalcStarOrbitDistance(Star star1, Star star2)
+        {
+            if (star1.Planets.Count == 0)
+            {
+                return 0;
+            }
+
+            double maxApo = 0;
+            double planetMass = 0;
+            foreach (Planet p in star1.Planets)
+            {
+                if (p.Orbit.Apoapsis > maxApo)
+                {
+                    maxApo = p.Orbit.Apoapsis;
+                    planetMass = p.Orbit.Mass;
+                }
+            }
+            // http://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
+            double gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * star1.Orbit.Mass * planetMass / (maxApo * maxApo);
+
+            // Solve for distance to star2 with 10x less gravitational attraction than to star1.
+            // (Note, 10x less depends on a 0.1 value for GalaxyGen.StarOrbitGravityFactor
+            return Math.Sqrt(Constants.Science.GRAVITATIONAL_CONSTANT * star2.Orbit.Mass * planetMass / gravAttractionToParent * GalaxyGen.StarOrbitGravityFactor);
+        }
 
         /// <summary>
         /// Generates a new star and adds it to the provided Star System.
@@ -334,12 +416,40 @@ namespace Pulsar4X
             // create star and populate data:
             Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
             star.Age = data._Age;
+            SetHabitableZone(star);     // calculate habitable zone
+            CalculateFullSpectralClass(star);
 
-            // Temporary orbit to store mass.
-            // Calculate real orbit later.
+            // Temporary orbit to store mass, Calculate real orbit later
             star.Orbit = Orbit.FromStationary(data._Mass);
 
             return star;
+        }
+
+        /// <summary>
+        /// Calculates and sets the Habitable Zone of this star based on it Luminosity.
+        /// calculated according to this site: http://www.planetarybiology.com/calculating_habitable_zone.html
+        /// </summary>
+        /// <returns>Average Habitable Zone</returns>
+        public static void SetHabitableZone(Star star)
+        {
+            star.MinHabitableRadius = Math.Sqrt(star.Luminosity / 1.1);
+            star.MaxHabitableRadius = Math.Sqrt(star.Luminosity / 0.53);
+            star.EcoSphereRadius = (star.MinHabitableRadius + star.MaxHabitableRadius) / 2; // our habital zone number is in the middle of our min/max values.
+        }
+
+        public static void CalculateFullSpectralClass(Star star)
+        {
+            // start by getting the sub-division, which is based on temp.
+            double sub = star.Temperature / GalaxyGen.StarTemperatureBySpectralType[star.SpectralType]._max;  // temp rang from 0 to 1.
+            star.SpectralSubDivision = (ushort)Math.Round( (1 - sub) * 10 );  // invert temp range as 0 is hottest, 9 is coolest.
+
+            // now get the luminosity class
+            ///< @todo For right now everthing is just main sequence. see http://en.wikipedia.org/wiki/Stellar_classification
+            /// on how this should be done. For right now tho class V is fine (its just flavor text).
+            star.LuminosityClass = LuminosityClass.V;
+
+            // finally add them all up to get the class string:
+            star.Class = star.SpectralType.ToString() + star.SpectralSubDivision.ToString() + "-" + star.LuminosityClass.ToString();
         }
 
         #endregion
@@ -454,46 +564,18 @@ namespace Pulsar4X
             // now loop and generate the planets:
             for (int i = 0; i < noOfPlanetsToGenerate; ++i)
             {
-                GeneratePlanet(star, finalGenerationChance, i + 1);
+                // we'll start by determining the planet type:
+                Planet.PlanetType pt = GalaxyGen.PlanetTypeDisrubution.Select(m_RNG.NextDouble());
+
+                string planetName = star.Name + " - " + (i + 1).ToString();
+                Planet newPlanet = GenerateSystemBody(star, planetName, pt);
+                
+                star.Planets.Add(newPlanet);
             }
         }
 
         /// <summary>
-        /// Works out what type of planet to generate based on the distrabution in GalaxyGen.PlanetTypeDisrubution.
-        /// It then calls a more type specific function to complete generation of the planet.
-        /// </summary>
-        private static void GeneratePlanet(Star star, double planetGenerationChance, int number)
-        {
-            // we'll start by determining the planet type:
-            double planetTypeChance = m_RNG.NextDouble();
-            Planet.PlanetType pt = Planet.PlanetType.Terrestrial;  // init planet type for safty.
-
-            double dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.GasGiant];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.GasGiant;
-
-            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.IceGiant];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.IceGiant;
-
-            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.GasDwarf];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.GasDwarf;
-
-            dist = GalaxyGen.PlanetTypeDisrubution[Planet.PlanetType.Terrestrial];
-            if (planetTypeChance < dist)
-                pt = Planet.PlanetType.Terrestrial;
-
-            // now that we know the planet type we can generate the correct type:
-            string planetName = star.Name + " - " + number.ToString();
-            Planet newPlanet = GenerateSystemBody(star, planetName, pt);
-
-            star.Planets.Add(newPlanet);
-        }
-
-        /// <summary>
         /// Generates a solar system body based on type.
-        /// @todo I think we can make this a general function to generate any type of system body that is not a star!!
         /// </summary>
         /// <remarks>
         /// Quite a lot of data goes into making a planet. What follows is a list of the different data
@@ -582,16 +664,17 @@ namespace Pulsar4X
             else
                 planet = new Planet(star);
 
-            planet.Type = Planet.PlanetType.Terrestrial;
+            planet.Type = planetType;
             planet.Name = name;
 
             // Creat some of the basic stats:
             double mass = GenerateSystemBodyMass(planet, parent); // RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[planet.Type]);
             planet.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[planet.Type]);
-            double radius = Math.Pow((3 * mass) / (4 * Math.PI * (planet.Density / 1000 )), 0.33333333);  // planet.Density / 1000 changes it mfrom g/cm2 to Kg/cm3, needed because mass in is KG. oh and 0.3333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.33333333
-            radius = radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU, also keep the temp var as it is easer to read then planet.Radius.
-            planet.Radius = radius;
-            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / (radius * radius));
+            //double radius = Math.Pow((3 * mass) / (4 * Math.PI * (planet.Density / 1000 )), 0.33333333);  
+            //radius = radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU, also keep the temp var as it is easer to read then planet.Radius.
+            planet.Radius = CalculateRadiusOfBody(mass, planet.Density);
+            double radiusSquaredInM = (planet.Radius * Constants.Units.M_PER_AU) * (planet.Radius * Constants.Units.M_PER_AU); // conver to m from au.
+            planet.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * mass) / radiusSquaredInM); // see: http://nova.stanford.edu/projects/mod-x/ad-surfgrav.html
             planet.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
 
            // Generate orbit:
@@ -605,45 +688,29 @@ namespace Pulsar4X
             // generate the planets day length:
             ///< @todo Move some of these length of day magic numbers into GalaxyGen
             ///< @todo Should we do Tidle Locked bodies??? iirc bodies trend toward being tidaly locked over time...
-            planet.LengthOfDay = new TimeSpan(m_RNG.Next(0, planet.Orbit.OrbitalPeriod.Days), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
+            planet.LengthOfDay = new TimeSpan((int)Math.Round(RNG_NextDoubleRange(0, planet.Orbit.OrbitalPeriod.TotalDays)), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
             if (planet.LengthOfDay < TimeSpan.FromHours(6))
                 planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
 
-            // to calculate base temp see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
             // Note that base temp does not take into account albedo or atmosphere.
-            double starTemp = (star.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
-            double planetTemp = starTemp * Math.Sqrt(star.Radius / (2 * planet.Orbit.SemiMajorAxis));
-            planetTemp += Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
-            planet.BaseTemperature = (float)planetTemp;
+            if (IsMoon(planet.Type))
+                planet.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, parent.Orbit.SemiMajorAxis);
+            else
+                planet.BaseTemperature = (float)CalculateBaseTemperatureOfBody(star, planet.Orbit.SemiMajorAxis);
 
-            // generate Plate techtonics
-            if (m_RNG.Next(0,1) == 0)
-            {
-                // this planet has some plate techtonics:
-                // this should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
-                ///< @todo make techtonics generation tweakable.
-                double techtonicsChance = mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age;
-                techtonicsChance = GMath.Clamp01(techtonicsChance);
-
-                if (techtonicsChance < 0.01)
-                    planet.Techtonics = Planet.TechtonicActivity.Dead;
-                if (techtonicsChance < 0.02)
-                    planet.Techtonics = Planet.TechtonicActivity.Minor;
-                if (techtonicsChance < 0.04)
-                    planet.Techtonics = Planet.TechtonicActivity.EarthLike;
-                else
-                    planet.Techtonics = Planet.TechtonicActivity.Major;
-            }
+            // generate Plate tectonics
+            planet.Tectonics = GenerateTectonicActivity(star, planet);
 
             // Generate Magnetic field:
             planet.MagneticFeild = (float)RNG_NextDoubleRange(GalaxyGen.PlanetMagneticFieldByType[planet.Type]);
-            if (planet.Techtonics == Planet.TechtonicActivity.Dead)
+            if (planet.Tectonics == Planet.TectonicActivity.Dead)
                 planet.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
             
             // now lets generate the atmosphere:
             planet.Atmosphere = GenerateAtmosphere(planet);
 
-            ///< @todo Generate Ruins
+            // Generate Ruins, note that it will only do so for suitable planets:
+            GenerateRuins(star, planet);
             
             ///< @todo Generate Minerials Properly instead of this ugly hack:
             planet.HomeworldMineralGeneration();
@@ -651,9 +718,6 @@ namespace Pulsar4X
             // generate moons if required for this body type:
             if (IsPlanet(planetType))
                 GenerateMoons(star, planet);
-
-            // force the planet to have the correct position for it and any of its moons:
-            planet.UpdatePosition(0);  ///< @todo wrap this in an if so it cannot be called in moons??
 
             return planet;
         }
@@ -678,7 +742,7 @@ namespace Pulsar4X
                 // these bodies have special mass limits over and above whats in PlanetMassByType.
                 double min, max;
                 min = GalaxyGen.PlanetMassByType[body.Type]._min;
-                max = GalaxyGen.PlanetMassByType[body.Type]._min;
+                max = GalaxyGen.PlanetMassByType[body.Type]._max;
 
                 if (max > parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody)
                     max = parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody;
@@ -691,11 +755,49 @@ namespace Pulsar4X
             return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[body.Type]);
         }
 
+        /// <summary>
+        /// Generate plate techtonics taking into consideration the mass of the planet and its age (via Star.Age).
+        /// </summary>
+        private static Planet.TectonicActivity GenerateTectonicActivity(Star star, Planet body)
+        {
+            if (body.Type != Planet.PlanetType.Terrestrial && body.Type != Planet.PlanetType.Terrestrial)
+            {
+                return Planet.TectonicActivity.NA;  // We are not a Terrestrial body, we have no Tectonics!!!
+            }
+            else if (m_RNG.NextDouble() < GalaxyGen.TerrestrialBodyTectonicActiviyChance)
+            {
+                // this planet has some plate tectonics:
+                // the following should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
+                // we conver age in billion years instead of years (otherwise we get tiny numbers).
+                double tectonicsChance = body.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age * 100000000; 
+                tectonicsChance = GMath.Clamp01(tectonicsChance);
+
+                Planet.TectonicActivity t = Planet.TectonicActivity.NA;
+
+                // step down the thresholds to get the correct activity:
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.Major])
+                    t = Planet.TectonicActivity.Major;
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.EarthLike])
+                    t = Planet.TectonicActivity.EarthLike;
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.Minor])
+                    t = Planet.TectonicActivity.Minor;
+                if (tectonicsChance < GalaxyGen.BodyTectonicsThresholds[Planet.TectonicActivity.Dead])
+                    t = Planet.TectonicActivity.Dead;
+
+                return t;
+            }
+
+            return Planet.TectonicActivity.Dead;
+        }
+
+        /// <summary>
+        /// Generates an orbit around a parent Star. 
+        /// </summary>
         private static void GenerateSystemBodyOrbit(Star parent, Planet child, double childMass)
         {
             // Create the orbital values:
-            double smeiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
-
+            double smeiMajorAxis =  RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
+                                                                          GalaxyGen.OrbitalDistanceDistributionByPlanetType[child.Type]);
             double eccentricity = 0;
             if (child.Type == Planet.PlanetType.Comet)
                 eccentricity = RNG_NextDoubleRange(0.6, 0.8);       ///< @todo more magic numbers.
@@ -708,19 +810,21 @@ namespace Pulsar4X
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
 
             // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
-            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination, 
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
 
+        /// <summary>
+        /// Generates an orbit around a parent System body. 
+        /// </summary>
         private static void GenerateSystemBodyOrbit(Planet parent, Planet child, double childMass)
         {
             // Create smeiMajorAxis:
             // this need to have sane min/max values given the radius of the two bodies:
             double min, max;
             min = (parent.Radius + child.Radius) * 3; ///< @todo move this magic number into GalaxyGen.
-            max = (parent.Radius + child.Radius) * 10000; ///< @todo move this magic number into GalaxyGen, also make it better??.
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);
+            max = GMath.Clamp((parent.Radius + child.Radius) * 10000, min, parent.Orbit.Periapsis * 0.25); ///< @todo move this magic number into GalaxyGen, also make it better??.
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // moon dont need to be raised to a power, they have a nice range :)
 
             // Create the other orbital values:
             double eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 2); // get random eccentricity needs better distrubution.
@@ -730,11 +834,13 @@ namespace Pulsar4X
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
 
             // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
 
+        /// <summary>
+        /// Generates an orbit for an Asteroid or Dwarf Planet. The orbit will be a slight deviation of the reference orbit provided.
+        /// </summary>
         private static void GenerateAsteroidBeltBodyOrbit(Star parent, Planet child, double childMass, Orbit referenceOrbit)
         {
             // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
@@ -744,7 +850,7 @@ namespace Pulsar4X
             deviation = referenceOrbit.SemiMajorAxis * GalaxyGen.MaxAsteriodOrbitDeviation;
             min = referenceOrbit.SemiMajorAxis - deviation;
             max = referenceOrbit.SemiMajorAxis + deviation;
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // dont need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyGen.MaxAsteriodOrbitDeviation, 2);
             min = referenceOrbit.Eccentricity - deviation;
@@ -770,9 +876,8 @@ namespace Pulsar4X
             double meanAnomaly = m_RNG.NextDouble() * 360;      
             
             // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
 
         /// <summary>
@@ -797,63 +902,66 @@ namespace Pulsar4X
             atmo.HydrosphereExtent = 0;
             atmo.Hydrosphere = false;
 
-            double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
-            if (m_RNG.NextDouble() > atmoChance)
+            // we uses these to keep a running tally of how much gass we have generated.
+            float totalATM = 0;
+            float currATM = 0;
+            int noOfTraceGases = 0;
+
+            // Generate an Atmosphere
+            ///< @todo Remove some of this hard coding:
+            switch (planet.Type)
             {
-                // we uses these to keep a running tally of how much gass we have generated.
-                float totalATM = 0;
-                float currATM = 0;
-                int noOfTraceGases = 0;
+                case Planet.PlanetType.GasDwarf:
+                case Planet.PlanetType.GasGiant:
+                    // Start with the ammount of heilum:
+                    currATM = (float)RNG_NextDoubleRange(0.05, 0.3);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
+                    totalATM += currATM;
 
-                // Generate an Atmosphere
-                ///< @todo Remove some of this hard coding:
-                switch (planet.Type)
-                {
-                    case Planet.PlanetType.GasDwarf:
-                    case Planet.PlanetType.GasGiant:
-                        // Start with the ammount of heilum:
-                        currATM = (float)RNG_NextDoubleRange(0.05, 0.3);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
-                        totalATM += currATM;
+                    // next get a random number/ammount of trace gases:
+                    noOfTraceGases = m_RNG.Next(1, 4);
+                    totalATM += AddTraceGases(atmo, noOfTraceGases);
 
-                        // next get a random number/ammount of trace gases:
-                        noOfTraceGases = m_RNG.Next(1, 4);
-                        totalATM += AddTraceGases(atmo, noOfTraceGases);
+                    // now make the remaining amount Hydrogen:
+                    currATM = 1 - totalATM; // get the remaining ATM.
+                    AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                    break;
+
+                case Planet.PlanetType.IceGiant:
+                    // Start with the ammount of heilum:
+                    currATM = (float)RNG_NextDoubleRange(0.1, 0.25);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
+                    totalATM += currATM;
+
+                    // next add a small amount of Methane:
+                    currATM = (float)RNG_NextDoubleRange(0.01, 0.03);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM); 
+                    totalATM += currATM;
+
+                    // Next some water and ammonia:
+                    currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(3), currATM); 
+                    totalATM += currATM;
+                    currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(4), currATM); 
+                    totalATM += currATM;
 
                         // now make the remaining amount Hydrogen:
-                        currATM = 1 - totalATM; // get the remaining ATM.
-                        AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
-                        break;
+                    currATM = 1 - totalATM; // get the remaining ATM.
+                    atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
+                    break;
 
-                    case Planet.PlanetType.IceGiant:
-                        // Start with the ammount of heilum:
-                        currATM = (float)RNG_NextDoubleRange(0.1, 0.25);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM); 
-                        totalATM += currATM;
+                case Planet.PlanetType.Moon:
+                case Planet.PlanetType.Terrestrial:
+                    // Only Terrestrial like planets have a limited chance of having an atmo:
+                    double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * 
+                                                        (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
 
-                        // next add a small amount of Methane:
-                        currATM = (float)RNG_NextDoubleRange(0.01, 0.03);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM); 
-                        totalATM += currATM;
-
-                        // Next some water and ammonia:
-                        currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(3), currATM); 
-                        totalATM += currATM;
-                        currATM = (float)RNG_NextDoubleRange(0.0, 0.01);
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(4), currATM); 
-                        totalATM += currATM;
-
-                         // now make the remaining amount Hydrogen:
-                        currATM = 1 - totalATM; // get the remaining ATM.
-                        atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(0), currATM);
-                        break;
-
-                    case Planet.PlanetType.Moon:
-                    case Planet.PlanetType.Terrestrial:
+                    if (m_RNG.NextDouble() > atmoChance)
+                    {
                         // Terrestrial Planets can have very large ammount of ATM.
                         // so we will generate a number to act as the total:
-                        float planetsATM = (float)RNG_NextDoubleRange(0.1, 100); 
+                        float planetsATM = (float)RNG_NextDoubleRange(0.1, 100);
                         // reduce my mass ratio relative to earth (so really small bodies cannot have massive atmos:
                         double massRatio = planet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
                         planetsATM = (float)GMath.Clamp((double)planetsATM * massRatio, 0.01, 200);
@@ -889,19 +997,20 @@ namespace Pulsar4X
                         // next get a random number/ammount of trace gases:
                         noOfTraceGases = m_RNG.Next(1, 4);
                         totalATM += AddTraceGases(atmo, noOfTraceGases, planetsATM);
-                        
+
                         // now make the remaining amount Nitrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
                         AddGasToAtmoSafely(atmo, AtmosphericGas.AtmosphericGases.SelectAt(6), currATM * planetsATM);
-                        break;
+                    }
+                    break;
 
-                    case Planet.PlanetType.IceMoon:
-                    case Planet.PlanetType.DwarfPlanet:
-                    case Planet.PlanetType.Asteriod:
-                    case Planet.PlanetType.Comet:
-                    default:
-                        break; // none
-                }
+                    // Everthing else has no atmosphere at all.
+                case Planet.PlanetType.IceMoon:
+                case Planet.PlanetType.DwarfPlanet:
+                case Planet.PlanetType.Asteriod:
+                case Planet.PlanetType.Comet:
+                default:
+                    break; // none
             }
 
             // now calc data resulting from above:
@@ -964,11 +1073,13 @@ namespace Pulsar4X
             ///< @todo Get had coded numbers out of here... again...
             // now we need to work out the moon type
             // we will do this by looking at the base temp of the parent.
-            // if the base temp of the planet / 200K is  > 1 then it will always be terrestrial.
-            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / 200;
+            // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
+            // i.e. a moon hotter then 150K will always by PlanetType.Moon.
+            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / 150;
             Planet.PlanetType pt = Planet.PlanetType.Moon;
 
             // esle if a random number is > tempRatio it will be an ice moon:
+            List<Planet> sorted = new List<Planet>();
             for (int i = 0; i < noOfMoons; ++i)
             {
                 if (tempRatio < 1)
@@ -980,14 +1091,64 @@ namespace Pulsar4X
                 
                 string name = parent.Name + " - Moon " + i.ToString();
                 Planet newMoon = GenerateSystemBody(star, name, pt, parent);
-                parent.Moons.Add(newMoon);
+                sorted.Add(newMoon); // we will sort this when we are done!
             }
+
+            // sort moons in decending order by semiMajorAxis:
+            //BindingList<Planet> sorted = parent.Moons;
+            sorted.Sort(delegate(Planet a, Planet b)
+                {
+                    return a.Orbit.SemiMajorAxis.CompareTo(b.Orbit.SemiMajorAxis);
+                });
+
+            parent.Moons = new BindingList<Planet>(sorted);  // now add the sorted list!!
+        }
+
+        /// <summary>
+        /// This function generate ruins for the specified system Body.
+        /// @todo Make tRuins Generation take star age/type into consideration??
+        /// </summary>
+        private static void GenerateRuins(Star star, Planet body)
+        {
+            // first we will check that this body type can have ruins on it:
+            if (body.Type != Planet.PlanetType.Terrestrial
+                || body.Type != Planet.PlanetType.Moon)
+            {
+                return; // wrong type.
+            }
+            else if (body.Atmosphere.Exists == false && (body.Atmosphere.Pressure > 2.5 || body.Atmosphere.Pressure < 0.01))
+            {
+                return; // no valid atmosphere!
+            }
+            else if (m_RNG.NextDouble() > 0.5)
+            {
+                return; // thats right... lucked out on this one.
+            }
+
+            // now if we have survived the guantlet lets gen some Ruins!!
+            Ruins ruins = new Ruins();
+
+            ruins.RuinSize = GalaxyGen.RuinsSizeDisrubution.Select(m_RNG.Next(0, 100));
+
+            int quality = GameState.RNG.Next(0, 100);
+            ruins.RuinQuality = GalaxyGen.RuinsQuilityDisrubution.Select(quality);
+            if (ruins.RuinSize == Ruins.RSize.City && quality >= 95)
+                    ruins.RuinQuality = Ruins.RQuality.MultipleIntact;  // special case!!
+
+            // Ruins count:
+            ruins.RuinCount = RNG_NextRange(GalaxyGen.RuinsCountRangeBySize[ruins.RuinSize]);    
+            ruins.RuinCount = (uint)Math.Round(GalaxyGen.RuinsQuilityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
+
+            body.PlanetaryRuins = ruins;
         }
 
         #endregion
 
         #region Asteriod Generation Functions
 
+        /// <summary>
+        /// Generates a random number of asteroid belts around a star. This will include a number of Dwarf Planets.
+        /// </summary>
         private static void GenerateAsteroidBelts(Star star)
         {
             // First we will work how many asteriods belts this star has, from 0 - MaxNoOfAsteroidBelts.
@@ -1037,13 +1198,17 @@ namespace Pulsar4X
             }
         }
 
+        /// <summary>
+        /// Generates a non-functions reference orbit to be used for generating orbits for specific asteroids and dwarf planets.
+        /// </summary>
         private static Orbit GenerateAsteroidBeltReferenceOrbit(Star parent)
         {
             // create stationary orbit to hold data:
             Orbit referenceOrbit = Orbit.FromStationary(1);
 
             // create values:
-            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRange(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]);
+            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
+                                                                         GalaxyGen.OrbitalDistanceDistributionByPlanetType[Planet.PlanetType.Asteriod]);
             referenceOrbit.Eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
             referenceOrbit.Inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
             referenceOrbit.ArgumentOfPeriapsis = m_RNG.NextDouble() * 360;
@@ -1057,6 +1222,9 @@ namespace Pulsar4X
 
         #region Comet Generation Functions
 
+        /// <summary>
+        /// Generates a random number of comets for a given star. The number of gererated will 
+        /// be at least GalaxyGen.MiniumCometsPerSystem and never more then GalaxyGen.MaxNoOfComets.
         private static void GenerateComets(Star star)
         {
             // first lets get a random number between our minium nad maximum number of comets:
@@ -1089,7 +1257,13 @@ namespace Pulsar4X
         /// </summary>
         public static JumpPoint GenerateJumpPoint(StarSystem system)
         {
-            Star luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+            m_RNG = new Random(GalaxyGen.SeedRNG.Next()); // Is there a better way?
+
+            Star luckyStar;
+            do
+            {
+                luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+            } while (luckyStar.Planets.Count != 0);
 
             return GenerateJumpPoint(luckyStar);
         }
@@ -1140,15 +1314,26 @@ namespace Pulsar4X
         /// </summary>
         private static int GetNaturalJumpPointGeneration(Star star)
         {
+            if (star.Planets.Count == 0)
+            {
+                return 0; // Don't generate JP's on planetless stars.
+            }
+
             int numJumpPoints = 1; // Each star always generates a JP.
 
             // Give a chance per planet to generate a JumpPoint
-            foreach (Planet p in star.Planets)
+            foreach (Planet currentPlanet in star.Planets)
             {
+                if (currentPlanet.Type == Planet.PlanetType.Comet || currentPlanet.Type == Planet.PlanetType.Asteriod)
+                {
+                    // Don't gen JP's around comets or asteroids.
+                    continue;
+                }
+
                 int chance = Constants.GameSettings.JumpPointGenerationChance;
 
                 // Higher mass planets = higher chance.
-                double planetEarthMass = p.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
+                double planetEarthMass = currentPlanet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
                 if (planetEarthMass > 1)
                 {
                     chance = chance + 2;
@@ -1183,6 +1368,12 @@ namespace Pulsar4X
             // Clamp generation to within the planetary system.
             foreach (Planet currentPlanet in star.Planets)
             {
+                if (currentPlanet.Type == Planet.PlanetType.Comet || currentPlanet.Type == Planet.PlanetType.Asteriod)
+                {
+                    // Don't gen JP's around comets or asteroids.
+                    continue;
+                }
+
                 if (minRadius > currentPlanet.Orbit.Periapsis)
                 {
                     minRadius = currentPlanet.Orbit.Periapsis;
@@ -1271,7 +1462,7 @@ namespace Pulsar4X
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max);
         }
-
+        
         /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range times by a constant value (e.g. a unit of some sort).
         /// </summary>
@@ -1284,11 +1475,35 @@ namespace Pulsar4X
         }
 
         /// <summary>
+        /// Raises the random number generated to the power provided to produce a non-uniform selection from the range.
+        /// </summary>
+        public static double RNG_NextDoubleRangeDistributedByPower(double min, double max, double power)
+        {
+            return min + Math.Pow(m_RNG.NextDouble(), power) * (max - min);
+        }
+
+        /// <summary>
+        /// Version of RNG_NextDoubleRangeDistributedByPower(double min, double max, double power) that takes GalaxyGen.MinMaxStruct directly.
+        /// </summary>
+        public static double RNG_NextDoubleRangeDistributedByPower(GalaxyGen.MinMaxStruct minMax, double power)
+        {
+            return RNG_NextDoubleRangeDistributedByPower(minMax._min, minMax._max, power);
+        }
+
+        /// <summary>
         /// Version of RNG_NextDoubleRange(double min, double max, double constant) that takes GalaxyGen.MinMaxStruct directly.
         /// </summary>
         public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax, double constant)
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max, constant);
+        }
+
+        /// <summary>
+        /// Returns a value between the min and max.
+        /// </summary>
+        public static uint RNG_NextRange(GalaxyGen.MinMaxStruct minMax)
+        {
+            return (uint)m_RNG.Next((int)minMax._min, (int)minMax._max);
         }
 
         /// <summary>
@@ -1302,7 +1517,34 @@ namespace Pulsar4X
 
             return value;
         }
-        
+
+        /// <summary>
+        /// Calculates the radius of a body.
+        /// </summary>
+        /// <param name="mass">The mass of the body in Kg</param>
+        /// <param name="density">The density in g/cm^2</param>
+        /// <returns>The radius in AU</returns>
+        public static double CalculateRadiusOfBody(double mass, double density)
+        {
+            double radius = Math.Pow((3 * mass) / (4 * Math.PI * (density / 1000)), 0.3333333333); // density / 1000 changes it from g/cm2 to Kg/cm3, needed because mass in is KG. 
+                                                                                                   // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
+            return radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU.
+        }
+
+        /// <summary>
+        /// Calculates the temperature of a body given its parent star and its distance from that star.
+        /// @note For info on how the Temp. is calculated see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+        /// </summary>
+        /// <param name="parentStar">The star this body is orbiting.</param>
+        /// <param name="distanceFromStar">the SemiMojorAxis of the body with regards to the star. (i.e. for moons it is the sma of its parent planet).</param>
+        /// <returns>Temperature in Degrees C</returns>
+        public static double CalculateBaseTemperatureOfBody(Star parentStar, double distanceFromStar)
+        {
+            double temp = (parentStar.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
+            temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
+            return temp + Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
+        }
+
         #endregion
     }
 }

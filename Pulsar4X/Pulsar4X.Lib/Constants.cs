@@ -59,6 +59,10 @@ namespace Pulsar4X
 
             public const double KM_PER_AU = CM_PER_AU / CM_PER_KM; //149597870.7
 
+            public const double M_PER_AU = KM_PER_AU * 1000;
+
+            public const double EARTH_GRAVITY = 9.81;
+
             /// <summary>
             /// Note that this is = to 1 ATM.
             /// </summary>

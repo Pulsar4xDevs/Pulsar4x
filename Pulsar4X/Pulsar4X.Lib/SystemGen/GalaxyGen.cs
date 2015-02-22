@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
-using Pulsar4X.Lib;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X
 {
@@ -179,7 +179,27 @@ namespace Pulsar4X
         /// </summary>
         public const double MaxPlanetInclination = 45; // degrees. used for orbits and axial tilt.
 
-        public const double MaxMoonMassRelativeToParentBody = 04;
+        /// <summary>
+        /// This controls the maximum moon mass relative to the parent body.
+        /// </summary>
+        public const double MaxMoonMassRelativeToParentBody = 0.4;
+
+        /// <summary>
+        /// We want StarOrbitGravityFactor times less gravitational attraction from childStar to parentStar's furthest planet then parentStar to parentStar's furthest planet.
+        /// <? todo: Is this comment completely confusing?
+        /// </summary>
+        public static double StarOrbitGravityFactor = 10;
+
+        /// <summary>
+        /// The chance a Terrestrial body will have some form of Tectonic activity.
+        /// Note that very small/low mass bodies will still end up dead.
+        /// </summary>
+        public static double TerrestrialBodyTectonicActiviyChance = 0.5;
+
+        /// <summary>
+        /// Epoch used when generating orbits. There should be no reason to change this.
+        /// </summary>
+        public static DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
 
         /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
@@ -203,13 +223,14 @@ namespace Pulsar4X
         /// Dwarf planets are excluded because they are generated with asteroids
         /// rather then with planets (on account of not having cleared their orbits).
         /// </summary>
-        public static Dictionary<Planet.PlanetType, double> PlanetTypeDisrubution = new Dictionary<Planet.PlanetType, double>()
-            {
-                { Planet.PlanetType.GasGiant, 0.2 },
-                { Planet.PlanetType.IceGiant, 0.2 },
-                { Planet.PlanetType.GasDwarf, 0.1 },
-                { Planet.PlanetType.Terrestrial, 0.5 },
-            };
+        /// 
+        public static WeightedList<Planet.PlanetType> PlanetTypeDisrubution = new WeightedList<Planet.PlanetType>()
+        {
+            { 0.2, Planet.PlanetType.GasGiant },
+            { 0.2, Planet.PlanetType.IceGiant },
+            { 0.1, Planet.PlanetType.GasDwarf },
+            { 0.5, Planet.PlanetType.Terrestrial }
+        };
 
         /// <summary>
         /// Limits of Planet masses based on type. Units are Kg.
@@ -248,17 +269,32 @@ namespace Pulsar4X
         /// <summary>
         /// Orbital distance restrictions (i.e. SemiMajorAxis restrictions) for a planet based upon the type of star it is orbiting.
         /// Units are AU.
-        /// @note These numbers, with the exception of G class stars, are WAGs. They could be improved or tweaked for gameplay.
+        /// @note These numbers, with the exception of G class stars, are based on habital zone calculations. They could be tweaked for gameplay.
         /// </summary>
         public static Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
             {
-                { SpectralType.O, new MinMaxStruct() { _min = 2, _max = 100 } },
-                { SpectralType.B, new MinMaxStruct() { _min = 1, _max = 85 } },
-                { SpectralType.A, new MinMaxStruct() { _min = 0.5, _max = 70 } },
-                { SpectralType.F, new MinMaxStruct() { _min = 0.35, _max = 60 } },
-                { SpectralType.G, new MinMaxStruct() { _min = 0.3, _max = 50 } },
-                { SpectralType.K, new MinMaxStruct() { _min = 0.2, _max = 30 } },
-                { SpectralType.M, new MinMaxStruct() { _min = 0.1, _max = 10 } },
+                { SpectralType.O, new MinMaxStruct() { _min = 1, _max = 200 } },
+                { SpectralType.B, new MinMaxStruct() { _min = 0.5, _max = 100 } },
+                { SpectralType.A, new MinMaxStruct() { _min = 0.3, _max = 80 } },
+                { SpectralType.F, new MinMaxStruct() { _min = 0.2, _max = 60 } },
+                { SpectralType.G, new MinMaxStruct() { _min = 0.1, _max = 40 } },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.01, _max = 20 } },
+                { SpectralType.M, new MinMaxStruct() { _min = 0.005, _max = 8 } },
+            };
+
+        /// <summary>
+        /// This is used to adjust the orbital distances in the range of OrbitalDistanceByStarSpectralType for a given planet type.
+        /// This is done by raising the random number generated to select from the range to the power of this distribution number.
+        /// </summary>
+        public static Dictionary<Planet.PlanetType, double> OrbitalDistanceDistributionByPlanetType = new Dictionary<Planet.PlanetType, double>()
+            {
+                { Planet.PlanetType.GasGiant, 1.8 },
+                { Planet.PlanetType.IceGiant, 1.5 },
+                { Planet.PlanetType.GasDwarf, 2 },
+                { Planet.PlanetType.Terrestrial, 3 },
+                { Planet.PlanetType.DwarfPlanet, 1.2 },
+                { Planet.PlanetType.Asteriod, 1.2 },
+                { Planet.PlanetType.Comet, 0.5 },
             };
 
         /// <summary>
@@ -305,8 +341,8 @@ namespace Pulsar4X
                 { Planet.PlanetType.GasGiant, 100000000 },
                 { Planet.PlanetType.IceGiant, 100000000 },
                 { Planet.PlanetType.GasDwarf, 100000000 },
-                { Planet.PlanetType.Terrestrial, 1.5 },
-                { Planet.PlanetType.Moon, 0.5 },
+                { Planet.PlanetType.Terrestrial, 1.4 },
+                { Planet.PlanetType.Moon, 0.3 },
                 { Planet.PlanetType.IceMoon, 0 },
                 { Planet.PlanetType.DwarfPlanet, 0 },
                 { Planet.PlanetType.Asteriod, 0 },
@@ -334,10 +370,84 @@ namespace Pulsar4X
         public static Dictionary<Planet.PlanetType, double> MaxNoOfMoonsByPlanetType = new Dictionary<Planet.PlanetType, double>()
         {
                 { Planet.PlanetType.GasGiant, 20 },
-                { Planet.PlanetType.IceGiant, 20 },
-                { Planet.PlanetType.GasDwarf, 10 },
-                { Planet.PlanetType.Terrestrial, 5 },
+                { Planet.PlanetType.IceGiant, 15 },
+                { Planet.PlanetType.GasDwarf, 8 },
+                { Planet.PlanetType.Terrestrial, 4 },
                 { Planet.PlanetType.DwarfPlanet, 1 },
+        };
+
+        /// <summary>
+        /// These are the maxinum thresholds fore each type of tectonic activity a planet can have.
+        /// Tectonic activity is calculated by Mass (in earth masses) / Star Age. 
+        /// Earth has a tectonic activity of 0.217 by this calculation.
+        /// So if the tectonic activing number is < the threshold of Earth like but greater than Minor then it will be Earth like.
+        /// </summary>
+        public static Dictionary<Planet.TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<Planet.TectonicActivity, double>()
+        {
+                { Planet.TectonicActivity.Dead , 0.01 },
+                { Planet.TectonicActivity.Minor , 0.2 },
+                { Planet.TectonicActivity.EarthLike , 0.4 },
+                { Planet.TectonicActivity.Major , 1 }          // Not used, just here for completness.
+        };
+
+        #endregion
+
+        #region Ruins Generation
+
+        /// <summary>
+        /// The chance that ruins will be generated on a suitable planet or moon.
+        /// @note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm. 
+        /// </summary>
+        public const double RuinsGenerationChance = 0.5;
+
+        /// <summary>
+        /// The chance of any given ruins size being generated.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static WeightedList<Ruins.RSize> RuinsSizeDisrubution = new WeightedList<Ruins.RSize>()
+        {
+            { 40, Ruins.RSize.Outpost },
+            { 30, Ruins.RSize.Settlement },
+            { 20, Ruins.RSize.Colony },
+            { 10, Ruins.RSize.City }
+        };
+
+        /// <summary>
+        /// The chance of any given ruins quility being generated. 
+        /// @note There is some special adiyional logic for Ruins.RQuality.MultipleIntact.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static WeightedList<Ruins.RQuality> RuinsQuilityDisrubution = new WeightedList<Ruins.RQuality>()
+        {
+            { 40, Ruins.RQuality.Destroyed },
+            { 30, Ruins.RQuality.Ruined },
+            { 15, Ruins.RQuality.PartiallyIntact },
+            { 15, Ruins.RQuality.Intact } 
+        };
+
+        /// <summary>
+        /// The ranges for the Ruins Count, by Ruins Size.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static Dictionary<Ruins.RSize, MinMaxStruct> RuinsCountRangeBySize = new Dictionary<Ruins.RSize, MinMaxStruct>()
+        {
+            { Ruins.RSize.Outpost, new MinMaxStruct() { _min = 15, _max = 50 } },
+            { Ruins.RSize.Settlement, new MinMaxStruct() { _min = 50, _max = 100 } },
+            { Ruins.RSize.Colony, new MinMaxStruct() { _min = 100, _max = 200 } },
+            { Ruins.RSize.City, new MinMaxStruct() { _min = 500, _max = 1000 } },
+        };
+
+        /// <summary>
+        /// The Quility modifiers. Final Ruins count is determined by RuinsCount * QuilityModifier.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public static Dictionary<Ruins.RQuality, double> RuinsQuilityAdjustment = new Dictionary<Ruins.RQuality, double>()
+        {
+            { Ruins.RQuality.Destroyed, 1.25 },
+            { Ruins.RQuality.Ruined, 1.5 },
+            { Ruins.RQuality.PartiallyIntact, 1.75 },
+            { Ruins.RQuality.Intact, 2.0 },
+            { Ruins.RQuality.MultipleIntact, 3.0 }
         };
 
         #endregion
