@@ -269,16 +269,24 @@ namespace Pulsar4X
                 m_dicStarColors["N"] = Color.FromArgb(255, 255, 157, 000);
             }
 
-            public static Color LookupColor(string a_szSpectralClass)
+            public static Color LookupColor(Star star)
             {
                 if (m_oStarColor == null)
                 {
                     m_oStarColor = new StarColor();
                 }
 
-                if (m_oStarColor.m_dicStarColors[a_szSpectralClass] != null)
+                if (star != null)
                 {
-                    return m_oStarColor.m_dicStarColors[a_szSpectralClass];
+                    string sClass = star.SpectralType.ToString() + star.SpectralSubDivision.ToString();
+                    if (m_oStarColor.m_dicStarColors.ContainsKey(sClass))
+                    {
+                        return m_oStarColor.m_dicStarColors[sClass];
+                    }
+                    else
+                    {
+                        return Color.White; 
+                    }
                 }
 
                 return Color.White;
