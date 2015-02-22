@@ -197,6 +197,11 @@ namespace Pulsar4X
         public static double TerrestrialBodyTectonicActiviyChance = 0.5;
 
         /// <summary>
+        /// Epoch used when generating orbits. There should be no reason to change this.
+        /// </summary>
+        public static DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+
+        /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
         /// @note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.
         /// @note Other factors such as the stars lumosoty and mass are also taken into account. So these numbers may not make a whole lot of sense on the surface.
@@ -286,10 +291,10 @@ namespace Pulsar4X
                 { Planet.PlanetType.GasGiant, 1.8 },
                 { Planet.PlanetType.IceGiant, 1.5 },
                 { Planet.PlanetType.GasDwarf, 2 },
-                { Planet.PlanetType.Terrestrial, 2.5 },
+                { Planet.PlanetType.Terrestrial, 3 },
                 { Planet.PlanetType.DwarfPlanet, 1.2 },
                 { Planet.PlanetType.Asteriod, 1.2 },
-                { Planet.PlanetType.Comet, 1 },
+                { Planet.PlanetType.Comet, 0.5 },
             };
 
         /// <summary>
@@ -336,8 +341,8 @@ namespace Pulsar4X
                 { Planet.PlanetType.GasGiant, 100000000 },
                 { Planet.PlanetType.IceGiant, 100000000 },
                 { Planet.PlanetType.GasDwarf, 100000000 },
-                { Planet.PlanetType.Terrestrial, 1.5 },
-                { Planet.PlanetType.Moon, 0.5 },
+                { Planet.PlanetType.Terrestrial, 1.4 },
+                { Planet.PlanetType.Moon, 0.3 },
                 { Planet.PlanetType.IceMoon, 0 },
                 { Planet.PlanetType.DwarfPlanet, 0 },
                 { Planet.PlanetType.Asteriod, 0 },
@@ -365,9 +370,9 @@ namespace Pulsar4X
         public static Dictionary<Planet.PlanetType, double> MaxNoOfMoonsByPlanetType = new Dictionary<Planet.PlanetType, double>()
         {
                 { Planet.PlanetType.GasGiant, 20 },
-                { Planet.PlanetType.IceGiant, 20 },
-                { Planet.PlanetType.GasDwarf, 10 },
-                { Planet.PlanetType.Terrestrial, 5 },
+                { Planet.PlanetType.IceGiant, 15 },
+                { Planet.PlanetType.GasDwarf, 8 },
+                { Planet.PlanetType.Terrestrial, 4 },
                 { Planet.PlanetType.DwarfPlanet, 1 },
         };
 

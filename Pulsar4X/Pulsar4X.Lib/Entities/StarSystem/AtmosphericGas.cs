@@ -50,7 +50,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         private static WeightedList<AtmosphericGas> _atmosphericGases = new WeightedList<AtmosphericGas>()
         {
-             { 100, new AtmosphericGas()
+             { 50, new AtmosphericGas()
              { 
                  Name = "Hydrogen", 
                  ChemicalSymbol = "H",
@@ -60,7 +60,7 @@ namespace Pulsar4X.Entities
                  GreenhouseEffect = 1
              }},
 
-             { 100, new AtmosphericGas()
+             { 50, new AtmosphericGas()
              { 
                  Name = "Helium", 
                  ChemicalSymbol = "He",
@@ -110,7 +110,7 @@ namespace Pulsar4X.Entities
                  GreenhouseEffect = 0
              }},
 
-             { 25, new AtmosphericGas()
+             { 50, new AtmosphericGas()
              { 
                  Name = "Nitrogen", 
                  ChemicalSymbol = "N",
@@ -140,7 +140,7 @@ namespace Pulsar4X.Entities
                  GreenhouseEffect = 1
              }},
 
-             { 10, new AtmosphericGas()
+             { 25, new AtmosphericGas()
              { 
                  Name = "Oxygen", 
                  ChemicalSymbol = "O",
@@ -160,7 +160,7 @@ namespace Pulsar4X.Entities
                  GreenhouseEffect = 1
              }},
 
-             { 3, new AtmosphericGas()
+             { 10, new AtmosphericGas()
              { 
                  Name = "Argon", 
                  ChemicalSymbol = "Ar",
@@ -170,7 +170,7 @@ namespace Pulsar4X.Entities
                  GreenhouseEffect = 0
              }},
 
-             { 5, new AtmosphericGas()
+             { 15, new AtmosphericGas()
              { 
                  Name = "Carbon dioxide", 
                  ChemicalSymbol = "CO2",

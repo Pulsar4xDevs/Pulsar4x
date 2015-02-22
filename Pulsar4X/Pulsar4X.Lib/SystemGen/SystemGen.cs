@@ -87,8 +87,6 @@ namespace Pulsar4X
 
             Sol.Stars.Add(Sun);
 
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
-
             Random RNG = new Random();
 
             for (int i = 0; i < 500; i++)
@@ -97,7 +95,7 @@ namespace Pulsar4X
                 Planet newPlanet = new Planet(Sun);
                 newPlanet.Name = "New Planet " + i;
 
-                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, J2000);
+                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, GalaxyGen.J2000);
 
                 double x, y;
 
@@ -132,11 +130,9 @@ namespace Pulsar4X
 
             Sol.Stars.Add(Sun);
 
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
-
             Planet Mercury = new Planet(Sun);
             Mercury.Name = "Mercury";
-            Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, J2000);
+            Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, GalaxyGen.J2000);
 
             Mercury.Radius = 2439.7 / Constants.Units.KM_PER_AU;
 
@@ -151,7 +147,7 @@ namespace Pulsar4X
 
             Planet Venus = new Planet(Sun);
             Venus.Name = "Venus";
-            Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, J2000);
+            Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, GalaxyGen.J2000);
 
             Venus.Radius = 6051.8 / Constants.Units.KM_PER_AU;
 
@@ -166,7 +162,7 @@ namespace Pulsar4X
 
             Planet Earth = new Planet(Sun);
             Earth.Name = "Earth";
-            Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, J2000);
+            Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, GalaxyGen.J2000);
 
             Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
 
@@ -180,7 +176,7 @@ namespace Pulsar4X
 
             Planet Moon = new Planet(Earth);
             Moon.Name = "Moon";
-            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, J2000);
+            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);
 
             Moon.Radius = 1738.14 / Constants.Units.KM_PER_AU;
 
@@ -580,7 +576,6 @@ namespace Pulsar4X
 
         /// <summary>
         /// Generates a solar system body based on type.
-        /// @todo I think we can make this a general function to generate any type of system body that is not a star!!
         /// </summary>
         /// <remarks>
         /// Quite a lot of data goes into making a planet. What follows is a list of the different data
@@ -815,9 +810,8 @@ namespace Pulsar4X
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
 
             // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
-            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination, 
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
 
         /// <summary>
@@ -840,9 +834,8 @@ namespace Pulsar4X
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
 
             // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
 
         /// <summary>
@@ -883,9 +876,8 @@ namespace Pulsar4X
             double meanAnomaly = m_RNG.NextDouble() * 360;      
             
             // now Create the orbit:
-            DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0); ///< @todo J2000 datetime should be in GalaxyGen!!
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
 
         /// <summary>
