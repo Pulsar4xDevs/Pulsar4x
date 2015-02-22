@@ -209,6 +209,28 @@ namespace Pulsar4X
         public const double IceMoonMaximumParentTemperature = 150;
 
         /// <summary>
+        /// The minium possible length of a day for any system body.
+        /// </summary>
+        public const int MiniumPossibleDayLength = 6;
+
+        /// <summary>
+        /// Is timesd by the total radius of the moon and its parent to come up with a minium orbit distance for that body.
+        /// </summary>
+        public const double MinMoonOrbitMultiplier = 2;
+
+        /// <summary>
+        /// This is the Absolute maximum orbit of moons, in AU.
+        /// @note The maximum may be RelativeMaxMoonOrbitDistance instead, but will never be more then this.
+        /// </summary>
+        public const double AbsoluteMaxMoonOrbitDistance = 60581692 / Constants.Units.KM_PER_AU;
+
+        /// <summary>
+        /// This is the relative maximum orbit of moons, in AU. it is times by the parents semiMajorAxis.
+        /// @note The maximum may be AbsoluteMaxMoonOrbitDistance instead, but will never be more then this.
+        /// </summary>
+        public const double RelativeMaxMoonOrbitDistance = 0.25; 
+
+        /// <summary>
         /// Controls how much the type of a star affects the generation of planets.
         /// @note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.
         /// @note Other factors such as the stars lumosoty and mass are also taken into account. So these numbers may not make a whole lot of sense on the surface.

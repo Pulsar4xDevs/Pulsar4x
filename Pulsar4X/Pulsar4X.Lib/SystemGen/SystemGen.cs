@@ -687,11 +687,11 @@ namespace Pulsar4X
                 GenerateSystemBodyOrbit(star, planet, mass);                            // not a moon or asteriod/dwarf planet, just get an orbit around the star.
                 
             // generate the planets day length:
-            ///< @todo Move some of these length of day magic numbers into GalaxyGen
-            ///< @todo Should we do Tidle Locked bodies??? iirc bodies trend toward being tidaly locked over time...
+            ///< @todo Should we do Tidaly Locked bodies??? iirc bodies trend toward being tidaly locked over time...
             planet.LengthOfDay = new TimeSpan((int)Math.Round(RNG_NextDoubleRange(0, planet.Orbit.OrbitalPeriod.TotalDays)), m_RNG.Next(0, 24), m_RNG.Next(0, 60), 0);
-            if (planet.LengthOfDay < TimeSpan.FromHours(6))
-                planet.LengthOfDay += TimeSpan.FromHours(6);  // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
+            // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
+            if (planet.LengthOfDay < TimeSpan.FromHours(GalaxyGen.MiniumPossibleDayLength))
+                planet.LengthOfDay += TimeSpan.FromHours(GalaxyGen.MiniumPossibleDayLength);  
 
             // Note that base temp does not take into account albedo or atmosphere.
             if (IsMoon(planet.Type))
@@ -823,9 +823,10 @@ namespace Pulsar4X
             // Create smeiMajorAxis:
             // this need to have sane min/max values given the radius of the two bodies:
             double min, max;
-            min = (parent.Radius + child.Radius) * 3; ///< @todo move this magic number into GalaxyGen.
-            max = GMath.Clamp((parent.Radius + child.Radius) * 10000, min, parent.Orbit.Periapsis * 0.25); ///< @todo move this magic number into GalaxyGen, also make it better??.
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // moon dont need to be raised to a power, they have a nice range :)
+            min = (parent.Radius + child.Radius) * GalaxyGen.MinMoonOrbitMultiplier;
+            max = GMath.Clamp((parent.Radius + child.Radius) * GalaxyGen.AbsoluteMaxMoonOrbitDistance, min, 
+                                                parent.Orbit.Periapsis * GalaxyGen.RelativeMaxMoonOrbitDistance);
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // moons dont need to be raised to a power, they have a nice range :)
 
             // Create the other orbital values:
             double eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 2); // get random eccentricity needs better distrubution.
