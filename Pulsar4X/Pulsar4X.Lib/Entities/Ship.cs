@@ -2828,19 +2828,67 @@ namespace Pulsar4X.Entities
         {
             if (ShipShield.Count != 0)
             {
+                if (Active == false)
+                {
+                    /// <summary>
+                    /// Remove either that this ship wants to recharge its shields, or the ship in total from the recharge list.
+                    /// </summary>
+                    if (ShipsFaction.RechargeList.ContainsKey(this) == true)
+                    {
+                        if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Shields) == (int)Faction.RechargeStatus.Shields)
+                        {
+                            ShipsFaction.RechargeList[this] = ShipsFaction.RechargeList[this] - (int)Faction.RechargeStatus.Shields;
+
+                            if (ShipsFaction.RechargeList[this] == 0)
+                            {
+                                ShipsFaction.RechargeList.Remove(this);
+                            }
+                        }
+                    }
+                }
+                else if (Active == true)
+                {
+                    /// <summary>
+                    /// Add to the recharge list.
+                    /// </summary>
+                    if (ShipsFaction.RechargeList.ContainsKey(this) == false)
+                    {
+                        ShipsFaction.RechargeList.Add(this, (int)Faction.RechargeStatus.Shields);
+                    }
+                    else 
+                    {
+                        if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Shields) != (int)Faction.RechargeStatus.Shields)
+                        {
+                            ShipsFaction.RechargeList[this] = ShipsFaction.RechargeList[this] + (int)Faction.RechargeStatus.Shields;
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// What is the shield state before this order, and what is this shield being set to? If active state changes then the EM signature must be recalculated.
+                /// </summary>
                 if (ShieldIsActive == true && Active == false)
                 {
+                    /// <summary>
+                    /// Recalculate the EM signature and resort the taskgroup ships based on EM as a result.
+                    /// </summary>
                     CurrentEMSignature = CurrentEMSignature - (int)(CurrentShieldPoolMax * 30.0f);
                     ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                 }
                 else if (ShieldIsActive == false && Active == true)
                 {
+                    /// <summary>
+                    /// Recalculate the EM signature and resort the taskgroup ships based on EM as a result.
+                    /// </summary>
                     CurrentEMSignature = CurrentEMSignature + (int)(CurrentShieldPoolMax * 30.0f);
                     ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                 }
 
                 ShieldIsActive = Active;
 
+                /// <summary>
+                /// If the shields are down then zero the current shield pool.
+                /// </summary>
                 if (ShieldIsActive == false)
                 {
                     CurrentShieldPool = 0.0f;
