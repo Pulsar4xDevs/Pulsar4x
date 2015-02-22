@@ -238,6 +238,7 @@ namespace Pulsar4X.Entities
 			{
                 // Don't attempt to calculate large timeframes.
 				timeSinceEpoch -= m_orbitalPeriod;
+                Epoch += m_orbitalPeriod;
 			}
 
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
