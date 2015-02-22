@@ -57,7 +57,6 @@ namespace Pulsar4X
                 Star newStar = GenerateStar(newSystem);
 
                 GenerateSystemBodiesForStar(newStar);
-                //GenerateAsteroidBelts(newStar);
                 GenerateComets(newStar);
 
                 // sort the stars children:
@@ -769,16 +768,6 @@ namespace Pulsar4X
         /// </remarks>
         private static void GenerateSystemBody(Star star, SystemBody body, SystemBody parent = null, Orbit referenceOrbit = null)
         {
-            // Create the SystemBody:
-            //SystemBody body = null;
-           // if (IsMoon(planetType))
-            //    body = new SystemBody(parent);
-           // else
-            //    body = new SystemBody(star);
-
-           // body.Type = planetType;
-           // body.Name = name;
-
             // if we have been passed a reference orbit, use it:
             if (referenceOrbit != null) 
             {
@@ -866,11 +855,71 @@ namespace Pulsar4X
             return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[body.Type]);
         }
 
+        /// <summary>
+        /// Calls GenerateSystemBody to generate the required moons.
+        /// </summary>
+        private static void GenerateMoons(Star star, SystemBody parent)
+        {
+            // first lets see if this planet gets moons:
+            if (m_RNG.NextDouble() > GalaxyGen.MoonGenerationChanceByPlanetType[parent.Type])
+                return; // no moons for you :(
+
+            // Okay lets work out the number of moons based on:
+            // The mass of the parent in proportion to the maximum mass for a planet of that type.
+            // The MaxNoOfMoonsByPlanetType
+            // And a random number for randomness.
+            double massRatioOfParent = parent.Orbit.Mass / GalaxyGen.PlanetMassByType[parent.Type]._max;
+            double moonGenChance = massRatioOfParent * m_RNG.NextDouble() * GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type];
+            moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type]);
+            int noOfMoons = (int)Math.Round(moonGenChance);
+
+            // now we need to work out the moon type
+            // we will do this by looking at the base temp of the parent.
+            // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
+            // i.e. a planet hotter then GalaxyGen.IceMoonMaximumParentTemperature will always have PlanetType.Moon.
+            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / GalaxyGen.IceMoonMaximumParentTemperature;
+            SystemBody.PlanetType pt = SystemBody.PlanetType.Moon;
+
+            // first pass to gen mass etc:
+            List<ProtoSystemBody> protoMoons = new List<ProtoSystemBody>();
+            double totalMoonMass = 0;
+            for (int i = 0; i < noOfMoons; ++i)
+            {
+                ProtoSystemBody protoMoon = new ProtoSystemBody();                     // create the proto moon
+                if (m_RNG.NextDouble() > tempRatio)
+                    protoMoon._type = SystemBody.PlanetType.IceMoon;                   // if a random number is > tempRatio it will be an ice moon.
+                else
+                    protoMoon._type = SystemBody.PlanetType.IceMoon;                   // else it is a Terrestrial Moon
+
+                protoMoon._mass = GenerateMoonMass(parent, protoMoon._type);           // Generate Mass
+                totalMoonMass += protoMoon._mass;                                      // add mass to total mass.
+                protoMoons.Add(protoMoon);
+            }
+
+            List<SystemBody> moons = GeneratePlanetSystemOrbits(parent, protoMoons, totalMoonMass);
+
+            int moonNo = 1;
+            foreach (SystemBody moon in moons)
+            {
+                moon.Name = parent.Name + " - Moon " + moonNo.ToString();
+
+                // flesh out moon details:
+                GenerateSystemBody(star, moon, parent);
+                parent.Moons.Add(moon);
+            }
+        }
+
+        /// <summary>
+        /// Generates mass for a Planet. tho it also works for comets and Asteroids and dwarfPlanets... just not moons.
+        /// </summary>
         private static double GeneratePlanetMass(SystemBody.PlanetType type)
         {
             return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[type]);
         }
 
+        /// <summary>
+        /// Generates Mass for a Moon.
+        /// </summary>
         private static double GenerateMoonMass(SystemBody parent, SystemBody.PlanetType type)
         {
             // quick safty check:
@@ -924,6 +973,9 @@ namespace Pulsar4X
 
             return SystemBody.TectonicActivity.Dead;
         }
+
+
+        # region Obsolete???
 
         /// <summary>
         /// Generates an orbit around a parent Star. 
@@ -1015,6 +1067,30 @@ namespace Pulsar4X
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
                                                     longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
         }
+
+        /// <summary>
+        /// Generates a non-functions reference orbit to be used for generating orbits for specific asteroids and dwarf planets.
+        /// </summary>
+        private static Orbit GenerateAsteroidBeltReferenceOrbit(Star parent)
+        {
+            // create stationary orbit to hold data:
+            Orbit referenceOrbit = Orbit.FromStationary(1);
+
+            // create values:
+            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
+                                                                         GalaxyGen.OrbitalDistanceDistributionByPlanetType[SystemBody.PlanetType.Asteroid]);
+            referenceOrbit.Eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
+            referenceOrbit.Inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            referenceOrbit.ArgumentOfPeriapsis = m_RNG.NextDouble() * 360;
+            referenceOrbit.MeanAnomaly = m_RNG.NextDouble() * 360;
+            referenceOrbit.LongitudeOfAscendingNode = m_RNG.NextDouble() * 360;
+
+            return referenceOrbit;
+        }
+
+        #endregion
+
+        #region Atmosphere Generation
 
         /// <summary>
         /// Generates an atmosphere for the provided planet based on its type.
@@ -1188,90 +1264,9 @@ namespace Pulsar4X
             return totalATMAdded;
         }
 
-        /// <summary>
-        /// Calls GenerateSystemBody to generate the required moons.
-        /// </summary>
-        private static void GenerateMoons(Star star, SystemBody parent)
-        {
-            // first lets see if this planet gets moons:
-            if (m_RNG.NextDouble() > GalaxyGen.MoonGenerationChanceByPlanetType[parent.Type])
-                return; // no moons for you :(
-            
-            // Okay lets work out the number of moons based on:
-            // The mass of the parent in proportion to the maximum mass for a planet of that type.
-            // The MaxNoOfMoonsByPlanetType
-            // And a random number for randomness.
-            double massRatioOfParent = parent.Orbit.Mass / GalaxyGen.PlanetMassByType[parent.Type]._max;
-            double moonGenChance = massRatioOfParent * m_RNG.NextDouble() * GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type];
-            moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type]);
-            int noOfMoons = (int)Math.Round(moonGenChance);
+        #endregion
 
-            // now we need to work out the moon type
-            // we will do this by looking at the base temp of the parent.
-            // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
-            // i.e. a planet hotter then GalaxyGen.IceMoonMaximumParentTemperature will always have PlanetType.Moon.
-            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / GalaxyGen.IceMoonMaximumParentTemperature;
-            SystemBody.PlanetType pt = SystemBody.PlanetType.Moon;
-
-            // first pass to gen mass etc:
-            List<ProtoSystemBody> protoMoons = new List<ProtoSystemBody>();
-            double totalMoonMass = 0;
-            for (int i = 0; i < noOfMoons; ++i)
-            {
-                ProtoSystemBody protoMoon = new ProtoSystemBody();                     // create the proto moon
-                if (m_RNG.NextDouble() > tempRatio)                                    
-                    protoMoon._type = SystemBody.PlanetType.IceMoon;                   // if a random number is > tempRatio it will be an ice moon.
-                else
-                    protoMoon._type = SystemBody.PlanetType.IceMoon;                   // else it is a Terrestrial Moon
-
-                protoMoon._mass = GenerateMoonMass(parent, protoMoon._type);           // Generate Mass
-                totalMoonMass += protoMoon._mass;                                      // add mass to total mass.
-                protoMoons.Add(protoMoon);
-            }
-
-            List<SystemBody> moons = GeneratePlanetSystemOrbits(parent, protoMoons, totalMoonMass);
-
-            int moonNo = 1;
-            foreach(SystemBody moon in moons)
-            {
-                moon.Name = parent.Name + " - Moon " + moonNo.ToString();
-
-                // flesh out moon details:
-                GenerateSystemBody(star, moon, parent);
-                parent.Moons.Add(moon);
-            }
-
-            // if a random number is > tempRatio it will be an ice moon:
-            //List<SystemBody> sorted = new List<SystemBody>();
-            //for (int i = 0; i < noOfMoons; ++i)
-            //{
-            //    if (tempRatio < 1)
-            //    {
-            //        // get random type:
-            //        if (m_RNG.NextDouble() > tempRatio)
-            //            pt = SystemBody.PlanetType.IceMoon;
-            //    }
-
-                
-
-            //    SystemBody newMoon = new SystemBody(parent, pt);
-
-            //    ///< @todo fix Moons!!!!!!!!!!!!!!!!
-
-            //    newMoon.Name = parent.Name + " - Moon " + i.ToString();
-            //    GenerateSystemBody(star, newMoon, parent);
-            //    sorted.Add(newMoon); // we will sort this when we are done!
-            //}
-
-            //// sort moons in decending order by semiMajorAxis:
-            ////BindingList<SystemBody> sorted = parent.Moons;
-            //sorted.Sort(delegate(SystemBody a, SystemBody b)
-            //    {
-            //        return a.Orbit.SemiMajorAxis.CompareTo(b.Orbit.SemiMajorAxis);
-            //    });
-
-            //parent.Moons = new BindingList<SystemBody>(sorted);  // now add the sorted list!!
-        }
+        
 
         /// <summary>
         /// This function generate ruins for the specified system Body.
@@ -1347,26 +1342,6 @@ namespace Pulsar4X
             }
         }
 
-        /// <summary>
-        /// Generates a non-functions reference orbit to be used for generating orbits for specific asteroids and dwarf planets.
-        /// </summary>
-        private static Orbit GenerateAsteroidBeltReferenceOrbit(Star parent)
-        {
-            // create stationary orbit to hold data:
-            Orbit referenceOrbit = Orbit.FromStationary(1);
-
-            // create values:
-            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
-                                                                         GalaxyGen.OrbitalDistanceDistributionByPlanetType[SystemBody.PlanetType.Asteroid]);
-            referenceOrbit.Eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
-            referenceOrbit.Inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
-            referenceOrbit.ArgumentOfPeriapsis = m_RNG.NextDouble() * 360;
-            referenceOrbit.MeanAnomaly = m_RNG.NextDouble() * 360;
-            referenceOrbit.LongitudeOfAscendingNode = m_RNG.NextDouble() * 360;
-
-            return referenceOrbit;
-        }
-
         #endregion
 
         #region Comet Generation Functions
@@ -1438,9 +1413,7 @@ namespace Pulsar4X
             // If numJumpPoints wasn't specified by the systemGen,
             // then just make as many jumpPoints as our stars cumulatively want to make.
             if (numJumpPoints == -1)
-            {
                 numJumpPoints = (int)starList.TotalWeight;
-            }
 
             numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointConnectivity);
 
@@ -1451,7 +1424,6 @@ namespace Pulsar4X
 
                 // Generate a jump point on a star from the weighted list.
                 GenerateJumpPoint(starList.Select(rnd));
-
                 jumpPointsGenerated++;
             }
 
@@ -1599,7 +1571,7 @@ namespace Pulsar4X
         /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range.
         /// </summary>
-        public static double RNG_NextDoubleRange(double min, double max)
+        private static double RNG_NextDoubleRange(double min, double max)
         {
             return min + m_RNG.NextDouble() * (max - min);
         }
@@ -1607,7 +1579,7 @@ namespace Pulsar4X
         /// <summary>
         /// Version of RNG_NextDoubleRange(double min, double max) that takes GalaxyGen.MinMaxStruct directly.
         /// </summary>
-        public static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax)
+        private static double RNG_NextDoubleRange(GalaxyGen.MinMaxStruct minMax)
         {
             return RNG_NextDoubleRange(minMax._min, minMax._max);
         }
@@ -1615,7 +1587,7 @@ namespace Pulsar4X
         /// <summary>
         /// Raises the random number generated to the power provided to produce a non-uniform selection from the range.
         /// </summary>
-        public static double RNG_NextDoubleRangeDistributedByPower(double min, double max, double power)
+        private static double RNG_NextDoubleRangeDistributedByPower(double min, double max, double power)
         {
             return min + Math.Pow(m_RNG.NextDouble(), power) * (max - min);
         }
@@ -1623,7 +1595,7 @@ namespace Pulsar4X
         /// <summary>
         /// Version of RNG_NextDoubleRangeDistributedByPower(double min, double max, double power) that takes GalaxyGen.MinMaxStruct directly.
         /// </summary>
-        public static double RNG_NextDoubleRangeDistributedByPower(GalaxyGen.MinMaxStruct minMax, double power)
+        private static double RNG_NextDoubleRangeDistributedByPower(GalaxyGen.MinMaxStruct minMax, double power)
         {
             return RNG_NextDoubleRangeDistributedByPower(minMax._min, minMax._max, power);
         }
@@ -1631,7 +1603,7 @@ namespace Pulsar4X
         /// <summary>
         /// Returns a value between the min and max.
         /// </summary>
-        public static uint RNG_NextRange(GalaxyGen.MinMaxStruct minMax)
+        private static uint RNG_NextRange(GalaxyGen.MinMaxStruct minMax)
         {
             return (uint)m_RNG.Next((int)minMax._min, (int)minMax._max);
         }
@@ -1639,7 +1611,7 @@ namespace Pulsar4X
         /// <summary>
         /// Selects a number from a range based on the selection percentage provided.
         /// </summary>
-        public static double SelectFromRange(GalaxyGen.MinMaxStruct minMax, double selection)
+        private static double SelectFromRange(GalaxyGen.MinMaxStruct minMax, double selection)
         {
             return minMax._min + selection * (minMax._max - minMax._min); ;
         }
