@@ -103,7 +103,7 @@ namespace Pulsar4X
                 SystemBody newPlanet = new SystemBody(Sun, SystemBody.PlanetType.Comet);
                 newPlanet.Name = "New Planet " + i;
 
-                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, GalaxyGen.J2000);
+                newPlanet.Orbit = Orbit.FromAsteroidFormat(5.9726E24, Sun.Orbit.Mass, RNG.NextDouble() * 100, RNG.NextDouble(), 0, RNG.NextDouble() * 360, RNG.NextDouble() * 360, RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
 
                 double x, y;
 
@@ -998,7 +998,7 @@ namespace Pulsar4X
 
             // now Create the orbit:
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
         }
 
         /// <summary>
@@ -1023,7 +1023,7 @@ namespace Pulsar4X
 
             // now Create the orbit:
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
         }
 
         /// <summary>
@@ -1065,7 +1065,7 @@ namespace Pulsar4X
             
             // now Create the orbit:
             child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GalaxyGen.J2000);
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
         }
 
         /// <summary>
