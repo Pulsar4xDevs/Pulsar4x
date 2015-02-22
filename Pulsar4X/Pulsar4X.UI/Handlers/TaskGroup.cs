@@ -763,12 +763,16 @@ namespace Pulsar4X.UI.Handlers
                 if (SelectedOrderIndex == -1)
                     index = orders.Count -1;
                 else
-                    index = SelectedOrderIndex;
+                    index = SelectedOrderIndex -1;
                 while (index >= 0)
                 {
                     if (orders[index].typeOf == stdtrans || orders[index].typeOf == sqdtrans || orders[index].typeOf == tndtrans)
+                    {
                         if (orders[index].jumpPoint.Connect != null)
                             targetsys = orders[index].jumpPoint.Connect.Position.System;
+                        index = -1;
+                    }
+                        
                     index--;
                 }
             }
