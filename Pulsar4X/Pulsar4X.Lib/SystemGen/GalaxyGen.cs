@@ -188,18 +188,25 @@ namespace Pulsar4X
         /// We want StarOrbitGravityFactor times less gravitational attraction from childStar to parentStar's furthest planet then parentStar to parentStar's furthest planet.
         /// <? todo: Is this comment completely confusing?
         /// </summary>
-        public static double StarOrbitGravityFactor = 10;
+        public const double StarOrbitGravityFactor = 10;
 
         /// <summary>
         /// The chance a Terrestrial body will have some form of Tectonic activity.
         /// Note that very small/low mass bodies will still end up dead.
         /// </summary>
-        public static double TerrestrialBodyTectonicActiviyChance = 0.5;
+        public const double TerrestrialBodyTectonicActiviyChance = 0.5;
 
         /// <summary>
         /// Epoch used when generating orbits. There should be no reason to change this.
         /// </summary>
         public static DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+
+        /// <summary>
+        /// The maximum temperture of a planet which can have Ice Moons, in Kelvin
+        /// This is used to work out the change of an Ice moon around a planet, the 
+        /// lower the plante's temp below this the moor likly an ice moon is.
+        /// </summary>
+        public const double IceMoonMaximumParentTemperature = 150;
 
         /// <summary>
         /// Controls how much the type of a star affects the generation of planets.

@@ -1071,12 +1071,11 @@ namespace Pulsar4X
             moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type]);
             int noOfMoons = (int)Math.Round(moonGenChance);
 
-            ///< @todo Get had coded numbers out of here... again...
             // now we need to work out the moon type
             // we will do this by looking at the base temp of the parent.
             // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
-            // i.e. a moon hotter then 150K will always by PlanetType.Moon.
-            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / 150;
+            // i.e. a planet hotter then GalaxyGen.IceMoonMaximumParentTemperature will always have PlanetType.Moon.
+            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / GalaxyGen.IceMoonMaximumParentTemperature;
             Planet.PlanetType pt = Planet.PlanetType.Moon;
 
             // esle if a random number is > tempRatio it will be an ice moon:
@@ -1107,7 +1106,7 @@ namespace Pulsar4X
 
         /// <summary>
         /// This function generate ruins for the specified system Body.
-        /// @todo Make tRuins Generation take star age/type into consideration??
+        /// @todo Make Ruins Generation take star age/type into consideration??
         /// </summary>
         private static void GenerateRuins(Star star, Planet body)
         {
