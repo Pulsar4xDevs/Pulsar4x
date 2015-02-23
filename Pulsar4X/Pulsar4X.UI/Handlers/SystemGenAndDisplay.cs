@@ -73,6 +73,7 @@ namespace Pulsar4X.UI.Handlers
 
             m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
             m_oDataPanel.PlanetsDataGrid.SelectionChanged += new EventHandler(PlanetsDataGrid_SelectionChanged);
+            m_oDataPanel.PlanetsDataGrid.CellDoubleClick += new DataGridViewCellEventHandler(PlanetDataGrid_CellDoubleClick);
 
             // Setup Event handlers for Controls panel buttons:
             m_oControlsPanel.GenSystemButton.Click += new EventHandler(GenSystemButton_Click);
@@ -159,6 +160,25 @@ namespace Pulsar4X.UI.Handlers
                 VM.CurrentPlanet = (SystemBody)sel[0].DataBoundItem;
             }
         }
+
+        private void PlanetDataGrid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == 6)
+            {
+                // double clicked on sma, check if inside habitable zone.
+                double sma = (double)m_oDataPanel.PlanetsDataGrid.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                if (sma < VM.CurrentStar.MaxHabitableRadius && sma > VM.CurrentStar.MinHabitableRadius)
+                {
+                    // we are in the habitable zone:
+                    m_oDataPanel.PlanetsDataGrid.Rows[e.RowIndex].DefaultCellStyle.BackColor = System.Drawing.Color.Aqua;
+                }
+                else
+                {
+                    m_oDataPanel.PlanetsDataGrid.Rows[e.RowIndex].DefaultCellStyle.BackColor = System.Drawing.Color.LightSalmon;
+                }
+            }
+        }
+
 
         #endregion
 
