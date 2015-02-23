@@ -15,7 +15,10 @@ namespace Pulsar4X.Entities
     /// All angles stored in Degrees, but calculated in Radians.
     /// </summary>
 	public class Orbit
-	{
+    {
+
+        #region Properties
+
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
@@ -98,12 +101,23 @@ namespace Pulsar4X.Entities
         private double m_meanMotion;
 
         /// <summary>
+        /// Point in orbit furthest from the ParentBody. Measured in AU.
+        /// </summary>
+        public double Apoapsis { get { return (1 + Eccentricity) * SemiMajorAxis; } }
+
+        /// <summary>
+        /// Point in orbit closest to the ParentBody. Measured in AU.
+        /// </summary>
+        public double Periapsis { get { return (1 - Eccentricity) * SemiMajorAxis; } }
+
+        /// <summary>
         /// Stationary orbits don't have all of the data to update. They always return (0, 0).
         /// </summary>
         private bool m_isStationary;
 
-        public double Apoapsis { get { return (1 + Eccentricity) * SemiMajorAxis; } }
-        public double Periapsis { get { return (1 - Eccentricity) * SemiMajorAxis; } }
+        #endregion
+
+        #region Orbit Construction Interface
 
         /// <summary>
         /// Returns an orbit representing the defined parameters.
@@ -120,8 +134,11 @@ namespace Pulsar4X.Entities
         public static Orbit FromMajorPlanetFormat(double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
-            double argumentOfPeriapsis = GetArgumentOfPeriapsisFromLongitudeOfPeriapsis(longitudeOfPeriapsis, longitudeOfAscendingNode);
-            double meanAnomaly = GetMeanAnomalyFromMeanLongitude(meanLongitude, longitudeOfAscendingNode, argumentOfPeriapsis);
+            // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
+            double argumentOfPeriapsis = longitudeOfPeriapsis - longitudeOfAscendingNode;
+            // http://en.wikipedia.org/wiki/Mean_longitude
+            double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
+
             return new Orbit(mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
@@ -145,7 +162,6 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Creates an orbit that never moves.
-        /// Kinda a hack for stationary stars.
         /// </summary>
         public static Orbit FromStationary(double mass)
         {
@@ -202,23 +218,9 @@ namespace Pulsar4X.Entities
             m_meanMotion = Angle.ToDegrees(m_meanMotion); // Stored in degrees.
         }
 
-        /// <summary>
-        /// Converts longitude of periapsis to argument of periapsis
-        /// </summary>
-        private static double GetArgumentOfPeriapsisFromLongitudeOfPeriapsis(double longitudeOfPeriapsis, double longitudeOfAscendingNode)
-        {
-            // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
-            return longitudeOfPeriapsis - longitudeOfAscendingNode;
-        }
+        #endregion
 
-        /// <summary>
-        /// Converts mean longitude to mean anomaly.
-        /// </summary>
-        private static double GetMeanAnomalyFromMeanLongitude(double meanLongitude, double longitudeOfAscendingNode, double argumentOfPeriapsis)
-        {
-            // http://en.wikipedia.org/wiki/Mean_longitude
-            return meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
-        }
+        #region Orbit Position Calculations
 
         /// <summary>
         /// Calculates the parent-relative cartesian coordinate of an orbit for a given time.
@@ -248,7 +250,9 @@ namespace Pulsar4X.Entities
 			currentMeanAnomaly += Angle.ToRadians(MeanMotion) * timeSinceEpoch.TotalSeconds;
 
 			double EccentricAnomaly = GetEccentricAnomaly(currentMeanAnomaly);
-			double TrueAnomaly = GetTrueAnomaly(Eccentricity, EccentricAnomaly);
+
+            // http://en.wikipedia.org/wiki/True_anomaly#From_the_eccentric_anomaly
+			double TrueAnomaly = Math.Atan2(Math.Sqrt(1 - Eccentricity * Eccentricity) * Math.Sin(EccentricAnomaly), Math.Cos(EccentricAnomaly) - Eccentricity);
 
             GetPosition(TrueAnomaly, out x, out y);
 		}
@@ -266,7 +270,8 @@ namespace Pulsar4X.Entities
                 return;
             }
 
-            double radius = GetRadius(TrueAnomaly);
+            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
+            double radius = SemiMajorAxis * Constants.Units.KM_PER_AU * (1 - Eccentricity * Eccentricity) / (1 + Eccentricity * Math.Cos(TrueAnomaly));
 
             // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
             TrueAnomaly += Angle.ToRadians(ArgumentOfPeriapsis);
@@ -278,29 +283,6 @@ namespace Pulsar4X.Entities
             x = radius * Math.Cos(TrueAnomaly);
             y = radius * Math.Sin(TrueAnomaly);
         }
-
-        /// <summary>
-        /// Calculates the current radius given the input angle.
-        /// </summary>
-        /// <param name="TrueAnomaly">Angle in Radians.</param>
-        /// <returns>Current Radius of an orbit in KM.</returns>
-        private double GetRadius(double TrueAnomaly)
-        {
-            // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            return (SemiMajorAxis * Constants.Units.KM_PER_AU * (1 - Eccentricity * Eccentricity) / (1 + Eccentricity * Math.Cos(TrueAnomaly)));
-        }
-
-		/// <summary>
-		/// Calculates the current TrueAnomaly given certain orbital parameters.
-		/// </summary>
-		/// <param name="Eccentricity"></param>
-		/// <param name="EccentricAnomaly"></param>
-		/// <returns>True Anomaly</returns>
-		private double GetTrueAnomaly(double Eccentricity, double EccentricAnomaly)
-		{
-            // http://en.wikipedia.org/wiki/True_anomaly#From_the_eccentric_anomaly
-            return Math.Atan2(Math.Sqrt(1 - Eccentricity * Eccentricity) * Math.Sin(EccentricAnomaly), Math.Cos(EccentricAnomaly) - Eccentricity);
-		}
 
 		/// <summary>
 		/// Calculates the current Eccentric Anomaly given certain orbital parameters.
@@ -343,8 +325,12 @@ namespace Pulsar4X.Entities
             double eccentricAnomaly = E[i - 1];
 
 			return E[i - 1];
-		}
+        }
+
+        #endregion
+
     }
+
 
     #region Data Binding
 
