@@ -1269,7 +1269,7 @@ namespace Pulsar4X.Entities
                         break;
                 }
 
-                CurrentHeading = Angle.ToDegrees(Math.Atan(dY / dX));
+                CurrentHeading = Pulsar4X.Helpers.GameMath.Angle.ToDegrees(Math.Atan(dY / dX));
             }
             else
                 CurrentHeading = 0.0;
