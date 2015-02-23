@@ -62,10 +62,8 @@ namespace Pulsar4X.UI.Handlers
 
             // Setup the SystemBody Data Grid
             m_oDataPanel.PlanetsDataGrid.AutoGenerateColumns = false;
-            //m_oDataPanel.PlanetsDataGrid.DataSource = VM.PlanetSource;
-
             m_oDataPanel.PlanetsDataGrid.RowHeadersVisible = false;
-            m_oDataPanel.PlanetsDataGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            m_oDataPanel.PlanetsDataGrid.SelectionMode = DataGridViewSelectionMode.CellSelect;
             m_oDataPanel.PlanetsDataGrid.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             m_oDataPanel.PlanetsDataGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
             m_oDataPanel.PlanetsDataGrid.Bind(c => c.AllowUserToAddRows, VM, d => d.isSM);
@@ -393,8 +391,9 @@ namespace Pulsar4X.UI.Handlers
             using (DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn())
             {
                 col.DataPropertyName = "Orbit_MassRelativeToEarth";
-                col.HeaderText = "Mass (Me)";
+                col.HeaderText = "Mass";
                 col.DefaultCellStyle.Format = "N6";
+                col.ToolTipText = "Mass relative to the Earth";
                 col.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
                 m_oDataPanel.PlanetsDataGrid.Columns.Add(col);
