@@ -1306,27 +1306,30 @@ namespace Pulsar4X
                     {
                         // Terrestrial Planets can have very large ammount of ATM.
                         // so we will generate a number to act as the total:
-                        float planetsATM = (float)RNG_NextDoubleRange(0.1, 100);
-                        // reduce my mass ratio relative to earth (so really small bodies cannot have massive atmos:
+                        double planetsATMChance = m_RNG.NextDouble();// (float)RNG_NextDoubleRange(0.1, 100);
+                        // get my mass ratio relative to earth (so really small bodies cannot have massive atmos:
                         double massRatio = planet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
-                        planetsATM = (float)GMath.Clamp((double)planetsATM * massRatio, 0.01, 200);
+                        float planetsATM = 1;
 
                         // Start with the ammount of Oxygen or Carbin Di-oxide or methane:
-                        int atmoTypeChance = m_RNG.Next(0, 2);
+                        int atmoTypeChance = m_RNG.Next(0, 3);
                         if (atmoTypeChance == 0)            // methane
                         {
+                            planetsATM = (float)GMath.Clamp((double)planetsATMChance * 5 * massRatio, 0.01, 5);
                             currATM = (float)RNG_NextDoubleRange(0.05, 0.40);
                             atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(2), currATM * planetsATM);
                             totalATM += currATM;
                         }
                         else if (atmoTypeChance == 1)   // Carbon Di-Oxide
                         {
+                            planetsATM = (float)GMath.Clamp((double)planetsATMChance * 5 * massRatio, 0.01, 200); // allow presure cooker atmos!!
                             currATM = (float)RNG_NextDoubleRange(0.05, 0.90);
-                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(1), currATM * planetsATM);
+                            atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(12), currATM * planetsATM);
                             totalATM += currATM;
                         }
                         else                        // oxygen
                         {
+                            planetsATM = (float)GMath.Clamp((double)planetsATMChance * 5 * massRatio, 0.01, 5);
                             currATM = (float)RNG_NextDoubleRange(0.05, 0.40);
                             atmo.Composition.Add(AtmosphericGas.AtmosphericGases.SelectAt(9), currATM * planetsATM);
                             totalATM += currATM;
@@ -1340,8 +1343,8 @@ namespace Pulsar4X
                         }
 
                         // next get a random number/ammount of trace gases:
-                        noOfTraceGases = m_RNG.Next(1, 4);
-                        totalATM += AddTraceGases(atmo, noOfTraceGases, planetsATM);
+                        noOfTraceGases = m_RNG.Next(1, 3);
+                        totalATM += AddTraceGases(atmo, noOfTraceGases, planetsATM, false);
 
                         // now make the remaining amount Nitrogen:
                         currATM = 1 - totalATM; // get the remaining ATM.
@@ -1379,27 +1382,32 @@ namespace Pulsar4X
         /// A small helper function for GenerateAtmosphere. It generates up to the specified number of
         /// "trace" gases and adds them to the atmosphere.
         /// </summary>
-        /// <param name="scaler">The ammount of gass added is multiplyed by this before being added to the Atmosphere.</param>
-        /// <returns>The ammount of gas added in ATMs (pre scaler)</returns>
-        private static float AddTraceGases(Atmosphere atmo, int number, float scaler = 1)
+        /// <param name="totalAtmoPressure">The ammount of gass added is multiplyed by this before being added to the Atmosphere.</param>
+        /// <returns>The ammount of gas added in ATMs</returns>
+        private static float AddTraceGases(Atmosphere atmo, int numberToAdd, float totalAtmoPressure = 1, bool allowHydrogenOrHelium = true)
         {
             float totalATMAdded = 0;
-            for (int i = 0; i < number; ++i)
+            int gassesAdded = 0;
+            while (gassesAdded < numberToAdd)
             {
-                float currATM = (float)RNG_NextDoubleRange(0, 0.005);
+                //float currATM = (float)RNG_NextDoubleRange(0, 0.01);
                 var gas = AtmosphericGas.AtmosphericGases.Select(m_RNG.NextDouble());
+                if (allowHydrogenOrHelium == false)
+                {
+                    if (gas.ChemicalSymbol == "H" || gas.ChemicalSymbol == "He")
+                        continue;
+                }
                 if (atmo.Composition.ContainsKey(gas))
-                    continue;           // just skip it.
-                atmo.Composition.Add(gas, currATM * scaler);   // up to max half a percent.  
-                totalATMAdded += currATM;
+                    continue;
+                atmo.Composition.Add(gas, 0.01f * totalAtmoPressure);   // add 1% for trace gasses.
+                totalATMAdded += 0.01f * totalAtmoPressure;
+                gassesAdded++;
             }
 
             return totalATMAdded;
         }
 
         #endregion
-
-        
 
         /// <summary>
         /// This function generate ruins for the specified system Body.
