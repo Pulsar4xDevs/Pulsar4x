@@ -97,6 +97,10 @@ namespace Pulsar4X.UI.Handlers
                     {
                         CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
                     }
+                    else
+                    {
+                        CurrentSYInfo = null;
+                    }
 
                     RefreshPanels();
                 }
@@ -349,6 +353,21 @@ namespace Pulsar4X.UI.Handlers
                 if (TreeViewDictionary.ContainsKey(m_oSummaryPanel.PopulationTreeView.SelectedNode.Name) == true)
                 {
                     m_oCurrnetPopulation = TreeViewDictionary[m_oSummaryPanel.PopulationTreeView.SelectedNode.Name];
+
+                    if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number >= 1.0f)
+                    {
+                        CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[0];
+                    }
+                    else if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number >= 1.0f)
+                    {
+                        CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
+                    }
+                    else
+                    {
+                        CurrentSYInfo = null;
+                    }
+
+                    RefreshPanels();
                 }
             }
         }
@@ -494,7 +513,11 @@ namespace Pulsar4X.UI.Handlers
                 if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
                 {
                     int index = m_oSummaryPanel.ShipyardDataGrid.CurrentCell.RowIndex;
-                    
+
+                    if (index > (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number) +
+                               (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number))
+                        return;
+
 
                     if(index < (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number))
                     {
@@ -541,7 +564,7 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void NewShipClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+            Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
         }
         #endregion
 
@@ -962,6 +985,8 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_oCurrnetFaction != null)
             {
+                m_oSummaryPanel.ShipyardDataGrid.ClearSelection();
+
                 /// <summary>
                 /// reset the construction type combo box selection to 0.
                 /// </summary>

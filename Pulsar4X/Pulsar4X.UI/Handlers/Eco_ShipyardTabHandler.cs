@@ -117,7 +117,41 @@ namespace Pulsar4X.UI.Handlers
             if (CurrentFaction != null && CurrentPopulation != null && SYInfo != null)
             {
                 RefreshShipyardDataGrid(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+                RefreshSYCGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
                 BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
+            }
+        }
+
+        /// <summary>
+        /// Need an updater function for this groupbox since the retool list can and will change.
+        /// </summary>
+        /// <param name="m_oSummaryPanel">Panel from economics</param>
+        /// <param name="CurrentFaction">Current Faction</param>
+        /// <param name="CurrentPopulation">Current Population</param>
+        /// <param name="RetoolList">List of ships that this shipyard can be retooled to.</param>
+        private static void RefreshSYCGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo, BindingList<ShipClassTN> RetoolList)
+        {
+
+#warning this doesn't update when a new shipclass is added on its own. the econ page is "shared" by all factions so an event may not be possible there.
+            if (RetoolList != null && CurrentFaction != null && SYInfo != null)
+            {
+
+                m_oSummaryPanel.NewShipClassComboBox.Items.Clear();
+                RetoolList.Clear();
+                foreach (ShipClassTN Ship in CurrentFaction.ShipDesigns)
+                {
+                    if (Ship.SizeTons <= SYInfo.Tonnage)
+                    {
+                        RetoolList.Add(Ship);
+                    }
+                }
+
+                foreach (ShipClassTN Ship in RetoolList)
+                {
+                    m_oSummaryPanel.NewShipClassComboBox.Items.Add(Ship);
+                }
+                if (RetoolList.Count != 0)
+                    m_oSummaryPanel.NewShipClassComboBox.SelectedIndex = 0;
             }
         }
 
@@ -174,7 +208,10 @@ namespace Pulsar4X.UI.Handlers
 
 #warning this doesn't update when a new shipclass is added on its own. the econ page is "shared" by all factions so an event may not be possible there.
             m_oSummaryPanel.NewShipClassComboBox.Items.Clear();
-            m_oSummaryPanel.NewShipClassComboBox.DataSource = RetoolList;
+            foreach (ShipClassTN Ship in RetoolList)
+            {
+                m_oSummaryPanel.NewShipClassComboBox.Items.Add(Ship);
+            }
             if (RetoolList.Count != 0)
                 m_oSummaryPanel.NewShipClassComboBox.SelectedIndex = 0;
         }
