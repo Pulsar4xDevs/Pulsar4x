@@ -710,8 +710,10 @@ namespace Pulsar4X
         private static Orbit FindClearOrbit(double parentMass, double mass, double insideOrbitMass, double insideOrbitApoapsis, double minDistance, double maxDistance)
         {
             // Adjust minDistance
-            double gravAttractionToInsideOrbit = Constants.Science.GRAVITATIONAL_CONSTANT * mass * insideOrbitMass / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
-            double gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * mass * parentMass / (minDistance * minDistance);
+            double graveAttractionInsiderNumerator = Constants.Science.GRAVITATIONAL_CONSTANT * mass * insideOrbitMass;
+            double graveAttractionParentNumerator = Constants.Science.GRAVITATIONAL_CONSTANT * mass * parentMass;
+            double gravAttractionToInsideOrbit = graveAttractionInsiderNumerator / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
+            double gravAttractionToParent = graveAttractionParentNumerator / (minDistance * minDistance);
 
             // Make sure we're 10x more attracted to our Parent, then our inside neighbor.
             while (gravAttractionToInsideOrbit * GalaxyGen.PlanetOrbitGravityFactor > gravAttractionToParent)
@@ -721,8 +723,8 @@ namespace Pulsar4X
                 minDistance += minDistance * 0.01;
 
                 // Reevaluate our gravitational attractions with new minDistance.
-                gravAttractionToInsideOrbit = Constants.Science.GRAVITATIONAL_CONSTANT * mass * insideOrbitMass / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
-                gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * mass * parentMass / (minDistance * minDistance);
+                gravAttractionToInsideOrbit = graveAttractionInsiderNumerator / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
+                gravAttractionToParent = graveAttractionParentNumerator / (minDistance * minDistance);
             }
 
             double sma;
