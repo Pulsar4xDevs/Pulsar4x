@@ -310,8 +310,6 @@ namespace Pulsar4X
 
             Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
 
-            // <@ todo: Generate orbits for stars in multi-star systems.
-
             system.Stars.Add(star);
             return star;
         }
@@ -593,6 +591,7 @@ namespace Pulsar4X
                 ProtoSystemBody protoBelt = new ProtoSystemBody();                                      // Create the Proto Asteroid
                 protoBelt._type = SystemBody.PlanetType.Asteroid;
                 protoBelt._mass = GeneratePlanetMass(SystemBody.PlanetType.Asteroid);                   // get its mass
+                totalSystemMass += protoBelt._mass;
                 protoPlanets.Add(protoBelt);
             }
 
@@ -623,62 +622,201 @@ namespace Pulsar4X
             }
         }
 
+
         /// <summary>
         /// Creates planet orbits for the given system (star + proto-planets). 
         /// Not all proto-planets are guaranteed to remian in the system. 
         /// Also creates orbits for asteroid belts cause they have to happen at the same time for it all to shake out right.
         /// </summary>
-        /// <param name="star">The Parent star of the system.</param>
+        /// <param name="parent">The Parent star of the system.</param>
         /// <param name="protoPlanets">List of Proto planets, i.e. a list of planets and their type.</param>
         /// <param name="totalSystemMass">The total mass of all planets in the system.</param>
         /// <returns>List of all the planets (SystemBody) in the system. the list should be sorted from nearst to the star to farthest away.</returns>
-        private static List<SystemBody> GenerateStarSystemOrbits(Star star, List<ProtoSystemBody> protoPlanets, double totalSystemMass)
+        private static List<SystemBody> GenerateStarSystemOrbits(Star parent, List<ProtoSystemBody> protoPlanets, double totalSystemMass)
         {
             List<SystemBody> planets = new List<SystemBody>();
+            List<SystemBody> rejected = new List<SystemBody>();
+            double remainingSystemMass = totalSystemMass;
+            double remainingDistance = GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._max - GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._min;
+            double minDistance = GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._min;
+            double insideOrbitApoapsis = 0;
+            double insideOrbitMass = 0;
 
-            foreach(ProtoSystemBody protoPlanet in protoPlanets)
+            for(int i = 0; i < protoPlanets.Count; i++)
             {
-                // first create our system body:
-                SystemBody planet = new SystemBody(star, protoPlanet._type);
+                ProtoSystemBody currentProto = protoPlanets[i];
 
-                // temp hack to keep things working:
-                if (protoPlanet._type != SystemBody.PlanetType.Asteroid)
-                    GenerateSystemBodyOrbit(star, planet, protoPlanet._mass);  
+                double massRatio = currentProto._mass / remainingSystemMass;
+                double maxDistance = remainingDistance * massRatio + minDistance;
 
-                // okay Rod, this is where you can do your thing...
+                if (currentProto._type == SystemBody.PlanetType.IceGiant)
+                {
+                    if (maxDistance < parent.MaxHabitableRadius)
+                    {
+                        // We're too close for an ice giant right now.
+                        // Find a next non-ice giant and swap it out.
+                        int insideI = i;
+                        while (insideI < protoPlanets.Count && protoPlanets[insideI]._type == SystemBody.PlanetType.IceGiant)
+                        {
+                            insideI++;
+                        }
+                        if (insideI == protoPlanets.Count)
+                        {
+                            // We couldn't find a non-ice giant planet to swap with. This ice giant got blown out of the system.
+                            protoPlanets.Remove(currentProto);
+                        }
+                        else
+                        {
+                            // Found a body to swap with at index insideI.
+                            protoPlanets[i] = protoPlanets[insideI];
+                            protoPlanets[insideI] = currentProto;
+                        }
+                        i--; // Since we swapped a new planet into this position, we want to reevaluate this position.
+                        continue;
+                    }
+                    if (minDistance < parent.MaxHabitableRadius)
+                    {
+                        minDistance = parent.MaxHabitableRadius;
+                    }
+                }
 
-                // note that if protoPlanet._type == Asteroid then that 
-                // body will become a reference for an asteriod belt... 
-                // assume its mass is typical for objects in it 
-                // (as for total mass of the system, asteriods are so small they count for almost nothing)
-                // be aware that they do deviate from the refereence orbit by +/- MaxAsteroidOrbitDeviation (by default 0.05 ot 5%).
-                if (protoPlanet._type == SystemBody.PlanetType.Asteroid)
-                    planet.Orbit = GenerateAsteroidBeltReferenceOrbit(star);  // turns out it's an asteriod belt.
+                // Create our system body:
+                SystemBody planet = new SystemBody(parent, currentProto._type);
+
+                planet.Orbit = FindClearOrbit(parent.Orbit.Mass, currentProto._mass, insideOrbitMass, insideOrbitApoapsis, minDistance, maxDistance);
+
+                if (planet.Orbit.Apoapsis > GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._max)
+                {
+                    // Planet could not fit in the system.
+                    remainingSystemMass -= currentProto._mass;
+                    rejected.Add(planet);
+                    continue;
+                }
 
                 planets.Add(planet);
+
+                // Prep for next loop pass.
+                insideOrbitApoapsis = planet.Orbit.Apoapsis;
+                minDistance = planet.Orbit.Apoapsis;
+                remainingDistance = GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._max - planet.Orbit.Apoapsis;
+
+                insideOrbitMass = planet.Orbit.Mass;
+                remainingSystemMass -= planet.Orbit.Mass;
+
             }
 
             return planets;
         }
 
+        private static Orbit FindClearOrbit(double parentMass, double mass, double insideOrbitMass, double insideOrbitApoapsis, double minDistance, double maxDistance)
+        {
+            // Adjust minDistance
+            double gravAttractionToInsideOrbit = Constants.Science.GRAVITATIONAL_CONSTANT * mass * insideOrbitMass / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
+            double gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * mass * parentMass / (minDistance * minDistance);
+
+            // Make sure we're 10x more attracted to our Parent, then our inside neighbor.
+            while (gravAttractionToInsideOrbit * GalaxyGen.PlanetOrbitGravityFactor > gravAttractionToParent)
+            {
+                // We're too attracted to our inside neighbor, increase minDistance by 1%.
+                // Assuming our parent is more massive than our inside neightbor, then this will "tip" us to be more attracted to parent.
+                minDistance += minDistance * 0.01;
+
+                // Reevaluate our gravitational attractions with new minDistance.
+                gravAttractionToInsideOrbit = Constants.Science.GRAVITATIONAL_CONSTANT * mass * insideOrbitMass / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
+                gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * mass * parentMass / (minDistance * minDistance);
+            }
+
+            double sma;
+            double eccentricity;
+
+            if (minDistance > maxDistance)
+            {
+                // We don't want eccentricity to be 0, but we also don't want to go below minDistance,
+                // but we ALSO don't want to go too far ABOVE maxDistance.
+                // Get a random eccentricity.
+                eccentricity = m_RNG.NextDouble();
+                while (eccentricity > 0.1)
+                {
+                    // Now make eccentricity is low, otherwise we will go WAY above maxDistance.
+                    eccentricity -= 0.1;
+                }
+                // Calculate our SemiMajorAxis from our periapsis (minDistance) and our generated eccentricity.
+                sma = minDistance / (1 - eccentricity);
+
+                // Note: Our Apoapsis is going to be above maxDistance. We will "scrunch" the rest of the system to compenstate.
+                // if Apoapsis > our StarTypeMaxDistance, then we'll remove the planet in the calling function.
+            }
+            else
+            {
+                // Pick a random SMA between minDistance and maxDistance.
+                sma = m_RNG.NextDouble() * (maxDistance - minDistance) + minDistance;
+
+                // Calculate max eccentricity.
+                // First calc max eccentricity for the apoapsis.
+                double maxApoEccentricity = (maxDistance - sma) / sma;
+                // Now calc max eccentricity for periapsis.
+                double minPeriEccentricity = -((minDistance - sma) / sma);
+
+                // Use the smaller value.
+                if (minPeriEccentricity < maxApoEccentricity)
+                {
+                    // We use maxApoEccentricity in next calc.
+                    maxApoEccentricity = minPeriEccentricity;
+                }
+
+                // Now scale down eccentricity by a random factor.
+                eccentricity = m_RNG.NextDouble() * maxApoEccentricity;
+            }
+
+
+            Orbit clearOrbit = Orbit.FromAsteroidFormat(mass, parentMass, sma, eccentricity, m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
+
+            return clearOrbit;
+        }
+
         /// <summary>
         /// Same as GenerateStarSystemOrbits, but for plantary systems (i.e. moons).
         /// </summary>
-        private static List<SystemBody> GeneratePlanetSystemOrbits(SystemBody parent, List<ProtoSystemBody> protoMoons, double totalMoonMass)
+        private static List<SystemBody> GeneratePlanetSystemOrbits(SystemBody parent, List<ProtoSystemBody> protoMoons, double totalSystemMass, double systemMinDistance, double systemMaxDistance)
         {
             List<SystemBody> moons = new List<SystemBody>();
+            List<SystemBody> rejected = new List<SystemBody>();
+            double remainingSystemMass = totalSystemMass;
+            double remainingDistance =systemMaxDistance - systemMinDistance;
+            double minDistance = systemMinDistance;
+            double insideOrbitApoapsis = 0;
+            double insideOrbitMass = 0;
 
-            foreach (ProtoSystemBody protoMoon in protoMoons)
+            for (int i = 0; i < protoMoons.Count; i++)
             {
-                // first create our moon:
-                SystemBody moon = new SystemBody(parent, protoMoon._type);
+                ProtoSystemBody currentProto = protoMoons[i];
 
-                // Temp hack to keep things working:
-                GenerateSystemBodyOrbit(parent, moon, protoMoon._mass);
+                double massRatio = currentProto._mass / remainingSystemMass;
+                double maxDistance = remainingDistance * massRatio + minDistance;
 
-                // okay Rod, this is where you can do your thing...
+                // Create our system body:
+                SystemBody planet = new SystemBody(parent, currentProto._type);
 
-                moons.Add(moon);
+                planet.Orbit = FindClearOrbit(parent.Orbit.Mass, currentProto._mass, insideOrbitMass, insideOrbitApoapsis, minDistance, maxDistance);
+
+                if (planet.Orbit.Apoapsis > systemMaxDistance)
+                {
+                    // Proto could not fit in the system.
+                    remainingSystemMass -= currentProto._mass;
+                    rejected.Add(planet);
+                    continue;
+                }
+
+                moons.Add(planet);
+
+                // Prep for next loop pass.
+                insideOrbitApoapsis = planet.Orbit.Apoapsis;
+                minDistance = planet.Orbit.Apoapsis;
+                remainingDistance = systemMaxDistance - planet.Orbit.Apoapsis;
+
+                insideOrbitMass = planet.Orbit.Mass;
+                remainingSystemMass -= planet.Orbit.Mass;
+
             }
 
             return moons;
@@ -1573,7 +1711,7 @@ namespace Pulsar4X
         /// </summary>
         private static double RNG_NextDoubleRange(double min, double max)
         {
-            return min + m_RNG.NextDouble() * (max - min);
+            return (min + m_RNG.NextDouble() * (max - min));
         }
 
         /// <summary>

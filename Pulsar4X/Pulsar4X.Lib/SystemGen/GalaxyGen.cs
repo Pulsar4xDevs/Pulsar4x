@@ -186,9 +186,11 @@ namespace Pulsar4X
 
         /// <summary>
         /// We want StarOrbitGravityFactor times less gravitational attraction from childStar to parentStar's furthest planet then parentStar to parentStar's furthest planet.
-        /// <? todo: Is this comment completely confusing?
+        /// <@ todo: Is this comment completely confusing?
         /// </summary>
         public const double StarOrbitGravityFactor = 10;
+
+        public const double PlanetOrbitGravityFactor = 20;
 
         /// <summary>
         /// The chance a Terrestrial body will have some form of Tectonic activity.
