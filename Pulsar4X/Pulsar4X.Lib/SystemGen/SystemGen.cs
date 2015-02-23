@@ -798,6 +798,7 @@ namespace Pulsar4X
             }
 
             RandomShuffle(protoPlanets); // make sure the list is completly random, given that we added things in a specific order.
+            SortPlanetList(protoPlanets);
 
             // now lets generate orbits for all that:
             List<SystemBody> systemBodies = GenerateStarSystemOrbits(star, protoPlanets, totalSystemMass);
@@ -820,6 +821,42 @@ namespace Pulsar4X
                     // flesh out asteroid belt
                     GenerateAsteroidBelt(star, body, beltNo);       // this will add each asteriod to the star for us!!
                     beltNo++;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Sorts a list of protoplanets, putting terra planets at the front.
+        /// This is not a perfect sort it just pushes the terra planets higher up the list.
+        /// </summary>
+        /// <param name="list"></param>
+        private static void SortPlanetList(List<ProtoSystemBody> list)
+        {
+            if (list.Count < 4)
+                return; // nothing we can do.
+
+            int halfListCount = list.Count / 2;
+
+            // we want to move terra planets higher up.
+            int swapIndex = 0;
+            for (int i = halfListCount; i < list.Count; ++i)
+            {
+                if (list[i]._type == SystemBody.PlanetType.Terrestrial)
+                {
+                    // lets just make sure we don't swap with another terra planet.
+                    while (list[swapIndex]._type == SystemBody.PlanetType.Terrestrial && swapIndex < halfListCount)
+                    {
+                        swapIndex++;
+                    }
+
+                    if (swapIndex == halfListCount)
+                        return;     // we can do no more good here
+
+                    var temp = list[swapIndex];
+                    list[swapIndex] = list[i];
+                    list[i] = temp;
+                    swapIndex++;        // so we don't keep swapping back and fourth!!
                 }
             }
         }
