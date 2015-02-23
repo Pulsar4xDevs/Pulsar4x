@@ -637,8 +637,8 @@ namespace Pulsar4X
             List<SystemBody> planets = new List<SystemBody>();
             List<SystemBody> rejected = new List<SystemBody>();
             double remainingSystemMass = totalSystemMass;
-            double remainingDistance = GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._max - GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._min;
             double minDistance = GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._min;
+            double remainingDistance = GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType]._max - minDistance;
             double insideOrbitApoapsis = 0;
             double insideOrbitMass = 0;
 
@@ -702,7 +702,6 @@ namespace Pulsar4X
 
                 insideOrbitMass = planet.Orbit.Mass;
                 remainingSystemMass -= planet.Orbit.Mass;
-
             }
 
             return planets;
@@ -733,13 +732,9 @@ namespace Pulsar4X
             {
                 // We don't want eccentricity to be 0, but we also don't want to go below minDistance,
                 // but we ALSO don't want to go too far ABOVE maxDistance.
-                // Get a random eccentricity.
-                eccentricity = m_RNG.NextDouble();
-                while (eccentricity > 0.1)
-                {
-                    // Now make eccentricity is low, otherwise we will go WAY above maxDistance.
-                    eccentricity -= 0.1;
-                }
+                // Get a LOW random eccentricity.
+                eccentricity = RNG_NextDoubleRange(0, 0.1);
+
                 // Calculate our SemiMajorAxis from our periapsis (minDistance) and our generated eccentricity.
                 sma = minDistance / (1 - eccentricity);
 
@@ -749,7 +744,7 @@ namespace Pulsar4X
             else
             {
                 // Pick a random SMA between minDistance and maxDistance.
-                sma = m_RNG.NextDouble() * (maxDistance - minDistance) + minDistance;
+                sma = RNG_NextDoubleRange(minDistance, maxDistance);
 
                 // Calculate max eccentricity.
                 // First calc max eccentricity for the apoapsis.
@@ -767,7 +762,6 @@ namespace Pulsar4X
                 // Now scale down eccentricity by a random factor.
                 eccentricity = m_RNG.NextDouble() * maxApoEccentricity;
             }
-
 
             Orbit clearOrbit = Orbit.FromAsteroidFormat(mass, parentMass, sma, eccentricity, m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, m_RNG.NextDouble() * 360, GameState.Instance.CurrentDate);
 
@@ -1034,7 +1028,7 @@ namespace Pulsar4X
                 protoMoons.Add(protoMoon);
             }
 
-            List<SystemBody> moons = GeneratePlanetSystemOrbits(parent, protoMoons, totalMoonMass);
+            List<SystemBody> moons = GeneratePlanetSystemOrbits(parent, protoMoons, totalMoonMass, 0.1, 1);
 
             int moonNo = 1;
             foreach (SystemBody moon in moons)
