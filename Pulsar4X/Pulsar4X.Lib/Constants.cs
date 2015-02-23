@@ -28,7 +28,6 @@ namespace Pulsar4X
 
 			// Gravitation Constant
 			public static double GRAVITATIONAL_CONSTANT = 6.67384E-11;
-
         }
 
         /// <summary>

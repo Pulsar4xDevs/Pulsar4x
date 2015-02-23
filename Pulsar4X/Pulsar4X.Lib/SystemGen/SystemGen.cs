@@ -41,12 +41,17 @@ namespace Pulsar4X
 
         public static StarSystem CreateSystem(string name)
         {
-            return CreateSystem(name, GalaxyGen.SeedRNG.Next());
+            return CreateSystem(name, -1);
         }
 
         public static StarSystem CreateSystem(string name, int seed, int numJumpPoints = -1)
         {
             // create new RNG with Seed.
+            if (seed == -1)
+            {
+                seed = GalaxyGen.SeedRNG.Next();
+            }
+
             m_RNG = new Random(seed);
 
             StarSystem newSystem = new StarSystem(name, seed);
