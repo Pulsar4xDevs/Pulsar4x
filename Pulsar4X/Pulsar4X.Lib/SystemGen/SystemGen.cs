@@ -810,7 +810,6 @@ namespace Pulsar4X
 
                 insideOrbitMass = planet.Orbit.Mass;
                 remainingSystemMass -= planet.Orbit.Mass;
-
             }
 
             return moons;
@@ -1021,14 +1020,16 @@ namespace Pulsar4X
                 if (m_RNG.NextDouble() > tempRatio)
                     protoMoon._type = SystemBody.PlanetType.IceMoon;                   // if a random number is > tempRatio it will be an ice moon.
                 else
-                    protoMoon._type = SystemBody.PlanetType.IceMoon;                   // else it is a Terrestrial Moon
+                    protoMoon._type = SystemBody.PlanetType.Terrestrial;               // else it is a Terrestrial Moon
 
                 protoMoon._mass = GenerateMoonMass(parent, protoMoon._type);           // Generate Mass
                 totalMoonMass += protoMoon._mass;                                      // add mass to total mass.
                 protoMoons.Add(protoMoon);
             }
 
-            List<SystemBody> moons = GeneratePlanetSystemOrbits(parent, protoMoons, totalMoonMass, 0.1, 1);
+            double minMoonOrbitDist = parent.Radius * GalaxyGen.MinMoonOrbitMultiplier;
+            double maxMoonDistance = GalaxyGen.MaxMoonOrbitDistanceByPlanetType[parent.Type] * massRatioOfParent;
+            List<SystemBody> moons = GeneratePlanetSystemOrbits(parent, protoMoons, totalMoonMass, minMoonOrbitDist, maxMoonDistance);
 
             int moonNo = 1;
             foreach (SystemBody moon in moons)

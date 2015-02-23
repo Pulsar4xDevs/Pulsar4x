@@ -171,7 +171,7 @@ namespace Pulsar4X
         /// (except MeanAnomaly, which is the starting point on the orbit. that is random). 
         /// The value is a percentage as a number between 0 and 1, tho typically it should be less than 10% (or 0.1).
         /// </summary>
-        public const double MaxAsteroidOrbitDeviation = 0.05;
+        public const double MaxAsteroidOrbitDeviation = 0.03;
 
         /// <summary>
         /// The maximum SystemBody orbit Inclination. Also used as the maximum orbital tilt.
@@ -218,7 +218,7 @@ namespace Pulsar4X
         /// <summary>
         /// Is timesd by the total radius of the moon and its parent to come up with a minium orbit distance for that body.
         /// </summary>
-        public const double MinMoonOrbitMultiplier = 2;
+        public const double MinMoonOrbitMultiplier = 2.5;
 
         /// <summary>
         /// This is the Absolute maximum orbit of moons, in AU.
@@ -391,6 +391,15 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.GasDwarf, 0.99 },
                 { SystemBody.PlanetType.Terrestrial, 0.5 },
                 { SystemBody.PlanetType.DwarfPlanet, 0.0001 },
+            };
+
+        public static Dictionary<SystemBody.PlanetType, double> MaxMoonOrbitDistanceByPlanetType = new Dictionary<SystemBody.PlanetType, double>()
+            {
+                { SystemBody.PlanetType.GasGiant, 60581692 / Constants.Units.KM_PER_AU },  // twice higest jupiter moon orbit
+                { SystemBody.PlanetType.IceGiant, 49285000 / Constants.Units.KM_PER_AU },   // twice Neptunes highest moon orbit
+                { SystemBody.PlanetType.GasDwarf, 6058169  / Constants.Units.KM_PER_AU },   // WAG
+                { SystemBody.PlanetType.Terrestrial, 1923740 / Constants.Units.KM_PER_AU }, // 5 * luna orbit.
+                { SystemBody.PlanetType.DwarfPlanet, 25000 / Constants.Units.KM_PER_AU },   // WAG
             };
 
         /// <summary>
