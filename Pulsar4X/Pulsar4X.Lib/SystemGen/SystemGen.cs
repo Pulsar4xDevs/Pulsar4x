@@ -1061,14 +1061,14 @@ namespace Pulsar4X
             double totalMoonMass = 0;
             for (int i = 0; i < noOfMoons; ++i)
             {
-                ProtoSystemBody protoMoon = new ProtoSystemBody();                     // create the proto moon
+                ProtoSystemBody protoMoon = new ProtoSystemBody();                      // create the proto moon
                 if (m_RNG.NextDouble() > tempRatio)
-                    protoMoon._type = SystemBody.PlanetType.IceMoon;                   // if a random number is > tempRatio it will be an ice moon.
+                    protoMoon._type = SystemBody.PlanetType.IceMoon;                    // if a random number is > tempRatio it will be an ice moon.
                 else
-                    protoMoon._type = SystemBody.PlanetType.Terrestrial;               // else it is a Terrestrial Moon
+                    protoMoon._type = SystemBody.PlanetType.Moon;                       // else it is a Terrestrial Moon
 
-                protoMoon._mass = GenerateMoonMass(parent, protoMoon._type);           // Generate Mass
-                totalMoonMass += protoMoon._mass;                                      // add mass to total mass.
+                protoMoon._mass = GenerateMoonMass(parent, protoMoon._type);            // Generate Mass
+                totalMoonMass += protoMoon._mass;                                       // add mass to total mass.
                 protoMoons.Add(protoMoon);
             }
 
