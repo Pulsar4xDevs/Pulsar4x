@@ -963,10 +963,13 @@ namespace Pulsar4X.Entities
         /// Constructor for basic faction.
         /// </summary>
         /// <param name="ID">placement of this faction in the factionsystemdetection lists. must be in order.</param>
-        public Faction(int ID)
+        public Faction(int ID, string name = "Human Federation", Species species = null)
         {
-            Name = "Human Federation";
-            Species = new Species(); // go with the default Species!
+            Name = name;
+            if (species == null)
+                Species = new Species(); // go with the default Species!
+            else
+                Species = species;
 
             KnownSystems = new BindingList<StarSystem>();
             TaskForces = new BindingList<TaskForce>();
@@ -1044,108 +1047,6 @@ namespace Pulsar4X.Entities
             ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
             PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;
 
-
-            FactionWealth = Constants.Faction.StartingWealth;
-
-            /// <summary>
-            /// Ships and missiles are added to these two binding lists. this is for later to help the detected contact list.
-            /// </summary>
-            DetShipList = new BindingList<ShipTN>();
-            DetMissileList = new BindingList<OrdnanceGroupTN>();
-
-            GameState.Instance.Factions.Add(this);
-
-            foreach (StarSystem system in GameState.Instance.StarSystems)
-            {
-                AddNewContactList(system);
-            }
-        }
-
-        /// <summary>
-        /// String for faction with specified name and species.
-        /// </summary>
-        /// <param name="a_oName">Faction name</param>
-        /// <param name="a_oSpecies">Faction species</param>
-        /// <param name="ID">Faction placement in its order(0th faction is 0, 1st faction is 1, and so on)</param>
-        public Faction(string a_oName, Species a_oSpecies, int ID)
-        {
-            Name = a_oName;
-            Species = a_oSpecies;
-
-            KnownSystems = new BindingList<StarSystem>();
-            TaskForces = new BindingList<TaskForce>();
-            Commanders = new BindingList<Commander>();
-            Populations = new BindingList<Population>();
-
-            ComponentList = new ComponentDefListTN();
-            ShipDesigns = new BindingList<ShipClassTN>();
-            TaskGroups = new BindingList<TaskGroupTN>();
-            Ships = new BindingList<ShipTN>();
-            ComponentList.AddInitialComponents();
-
-            SystemContacts = new Dictionary<StarSystem, FactionSystemDetection>();
-            DetectedContactLists = new Dictionary<StarSystem, DetectedContactsList>();
-
-            FactionID = ID;
-
-            InstallationTypes = new BindingList<Installation>();
-            for (int loop = 0; loop < (int)Installation.InstallationType.InstallationCount; loop++)
-            {
-                Installation NewInst = new Installation((Installation.InstallationType)loop);
-                InstallationTypes.Add(NewInst);
-            }
-
-            MessageLog = new BindingList<MessageEntry>();
-
-            MissileGroups = new BindingList<OrdnanceGroupTN>();
-
-            OrdnanceSeries = new BindingList<OrdnanceSeriesTN>();
-            OrdnanceSeriesTN NewOrd = new OrdnanceSeriesTN("No Series Selected");
-            OrdnanceSeries.Add(NewOrd);
-
-            BaseTracking = Constants.GameSettings.FactionBaseTrackingSpeed;
-
-            OpenFireFC = new Dictionary<ComponentTN, ShipTN>();
-            OpenFireFCType = new Dictionary<ComponentTN, bool>();
-
-            PointDefense = new Dictionary<StarSystem, PointDefenseList>();
-
-            MissileRemoveList = new BindingList<OrdnanceGroupTN>();
-
-            RechargeList = new Dictionary<ShipTN, int>();
-
-            FactionTechLevel = new BindingList<SByte>();
-            for (int loop = 0; loop < (int)FactionTechnology.Count; loop++)
-            {
-                FactionTechLevel.Add(-1);
-            }
-
-            /// <summary>
-            /// Hardening is a special case that must start at zero and not negative 1.
-            /// </summary>
-            FactionTechLevel[(int)Faction.FactionTechnology.Hardening] = 0;
-
-            /// <summary>
-            /// These are conventional tech starts, each conventional faction starts with them researched.
-            /// If anyone has a better idea about how these should be organized feel free, but note that changing this will have repercussions in Component design(specifically components.cs)
-            /// </summary>
-            FactionTechLevel[(int)Faction.FactionTechnology.ThermalSensorSensitivity] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.EMSensorSensitivity] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.FuelConsumption] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.ThermalReduction] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.CapacitorChargeRate] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.EngineBaseTech] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.ReducedSizeLaunchers] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.ArmourProtection] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.WarheadStrength] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.MissileAgility] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.TurretTracking] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
-            FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize] = 0;
-
-            ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
-            PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;
 
             FactionWealth = Constants.Faction.StartingWealth;
 
