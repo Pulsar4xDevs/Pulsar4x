@@ -94,7 +94,7 @@ namespace Pulsar4X.UI.Handlers
         /// Initialize the Shipyard tab
         /// </summary>
         /// <param name="m_oSummaryPanel">The summary panel from the economics handler.</param>
-        public static void BuildShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation)
+        public static void BuildShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, BindingList<ShipClassTN> RetoolTargets)
         {
             MaxShipyardRows = 38;
             //m_oSummaryPanel.
@@ -103,7 +103,7 @@ namespace Pulsar4X.UI.Handlers
             //build the create task groupbox
             //listen to the buttons
             BuildShipyardDataGrid(m_oSummaryPanel);
-            BuildSYCGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+            BuildSYCGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, RetoolTargets);
             BuildSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
         }
 
@@ -111,12 +111,13 @@ namespace Pulsar4X.UI.Handlers
         /// Refresh the shipyard tab.
         /// </summary>
         /// <param name="m_oSummaryPanel">The summary panel from the economics handler.</param>
-        public static void RefreshShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation,  Installation.ShipyardInformation SYInfo)
+        public static void RefreshShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo
+                                              , BindingList<ShipClassTN> RetoolTargets)
         {
-            if (CurrentFaction != null && CurrentPopulation != null)
+            if (CurrentFaction != null && CurrentPopulation != null && SYInfo != null)
             {
                 RefreshShipyardDataGrid(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
-                BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo);
+                BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
             }
         }
 
@@ -165,7 +166,7 @@ namespace Pulsar4X.UI.Handlers
         /// This builds the Shipyard complex groupbox, which controls how the shipyards themselves are modified. Shipyard tasks(such as ship building) are handled elsewhere.
         /// </summary>
         /// <param name="m_oSummaryPanel">The summary panel from the economics handler.</param>
-        private static void BuildSYCGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation)
+        private static void BuildSYCGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, BindingList<ShipClassTN> RetoolList)
         {
             m_oSummaryPanel.SYCTaskTypeComboBox.Items.Clear();
             m_oSummaryPanel.SYCTaskTypeComboBox.DataSource = Constants.ShipyardInfo.ShipyardTasks;
@@ -173,8 +174,8 @@ namespace Pulsar4X.UI.Handlers
 
 #warning this doesn't update when a new shipclass is added on its own. the econ page is "shared" by all factions so an event may not be possible there.
             m_oSummaryPanel.NewShipClassComboBox.Items.Clear();
-            m_oSummaryPanel.NewShipClassComboBox.DataSource = CurrentFaction.ShipDesigns;
-            if(CurrentFaction.ShipDesigns.Count != 0)
+            m_oSummaryPanel.NewShipClassComboBox.DataSource = RetoolList;
+            if (RetoolList.Count != 0)
                 m_oSummaryPanel.NewShipClassComboBox.SelectedIndex = 0;
         }
 
@@ -290,15 +291,23 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[5].Value = "No Assigned Class";
                     }
 
-                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[6].Value = Constants.ShipyardInfo.ShipyardTasks[(int)SYI.CurrentActivity];
-                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[7].Value = SYI.Progress;
-                    if (SYI.CurrentActivity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[6].Value = Constants.ShipyardInfo.ShipyardTasks[(int)SYI.CurrentActivity.Activity];
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[7].Value = SYI.CurrentActivity.Progress;
+                    if (SYI.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                     {
                         m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[8].Value = "N/A";
                     }
                     else
                     {
-                        m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[8].Value = SYI.CompletionDate;
+                        float YearsOfProduction = (float)SYI.CurrentActivity.CostOfActivity / SYI.CalcAnnualSYProduction();
+                        if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                        {
+                            m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[8].Value = SYI.CurrentActivity.CompletionDate;
+                        }
+                        else
+                        {
+                            m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[8].Value = "N/A";
+                        }
                     }
 
                     m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[9].Value = SYI.ModRate;
@@ -344,15 +353,15 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[5].Value = "No Assigned Class";
                     }
 
-                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[6].Value = Constants.ShipyardInfo.ShipyardTasks[(int)SYI.CurrentActivity];
-                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[7].Value = SYI.Progress;
-                    if (SYI.CurrentActivity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[6].Value = Constants.ShipyardInfo.ShipyardTasks[(int)SYI.CurrentActivity.Activity];
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[7].Value = SYI.CurrentActivity.Progress;
+                    if (SYI.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                     {
                         m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[8].Value = "N/A";
                     }
                     else
                     {
-                        m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[8].Value = SYI.CompletionDate;
+                        m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[8].Value = SYI.CurrentActivity.CompletionDate;
                     }
 
                     m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[9].Value = SYI.ModRate;
@@ -373,99 +382,85 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Every task will cost resources, and this program will populate the required resources listbox.
         /// </summary>
-        /// <param name="m_oSummaryPanel"></param>
-        /// <param name="CurrentFaction"></param>
-        /// <param name="CurrentPopulation"></param>
-        public static void BuildSYCRequiredMinerals(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
+        /// <param name="m_oSummaryPanel">Panel the economics handler will pass to us</param>
+        /// <param name="CurrentFaction">Current Faction</param>
+        /// <param name="CurrentPopulation">Currently selected population</param>
+        /// <param name="SYInfo">Current Shipyard</param>
+        /// <param name="Retool">Retool target if any</param>
+        /// <param name="CapLimit">Cap expansion limit if any</param>
+        public static void BuildSYCRequiredMinerals(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo,
+                                                    BindingList<ShipClassTN> PotentialRetoolTargets)
         {
-            m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Clear();
-
-            int Tonnage = -1;
-            Constants.ShipyardInfo.ShipyardActivity Activity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
-
-            switch (Activity)
+            if (m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex != -1  && SYInfo != null)
             {
-                case Constants.ShipyardInfo.ShipyardActivity.Add500Tons:
-                    Tonnage = 500;
-                    break;
-                case Constants.ShipyardInfo.ShipyardActivity.Add1000Tons:
-                    Tonnage = 1000;
-                    break;
-                case Constants.ShipyardInfo.ShipyardActivity.Add2000Tons:
-                    Tonnage = 2000;
-                    break;
-                case Constants.ShipyardInfo.ShipyardActivity.Add5000Tons:
-                    Tonnage = 5000;
-                    break;
-                case Constants.ShipyardInfo.ShipyardActivity.Add10000Tons:
-                    Tonnage = 10000;
-                    break;
-            }
+                m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Clear();
+                Constants.ShipyardInfo.ShipyardActivity Activity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
 
-            if (Tonnage != -1)
-            {
-                decimal TotalCost = 0.0m;
-                for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                if (Activity != Constants.ShipyardInfo.ShipyardActivity.CapExpansion && Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                 {
-
-                    if (Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] != 0)
+                    Installation.ShipyardInformation CostPrototyper = new Installation.ShipyardInformation(SYInfo.ShipyardType);
+                    CostPrototyper.Tonnage = SYInfo.Tonnage;
+                    CostPrototyper.Slipways = SYInfo.Slipways;
+                    CostPrototyper.ModRate = SYInfo.ModRate;
+                    CostPrototyper.AssignedClass = SYInfo.AssignedClass;
+                    ShipClassTN RetoolTarget = null;
+                    if (PotentialRetoolTargets.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
                     {
-                        int Adjustment = 1;
-                        if (SYInfo.ShipyardType == Constants.ShipyardInfo.SYType.Naval)
-                        {
-                            Adjustment = Constants.ShipyardInfo.NavalToCommercialRatio;
-                        }
-
-                        /// <summary>
-                        /// Formula for tonnage expansion. This also appears in the constants file for now.
-                        /// </summary>
-                        decimal value = Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] * (Tonnage / Constants.ShipyardInfo.TonnageDenominator) * SYInfo.Slipways * Adjustment;
-
-                        TotalCost = TotalCost + value;
-
-                        string FormattedMineralTotal = value.ToString("#,##0");
-
-                        String CostString = String.Format("{0} {1} ({2})", (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal, CurrentPopulation.Minerials[MineralIterator]);
-                        m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Add(CostString);
+                        RetoolTarget = PotentialRetoolTargets[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
                     }
-                }
+                    int NewCapLimit = -1;
+                    bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
 
-                m_oSummaryPanel.SYCBuildCostTextBox.Text = TotalCost.ToString();
-            }
-            else
-            {
-                m_oSummaryPanel.SYCBuildCostTextBox.Text = "N/A";
+                    CostPrototyper.SetShipyardActivity(Activity, RetoolTarget, NewCapLimit);
 
-                if (Activity == Constants.ShipyardInfo.ShipyardActivity.AddSlipway)
-                {
-                    decimal TotalCost = 0.0m;
                     for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
                     {
 
-                        if (Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] != 0)
+                        if (CostPrototyper.CurrentActivity.minerialsCost[MineralIterator] != 0.0m)
                         {
-                            int Adjustment = 1;
-                            if (SYInfo.ShipyardType == Constants.ShipyardInfo.SYType.Naval)
-                                Adjustment = 10;
-
-                            /// <summary>
-                            /// Formula for tonnage expansion. This also appears in the constants file for now.
-                            /// </summary>
-                            decimal value = Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] * (SYInfo.Tonnage / Constants.ShipyardInfo.TonnageDenominator) * SYInfo.Slipways * Adjustment;
-
-                            TotalCost = TotalCost + value;
-
-                            string FormattedMineralTotal = value.ToString("#,##0");
+                            string FormattedMineralTotal = CostPrototyper.CurrentActivity.minerialsCost[MineralIterator].ToString("#,##0");
 
                             String CostString = String.Format("{0} {1} ({2})", (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal, CurrentPopulation.Minerials[MineralIterator]);
                             m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Add(CostString);
                         }
                     }
 
-                    m_oSummaryPanel.SYCBuildCostTextBox.Text = TotalCost.ToString();
+                    m_oSummaryPanel.SYCBuildCostTextBox.Text = CostPrototyper.CurrentActivity.CostOfActivity.ToString();
+
+                    float YearsOfProduction = (float)CostPrototyper.CurrentActivity.CostOfActivity / CostPrototyper.CalcAnnualSYProduction();
+                    if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                    {
+                        m_oSummaryPanel.SYCCompletionDateTextBox.Text = CostPrototyper.CurrentActivity.CompletionDate.ToShortDateString();
+                    }
+                    else
+                    {
+                        m_oSummaryPanel.SYCCompletionDateTextBox.Text = "N/A";
+                    }
+
+                    if ((Activity == Constants.ShipyardInfo.ShipyardActivity.Retool && RetoolTarget == null) ||
+                        (Activity == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX && (r == false || (NewCapLimit <= SYInfo.Tonnage))))
+                    {
+                        m_oSummaryPanel.SYCCompletionDateTextBox.Text = "N/A";
+                        m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Clear();
+                    }
+
+                    /// <summary>
+                    /// This retool is free. or not necessary.
+                    /// </summary>
+                    if (Activity == Constants.ShipyardInfo.ShipyardActivity.Retool && ((RetoolTarget != null && SYInfo.AssignedClass == null) || RetoolTarget == SYInfo.AssignedClass))
+                    {
+                        m_oSummaryPanel.SYCBuildCostTextBox.Text = "N/A";
+                        m_oSummaryPanel.SYCCompletionDateTextBox.Text = "N/A";
+                        m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Clear();
+                    }
+                }
+                else
+                {
+                    m_oSummaryPanel.SYCBuildCostTextBox.Text = "N/A";
+                    m_oSummaryPanel.SYCCompletionDateTextBox.Text = "N/A";
+                    m_oSummaryPanel.SYCRequiredMaterialsListBox.Items.Clear();
                 }
             }
-
         }
     }
 }
