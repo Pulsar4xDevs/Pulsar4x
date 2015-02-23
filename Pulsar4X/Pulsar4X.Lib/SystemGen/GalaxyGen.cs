@@ -125,7 +125,6 @@ namespace Pulsar4X
 
         #endregion
 
-
         #region Advanced SystemBody and other Body Generation Parameters
 
         /// <summary>
