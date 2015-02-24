@@ -172,11 +172,12 @@ namespace Pulsar4X.Entities
                 else
                 {
                     // From Aurora: Greenhouse Factor = 1 + (Atmospheric Pressure /10) + Greenhouse Pressure   (Maximum = 3.0)
-                    GreenhouseFactor = (Pressure * 0.1F) + GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
+                    GreenhouseFactor = 0.1f + (Pressure * 0.1F) + GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
                     GreenhouseFactor = (float)GMath.Clamp(GreenhouseFactor, -3.0, 3.0);
 
                     // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
-                    SurfaceTemperature = (ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN) * GreenhouseFactor * (1 - Albedo);
+                    SurfaceTemperature = (ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN);
+                    SurfaceTemperature += SurfaceTemperature * GreenhouseFactor * (1 - Albedo);
                     SurfaceTemperature += (float)Constants.Units.KELVIN_TO_DEGREES_C; // convert back to kelvin
                 }
 
