@@ -147,9 +147,9 @@ namespace Pulsar4X.Entities.Components
         /// Constructor for series.
         /// </summary>
         public OrdnanceSeriesTN(String Title)
+            : base()
         {
             Name = Title;
-            Id = Guid.NewGuid();
             MissilesInSeries = new BindingList<OrdnanceDefTN>();
         }
 
@@ -880,9 +880,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="mfCtrl">MFC directing this missile.</param>
         /// <param name="definition">definition of the missile.</param>
         public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition, ShipTN ShipFiredFrom)
+            : base()
         {
             Name = definition.Name;
-            Id = Guid.NewGuid();
 
             MFC = mfCtrl;
 

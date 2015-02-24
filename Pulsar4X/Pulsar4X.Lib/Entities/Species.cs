@@ -19,6 +19,7 @@ namespace Pulsar4X.Entities
         public double MaximumTemperatureConstraint { get; set; }
 
         public Species()
+            : base()
         {
             // set default values:
             Name = "Human";

@@ -170,6 +170,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="InstallationToBuild">Installation to build</param>
         public ConstructionBuildQueueItem(Installation InstallationToBuild)
+            : base()
         {
             Name = InstallationToBuild.Name;
             numToBuild = 0.0f;
@@ -186,6 +187,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ComponentToBuild">Ship Component to build</param>
         public ConstructionBuildQueueItem(ComponentDefTN ComponentToBuild)
+            : base()
         {
             Name = ComponentToBuild.Name;
             numToBuild = 0.0f;
@@ -201,6 +203,7 @@ namespace Pulsar4X.Entities
         /// Maintenance supplies build queue constructor
         /// </summary>
         public ConstructionBuildQueueItem()
+            : base()
         {
             Name = "Maintenance Supplies";
             numToBuild = 0.0f;
@@ -231,6 +234,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Definition"></param>
         public MissileBuildQueueItem(OrdnanceDefTN Definition)
+            : base()
         {
             numToBuild = 0.0f;
             buildCapacity = 0.0f;
@@ -262,6 +266,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Definition"></param>
         public FighterBuildQueueItem(ShipClassTN Definition)
+            : base()
         {
             numToBuild = 0.0f;
             buildCapacity = 0.0f;

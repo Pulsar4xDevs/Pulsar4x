@@ -371,6 +371,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ID">placement of this faction in the factionsystemdetection lists. must be in order.</param>
         public Faction(int ID, string name = "Human Federation", Species species = null)
+            : base()
         {
             Name = name;
             if (species == null)

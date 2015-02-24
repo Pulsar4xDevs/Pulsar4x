@@ -64,8 +64,8 @@ namespace Pulsar4X.Entities
         public int Seed { get { return m_seed; } }
 
         public StarSystem(string name, int seed)
+            : base()
         {
-            Id = Guid.NewGuid();
             Name = name;
             Stars = new BindingList<Star>();
 

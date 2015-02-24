@@ -71,8 +71,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="ShipTarget">Ship that will be the target</param>
         public TargetTN(ShipTN ShipTarget)
+            : base()
         {
-            Id = Guid.NewGuid();
             TargetType = ShipTarget.ShipsTaskGroup.SSEntity;
             Ship = ShipTarget;
         }
@@ -82,8 +82,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="BodyTarget">Body which is the target</param>
         public TargetTN(SystemBody BodyTarget)
+            : base()
         {
-            Id = Guid.NewGuid();
             TargetType = BodyTarget.SSEntity;
             Body = BodyTarget;
         }
@@ -93,8 +93,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="PopTarget">Population that is targeted.</param>
         public TargetTN(Population PopTarget)
+            : base()
         {
-            Id = Guid.NewGuid();
             TargetType = StarSystemEntityType.Population;
             Pop = PopTarget;
         }
@@ -104,8 +104,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="WPTarget">waypoint to be targeted.</param>
         public TargetTN(Waypoint WPTarget)
+            : base()
         {
-            Id = Guid.NewGuid();
             TargetType = WPTarget.SSEntity;
             WP = WPTarget;
         }
@@ -115,8 +115,8 @@ namespace Pulsar4X.Entities.Components
         /// </summary>
         /// <param name="OGTarget">missile targeted on.</param>
         public TargetTN(OrdnanceGroupTN OGTarget)
+            : base()
         {
-            Id = Guid.NewGuid();
             TargetType = OGTarget.SSEntity;
             MissileGroup = OGTarget;
         }

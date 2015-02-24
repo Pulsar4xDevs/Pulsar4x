@@ -56,6 +56,7 @@ namespace Pulsar4X.Entities
         public RQuality RuinQuality { get; set; }
 
         public Ruins()
+            : base()
         {
             ///< @todo Generate a name/race for the ruins, and also how should difficulty be effected by having 2 ruins of the same race, with one already looted?
             /// -- Can you have two ruins of the same race on a single body?? i thought it was one planet, 1 runis - SnopyDogy
