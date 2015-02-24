@@ -490,6 +490,7 @@ namespace Pulsar4X.Entities
 
         public Population(SystemBody a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
         {
+            Id = Guid.NewGuid();
             // initialise minerials:
             m_aiMinerials = new float[Constants.Minerals.NO_OF_MINERIALS];
             for (int i = 0; i < Constants.Minerals.NO_OF_MINERIALS; ++i)
@@ -517,6 +518,8 @@ namespace Pulsar4X.Entities
 
             Faction = a_oFaction;
             Planet = a_oPlanet;
+
+
             if (a_oSpecies == null)
             {
                 Species = Faction.Species;
@@ -526,7 +529,7 @@ namespace Pulsar4X.Entities
                 Species = a_oSpecies;
             }
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
-
+            Planet.Position.System.Populations.Add(this);
             Contact = new SystemContact(Faction, this);
 
             GovernorPresent = false;
