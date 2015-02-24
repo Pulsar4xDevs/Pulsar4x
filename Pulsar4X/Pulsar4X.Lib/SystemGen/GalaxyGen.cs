@@ -47,6 +47,37 @@ namespace Pulsar4X
         // constants file because they are only used for star gen.
 
         /// <summary>
+        /// Distribution of differnt stra spectral types. This is based on actuall numbers in real life.
+        /// See: http://en.wikipedia.org/wiki/Stellar_classification
+        /// </summary>
+        public static WeightedList<SpectralType> StarTypeDistributionForRealStars = new WeightedList<SpectralType>()
+        {
+            { 0.00003, SpectralType.O },
+            { 0.13, SpectralType.B },
+            { 0.6, SpectralType.A },
+            { 3, SpectralType.F },
+            { 7.6, SpectralType.G },
+            { 12.1, SpectralType.K },
+            { 76.45, SpectralType.M },
+            { 0.11997, SpectralType.M }     // reserved for more exotic star types
+        };
+
+        /// <summary>
+        /// Distribution of differnt stra spectral types. These numbers are made up and can be tweaked for game balance.
+        /// </summary>
+        public static WeightedList<SpectralType> StarTypeDistributionForFakeStars = new WeightedList<SpectralType>()
+        {
+            { 0, SpectralType.O },
+            { 0, SpectralType.B },
+            { 5, SpectralType.A },
+            { 15, SpectralType.F },
+            { 50, SpectralType.G },
+            { 15, SpectralType.K },
+            { 10, SpectralType.M },
+            { 5, SpectralType.M }      // reserved for more exotic star types
+        };
+
+        /// <summary>
         /// This Dictionary holds the minium and maximum radius values (in AU) for a Star given its spectral type.
         /// @note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
         /// </summary>
@@ -300,11 +331,11 @@ namespace Pulsar4X
             {
                 { SpectralType.O, new MinMaxStruct() { _min = 1, _max = 200 } },
                 { SpectralType.B, new MinMaxStruct() { _min = 0.5, _max = 100 } },
-                { SpectralType.A, new MinMaxStruct() { _min = 0.3, _max = 80 } },
+                { SpectralType.A, new MinMaxStruct() { _min = 0.3, _max = 90 } },
                 { SpectralType.F, new MinMaxStruct() { _min = 0.2, _max = 60 } },
                 { SpectralType.G, new MinMaxStruct() { _min = 0.1, _max = 40 } },
-                { SpectralType.K, new MinMaxStruct() { _min = 0.01, _max = 20 } },
-                { SpectralType.M, new MinMaxStruct() { _min = 0.005, _max = 8 } },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.01, _max = 18 } },
+                { SpectralType.M, new MinMaxStruct() { _min = 0.005, _max = 9 } },
             };
 
         /// <summary>

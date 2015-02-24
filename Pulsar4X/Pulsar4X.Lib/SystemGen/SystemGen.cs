@@ -560,7 +560,11 @@ namespace Pulsar4X
         private static Star GenerateStar(StarSystem system)
         {
             // Generate star quick and dirty:
-            SpectralType st = GenerateSpectralType();
+            SpectralType st = SpectralType.M;
+            if (GalaxyGen.RealStarSystems)
+                st = GalaxyGen.StarTypeDistributionForRealStars.Select(m_RNG.NextDouble());
+            else
+                st = GalaxyGen.StarTypeDistributionForFakeStars.Select(m_RNG.NextDouble());
           
             // generate the name:
             string starName = system.Name + " ";
@@ -579,59 +583,6 @@ namespace Pulsar4X
 
             system.Stars.Add(star);
             return star;
-        }
-
-        /// <summary>
-        /// Generates a Spectral Class for a star, See http://en.wikipedia.org/wiki/Stellar_classification
-        /// </summary>
-        /// <returns>A randomly generated Spectral type.</returns>
-        private static SpectralType GenerateSpectralType()
-        {
-            double chance = m_RNG.NextDouble();
-
-            // The odds of a system being generated are different depending on the weither we are talking real star suystems or not.
-            if (GalaxyGen.RealStarSystems)
-            {
-                if (chance < 0.7645) // actual chance is 76.45%
-                    return SpectralType.M;
-                if (chance < 0.8855) // actual chace is 12.1%
-                    return SpectralType.K;
-                if (chance < 0.9615) // actual chance is 7.6%
-                    return SpectralType.G;
-                if (chance < 0.9915) // actual chance of 3%
-                    return SpectralType.F;
-                if (chance < 0.0075) // actual chance 0.6%
-                    return SpectralType.A;
-                if (chance < 0.9988) // actual; chance of 0.13%
-                    return SpectralType.B;
-                if (chance < 0.9989) // actual chance is ~0.00003% (so the number should be 0.9988003) but it is rounded up to give a slightly better chance.
-                    return SpectralType.O;
-            }
-            else
-            {
-                // For fake star system we adjust the odds to give the player more G, F, A, B, O type stars. 
-                // the handwavium for this is that JPs like attaching to the biggest stars!
-                if (chance < 0.3333) // actual chance is 33.33%
-                    return SpectralType.M;
-                if (chance < 0.5833) // actual chace is 25%
-                    return SpectralType.K;
-                if (chance < 0.7833) // actual chance is 20%
-                    return SpectralType.G;
-                if (chance < 0.87) // actual chance of 8.67%
-                    return SpectralType.F;
-                if (chance < 0.91) // actual chance 4%
-                    return SpectralType.A;
-                if (chance < 0.935) // actual; chance of 2.5%
-                    return SpectralType.B;
-                if (chance < 0.95) // actual chance is 01.5%
-                    return SpectralType.O;
-
-                // Left 5% chance so we could have black wholes and suff :) at the moment it just flows to another M class star.
-            }
-
-            ///< @todo Support Other Spectral Class types, such as C & D. also things like Black holes??
-
-            return SpectralType.M; // if in doubt it's an M class, as they are most common.
         }
 
         /// <summary>
