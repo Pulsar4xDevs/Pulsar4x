@@ -31,6 +31,7 @@ namespace Pulsar4X.UI.Handlers
         public enum ListEntityType
         {
             Planets,
+            Colonies,
             Contacts,
             TaskGroups,
             Waypoints,
@@ -804,6 +805,7 @@ namespace Pulsar4X.UI.Handlers
 
                 if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
                     AddWaypointsToList(targetsystem);
+                AddColonysToList(targetsystem);
             }
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
@@ -1043,6 +1045,21 @@ namespace Pulsar4X.UI.Handlers
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
                     SystemLocationDict.Add(entObj.Id, valueObj);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Adds Colonys to the locationList.
+        /// </summary>
+        private void AddColonysToList(StarSystem starsystem)
+        {
+            foreach (Population colony in starsystem.Populations)
+            {
+                string keyName = colony.Name;
+                StarSystemEntity entObj = colony;
+                SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Colonies, entObj);
+                SystemLocationGuidDict.Add(entObj.Id, keyName);
+                SystemLocationDict.Add(entObj.Id, valueObj);
             }
         }
 
