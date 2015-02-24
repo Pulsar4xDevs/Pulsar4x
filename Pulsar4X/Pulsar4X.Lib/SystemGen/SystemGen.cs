@@ -167,16 +167,15 @@ namespace Pulsar4X
             Earth.Name = "Earth";
             Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, GalaxyGen.J2000);
             Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
-            Earth.BaseTemperature = 254.3f + (float)Constants.Units.KELVIN_TO_DEGREES_C;
+            Earth.BaseTemperature = 279.3f + (float)Constants.Units.KELVIN_TO_DEGREES_C;  //(float)CalculateBaseTemperatureOfBody(Sun, Earth.Orbit.SemiMajorAxis);
             Earth.Tectonics = SystemBody.TectonicActivity.EarthLike;
             Earth.SurfaceGravity = 9.8f;
             Earth.Atmosphere = new Atmosphere(Earth);
             Earth.Atmosphere.Albedo = 0.306f;
-
+            Earth.Atmosphere.SurfaceTemperature = Earth.BaseTemperature;
             AddGasToAtmoSafely(Earth.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 0.78f);  // N
             AddGasToAtmoSafely(Earth.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(9), 0.21f);  // O
             AddGasToAtmoSafely(Earth.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(11), 0.01f);  // Ar
-
             Earth.Atmosphere.UpdateState();
             Earth.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Earth.Position.System = Sol;
@@ -198,11 +197,16 @@ namespace Pulsar4X
             Mars.Name = "Mars";
             Mars.Orbit = Orbit.FromMajorPlanetFormat(0.64174E24, Sun.Orbit.Mass, 1.52366231, 0.09341233, 1.85061, 49.57854, 336.04084, 355.45332, GalaxyGen.J2000);
             Mars.Radius = 3396.2 / Constants.Units.KM_PER_AU;
-            Mars.BaseTemperature = 210.1f + (float)Constants.Units.KELVIN_TO_DEGREES_C;
+            Mars.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Mars.Orbit.SemiMajorAxis);// 210.1f + (float)Constants.Units.KELVIN_TO_DEGREES_C;
             Mars.Tectonics = SystemBody.TectonicActivity.Dead;
-            Mars.SurfaceGravity = 3.69f;
+            Mars.SurfaceGravity = 3.71f;
             Mars.Atmosphere = new Atmosphere(Mars);
             Mars.Atmosphere.Albedo = 0.250f;
+            Mars.Atmosphere.SurfaceTemperature = Mars.BaseTemperature;
+            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(12), 0.95f * 0.01f);  // C02% * Mars Atms
+            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(6), 0.027f * 0.01f);  // N% * Mars Atms
+            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(9), 0.007f * 0.01f);  // O% * Mars Atms
+            AddGasToAtmoSafely(Mars.Atmosphere, AtmosphericGas.AtmosphericGases.SelectAt(11), 0.016f * 0.01f);  // Ar% * Mars Atms
             Mars.Atmosphere.UpdateState();
             Mars.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Mars.Position.System = Sol;
@@ -1345,6 +1349,7 @@ namespace Pulsar4X
         private static Atmosphere GenerateAtmosphere(SystemBody planet)
         {
             Atmosphere atmo = new Atmosphere(planet);
+            atmo.SurfaceTemperature = planet.BaseTemperature;       // we need something sane to star us off.
 
             // calc albedo:
             atmo.Albedo = (float)RNG_NextDoubleRange(GalaxyGen.PlanetAlbedoByType[planet.Type]);
@@ -1408,7 +1413,7 @@ namespace Pulsar4X
                     double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * 
                                                         (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
 
-                    if (m_RNG.NextDouble() > atmoChance)
+                    if (m_RNG.NextDouble() < atmoChance)
                     {
                         // Terrestrial Planets can have very large ammount of ATM.
                         // so we will generate a number to act as the total:

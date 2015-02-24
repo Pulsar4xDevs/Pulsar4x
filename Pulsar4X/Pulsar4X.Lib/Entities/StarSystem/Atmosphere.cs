@@ -134,6 +134,7 @@ namespace Pulsar4X.Entities
 
         /// <summary>
         /// Updates the state of the bodies atmosphere. Run this after adding removing gasses or modifing albedo.
+        /// @note For info on how I have tweaked this from aurora see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
         /// @todo Calc Hydrosphere changes & update albedo accordingly.
         /// </summary>
         public void UpdateState()
@@ -172,12 +173,12 @@ namespace Pulsar4X.Entities
                 else
                 {
                     // From Aurora: Greenhouse Factor = 1 + (Atmospheric Pressure /10) + Greenhouse Pressure   (Maximum = 3.0)
-                    GreenhouseFactor = 0.1f + (Pressure * 0.1F) + GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
+                    GreenhouseFactor = (Pressure * 0.035F) + GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
                     GreenhouseFactor = (float)GMath.Clamp(GreenhouseFactor, -3.0, 3.0);
 
                     // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
                     SurfaceTemperature = (ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN);
-                    SurfaceTemperature += SurfaceTemperature * GreenhouseFactor * (1 - Albedo);
+                    SurfaceTemperature += SurfaceTemperature * GreenhouseFactor * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4, see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                     SurfaceTemperature += (float)Constants.Units.KELVIN_TO_DEGREES_C; // convert back to kelvin
                 }
 
@@ -196,7 +197,8 @@ namespace Pulsar4X.Entities
             {
                 // simply apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                 Pressure = 0;
-                SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
+                SurfaceTemperature = ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN; // conver to kelvin.
+                SurfaceTemperature = SurfaceTemperature * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4
                 _atmosphereDescriptionInATM = "None";
                 _atmosphereDescriptionInPercent = "None";
             }

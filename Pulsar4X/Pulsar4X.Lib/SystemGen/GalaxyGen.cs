@@ -138,14 +138,9 @@ namespace Pulsar4X
         public const int MaxNoOfPlanets = 25;
 
         /// <summary>
-        /// The maximum number of asteriods a system can have. Period.
-        /// </summary>
-        public const int MaxNoOfAsteroids = 300;
-
-        /// <summary>
         /// Asteriods are generate in belts, this controls the max number per belt. It cannot be larger than MaxNoOfAsteroids.
         /// </summary>
-        public const int MaxNoOfAsteroidsPerBelt = 200;
+        public const int MaxNoOfAsteroidsPerBelt = 150;
 
         /// <summary>
         /// Asteriods are generated in belts. this controls the maximum number of belts.
@@ -162,7 +157,7 @@ namespace Pulsar4X
         /// <summary>
         /// The Maximum number of comets per system. note that if MiniumCometsPerSystem > MaxNoOfComets then MiniumCometsPerSystem = MaxNoOfComets.
         /// </summary>
-        public const int MaxNoOfComets = 50;
+        public const int MaxNoOfComets = 25;
 
         /// <summary>
         /// Asteroids and Dwarf planets are generated in belts. To do this a single orbit is first generate as the 
@@ -371,8 +366,8 @@ namespace Pulsar4X
                 { SystemBody.PlanetType.GasGiant, 100000000 },
                 { SystemBody.PlanetType.IceGiant, 100000000 },
                 { SystemBody.PlanetType.GasDwarf, 100000000 },
-                { SystemBody.PlanetType.Terrestrial, 1.4 },
-                { SystemBody.PlanetType.Moon, 0.3 },
+                { SystemBody.PlanetType.Terrestrial, 2 },
+                { SystemBody.PlanetType.Moon, 0.5 },
                 { SystemBody.PlanetType.IceMoon, 0 },
                 { SystemBody.PlanetType.DwarfPlanet, 0 },
                 { SystemBody.PlanetType.Asteroid, 0 },
