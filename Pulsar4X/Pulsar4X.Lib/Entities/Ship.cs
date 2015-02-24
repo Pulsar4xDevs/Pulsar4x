@@ -2828,19 +2828,67 @@ namespace Pulsar4X.Entities
         {
             if (ShipShield.Count != 0)
             {
+                if (Active == false)
+                {
+                    /// <summary>
+                    /// Remove either that this ship wants to recharge its shields, or the ship in total from the recharge list.
+                    /// </summary>
+                    if (ShipsFaction.RechargeList.ContainsKey(this) == true)
+                    {
+                        if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Shields) == (int)Faction.RechargeStatus.Shields)
+                        {
+                            ShipsFaction.RechargeList[this] = ShipsFaction.RechargeList[this] - (int)Faction.RechargeStatus.Shields;
+
+                            if (ShipsFaction.RechargeList[this] == 0)
+                            {
+                                ShipsFaction.RechargeList.Remove(this);
+                            }
+                        }
+                    }
+                }
+                else if (Active == true)
+                {
+                    /// <summary>
+                    /// Add to the recharge list.
+                    /// </summary>
+                    if (ShipsFaction.RechargeList.ContainsKey(this) == false)
+                    {
+                        ShipsFaction.RechargeList.Add(this, (int)Faction.RechargeStatus.Shields);
+                    }
+                    else 
+                    {
+                        if ((ShipsFaction.RechargeList[this] & (int)Faction.RechargeStatus.Shields) != (int)Faction.RechargeStatus.Shields)
+                        {
+                            ShipsFaction.RechargeList[this] = ShipsFaction.RechargeList[this] + (int)Faction.RechargeStatus.Shields;
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// What is the shield state before this order, and what is this shield being set to? If active state changes then the EM signature must be recalculated.
+                /// </summary>
                 if (ShieldIsActive == true && Active == false)
                 {
+                    /// <summary>
+                    /// Recalculate the EM signature and resort the taskgroup ships based on EM as a result.
+                    /// </summary>
                     CurrentEMSignature = CurrentEMSignature - (int)(CurrentShieldPoolMax * 30.0f);
                     ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                 }
                 else if (ShieldIsActive == false && Active == true)
                 {
+                    /// <summary>
+                    /// Recalculate the EM signature and resort the taskgroup ships based on EM as a result.
+                    /// </summary>
                     CurrentEMSignature = CurrentEMSignature + (int)(CurrentShieldPoolMax * 30.0f);
                     ShipsTaskGroup.SortShipBySignature(EMList, ShipsTaskGroup.EMSortList, 1);
                 }
 
                 ShieldIsActive = Active;
 
+                /// <summary>
+                /// If the shields are down then zero the current shield pool.
+                /// </summary>
                 if (ShieldIsActive == false)
                 {
                     CurrentShieldPool = 0.0f;
@@ -3197,4 +3245,75 @@ namespace Pulsar4X.Entities
     /// <summary>
     /// End of ShipTN class
     /// </summary>
+    /// 
+
+    /// <summary>
+    /// This is intended to be part of a larger dictionary that separates these by system. Component and Ship data is stored for every Point defense enabled FC here.
+    /// moved from Faction.cs, for want of a better place to put it. 
+    /// </summary>
+    public class PointDefenseList
+    {
+        /// <summary>
+        /// The component and which ship it is on.
+        /// </summary>
+        public Dictionary<ComponentTN, ShipTN> PointDefenseFC { get; set; }
+
+        /// <summary>
+        /// FCType of the base component, again, no pointer exists to the component def so this must be stored.
+        /// as always, false = MFC, true = BFC.
+        /// </summary>
+        public Dictionary<ComponentTN, bool> PointDefenseType { get; set; }
+
+
+        /// <summary>
+        /// Constructor for PDList.
+        /// </summary>
+        public PointDefenseList()
+        {
+            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
+            PointDefenseType = new Dictionary<ComponentTN, bool>();
+        }
+
+
+#warning When jump transits are fully implemented, PointDefenseFC listings will have to be moved as appropriate, be sure to handle that.
+
+        /// <summary>
+        /// Handles adding a new FC to the list.
+        /// </summary>
+        /// <param name="Comp">Fire control component to add</param>
+        /// <param name="Ship">Ship the FC is on.</param>
+        /// <param name="Type">Type of FC.</param>
+        public void AddComponent(ComponentTN Comp, ShipTN Ship, bool Type)
+        {
+            if (PointDefenseFC.ContainsKey(Comp) == false)
+            {
+                PointDefenseFC.Add(Comp, Ship);
+            }
+
+            if (PointDefenseType.ContainsKey(Comp) == false)
+            {
+                PointDefenseType.Add(Comp, Type);
+            }
+        }
+
+        /// <summary>
+        /// Handles removing an existing FC from the list.
+        /// </summary>
+        /// <param name="Comp">Fire control component to remove</param>
+        /// <param name="Ship">Ship the FC is on.</param>
+        /// <param name="Type">Type of FC.</param>
+        public void RemoveComponent(ComponentTN Comp)
+        {
+            if (PointDefenseFC.ContainsKey(Comp) == true)
+            {
+                PointDefenseFC.Remove(Comp);
+            }
+
+            if (PointDefenseType.ContainsKey(Comp) == true)
+            {
+                PointDefenseType.Remove(Comp);
+            }
+        }
+    }
+
 }

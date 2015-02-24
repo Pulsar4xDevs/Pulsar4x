@@ -484,7 +484,7 @@ namespace Pulsar4X.UI.Handlers
                             shipcontact.TaskGroupsOrdered.Add(CurrentTaskGroup);
                             break;
                         case SystemListObject.ListEntityType.Planets:
-                            Planet planet = (Planet)entity;
+                            SystemBody planet = (SystemBody)entity;
                             NewOrder = new Order(selected_ordertype, -1, -1, 0, planet);
                             break;
                         case SystemListObject.ListEntityType.JumpPoint:
@@ -509,6 +509,7 @@ namespace Pulsar4X.UI.Handlers
             if (SelectedOrderIndex != -1 && SelectedOrderIndex < CurrentTaskGroup.TaskGroupOrders.Count)
                 SelectedOrderIndex += 1;
             BuildPlottedMoveList();
+            BuildSystemLocationList();
             CalculateTimeDistance();
         }
 
@@ -741,27 +742,69 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+
+        /// <summary>
+        /// finds target system for updating systemlocationlist
+        /// </summary>
+        /// <returns></returns>
+        private StarSystem GetTargetSystem()
+        {
+            StarSystem targetsys = CurrentTaskGroup.Position.System;
+            BindingList<Order> borders = CurrentTaskGroup.TaskGroupOrders;
+            
+            List<Order> orders = CurrentTaskGroup.TaskGroupOrders.ToList();
+            Constants.ShipTN.OrderType stdtrans = Constants.ShipTN.OrderType.StandardTransit;
+            Constants.ShipTN.OrderType sqdtrans = Constants.ShipTN.OrderType.SquadronTransit;
+            Constants.ShipTN.OrderType tndtrans = Constants.ShipTN.OrderType.TransitAndDivide;
+
+            if (orders.Any(o => o.typeOf == stdtrans) || orders.Any(o => o.typeOf == sqdtrans) || orders.Any(o => o.typeOf == tndtrans))
+            {
+                int index;
+                if (SelectedOrderIndex == -1)
+                    index = orders.Count -1;
+                else
+                    index = SelectedOrderIndex -1;
+                while (index >= 0)
+                {
+                    if (orders[index].typeOf == stdtrans || orders[index].typeOf == sqdtrans || orders[index].typeOf == tndtrans)
+                    {
+                        if (orders[index].jumpPoint.Connect != null)
+                            targetsys = orders[index].jumpPoint.Connect.Position.System;
+                        else
+                            targetsys = null; //jumping into an unknown system.
+                        index = -1;
+                    }
+                        
+                    index--;
+                }
+            }
+            return targetsys;
+        }
+
         /// <summary>
         /// Build the Total System Location List here.
         /// </summary>
         private void BuildSystemLocationList()
         {
             //m_oTaskGroupPanel.SystemLocationsListBox.Items.Clear();
+            StarSystem targetsystem = GetTargetSystem();
 
             SystemLocationDict.Clear();
             SystemLocationGuidDict.Clear();
-            AddJumpPointsToList();
-            AddPlanetsToList();
+            if (targetsystem != null)
+            {
+                AddJumpPointsToList(targetsystem);
+                AddPlanetsToList(targetsystem);
 
-            if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
-                AddContactsToList();
+                if (m_oTaskGroupPanel.DisplayContactsCheckBox.Checked == true)
+                    AddContactsToList(targetsystem);
 
-            if (m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.Checked == true)
-                AddTaskGroupsToList();
+                if (m_oTaskGroupPanel.DisplayTaskGroupsCheckBox.Checked == true)
+                    AddTaskGroupsToList(targetsystem);
 
-            if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
-                AddWaypointsToList();
-
+                if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
+                    AddWaypointsToList(targetsystem);
+            }
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
 
@@ -787,8 +830,9 @@ namespace Pulsar4X.UI.Handlers
                     m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex = -1;
                     SelectedOrderIndex = -1;
                     m_oTaskGroupPanel.AddMoveButton.Text = "Add Order";
-                }
+                }                
             }
+            BuildSystemLocationList();
         }
 
         /// <summary>
@@ -876,9 +920,9 @@ namespace Pulsar4X.UI.Handlers
             int prevIndex = SelectedOrderIndex;
             SelectedOrderIndex = -1;
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
-            for (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
+            foreach(Order order in CurrentTaskGroup.TaskGroupOrders)// (int loop = 0; loop < CurrentTaskGroup.TaskGroupOrders.Count; loop++)
             {
-                m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(CurrentTaskGroup.TaskGroupOrders[loop].Name);
+                m_oTaskGroupPanel.PlottedMovesListBox.Items.Add(order.Name);
             }
 
             if (prevIndex < CurrentTaskGroup.TaskGroupOrders.Count)
@@ -893,16 +937,15 @@ namespace Pulsar4X.UI.Handlers
         /// Add every planet in the system that this TG is in to the list.
         /// Eventually jump orders will modify this. to be the system at the end of the order stack.
         /// </summary>
-        private void AddPlanetsToList()
+        private void AddPlanetsToList(StarSystem starsystem)
         {
-
-            for (int loop = 0; loop < CurrentTaskGroup.Contact.Position.System.Stars.Count; loop++)
+            foreach (Star star in starsystem.Stars)
             {
-                for (int loop2 = 0; loop2 < CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets.Count; loop2++)
+                foreach (SystemBody planet in star.Planets)
                 {
                     //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
-                    string keyName = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
-                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
+                    string keyName = planet.Name;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
+                    StarSystemEntity entObj = planet;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
                     SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
                     SystemListObject valueObj = new SystemListObject(entType, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
@@ -911,9 +954,9 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        private void AddJumpPointsToList()
+        private void AddJumpPointsToList(StarSystem starsystem)
         {
-            foreach (JumpPoint jp in CurrentTaskGroup.Contact.Position.System.JumpPoints)
+            foreach (JumpPoint jp in starsystem.JumpPoints)
             {
                 StarSystemEntity entObj = jp;
                 SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.JumpPoint;
@@ -926,10 +969,10 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Adds any detected ships to the system location box.
         /// </summary>
-        private void AddContactsToList()
+        private void AddContactsToList(StarSystem starsystem)
         {
 
-            if (CurrentFaction.DetectedContactLists.ContainsKey(CurrentTaskGroup.Contact.Position.System) == true)
+            if (CurrentFaction.DetectedContactLists.ContainsKey(starsystem) == true)
             {
                 foreach (KeyValuePair<ShipTN, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.Position.System].DetectedContacts)
                 {
@@ -965,14 +1008,13 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Adds friendly taskgroups to the system location box
         /// </summary>
-        private void AddTaskGroupsToList()
-        {
-
-            for (int loop = 0; loop < CurrentTaskGroup.Contact.Position.System.SystemContactList.Count; loop++)
+        private void AddTaskGroupsToList(StarSystem starsystem)
+        {           
+            foreach(SystemContact contact in starsystem.SystemContactList)
             {
-                if (CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].SSEntity == StarSystemEntityType.TaskGroup)
+                if (contact.SSEntity == StarSystemEntityType.TaskGroup)
                 {
-                    TaskGroupTN TaskGroup = CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].Entity as TaskGroupTN;
+                    TaskGroupTN TaskGroup = contact.Entity as TaskGroupTN;
                     if (CurrentTaskGroup != TaskGroup && TaskGroup.TaskGroupFaction == CurrentFaction)
                     {
                         //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.SystemContactList[loop].TaskGroup);
@@ -989,16 +1031,14 @@ namespace Pulsar4X.UI.Handlers
         /// <summary>
         /// Adds user generated waypoints to the location list.
         /// </summary>
-        private void AddWaypointsToList()
+        private void AddWaypointsToList(StarSystem starsystem)
         {
-
-            for (int loop = 0; loop < CurrentTaskGroup.Contact.Position.System.Waypoints.Count; loop++)
+            foreach (Waypoint waypoint in starsystem.Waypoints)
             {
-                if (CurrentTaskGroup.Contact.Position.System.Waypoints[loop].FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
-                {    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Waypoints[loop]);
-                    string keyName = CurrentTaskGroup.Contact.Position.System.Waypoints[loop].Name;
-                    StarSystemEntity entObj = CurrentTaskGroup.Contact.Position.System.Waypoints[loop];
-
+                if (waypoint.FactionId == CurrentTaskGroup.TaskGroupFaction.FactionID)
+                {   
+                    string keyName = waypoint.Name;
+                    StarSystemEntity entObj = waypoint;
                     SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Waypoints, entObj);
                     SystemLocationGuidDict.Add(entObj.Id, keyName);
                     SystemLocationDict.Add(entObj.Id, valueObj);
@@ -1220,13 +1260,10 @@ namespace Pulsar4X.UI.Handlers
                 m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
                 m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
 
-                RefreshShipCells();
-
-                BuildSystemLocationList();
+                RefreshShipCells();               
                 ClearActionList();
-
                 BuildPlottedMoveList();
-
+                BuildSystemLocationList();
                 CalculateTimeDistance();
             }
         }

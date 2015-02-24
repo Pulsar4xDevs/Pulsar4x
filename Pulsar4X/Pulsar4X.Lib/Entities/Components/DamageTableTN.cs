@@ -85,6 +85,7 @@ namespace Pulsar4X.Entities.Components
 
 
         public DamageTableTN(DamageTypeTN DamageType, ushort Damage)
+            : base()
         {
             Type = DamageType;
             DamageTotal = Damage;

@@ -11,7 +11,6 @@ using log4net.Config;
 using log4net;
 #endif
 using Pulsar4X.Entities;
-using Pulsar4X.Lib;
 
 namespace Pulsar4X.UI.GLUtilities
 {

@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.Linq.Expressions;
+using Pulsar4X.Helpers;
 
 namespace Pulsar4X.UI.ViewModels
 {
@@ -34,7 +35,7 @@ namespace Pulsar4X.UI.ViewModels
                 else
                     CurrentStarSystemAge = "N/A";
                 Seed = _currentstarsystem.Seed.ToString();
-                Stars = new BindingList<Star>(_currentstarsystem.Stars);
+                Stars = new SortableBindingList<Star>(_currentstarsystem.Stars);
                 StarsSource.DataSource = Stars;
                 OnPropertyChanged(() => Stars);
             }
@@ -70,8 +71,8 @@ namespace Pulsar4X.UI.ViewModels
             }
         }
 
-        private BindingList<Star> _stars;
-        public BindingList<Star> Stars
+        private SortableBindingList<Star> _stars;
+        public SortableBindingList<Star> Stars
         {
             get { return _stars; }
             set
@@ -125,21 +126,20 @@ namespace Pulsar4X.UI.ViewModels
                 _currentstar = value;
                 //NotifyPropertyChanged("CurrentStar");
                 OnPropertyChanged(() => CurrentStar);
-                var planetslist = new BindingList<Planet>();
-                foreach (Planet planet in CurrentStar.Planets)
+                var planetslist = new SortableBindingList<SystemBody>();
+                foreach (SystemBody planet in CurrentStar.Planets)
                 {
                     planetslist.Add(planet);
-                    foreach (Planet moon in planet.Moons)
+                    foreach (SystemBody moon in planet.Moons)
                     {
                         planetslist.Add(moon);
                     }
                 }
                 PlanetSource.DataSource = planetslist;
                 OnPropertyChanged(() => PlanetSource);
-
             }
         }
-        public Planet CurrentPlanet { get; set; }
+        public SystemBody CurrentPlanet { get; set; }
 
         public bool isSM { get; set; }
         public bool isNotSM { get { return !isSM; } set { isSM = !value; } }

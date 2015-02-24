@@ -59,7 +59,7 @@ namespace Pulsar4X.UI
             {
                 oNewFaction.AddNewContactList(CurSystem);
             }
-            Entities.Planet P1 = new Entities.Planet(sol.Stars[0]);
+            Entities.SystemBody P1 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< @tdo WTF???
             P1.Position.X = 10.0;
             P1.Position.Y = 10.0;
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.UI
                 oNewFaction2.AddNewContactList(CurSystem);
             }
 
-            Entities.Planet P2 = new Entities.Planet(sol.Stars[0]);
+            Entities.SystemBody P2 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< wtf???
             P2.Position.X = -10.0;
             P2.Position.Y = -10.0;
 

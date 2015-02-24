@@ -247,11 +247,11 @@ namespace Pulsar4X.Entities
         }
 
         public Installation()
+            : base()
         {
             /// <summary>
             /// Id must be present or anything needing it will lose its cookies.
             /// </summary>
-            Id = Guid.NewGuid();
 
             Number = 0;
             Mass = 25000;
@@ -266,11 +266,11 @@ namespace Pulsar4X.Entities
         }
 
         public Installation(InstallationType a_eType)
+            : base()
         {
             /// <summary>
             /// Id must be present or anything needing it will lose its cookies.
             /// </summary>
-            Id = Guid.NewGuid();
 
             Number = 0;
             Mass = 25000;

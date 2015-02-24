@@ -64,8 +64,8 @@ namespace Pulsar4X.Entities
         public int Seed { get { return m_seed; } }
 
         public StarSystem(string name, int seed)
+            : base()
         {
-            Id = Guid.NewGuid();
             Name = name;
             Stars = new BindingList<Star>();
 
@@ -82,6 +82,12 @@ namespace Pulsar4X.Entities
 
             // Subscribe to change events.
             SystemContactList.ListChanged += SystemContactList_ListChanged;
+
+            // Create the faciton contact information for each faction.
+            foreach (Faction f in GameState.Instance.Factions)
+            {
+                f.AddNewContactList(this);
+            }
         }
 
         /// <summary>
@@ -162,21 +168,12 @@ namespace Pulsar4X.Entities
             // Update the position of all planets. This should probably be in something like the construction tick in Aurora.
             foreach (Star CurrentStar in Stars)
             {
-                // The system primary will cause a divide by zero error currently as it has no orbit.
-                if (CurrentStar != Stars[0])
-                {
-                    CurrentStar.UpdatePosition(deltaSeconds);
+                CurrentStar.UpdatePosition(deltaSeconds);
 
-                    // Since the star moved, update the JumpPoint position.
-                    foreach (JumpPoint CurrentJumpPoint in JumpPoints)
-                    {
-                        CurrentJumpPoint.UpdatePosition();
-                    }
-                }
-
-                foreach (Planet CurrentPlanet in CurrentStar.Planets)
+                // Since the star moved, update the JumpPoint position.
+                foreach (JumpPoint CurrentJumpPoint in JumpPoints)
                 {
-                    CurrentPlanet.UpdatePosition(deltaSeconds);
+                    CurrentJumpPoint.UpdatePosition();
                 }
             }
         }

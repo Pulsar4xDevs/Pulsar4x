@@ -10,6 +10,7 @@ using Pulsar4X;
 #if LOG4NET_ENABLED
 using log4net.Config;
 using log4net;
+using Pulsar4X.Helpers.GameMath;
 #endif
 
 /// <summary>
@@ -1231,7 +1232,7 @@ namespace Pulsar4X.Entities
             if (IsOrbiting)
             {
                 GetPositionFromOrbit();
-                Planet OrbitingPlanet = OrbitingBody as Planet;
+                SystemBody OrbitingPlanet = OrbitingBody as SystemBody;
                 if (OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
                 {
                     OrbitingPlanet.TaskGroupsInOrbit.Remove(this);
@@ -1268,7 +1269,7 @@ namespace Pulsar4X.Entities
                         break;
                 }
 
-                CurrentHeading = (Math.Atan((dY / dX)) / Constants.Units.RADIAN);
+                CurrentHeading = Pulsar4X.Helpers.GameMath.Angle.ToDegrees(Math.Atan(dY / dX));
             }
             else
                 CurrentHeading = 0.0;
@@ -1742,7 +1743,7 @@ namespace Pulsar4X.Entities
                 {
                     OrbitingBody = TaskGroupOrders[0].pop.Planet;
                 }
-                Planet OrbitingPlanet = OrbitingBody as Planet;
+                SystemBody OrbitingPlanet = OrbitingBody as SystemBody;
                 if (!OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
                 {
                     OrbitingPlanet.TaskGroupsInOrbit.Add(this);
@@ -2139,7 +2140,7 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
-                    #region Unload 90% Of Fuel To Planet
+                    #region Unload 90% Of Fuel To SystemBody
                     case (int)Constants.ShipTN.OrderType.UnloadFuelToPlanet:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
                         for (int loop = 0; loop < Ships.Count; loop++)
@@ -2280,7 +2281,7 @@ namespace Pulsar4X.Entities
                         break;
                     #endregion
 
-                    #region Unload 90% Of Supplies To Planet
+                    #region Unload 90% Of Supplies To SystemBody
                     case (int)Constants.ShipTN.OrderType.UnloadSuppliesToPlanet:
                         TaskGroupOrders[0].orderTimeRequirement = 0;
                         for (int loop = 0; loop < Ships.Count; loop++)
@@ -2581,7 +2582,7 @@ namespace Pulsar4X.Entities
                         OrbitingBody = TaskGroupOrders[0].pop.Planet;
                     }
 
-                    Planet OrbitingPlanet = OrbitingBody as Planet;
+                    SystemBody OrbitingPlanet = OrbitingBody as SystemBody;
 
                     if (!OrbitingPlanet.TaskGroupsInOrbit.Contains(this))
                     {

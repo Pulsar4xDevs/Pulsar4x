@@ -19,6 +19,7 @@ namespace Pulsar4X.Entities
         public double MaximumTemperatureConstraint { get; set; }
 
         public Species()
+            : base()
         {
             // set default values:
             Name = "Human";
@@ -34,7 +35,7 @@ namespace Pulsar4X.Entities
 
         }
 
-        public double ColonyCost(Planet planet)
+        public double ColonyCost(SystemBody planet)
         {
             double cost = 1.0;
             cost *= ColonyGravityCost(planet);
@@ -45,23 +46,23 @@ namespace Pulsar4X.Entities
             return cost;
         }
 
-        public double ColonyGravityCost(Planet planet)
+        public double ColonyGravityCost(SystemBody planet)
         {
             return 1;
         }
 
-        public double ColonyPressureCost(Planet planet)
+        public double ColonyPressureCost(SystemBody planet)
         {
             return 1;
         }
 
-        public double ColonyTemperatureCost(Planet planet)
+        public double ColonyTemperatureCost(SystemBody planet)
         {
             double cost = 1;
             return cost;
         }
 
-        public double ColonyGasCost(Planet planet)
+        public double ColonyGasCost(SystemBody planet)
         {
             double cost = 1;
             return cost;

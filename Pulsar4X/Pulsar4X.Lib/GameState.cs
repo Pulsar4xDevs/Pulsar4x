@@ -234,15 +234,15 @@ namespace Pulsar4X
             set { _stars = value; }
         }
 
-        private BindingList<Planet> _planets;
-        public BindingList<Planet> Planets
+        private BindingList<SystemBody> _planets;
+        public BindingList<SystemBody> Planets
         {
             get
             {
                 if (_planets == null)
                 {
                     // Load from DB here
-                    _planets = new BindingList<Planet>();
+                    _planets = new BindingList<SystemBody>();
                 }
                 return _planets;
             }

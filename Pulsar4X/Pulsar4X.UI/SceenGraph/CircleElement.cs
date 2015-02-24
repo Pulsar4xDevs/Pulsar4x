@@ -7,7 +7,6 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
-using Pulsar4X.Lib;
 
 namespace Pulsar4X.UI.SceenGraph
 {

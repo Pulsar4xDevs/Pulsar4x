@@ -66,6 +66,29 @@ namespace Pulsar4X.Entities
         public decimal BuildPointCost { get; set; }
 
         /// <summary>
+        /// Cost of this shipclass in minerals
+        /// </summary>
+        [Browsable(false)]
+        private decimal[] m_aiMinerialsCost;
+
+        [DisplayName("Cost"),
+        Category("Detials"),
+        Description("Cost in minerals of the ship."),
+        Browsable(true),
+        ReadOnly(true)]
+        public decimal[] minerialsCost
+        {
+            get
+            {
+                return m_aiMinerialsCost;
+            }
+            set
+            {
+                m_aiMinerialsCost = value;
+            }
+        }
+
+        /// <summary>
         /// Size in tons.
         /// </summary>
         [DisplayName("Size in Tons"),
@@ -905,6 +928,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Title">Class name</param>
         public ShipClassTN(string Title, Faction ShipClassFaction)
+            : base()
         {
             Name = Title;
             Faction = ShipClassFaction;
@@ -915,6 +939,11 @@ namespace Pulsar4X.Entities
             /// Sanity initializations
             /// </summary>
             BuildPointCost = 0.0m;
+            m_aiMinerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerialsCost[mineralIterator] = 0;
+            }
             SizeHS = 0.0f;
             SizeTons = 0.0f;
             TotalHTK = 0;
@@ -1142,6 +1171,14 @@ namespace Pulsar4X.Entities
             BuildPointCost = BuildPointCost + (Component.cost * increment);
 
             /// <summary>
+            /// Mineral cost is similarly increased.
+            /// </summary>
+            for(int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerialsCost[mineralIterator] = m_aiMinerialsCost[mineralIterator] + (Component.minerialsCost[mineralIterator] * increment); 
+            }
+
+            /// <summary>
             /// Update TotalHTK
             /// </summary>
             TotalHTK = TotalHTK + (Component.htk * increment);
@@ -1313,11 +1350,23 @@ namespace Pulsar4X.Entities
             /// Armor requires that size and cost be subtracted from the ship before recalculation/readding.
             /// </summary>
             BuildPointCost = BuildPointCost - ShipArmorDef.cost;
+
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerialsCost[mineralIterator] = m_aiMinerialsCost[mineralIterator] - ShipArmorDef.minerialsCost[mineralIterator];
+            }
+
             SizeHS = SizeHS - ShipArmorDef.size;
 
             ShipArmorDef.CalcArmor(Title, ArmorPHS, SizeHS, ArmorDepth);
 
             BuildPointCost = BuildPointCost + ShipArmorDef.cost;
+
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                m_aiMinerialsCost[mineralIterator] = m_aiMinerialsCost[mineralIterator] + ShipArmorDef.minerialsCost[mineralIterator];
+            }
+
             SizeHS = SizeHS + ShipArmorDef.size;
 
             SizeTons = SizeHS * 50.0f;

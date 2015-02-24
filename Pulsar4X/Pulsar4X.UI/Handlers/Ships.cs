@@ -639,11 +639,6 @@ namespace Pulsar4X.UI.Handlers
             {
                 _CurrnetShip.SetShields(true);
 
-                if (_CurrnetFaction.RechargeList.ContainsKey(_CurrnetShip) == false)
-                {
-                    _CurrnetFaction.RechargeList.Add(_CurrnetShip, (int)Faction.RechargeStatus.Shields);
-                }
-
                 if (_CurrnetShip.ShieldIsActive == true && _CurrnetShip.CurrentShieldPoolMax != 0.0f)
                 {
                     m_oDetailsPanel.ShieldGroupBox.Text = "Shields(On)";
@@ -661,28 +656,6 @@ namespace Pulsar4X.UI.Handlers
             if (_CurrnetShip != null)
             {
                 _CurrnetShip.SetShields(false);
-
-                if (_CurrnetFaction.RechargeList.ContainsKey(_CurrnetShip) == true)
-                {
-                    int value = _CurrnetFaction.RechargeList[_CurrnetShip];
-
-                    /// <summary>
-                    /// Value here is a bitwise status word.
-                    /// </summary>
-                    if ((value & (int)Faction.RechargeStatus.Shields) == 1)
-                    {
-                        value = value - (int)Faction.RechargeStatus.Shields;
-
-                        if (value == 0)
-                        {
-                            _CurrnetFaction.RechargeList.Remove(_CurrnetShip);
-                        }
-                        else
-                        {
-                            _CurrnetFaction.RechargeList[_CurrnetShip] = value;
-                        }
-                    }
-                }
 
                 m_oDetailsPanel.ShieldGroupBox.Text = "Shields(Off)";
             }

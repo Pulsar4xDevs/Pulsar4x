@@ -170,6 +170,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="InstallationToBuild">Installation to build</param>
         public ConstructionBuildQueueItem(Installation InstallationToBuild)
+            : base()
         {
             Name = InstallationToBuild.Name;
             numToBuild = 0.0f;
@@ -186,6 +187,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ComponentToBuild">Ship Component to build</param>
         public ConstructionBuildQueueItem(ComponentDefTN ComponentToBuild)
+            : base()
         {
             Name = ComponentToBuild.Name;
             numToBuild = 0.0f;
@@ -201,6 +203,7 @@ namespace Pulsar4X.Entities
         /// Maintenance supplies build queue constructor
         /// </summary>
         public ConstructionBuildQueueItem()
+            : base()
         {
             Name = "Maintenance Supplies";
             numToBuild = 0.0f;
@@ -231,6 +234,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Definition"></param>
         public MissileBuildQueueItem(OrdnanceDefTN Definition)
+            : base()
         {
             numToBuild = 0.0f;
             buildCapacity = 0.0f;
@@ -262,6 +266,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Definition"></param>
         public FighterBuildQueueItem(ShipClassTN Definition)
+            : base()
         {
             numToBuild = 0.0f;
             buildCapacity = 0.0f;
@@ -300,9 +305,9 @@ namespace Pulsar4X.Entities
         public Species Species { get; set; }
 
         /// <summary>
-        /// Planet the population is attached to
+        /// SystemBody the population is attached to
         /// </summary>
-        public Planet Planet { get; set; }
+        public SystemBody Planet { get; set; }
 
         /// <summary>
         /// Does this pop have an assigned governor?
@@ -483,7 +488,7 @@ namespace Pulsar4X.Entities
 
         #endregion
 
-        public Population(Planet a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
+        public Population(SystemBody a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
         {
             Id = Guid.NewGuid();
             // initialise minerials:

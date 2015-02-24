@@ -882,7 +882,7 @@ namespace Pulsar4X.Entities.Components
                 {
 #warning Beam Fire control on planet/population section not implemented.
                     /// <summary>
-                    /// Planet section eventually goes here.
+                    /// SystemBody section eventually goes here.
                     /// </summary>
                     return weaponFired;
                 }

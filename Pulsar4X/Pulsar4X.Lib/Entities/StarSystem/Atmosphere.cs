@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
+using Pulsar4X.Helpers;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Entities
 {
     
     /// <summary>
-    /// The Atmosphere of a Planet or Moon.
-    /// @todo Make this a generic component.
-    /// @todo Add a ToString overload which will retunr a string like this: 
-    /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
+    /// The Atmosphere of a SystemBody or Moon.
     /// </summary>
-    public class Atmosphere
+    public class Atmosphere : GameEntity
     {
         /// <summary>
         /// Atmospheric Presure
@@ -35,6 +35,15 @@ namespace Pulsar4X.Entities
         /// </summary>
         public float GreenhouseFactor { get; set; }
 
+        private float _greenhousePressure = 0;
+        /// <summary>
+        /// Pressure (in atm) of greenhouse gasses. but not really.
+        /// to get this figure for a given gass toy would take its pressure 
+        /// in the atmosphere and times it by the gasses GreenhouseEffect 
+        /// which is a number between 1 and -1 normally.
+        /// </summary>
+        public float GreenhousePressure { get { return _greenhousePressure; } }
+
         /// <summary>
         /// How much light the body reflects. Affects temp.
         /// a number from 0 to 1.
@@ -55,6 +64,27 @@ namespace Pulsar4X.Entities
         /// </summary>
         public Dictionary<AtmosphericGas, float> Composition { get { return _composition; } }
 
+        private string _atmosphereDescriptionInPercent = "";
+        /// <summary>
+        /// A sting describing the Atmosphere in Percentages, like this:
+        /// "75% Nitrogen (N), 21% Oxygen (O), 3% Carbon dioxide (CO2), 1% Argon (Ar)"
+        /// By Default ToString return this.
+        /// </summary>
+        public string AtomsphereDescriptionInPercent
+        {
+            get { return _atmosphereDescriptionInPercent; }
+        }
+
+        private string _atmosphereDescriptionInATM = "";
+        /// <summary>
+        /// A sting describing the Atmosphere in Atmospheres (atm), like this:
+        /// "0.75atm Nitrogen (N), 0.21atm Oxygen (O), 0.03atm Carbon dioxide (CO2), 0.01atm Argon (Ar)"
+        /// </summary>
+        public string AtomsphereDescriptionATM
+        {
+            get { return _atmosphereDescriptionInATM; }
+        }
+
         /// <summary>
         /// Returns true if The atmosphere exists (i.e. there are any gases in it), else it return false.
         /// </summary>
@@ -73,50 +103,104 @@ namespace Pulsar4X.Entities
         {
             get
             {
-                if (ParentBody.Type == Planet.PlanetType.Terrestrial
-                    || ParentBody.Type == Planet.PlanetType.Moon)
+                if (ParentBody.Type == SystemBody.PlanetType.Terrestrial
+                    || ParentBody.Type == SystemBody.PlanetType.Moon)
                     return true;  // only these bodies have atmospheres that can be terraformed.
 
                 return false;
             }
         }
 
-        private Planet _parentBody;
-
+        private SystemBody _parentBody;
         /// <summary>
         /// The body this atmosphere belong to.
         /// </summary>
-        public Planet ParentBody { get { return _parentBody; } }
+        public SystemBody ParentBody { get { return _parentBody; } }
 
-        public Atmosphere(Planet parentBody)
+
+        /// <summary>
+        /// Atmosphere Constructor
+        /// </summary>
+        public Atmosphere(SystemBody parentBody)
+            : base()
         {
             _parentBody = parentBody;
         }
 
+        public override string ToString()
+        {
+            return _atmosphereDescriptionInPercent;
+        }
+
         /// <summary>
         /// Updates the state of the bodies atmosphere. Run this after adding removing gasses or modifing albedo.
+        /// @note For info on how I have tweaked this from aurora see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+        /// @todo Calc Hydrosphere changes & update albedo accordingly.
         /// </summary>
         public void UpdateState()
         {
             if (Exists)
             {
-                if (ParentBody.Type == Planet.PlanetType.GasDwarf 
-                    || ParentBody.Type == Planet.PlanetType.GasGiant
-                    || ParentBody.Type == Planet.PlanetType.IceGiant)
+                // clear old values.
+                _atmosphereDescriptionInATM = "";
+                _atmosphereDescriptionInPercent = "";
+                Pressure = 0;
+                _greenhousePressure = 0;
+
+                foreach (var gas in _composition)
                 {
+                    _atmosphereDescriptionInATM += gas.Value.ToString("N4") + "atm " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";
+                    Pressure += gas.Value;
+
+                    // only add a greenhouse gas if it is not frozen:
+                    if (SurfaceTemperature >= gas.Key.BoilingPoint)
+                    {
+                        // actual greenhouse pressure adjusted by gas GreenhouseEffect.
+                        // note that this produces the same affect as in aurora if all GreenhouseEffect bvalue are -1, 0 or 1.
+                        _greenhousePressure += (float)gas.Key.GreenhouseEffect * gas.Value;
+                    }
+                }
+
+                if (ParentBody.Type == SystemBody.PlanetType.GasDwarf
+                    || ParentBody.Type == SystemBody.PlanetType.GasGiant
+                    || ParentBody.Type == SystemBody.PlanetType.IceGiant)
+                {
+                    // special gas giant stuff, needed because we do not apply greenhouse factor to them:
+                    SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
                     Pressure = 1;       // because thats the deffenition of the surface of these planets, when 
                     // atmosphereic pressure = the pressure of earths atmosphere at its surface (what we call 1 atm).
                 }
+                else
+                {
+                    // From Aurora: Greenhouse Factor = 1 + (Atmospheric Pressure /10) + Greenhouse Pressure   (Maximum = 3.0)
+                    GreenhouseFactor = (Pressure * 0.035F) + GreenhousePressure;  // note that we do without the extra +1 as it seems to give us better temps.
+                    GreenhouseFactor = (float)GMath.Clamp(GreenhouseFactor, -3.0, 3.0);
 
-                ///< @todo Update Atmospheric pressure
-                ///< @todo Calc Hydrosphere changes & update albedo accordingly.
-                ///< @todo Calc greehouse effect based on atmosphere and apply it + albedo to surface temp. 
+                    // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
+                    SurfaceTemperature = (ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN);
+                    SurfaceTemperature += SurfaceTemperature * GreenhouseFactor * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4, see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
+                    SurfaceTemperature += (float)Constants.Units.KELVIN_TO_DEGREES_C; // convert back to kelvin
+                }
+
+                // loop a second time to work out atmo percentages:
+                foreach (var gas in _composition)
+                {
+                    if (Pressure != 0)
+                        _atmosphereDescriptionInPercent += (gas.Value / Pressure).ToString("P0") + " " + gas.Key.Name + " " + gas.Key.ChemicalSymbol + ", ";  ///< @todo this is not right!!
+                }
+
+                // trim trailing", " from the strings.
+                _atmosphereDescriptionInATM = _atmosphereDescriptionInATM.Remove(_atmosphereDescriptionInATM.Length - 2);
+                _atmosphereDescriptionInPercent = _atmosphereDescriptionInPercent.Remove(_atmosphereDescriptionInPercent.Length - 2);
             }
             else
             {
                 // simply apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                 Pressure = 0;
-                SurfaceTemperature = ParentBody.BaseTemperature * (1 - Albedo);
+                SurfaceTemperature = ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN; // conver to kelvin.
+                SurfaceTemperature = SurfaceTemperature * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4
+                _atmosphereDescriptionInATM = "None";
+                _atmosphereDescriptionInPercent = "None";
             }
         }
 
@@ -146,4 +230,56 @@ namespace Pulsar4X.Entities
             UpdateState();                  // update other state to reflect the new gas ammount.
         }
     }
+
+    #region Data Binding
+
+    /// <summary>
+    /// Used for databinding, see here: http://blogs.msdn.com/b/msdnts/archive/2007/01/19/how-to-bind-a-datagridview-column-to-a-second-level-property-of-a-data-source.aspx
+    /// </summary>
+    public class AtmosphereTypeDescriptor : CustomTypeDescriptor
+    {
+        public AtmosphereTypeDescriptor(ICustomTypeDescriptor parent)
+            : base(parent)
+        { }
+
+        public override PropertyDescriptorCollection GetProperties()
+        {
+            PropertyDescriptorCollection cols = base.GetProperties();
+            PropertyDescriptor addressPD = cols["Atmosphere"];
+            PropertyDescriptorCollection Atmo_child = addressPD.GetChildProperties();
+            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 6];
+
+            cols.CopyTo(array, 0);
+            array[cols.Count] = new SubPropertyDescriptor(addressPD, Atmo_child["AtomsphereDescriptionInPercent"], "Atmosphere_InPercent");
+            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Atmo_child["AtomsphereDescriptionATM"], "Atmosphere_InATM");
+            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Atmo_child["Pressure"], "Atmosphere_Pressure");
+            array[cols.Count + 3] = new SubPropertyDescriptor(addressPD, Atmo_child["HydrosphereExtent"], "Atmosphere_HydrosphereExtent");
+            array[cols.Count + 4] = new SubPropertyDescriptor(addressPD, Atmo_child["Albedo"], "Atmosphere_Albedo");
+            array[cols.Count + 5] = new SubPropertyDescriptor(addressPD, Atmo_child["SurfaceTemperature"], "Atmosphere_SurfaceTemperature");
+
+            PropertyDescriptorCollection newcols = new PropertyDescriptorCollection(array);
+            return newcols;
+        }
+
+        public override PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+        {
+            PropertyDescriptorCollection cols = base.GetProperties(attributes);
+            PropertyDescriptor addressPD = cols["Atmosphere"];
+            PropertyDescriptorCollection Atmo_child = addressPD.GetChildProperties();
+            PropertyDescriptor[] array = new PropertyDescriptor[cols.Count + 6];
+
+            cols.CopyTo(array, 0);
+            array[cols.Count] = new SubPropertyDescriptor(addressPD, Atmo_child["AtomsphereDescriptionInPercent"], "Atmosphere_InPercent");
+            array[cols.Count + 1] = new SubPropertyDescriptor(addressPD, Atmo_child["AtomsphereDescriptionATM"], "Atmosphere_InATM");
+            array[cols.Count + 2] = new SubPropertyDescriptor(addressPD, Atmo_child["Pressure"], "Atmosphere_Pressure");
+            array[cols.Count + 3] = new SubPropertyDescriptor(addressPD, Atmo_child["HydrosphereExtent"], "Atmosphere_HydrosphereExtent");
+            array[cols.Count + 4] = new SubPropertyDescriptor(addressPD, Atmo_child["Albedo"], "Atmosphere_Albedo");
+            array[cols.Count + 5] = new SubPropertyDescriptor(addressPD, Atmo_child["SurfaceTemperature"], "Atmosphere_SurfaceTemperature");
+
+            PropertyDescriptorCollection newcols = new PropertyDescriptorCollection(array);
+            return newcols;
+        }
+    }
+
+    #endregion
 }

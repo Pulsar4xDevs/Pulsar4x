@@ -87,6 +87,13 @@ namespace Pulsar4X.Entities.Components
             isDivisible = false;
 
             componentType = ComponentTypeTN.Armor;
+
+            minerialsCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                minerialsCost[mineralIterator] = 0.0m;
+            }
         }
 
         /// <summary>
@@ -192,12 +199,6 @@ namespace Pulsar4X.Entities.Components
                     //1.3 1.2 1.1 1.0 .9 .8 .7 .6 .5 .4 .3 .2 .1
                     float NeutroniumFraction = (10.0f - (float)fraction) / 10.0f;
                     //-.3  -.2  -.1 0 .1 .2 .3 .4 .5 .6 .7 .8 .9   
-
-                    minerialsCost = new decimal[Constants.Minerals.NO_OF_MINERIALS];
-                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
-                    {
-                        minerialsCost[mineralIterator] = 0;
-                    }
 
                     if (DuraniumFraction >= 1.0)
                     {

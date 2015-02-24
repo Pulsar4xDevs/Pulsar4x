@@ -7,7 +7,6 @@ using System.ComponentModel;
 using Newtonsoft.Json;
 using System.Drawing;
 
-
 namespace Pulsar4X.Entities
 {
     public enum SpectralType
@@ -25,31 +24,38 @@ namespace Pulsar4X.Entities
 
     public enum LuminosityClass
     {
-        O,
-        I,
-        II,
-        III,
-        IV,
-        V,
-        sd,
-        D,
+        O,          // Hypergiants
+        Ia,         // Luminous Supergiants
+        Iab,        // Intermediate Supergiants
+        Ib,         // Less Luminos Supergiants
+        II,         // Bright Giants
+        III,        // Giants
+        IV,         // Subgiants
+        V,          // Main-Sequence (like our sun)
+        sd,         // Subdwarfs
+        D,          // White Dwarfs
     }
 
+    [TypeDescriptionProvider(typeof(StarTypeDescriptionProvider))]
     public class Star : OrbitingEntity
     {
-        public BindingList<Planet> Planets { get; set; }
+        public BindingList<SystemBody> Planets { get; set; }
         public double Age { get; set; }
         public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
         public float Luminosity { get; set; }
-        public string Class { get; set; } 
-        public double EcoSphereRadius { get; set; } // Average echo sphere. TODO: change this to include min and max radius from GetHabitableZone
+        public string Class { get; set; }
+        public double EcoSphereRadius { get; set; } // Average Habitable Radius, in AU.
+        public double MinHabitableRadius { get; set; }  // in au
+        public double MaxHabitableRadius { get; set; }  // in au
 
         public SpectralType SpectralType { get; set; }
+        public ushort SpectralSubDivision { get; set; }       // number from  0 (hottest) to 9 (coolest)
+        public LuminosityClass LuminosityClass {get; set; }
 
         public Star()
             : base()
         {
-            Planets = new BindingList<Planet>();
+            Planets = new BindingList<SystemBody>();
             SupportsPopulations = false;
         }
 
@@ -62,14 +68,12 @@ namespace Pulsar4X.Entities
             Temperature = temp;
             Luminosity = luminosity;
             SpectralType = spectralType;
+            Radius = radius;
 
             Class = SpectralType.ToString();
 
-            Planets = new BindingList<Planet>();
+            Planets = new BindingList<SystemBody>();
             SupportsPopulations = false;
-
-            double minHabitableZone, maxHabitableZone;
-            EcoSphereRadius = GetHabitableZone(out minHabitableZone, out maxHabitableZone);
         }
 
         /// <summary>
@@ -91,35 +95,42 @@ namespace Pulsar4X.Entities
                 Position.X += Parent.Position.X;
                 Position.Y += Parent.Position.Y;
             }
-        }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="semiMajorAxis"></param>
-        /// <param name="albedo"></param>
-        /// <returns></returns>
-        public uint GetEffectiveTemp(double semiMajorAxis, double albedo)
-        {
-            ///< \todo: I'm pretty sure this code is wildly inaccurate.
-            double S = (Radius / semiMajorAxis) * (2 * Constants.Science.σSB * Math.Pow(Temperature, 4));
-            double Fa = S * (1 - albedo) / 4;
-            uint Te = (uint)Math.Pow((Fa / Constants.Science.σSB), 0.25);
-            return Te;
-        }
-
-        /// <summary>
-        /// Calculates the Habitable Zone of this star.
-        /// </summary>
-        /// <param name="minRadius">Minimum Habitable Zone (Effective Temp == Water Boiling)</param>
-        /// <param name="maxRadius">Maximum Habitable Zone (Effective Temp == Water Freezing)</param>
-        /// <returns>Earth Habitable Zone (Effective Temp == 288K (15C))</returns>
-        public double GetHabitableZone(out double minRadius, out double maxRadius)
-        {
-            uint TempAt1AU = GetEffectiveTemp(1, 0);
-            minRadius = Math.Pow(Constants.Science.TEMP_WATER_BOIL / TempAt1AU, -2);
-            maxRadius = Math.Pow(Constants.Science.TEMP_WATER_FREEZE / TempAt1AU, -2);
-            return Math.Pow(288F / TempAt1AU, -2);
+            foreach (SystemBody CurrentPlanet in Planets)
+            {
+                CurrentPlanet.UpdatePosition(deltaSeconds);
+            }
         }
     }
+
+    #region Data Binding
+
+    /// <summary>
+    /// Used for databinding, see here: http://blogs.msdn.com/b/msdnts/archive/2007/01/19/how-to-bind-a-datagridview-column-to-a-second-level-property-of-a-data-source.aspx
+    /// </summary>
+    public class StarTypeDescriptionProvider : TypeDescriptionProvider
+    {
+        private ICustomTypeDescriptor td;
+
+        public StarTypeDescriptionProvider()
+            : this(TypeDescriptor.GetProvider(typeof(Star)))
+        { }
+
+        public StarTypeDescriptionProvider(TypeDescriptionProvider parent)
+            : base(parent)
+        { }
+
+        public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+        {
+            if (td == null)
+            {
+                td = base.GetTypeDescriptor(objectType, instance);
+                td = new OrbitTypeDescriptor(td);
+            }
+
+            return td;
+        }
+    }
+
+    #endregion
 }

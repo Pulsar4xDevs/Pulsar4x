@@ -12,10 +12,11 @@ using log4net;
 
 namespace Pulsar4X.Entities
 {
-    public class Planet : OrbitingEntity
+    [TypeDescriptionProvider(typeof(PlanetTypeDescriptionProvider))]
+    public class SystemBody : OrbitingEntity
     {
 #if LOG4NET_ENABLED
-        public static readonly ILog logger = LogManager.GetLogger(typeof(Planet));
+        public static readonly ILog logger = LogManager.GetLogger(typeof(SystemBody));
 #endif
 
         public enum PlanetType
@@ -25,14 +26,14 @@ namespace Pulsar4X.Entities
             IceGiant,       // Like Uranus/Neptune
             DwarfPlanet,    // Pluto!
             GasDwarf,       // What you'd get is Jupiter and Saturn ever had a baby.
-            ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron Planet (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
+            ///< @todo Add more planet types like Ice Planets (bigger Plutos), carbon planet (http://en.wikipedia.org/wiki/Carbon_planet), Iron SystemBody (http://en.wikipedia.org/wiki/Iron_planet) or Lava Planets (http://en.wikipedia.org/wiki/Lava_planet). (more: http://en.wikipedia.org/wiki/List_of_planet_types).
             Moon,
             IceMoon,
-            Asteriod,
+            Asteroid,
             Comet
         }
 
-        public enum TechtonicActivity
+        public enum TectonicActivity
         {
             Dead,
             Minor,
@@ -51,7 +52,14 @@ namespace Pulsar4X.Entities
         public Dictionary<Faction, bool> GeoSurveyList { get; set; }
 
         /// <summary>
-        /// @todo How is ColonyCost calculated in Aurora??
+        /// @todo From the Aurora Wiki:
+        /// The colony cost is calculated in the following way. The five checks below this paragraph are made. Whichever results in the highest colony cost, that will be the colony cost for the planet. You can see these factors in the Colony Cost Factors section in the lower left of the F9 view for the currently selected planet. 
+        /// 1.) If the atmosphere is not breathable, the colony cost is 2.0. 
+        /// 2.) If there are toxic gases in the atmosphere then the colony cost will be 2.0 for some gases and 3.0 for others. 
+        /// 3.) If the pressure is too high, the colony cost will be equal to the Atmospheric Pressure divided by the species maximum pressure with a minimum of 2.0 
+        /// 4.) If the oxygen percentage is above 30%, the colony cost will be 2.0 
+        /// 5.) The colony cost for a temperature outside the range is Temperature Difference / Temperature Deviation. So if the deviation was 22 and the temperature was 48 degrees below the minimum, the colony cost would be 48/22 = 2.18 
+        /// Some (or all) of these need to be implimented.
         /// </summary>
         public float ColonyCost { get; set; }
 
@@ -69,7 +77,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// The density of the body in g/cm^3
         /// </summary>
-        public double Density { get; set; } 
+        public double Density { get; set; }
 
         public TimeSpan LengthOfDay { get; set; }
 
@@ -83,7 +91,7 @@ namespace Pulsar4X.Entities
         /// Plate techtonics. Ammount of activity depends on age vs mass.
         /// Influences magnitic feild.
         /// </summary>
-        public TechtonicActivity Techtonics { get; set; }
+        public TectonicActivity Tectonics { get; set; }
 
         /// <summary>
         /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
@@ -105,7 +113,7 @@ namespace Pulsar4X.Entities
         public float RadiationLevel { get; set; }
         public float AtmosphericDust { get; set; }
 
-        public BindingList<Planet> Moons { get; set; } //moons orbiting the planet
+        public BindingList<SystemBody> Moons { get; set; } //moons orbiting the planet
         public BindingList<Population> Populations { get; set; } // list of Populations (colonies) on this planet.
 
         /// <summary>
@@ -144,7 +152,7 @@ namespace Pulsar4X.Entities
             }
         }
 
-        public Planet(OrbitingEntity parent)
+        public SystemBody(OrbitingEntity parent, PlanetType type)
             : base()
         {
             /// <summary>
@@ -152,7 +160,9 @@ namespace Pulsar4X.Entities
             /// </summary>
             Id = Guid.NewGuid();
 
-            Moons = new BindingList<Planet>();
+            Type = type; // set the type ASAP in case anthing needs to know it.
+
+            Moons = new BindingList<SystemBody>();
             Populations = new BindingList<Population>();
 
             SSEntity = StarSystemEntityType.Body;
@@ -161,9 +171,6 @@ namespace Pulsar4X.Entities
             Position = parent.Position;
 
             TaskGroupsInOrbit = new BindingList<TaskGroupTN>();
-
-            ///< @todo Planet generation needs minerals, anomalies, and ruins generation.
-            PlanetaryRuins = new Ruins();  // Should this happen here??
 
             GeoSurveyList = new Dictionary<Faction, bool>();
 
@@ -216,7 +223,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Update all the moons.
             /// </summary>
-            foreach (Planet CurrentMoon in Moons)
+            foreach (SystemBody CurrentMoon in Moons)
             {
                 CurrentMoon.UpdatePosition(tickValue);
             }
@@ -246,4 +253,36 @@ namespace Pulsar4X.Entities
             }
         }
     }
+
+    #region Data Binding
+
+    /// <summary>
+    /// Used for databinding, see here: http://blogs.msdn.com/b/msdnts/archive/2007/01/19/how-to-bind-a-datagridview-column-to-a-second-level-property-of-a-data-source.aspx
+    /// </summary>
+    public class PlanetTypeDescriptionProvider : TypeDescriptionProvider
+    {
+        private ICustomTypeDescriptor td;
+
+        public PlanetTypeDescriptionProvider()
+            : this(TypeDescriptor.GetProvider(typeof(SystemBody)))
+        { }
+
+        public PlanetTypeDescriptionProvider(TypeDescriptionProvider parent)
+            : base(parent)
+        { }
+
+        public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+        {
+            if (td == null)
+            {
+                td = base.GetTypeDescriptor(objectType, instance);
+                td = new AtmosphereTypeDescriptor(td);
+                td = new OrbitTypeDescriptor(td);
+            }
+
+            return td;
+        }
+    }
+
+    #endregion
 }

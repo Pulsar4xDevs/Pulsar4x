@@ -64,6 +64,7 @@ namespace Pulsar4X.Entities.Components
         public NewtonianType m_oType { get; set; }
 
         public BasicNewtonian()
+            : base()
         {
 
         }
