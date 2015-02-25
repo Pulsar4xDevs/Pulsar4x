@@ -63,7 +63,7 @@ namespace Pulsar4X
         };
 
         /// <summary>
-        /// Distribution of differnt stra spectral types. These numbers are made up and can be tweaked for game balance.
+        /// Distribution of differnt star spectral types. These numbers are made up and can be tweaked for game balance.
         /// </summary>
         public static WeightedList<SpectralType> StarTypeDistributionForFakeStars = new WeightedList<SpectralType>()
         {
@@ -292,7 +292,7 @@ namespace Pulsar4X
         /// Limits of SystemBody masses based on type. Units are Kg.
         /// @note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
         /// </summary>
-        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> PlanetMassByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
+        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> SystemBodyMassByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
                 { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 500 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
                 { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 30 * Constants.Units.EARTH_MASS_IN_KILOGRAMS} },
@@ -309,7 +309,7 @@ namespace Pulsar4X
         /// Limits of a Planets density based on its type, in g/cm3
         /// @note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
         /// </summary>
-        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> PlanetDensityByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
+        public static Dictionary<SystemBody.PlanetType, MinMaxStruct> SystemBodyDensityByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
                 { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 0.5, _max = 10 } },
                 { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 1, _max = 5 } },

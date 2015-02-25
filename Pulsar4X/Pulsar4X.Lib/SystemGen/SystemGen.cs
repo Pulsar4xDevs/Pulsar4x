@@ -6,10 +6,63 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 
 namespace Pulsar4X
 {
+    /// <summary>
+    /// Stargen containes functions for generating new star systems based on the information contained in GalaxyGen. 
+    /// </summary>
+    /// <remarks>
+    /// Stargen works by the following process:
+    /// <list type="number">
+    /// <item>
+    /// First the Stars are generated, starting with their spectral type and then using that to generate sane vaslues for all other star data.
+    /// </item>
+    /// <item>
+    /// Once a star is generated Planets, Asteriods, Dwarf planets and Moons (aka System Bodies) are generated for the star. 
+    /// This process is quite a lot more complicated but can best be describe as a three stage process:
+    ///     <list type="number">
+    ///     <item>
+    ///     The first stage defines a number "Protoplanets" consiting the mass and planet type. amoungst these "Protoplanets" are 
+    ///     single Asteroids which will act as references for later generation of entire Asteroid belts, including Dwarf Planets. 
+    ///     The list of protoplanets is sorted to make sure Terrestrial planets are mostly at the top of the list.
+    ///     Note that moons are not generated at this stage.
+    ///     </item>
+    ///     <item>
+    ///     The second stage involves generating orbits for the planets. This is done in much the same was as for Stars, 
+    ///     by making sure that planets are at least 10x more gravationaly bound to the parent star then they are to their 
+    ///     nearest neighbours we ensure some "sane" seperation between planets.
+    ///     </item>
+    ///     The third and final pass involes fleshing out the remain properties of the planets. This includes Densite, Radius, 
+    ///     Temerature, Atmosphere, Ruins, Minerials, etc. For each reference asteroid an aproprate number of dwarf planets and asteroids
+    ///     Are generated (note that they only go though this last stage with mass and orbits generated based on the reference asteroid provided).
+    ///     Planets also have their moons generated at this stage. It is worth noting that moons go through the same 3 stage process, it is just nested
+    ///     inside the 3rd stage for planets.
+    ///     </list>
+    /// Generation of system bodies repsent the meat of Star Generation.
+    /// </item>
+    /// <item>
+    /// Comets are generated in their own Single stage process. it is almost identical to the process Asteriod have, except they do not have a reference orbit
+    /// (A lot of code is reused for all System Body generation, including comets). 
+    /// </item>
+    /// <item>
+    /// Orbits are generated for the stars. This is done is such a way as to ensure that the stars are more gravitationaly bound to the 
+    /// Parent (largest) star in the system then to any of the child stars.
+    /// </item>
+    /// <item>
+    /// Jump points are generated for each star in the system. Unlike Aurora where only the first star in a system had jump points in 
+    /// Pulsar every star has its own, even in multi star systems. 
+    /// </item>
+    /// <item>
+    /// Jump points are generated for each star in the system. Unlike Aurora where only the first star in a system had jump points in 
+    /// Pulsar every star has its own, even in multi star systems. 
+    /// </item>
+    /// <item>
+    /// Finally NPRs are generated. Note that this has not yet been implemented as NPR Factions are not yet supported.
+    /// </item>
+    /// </list>
+    /// In addition it contains a function which will return a hard coded veriosn of our own Solar System as well as several related convience functions.
+    /// </remarks>
     public static class SystemGen
     {
         /// <summary>
@@ -39,11 +92,18 @@ namespace Pulsar4X
             public SystemBody.PlanetType _type;
         }
 
+        /// <summary>
+        /// Creates a single Star system with the provided name. It generates a new seed for the system.
+        /// </summary>
         public static StarSystem CreateSystem(string name)
         {
             return CreateSystem(name, -1);
         }
 
+        /// <summary>
+        /// Creates a single Star System using the random seed provided. 
+        /// If given the same seed twice it should generate 2 identical systems even on different PCs.
+        /// </summary>
         public static StarSystem CreateSystem(string name, int seed, int numJumpPoints = -1)
         {
             // create new RNG with Seed.
@@ -63,14 +123,6 @@ namespace Pulsar4X
 
                 GenerateSystemBodiesForStar(newStar);
                 GenerateComets(newStar);
-
-                // sort the stars children:
-                List<SystemBody> sorted = new List<SystemBody>(newStar.Planets.ToArray());
-                sorted.Sort(delegate(SystemBody a, SystemBody b)
-                {
-                    return a.Orbit.SemiMajorAxis.CompareTo(b.Orbit.SemiMajorAxis);
-                });
-                newStar.Planets = new BindingList<SystemBody>(sorted);
             }
 
             GenerateStarOrbits(newSystem);
@@ -87,6 +139,9 @@ namespace Pulsar4X
 
         #region Create Sol
 
+        /// <summary>
+        /// A system specifically generated to stress test orbit code.
+        /// </summary>
         public static StarSystem CreateStressTest()
         {
             StarSystem Sol= new StarSystem("StressTest", -1);
@@ -127,6 +182,9 @@ namespace Pulsar4X
             return Sol;
         }
 
+        /// <summary>
+        /// Creates our own solar system.
+        /// </summary>
         public static StarSystem CreateSol()
         {
             StarSystem Sol = new StarSystem("Sol", GalaxyGen.SeedRNG.Next());
@@ -280,6 +338,9 @@ namespace Pulsar4X
 
         #region Orbit Generation Functions
 
+        /// <summary>
+        /// Generates Star orbits.
+        /// </summary>
         private static void GenerateStarOrbits(StarSystem system)
         {
             List<Star> starList = system.Stars.ToList();
@@ -354,7 +415,6 @@ namespace Pulsar4X
             // (Note, 10x less depends on a 0.1 value for GalaxyGen.StarOrbitGravityFactor
             return Math.Sqrt(Constants.Science.GRAVITATIONAL_CONSTANT * star2.Orbit.Mass * planetMass / gravAttractionToParent * GalaxyGen.StarOrbitGravityFactor);
         }
-
 
         /// <summary>
         /// Creates planet orbits for the given system (star + proto-planets). 
@@ -553,6 +613,30 @@ namespace Pulsar4X
         /// <summary>
         /// Generates an orbit around a parent Star. User for Comet orbits for the most part.
         /// </summary>
+        /// <remarks>
+        /// To create the orbit of a System Body 6 seperate values must first be generated:
+        ///     <list type="Bullet">
+        ///     <item>
+        ///     <b>SemiMajorAxis:</b> Randomly selected based on a range for the given star type, see: GalaxyGen.OrbitalDistanceByStarSpectralType
+        ///     and GalaxyGen.OrbitalDistanceDistributionByPlanetType.
+        ///     </item>
+        ///     <item>
+        ///     <b>Eccentricity:</b> A random value between 0 and 1.0 (currently 0.8 due to bugs!!) is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Inclination:</b> A random value between 0 and GalaxyGen.MaxPlanetInclination is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Argument Of Periapsis:</b> A random value between 0 and 360 is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Mean Anomaly:</b> A random value between 0 and 360 is generated.
+        ///     </item>
+        ///     <item>
+        ///     <b>Longitude Of Ascending Node:</b> A random value between 0 and 360 is generated.
+        ///     </item>
+        ///     </list>
+        /// </remarks>
         private static void GenerateSystemBodyOrbit(Star parent, SystemBody child, double childMass)
         {
             // Create the orbital values:
@@ -562,9 +646,9 @@ namespace Pulsar4X
             if (child.Type == SystemBody.PlanetType.Comet)
                 eccentricity = RNG_NextDoubleRange(0.6, 0.8);       ///< @todo more magic numbers.
             else
-                eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
+                eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity less magic numbers
 
-            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there.
             double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
             double meanAnomaly = m_RNG.NextDouble() * 360;
             double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
@@ -655,8 +739,7 @@ namespace Pulsar4X
 
         /// <summary>
         /// Generates Data for a star based on it's spectral type and populates it with the data.
-        /// \note Does not generate a name for the star.
-        /// \note This is not very scientific and that the 'magic' numbers are sourced from Wikipedia, mostly here: http://en.wikipedia.org/wiki/Stellar_classification
+        /// @note Does not generate a name for the star.
         /// </summary>
         /// <remarks>
         /// This function randomly generates the Radius, Temperature, Luminosity, Mass and Age of a star and then returns a star populated with those generated values.
@@ -710,7 +793,7 @@ namespace Pulsar4X
             Star star = new Star(name, data._Radius, data._Temp, data._Luminosity, data._SpectralType, system);
             star.Age = data._Age;
             SetHabitableZone(star);     // calculate habitable zone
-            CalculateFullSpectralClass(star);
+            GenerateFullSpectralClass(star);
 
             // Temporary orbit to store mass, Calculate real orbit later
             star.Orbit = Orbit.FromStationary(data._Mass);
@@ -730,7 +813,10 @@ namespace Pulsar4X
             star.EcoSphereRadius = (star.MinHabitableRadius + star.MaxHabitableRadius) / 2; // our habital zone number is in the middle of our min/max values.
         }
 
-        public static void CalculateFullSpectralClass(Star star)
+        /// <summary>
+        /// Generates a string specifing the full spectral class form a star.
+        /// </summary>
+        public static void GenerateFullSpectralClass(Star star)
         {
             // start by getting the sub-division, which is based on temp.
             double sub = star.Temperature / GalaxyGen.StarTemperatureBySpectralType[star.SpectralType]._max;  // temp rang from 0 to 1.
@@ -750,86 +836,29 @@ namespace Pulsar4X
         #region SystemBody Generation Functions
 
         /// <summary>
-        /// This function Works out how many planets to generate for a given star.
+        /// This function intigates each stage of System Body generation for a given star. 
+        /// Note that most of the actual wortk is done by other functions. 
         /// </summary>
         /// <remarks>
-        /// Now lets try and work out how many planets there should be.
-        /// My "common knowladge" science tells me that in general terms
-        /// the bigger the star the more material there was in its general 
-        /// vacinity when it formed (had to be for the star to get that big in the first place).
-        /// But the REALLY big stars (types O, B and A) blow away any left over 
-        /// material very quickly after fusion starts due to massive solar winds.
-        /// so we want to generate very few planets for smaller and Huge stars 
-        /// and quite a lot for stars more like our own (type G).
-        /// given this planet generation is balanced somthing like this:
+        /// While most of the actual work for each stage is done by other functions this
+        /// function is responsable for determining the nubmer of stare a given star should have
+        /// and the number of asteroid belts it should have, if any at all.
         /// 
-        /// A/B/O (0.8% chance of occuring in real stars) will have:
-        /// <list type="Bullet">
-        /// <item>
-        /// A medium number of planets. Favoring Gass Giants.
-        /// </item>
-        /// <item>
-        /// Lots of resources on planets.
-        /// </item>
-        /// <item>
-        /// High chance of a body having a research anomly (say 10%).
-        /// </item>
-        /// <item>
-        /// low chance for ruins (say 1%).
-        /// </item>
-        /// <item>
-        /// Lowest chace for NPR races (or even habital planets) are in these systems.
-        /// </item>
-        /// </list>
+        /// Ideally the bigger the star the more planets we should generate. So we use a mass ratio 
+        /// in addition to a Second Tweakable ratio to get a number we can mulitply against the 
+        /// maximum number of planets to get the final number to generate. The tweakable ration is 
+        /// defined in GalaxyGen.StarSpecralTypePlanetGenerationRatio.
         /// 
-        /// F/G/K (~23% generation chance in RS) will have:
-        /// <list type="Bullet">
-        /// <item>
-        /// A large number of all planet types.
-        /// </item>
-        /// <item>
-        /// moderate resources on planets.
-        /// </item>
-        /// <item>
-        /// a small chance for research anomlies (say 1%).
-        /// </item>
-        /// <item>
-        /// a moderate chance for ruins (say 5%).
-        /// </item>
-        /// <item>
-        /// Best chance for NPR races is in these systems.
-        /// </item>
-        /// </list>
-        ///
-        /// M (~76% generation chance in RS) will have
-        /// <list type="Bullet">
-        /// <item>
-        /// a small number of planets. Favoring Gas Dwarfs.
-        /// </item>
-        /// <item>
-        /// Low resources
-        /// </item>
-        /// <item>
-        /// a low chance for anomlies (say 0.2%)
-        /// </item>
-        /// <item>
-        /// High chance of ruins (say 10%)
-        /// </item>
-        /// </list>
-        ///      
-        /// (see GalaxyGen.StarSpecralTypePlanetGenerationRatio for a tweakalbe for no. of Planets).
+        /// The generated list of protoplanets is sorted to push Terrestrial planets to the top of the list.
+        /// This is done to ensure that their orbits are in the inner system.
         /// 
-        /// Of course the other major factor in this would be system age:
-        /// <list type="Bullet">
-        /// <item>
-        /// Young systems have lower Ruins/NPR chances, higher Anomly chances and More resources.
-        /// </item>
-        /// <item>
-        /// Older systems would have less resources and a lower Anomly chance but higher NPR/Ruins chances.
-        /// </item>
-        /// </list>
-        ///
-        /// The system age thing lines up with the age of the different star classes so these two thing should compond each other.
+        /// Deciding on the number of Asteroid belts is simply done by randomly choosing a number 
+        /// from 0 to GalaxyGen.MaxNoOfAsteroidBelts. The result is the number of asteriod belts to generate.
+        /// 
+        /// Most of the work for stage 2, i.e. Orbits, is done by GenerateStarSystemOrbits.
+        /// 
+        /// Most of the work for stage 3, i.e. fleshing out the Planet details, is done by GenerateSystemBody
+        /// or GenerateAsteroidBelt, depending on the SystemBody type.
         /// </remarks>
         private static void GenerateSystemBodiesForStar(Star star)
         {
@@ -837,24 +866,16 @@ namespace Pulsar4X
             if (m_RNG.NextDouble() > GalaxyGen.PlanetGenerationChance)
                 return;  // nope, this star has no planets.
 
-            double starMassRatio = GMath.Clamp01(star.Orbit.Mass / (1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS));   // heavy star = more material.
+            double starMassRatio = GMath.Clamp01(star.Orbit.Mass / Constants.Units.SOLAR_MASS_IN_KILOGRAMS);   // heavy star = more material, in relation to Sol.
             double starSpecralTypeRatio =  GalaxyGen.StarSpecralTypePlanetGenerationRatio[star.SpectralType];    // tweakble
 
-            double starLuminosityRatio = 1;
-            if (star.Luminosity > GalaxyGen.StarLuminosityBySpectralType[SpectralType.F]._max)
-                starLuminosityRatio = 1 - GMath.Clamp01(star.Luminosity / GalaxyGen.StarLuminosityBySpectralType[SpectralType.O]._max);   // really bright stars blow away material.
-            else
-                starLuminosityRatio = GMath.Clamp01(star.Luminosity / GalaxyGen.StarLuminosityBySpectralType[SpectralType.F]._max);       // realy dim stars don't.
+            // final 'chance' for number of planets generated. take into consideration star mass and balance decisions for star class.
+            double finalGenerationChance = GMath.Clamp01(starMassRatio * starSpecralTypeRatio);
 
-            // final 'chance' for number of planets generated. take into consideration star mass, solar wind (via luminosity)
-            // and balance decisions for star class.
-            double finalGenerationChance = GMath.Clamp01(starMassRatio * starLuminosityRatio * starSpecralTypeRatio);
+            // using the planet generation chance we will calculate the number of additional planets over and above the minium of 1. 
+            int noOfPlanetsToGenerate = (int)GMath.Clamp(finalGenerationChance * GalaxyGen.MaxNoOfPlanets, 1, GalaxyGen.MaxNoOfPlanets);
 
-            // using the planet generation chance we will calculate the number of additional 
-            // planets over and above the minium of 1. 
-            int noOfPlanetsToGenerate = (int)(finalGenerationChance * GalaxyGen.MaxNoOfPlanets) + 1;
-
-            // create protPlanet list:
+            // create protoPlanet list:
             List<ProtoSystemBody> protoPlanets = new List<ProtoSystemBody>();
             double totalSystemMass = 0;
 
@@ -896,7 +917,7 @@ namespace Pulsar4X
                 {
                     // flesh out planet:
                     body.Name = star.Name + " - " + bodyNo.ToString();
-                    GenerateSystemBody(star, body);
+                    FinalizeSystemBodyGeneration(star, body);
                     bodyNo++;
                     star.Planets.Add(body);     // don't forget to add the planet to the star!!
                 }
@@ -914,7 +935,6 @@ namespace Pulsar4X
         /// Sorts a list of protoplanets, putting terra planets at the front.
         /// This is not a perfect sort it just pushes the terra planets higher up the list.
         /// </summary>
-        /// <param name="list"></param>
         private static void SortPlanetList(List<ProtoSystemBody> list)
         {
             if (list.Count < 4)
@@ -946,54 +966,41 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Generates a solar system body based on type.
+        /// This function Finalizes the generation of System Bodies. Note that in the case of 
+        /// Asteroids/Dwarf Planets it is resposnable for the complete creation of those bodies 
+        /// based on a reference Asteroid provided. The same is also true of Comets, however no reference 
+        /// body/orbit is required for them.
         /// </summary>
         /// <remarks>
-        /// Quite a lot of data goes into making a planet. What follows is a list of the different data
-        /// points which need to be either randomly generated or infered through previously generated data.
-        /// The List is in the required order of generation.
+        /// Quite a lot of data goes into making a System Body. What follows is a list of the different data
+        /// points which need to be either randomly generated or infered through previously generated data. 
+        /// @note Some data points require other data to be generate before them, the list order takes that into consideration.
+        /// @note This function does not generate all of the following data in all cases, it often depends on they type of System Body it is generating.
         /// <list type="Bullet">
         /// <item>
-        /// <b>Mass:</b> Randomly selected based on a range for the given planet type, see GalaxyGen.PlanetMassByType.
+        /// <b>Mass:</b> If required it is generated by a call to GenerateSystemBodyMass().
         /// </item>
         /// <item>
-        /// <b>Density:</b> Randomly selected based on a range for the given planet type, see GalaxyGen.PlanetDensityByType.
+        /// <b>Orbit:</b> If required an orbit is generated with either GenerateAsteroidBeltBodyOrbit() or GenerateSystemBodyOrbit()
+        /// Depending on weither or not a reference orbit was provided.
         /// </item>
         /// <item>
-        /// <b>Radius:</b> Inferd from mass and densitiy using the formular: r = ((3M)/(4pD))^(1/3), where p = PI, D = Density, and M = Mass.
+        /// <b>Density:</b> Randomly selected based on a range for the given planet type, see GalaxyGen.SystemBodyDensityByType.
         /// </item>
         /// <item>
-        /// <b>Surface Gravity:</b> Is calculated with the following formular: g = (G * M) / r^2, where G = Gravatational Constant, M = Mass and r = radius.
+        /// <b>Radius:</b> Generated using CalculateRadiusOfBody().
+        /// </item>
+        /// <item>
+        /// <b>Surface Gravity:</b> Is calculated with the following formular: 
+        /// <c>g = (G * M) / r^2</c>
+        /// Where G = Gravatational Constant, M = Mass and r = radius.
         /// </item>
         /// <item>
         /// <b>Axial Tilt:</b> A random value between 0 and GalaxyGen.MaxPlanetInclination is generated.
         /// </item>
         /// <item>
-        /// <b>Orbit:</b> To create the orbit of a planet 6 seperate values must first be generated:
-        ///     <list type="Bullet">
-        ///     <item>
-        ///     <b>SemiMajorAxis:</b> Randomly selected based on a range for the given star type, see: GalaxyGen.OrbitalDistanceByStarSpectralType.
-        ///     @note This should probably be change so we generate the closest planets first, Rather then just dropping them any old where.
-        ///     </item>
-        ///     <item>
-        ///     <b>Eccentricity:</b> A random value between 0 and 1.0 (currently 0.8 due to bugs!!) is generated.
-        ///     </item>
-        ///     <item>
-        ///     <b>Inclination:</b> A random value between 0 and GalaxyGen.MaxPlanetInclination is generated.
-        ///     </item>
-        ///     <item>
-        ///     <b>Argument Of Periapsis:</b> A random value between 0 and 360 is generated.
-        ///     </item>
-        ///     <item>
-        ///     <b>Mean Anomaly:</b> A random value between 0 and 360 is generated.
-        ///     </item>
-        ///     <item>
-        ///     <b>Longitude Of Ascending Node:</b> A random value between 0 and 360 is generated.
-        ///     </item>
-        ///     </list>
-        /// </item>
-        /// <item>
-        /// <b>Length Of Day:</b> Randomly generated TimeSpan with a range of 6 hours to the year length of the body (tho never less than 6 hours).
+        /// <b>Length Of Day:</b> Randomly generated TimeSpan with a range of GalaxyGen.MiniumPossibleDayLength hours to the 
+        /// year length of the body (tho never less than GalaxyGen.MiniumPossibleDayLength).
         /// </item>
         /// <item>
         /// <b>Base Temperature:</b> This is calculated using the Stefan–Boltzmann law, See http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
@@ -1012,21 +1019,21 @@ namespace Pulsar4X
         /// If the planet does not have some type of Plate Techtonics (i.e. it is a dead world) then the magnectic field is reduced in strength by a factor of 10.
         /// </item>
         /// <item>
-        /// <b>Atmosphere:</b> TODO
+        /// <b>Atmosphere:</b> Is generated by GenerateAtmosphere().
         /// </item>
         /// <item>
-        /// <b>Planetary Ruins:</b> TODO
+        /// <b>Planetary Ruins:</b> is generated by GenerateRuins().
         /// </item>
         /// <item>
-        /// <b>Minerials:</b> Currently an ugly hace of using homworld minerials. Note that minerial generation 
+        /// <b>Minerials:</b> Currently an ugly hack of using homworld minerials. Note that minerial generation 
         /// functions should be part of the SystemBody class as the player will likly want to re-generate them.
         /// </item>
         /// <item>
-        /// <b>Moons:</b> Might be dove via some indirect recursive calling of a generilised version of this function.
+        /// <b>Moons:</b> If we a generating a planet we genmerate moons using GenerateMoons().
         /// </item>
         /// </list>
         /// </remarks>
-        private static void GenerateSystemBody(Star star, SystemBody body, SystemBody parent = null, Orbit referenceOrbit = null)
+        private static void FinalizeSystemBodyGeneration(Star star, SystemBody body, SystemBody parent = null, Orbit referenceOrbit = null)
         {
             // if we have been passed a reference orbit, use it:
             if (referenceOrbit != null) 
@@ -1041,7 +1048,7 @@ namespace Pulsar4X
             }
 
             // Create some of the basic stats:
-            body.Density = RNG_NextDoubleRange(GalaxyGen.PlanetDensityByType[body.Type]);
+            body.Density = RNG_NextDoubleRange(GalaxyGen.SystemBodyDensityByType[body.Type]);
             body.Radius = CalculateRadiusOfBody(body.Orbit.Mass, body.Density);
             double radiusSquaredInM = (body.Radius * Constants.Units.M_PER_AU) * (body.Radius * Constants.Units.M_PER_AU); // conver to m from au.
             body.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * body.Orbit.Mass) / radiusSquaredInM); // see: http://nova.stanford.edu/projects/mod-x/ad-surfgrav.html
@@ -1084,13 +1091,10 @@ namespace Pulsar4X
 
         /// <summary>
         /// Generates the Mass for the system body by selecting it randomly 
-        /// from the range specified in GalaxyGen.PlanetMassByType.
+        /// from the range specified in GalaxyGen.SystemBodyMassByType.
         /// Some extra logic is run for moon to prevent them being larger then the planet they orbit.
         /// the maximum mass of a moon relative to the parent body is controlled by GalaxyGen.MaxMoonMassRelativeToParentBody.
         /// </summary>
-        /// <param name="body"></param>
-        /// <param name="parent"></param>
-        /// <returns></returns>
         private static double GenerateSystemBodyMass(SystemBody body, SystemBody parent)
         {
             if (IsMoon(body.Type))
@@ -1101,8 +1105,8 @@ namespace Pulsar4X
 
                 // these bodies have special mass limits over and above whats in PlanetMassByType.
                 double min, max;
-                min = GalaxyGen.PlanetMassByType[body.Type]._min;
-                max = GalaxyGen.PlanetMassByType[body.Type]._max;
+                min = GalaxyGen.SystemBodyMassByType[body.Type]._min;
+                max = GalaxyGen.SystemBodyMassByType[body.Type]._max;
 
                 if (max > parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody)
                     max = parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody;
@@ -1112,11 +1116,15 @@ namespace Pulsar4X
                 return RNG_NextDoubleRange(min, max);
             }
 
-            return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[body.Type]);
+            return RNG_NextDoubleRange(GalaxyGen.SystemBodyMassByType[body.Type]);
         }
 
         /// <summary>
-        /// Calls GenerateSystemBody to generate the required moons.
+        /// This function follows a similar 3 stage process to the generation of other system bodies.
+        /// It first determins if this Planet will have any moons using GalaxyGen.MoonGenerationChanceByPlanetType.
+        /// It then works out how many moons it has using GalaxyGen.MaxNoOfMoonsByPlanetType.
+        /// thenm it generates Proto Moons before calling GeneratePlanetSystemOrbits() to generate orbits for Protomoons. 
+        /// Finally it calls GenerateSystemBody() to finish the moons.
         /// </summary>
         private static void GenerateMoons(Star star, SystemBody parent)
         {
@@ -1128,7 +1136,7 @@ namespace Pulsar4X
             // The mass of the parent in proportion to the maximum mass for a planet of that type.
             // The MaxNoOfMoonsByPlanetType
             // And a random number for randomness.
-            double massRatioOfParent = parent.Orbit.Mass / GalaxyGen.PlanetMassByType[parent.Type]._max;
+            double massRatioOfParent = parent.Orbit.Mass / GalaxyGen.SystemBodyMassByType[parent.Type]._max;
             double moonGenChance = massRatioOfParent * m_RNG.NextDouble() * GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type];
             moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyGen.MaxNoOfMoonsByPlanetType[parent.Type]);
             int noOfMoons = (int)Math.Round(moonGenChance);
@@ -1166,21 +1174,21 @@ namespace Pulsar4X
                 moon.Name = parent.Name + " - Moon " + moonNo.ToString();
 
                 // flesh out moon details:
-                GenerateSystemBody(star, moon, parent);
+                FinalizeSystemBodyGeneration(star, moon, parent);
                 parent.Moons.Add(moon);
             }
         }
 
         /// <summary>
-        /// Generates mass for a Planet. tho it also works for comets and Asteroids and dwarfPlanets... just not moons.
+        /// Generates mass for a Planet. tho it also works for Comets and Asteroids and Dwarf Planets... just not moons.
         /// </summary>
         private static double GeneratePlanetMass(SystemBody.PlanetType type)
         {
-            return RNG_NextDoubleRange(GalaxyGen.PlanetMassByType[type]);
+            return RNG_NextDoubleRange(GalaxyGen.SystemBodyMassByType[type]);
         }
 
         /// <summary>
-        /// Generates Mass for a Moon.
+        /// Generates Mass for a Moon, it makes sure that the mass of the moon will never be more then that of it's parent body.
         /// </summary>
         private static double GenerateMoonMass(SystemBody parent, SystemBody.PlanetType type)
         {
@@ -1190,8 +1198,8 @@ namespace Pulsar4X
 
             // these bodies have special mass limits over and above whats in PlanetMassByType.
             double min, max;
-            min = GalaxyGen.PlanetMassByType[type]._min;
-            max = GalaxyGen.PlanetMassByType[type]._max;
+            min = GalaxyGen.SystemBodyMassByType[type]._min;
+            max = GalaxyGen.SystemBodyMassByType[type]._max;
 
             if (max > parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody)
                 max = parent.Orbit.Mass * GalaxyGen.MaxMoonMassRelativeToParentBody;
@@ -1314,7 +1322,7 @@ namespace Pulsar4X
                 case SystemBody.PlanetType.Terrestrial:
                     // Only Terrestrial like planets have a limited chance of having an atmo:
                     double atmoChance = GMath.Clamp01(GalaxyGen.AtmosphereGenerationModifier[planet.Type] * 
-                                                        (planet.Orbit.Mass / GalaxyGen.PlanetMassByType[planet.Type]._max));
+                                                        (planet.Orbit.Mass / GalaxyGen.SystemBodyMassByType[planet.Type]._max));
 
                     if (m_RNG.NextDouble() < atmoChance)
                     {
@@ -1480,7 +1488,7 @@ namespace Pulsar4X
                 asteroid.Name = star.Name + " - Asteriod " + beltNo.ToString() + "-" + i.ToString();
                    
                 // Generate the asteriod:
-                GenerateSystemBody(star, asteroid, null, referenceBody.Orbit);
+                FinalizeSystemBodyGeneration(star, asteroid, null, referenceBody.Orbit);
                 star.Planets.Add(asteroid);
             }
 
@@ -1492,7 +1500,7 @@ namespace Pulsar4X
                 dwarf.Name = star.Name + " - Dwarf Planet" + beltNo.ToString() + "-" + i.ToString();
 
                 // Generate the asteriod:
-                GenerateSystemBody(star, dwarf, null, referenceBody.Orbit);
+                FinalizeSystemBodyGeneration(star, dwarf, null, referenceBody.Orbit);
                 star.Planets.Add(dwarf);
             }
         }
@@ -1504,6 +1512,7 @@ namespace Pulsar4X
         /// <summary>
         /// Generates a random number of comets for a given star. The number of gererated will 
         /// be at least GalaxyGen.MiniumCometsPerSystem and never more then GalaxyGen.MaxNoOfComets.
+        /// </summary>
         private static void GenerateComets(Star star)
         {
             // first lets get a random number between our minium nad maximum number of comets:
@@ -1520,7 +1529,7 @@ namespace Pulsar4X
 
                 newComet.Name = star.Name + " - Comet" + i.ToString();
 
-                GenerateSystemBody(star, newComet);
+                FinalizeSystemBodyGeneration(star, newComet);
                 star.Planets.Add(newComet);
             }
         }
@@ -1772,7 +1781,9 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Calculates the radius of a body.
+        /// Calculates the radius of a body from mass and densitiy using the formular: 
+        /// <c>r = ((3M)/(4pD))^(1/3)</c>
+        /// Where p = PI, D = Density, and M = Mass.
         /// </summary>
         /// <param name="mass">The mass of the body in Kg</param>
         /// <param name="density">The density in g/cm^2</param>
