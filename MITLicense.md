@@ -19,6 +19,5 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 Aurora is Copyright Steve Walmsley
-Stargen is Copyright Martyn Fogg, Matt Burdick et al
 
 The names of the above copyright holders shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization.
