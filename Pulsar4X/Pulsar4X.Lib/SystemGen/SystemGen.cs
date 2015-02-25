@@ -279,6 +279,7 @@ namespace Pulsar4X
         #endregion
 
         #region Orbit Generation Functions
+
         private static void GenerateStarOrbits(StarSystem system)
         {
             List<Star> starList = system.Stars.ToList();
@@ -548,6 +549,73 @@ namespace Pulsar4X
 
             return moons;
         }
+
+        /// <summary>
+        /// Generates an orbit around a parent Star. User for Comet orbits for the most part.
+        /// </summary>
+        private static void GenerateSystemBodyOrbit(Star parent, SystemBody child, double childMass)
+        {
+            // Create the orbital values:
+            double smeiMajorAxis = RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
+                                                                          GalaxyGen.OrbitalDistanceDistributionByPlanetType[child.Type]);
+            double eccentricity = 0;
+            if (child.Type == SystemBody.PlanetType.Comet)
+                eccentricity = RNG_NextDoubleRange(0.6, 0.8);       ///< @todo more magic numbers.
+            else
+                eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
+
+            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
+            double meanAnomaly = m_RNG.NextDouble() * 360;
+            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
+
+            // now Create the orbit:
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
+        }
+
+        /// <summary>
+        /// Generates an orbit for an Asteroid or Dwarf SystemBody. The orbit will be a slight deviation of the reference orbit provided.
+        /// </summary>
+        private static void GenerateAsteroidBeltBodyOrbit(Star parent, SystemBody child, double childMass, Orbit referenceOrbit)
+        {
+            // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
+
+            // Create smeiMajorAxis:
+            double min, max, deviation;
+            deviation = referenceOrbit.SemiMajorAxis * GalaxyGen.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.SemiMajorAxis - deviation;
+            max = referenceOrbit.SemiMajorAxis + deviation;
+            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // dont need to raise to power, reference orbit already did that.
+
+            deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyGen.MaxAsteroidOrbitDeviation, 2);
+            min = referenceOrbit.Eccentricity - deviation;
+            max = referenceOrbit.Eccentricity + deviation;
+            double eccentricity = RNG_NextDoubleRange(min, max); // get random eccentricity needs better distrubution.
+
+            deviation = referenceOrbit.Inclination * GalaxyGen.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.Inclination - deviation;
+            max = referenceOrbit.Inclination + deviation;
+            double inclination = RNG_NextDoubleRange(min, max); // doesn't do much at the moment but may as well be there. Neet better Dist.
+
+            deviation = referenceOrbit.ArgumentOfPeriapsis * GalaxyGen.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.ArgumentOfPeriapsis - deviation;
+            max = referenceOrbit.ArgumentOfPeriapsis + deviation;
+            double argumentOfPeriapsis = RNG_NextDoubleRange(min, max);
+
+            deviation = referenceOrbit.LongitudeOfAscendingNode * GalaxyGen.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.LongitudeOfAscendingNode - deviation;
+            max = referenceOrbit.LongitudeOfAscendingNode + deviation;
+            double longitudeOfAscendingNode = RNG_NextDoubleRange(min, max);
+
+            // Keep the starting point of the orbit completly random.
+            double meanAnomaly = m_RNG.NextDouble() * 360;
+
+            // now Create the orbit:
+            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
+        }
+
         #endregion
 
         #region Star Generation Functions
@@ -1168,122 +1236,6 @@ namespace Pulsar4X
             return SystemBody.TectonicActivity.Dead;
         }
 
-
-        # region Obsolete???
-
-        /// <summary>
-        /// Generates an orbit around a parent Star. 
-        /// </summary>
-        private static void GenerateSystemBodyOrbit(Star parent, SystemBody child, double childMass)
-        {
-            // Create the orbital values:
-            double smeiMajorAxis =  RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
-                                                                          GalaxyGen.OrbitalDistanceDistributionByPlanetType[child.Type]);
-            double eccentricity = 0;
-            if (child.Type == SystemBody.PlanetType.Comet)
-                eccentricity = RNG_NextDoubleRange(0.6, 0.8);       ///< @todo more magic numbers.
-            else
-                eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
-
-            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
-            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
-            double meanAnomaly = m_RNG.NextDouble() * 360;
-            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
-
-            // now Create the orbit:
-            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
-        }
-
-        /// <summary>
-        /// Generates an orbit around a parent System body. 
-        /// </summary>
-        private static void GenerateSystemBodyOrbit(SystemBody parent, SystemBody child, double childMass)
-        {
-            // Create smeiMajorAxis:
-            // this need to have sane min/max values given the radius of the two bodies:
-            double min, max;
-            min = (parent.Radius + child.Radius) * GalaxyGen.MinMoonOrbitMultiplier;
-            max = GMath.Clamp((parent.Radius + child.Radius) * GalaxyGen.AbsoluteMaxMoonOrbitDistance, min, 
-                                                parent.Orbit.Periapsis * GalaxyGen.RelativeMaxMoonOrbitDistance);
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // moons dont need to be raised to a power, they have a nice range :)
-
-            // Create the other orbital values:
-            double eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 2); // get random eccentricity needs better distrubution.
-            double inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
-            double argumentOfPeriapsis = m_RNG.NextDouble() * 360;
-            double meanAnomaly = m_RNG.NextDouble() * 360;
-            double longitudeOfAscendingNode = m_RNG.NextDouble() * 360;
-
-            // now Create the orbit:
-            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
-        }
-
-        /// <summary>
-        /// Generates an orbit for an Asteroid or Dwarf SystemBody. The orbit will be a slight deviation of the reference orbit provided.
-        /// </summary>
-        private static void GenerateAsteroidBeltBodyOrbit(Star parent, SystemBody child, double childMass, Orbit referenceOrbit)
-        {
-            // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
-
-            // Create smeiMajorAxis:
-            double min, max, deviation;
-            deviation = referenceOrbit.SemiMajorAxis * GalaxyGen.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.SemiMajorAxis - deviation;
-            max = referenceOrbit.SemiMajorAxis + deviation;
-            double smeiMajorAxis = RNG_NextDoubleRange(min, max);  // dont need to raise to power, reference orbit already did that.
-
-            deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyGen.MaxAsteroidOrbitDeviation, 2);
-            min = referenceOrbit.Eccentricity - deviation;
-            max = referenceOrbit.Eccentricity + deviation;
-            double eccentricity = RNG_NextDoubleRange(min, max); // get random eccentricity needs better distrubution.
-
-            deviation = referenceOrbit.Inclination * GalaxyGen.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.Inclination - deviation;
-            max = referenceOrbit.Inclination + deviation;
-            double inclination = RNG_NextDoubleRange(min, max); // doesn't do much at the moment but may as well be there. Neet better Dist.
-
-            deviation = referenceOrbit.ArgumentOfPeriapsis * GalaxyGen.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.ArgumentOfPeriapsis - deviation;
-            max = referenceOrbit.ArgumentOfPeriapsis + deviation;
-            double argumentOfPeriapsis = RNG_NextDoubleRange(min, max);
-
-            deviation = referenceOrbit.LongitudeOfAscendingNode * GalaxyGen.MaxAsteroidOrbitDeviation;
-            min = referenceOrbit.LongitudeOfAscendingNode - deviation;
-            max = referenceOrbit.LongitudeOfAscendingNode + deviation;
-            double longitudeOfAscendingNode = RNG_NextDoubleRange(min, max);
-
-            // Keep the starting point of the orbit completly random.
-            double meanAnomaly = m_RNG.NextDouble() * 360;      
-            
-            // now Create the orbit:
-            child.Orbit = Orbit.FromAsteroidFormat(childMass, parent.Orbit.Mass, smeiMajorAxis, eccentricity, inclination,
-                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, GameState.Instance.CurrentDate);
-        }
-
-        /// <summary>
-        /// Generates a non-functions reference orbit to be used for generating orbits for specific asteroids and dwarf planets.
-        /// </summary>
-        private static Orbit GenerateAsteroidBeltReferenceOrbit(Star parent)
-        {
-            // create stationary orbit to hold data:
-            Orbit referenceOrbit = Orbit.FromStationary(1);
-
-            // create values:
-            referenceOrbit.SemiMajorAxis = RNG_NextDoubleRangeDistributedByPower(GalaxyGen.OrbitalDistanceByStarSpectralType[parent.SpectralType],
-                                                                         GalaxyGen.OrbitalDistanceDistributionByPlanetType[SystemBody.PlanetType.Asteroid]);
-            referenceOrbit.Eccentricity = Math.Pow(RNG_NextDoubleRange(0, 0.8), 3); // get random eccentricity needs better distrubution.
-            referenceOrbit.Inclination = m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination; // doesn't do much at the moment but may as well be there. Neet better Dist.
-            referenceOrbit.ArgumentOfPeriapsis = m_RNG.NextDouble() * 360;
-            referenceOrbit.MeanAnomaly = m_RNG.NextDouble() * 360;
-            referenceOrbit.LongitudeOfAscendingNode = m_RNG.NextDouble() * 360;
-
-            return referenceOrbit;
-        }
-
-        #endregion
-
         #region Atmosphere Generation
 
         /// <summary>
@@ -1759,18 +1711,6 @@ namespace Pulsar4X
             return false;
         }
 
-        private static bool IsPlanetOrDwarfPlanet(SystemBody.PlanetType pt)
-        {
-            if (pt == SystemBody.PlanetType.Terrestrial
-                || pt == SystemBody.PlanetType.GasDwarf
-                || pt == SystemBody.PlanetType.GasGiant
-                || pt == SystemBody.PlanetType.IceGiant
-                || pt == SystemBody.PlanetType.DwarfPlanet)
-                return true;
-
-            return false;
-        }
-
         /// <summary>
         /// Returns the next Double from m_RNG adjusted to be between the min and max range.
         /// </summary>
@@ -1822,7 +1762,7 @@ namespace Pulsar4X
         /// <summary>
         /// Randomly reverses the current sign of the value, i.e. it will randomly make the number positive or negative.
         /// </summary>
-        public static double RandomizeSign(double value)
+        private static double RandomizeSign(double value)
         {
             // 50/50 odds of reversing the sign:
             if (m_RNG.NextDouble() > 0.5)
