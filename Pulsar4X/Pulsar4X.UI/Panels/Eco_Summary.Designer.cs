@@ -378,6 +378,14 @@ namespace Pulsar4X.UI.Panels
             get { return m_oSYCBuildCostTextBox; }
         }
 
+        /// <summary>
+        /// The estimated completion date will go here.
+        /// </summary>
+        public TextBox SYCCompletionDateTextBox
+        {
+            get { return m_oSYCCompletionDateTextBox; }
+        }
+
         #endregion
 
         #region Shipyard Tasks Tab
@@ -1751,6 +1759,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSYCCompletionDateTextBox.ReadOnly = true;
             this.m_oSYCCompletionDateTextBox.Size = new System.Drawing.Size(355, 20);
             this.m_oSYCCompletionDateTextBox.TabIndex = 16;
+            this.m_oSYCCompletionDateTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oCompletionDateLabel
             // 

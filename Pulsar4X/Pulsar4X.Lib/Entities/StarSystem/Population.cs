@@ -617,7 +617,7 @@ namespace Pulsar4X.Entities
             SYI.Name = "Naval Yard #1";
             SYI.Tonnage = 1000;
             SYI.Slipways = 1;
-            SYI.CurrentActivity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+            SYI.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
             SYI.AssignedClass = null;
             SYI.ModRate = Constants.Faction.BaseModRate;
 
@@ -744,7 +744,7 @@ namespace Pulsar4X.Entities
                         SYI.Name = "Naval Yard #" + (Number++).ToString();
                         SYI.Tonnage = 1000;
                         SYI.Slipways = 1;
-                        SYI.CurrentActivity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+                        SYI.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
                         SYI.AssignedClass = null;
                         SYI.ModRate = Constants.Faction.BaseModRate;
 
@@ -772,7 +772,7 @@ namespace Pulsar4X.Entities
                         SYI.Name = "Commercial Yard #" + (Number++).ToString();
                         SYI.Tonnage = 10000;
                         SYI.Slipways = 1;
-                        SYI.CurrentActivity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+                        SYI.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
                         SYI.AssignedClass = null;
                         SYI.ModRate = Constants.Faction.BaseModRate;
 

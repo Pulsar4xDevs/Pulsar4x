@@ -81,7 +81,167 @@ namespace Pulsar4X.Entities
                 /// How should tasks be done in the event of a resource shortage. -1 = paused.
                 /// </summary>
                 public int Priority { get; set; }
+
+                /// <summary>
+                /// Constructor for task.
+                /// </summary>
+                /// <param name="Ship">Ship to Build/Refit/Repair/Scrap</param>
+                /// <param name="TargetTG">Target TG if applicable</param>
+                public ShipyardTask(ShipTN Ship, Constants.ShipyardInfo.Task TaskToPerform, TaskGroupTN TargetTG = null)
+                {
+                    CurrentShip = Ship;
+                    CurrentTask = TaskToPerform;
+                    Progress = 0.0m;
+                    Priority = 0;
+
+                    switch (TaskToPerform)
+                    {
+                        case Constants.ShipyardInfo.Task.Construction:
+                            break;
+                        case Constants.ShipyardInfo.Task.Repair:
+                            break;
+                        case Constants.ShipyardInfo.Task.Refit:
+                            break;
+                        case Constants.ShipyardInfo.Task.Scrap:
+                            break;
+                    }
+                }
+
+                /// <summary>
+                /// Suspend this task.
+                /// </summary>
+                public void Pause()
+                {
+                    Priority = -1;
+                }
+
+                /// <summary>
+                /// Increment priority by 1.
+                /// </summary>
+                public void IncrementPriority()
+                {
+                    Priority = Priority + 1;
+                }
+
+                /// <summary>
+                /// reduce the priority of this ship build. 0 is the minimum priority short of pausing construction.
+                /// </summary>
+                public void DecrementPriority()
+                {
+                    if(Priority > 0)
+                        Priority = Priority - 1;
+                }
             }
+
+            public class ShipyardActivity
+            {
+                /// <summary>
+                /// What task is this shipyard currently set to accomplish.
+                /// </summary>
+                public Constants.ShipyardInfo.ShipyardActivity Activity { get; set; }
+
+                /// <summary>
+                /// If the current activity is a retool, how far along are we?
+                /// </summary>
+                public ShipClassTN TargetOfRetool { get; set; }
+
+                /// <summary>
+                /// How far along with our current activity is this shipyard?
+                /// </summary>
+                public decimal Progress { get; set; }
+
+                /// <summary>
+                /// How much will this activity cost to perform?
+                /// </summary>
+                public decimal CostOfActivity { get; set; }
+
+                /// <summary>
+                /// The mineral cost of this activity.
+                /// </summary>
+                private decimal[] m_aiMinerialsCost;
+                public decimal[] minerialsCost
+                {
+                    get
+                    {
+                        return m_aiMinerialsCost;
+                    }
+                    set
+                    {
+                        m_aiMinerialsCost = value;
+                    }
+                }
+
+                /// <summary>
+                /// Estimate of when this complex will finish its current task.
+                /// </summary>
+                public DateTime CompletionDate { get; set; }
+
+                /// <summary>
+                /// Expand capacity until this limit is reached if the appropriate activity is set.
+                /// </summary>
+                public int CapExpansionLimit { get; set; }
+
+
+                /// <summary>
+                /// Default Constructor.
+                /// </summary>
+                public ShipyardActivity()
+                {
+                    m_aiMinerialsCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+                    Activity = Constants.ShipyardInfo.ShipyardActivity.NoActivity;
+                    Progress = 0.0m;
+                    CostOfActivity = 0.0m;
+
+                    TargetOfRetool = null;
+                    CapExpansionLimit = -1;
+                }
+
+                /// <summary>
+                /// Constructor for Cap expansion orders. These are open ended.
+                /// </summary>
+                /// <param name="NewActivity">new activity to set.</param>
+                public ShipyardActivity(Constants.ShipyardInfo.ShipyardActivity NewActivity)
+                {
+                    m_aiMinerialsCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+                    Activity = NewActivity;
+
+                    TargetOfRetool = null;
+                    CapExpansionLimit = -1;
+                }
+
+                /// <summary>
+                /// Constructor for Activity.
+                /// </summary>
+                /// <param name="NewActivity">New activity for this shipyard.</param>
+                /// <param name="Cost">Cost of the activity. This will depend on the shipyard, so can't be calculated here in all cases.</param>
+                /// <param name="minCost">Mineral cost of activity.</param>
+                /// <param name="CompDate">Estimated completion date.</param>
+                /// <param name="RetoolTarget">Shipclass to retool this shipyard to.</param>
+                /// <param name="CapLimit">Expand this shipard until CapLimit tons. if -1 then this should not be cap expansion until X tons</param>
+                public ShipyardActivity(Constants.ShipyardInfo.ShipyardActivity NewActivity, decimal Cost, decimal [] minCost, DateTime CompDate, ShipClassTN RetoolTarget=null)
+                {
+                    m_aiMinerialsCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+                    Activity = NewActivity;
+                    Progress = 0.0m;
+                    TargetOfRetool = null;
+                    CapExpansionLimit = -1;
+
+                    CostOfActivity = Cost;
+
+                    CompletionDate = CompDate;
+
+                    for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                    {
+                        m_aiMinerialsCost[mineralIterator] = minCost[mineralIterator];
+                    }
+
+                    if (RetoolTarget != null && NewActivity == Constants.ShipyardInfo.ShipyardActivity.Retool)
+                    {
+                        TargetOfRetool = RetoolTarget;
+                    }
+                }
+            }
+
             /// <summary>
             /// Name of this Shipyard. separate from the installation data type name.
             /// </summary>
@@ -103,69 +263,209 @@ namespace Pulsar4X.Entities
             public BindingList<ShipyardTask> BuildingShips { get; set; }
 
             /// <summary>
+            /// What if any modifications is this shipyard performing?
+            /// </summary>
+            public ShipyardActivity CurrentActivity { get; set; }
+
+            /// <summary>
             /// What shipclass are we set to build?
             /// </summary>
             public ShipClassTN AssignedClass { get; set; }
 
             /// <summary>
-            /// What task is this shipyard currently set to accomplish.
-            /// </summary>
-            public Constants.ShipyardInfo.ShipyardActivity CurrentActivity { get; set; }
-
-            /// <summary>
-            /// How far along with our current activity is this shipyard?
-            /// </summary>
-            public decimal Progress { get; set; }
-
-            /// <summary>
-            /// Estimate of when this complex will finish its current task.
-            /// </summary>
-            public DateTime CompletionDate { get; set; }
-
-            /// <summary>
             /// How quickly this shipyard complex can complete activities and construct ships. This may be modified by technology and governor bonuses.
             /// ModRate = Base(240) * ((Size-1000)/1000) * 40
             /// SY 560 is 1.4 * 400
+            /// For Shipyard modification: AnnualSYProd = (ModRate / 200) * 834
             /// </summary>
             public int ModRate { get; set; }
-
-            /// <summary>
-            /// Expand capacity until this limit is reached.
-            /// </summary>
-            public int CapExpansionLimit { get; set; }
 
             /// <summary>
             /// What type of shipyard is this?
             /// </summary>
             public Constants.ShipyardInfo.SYType ShipyardType { get; set; }
 
+            /// <summary>
+            /// Constructor for shipyard information
+            /// </summary>
+            /// <param name="Type"></param>
             public ShipyardInformation(Constants.ShipyardInfo.SYType Type)
             {
                 ShipyardType = Type;
                 AssignedClass = null;
+
+                BuildingShips = new BindingList<ShipyardTask>();
+                CurrentActivity = new ShipyardActivity();
             }
 
             /// <summary>
-            /// Handle the retool preparation that will need to be done for this shipyard if any.
+            /// Set the activity that this shipyard complex will undertake.
             /// </summary>
-            /// <param name="NewShipClass"></param>
-            public void RetoolTo(ShipClassTN NewShipClass)
+            /// <param name="NewActivity">New Activity to perform.</param>
+            /// <param name="RetoolTarget">Retool target if any</param>
+            /// <param name="CapLimit">Capacity Expansion Limit if any.</param>
+            public void SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity NewActivity, ShipClassTN RetoolTarget = null, int CapLimit = -1)
             {
+                decimal[] mCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+                float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+
                 /// <summary>
-                /// One free retool. Hypothetically this shipyard was built with this shipclass in mind.
+                /// These are declared here since each switch case is considered to be on the same level of scope and just putting them in the first case doesn't seem quite right.
                 /// </summary>
-                if (AssignedClass == null)
+                float YearsOfProduction = 0.0f;
+                int TimeToBuild = 0;
+                DateTime EstTime;
+                TimeSpan TS;
+
+                switch (NewActivity)
                 {
-                    AssignedClass = NewShipClass;
+                    case Constants.ShipyardInfo.ShipyardActivity.AddSlipway:
+                        decimal TotalSlipwayCost = 0.0m;
+                        for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                        {
+                            if (Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] != 0)
+                            {
+                                int Adjustment = 1;
+                                if (ShipyardType == Constants.ShipyardInfo.SYType.Naval)
+                                    Adjustment = 10;
+
+                                /// <summary>
+                                /// Formula for tonnage expansion. This also appears in the constants file for now.
+                                /// </summary>
+                                decimal value = Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] * (Tonnage / Constants.ShipyardInfo.TonnageDenominator) * Slipways * Adjustment;
+                                mCost[MineralIterator] = value;
+                                TotalSlipwayCost = TotalSlipwayCost + value;
+                            }
+                        }
+
+                        YearsOfProduction = (float)TotalSlipwayCost / CalcAnnualSYProduction();
+                        EstTime = GameState.Instance.GameDateTime;
+                        if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                        {
+                            TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                            TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                            EstTime = EstTime.Add(TS);
+                        }
+
+                        CurrentActivity = new ShipyardActivity(NewActivity, TotalSlipwayCost, mCost, EstTime);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.Add500Tons:
+                        SetExpansion(NewActivity, 500, mCost, DaysInYear);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.Add1000Tons:
+                        SetExpansion(NewActivity, 1000, mCost, DaysInYear);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.Add2000Tons:
+                        SetExpansion(NewActivity, 2000, mCost, DaysInYear);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.Add5000Tons:
+                        SetExpansion(NewActivity, 5000, mCost, DaysInYear);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.Add10000Tons:
+                        SetExpansion(NewActivity, 10000, mCost, DaysInYear);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.Retool:
+                        /// <summary>
+                        /// One free retool. Hypothetically this shipyard was built with this shipclass in mind.
+                        /// </summary>
+                        if (AssignedClass == null)
+                        {
+                            AssignedClass = RetoolTarget;
+                        }
+                        /// <summary>
+                        /// Lengthy retool process as the shipyard converts to build the new vessel.
+                        /// </summary>
+                        else
+                        {
+                            /// <summary>
+                            /// Caclulate the cost of this retool:
+                            /// </summary>
+                            decimal CostToRetool = 0.5m * RetoolTarget.BuildPointCost + ((0.25m * RetoolTarget.BuildPointCost) * Slipways);
+                            mCost[(int)Constants.Minerals.MinerialNames.Duranium] = CostToRetool / 2.0m;
+                            mCost[(int)Constants.Minerals.MinerialNames.Neutronium] = CostToRetool / 2.0m;
+
+                            /// <summary>
+                            /// How long will this retool take?
+                            /// </summary>
+                            YearsOfProduction = (float)CostToRetool / CalcAnnualSYProduction();
+                            EstTime = GameState.Instance.GameDateTime;
+                            if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                            {
+                                TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                                TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                                EstTime = EstTime.Add(TS);
+                            }
+                            CurrentActivity = new ShipyardActivity(NewActivity, CostToRetool, mCost, EstTime, RetoolTarget);
+                        }
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.CapExpansion:
+                        CurrentActivity = new ShipyardActivity(NewActivity);
+                        break;
+                    case Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX:
+                        if (CapLimit > Tonnage)
+                        {
+                            SetExpansion(NewActivity, (CapLimit - Tonnage), mCost, DaysInYear);
+                            CurrentActivity.CapExpansionLimit = CapLimit;
+                        }
+                        break;
                 }
-                /// <summary>
-                /// Lengthy retool process as the shipyard converts to build the new vessel.
-                /// </summary>
-                else
+            }
+
+            /// <summary>
+            /// Get the annual production with regards to shipyard modification for the selected shipyard.
+            /// </summary>
+            /// <param name="SYInfo">Shipyard to calculate this for</param>
+            /// <returns></returns>
+            public float CalcAnnualSYProduction()
+            {
+                float AnnualSYProd = (ModRate / Constants.ShipyardInfo.BaseModRate) * Constants.ShipyardInfo.BaseModProd;
+
+                return AnnualSYProd;
+            }
+
+            /// <summary>
+            /// Helper function for repetitive code.
+            /// </summary>
+            /// <param name="NewActivity">Activity to set</param>
+            /// <param name="tons">How many tons should the yard be expanded by?</param>
+            /// <param name="mCost">Mineral cost variable that this function will fill out.</param>
+            /// <param name="DaysInYear">this should probably be a constant somewhere.</param>
+            private void SetExpansion(Constants.ShipyardInfo.ShipyardActivity NewActivity, int tons, decimal [] mCost, float DaysInYear)
+            {
+                decimal TotalCost = 0.0m;
+                for (int MineralIterator = 0; MineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; MineralIterator++)
                 {
 
+                    if (Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] != 0)
+                    {
+                        int Adjustment = 1;
+                        if (ShipyardType == Constants.ShipyardInfo.SYType.Naval)
+                        {
+                            Adjustment = Constants.ShipyardInfo.NavalToCommercialRatio;
+                        }
+
+                        /// <summary>
+                        /// Formula for tonnage expansion. This also appears in the constants file for now.
+                        /// </summary>
+                        decimal value = Constants.ShipyardInfo.MineralCostOfExpansion[MineralIterator] * (tons / Constants.ShipyardInfo.TonnageDenominator) * Slipways * Adjustment;
+                        mCost[MineralIterator] = value;
+                        TotalCost = TotalCost + value;
+                    }
+                    else
+                        mCost[MineralIterator] = 0.0m;
                 }
 
+                float YearsOfProduction = (float)TotalCost / CalcAnnualSYProduction();
+                DateTime EstTime = GameState.Instance.GameDateTime;
+                if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                {
+                    int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                    EstTime = GameState.Instance.GameDateTime;
+                    TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                    EstTime = EstTime.Add(TS);
+                }
+
+                CurrentActivity = new ShipyardActivity(NewActivity, TotalCost, mCost, EstTime);
             }
         }
 

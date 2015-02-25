@@ -25,6 +25,8 @@ namespace Pulsar4X.UI.ViewModels
             set
             {
                 _currentFaction = value;
+                OnPropertyChanged(() => CurrentFaction);
+                OnFactionChanged();
 
                 // safty check:
                 if (_currentFaction == null)

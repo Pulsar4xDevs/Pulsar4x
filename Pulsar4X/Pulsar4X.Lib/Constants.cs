@@ -603,9 +603,9 @@ namespace Pulsar4X
             public const float SoriumToFuel = 2000.0f;
 
             /// <summary>
-            /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
+            /// YearsOfProduction here being greater than 5K means that this project will essentially never finish under current conditions. so don't bother printing an estimated completion date.
             /// </summary>
-            public const int TimerYearMax = 5475852;
+            public const int TimerYearMax = 5000;
         }
 
         public static class ShipyardInfo
@@ -679,6 +679,17 @@ namespace Pulsar4X
             /// Naval shipyard complexes cost 10x what Commercial shipyard complexes cost.
             /// </summary>
             public const int NavalToCommercialRatio = 10;
+
+
+            /// <summary>
+            /// The formula for shipyard modification is: AnnualSYProd = (ModRate / 200) * 834
+            /// </summary>
+            public const int BaseModRate = 200;
+
+            /// <summary>
+            /// How many BP does a shipyard produce to modify itself for every 200 modRate?
+            /// </summary>
+            public const int BaseModProd = 834;
         }
 
         /// <summary>

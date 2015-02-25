@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.ComponentModel;
 using System.Windows.Forms;
 using WeifenLuo.WinFormsUI.Docking;
 using Pulsar4X.UI.ViewModels;
@@ -96,6 +97,10 @@ namespace Pulsar4X.UI.Handlers
                     {
                         CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
                     }
+                    else
+                    {
+                        CurrentSYInfo = null;
+                    }
 
                     RefreshPanels();
                 }
@@ -144,7 +149,15 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private Dictionary<Guid, string> BuildLocationDisplayDict { get; set; }
 
+        /// <summary>
+        /// Currently Selected Shipyard
+        /// </summary>
         private Installation.ShipyardInformation CurrentSYInfo { get; set; }
+
+        /// <summary>
+        /// What shipclasses can the current SY retool to?
+        /// </summary>
+        private BindingList<ShipClassTN> PotentialRetoolTargets { get; set; }
 
         public Economics()
         {
@@ -253,16 +266,30 @@ namespace Pulsar4X.UI.Handlers
                 CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
             }
 
+            PotentialRetoolTargets = new BindingList<ShipClassTN>();
+            if (CurrentSYInfo != null)
+            {
+                foreach (ShipClassTN ShipClass in CurrentFaction.ShipDesigns)
+                {
+                    if (ShipClass.SizeTons <= CurrentSYInfo.Tonnage)
+                    {
+                        PotentialRetoolTargets.Add(ShipClass);
+                    }
+                }
+            }
+
             m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndexChanged += new EventHandler(SYCTaskTypeComboBox_SelectedIndexChanged);
             m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndexChanged += new EventHandler(SYTaskTypeComboBox_SelectedIndexChanged);
             m_oSummaryPanel.SetActivityButton.Click += new EventHandler(SetActivityButton_Click);
             m_oSummaryPanel.ShipyardDataGrid.SelectionChanged += new EventHandler(ShipyardDataGrid_SelectionChanged);
+            m_oSummaryPanel.ExpandCapUntilXTextBox.TextChanged += new EventHandler(ExpandCapUntilXTextBox_TextChanged);
+            m_oSummaryPanel.NewShipClassComboBox.SelectedIndexChanged += new EventHandler(NewShipClassComboBox_SelectedIndexChanged);
 
             m_oSummaryPanel.ShipyardDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ShipyardDataGrid.ColumnHeadersHeight = 34;
             m_oSummaryPanel.ShipyardTaskDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ShipyardTaskDataGrid.ColumnHeadersHeight = 34;
-            Eco_ShipyardTabHandler.BuildShipyardTab(m_oSummaryPanel,m_oCurrnetFaction,m_oCurrnetPopulation);
+            Eco_ShipyardTabHandler.BuildShipyardTab(m_oSummaryPanel,m_oCurrnetFaction,m_oCurrnetPopulation,PotentialRetoolTargets);
             #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
@@ -326,6 +353,21 @@ namespace Pulsar4X.UI.Handlers
                 if (TreeViewDictionary.ContainsKey(m_oSummaryPanel.PopulationTreeView.SelectedNode.Name) == true)
                 {
                     m_oCurrnetPopulation = TreeViewDictionary[m_oSummaryPanel.PopulationTreeView.SelectedNode.Name];
+
+                    if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number >= 1.0f)
+                    {
+                        CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[0];
+                    }
+                    else if (m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number >= 1.0f)
+                    {
+                        CurrentSYInfo = m_oCurrnetPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[0];
+                    }
+                    else
+                    {
+                        CurrentSYInfo = null;
+                    }
+
+                    RefreshPanels();
                 }
             }
         }
@@ -361,7 +403,7 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.ExpandCapUntilXTextBox.Visible = false;
                 }
 
-                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+                Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
             }
         }
 
@@ -422,14 +464,15 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex != -1)
             {
-                if (CurrentSYInfo.CurrentActivity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                if (CurrentSYInfo.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                 {
                     if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.Retool)
                     {
-                        if (CurrentFaction.ShipDesigns.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
+                        if (PotentialRetoolTargets.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
                         {
-                            ShipClassTN RetoolTarget = CurrentFaction.ShipDesigns[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
-                            CurrentSYInfo.RetoolTo(RetoolTarget);
+                                        
+                            ShipClassTN RetoolTarget = PotentialRetoolTargets[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
+                            CurrentSYInfo.SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity.Retool, RetoolTarget);
                             
                         }
                     }
@@ -439,13 +482,12 @@ namespace Pulsar4X.UI.Handlers
                         bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
                         if (r == true && NewCapLimit > CurrentSYInfo.Tonnage)
                         {
-                            CurrentSYInfo.CapExpansionLimit = NewCapLimit;
-                            CurrentSYInfo.CurrentActivity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
+                            CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex, null, NewCapLimit);
                         }
                     }
                     else
                     {
-                        CurrentSYInfo.CurrentActivity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
+                        CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex);
                     }
 
                     
@@ -455,7 +497,7 @@ namespace Pulsar4X.UI.Handlers
                     //pop up prompt about overwriting current activity
                 }
 
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
             }
         }
 
@@ -471,7 +513,11 @@ namespace Pulsar4X.UI.Handlers
                 if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
                 {
                     int index = m_oSummaryPanel.ShipyardDataGrid.CurrentCell.RowIndex;
-                    
+
+                    if (index > (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number) +
+                               (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number))
+                        return;
+
 
                     if(index < (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number))
                     {
@@ -483,9 +529,42 @@ namespace Pulsar4X.UI.Handlers
                         CurrentSYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[index];
                     }
 
-                    Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+                    PotentialRetoolTargets.Clear();
+                    foreach (ShipClassTN ShipClass in CurrentFaction.ShipDesigns)
+                    {
+                        if (ShipClass.SizeTons <= CurrentSYInfo.Tonnage)
+                        {
+                            PotentialRetoolTargets.Add(ShipClass);
+                        }
+                    }
+
+                    Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
                 }
             }
+        }
+
+        /// <summary>
+        /// Make sure the cost of capacity expansion can be updated.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ExpandCapUntilXTextBox_TextChanged(object sender, EventArgs e)
+        {
+            Constants.ShipyardInfo.ShipyardActivity Activity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
+            if (Activity == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+            {
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+            }
+        }
+
+        /// <summary>
+        /// Cost to retool needs to change to reflect the newly selected shipclass.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewShipClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
         }
         #endregion
 
@@ -906,6 +985,8 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_oCurrnetFaction != null)
             {
+                m_oSummaryPanel.ShipyardDataGrid.ClearSelection();
+
                 /// <summary>
                 /// reset the construction type combo box selection to 0.
                 /// </summary>
@@ -936,7 +1017,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Shipyard Tab:
                 /// </summary>
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo);
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo, PotentialRetoolTargets);
             }
         }
 
@@ -977,7 +1058,7 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Shipyard Tab:
                 /// </summary>
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo);
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo, PotentialRetoolTargets);
             }
         }
 
