@@ -31,11 +31,16 @@ namespace Pulsar4X.UI.Dialogs
             GenProgressBar.Minimum = 0;
             GenProgressBar.Maximum = iNoOfSystemsToGenerate;
 
+            GameState.Instance.StarSystems.RaiseListChangedEvents = false;
+
             for (int i = 0; i < iNoOfSystemsToGenerate; ++i)
             {
                 SystemGen.CreateSystem(GalaxyNameTextBox.Text + i.ToString());
                 GenProgressBar.Value = i;
             }
+
+            GameState.Instance.StarSystems.RaiseListChangedEvents = true;
+            GameState.Instance.StarSystems.ResetBindings();
 
             m_oSW.Stop();
             Timelabel.Text = m_oSW.Elapsed.Hours.ToString() + ":" + m_oSW.Elapsed.Minutes.ToString() + ":" + m_oSW.Elapsed.Seconds.ToString() + ":" + m_oSW.Elapsed.Milliseconds.ToString();
