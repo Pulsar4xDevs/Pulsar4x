@@ -147,9 +147,9 @@ namespace Pulsar4X.Entities.Components
         /// Constructor for series.
         /// </summary>
         public OrdnanceSeriesTN(String Title)
+            : base()
         {
             Name = Title;
-            Id = Guid.NewGuid();
             MissilesInSeries = new BindingList<OrdnanceDefTN>();
         }
 
@@ -880,9 +880,9 @@ namespace Pulsar4X.Entities.Components
         /// <param name="mfCtrl">MFC directing this missile.</param>
         /// <param name="definition">definition of the missile.</param>
         public OrdnanceTN(MissileFireControlTN mfCtrl, OrdnanceDefTN definition, ShipTN ShipFiredFrom)
+            : base()
         {
             Name = definition.Name;
-            Id = Guid.NewGuid();
 
             MFC = mfCtrl;
 
@@ -1324,6 +1324,7 @@ namespace Pulsar4X.Entities.Components
 #warning Population and body targetting may need to be looked at, specifically due to how body positions are relative.
             switch (Missiles[0].target.targetType)
             {
+                    // <? todo: Fix the whole "Target" thing.
                 case StarSystemEntityType.TaskGroup:
                     dX = (float)(Contact.Position.X - Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.X);
                     dY = (float)(Contact.Position.Y - Missiles[0].target.ship.ShipsTaskGroup.Contact.Position.Y);
@@ -1332,15 +1333,13 @@ namespace Pulsar4X.Entities.Components
                     dX = (float)(Contact.Position.X - Missiles[0].target.missileGroup.contact.Position.X);
                     dY = (float)(Contact.Position.Y - Missiles[0].target.missileGroup.contact.Position.Y);
                     break;
-
                 case StarSystemEntityType.Population:
                     dX = (float)(Contact.Position.X - Missiles[0].target.pop.Contact.Position.X);
                     dY = (float)(Contact.Position.Y - Missiles[0].target.pop.Contact.Position.Y);
                     break;
                 case StarSystemEntityType.Body:
-#warning Primary is probably not needed anymore.
-                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.X /*+ Missiles[0].target.body.Primary.Position.X*/);
-                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.Y /*+ Missiles[0].target.body.Primary.Position.Y*/);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.X);
+                    dX = (float)(Contact.Position.X - Missiles[0].target.body.Position.Y);
                     break;
                 case StarSystemEntityType.Waypoint:
                     dX = (float)(Contact.Position.X - Missiles[0].target.wp.Position.X);

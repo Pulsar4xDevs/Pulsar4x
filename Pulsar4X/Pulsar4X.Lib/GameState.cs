@@ -82,8 +82,6 @@ namespace Pulsar4X
 
         private GameState()
         {
-            m_oStarSystemFactory = new Stargen.StarSystemFactory();
-
             CurrentYear = 2025;
             m_currentSecond = 0;
 
@@ -93,15 +91,6 @@ namespace Pulsar4X
         }
 
         #endregion
-
-        private Stargen.StarSystemFactory m_oStarSystemFactory;
-        public Stargen.StarSystemFactory StarSystemFactory
-        {
-            get
-            {
-                return m_oStarSystemFactory;
-            }
-        }
 
         public void Load()
         {
@@ -151,13 +140,28 @@ namespace Pulsar4X
                     CurrentYear++;
                 }
                 m_currentSecond = value;
+
+                CurrentDate = new DateTime(CurrentYear, 1, 1);
+                CurrentDate += TimeSpan.FromSeconds(value);
             }
         }
 
         /// <summary>
         /// Current Year.
         /// </summary>
-        public int CurrentYear { get; set; }
+        private int m_currentYear;
+        public int CurrentYear 
+        {
+            get { return m_currentYear; }
+            set 
+            { 
+                m_currentYear = value;
+                CurrentDate = new DateTime(value, 1, 1);
+                CurrentDate += TimeSpan.FromSeconds(CurrentSecond);
+            }
+        }
+
+        public DateTime CurrentDate { get; set; }
 
         /// <summary>
         /// deltaTime in seconds of the last update to the current update.
@@ -230,15 +234,15 @@ namespace Pulsar4X
             set { _stars = value; }
         }
 
-        private BindingList<Planet> _planets;
-        public BindingList<Planet> Planets
+        private BindingList<SystemBody> _planets;
+        public BindingList<SystemBody> Planets
         {
             get
             {
                 if (_planets == null)
                 {
                     // Load from DB here
-                    _planets = new BindingList<Planet>();
+                    _planets = new BindingList<SystemBody>();
                 }
                 return _planets;
             }

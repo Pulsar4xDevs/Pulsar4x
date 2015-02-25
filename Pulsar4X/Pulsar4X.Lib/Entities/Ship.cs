@@ -3245,4 +3245,75 @@ namespace Pulsar4X.Entities
     /// <summary>
     /// End of ShipTN class
     /// </summary>
+    /// 
+
+    /// <summary>
+    /// This is intended to be part of a larger dictionary that separates these by system. Component and Ship data is stored for every Point defense enabled FC here.
+    /// moved from Faction.cs, for want of a better place to put it. 
+    /// </summary>
+    public class PointDefenseList
+    {
+        /// <summary>
+        /// The component and which ship it is on.
+        /// </summary>
+        public Dictionary<ComponentTN, ShipTN> PointDefenseFC { get; set; }
+
+        /// <summary>
+        /// FCType of the base component, again, no pointer exists to the component def so this must be stored.
+        /// as always, false = MFC, true = BFC.
+        /// </summary>
+        public Dictionary<ComponentTN, bool> PointDefenseType { get; set; }
+
+
+        /// <summary>
+        /// Constructor for PDList.
+        /// </summary>
+        public PointDefenseList()
+        {
+            PointDefenseFC = new Dictionary<ComponentTN, ShipTN>();
+            PointDefenseType = new Dictionary<ComponentTN, bool>();
+        }
+
+
+#warning When jump transits are fully implemented, PointDefenseFC listings will have to be moved as appropriate, be sure to handle that.
+
+        /// <summary>
+        /// Handles adding a new FC to the list.
+        /// </summary>
+        /// <param name="Comp">Fire control component to add</param>
+        /// <param name="Ship">Ship the FC is on.</param>
+        /// <param name="Type">Type of FC.</param>
+        public void AddComponent(ComponentTN Comp, ShipTN Ship, bool Type)
+        {
+            if (PointDefenseFC.ContainsKey(Comp) == false)
+            {
+                PointDefenseFC.Add(Comp, Ship);
+            }
+
+            if (PointDefenseType.ContainsKey(Comp) == false)
+            {
+                PointDefenseType.Add(Comp, Type);
+            }
+        }
+
+        /// <summary>
+        /// Handles removing an existing FC from the list.
+        /// </summary>
+        /// <param name="Comp">Fire control component to remove</param>
+        /// <param name="Ship">Ship the FC is on.</param>
+        /// <param name="Type">Type of FC.</param>
+        public void RemoveComponent(ComponentTN Comp)
+        {
+            if (PointDefenseFC.ContainsKey(Comp) == true)
+            {
+                PointDefenseFC.Remove(Comp);
+            }
+
+            if (PointDefenseType.ContainsKey(Comp) == true)
+            {
+                PointDefenseType.Remove(Comp);
+            }
+        }
+    }
+
 }

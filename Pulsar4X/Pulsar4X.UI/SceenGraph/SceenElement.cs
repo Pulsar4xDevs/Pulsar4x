@@ -34,7 +34,7 @@ namespace Pulsar4X.UI.SceenGraph
 
         /// <summary>
         /// The Controlling Primitive is used to to work out things like if this boject has been selected, 
-        /// e.g. For a Planet the Planet icon in the Controlling Primitive, everthing else is just UI chrome that hangs off mit.
+        /// e.g. For a SystemBody the SystemBody icon in the Controlling Primitive, everthing else is just UI chrome that hangs off mit.
         /// </summary>
         protected GLPrimitive m_oPrimaryPrimitive;
 

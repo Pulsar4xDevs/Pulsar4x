@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-using Pulsar4X.Stargen;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -31,12 +30,11 @@ namespace Pulsar4X.UI
 #endif
 
             // gen star system:
-            Entities.StarSystem otest = GameState.Instance.StarSystemFactory.Create("Test");
-            GameState.Instance.StarSystemCurrentIndex++;
-            GameState.Instance.StarSystemFactory.Create("Foo");
-            GameState.Instance.StarSystemCurrentIndex++;
-            GameState.Instance.StarSystemFactory.Create("Bar");
-            GameState.Instance.StarSystemCurrentIndex++;
+            Entities.StarSystem sol = SystemGen.CreateSol();
+            SystemGen.CreateStressTest();
+            SystemGen.CreateSystem("Test");
+            SystemGen.CreateSystem("Foo");
+            SystemGen.CreateSystem("Bar");
 
 
 
@@ -51,7 +49,7 @@ namespace Pulsar4X.UI
             /// <summary>
             /// This following section should probably be moved to the Faction constructor at some point.
             /// </summary>
-            oNewFaction.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
+            oNewFaction.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction));
             oNewFaction.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction.Populations[0].ConventionalStart();
             /// <summary>
@@ -61,18 +59,17 @@ namespace Pulsar4X.UI
             {
                 oNewFaction.AddNewContactList(CurSystem);
             }
-            Entities.Planet P1 = new Entities.Planet(otest.Stars[0], otest.Stars[0]);
+            Entities.SystemBody P1 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< @tdo WTF???
             P1.Position.X = 10.0;
             P1.Position.Y = 10.0;
 
             oNewFaction.Capitol = oNewFaction.Populations[0].Planet;
-            oNewFaction.Capitol.GeoSurveyList.Add(oNewFaction, true);
-            oNewFaction.AddNewTaskGroup("Combat Taskgroup  HR", P1, otest);
+            oNewFaction.AddNewTaskGroup("Combat Taskgroup  HR", P1, sol);
             oNewFaction.FactionColor = System.Drawing.Color.Blue;
 
             Entities.Faction oNewFaction2 = new Entities.Faction(1);
             oNewFaction2.Name = "Terran Federation";
-            oNewFaction2.Populations.Add(new Entities.Population(otest.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction2));
+            oNewFaction2.Populations.Add(new Entities.Population(sol.Stars.FirstOrDefault().Planets.FirstOrDefault(), oNewFaction2));
             oNewFaction2.Populations[0].Planet.HomeworldMineralGeneration();
             oNewFaction2.Populations[0].ConventionalStart();
 
@@ -84,14 +81,13 @@ namespace Pulsar4X.UI
                 oNewFaction2.AddNewContactList(CurSystem);
             }
 
-            Entities.Planet P2 = new Entities.Planet(otest.Stars[0], otest.Stars[0]);
+            Entities.SystemBody P2 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< wtf???
             P2.Position.X = -10.0;
             P2.Position.Y = -10.0;
 
 
             oNewFaction2.Capitol = oNewFaction2.Populations[0].Planet;
-            oNewFaction2.Capitol.GeoSurveyList.Add(oNewFaction2, true);
-            oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, otest);
+            oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, sol);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 
             oNewFaction.AddNewShipDesign("Sword");

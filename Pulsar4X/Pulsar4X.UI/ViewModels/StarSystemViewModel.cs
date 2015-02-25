@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Pulsar4X.Stargen;
 using Pulsar4X.Entities;
 using Pulsar4X.UI.Helpers;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.Linq.Expressions;
+using Pulsar4X.Helpers;
 
 namespace Pulsar4X.UI.ViewModels
 {
@@ -28,11 +28,14 @@ namespace Pulsar4X.UI.ViewModels
                     return;
                 }
 
-                //NotifyPropertyChanged("CurrentStarSystem");
                 OnPropertyChanged(() => CurrentStarSystem);
-                CurrentStarSystemAge = _currentstarsystem.Stars[0].Age.ToString();
+
+                if (_currentstarsystem.Stars != null && _currentstarsystem.Stars.Count > 0)
+                    CurrentStarSystemAge = _currentstarsystem.Stars[0].Age.ToString();
+                else
+                    CurrentStarSystemAge = "N/A";
                 Seed = _currentstarsystem.Seed.ToString();
-                Stars = new BindingList<Star>(_currentstarsystem.Stars);
+                Stars = new SortableBindingList<Star>(_currentstarsystem.Stars);
                 StarsSource.DataSource = Stars;
                 OnPropertyChanged(() => Stars);
             }
@@ -68,8 +71,8 @@ namespace Pulsar4X.UI.ViewModels
             }
         }
 
-        private BindingList<Star> _stars;
-        public BindingList<Star> Stars
+        private SortableBindingList<Star> _stars;
+        public SortableBindingList<Star> Stars
         {
             get { return _stars; }
             set
@@ -123,21 +126,20 @@ namespace Pulsar4X.UI.ViewModels
                 _currentstar = value;
                 //NotifyPropertyChanged("CurrentStar");
                 OnPropertyChanged(() => CurrentStar);
-                var planetslist = new BindingList<Planet>();
-                foreach (Planet planet in CurrentStar.Planets)
+                var planetslist = new SortableBindingList<SystemBody>();
+                foreach (SystemBody planet in CurrentStar.Planets)
                 {
                     planetslist.Add(planet);
-                    foreach (Planet moon in planet.Moons)
+                    foreach (SystemBody moon in planet.Moons)
                     {
                         planetslist.Add(moon);
                     }
                 }
                 PlanetSource.DataSource = planetslist;
                 OnPropertyChanged(() => PlanetSource);
-
             }
         }
-        public Planet CurrentPlanet { get; set; }
+        public SystemBody CurrentPlanet { get; set; }
 
         public bool isSM { get; set; }
         public bool isNotSM { get { return !isSM; } set { isSM = !value; } }

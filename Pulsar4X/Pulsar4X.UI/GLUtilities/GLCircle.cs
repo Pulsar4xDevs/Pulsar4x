@@ -11,7 +11,6 @@ using log4net.Config;
 using log4net;
 #endif
 using Pulsar4X.Entities;
-using Pulsar4X.Lib;
 
 namespace Pulsar4X.UI.GLUtilities
 {
@@ -132,26 +131,24 @@ namespace Pulsar4X.UI.GLUtilities
             // Save some stuff to member vars:
             //double dKMperAUdevby10 = (Pulsar4X.Constants.Units.KM_PER_AU / 10); // we scale everthing down by 10 to avoid float buffer overflows.
             m_v3Position = a_v3Pos;
-            m_v2Size.X = (float)(a_oOrbitEntity.SemiMajorAxis);
+            m_v2Size.X = 1;
 
             // set verts to 360, looks good at any zoom.
             int iNumOfVerts = 360;
-
-            // create some working vars:
-            double dAngle;
-            double dX, dY;
-
+            
             //create our Vertex and index arrays:
             m_aoVerticies = new GLVertex[iNumOfVerts];
             m_auiIndicies = new ushort[iNumOfVerts + 1]; // make this one longer so it can loop back around to the begining!!
 
             for (int i = 0; i < iNumOfVerts; ++i)
             {
-                dAngle = i * (MathHelper.TwoPi / iNumOfVerts);
-                OrbitTable.Instance.FindCordsFromAngle(a_oOrbitEntity, dAngle, out dX, out dY);
+                double dAngle = i * (MathHelper.TwoPi / iNumOfVerts);
 
-                m_aoVerticies[i].m_v4Position.X = (float)(dX / a_oOrbitEntity.SemiMajorAxis);
-                m_aoVerticies[i].m_v4Position.Y = (float)(dY / a_oOrbitEntity.SemiMajorAxis);
+                double x, y;
+                a_oOrbitEntity.Orbit.GetPosition(dAngle, out x, out y);
+
+                m_aoVerticies[i].m_v4Position.X = (float)x;
+                m_aoVerticies[i].m_v4Position.Y = (float)y;
                 m_aoVerticies[i].m_v4Position.Z = 0;
                 m_aoVerticies[i].SetColor(a_oColor);
                 m_auiIndicies[i] = (ushort)i;
@@ -161,7 +158,7 @@ namespace Pulsar4X.UI.GLUtilities
             m_auiIndicies[iNumOfVerts] = 0;
 
             // Setup Matrix:
-            m_m4ModelMatrix = Matrix4.CreateScale(m_v2Size.X) * Matrix4.CreateTranslation(a_v3Pos);
+            m_m4ModelMatrix = Matrix4.Identity * Matrix4.CreateTranslation(a_v3Pos);
 
             // Set our shader program:
             m_oEffect = a_oEffect;

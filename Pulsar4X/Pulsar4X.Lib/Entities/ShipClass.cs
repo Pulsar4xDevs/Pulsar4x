@@ -928,6 +928,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="Title">Class name</param>
         public ShipClassTN(string Title, Faction ShipClassFaction)
+            : base()
         {
             Name = Title;
             Faction = ShipClassFaction;

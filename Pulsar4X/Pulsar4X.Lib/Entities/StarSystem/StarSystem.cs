@@ -60,18 +60,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Random generation seed used to generate this system.
         /// </summary>
-        public int Seed { get; set; }
+        private int m_seed;
+        public int Seed { get { return m_seed; } }
 
-        private bool contactsChanged;
-
-        public StarSystem()
-            : this(string.Empty)
+        public StarSystem(string name, int seed)
+            : base()
         {
-        }
-
-        public StarSystem(string name)
-        {
-            Id = Guid.NewGuid();
             Name = name;
             Stars = new BindingList<Star>();
 
@@ -84,12 +78,16 @@ namespace Pulsar4X.Entities
             Populations = new BindingList<Population>();
             OrdnanceGroups = new BindingList<OrdnanceGroupTN>();
 
+            m_seed = seed;
+
             // Subscribe to change events.
             SystemContactList.ListChanged += SystemContactList_ListChanged;
 
-            TaskGroups.ListChanged += ContactsChanged;
-            Populations.ListChanged += ContactsChanged;
-            OrdnanceGroups.ListChanged += ContactsChanged;
+            // Create the faciton contact information for each faction.
+            foreach (Faction f in GameState.Instance.Factions)
+            {
+                f.AddNewContactList(this);
+            }
         }
 
         /// <summary>
@@ -113,20 +111,6 @@ namespace Pulsar4X.Entities
                 Waypoints.Clear();
             else
                 Waypoints.Remove(Remove);
-        }
-
-        /// <summary>
-        /// Adds a new jump point to the system. Since JPs can't be destroyed there is no corresponding remove function. Perhaps there should be.
-        /// </summary>
-        /// <param name="parentStar">Star to attach this JP to.</param>
-        /// <param name="Position.XAU">X offset from Star Position</param>
-        /// <param name="Position.YAU">Y offset from Star Position.</param>
-        /// <returns>Newly Created Jumpoint</returns>
-        public JumpPoint CreateJumpPoint(Star parentStar, double XOffsetAU, double YOffsetAU)
-        {
-            JumpPoint NewJP = new JumpPoint(this, parentStar, XOffsetAU, YOffsetAU);
-            JumpPoints.Add(NewJP);
-            return NewJP;
         }
 
         private void SystemContactList_ListChanged(object sender, ListChangedEventArgs e)
@@ -176,17 +160,6 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
-        /// Event raised when TaskGroups, Populations, or OrdnanceGroups are
-        /// added/removed from the system.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ContactsChanged(object sender, ListChangedEventArgs e)
-        {
-            contactsChanged = true;
-        }
-
-        /// <summary>
         /// Updates this StarSystem for the new time.
         /// </summary>
         /// <param name="deltaSeconds">Change in seconds since last update.</param>
@@ -195,21 +168,12 @@ namespace Pulsar4X.Entities
             // Update the position of all planets. This should probably be in something like the construction tick in Aurora.
             foreach (Star CurrentStar in Stars)
             {
-                // The system primary will cause a divide by zero error currently as it has no orbit.
-                if (CurrentStar != Stars[0])
-                {
-                    CurrentStar.UpdatePosition(deltaSeconds);
+                CurrentStar.UpdatePosition(deltaSeconds);
 
-                    // Since the star moved, update the JumpPoint position.
-                    foreach (JumpPoint CurrentJumpPoint in JumpPoints)
-                    {
-                        CurrentJumpPoint.UpdatePosition();
-                    }
-                }
-
-                foreach (Planet CurrentPlanet in CurrentStar.Planets)
+                // Since the star moved, update the JumpPoint position.
+                foreach (JumpPoint CurrentJumpPoint in JumpPoints)
                 {
-                    CurrentPlanet.UpdatePosition(deltaSeconds);
+                    CurrentJumpPoint.UpdatePosition();
                 }
             }
         }

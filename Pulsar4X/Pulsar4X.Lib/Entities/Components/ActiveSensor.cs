@@ -521,7 +521,7 @@ namespace Pulsar4X.Entities.Components
         /// Target assignment of planets.
         /// </summary>
         /// <param name="PlanetTarget">planet</param>
-        public void assignTarget(Planet PlanetTarget)
+        public void assignTarget(SystemBody PlanetTarget)
         {
             m_oTarget = new TargetTN(PlanetTarget);
         }

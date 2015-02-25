@@ -11,13 +11,12 @@ using Pulsar4X.Entities;
 namespace Pulsar4X.UI.SceenGraph
 {
     /// <summary>
-    /// A Planet node/element in a sceen graph.
+    /// A SystemBody node/element in a sceen graph.
     /// </summary>
     class PlanetElement : SceenElement
     {
 
-        private Planet m_oPlanet;
-
+        private SystemBody m_oPlanet;
 
         public override GameEntity SceenEntity
         {
@@ -27,7 +26,7 @@ namespace Pulsar4X.UI.SceenGraph
             }
             set
             {
-                m_oPlanet = value as Planet;
+                m_oPlanet = value as SystemBody;
             }
         }
 
@@ -42,7 +41,7 @@ namespace Pulsar4X.UI.SceenGraph
         {
         }
 
-        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, Planet a_oPlanet, System.Drawing.Color a_oColor)
+        public PlanetElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, SystemBody a_oPlanet, System.Drawing.Color a_oColor)
             : base(a_oPlanet)
         {
             m_oOrbitCircle = new CircleElement(a_oDefaultEffect, a_oPosition, a_oPlanet, a_oColor);
@@ -57,10 +56,9 @@ namespace Pulsar4X.UI.SceenGraph
                 oPrimitive.Render();
             }
 
-            /// <summary>
-            /// Putting this as a child means that it runs afoul of the "don't render children" check.
-            /// </summary>
-            m_oOrbitCircle.Render();
+            // Putting this as a child means that it runs afoul of the "don't render children" check.
+            if (m_oPlanet.Type != SystemBody.PlanetType.Asteroid && m_oPlanet.Type != SystemBody.PlanetType.Comet)   // dont render for asteriods or comets.
+                m_oOrbitCircle.Render();
 
             if (RenderChildren == true)
             {
@@ -70,7 +68,8 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
-            if (m_oLable != null)
+            ///< @todo Make drawing of Asteriod/comet text and orbit circles a setting the player can toggle). or base it on zoom.
+            if (m_oLable != null && m_oPlanet.Type != SystemBody.PlanetType.Asteroid && m_oPlanet.Type != SystemBody.PlanetType.Comet)
             {
                 m_oLable.Render();
             }

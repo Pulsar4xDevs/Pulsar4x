@@ -29,6 +29,7 @@ namespace Pulsar4X.Entities
 
         public GameEntity()
         {
+            Id = Guid.NewGuid();
         }
 
         public override string ToString()

@@ -77,8 +77,8 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// SSE might be a planet, if so it is here.
         /// </summary>
-        private Planet Body { get; set; }
-        public Planet body
+        private SystemBody Body { get; set; }
+        public SystemBody body
         {
             get { return Body; }
         }
@@ -187,8 +187,8 @@ namespace Pulsar4X.Entities
         /// <param name="SecondaryOrder">Any secondary order specification such as installation type.</param>
         /// <param name="TertiaryOrder"> Any Tertiary order such as limits.</param>
         /// <param name="Delay">Delay in seconds before performing this order.</param>
-        /// <param name="PlanetOrder">The Planet in question.</param>
-        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Planet PlanetOrder)
+        /// <param name="PlanetOrder">The SystemBody in question.</param>
+        public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, SystemBody PlanetOrder)
         {
             TypeOf = TypeOrder;
             Target = PlanetOrder;
