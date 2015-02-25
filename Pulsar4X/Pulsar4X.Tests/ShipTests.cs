@@ -21,7 +21,7 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -124,7 +124,7 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -161,7 +161,7 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -205,7 +205,7 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -315,7 +315,7 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
@@ -383,7 +383,7 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = SystemGen.CreateSol();
-            SystemBody planet = new SystemBody(System.Stars[0]);
+            SystemBody planet = new SystemBody(System.Stars[0], SystemBody.PlanetType.Terrestrial);;
             System.Stars[0].Planets.Add(planet);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
@@ -470,7 +470,7 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = SystemGen.CreateSol();
-            SystemBody planet = new SystemBody(System.Stars[0]);
+            SystemBody planet = new SystemBody(System.Stars[0], SystemBody.PlanetType.Terrestrial);;
             System.Stars[0].Planets.Add(planet);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
@@ -518,7 +518,7 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0);
             StarSystem System = SystemGen.CreateSol();
-            SystemBody planet = new SystemBody(System.Stars[0]);
+            SystemBody planet = new SystemBody(System.Stars[0], SystemBody.PlanetType.Terrestrial);;
             System.Stars[0].Planets.Add(planet);
 
             TaskGroupTN TaskGroup1 = new TaskGroupTN("Taskforce 001", FID, planet, System);
@@ -596,7 +596,7 @@ namespace Pulsar4X.Tests
 
             Faction FID = new Faction(0); 
             StarSystem System = SystemGen.CreateSol();
-            SystemBody planet = new SystemBody(System.Stars[0]);
+            SystemBody planet = new SystemBody(System.Stars[0], SystemBody.PlanetType.Terrestrial);;
             System.Stars[0].Planets.Add(planet);
 
 
@@ -646,12 +646,12 @@ namespace Pulsar4X.Tests
             Star S2 = new Star();
             System2.Stars.Add(S2);
 
-            SystemBody Start1 = new SystemBody(System1.Stars[0]);
+            SystemBody Start1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             Start1.Position.X = 1.0;
             Start1.Position.Y = 1.0;
 
 
-            SystemBody Start2 = new SystemBody(System1.Stars[0]);
+            SystemBody Start2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             Start2.Position.X = 1.0005;
             Start2.Position.Y = 1.0005;
 
@@ -755,7 +755,7 @@ namespace Pulsar4X.Tests
             Faction PlayerFaction1 = new Faction(0);
 
             StarSystem System1 = SystemGen.CreateSol();
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
 
             System1.Stars[0].Planets[0].Position.X = 1.0;
@@ -805,8 +805,8 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -874,8 +874,8 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -935,9 +935,9 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
-            SystemBody pl3 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl3 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
             System1.Stars[0].Planets.Add(pl3);
@@ -1045,9 +1045,9 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
-            SystemBody pl3 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl3 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
             System1.Stars[0].Planets.Add(pl3);
@@ -1162,8 +1162,8 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1234,8 +1234,8 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1364,7 +1364,7 @@ namespace Pulsar4X.Tests
                     float wx = ((float)randx / 50000.0f) - 1.0f;
                     float wy = ((float)randy / 50000.0f) - 1.0f;
 
-                    SystemBody Start = new SystemBody(Sol.Stars[0]);
+                    SystemBody Start = new SystemBody(Sol.Stars[0], SystemBody.PlanetType.Terrestrial);
                     Start.Position.X = wx;
                     Start.Position.Y = wy;
 
@@ -1745,8 +1745,8 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1830,8 +1830,8 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
 
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1945,8 +1945,8 @@ namespace Pulsar4X.Tests
             /// <summary>
             /// Planets and populations are needed for house keeping.
             /// </summary>
-            SystemBody pl1 = new SystemBody(System1.Stars[0]);
-            SystemBody pl2 = new SystemBody(System1.Stars[0]);
+            SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
