@@ -146,12 +146,12 @@ namespace Pulsar4X
         {
             StarSystem Sol= new StarSystem("StressTest", -1);
 
-            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5778, 1, SpectralType.G, Sol);
+            Star Sun = new Star("Sol", Constants.Units.SolarRadiusInAu, 5778, 1, SpectralType.G, Sol);
             Sun.Age = 4.6E9;
-            Sun.Orbit = Orbit.FromStationary(Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+            Sun.Orbit = Orbit.FromStationary(Constants.Units.SolarMassInKG);
             Sun.Class = "G2";
 
-            Sun.Radius = 696000 / Constants.Units.KM_PER_AU;
+            Sun.Radius = 696000 / Constants.Units.KmPerAu;
 
             Sol.Stars.Add(Sun);
 
@@ -192,18 +192,18 @@ namespace Pulsar4X
             // Used for JumpPoint generation.
             m_RNG = new Random(Sol.Seed);
 
-            Star Sun = new Star("Sol", Constants.Units.SOLAR_RADIUS_IN_AU, 5505, 1, SpectralType.G, Sol);
+            Star Sun = new Star("Sol", Constants.Units.SolarRadiusInAu, 5505, 1, SpectralType.G, Sol);
             Sun.Age = 4.6E9;
-            Sun.Orbit = Orbit.FromStationary(Constants.Units.SOLAR_MASS_IN_KILOGRAMS);
+            Sun.Orbit = Orbit.FromStationary(Constants.Units.SolarMassInKG);
             Sun.Class = "G2";
-            Sun.Radius = 696000 / Constants.Units.KM_PER_AU;
+            Sun.Radius = 696000 / Constants.Units.KmPerAu;
             SetHabitableZone(Sun);
             Sol.Stars.Add(Sun);
 
             SystemBody Mercury = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
             Mercury.Name = "Mercury";
             Mercury.Orbit = Orbit.FromMajorPlanetFormat(3.3022E23, Sun.Orbit.Mass, 0.387098, 0.205630, 0, 48.33167, 29.124, 252.25084, GalaxyGen.J2000);
-            Mercury.Radius = 2439.7 / Constants.Units.KM_PER_AU;
+            Mercury.Radius = 2439.7 / Constants.Units.KmPerAu;
             double x, y;
             Mercury.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Mercury.Position.System = Sol;
@@ -214,7 +214,7 @@ namespace Pulsar4X
             SystemBody Venus = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
             Venus.Name = "Venus";
             Venus.Orbit = Orbit.FromMajorPlanetFormat(4.8676E24, Sun.Orbit.Mass, 0.72333199, 0.00677323, 0, 76.68069, 131.53298, 181.97973, GalaxyGen.J2000);
-            Venus.Radius = 6051.8 / Constants.Units.KM_PER_AU;
+            Venus.Radius = 6051.8 / Constants.Units.KmPerAu;
             Venus.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Venus.Position.System = Sol;
             Venus.Position.X = x;
@@ -224,8 +224,8 @@ namespace Pulsar4X
             SystemBody Earth = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
             Earth.Name = "Earth";
             Earth.Orbit = Orbit.FromMajorPlanetFormat(5.9726E24, Sun.Orbit.Mass, 1.00000011, 0.01671022, 0, -11.26064, 102.94719, 100.46435, GalaxyGen.J2000);
-            Earth.Radius = 6378.1 / Constants.Units.KM_PER_AU;
-            Earth.BaseTemperature = 279.3f + (float)Constants.Units.KELVIN_TO_DEGREES_C;  //(float)CalculateBaseTemperatureOfBody(Sun, Earth.Orbit.SemiMajorAxis);
+            Earth.Radius = 6378.1 / Constants.Units.KmPerAu;
+            Earth.BaseTemperature = Temperature.ToCelsius(279.3f);  //(float)CalculateBaseTemperatureOfBody(Sun, Earth.Orbit.SemiMajorAxis);
             Earth.Tectonics = SystemBody.TectonicActivity.EarthLike;
             Earth.SurfaceGravity = 9.8f;
             Earth.Atmosphere = new Atmosphere(Earth);
@@ -243,8 +243,8 @@ namespace Pulsar4X
 
             SystemBody Moon = new SystemBody(Earth, SystemBody.PlanetType.Moon);
             Moon.Name = "Moon";
-            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KM_PER_AU, 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);
-            Moon.Radius = 1738.14 / Constants.Units.KM_PER_AU;
+            Moon.Orbit = Orbit.FromAsteroidFormat(0.073E24, Earth.Orbit.Mass, 384748 / Constants.Units.KmPerAu, 0.0549006, 0, 0, 0, 0, GalaxyGen.J2000);
+            Moon.Radius = 1738.14 / Constants.Units.KmPerAu;
             Moon.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Moon.Position.System = Sol;
             Moon.Position.X = Earth.Position.X + x;
@@ -254,7 +254,7 @@ namespace Pulsar4X
             SystemBody Mars = new SystemBody(Sun, SystemBody.PlanetType.Terrestrial);
             Mars.Name = "Mars";
             Mars.Orbit = Orbit.FromMajorPlanetFormat(0.64174E24, Sun.Orbit.Mass, 1.52366231, 0.09341233, 1.85061, 49.57854, 336.04084, 355.45332, GalaxyGen.J2000);
-            Mars.Radius = 3396.2 / Constants.Units.KM_PER_AU;
+            Mars.Radius = 3396.2 / Constants.Units.KmPerAu;
             Mars.BaseTemperature = (float)CalculateBaseTemperatureOfBody(Sun, Mars.Orbit.SemiMajorAxis);// 210.1f + (float)Constants.Units.KELVIN_TO_DEGREES_C;
             Mars.Tectonics = SystemBody.TectonicActivity.Dead;
             Mars.SurfaceGravity = 3.71f;
@@ -275,7 +275,7 @@ namespace Pulsar4X
             SystemBody Jupiter = new SystemBody(Sun, SystemBody.PlanetType.GasGiant);
             Jupiter.Name = "Jupiter";
             Jupiter.Orbit = Orbit.FromMajorPlanetFormat(1898.3E24, Sun.Orbit.Mass, 5.20336301, 0.04839266, 1.30530, 100.55615, 14.75385, 34.40438, GalaxyGen.J2000);
-            Jupiter.Radius = 71492 / Constants.Units.KM_PER_AU;
+            Jupiter.Radius = 71492 / Constants.Units.KmPerAu;
             Jupiter.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Jupiter.Position.System = Sol;
             Jupiter.Position.X = x;
@@ -285,7 +285,7 @@ namespace Pulsar4X
             SystemBody Saturn = new SystemBody(Sun, SystemBody.PlanetType.GasGiant);
             Saturn.Name = "Saturn";
             Saturn.Orbit = Orbit.FromMajorPlanetFormat(568.36E24, Sun.Orbit.Mass, 9.53707032, 0.05415060, 2.48446, 113.71504, 92.43194, 49.94432, GalaxyGen.J2000);
-            Saturn.Radius = 60268 / Constants.Units.KM_PER_AU;
+            Saturn.Radius = 60268 / Constants.Units.KmPerAu;
             Saturn.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Saturn.Position.System = Sol;
             Saturn.Position.X = x;
@@ -295,7 +295,7 @@ namespace Pulsar4X
             SystemBody Uranus = new SystemBody(Sun, SystemBody.PlanetType.IceGiant);
             Uranus.Name = "Uranus";
             Uranus.Orbit = Orbit.FromMajorPlanetFormat(86.816E24, Sun.Orbit.Mass, 19.19126393, 0.04716771, 0.76986, 74.22988, 170.96424, 313.23218, GalaxyGen.J2000);
-            Uranus.Radius = 25559 / Constants.Units.KM_PER_AU;
+            Uranus.Radius = 25559 / Constants.Units.KmPerAu;
             Uranus.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Uranus.Position.System = Sol;
             Uranus.Position.X = x;
@@ -304,9 +304,9 @@ namespace Pulsar4X
 
             SystemBody Neptune = new SystemBody(Sun, SystemBody.PlanetType.IceGiant);
             Neptune.Name = "Neptune";
-            Neptune.Orbit = Orbit.FromMajorPlanetFormat(102E24, Sun.Orbit.Mass, 4495.1E6 / Constants.Units.KM_PER_AU,
+            Neptune.Orbit = Orbit.FromMajorPlanetFormat(102E24, Sun.Orbit.Mass, 4495.1E6 / Constants.Units.KmPerAu,
                 0.011, 1.8, 131.72169, 44.97135, 304.88003, GalaxyGen.J2000);
-            Neptune.Radius = 24764 / Constants.Units.KM_PER_AU;
+            Neptune.Radius = 24764 / Constants.Units.KmPerAu;
             Neptune.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Neptune.Position.System = Sol;
             Neptune.Position.X = x;
@@ -315,9 +315,9 @@ namespace Pulsar4X
 
             SystemBody Pluto = new SystemBody(Sun, SystemBody.PlanetType.DwarfPlanet);
             Pluto.Name = "Pluto";
-            Pluto.Orbit = Orbit.FromMajorPlanetFormat(0.0131E24, Sun.Orbit.Mass, 5906.38E6 / Constants.Units.KM_PER_AU,
+            Pluto.Orbit = Orbit.FromMajorPlanetFormat(0.0131E24, Sun.Orbit.Mass, 5906.38E6 / Constants.Units.KmPerAu,
                 0.24880766, 17.14175, 110.30347, 224.06676, 238.92881, GalaxyGen.J2000);
-            Pluto.Radius = 1195 / Constants.Units.KM_PER_AU;
+            Pluto.Radius = 1195 / Constants.Units.KmPerAu;
             Pluto.Orbit.GetPosition(GameState.Instance.CurrentDate, out x, out y);
             Pluto.Position.System = Sol;
             Pluto.Position.X = x;
@@ -409,11 +409,11 @@ namespace Pulsar4X
                 }
             }
             // http://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
-            double gravAttractionToParent = Constants.Science.GRAVITATIONAL_CONSTANT * star1.Orbit.Mass * planetMass / (maxApo * maxApo);
+            double gravAttractionToParent = Constants.Science.GravitationalConstant * star1.Orbit.Mass * planetMass / (maxApo * maxApo);
 
             // Solve for distance to star2 with 10x less gravitational attraction than to star1.
             // (Note, 10x less depends on a 0.1 value for GalaxyGen.StarOrbitGravityFactor
-            return Math.Sqrt(Constants.Science.GRAVITATIONAL_CONSTANT * star2.Orbit.Mass * planetMass / gravAttractionToParent * GalaxyGen.StarOrbitGravityFactor);
+            return Math.Sqrt(Constants.Science.GravitationalConstant * star2.Orbit.Mass * planetMass / gravAttractionToParent * GalaxyGen.StarOrbitGravityFactor);
         }
 
         /// <summary>
@@ -503,8 +503,8 @@ namespace Pulsar4X
         private static Orbit FindClearOrbit(double parentMass, double mass, double insideOrbitMass, double insideOrbitApoapsis, double minDistance, double maxDistance)
         {
             // Adjust minDistance
-            double graveAttractionInsiderNumerator = Constants.Science.GRAVITATIONAL_CONSTANT * mass * insideOrbitMass;
-            double graveAttractionParentNumerator = Constants.Science.GRAVITATIONAL_CONSTANT * mass * parentMass;
+            double graveAttractionInsiderNumerator = Constants.Science.GravitationalConstant * mass * insideOrbitMass;
+            double graveAttractionParentNumerator = Constants.Science.GravitationalConstant * mass * parentMass;
             double gravAttractionToInsideOrbit = graveAttractionInsiderNumerator / ((minDistance - insideOrbitApoapsis) * (minDistance - insideOrbitApoapsis));
             double gravAttractionToParent = graveAttractionParentNumerator / (minDistance * minDistance);
 
@@ -866,7 +866,7 @@ namespace Pulsar4X
             if (m_RNG.NextDouble() > GalaxyGen.PlanetGenerationChance)
                 return;  // nope, this star has no planets.
 
-            double starMassRatio = GMath.Clamp01(star.Orbit.Mass / Constants.Units.SOLAR_MASS_IN_KILOGRAMS);   // heavy star = more material, in relation to Sol.
+            double starMassRatio = GMath.Clamp01(star.Orbit.Mass / Constants.Units.SolarMassInKG);   // heavy star = more material, in relation to Sol.
             double starSpecralTypeRatio =  GalaxyGen.StarSpecralTypePlanetGenerationRatio[star.SpectralType];    // tweakble
 
             // final 'chance' for number of planets generated. take into consideration star mass and balance decisions for star class.
@@ -1050,8 +1050,8 @@ namespace Pulsar4X
             // Create some of the basic stats:
             body.Density = RNG_NextDoubleRange(GalaxyGen.SystemBodyDensityByType[body.Type]);
             body.Radius = CalculateRadiusOfBody(body.Orbit.Mass, body.Density);
-            double radiusSquaredInM = (body.Radius * Constants.Units.M_PER_AU) * (body.Radius * Constants.Units.M_PER_AU); // conver to m from au.
-            body.SurfaceGravity = (float)((Constants.Science.GRAVITATIONAL_CONSTANT * body.Orbit.Mass) / radiusSquaredInM); // see: http://nova.stanford.edu/projects/mod-x/ad-surfgrav.html
+            double radiusSquaredInM = (body.Radius * Constants.Units.MetersPerAu) * (body.Radius * Constants.Units.MetersPerAu); // conver to m from au.
+            body.SurfaceGravity = (float)((Constants.Science.GravitationalConstant * body.Orbit.Mass) / radiusSquaredInM); // see: http://nova.stanford.edu/projects/mod-x/ad-surfgrav.html
             body.AxialTilt = (float)(m_RNG.NextDouble() * GalaxyGen.MaxPlanetInclination);
                 
             // generate the planets day length:
@@ -1145,7 +1145,7 @@ namespace Pulsar4X
             // we will do this by looking at the base temp of the parent.
             // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
             // i.e. a planet hotter then GalaxyGen.IceMoonMaximumParentTemperature will always have PlanetType.Moon.
-            double tempRatio = (parent.BaseTemperature + Constants.Units.DEGREES_C_TO_KELVIN) / GalaxyGen.IceMoonMaximumParentTemperature;
+            double tempRatio = Temperature.ToKelvin(parent.BaseTemperature) / GalaxyGen.IceMoonMaximumParentTemperature;
             SystemBody.PlanetType pt = SystemBody.PlanetType.Moon;
 
             // first pass to gen mass etc:
@@ -1223,7 +1223,7 @@ namespace Pulsar4X
                 // this planet has some plate tectonics:
                 // the following should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
                 // we conver age in billion years instead of years (otherwise we get tiny numbers).
-                double tectonicsChance = body.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS / star.Age * 100000000; 
+                double tectonicsChance = body.Orbit.Mass / Constants.Units.EarthMassInKG / star.Age * 100000000; 
                 tectonicsChance = GMath.Clamp01(tectonicsChance);
 
                 SystemBody.TectonicActivity t = SystemBody.TectonicActivity.NA;
@@ -1330,7 +1330,7 @@ namespace Pulsar4X
                         // so we will generate a number to act as the total:
                         double planetsATMChance = m_RNG.NextDouble();// (float)RNG_NextDoubleRange(0.1, 100);
                         // get my mass ratio relative to earth (so really small bodies cannot have massive atmos:
-                        double massRatio = planet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
+                        double massRatio = planet.Orbit.Mass / Constants.Units.EarthMassInKG;
                         float planetsATM = 1;
 
                         // Start with the ammount of Oxygen or Carbin Di-oxide or methane:
@@ -1618,7 +1618,7 @@ namespace Pulsar4X
                 int chance = Constants.GameSettings.JumpPointGenerationChance;
 
                 // Higher mass planets = higher chance.
-                double planetEarthMass = currentPlanet.Orbit.Mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS;
+                double planetEarthMass = currentPlanet.Orbit.Mass / Constants.Units.EarthMassInKG;
                 if (planetEarthMass > 1)
                 {
                     chance = chance + 2;
@@ -1792,7 +1792,7 @@ namespace Pulsar4X
         {
             double radius = Math.Pow((3 * mass) / (4 * Math.PI * (density / 1000)), 0.3333333333); // density / 1000 changes it from g/cm2 to Kg/cm3, needed because mass in is KG. 
                                                                                                    // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
-            return radius / 1000 / 100 / Constants.Units.KM_PER_AU;     // convert from cm to AU.
+            return radius / 1000 / 100 / Constants.Units.KmPerAu;     // convert from cm to AU.
         }
 
         /// <summary>
@@ -1804,9 +1804,9 @@ namespace Pulsar4X
         /// <returns>Temperature in Degrees C</returns>
         public static double CalculateBaseTemperatureOfBody(Star parentStar, double distanceFromStar)
         {
-            double temp = (parentStar.Temperature + Constants.Units.DEGREES_C_TO_KELVIN); // we need to work in kelvin here.
+            double temp = Temperature.ToKelvin(parentStar.Temperature);
             temp = temp * Math.Sqrt(parentStar.Radius / (2 * distanceFromStar));
-            return temp + Constants.Units.KELVIN_TO_DEGREES_C;  // convert back to degrees.
+            return Temperature.ToCelsius(temp);
         }
 
         /// <summary>

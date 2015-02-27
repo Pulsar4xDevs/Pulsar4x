@@ -2766,7 +2766,7 @@ namespace Pulsar4X.Entities
 
                             if (distance < Constants.Units.BEAM_AU_MAX)
                             {
-                                float DistKM = distance * (float)Constants.Units.KM_PER_AU;
+                                float DistKM = distance * (float)Constants.Units.KmPerAu;
 
                                 fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
                             }
@@ -2790,7 +2790,7 @@ namespace Pulsar4X.Entities
 
                             if (distance < Constants.Units.BEAM_AU_MAX)
                             {
-                                float DistKM = distance * (float)Constants.Units.KM_PER_AU;
+                                float DistKM = distance * (float)Constants.Units.KmPerAu;
 
                                 fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
                             }

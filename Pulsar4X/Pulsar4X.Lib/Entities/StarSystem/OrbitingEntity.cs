@@ -26,8 +26,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double RadiusinKM
         {
-            get { return Radius * Constants.Units.KM_PER_AU; }
-            set { Radius = value / Constants.Units.KM_PER_AU; }
+            get { return Radius * Constants.Units.KmPerAu; }
+            set { Radius = value / Constants.Units.KmPerAu; }
         }
 
         /// <summary>

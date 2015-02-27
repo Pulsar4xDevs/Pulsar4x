@@ -18,6 +18,31 @@ namespace Pulsar4X.Helpers.GameMath
         }
     }
 
+    public static class Temperature
+    {
+        public static double ToKelvin(double celsius)
+        {
+            return celsius + Constants.Units.DegreesCToKelvin;
+        }
+
+        public static float ToKelvin(float celsius)
+        {
+            return (float)(celsius + Constants.Units.DegreesCToKelvin);
+        }
+
+        public static double ToCelsius(double kelvin)
+        {
+            return kelvin + Constants.Units.KelvinToDegreesC;
+        }
+
+        public static float ToCelsius(float kelvin)
+        {
+            return (float)(kelvin + Constants.Units.KelvinToDegreesC);
+        }
+    }
+
+
+
     public class WeightedValue<T>
     {
         public double Weight { get; set; }

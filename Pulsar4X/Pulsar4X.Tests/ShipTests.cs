@@ -628,7 +628,7 @@ namespace Pulsar4X.Tests
             while (TaskGroup1.TaskGroupOrders.Count != 0)
             {
                 TaskGroup1.FollowOrders(5);
-                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.Position.X * Constants.Units.KM_PER_AU, TaskGroup1.Contact.Position.Y * Constants.Units.KM_PER_AU, TaskGroup1.Contact.Position.X, TaskGroup1.Contact.Position.Y);
+                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.Position.X * Constants.Units.KmPerAu, TaskGroup1.Contact.Position.Y * Constants.Units.KmPerAu, TaskGroup1.Contact.Position.X, TaskGroup1.Contact.Position.Y);
             }
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);
