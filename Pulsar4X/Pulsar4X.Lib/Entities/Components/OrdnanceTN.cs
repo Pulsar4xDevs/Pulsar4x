@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using Pulsar4X.Helpers.GameMath;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -1386,7 +1387,7 @@ namespace Pulsar4X.Entities.Components
                 /// </summary>
                 if (Count < (double)Missiles[0].missileDef.maxSpeed)
                 {
-                    MissileSpeedInAU = (double)Missiles[0].missileDef.maxSpeed / Constants.Units.KmPerAu;
+                    MissileSpeedInAU =  Distance.ToAU( (double)Missiles[0].missileDef.maxSpeed );
                     TimeReq = (uint)Math.Ceiling((dZ / MissileSpeedInAU));
                 }
                 else
@@ -1395,12 +1396,12 @@ namespace Pulsar4X.Entities.Components
                     /// even though TimeReq is a uint I'll treat it as a "signed" int in this case.
                     /// </summary>
                     TimeReq = 2147483649;
-                    MissileSpeedInAU = (double)Missiles[0].missileDef.maxSpeed / Constants.Units.KmPerAu;
+                    MissileSpeedInAU = Distance.ToAU( (double)Missiles[0].missileDef.maxSpeed );
                 }
             }
             else
             {
-                MissileSpeedInAU = (double)Missiles[0].missileDef.maxSpeed / Constants.Units.KmPerAu;
+                MissileSpeedInAU = Distance.ToAU( (double)Missiles[0].missileDef.maxSpeed );
                 TimeReq = (uint)Math.Ceiling((dZ / MissileSpeedInAU));
             }
         }
@@ -1628,8 +1629,8 @@ namespace Pulsar4X.Entities.Components
                 Contact.LastPosition.X = Contact.Position.X;
                 Contact.LastPosition.Y = Contact.Position.Y;
 
-                Contact.Position.X = Contact.Position.X + ((double)(TimeSlice * CurrentSpeedX) / Constants.Units.KmPerAu);
-                Contact.Position.Y = Contact.Position.Y + ((double)(TimeSlice * CurrentSpeedY) / Constants.Units.KmPerAu);
+                Contact.Position.X = Contact.Position.X + (Distance.ToAU( (double)(TimeSlice * CurrentSpeedX) ));
+                Contact.Position.Y = Contact.Position.Y + (Distance.ToAU( (double)(TimeSlice * CurrentSpeedY) ));
 
                 CheckFuel(TimeSlice);
 

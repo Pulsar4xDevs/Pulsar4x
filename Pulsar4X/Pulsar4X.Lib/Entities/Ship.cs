@@ -5,6 +5,7 @@ using System.Text;
 using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
+using Pulsar4X.Helpers.GameMath;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -2766,7 +2767,7 @@ namespace Pulsar4X.Entities
 
                             if (distance < Constants.Units.BEAM_AU_MAX)
                             {
-                                float DistKM = distance * (float)Constants.Units.KmPerAu;
+                                float DistKM = (float)Distance.ToKm(distance);
 
                                 fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
                             }
@@ -2790,7 +2791,7 @@ namespace Pulsar4X.Entities
 
                             if (distance < Constants.Units.BEAM_AU_MAX)
                             {
-                                float DistKM = distance * (float)Constants.Units.KmPerAu;
+                                float DistKM = (float)Distance.ToKm(distance);
 
                                 fired = ShipBFC[loop].FireWeapons(DistKM, RNG, track, this);
                             }

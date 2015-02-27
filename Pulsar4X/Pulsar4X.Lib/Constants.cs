@@ -28,7 +28,6 @@ namespace Pulsar4X
         /// </summary>
         public static class Units
         {
-
             public const double SolarMassInKG =  1.98855E30;
 
             public const double EarthMassInKG = 5.97219E24;
