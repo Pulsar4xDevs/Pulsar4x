@@ -1216,7 +1216,7 @@ namespace Pulsar4X.UI.Handlers
                     /// This is the easy case, no worries about overflows here. I hope.
                     /// </summary>
 
-                    double Distance = Math.Floor(dZ * Constants.Units.KM_PER_AU);
+                    double Distance = Math.Floor(dZ * Constants.Units.KmPerAu);
 
                     double TimeSeconds = Math.Floor(Distance / CurrentTaskGroup.CurrentSpeed);
 
