@@ -1620,9 +1620,9 @@ namespace Pulsar4X
         /// </summary>
         private static int GetNaturalJumpPointGeneration(Star star)
         {
-            if (star.Planets.Count == 0)
+            if (star.Planets.Count == 0 && star != star.Position.System.Stars[0])
             {
-                return 0; // Don't generate JP's on planetless stars.
+                return 0; // Don't generate JP's on non-primary planetless stars.
             }
 
             int numJumpPoints = 1; // Each star always generates a JP.
@@ -1668,8 +1668,8 @@ namespace Pulsar4X
         /// </summary>
         private static JumpPoint GenerateJumpPoint(Star star)
         {
-            double minRadius = double.MaxValue;
-            double maxRadius = double.MinValue;
+            double minRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min;
+            double maxRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max;
 
             // Clamp generation to within the planetary system.
             foreach (SystemBody currentPlanet in star.Planets)
