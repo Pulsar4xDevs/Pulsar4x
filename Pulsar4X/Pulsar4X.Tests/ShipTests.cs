@@ -6,7 +6,7 @@ using NUnit.Framework;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
-
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Tests
 {
@@ -628,7 +628,7 @@ namespace Pulsar4X.Tests
             while (TaskGroup1.TaskGroupOrders.Count != 0)
             {
                 TaskGroup1.FollowOrders(5);
-                Console.WriteLine("{0} {1} | {2} {3}", TaskGroup1.Contact.Position.X * Constants.Units.KM_PER_AU, TaskGroup1.Contact.Position.Y * Constants.Units.KM_PER_AU, TaskGroup1.Contact.Position.X, TaskGroup1.Contact.Position.Y);
+                Console.WriteLine("{0} {1} | {2} {3}", Distance.ToKm(TaskGroup1.Contact.Position.X), Distance.ToKm(TaskGroup1.Contact.Position.Y), TaskGroup1.Contact.Position.X, TaskGroup1.Contact.Position.Y);
             }
 
             Console.WriteLine("Fuel Remaining:{0}", TaskGroup1.Ships[0].CurrentFuel);

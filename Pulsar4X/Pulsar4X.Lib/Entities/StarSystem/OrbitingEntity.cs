@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Pulsar4X.Entities;
 using Newtonsoft.Json;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Entities
 {
@@ -26,8 +27,8 @@ namespace Pulsar4X.Entities
         /// </summary>
         public double RadiusinKM
         {
-            get { return Radius * Constants.Units.KM_PER_AU; }
-            set { Radius = value / Constants.Units.KM_PER_AU; }
+            get { return Distance.ToKm(Radius); }
+            set { Radius = Distance.ToAU(value); }
         }
 
         /// <summary>

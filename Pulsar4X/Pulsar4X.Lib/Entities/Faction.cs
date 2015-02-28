@@ -8,6 +8,7 @@ using System.ComponentModel;
 using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.Drawing;
+using Pulsar4X.Helpers.GameMath;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -578,7 +579,7 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// how far could this TG travel within a single day?
                                 /// </summary>
-                                float TaskGroupDistance = (CurrentTaskGroup.CurrentSpeed / (float)Constants.Units.KM_PER_AU) * Constants.TimeInSeconds.Day;
+                                float TaskGroupDistance = (float)Distance.ToAU(CurrentTaskGroup.CurrentSpeed) * Constants.TimeInSeconds.Day;
 
 
 
@@ -1621,7 +1622,7 @@ namespace Pulsar4X.Entities
             /// </summary>
             if (detection > (int)Constants.Units.TEN_KM_MAX)
             {
-                double factor = Constants.Units.KM_PER_AU / 10000.0;
+                double factor = Constants.Units.KmPerAu / 10000.0;
                 double AUDetection = (double)detection / factor;
 
                 /// <summary>
@@ -1639,7 +1640,7 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 if (dist < Constants.Units.MAX_KM_IN_AU)
                 {
-                    float distKM = (dist * (float)Constants.Units.KM_PER_AU) / 10000.0f;
+                    float distKM = (float)Distance.ToKm(dist) / 10000.0f;
 
                     /// <summary>
                     /// if distKM is less than detection(KM) then detection occurs.

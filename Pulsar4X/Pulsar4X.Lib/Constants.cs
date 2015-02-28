@@ -19,15 +19,8 @@ namespace Pulsar4X
         /// </summary>
         public static class Science
         {
-            // Stefan–Boltzmann constant
-            public static float σSB = 5.6704E-8F;
-
-            // Temperatures measured in K.
-            public static float TEMP_WATER_FREEZE = 273;
-            public static float TEMP_WATER_BOIL = 373;
-
 			// Gravitation Constant
-			public static double GRAVITATIONAL_CONSTANT = 6.67384E-11;
+			public const double GravitationalConstant = 6.67384E-11;
         }
 
         /// <summary>
@@ -35,53 +28,56 @@ namespace Pulsar4X
         /// </summary>
         public static class Units
         {
+            public const double SolarMassInKG =  1.98855E30;
+
+            public const double EarthMassInKG = 5.97219E24;
+
+            public const double SolMassInEarthMasses = 332946;
+
+            public const double KmPerLightYear = 9460730472580.8;
+
+            public const double AuPerLightYear = KmPerLightYear / KmPerAu;
+
+            public const double KmPerAu = 149597871;
+
+            public const double MetersPerAu = KmPerAu * 1000;
+
             /// <summary>
-            /// Mass in grams of one solar mass
+            /// Plus or Minus 65Km
             /// </summary>
-            public const double SOLAR_MASS_IN_GRAMS = 1.98855E33;
+            public const double SolarRadiusInKm = 696342.0;
 
-            public const double SOLAR_MASS_IN_KILOGRAMS = Constants.Units.SOLAR_MASS_IN_GRAMS / 1000;
+            public const double SolarRadiusInAu = SolarRadiusInKm / KmPerAu;
 
-            public const double EARTH_MASS_IN_GRAMS = 5.97219E27;
-
-            public const double EARTH_MASS_IN_KILOGRAMS = EARTH_MASS_IN_GRAMS / 1000;
-
-            public const double SUN_MASS_IN_EARTH_MASSES = SOLAR_MASS_IN_GRAMS / EARTH_MASS_IN_GRAMS;
-
-            public const double CM_PER_AU = 1.495978707E13;
-
-            public const double CM_PER_KM = 1.0E5;
-
-            public const double CM_PER_METER = 100.0;
-
-            public const double KM_PER_LIGHTYEAR = 9460730472580.8;
-
-            public const double KM_PER_AU = CM_PER_AU / CM_PER_KM; //149597870.7
-
-            public const double M_PER_AU = KM_PER_AU * 1000;
-
-            public const double EARTH_GRAVITY = 9.81;
+            /// <summary>
+            /// Earth's gravity in m/s^2. Aka 1g.
+            /// </summary>
+            public const double EarthGravity = 9.81;
 
             /// <summary>
             /// Note that this is = to 1 ATM.
             /// </summary>
-            public const double EARTH_ATMOSPHERE_IN_KPA = 101.325;
-
-            /// <summary>
-            ///  The total mass of the earths atmosphere in Kgs.
-            /// </summary>
-            public const double EARTH_ATMOSPHERE_TOTAL_MASS = 5.3E18;
-
+            public const double EarthAtmosphereInKpa = 101.325;
 
             /// <summary>
             /// Add to Kelvin to get degrees c.
             /// </summary>
-            public const double DEGREES_C_TO_KELVIN = 273.15;
+            public const double DegreesCToKelvin = 273.15;
 
             /// <summary>
             /// Add to degrees c to get kelvin.
             /// </summary>
-            public const double KELVIN_TO_DEGREES_C = -273.15;
+            public const double KelvinToDegreesC = -273.15;
+
+            /// <summary>
+            /// Number of radians in 360 degrees
+            /// </summary>
+            public const double RadiansPerRotation = 2.0 * Math.PI;
+
+            /// <summary>
+            /// RADIAN is the value of each degree in radians. PI/180.
+            /// </summary>
+            public const double Radian = Math.PI / 180.0;
 
 
             /// <summary>
@@ -91,17 +87,17 @@ namespace Pulsar4X
             /// <summary>
             /// 32 bit limitation number for distances in KM. //14.35504154
             /// </summary>
-            public const double MAX_KM_IN_AU = 2147483648.0 / KM_PER_AU;
+            public const double MAX_KM_IN_AU = 2147483648.0 / KmPerAu;
 
             /// <summary>
             /// 5 second speed of light limitation for beam weapons.
             /// </summary>
-            public const double BEAM_AU_MAX = 1500000.0 / KM_PER_AU; //~0.01002 AU
+            public const double BEAM_AU_MAX = 1500000.0 / KmPerAu; //~0.01002 AU
 
             /// <summary>
             /// Speed of light limitation, this time in KM.
             /// </summary>
-            public const double BEAM_KM_MAX = Constants.Units.BEAM_AU_MAX * Constants.Units.KM_PER_AU;
+            public const double BEAM_KM_MAX = Constants.Units.BEAM_AU_MAX * Constants.Units.KmPerAu;
 
             /// <summary>
             /// 32 bit limitation for the 10KM unit system used by auroraTN.
@@ -112,64 +108,17 @@ namespace Pulsar4X
             /// 32 bit limitation for orbit period days.
             /// </summary>
             public const double MAX_DAYS_IN_SECONDS = 2147483648.0 / Constants.TimeInSeconds.Day;
-
-            /// <summary>
-            /// Plus or Minus 65Km
-            /// </summary>
-            public const double SOLAR_RADIUS_IN_KM = 696342.0;
-
-            public const double SOLAR_RADIUS_IN_AU = SOLAR_RADIUS_IN_KM / KM_PER_AU;
-
-            public const double SECONDS_PER_HOUR = 3600.0;
-
-            public const double MILLIBARS_PER_BAR = 1000.00;
-
-            /// <summary>
-            /// units of dyne cm2/gram2	
-            /// </summary>
-            public const double GRAV_CONSTANT = 6.672E-8;
-
-            /// <summary>
-            /// units: g*m2/(sec2*K*mol)
-            /// </summary>
-            public const double MOLAR_GAS_CONST = 8314.41;
-
-            /// <summary>
-            ///  ratio of esc vel to RMS vel
-            /// </summary>
-            public const double GAS_RETENTION_THRESHOLD = 6.0;
-
-            /// <summary>
-            /// Number of radians in 360 degrees
-            /// </summary>
-            public const double RADIANS_PER_ROTATION = 2.0 * Math.PI;
-
-            /// <summary>
-            /// RADIAN is the value of each degree in radians. PI/180.
-            /// </summary>
-            public const double RADIAN = Math.PI / 180.0;
-
-            public const double ECCENTRICITY_COEFF = 0.077;	// Dole's was 0.077	
-
-            public const double PROTOPLANET_MASS = 1.0E-15;	// Units of solar masses
-
-            /// <summary>
-            /// Km2/kg 
-            /// </summary>
-            public const double CLOUD_COVERAGE_FACTOR = 1.839E-8;
-            public const double ICE_ALBEDO = 0.7;
-            public const double CLOUD_ALBEDO = 0.52;
-            public const double GAS_GIANT_ALBEDO = 0.5;
-            public const double AIRLESS_ICE_ALBEDO = 0.5;
-            public const double EARTH_ALBEDO = 0.3;
-            public const double GREENHOUSE_TRIGGER_ALBEDO = 0.20;
-            public const double ROCKY_ALBEDO = 0.15;
-            public const double ROCKY_AIRLESS_ALBEDO = 0.07;
-            public const double WATER_ALBEDO = 0.04;
-            
-            public const double INCREDIBLY_LARGE_NUMBER = 9.9999E37;
         }
         
+        /// <summary>
+        /// This Class is used to lookup RGBA Colors for different star classes.
+        /// </summary>
+        /// <remarks>
+        /// @note The following colors are source fron:
+        /// http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
+        /// where this source did not provide a color an aproiximation was done using 
+        /// the next class above and below the missing one. These are comented as such.
+        /// </remarks>
         public class StarColor
         {
             private Dictionary<string, Color> m_dicStarColors;
@@ -179,11 +128,7 @@ namespace Pulsar4X
             private StarColor()
             {
                 m_dicStarColors = new Dictionary<string, Color>();
-
-                // note the following colors are source fron:
-                // http://www.vendian.org/mncharity/dir3/starcolor/UnstableURLs/starcolors.html
-                // where this source did not provide a color an aproiximation was done using 
-                // the next class above and below the missing one. The are comented as such.
+                
                 m_dicStarColors["O5"] = Color.FromArgb(255, 155, 176, 255);
                 m_dicStarColors["O6"] = Color.FromArgb(255, 162, 184, 255);
                 m_dicStarColors["O7"] = Color.FromArgb(255, 157, 177, 255);
@@ -268,6 +213,9 @@ namespace Pulsar4X
                 m_dicStarColors["N"] = Color.FromArgb(255, 255, 157, 000);
             }
 
+            /// <summary>
+            /// Returns the color of the provided star.
+            /// </summary>
             public static Color LookupColor(Star star)
             {
                 if (m_oStarColor == null)
@@ -292,6 +240,9 @@ namespace Pulsar4X
             }
         }
 
+        /// <summary>
+        /// @todo this (Minerals) should be mnoved.
+        /// </summary>
         public static class Minerals
         {
             public enum MinerialNames
@@ -693,7 +644,7 @@ namespace Pulsar4X
         }
 
         /// <summary>
-        /// Tick times to complete said interval.
+        /// Tick times (in seconds) to complete said interval.
         /// </summary>
         public static class TimeInSeconds
         {

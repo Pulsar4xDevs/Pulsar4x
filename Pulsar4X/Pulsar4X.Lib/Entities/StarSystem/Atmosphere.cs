@@ -177,9 +177,9 @@ namespace Pulsar4X.Entities
                     GreenhouseFactor = (float)GMath.Clamp(GreenhouseFactor, -3.0, 3.0);
 
                     // From Aurora: Surface Temperature in Kelvin = Base Temperature in Kelvin x Greenhouse Factor x Albedo
-                    SurfaceTemperature = (ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN);
+                    SurfaceTemperature = Temperature.ToKelvin(ParentBody.BaseTemperature);
                     SurfaceTemperature += SurfaceTemperature * GreenhouseFactor * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4, see: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
-                    SurfaceTemperature += (float)Constants.Units.KELVIN_TO_DEGREES_C; // convert back to kelvin
+                    SurfaceTemperature = Temperature.ToCelsius(SurfaceTemperature);
                 }
 
                 // loop a second time to work out atmo percentages:
@@ -197,7 +197,7 @@ namespace Pulsar4X.Entities
             {
                 // simply apply albedo, see here: http://en.wikipedia.org/wiki/Stefan%E2%80%93Boltzmann_law
                 Pressure = 0;
-                SurfaceTemperature = ParentBody.BaseTemperature + (float)Constants.Units.DEGREES_C_TO_KELVIN; // conver to kelvin.
+                SurfaceTemperature = Temperature.ToKelvin(ParentBody.BaseTemperature);
                 SurfaceTemperature = SurfaceTemperature * (float)Math.Pow(1 - Albedo, 0.25);   // We need to raise albedo to the power of 1/4
                 _atmosphereDescriptionInATM = "None";
                 _atmosphereDescriptionInPercent = "None";

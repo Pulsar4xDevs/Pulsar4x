@@ -28,12 +28,12 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// Mass in Earth Masses of this entity.
         /// </summary>
-        public double MassRelativeToEarth { get { return m_mass / Constants.Units.EARTH_MASS_IN_KILOGRAMS; } }
+        public double MassRelativeToEarth { get { return m_mass / Constants.Units.EarthMassInKG; } }
 
         /// <summary>
         /// Mass in Solar Masses of this entity.
         /// </summary>
-        public double MassRelativeToSol { get { return m_mass / Constants.Units.SOLAR_MASS_IN_KILOGRAMS; } }
+        public double MassRelativeToSol { get { return m_mass / Constants.Units.SolarMassInKG; } }
 
         /// <summary>
         /// Mass in KG of parent (object this orbit orbits)
@@ -200,10 +200,10 @@ namespace Pulsar4X.Entities
             // Calculate extended parameters.
 
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
-            m_gravitationalParameter = Constants.Science.GRAVITATIONAL_CONSTANT * (ParentMass + Mass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
+            m_gravitationalParameter = Constants.Science.GravitationalConstant * (ParentMass + Mass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
 
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
-            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3) / (GravitationalParameter));
+            double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.ToKm(SemiMajorAxis), 3) / (GravitationalParameter));
             if (orbitalPeriod * 10000000 > Int64.MaxValue)
             {
                 m_orbitalPeriod = TimeSpan.MaxValue;
@@ -214,7 +214,7 @@ namespace Pulsar4X.Entities
             }
 
             // http://en.wikipedia.org/wiki/Mean_motion
-            m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(SemiMajorAxis * Constants.Units.KM_PER_AU, 3)); // Calculated in radians.
+            m_meanMotion = Math.Sqrt(GravitationalParameter / Math.Pow(Distance.ToKm(SemiMajorAxis), 3)); // Calculated in radians.
             m_meanMotion = Angle.ToDegrees(m_meanMotion); // Stored in degrees.
         }
 
@@ -271,13 +271,13 @@ namespace Pulsar4X.Entities
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
-            double radius = SemiMajorAxis * Constants.Units.KM_PER_AU * (1 - Eccentricity * Eccentricity) / (1 + Eccentricity * Math.Cos(TrueAnomaly));
+            double radius = Distance.ToKm(SemiMajorAxis) * (1 - Eccentricity * Eccentricity) / (1 + Eccentricity * Math.Cos(TrueAnomaly));
 
             // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
             TrueAnomaly += Angle.ToRadians(ArgumentOfPeriapsis);
 
             // Convert KM to AU
-            radius /= Constants.Units.KM_PER_AU;
+            radius = Distance.ToAU(radius);
 
             // Polar to Cartesian conversion.
             x = radius * Math.Cos(TrueAnomaly);

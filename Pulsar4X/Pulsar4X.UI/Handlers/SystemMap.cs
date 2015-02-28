@@ -841,7 +841,7 @@ namespace Pulsar4X.UI.Handlers
         {
             if (m_oGLCanvas != null)
             {
-                double dKmscale = (m_oGLCanvas.Size.Width / m_oGLCanvas.ZoomFactor) * Constants.Units.KM_PER_AU;
+                double dKmscale = (m_oGLCanvas.Size.Width / m_oGLCanvas.ZoomFactor) * Constants.Units.KmPerAu;
                 float dAUScale = (float)(m_oGLCanvas.Size.Width / m_oGLCanvas.ZoomFactor);
                 m_oControlsPanel.ScaleKMLable.Text = "Km = " + dKmscale.ToString();
                 m_oControlsPanel.ScaleAULable.Text = "AU = " + dAUScale.ToString();

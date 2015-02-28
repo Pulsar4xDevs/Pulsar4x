@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 using Pulsar4X;
+using Pulsar4X.Helpers.GameMath;
 
 #if LOG4NET_ENABLED
 using log4net.Config;
@@ -1313,8 +1314,8 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// minor matrix multiplication here.
                 /// </summary>
-                CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.RADIAN) * sign;
-                CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.RADIAN) * sign;
+                CurrentSpeedX = CurrentSpeed * Math.Cos(CurrentHeading * Constants.Units.Radian) * sign;
+                CurrentSpeedY = CurrentSpeed * Math.Sin(CurrentHeading * Constants.Units.Radian) * sign;
             }
             else
             {
@@ -1368,7 +1369,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if (Count < (double)CurrentSpeed)
                     {
-                        TimeRequirement = (uint)Math.Ceiling((dZ / ((double)CurrentSpeed / Constants.Units.KM_PER_AU)));
+                        TimeRequirement = (uint)Math.Ceiling(dZ / Distance.ToAU(CurrentSpeed));
                     }
                     else
                     {
@@ -1384,7 +1385,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// This line hosed me with parenthesis requirements, should do things more explicitly.
                     /// </summary>
-                    TimeRequirement = (uint)Math.Ceiling((dZ / ((double)CurrentSpeed / Constants.Units.KM_PER_AU)));
+                    TimeRequirement = (uint)Math.Ceiling(dZ / Distance.ToAU(CurrentSpeed));
                 }
 
             }
@@ -1701,10 +1702,10 @@ namespace Pulsar4X.Entities
             else
             {
 
-                Contact.Position.X = Contact.Position.X + (((double)TimeSlice * CurrentSpeedX) / Constants.Units.KM_PER_AU);
-                Contact.Position.Y = Contact.Position.Y + (((double)TimeSlice * CurrentSpeedY) / Constants.Units.KM_PER_AU);
+                Contact.Position.X = Contact.Position.X + Distance.ToAU(TimeSlice * CurrentSpeedX);
+                Contact.Position.Y = Contact.Position.Y + Distance.ToAU(TimeSlice * CurrentSpeedY);
 
-                TotalOrderDistance = TotalOrderDistance - (double)((CurrentSpeed * TimeSlice) / Constants.Units.KM_PER_AU);
+                TotalOrderDistance = TotalOrderDistance - Distance.ToAU(CurrentSpeed * TimeSlice);
 
                 UseFuel(TimeSlice);
 
@@ -2540,11 +2541,11 @@ namespace Pulsar4X.Entities
                                 /// </summary>
                                 int degree = GameState.RNG.Next(0, 359);
                                 int Jump = GameState.RNG.Next((int)Math.Floor((float)MinJumpRadius * 0.95f), MinJumpRadius);
-                                double X = Jump * Math.Cos(degree * Constants.Units.RADIAN);
-                                double Y = Jump * Math.Sin(degree * Constants.Units.RADIAN);
+                                double X = Jump * Math.Cos(degree * Constants.Units.Radian);
+                                double Y = Jump * Math.Sin(degree * Constants.Units.Radian);
 
-                                X = X / Constants.Units.KM_PER_AU;
-                                Y = Y / Constants.Units.KM_PER_AU;
+                                X = Distance.ToAU(X);
+                                Y = Distance.ToAU(Y);
 
                                 Position.X = Position.X + X;
                                 Position.Y = Position.Y + Y;

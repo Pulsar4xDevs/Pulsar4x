@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Pulsar4X.Helpers.GameMath
 {
+    /// <summary>
+    /// Small Helper Class for Angle unit Conversions
+    /// </summary>
     public static class Angle
     {
         public static double ToRadians(double degrees)
@@ -17,6 +20,49 @@ namespace Pulsar4X.Helpers.GameMath
             return radians * 180 / Math.PI;
         }
     }
+
+    /// <summary>
+    /// Small helper class for Temperature unit conversions
+    /// </summary>
+    public static class Temperature
+    {
+        public static double ToKelvin(double celsius)
+        {
+            return celsius + Constants.Units.DegreesCToKelvin;
+        }
+
+        public static float ToKelvin(float celsius)
+        {
+            return (float)(celsius + Constants.Units.DegreesCToKelvin);
+        }
+
+        public static double ToCelsius(double kelvin)
+        {
+            return kelvin + Constants.Units.KelvinToDegreesC;
+        }
+
+        public static float ToCelsius(float kelvin)
+        {
+            return (float)(kelvin + Constants.Units.KelvinToDegreesC);
+        }
+    }
+
+    /// <summary>
+    /// Small helper class for Distance unit conversions
+    /// </summary>
+    public static class Distance
+    {
+        public static double ToAU(double km)
+        {
+            return km / Constants.Units.KmPerAu;
+        }
+
+        public static double ToKm(double au)
+        {
+            return au * Constants.Units.KmPerAu;
+        }
+    }
+
 
     public class WeightedValue<T>
     {

@@ -7,6 +7,7 @@ using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 using System.Drawing;
 using System.Collections.ObjectModel;
+using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Entities
 {
@@ -28,7 +29,7 @@ namespace Pulsar4X.Entities
         {
             bool Intercept = false;
             StarSystem CurrentSystem = Missile.missileGroup.contact.Position.System;
-            float PointBlank = 10000.0f / (float)Constants.Units.KM_PER_AU;
+            float PointBlank = (float)Distance.ToAU(10000.0);
 
             /// <summary>
             /// loop through every faction.
@@ -246,7 +247,7 @@ namespace Pulsar4X.Entities
                                     rangeAreaDefenseKm = ShipBeamFC.pDRange * 10000.0f;
                                 }
 
-                                float distKM = dist * (float)Constants.Units.KM_PER_AU;
+                                float distKM = (float)Distance.ToKm(dist);
 
                                 /// <summary>
                                 /// Additional paranoia check of range, I need to fix Area defense PD range values to ship bfc range in any event, that hasn't been done yet.
@@ -380,7 +381,7 @@ namespace Pulsar4X.Entities
                             /// Range is in 10K units so it has to be adjusted to AU for later down.
                             /// </summary>
 #warning magic 10k number here
-                            float range = (Math.Min(MFCEngageDistKm, rangeAreaDefenseKm) / (float)Constants.Units.KM_PER_AU);
+                            float range = (float)Distance.ToAU((Math.Min(MFCEngageDistKm, rangeAreaDefenseKm)));
                             range = range * 10000.0f;
 
                             int MSize = 0;

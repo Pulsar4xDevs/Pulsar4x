@@ -83,13 +83,13 @@ namespace Pulsar4X
         /// </summary>
         public static Dictionary<SpectralType, MinMaxStruct> StarRadiusBySpectralType = new Dictionary<SpectralType, MinMaxStruct>()
             {
-                { SpectralType.O, new MinMaxStruct() { _min = 6.6 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 250 * Constants.Units.SOLAR_RADIUS_IN_AU } },
-                { SpectralType.B, new MinMaxStruct() { _min = 1.8 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 6.6 * Constants.Units.SOLAR_RADIUS_IN_AU } },
-                { SpectralType.A, new MinMaxStruct() { _min = 1.4 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 1.8 * Constants.Units.SOLAR_RADIUS_IN_AU } },
-                { SpectralType.F, new MinMaxStruct() { _min = 1.15 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 1.4 * Constants.Units.SOLAR_RADIUS_IN_AU } },
-                { SpectralType.G, new MinMaxStruct() { _min = 0.96 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 1.15 * Constants.Units.SOLAR_RADIUS_IN_AU } },
-                { SpectralType.K, new MinMaxStruct() { _min = 0.7 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 0.96 * Constants.Units.SOLAR_RADIUS_IN_AU } },
-                { SpectralType.M, new MinMaxStruct() { _min = 0.12 * Constants.Units.SOLAR_RADIUS_IN_AU, _max = 0.7 * Constants.Units.SOLAR_RADIUS_IN_AU} },
+                { SpectralType.O, new MinMaxStruct() { _min = 6.6 * Constants.Units.SolarRadiusInAu, _max = 250 * Constants.Units.SolarRadiusInAu } },
+                { SpectralType.B, new MinMaxStruct() { _min = 1.8 * Constants.Units.SolarRadiusInAu, _max = 6.6 * Constants.Units.SolarRadiusInAu } },
+                { SpectralType.A, new MinMaxStruct() { _min = 1.4 * Constants.Units.SolarRadiusInAu, _max = 1.8 * Constants.Units.SolarRadiusInAu } },
+                { SpectralType.F, new MinMaxStruct() { _min = 1.15 * Constants.Units.SolarRadiusInAu, _max = 1.4 * Constants.Units.SolarRadiusInAu } },
+                { SpectralType.G, new MinMaxStruct() { _min = 0.96 * Constants.Units.SolarRadiusInAu, _max = 1.15 * Constants.Units.SolarRadiusInAu } },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.7 * Constants.Units.SolarRadiusInAu, _max = 0.96 * Constants.Units.SolarRadiusInAu } },
+                { SpectralType.M, new MinMaxStruct() { _min = 0.12 * Constants.Units.SolarRadiusInAu, _max = 0.7 * Constants.Units.SolarRadiusInAu} },
             };
 
         /// <summary>
@@ -128,13 +128,13 @@ namespace Pulsar4X
         /// </summary>
         public static Dictionary<SpectralType, MinMaxStruct> StarMassBySpectralType = new Dictionary<SpectralType, MinMaxStruct>()
             {
-                { SpectralType.O, new MinMaxStruct() { _min = 16 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 265 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
-                { SpectralType.B, new MinMaxStruct() { _min = 2.1 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 16 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
-                { SpectralType.A, new MinMaxStruct() { _min = 1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 2.1 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
-                { SpectralType.F, new MinMaxStruct() { _min = 1.04 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 1.4 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
-                { SpectralType.G, new MinMaxStruct() { _min = 0.8 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 1.04 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
-                { SpectralType.K, new MinMaxStruct() { _min = 0.45 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 0.8 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
-                { SpectralType.M, new MinMaxStruct() { _min = 0.08 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS, _max = 0.45 * Constants.Units.SOLAR_MASS_IN_KILOGRAMS } },
+                { SpectralType.O, new MinMaxStruct() { _min = 16 * Constants.Units.SolarMassInKG, _max = 265 * Constants.Units.SolarMassInKG } },
+                { SpectralType.B, new MinMaxStruct() { _min = 2.1 * Constants.Units.SolarMassInKG, _max = 16 * Constants.Units.SolarMassInKG } },
+                { SpectralType.A, new MinMaxStruct() { _min = 1.4 * Constants.Units.SolarMassInKG, _max = 2.1 * Constants.Units.SolarMassInKG } },
+                { SpectralType.F, new MinMaxStruct() { _min = 1.04 * Constants.Units.SolarMassInKG, _max = 1.4 * Constants.Units.SolarMassInKG } },
+                { SpectralType.G, new MinMaxStruct() { _min = 0.8 * Constants.Units.SolarMassInKG, _max = 1.04 * Constants.Units.SolarMassInKG } },
+                { SpectralType.K, new MinMaxStruct() { _min = 0.45 * Constants.Units.SolarMassInKG, _max = 0.8 * Constants.Units.SolarMassInKG } },
+                { SpectralType.M, new MinMaxStruct() { _min = 0.08 * Constants.Units.SolarMassInKG, _max = 0.45 * Constants.Units.SolarMassInKG } },
             };
 
         /// <summary>
@@ -249,7 +249,7 @@ namespace Pulsar4X
         /// This is the Absolute maximum orbit of moons, in AU.
         /// @note The maximum may be RelativeMaxMoonOrbitDistance instead, but will never be more then this.
         /// </summary>
-        public const double AbsoluteMaxMoonOrbitDistance = 60581692 / Constants.Units.KM_PER_AU;
+        public const double AbsoluteMaxMoonOrbitDistance = 60581692 / Constants.Units.KmPerAu;
 
         /// <summary>
         /// This is the relative maximum orbit of moons, in AU. it is times by the parents semiMajorAxis.
@@ -294,11 +294,11 @@ namespace Pulsar4X
         /// </summary>
         public static Dictionary<SystemBody.PlanetType, MinMaxStruct> SystemBodyMassByType = new Dictionary<SystemBody.PlanetType, MinMaxStruct>()
             {
-                { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 500 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
-                { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 30 * Constants.Units.EARTH_MASS_IN_KILOGRAMS} },
-                { SystemBody.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 15 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
-                { SystemBody.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05 * Constants.Units.EARTH_MASS_IN_KILOGRAMS, _max = 5 * Constants.Units.EARTH_MASS_IN_KILOGRAMS }  },
-                { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 1E16, _max = 1 * Constants.Units.EARTH_MASS_IN_KILOGRAMS } },
+                { SystemBody.PlanetType.GasGiant, new MinMaxStruct() { _min = 15 * Constants.Units.EarthMassInKG, _max = 500 * Constants.Units.EarthMassInKG } },
+                { SystemBody.PlanetType.IceGiant, new MinMaxStruct() { _min = 5 * Constants.Units.EarthMassInKG, _max = 30 * Constants.Units.EarthMassInKG} },
+                { SystemBody.PlanetType.GasDwarf, new MinMaxStruct() { _min = 1 * Constants.Units.EarthMassInKG, _max = 15 * Constants.Units.EarthMassInKG } },
+                { SystemBody.PlanetType.Terrestrial, new MinMaxStruct() { _min = 0.05 * Constants.Units.EarthMassInKG, _max = 5 * Constants.Units.EarthMassInKG }  },
+                { SystemBody.PlanetType.Moon, new MinMaxStruct() { _min = 1E16, _max = 1 * Constants.Units.EarthMassInKG } },
                 { SystemBody.PlanetType.IceMoon, new MinMaxStruct() { _min = 1E16, _max = 5E22 } }, // note 1E16 is 1 nano earth mass.
                 { SystemBody.PlanetType.DwarfPlanet, new MinMaxStruct() { _min = 2E20 , _max = 5E23 } },
                 { SystemBody.PlanetType.Asteroid, new MinMaxStruct() { _min = 1E15, _max = 9E19 } },
@@ -420,11 +420,11 @@ namespace Pulsar4X
 
         public static Dictionary<SystemBody.PlanetType, double> MaxMoonOrbitDistanceByPlanetType = new Dictionary<SystemBody.PlanetType, double>()
             {
-                { SystemBody.PlanetType.GasGiant, 60581692 / Constants.Units.KM_PER_AU },  // twice higest jupiter moon orbit
-                { SystemBody.PlanetType.IceGiant, 49285000 / Constants.Units.KM_PER_AU },   // twice Neptunes highest moon orbit
-                { SystemBody.PlanetType.GasDwarf, 6058169  / Constants.Units.KM_PER_AU },   // WAG
-                { SystemBody.PlanetType.Terrestrial, 1923740 / Constants.Units.KM_PER_AU }, // 5 * luna orbit.
-                { SystemBody.PlanetType.DwarfPlanet, 25000 / Constants.Units.KM_PER_AU },   // WAG
+                { SystemBody.PlanetType.GasGiant, 60581692 / Constants.Units.KmPerAu },  // twice higest jupiter moon orbit
+                { SystemBody.PlanetType.IceGiant, 49285000 / Constants.Units.KmPerAu },   // twice Neptunes highest moon orbit
+                { SystemBody.PlanetType.GasDwarf, 6058169  / Constants.Units.KmPerAu },   // WAG
+                { SystemBody.PlanetType.Terrestrial, 1923740 / Constants.Units.KmPerAu }, // 5 * luna orbit.
+                { SystemBody.PlanetType.DwarfPlanet, 25000 / Constants.Units.KmPerAu },   // WAG
             };
 
         /// <summary>
