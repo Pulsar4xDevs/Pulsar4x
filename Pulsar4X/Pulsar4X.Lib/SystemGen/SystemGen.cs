@@ -1581,33 +1581,15 @@ namespace Pulsar4X
             /// <summary>
             /// Only the system primary will have jumppoints if this is true.
             /// </summary>
-            if (Constants.GameSettings.PrimaryOnlyJumpPoints == true)
+            int i = 0;
+            do
             {
-                if (numJumpPoints == -1)
-                {
-                    int ConnectivityChance = m_RNG.Next(100);
-                    if (ConnectivityChance < 10)
-                    {
-                        numJumpPoints = m_RNG.Next(14) + 1;
-
-                    }
-                    else
-                    {
-                        numJumpPoints = m_RNG.Next(4) + 1;
-                    }
-                }
+                Star currentStar = system.Stars[i];
+                starList.Add(GetNaturalJumpPointGeneration(currentStar), currentStar);
+                i++;
             }
-            else
-            {
+            while (i < system.Stars.Count && !Constants.GameSettings.PrimaryOnlyJumpPoints);
 
-                foreach (Star currentStar in system.Stars)
-                {
-                    // Build our weighted list based on how many JP's the star naturally
-                    // wants to generate.
-                    starList.Add(GetNaturalJumpPointGeneration(currentStar), currentStar);
-                }
-            }
-                
             // If numJumpPoints wasn't specified by the systemGen,
             // then just make as many jumpPoints as our stars cumulatively want to make.
             if (numJumpPoints == -1)
@@ -1615,23 +1597,18 @@ namespace Pulsar4X
 
             numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointConnectivity);
 
+            if (Constants.GameSettings.SystemJumpPointHubChance > m_RNG.Next(100))
+            {
+                numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointHubConnectivity);
+            }
+
             int jumpPointsGenerated = 0;
             while (jumpPointsGenerated < numJumpPoints)
             {
                 double rnd = m_RNG.NextDouble();
 
-                /// <summary>
-                /// Only the system primary will have jumppoints if this is true.
-                /// </summary>
-                if (Constants.GameSettings.PrimaryOnlyJumpPoints == true)
-                {
-                    GenerateJumpPoint(system.Stars[0]);
-                }
-                else
-                {
-                    // Generate a jump point on a star from the weighted list.
-                    GenerateJumpPoint(starList.Select(rnd));
-                }
+                // Generate a jump point on a star from the weighted list.
+                GenerateJumpPoint(starList.Select(rnd));
                 jumpPointsGenerated++;
             }
 
