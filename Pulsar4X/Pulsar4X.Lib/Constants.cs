@@ -1037,6 +1037,11 @@ namespace Pulsar4X
 
             // Chance for a null-owned jumpgate to be present on a newly generated JP.
             public static int JumpPointGatedChance = 10;
+
+            /// <summary>
+            /// Jumppoints will not appear on secondary stars if true.
+            /// </summary>
+            public static bool PrimaryOnlyJumpPoints = false;
         }
     }
 }
