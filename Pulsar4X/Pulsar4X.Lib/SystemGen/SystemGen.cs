@@ -1548,10 +1548,21 @@ namespace Pulsar4X
             m_RNG = new Random(GalaxyGen.SeedRNG.Next()); // Is there a better way?
 
             Star luckyStar;
-            do
+
+            /// <summary>
+            /// Only the system primary will have jumppoints if this is true.
+            /// </summary>
+            if (Constants.GameSettings.PrimaryOnlyJumpPoints == true)
             {
-                luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
-            } while (luckyStar.Planets.Count != 0);
+                luckyStar = system.Stars[0];
+            }
+            else
+            {
+                do
+                {
+                    luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+                } while (luckyStar.Planets.Count != 0);
+            }
 
             return GenerateJumpPoint(luckyStar);
         }
@@ -1567,12 +1578,17 @@ namespace Pulsar4X
         {
             WeightedList<Star> starList = new WeightedList<Star>();
 
-            foreach (Star currentStar in system.Stars)
+            /// <summary>
+            /// Only the system primary will have jumppoints if this is true.
+            /// </summary>
+            int i = 0;
+            do
             {
-                // Build our weighted list based on how many JP's the star naturally
-                // wants to generate.
+                Star currentStar = system.Stars[i];
                 starList.Add(GetNaturalJumpPointGeneration(currentStar), currentStar);
+                i++;
             }
+            while (i < system.Stars.Count && !Constants.GameSettings.PrimaryOnlyJumpPoints);
 
             // If numJumpPoints wasn't specified by the systemGen,
             // then just make as many jumpPoints as our stars cumulatively want to make.
@@ -1580,6 +1596,11 @@ namespace Pulsar4X
                 numJumpPoints = (int)starList.TotalWeight;
 
             numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointConnectivity);
+
+            if (Constants.GameSettings.SystemJumpPointHubChance > m_RNG.Next(100))
+            {
+                numJumpPoints = (int)Math.Round(numJumpPoints * Constants.GameSettings.JumpPointHubConnectivity);
+            }
 
             int jumpPointsGenerated = 0;
             while (jumpPointsGenerated < numJumpPoints)
@@ -1599,9 +1620,9 @@ namespace Pulsar4X
         /// </summary>
         private static int GetNaturalJumpPointGeneration(Star star)
         {
-            if (star.Planets.Count == 0)
+            if (star.Planets.Count == 0 && star != star.Position.System.Stars[0])
             {
-                return 0; // Don't generate JP's on planetless stars.
+                return 0; // Don't generate JP's on non-primary planetless stars.
             }
 
             int numJumpPoints = 1; // Each star always generates a JP.
@@ -1647,8 +1668,8 @@ namespace Pulsar4X
         /// </summary>
         private static JumpPoint GenerateJumpPoint(Star star)
         {
-            double minRadius = double.MaxValue;
-            double maxRadius = double.MinValue;
+            double minRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._min;
+            double maxRadius = GalaxyGen.OrbitalDistanceByStarSpectralType[star.SpectralType]._max;
 
             // Clamp generation to within the planetary system.
             foreach (SystemBody currentPlanet in star.Planets)

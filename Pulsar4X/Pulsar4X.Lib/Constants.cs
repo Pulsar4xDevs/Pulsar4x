@@ -1023,6 +1023,12 @@ namespace Pulsar4X
             // How connected universe is. Multiplier for number of JP's generated.
             public static decimal JumpPointConnectivity = 1;
 
+            // Percent chance of a "Hub JP System" to be created.
+            public static int SystemJumpPointHubChance = 10;
+
+            // How connected a "Hub System" is. Multiplier for number of JP's generated.
+            public static decimal JumpPointHubConnectivity = 2;
+
             // Base chance for each planet to generate a JP.
             public static int JumpPointGenerationChance = 10;
 
@@ -1037,6 +1043,11 @@ namespace Pulsar4X
 
             // Chance for a null-owned jumpgate to be present on a newly generated JP.
             public static int JumpPointGatedChance = 10;
+
+            /// <summary>
+            /// Jumppoints will not appear on secondary stars if true.
+            /// </summary>
+            public static bool PrimaryOnlyJumpPoints = false;
         }
     }
 }
