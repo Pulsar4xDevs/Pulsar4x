@@ -499,5 +499,11 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
         }
+
+
+        private static void GetShipList(Population CurrentPopulation)
+        {
+            //CurrentPopulation.Planet.TaskGroupsInOrbit;
+        }
     }
 }

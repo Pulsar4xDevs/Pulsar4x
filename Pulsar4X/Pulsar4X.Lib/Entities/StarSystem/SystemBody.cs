@@ -185,6 +185,9 @@ namespace Pulsar4X.Entities
                 m_aiMinerialReserves[mineralIterator] = 0.0f;
                 m_aiMinerialAccessibility[mineralIterator] = 0.0f;
             }
+
+#warning planet generation needs minerals, anomalies, and ruins generation.
+            PlanetaryRuins = new Ruins();
         }
 
 

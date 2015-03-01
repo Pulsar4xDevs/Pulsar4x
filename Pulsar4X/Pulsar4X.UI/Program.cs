@@ -59,11 +59,12 @@ namespace Pulsar4X.UI
             {
                 oNewFaction.AddNewContactList(CurSystem);
             }
-            Entities.SystemBody P1 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< @tdo WTF???
+            Entities.SystemBody P1 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< @tdo WTF??? Alpha Build Related Area fat fingering ^
             P1.Position.X = 10.0;
             P1.Position.Y = 10.0;
 
             oNewFaction.Capitol = oNewFaction.Populations[0].Planet;
+            oNewFaction.Capitol.GeoSurveyList.Add(oNewFaction, true);
             oNewFaction.AddNewTaskGroup("Combat Taskgroup  HR", P1, sol);
             oNewFaction.FactionColor = System.Drawing.Color.Blue;
 
@@ -81,12 +82,13 @@ namespace Pulsar4X.UI
                 oNewFaction2.AddNewContactList(CurSystem);
             }
 
-            Entities.SystemBody P2 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< wtf???
+            Entities.SystemBody P2 = new Entities.SystemBody(sol.Stars[0], Entities.SystemBody.PlanetType.Comet);  ///< wtf??? its a fatfinger to initialize the position of Combat Taskgroup TR
             P2.Position.X = -10.0;
             P2.Position.Y = -10.0;
 
 
             oNewFaction2.Capitol = oNewFaction2.Populations[0].Planet;
+            oNewFaction2.Capitol.GeoSurveyList.Add(oNewFaction2, true);
             oNewFaction2.AddNewTaskGroup("Combat Taskgroup TR", P2, sol);
             oNewFaction2.FactionColor = System.Drawing.Color.Red;
 

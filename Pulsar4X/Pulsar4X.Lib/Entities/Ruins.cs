@@ -60,6 +60,8 @@ namespace Pulsar4X.Entities
         {
             ///< @todo Generate a name/race for the ruins, and also how should difficulty be effected by having 2 ruins of the same race, with one already looted?
             /// -- Can you have two ruins of the same race on a single body?? i thought it was one planet, 1 runis - SnopyDogy
+            /// You cannot have two ruins on the same planet. However ruins of the same species on different planets may be looted. and once you've done the xenology work for said race
+            /// it should be easier to crack subsequent ruins of theirs. presumably. I've never really run into this condition in Aurora.
             RuinTechLevel = GameState.RNG.Next(5);
 
             RuinSize = RSize.NoRuins;

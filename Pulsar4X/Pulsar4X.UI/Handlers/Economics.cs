@@ -1566,7 +1566,7 @@ namespace Pulsar4X.UI.Handlers
         {
             try
             {
-                if (CurrentPopulation != null)
+                if (CurrentPopulation != null && m_oSummaryPanel.SummaryDataGrid.Rows.Count != 0)
                 {
 
                     /// <summary>
@@ -2181,7 +2181,8 @@ namespace Pulsar4X.UI.Handlers
             catch
             {
 #if LOG4NET_ENABLED
-                logger.Error("Something whent wrong Refreshing Cells for Economics summary screen...");
+                String LoggerEntry = String.Format("Ran into an error in RefreshSummaryCells.");
+                logger.Error(LoggerEntry);
 #endif
             }
         }
@@ -3398,7 +3399,7 @@ namespace Pulsar4X.UI.Handlers
 #warning fighters and PDCs not yet handled here.
             try
             {
-                if (CurrentPopulation != null)
+                if (CurrentPopulation != null && m_oSummaryPanel.ConstructionDataGrid.Rows.Count != 0)
                 {
                     float BuildPercentage = 0.0f;
 
