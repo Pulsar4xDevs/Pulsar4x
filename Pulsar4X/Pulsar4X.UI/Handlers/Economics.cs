@@ -2077,11 +2077,11 @@ namespace Pulsar4X.UI.Handlers
                     m_oSummaryPanel.SummaryDataGrid.Rows[12 + Adjust1].Cells[1].Value = "";
                     m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[0].Value = "Tectonics";
                     m_oSummaryPanel.SummaryDataGrid.Rows[13 + Adjust1].Cells[1].Value = null; //CurrentPopulation.SystemBody.PlanetaryTectonics;
-                    //if (CurrentPopulation.SystemBody.GeoTeamSurvey)
+                    if (CurrentPopulation.Planet.GeoSurveyList.ContainsKey(CurrentFaction) == true)
                     {
                         Entry = "Completed";
                     }
-                    //else
+                    else
                     {
                         Entry = "No";
                     }
