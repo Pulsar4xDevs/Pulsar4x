@@ -641,6 +641,16 @@ namespace Pulsar4X
             /// How many BP does a shipyard produce to modify itself for every 200 modRate?
             /// </summary>
             public const int BaseModProd = 834;
+
+            /// <summary>
+            /// How many BPs a shipyard produces annually(unmodified by leaders) that it can use to build ships.
+            /// </summary>
+            public static int[] ShipProductionRate = { 400, 560, 750, 1000, 1300, 1600, 2100, 2750, 3500, 4600, 6000, 8000};
+
+            /// <summary>
+            /// Current Techlevel maximum for ship production rate.
+            /// </summary>
+            public const int MaxShipProductionRate = 11;
         }
 
         /// <summary>

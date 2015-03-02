@@ -191,6 +191,11 @@ namespace Pulsar4X.Entities
         public PointDefenseList TaskGroupPDL { get; set; }
 
         /// <summary>
+        /// This taskgroup should not be allowed to move if it is in a shipyard.
+        /// </summary>
+        public bool IsInShipyard { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -208,6 +213,7 @@ namespace Pulsar4X.Entities
 
             IsOrbiting = true;
             OrbitingBody = StartingBody;
+            (OrbitingBody as SystemBody).TaskGroupsInOrbit.Add(this);
 
             SSEntity = StarSystemEntityType.TaskGroup;
 
@@ -291,6 +297,8 @@ namespace Pulsar4X.Entities
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
 
             TaskGroupPDL = new PointDefenseList();
+
+            IsInShipyard = false;
 
             //add default legal order for targeting TGs.
             _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
@@ -1212,6 +1220,7 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Classic: I commented this out to make secondary star orbits work, but left the rest of the adjustments in.
             /// In 0.3 I changed how planets store their position to use only their data, not their primary's data.
+            /// </summary>
             Contact.Position.X = OrbitingBody.Position.X;
             Contact.Position.Y = OrbitingBody.Position.Y;
         }

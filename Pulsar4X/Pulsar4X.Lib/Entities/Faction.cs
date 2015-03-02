@@ -452,6 +452,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.ShipProdRate] = 0;
 
             ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
             PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;

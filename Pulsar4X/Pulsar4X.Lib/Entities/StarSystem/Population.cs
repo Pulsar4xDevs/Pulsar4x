@@ -626,6 +626,8 @@ namespace Pulsar4X.Entities
             /// </summary>
             SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
 
+            Faction.AddNewTaskGroup("Shipyard TG", Planet, Planet.Position.System);
+
             Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo.Add(SYI);
             Installations[(int)Installation.InstallationType.MaintenanceFacility].Number = 5.0f;
             Installations[(int)Installation.InstallationType.ResearchLab].Number = 5.0f;

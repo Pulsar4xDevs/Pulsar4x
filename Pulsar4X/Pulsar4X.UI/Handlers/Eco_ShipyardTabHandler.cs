@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 using System.ComponentModel;
 
 #if LOG4NET_ENABLED
@@ -74,6 +75,9 @@ m_oRepairRefitScrapShipComboBox
     Visible during construction only
 m_oSYShipNameTextBox
 
+m_oRepairRefitScrapLabel
+m_oRepairRefitScrapClassComboBox
+
 Text Label format for the SY Tasks tab: "Annual Ship Building Rate Per Slipway for 5000 ton ship: 111    Available Slipways: 1"
 
 */
@@ -88,7 +92,31 @@ namespace Pulsar4X.UI.Handlers
 #if LOG4NET_ENABLED
         public static readonly ILog logger = LogManager.GetLogger(typeof(Eco_ShipyardTabHandler));
 #endif
+
+        /// <summary>
+        /// Rows for the shipyard datagrid.
+        /// </summary>
         private static int MaxShipyardRows { get; set; }
+
+        /// <summary>
+        /// Ships in orbit that are in need of repairs.
+        /// </summary>
+        private static BindingList<ShipTN> DamagedShipList { get; set; }
+
+        /// <summary>
+        /// List of classes that can be built at this shipyard.
+        /// </summary>
+        private static BindingList<ShipClassTN> EligibleClassList { get; set; }
+
+        /// <summary>
+        /// List of classes that can be the target of a repair/refit/scrap operation.
+        /// </summary>
+        private static BindingList<ShipClassTN> ClassesInOrbit { get; set; }
+
+        /// <summary>
+        /// List of each ship assigned with a shipclass in orbit to be a potential target for a repair/refit/scrap operation. 
+        /// </summary>
+        private static BindingList<ShipTN> ShipsOfClassInOrbit { get; set; }
 
         /// <summary>
         /// Initialize the Shipyard tab
@@ -119,6 +147,14 @@ namespace Pulsar4X.UI.Handlers
                 RefreshShipyardDataGrid(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
                 RefreshSYCGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
                 BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
+                RefreshSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo);
+                BuildSYTRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo);
+
+                String Entry = String.Format("Shipyard Complex Activity({0})", SYInfo.Name);
+                m_oSummaryPanel.ShipyardTaskGroupBox.Text = Entry;
+
+                Entry = String.Format("Create Task({0})", SYInfo.Name);
+                m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
             }
         }
 
@@ -191,7 +227,7 @@ namespace Pulsar4X.UI.Handlers
             catch
             {
 #if LOG4NET_ENABLED
-                logger.Error("Something whent wrong Creating ShipyardDataGrid Columns for Economics summary screen...");
+                logger.Error("Something whent wrong Creating ShipyardDataGrid Columns for Eco_ShipyardTabHandler.cs");
 #endif
             }
         }
@@ -226,10 +262,154 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.SYTaskTypeComboBox.Items.Clear();
             m_oSummaryPanel.SYTaskTypeComboBox.DataSource = Constants.ShipyardInfo.ShipyardTaskType;
             m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// Refreshing the shipyard task groupbox will be necessary on player input.
+        /// </summary>
+        /// <param name="m_oSummaryPanel">The economics handler panel.</param>
+        /// <param name="CurrentFaction">Selected faction from the economics handler.</param>
+        /// <param name="CurrentPopulation">Selected population from the economics handler.</param>
+        /// <param name="SYInfo">Shipyard information from the economics handler.</param>
+        public static void RefreshSYTaskGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
+        {
+            if(m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex != -1)
+            {
+                Constants.ShipyardInfo.Task CurrentSYTask = (Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex;
+
+                switch (CurrentSYTask)
+                {
+                    case Constants.ShipyardInfo.Task.Construction:
+                        
+                        /// <summary>
+                        /// Fill the taskgroups in orbit combo box.
+                        /// </summary>
+                        m_oSummaryPanel.SYTaskGroupComboBox.Items.Clear();
+                        foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+                        {
+                            if(CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                                m_oSummaryPanel.SYTaskGroupComboBox.Items.Add(CurrentTaskGroup);
+                        }
+#warning later on look for Shipyard TG? and should shipyard TG be "special"?
+                        if (m_oSummaryPanel.SYTaskGroupComboBox.Items.Count != 0)
+                            m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex = 0;
+
+                        if (SYInfo.AssignedClass != null)
+                        {
+                            m_oSummaryPanel.SYNewClassComboBox.Items.Clear();
+
+                            GetEligibleClassList(CurrentFaction, SYInfo);
+
+                            foreach (ShipClassTN CurrentClass in EligibleClassList)
+                            {
+                                m_oSummaryPanel.SYNewClassComboBox.Items.Add(CurrentClass);
+                            }
+                            if (m_oSummaryPanel.SYNewClassComboBox.Items.Count != 0)
+                                m_oSummaryPanel.SYNewClassComboBox.SelectedIndex = 0;
+
+                            int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[0]);
+                            String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
+                                                         (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
+                            m_oSummaryPanel.SYShipNameTextBox.Text = Entry; 
+                        }
+
+                        break;
+                    case Constants.ShipyardInfo.Task.Repair:
+                        m_oSummaryPanel.RepairRefitScrapLabel.Text = "Repair";
+                        GetDamagedShipList(CurrentFaction, CurrentPopulation);
+                        m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
+                        foreach (ShipTN CurrentShip in DamagedShipList)
+                        {
+                            m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Add(CurrentShip);
+                        }
+                        if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
+                            m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
+                        break;
+                    case Constants.ShipyardInfo.Task.Refit:
+                        m_oSummaryPanel.RepairRefitScrapLabel.Text = "Refit";
+                        GetShipClassesInOrbit(CurrentFaction, CurrentPopulation);
+                        m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Clear();
+                        foreach (ShipClassTN CurrentClass in ClassesInOrbit)
+                        {
+                            m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Add(CurrentClass);
+                        }
+                        ShipClassTN CurrentRRSClass = null;
+                        if (m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Count != 0)
+                        {
+                            m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex = 0;
+                            CurrentRRSClass = ClassesInOrbit[m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex];
+                        }
+
+                        if(CurrentRRSClass != null)
+                        {
+                            GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass);
+                            m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
+                            foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
+                            {
+                                m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Add(CurrentShip);
+                            }
+                            if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
+                                m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
+                        }
+                        break;
+                    case Constants.ShipyardInfo.Task.Scrap:
+                        m_oSummaryPanel.RepairRefitScrapLabel.Text = "Scrap";
+                        GetShipClassesInOrbit(CurrentFaction, CurrentPopulation);
+                        m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Clear();
+                        foreach (ShipClassTN CurrentClass in ClassesInOrbit)
+                        {
+                            m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Add(CurrentClass);
+                        }
+                        CurrentRRSClass = null;
+                        if (m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Count != 0)
+                        {
+                            m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex = 0;
+                            CurrentRRSClass = ClassesInOrbit[m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex];
+                        }
+
+                        if(CurrentRRSClass != null)
+                        {
+                            GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass);
+                            m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
+                            foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
+                            {
+                                m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Add(CurrentShip);
+                            }
+                            if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
+                                m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
+                        }
+
+                        break;
+                }
+
+            }
+        }
 
 
-            // Do Eligible classes here:
-            //m_oSYNewClassComboBox
+        /// <summary>
+        /// Update just the RRSShipComboBox since a full refresh will cause issues with constantly prompting more refreshes.
+        /// </summary>
+        /// <param name="m_oSummaryPanel">Current economics handler</param>
+        /// <param name="CurrentFaction">Selected faction</param>
+        /// <param name="CurrentPopulation">Selected population</param>
+        public static void RefreshRRSShipComboBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation)
+        {
+            if (m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex != -1)
+            {
+               ShipClassTN CurrentRRSClass = ClassesInOrbit[m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex];
+
+               GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass);
+
+               m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
+               foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
+               {
+                   m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Add(CurrentShip);
+                   if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
+                   {
+                       m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
+                   }
+               }
+            }
         }
 
 
@@ -500,10 +680,247 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-
-        private static void GetShipList(Population CurrentPopulation)
+        /// <summary>
+        /// Build the Shipyard task required minerals box.
+        /// </summary>
+        /// <param name="m_oSummaryPanel">Panel from the economics handler</param>
+        /// <param name="CurrentFaction">Currently selected faction.</param>
+        /// <param name="CurrentPopulation">Currently selected population</param>
+        /// <param name="SYInfo">Currently selected shipyard on currently selected population belonging to currently selected faction</param>
+        public static void BuildSYTRequiredMinerals(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
         {
-            //CurrentPopulation.Planet.TaskGroupsInOrbit;
+            if (m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex != -1 && m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex != -1 && SYInfo != null &&
+                (m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1 || m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex != -1))
+            {
+                m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Clear();
+
+                Installation.ShipyardInformation CostPrototyper = new Installation.ShipyardInformation(SYInfo.ShipyardType);
+                CostPrototyper.Tonnage = SYInfo.Tonnage;
+                CostPrototyper.Slipways = SYInfo.Slipways;
+                CostPrototyper.ModRate = SYInfo.ModRate;
+                CostPrototyper.AssignedClass = SYInfo.AssignedClass;
+
+                ShipTN CurrentShip = null;
+                ShipClassTN ConstructRefit = null;
+                TaskGroupTN TargetTG = null;
+                int TGIndex = -1;
+
+                /// <summary>
+                /// I'm not storing a faction only list of taskgroups in orbit anywhere, so lets calculate that here.
+                /// </summary>
+                foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+                {
+                    if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                    {
+                        if (TGIndex == m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex)
+                        {
+                            TargetTG = CurrentTaskGroup;
+                            break;
+                        }
+                        TGIndex++;
+                    }
+                }
+
+                /// <summary>
+                /// This is some sort of error condition. do I really care though? only if it horribly breaks the cost prototyping process.
+                /// </summary>
+                if (TGIndex == -1)
+                    return;
+
+
+                Constants.ShipyardInfo.Task SYITask = (Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex;
+
+
+                int BaseBuildRate = SYInfo.CalcShipBuildRate(CurrentFaction, CurrentPopulation);
+
+                if ((int)SYITask != -1)
+                {
+                    switch (SYITask)
+                    {
+                        case Constants.ShipyardInfo.Task.Construction:
+                            int newShipIndex = m_oSummaryPanel.SYNewClassComboBox.SelectedIndex;
+                            if (newShipIndex != -1)
+                            {
+                                ConstructRefit = EligibleClassList[newShipIndex];
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Repair:
+                            int CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
+                            if (CurrentShipIndex != -1)
+                            {
+                                CurrentShip = DamagedShipList[CurrentShipIndex];
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Refit:
+                            newShipIndex = m_oSummaryPanel.SYNewClassComboBox.SelectedIndex;
+                            if (newShipIndex != -1)
+                            {
+                                ConstructRefit = EligibleClassList[newShipIndex];
+                            }
+
+                            CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
+                            if (CurrentShipIndex != -1)
+                            {
+                                CurrentShip = ShipsOfClassInOrbit[CurrentShipIndex];
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Scrap:
+                            CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
+                            if (CurrentShipIndex != -1)
+                            {
+                                CurrentShip = ShipsOfClassInOrbit[CurrentShipIndex];
+                            }
+                            break;
+                    }
+
+
+                    Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, ConstructRefit);
+                    CostPrototyper.BuildingShips.Add(NewTask);
+
+                    m_oSummaryPanel.SYTaskCostTextBox.Text = CostPrototyper.BuildingShips[0].Cost.ToString();
+                    m_oSummaryPanel.SYTaskCompletionDateTextBox.Text = CostPrototyper.BuildingShips[0].CompletionDate.ToShortDateString();;
+
+                    for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                    {
+
+                        if (CostPrototyper.BuildingShips[0].minerialsCost[MineralIterator] != 0.0m)
+                        {
+                            string FormattedMineralTotal = CostPrototyper.BuildingShips[0].minerialsCost[MineralIterator].ToString("#,##0");
+
+                            String CostString = String.Format("{0} {1} ({2})", (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal, CurrentPopulation.Minerials[MineralIterator]);
+                            m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Add(CostString);
+                        }
+                    }
+
+                }
+
+            }
+            else
+            {
+                m_oSummaryPanel.SYTaskCostTextBox.Text = "N/A";
+                m_oSummaryPanel.SYTaskCompletionDateTextBox.Text = "N/A";
+                m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Clear();
+            }
+        }
+
+        /// <summary>
+        /// Get a list of the shipclasses in orbit. this wll be needed to help prune repair/refit/scrap operation options.
+        /// </summary>
+        /// <param name="CurrentFaction">Current faction from the economics handler</param>
+        /// <param name="CurrentPopulation">Current Population from the economics handler.</param>
+        private static void GetShipClassesInOrbit(Faction CurrentFaction, Population CurrentPopulation)
+        {
+            ClassesInOrbit = new BindingList<ShipClassTN>();
+
+            foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+            {
+                if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                {
+                    foreach (ShipTN CurrentShip in CurrentTaskGroup.Ships)
+                    {
+                        if (ClassesInOrbit.Contains(CurrentShip.ShipClass) == false)
+                            ClassesInOrbit.Add(CurrentShip.ShipClass);
+                    }
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Now I want a list of the ships of a specific class that are in orbit. these will potentially be targets for repair, refit, or scrap operations.
+        /// </summary>
+        /// <param name="CurrentFaction">Economics handler selected faction.</param>
+        /// <param name="CurrentPopulation">Population from the economics handler.</param>
+        /// <param name="CurrentShipClass">Shipclass selected via the RepairRefitScrapClassComboBox</param>
+        private static void GetShipsOfClassInOrbit(Faction CurrentFaction, Population CurrentPopulation, ShipClassTN CurrentShipClass)
+        {
+            ShipsOfClassInOrbit = new BindingList<ShipTN>();
+            foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+            {
+                if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                {
+                    foreach (ShipTN CurrentShip in CurrentTaskGroup.Ships)
+                    {
+                        if (CurrentShip.ShipClass == CurrentShipClass)
+                            ShipsOfClassInOrbit.Add(CurrentShip);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// This function produces a list of ships that have taken Armor or component damage. repair will need this.
+        /// </summary>
+        /// <param name="CurrentPopulation">Population selected by the economics handler.</param>
+        /// <param name="DamagedShipsInOrbit">list of damaged ships this function will produce.</param>
+        private static void GetDamagedShipList(Faction CurrentFaction, Population CurrentPopulation)
+        {
+            DamagedShipList = new BindingList<ShipTN>();
+            foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+            {
+                if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                {
+                    foreach (ShipTN CurrentShip in CurrentTaskGroup.Ships)
+                    {
+                        /// <summary>
+                        /// Either a component is destroyed or the ship has taken armour damage.
+                        /// </summary>
+                        if (CurrentShip.DestroyedComponents.Count != 0 || CurrentShip.ShipArmor.isDamaged == true)
+                            DamagedShipList.Add(CurrentShip);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// This function gets the list of shipclasses this shipyard can build. In order to be considered eligible the class must be locked, and thus not alterable.
+        /// eligible classes are those that would cost within 20% of cost to refit this shipclass towards.
+        /// </summary>
+        /// <param name="CurrentFaction">Current faction from the economics handler.</param>
+        /// <param name="SYInfo">Currently selected shipyard.</param>
+        private static void GetEligibleClassList(Faction CurrentFaction, Installation.ShipyardInformation SYInfo)
+        {
+            if (SYInfo.AssignedClass == null)
+            {
+                return;
+            }
+
+            EligibleClassList = new BindingList<ShipClassTN>();
+
+            /// <summary>
+            /// Shipyards may always build the ship that they are tooled for.
+            /// </summary>
+            EligibleClassList.Add(SYInfo.AssignedClass);
+
+            /// <summary>
+            /// If the total refit cost is less than this, the CurrentClass is eligible.
+            /// </summary>
+            decimal RefitThreshold = SYInfo.AssignedClass.BuildPointCost * 0.2m;
+
+            /// <summary>
+            /// component definition and count lists for the assigned class. for refit purposes we don't care about any specialized component functionality, just cost here.
+            /// </summary>
+            BindingList<ComponentDefTN> AssignedClassComponents = SYInfo.AssignedClass.ListOfComponentDefs;
+            BindingList<short> AssignedClassComponentCounts = SYInfo.AssignedClass.ListOfComponentDefsCount;
+
+            foreach (ShipClassTN CurrentClass in CurrentFaction.ShipDesigns)
+            {
+                /// <summary>
+                /// Assigned class is already set to be built, and shouldn't ever be an "eligible class"
+                /// </summary>
+                if (CurrentClass == SYInfo.AssignedClass)
+                    continue;
+
+                /// <summary>
+                /// unlocked classes can be edited so I do not wish to have them included here.
+                /// </summary>
+                if(CurrentClass.IsLocked == true)
+                {
+                    decimal TotalRefitCost = SYInfo.AssignedClass.GetRefitCost(CurrentClass);
+
+                    if (TotalRefitCost <= RefitThreshold)
+                        EligibleClassList.Add(CurrentClass);
+                }
+            }
         }
     }
 }

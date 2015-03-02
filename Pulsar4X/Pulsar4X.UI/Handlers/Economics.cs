@@ -284,6 +284,7 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ShipyardDataGrid.SelectionChanged += new EventHandler(ShipyardDataGrid_SelectionChanged);
             m_oSummaryPanel.ExpandCapUntilXTextBox.TextChanged += new EventHandler(ExpandCapUntilXTextBox_TextChanged);
             m_oSummaryPanel.NewShipClassComboBox.SelectedIndexChanged += new EventHandler(NewShipClassComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndexChanged += new EventHandler(RepairRefitScrapClassComboBox_SelectedIndexChanged);
 
             m_oSummaryPanel.ShipyardDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ShipyardDataGrid.ColumnHeadersHeight = 34;
@@ -424,7 +425,9 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.SYShipNameTextBox.Visible = true;
                         m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = false;
                         m_oSummaryPanel.TaskGroupLabel.Visible = true;
-                        m_oSummaryPanel.SYTaskGroupComboBox.Visible = true;     
+                        m_oSummaryPanel.SYTaskGroupComboBox.Visible = true;
+                        m_oSummaryPanel.RepairRefitScrapLabel.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapClassComboBox.Visible = false;
                         break;
                     case Constants.ShipyardInfo.Task.Repair:
                         m_oSummaryPanel.NewClassLabel.Visible = false;
@@ -433,6 +436,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = true;
                         m_oSummaryPanel.TaskGroupLabel.Visible = false;
                         m_oSummaryPanel.SYTaskGroupComboBox.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapLabel.Visible = true;
+                        m_oSummaryPanel.RepairRefitScrapClassComboBox.Visible = false;
                         
                         break;
                     case Constants.ShipyardInfo.Task.Refit:
@@ -442,6 +447,8 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = true;
                         m_oSummaryPanel.TaskGroupLabel.Visible = false;
                         m_oSummaryPanel.SYTaskGroupComboBox.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapLabel.Visible = true;
+                        m_oSummaryPanel.RepairRefitScrapClassComboBox.Visible = true;
                         break;
                     case Constants.ShipyardInfo.Task.Scrap:
                         m_oSummaryPanel.NewClassLabel.Visible = false;
@@ -450,9 +457,23 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.RepairRefitScrapShipComboBox.Visible = true;
                         m_oSummaryPanel.TaskGroupLabel.Visible = false;
                         m_oSummaryPanel.SYTaskGroupComboBox.Visible = false;
+                        m_oSummaryPanel.RepairRefitScrapLabel.Visible = true;
+                        m_oSummaryPanel.RepairRefitScrapClassComboBox.Visible = true;
                         break;
                 }
+
+                Eco_ShipyardTabHandler.RefreshSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
             }
+        }
+
+        /// <summary>
+        /// Update the RRS ship combo box based on the change in RRS class combobox.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RepairRefitScrapClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Eco_ShipyardTabHandler.RefreshRRSShipComboBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
         }
 
         /// <summary>
@@ -536,6 +557,15 @@ namespace Pulsar4X.UI.Handlers
                         {
                             PotentialRetoolTargets.Add(ShipClass);
                         }
+                    }
+
+                    if (CurrentSYInfo != null)
+                    {
+                        String Entry = String.Format("Shipyard Complex Activity({0})",CurrentSYInfo.Name);
+                        m_oSummaryPanel.ShipyardTaskGroupBox.Text = Entry;
+
+                        Entry = String.Format("Create Task({0})", CurrentSYInfo.Name);
+                        m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
                     }
 
                     Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);

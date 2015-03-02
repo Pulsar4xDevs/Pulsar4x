@@ -2332,6 +2332,119 @@ namespace Pulsar4X.Entities
                     break;
             }
         }
+
+        /// <summary>
+        /// This function returns the cost of repairing the specified component based on the data given to the damage control queue.
+        /// </summary>
+        /// <param name="ID">Id of component in general ship component list.</param>
+        /// <param name="CType">type of component.</param>
+        /// <returns>cost of said component.</returns>
+        public decimal GetDamagedComponentsRepairCost(int ID, ComponentTypeTN CType)
+        {
+            switch (CType)
+            {
+                case ComponentTypeTN.Crew:
+                       return CrewQuarters[ShipComponents[ID].componentIndex].genCompDef.cost;
+                    break;
+
+                case ComponentTypeTN.Fuel:
+                    return FuelTanks[ShipComponents[ID].componentIndex].genCompDef.cost;
+                    break;
+
+                case ComponentTypeTN.Engineering:
+                    return EngineeringBays[ShipComponents[ID].componentIndex].genCompDef.cost;
+                    break;
+
+                case ComponentTypeTN.Bridge:
+                case ComponentTypeTN.MaintenanceBay:
+                case ComponentTypeTN.FlagBridge:
+                case ComponentTypeTN.DamageControl:
+                case ComponentTypeTN.OrbitalHabitat:
+                case ComponentTypeTN.RecFacility:
+                    return OtherComponents[ShipComponents[ID].componentIndex].genCompDef.cost;
+                    break;
+
+                case ComponentTypeTN.Engine:
+                    /// <summary>
+                    /// All engines have to be the same, so engine 0 is used for these for convienience.
+                    /// </summary>
+                    return ShipEngine[0].engineDef.cost;
+                    break;
+
+                case ComponentTypeTN.PassiveSensor:
+                    return ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.cost;
+                    break;
+                case ComponentTypeTN.ActiveSensor:
+                    return ShipASensor[ShipComponents[ID].componentIndex].aSensorDef.cost;
+                    break;
+
+                case ComponentTypeTN.CargoHold:
+                    return ShipCargo[ShipComponents[ID].componentIndex].cargoDef.cost;
+                    break;
+
+                case ComponentTypeTN.CargoHandlingSystem:
+                    return ShipCHS[ShipComponents[ID].componentIndex].cargoHandleDef.cost;
+                    break;
+                case ComponentTypeTN.CryoStorage:
+                    return ShipColony[ShipComponents[ID].componentIndex].colonyDef.cost;
+                    break;
+                case ComponentTypeTN.BeamFireControl:
+                    return ShipBFC[ShipComponents[ID].componentIndex].beamFireControlDef.cost;
+                    break;
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.Gauss:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvRail:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.AdvParticle:
+                    return ShipBeam[ShipComponents[ID].componentIndex].beamDef.cost;
+                    break;
+
+                case ComponentTypeTN.Reactor:
+                    return ShipReactor[ShipComponents[ID].componentIndex].reactorDef.cost;
+                    break;
+
+                case ComponentTypeTN.Shield:
+                    return ShipShield[ShipComponents[ID].componentIndex].shieldDef.cost;
+                    break;
+
+                case ComponentTypeTN.AbsorptionShield:
+                    return ShipShield[ShipComponents[ID].componentIndex].shieldDef.cost;
+                    break;
+
+                case ComponentTypeTN.MissileLauncher:
+                    return ShipMLaunchers[ShipComponents[ID].componentIndex].missileLauncherDef.cost;
+                    break;
+
+                case ComponentTypeTN.Magazine:
+                    return ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.cost;
+                    break;
+
+                case ComponentTypeTN.MissileFireControl:
+                    return ShipMFC[ShipComponents[ID].componentIndex].mFCSensorDef.cost;
+                    break;
+
+                case ComponentTypeTN.CIWS:
+                    return ShipCIWS[ShipComponents[ID].componentIndex].cIWSDef.cost;
+                    break;
+
+                case ComponentTypeTN.Turret:
+                    return ShipTurret[ShipComponents[ID].componentIndex].turretDef.cost;
+                    break;
+
+                case ComponentTypeTN.JumpEngine:
+                    return ShipJumpEngine[ShipComponents[ID].componentIndex].jumpEngineDef.cost;
+                    break;
+            }
+
+            return 0.0m;
+        }
+
         /// <summary>
         /// Handle the consequences of a ship destruction in game mechanics. C# loses its cookies if I try to actually delete anything here.
         /// still many things need to be cleaned up when a ship is destroyed outright.
