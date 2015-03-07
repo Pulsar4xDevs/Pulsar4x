@@ -6,22 +6,13 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class PopulationDB : IDataBlob
+    class PopulationDB : BaseDataBlob
     {
-        public int Entity { get { return m_entityID; } }
-        private int m_entityID;
-
         public double PopulationSize;
 
-        public PopulationDB(int entityID, double popSize)
+        public PopulationDB(double popSize)
         {
-            m_entityID = entityID;
             PopulationSize = popSize;
-        }
-
-        public IDataBlob UpdateEntityID(int newEntityID)
-        {
-            return new PopulationDB(newEntityID, PopulationSize);
         }
     }
 }

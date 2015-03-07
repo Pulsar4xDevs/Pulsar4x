@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class RuinsDB : IDataBlob
+    class RuinsDB : BaseDataBlob
     {
         public enum RSize
         {
@@ -25,14 +25,6 @@ namespace Pulsar4X.ECSLib.DataBlobs
             Intact,
             MultipleIntact,
             Count
-        }
-
-        public int Entity { get { return m_entityID; } }
-        private readonly int m_entityID;
-
-        public IDataBlob UpdateEntityID(int newEntityID)
-        {
-            return new RuinsDB(newEntityID, RuinTechLevel, RuinSize, RuinQuality);
         }
 
         /// <summary>
@@ -57,7 +49,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="ruinTechLevel"> What kinds of things should be found in this ruin? including sophistication of killbots?</param>
         /// <param name="ruinSize">How big are these ruins?</param>
         /// <param name="ruinQuality"> What shape are these ruins in?</param>
-        public RuinsDB(int entityID, int ruinTechLevel, RSize ruinSize, RQuality ruinQuality)
+        public RuinsDB(int ruinTechLevel, RSize ruinSize, RQuality ruinQuality)
         { }
     }
 }

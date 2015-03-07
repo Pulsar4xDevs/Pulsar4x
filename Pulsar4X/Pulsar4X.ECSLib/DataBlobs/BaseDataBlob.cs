@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    public interface IDataBlob
+    public abstract class BaseDataBlob
     {
-        int Entity { get; }
-
-        IDataBlob UpdateEntityID(int newEntityID);
+        public int Entity { get; set; }
     }
 }

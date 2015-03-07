@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
     public class EntityManager
     {
         private List<int> m_entities;
-        private Dictionary<Type, List<IDataBlob>> m_dataBlobMap;
+        private Dictionary<Type, List<BaseDataBlob>> m_dataBlobMap;
 
         public EntityManager()
         {
@@ -24,7 +24,7 @@ namespace Pulsar4X.ECSLib
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public T GetDataBlob<T>(int entity) where T : IDataBlob
+        public T GetDataBlob<T>(int entity) where T : BaseDataBlob
         {
             return (T)m_dataBlobMap[typeof(T)][entity];
         }
@@ -35,9 +35,10 @@ namespace Pulsar4X.ECSLib
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <param name="dataBlob"></param>
-        public void SetDataBlob<T>(int entity, T dataBlob) where T : IDataBlob
+        public void SetDataBlob<T>(int entity, T dataBlob) where T : BaseDataBlob
         {
-            m_dataBlobMap[typeof(T)][entity] = dataBlob;
+            dataBlob.Entity = entity;
+            m_dataBlobMap[dataBlob.GetType()][entity] = dataBlob;
         }
 
         /// <summary>
@@ -45,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<T> GetAllDataBlobsOfType<T>() where T: IDataBlob
+        public List<T> GetAllDataBlobsOfType<T>() where T: BaseDataBlob
         {
             return m_dataBlobMap[typeof(T)].ConvertAll<T>(v => (T)v);
         }
@@ -55,13 +56,13 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public List<IDataBlob> GetAllDataBlobsOfEntity(int entity)
+        public List<BaseDataBlob> GetAllDataBlobsOfEntity(int entity)
         {
-            List<IDataBlob> entityDBs = new List<IDataBlob>();
+            List<BaseDataBlob> entityDBs = new List<BaseDataBlob>();
 
-            foreach (List<IDataBlob> entityDBMap in m_dataBlobMap.Values)
+            foreach (List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
             {
-                IDataBlob currDataBlob = entityDBMap[entity];
+                BaseDataBlob currDataBlob = entityDBMap[entity];
                 if (currDataBlob != null)
                 {
                     entityDBs.Add(currDataBlob);
@@ -114,7 +115,7 @@ namespace Pulsar4X.ECSLib
             {
                 m_entities.Add(i);
                 // Make sure the entityDBMaps have enough space for this entity.
-                foreach(List<IDataBlob> entityDBMap in m_dataBlobMap.Values)
+                foreach(List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
                 {
                     entityDBMap.Add(null);
                 }
@@ -124,7 +125,7 @@ namespace Pulsar4X.ECSLib
                 m_entities[i] = i;
                 // Make sure the EntityDBMaps are null for this entity.
                 // This should be done by RemoveEntity, but let's just be safe.
-                foreach (List<IDataBlob> entityDBMap in m_dataBlobMap.Values)
+                foreach (List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
                 {
                     entityDBMap[i] = null;
                 }
@@ -138,13 +139,12 @@ namespace Pulsar4X.ECSLib
         /// Adds an entity with the pre-existing datablobs to this EntityManager.
         /// </summary>
         /// <param name="dataBlobs"></param>
-        public void AddEntity(List<IDataBlob> dataBlobs)
+        public void AddEntity(List<BaseDataBlob> dataBlobs)
         {
             int entity = CreateEntity();
-            foreach (IDataBlob dataBlob in dataBlobs)
+            foreach (BaseDataBlob dataBlob in dataBlobs)
             {
-                IDataBlob newDataBlob = dataBlob.UpdateEntityID(entity);
-                m_dataBlobMap[newDataBlob.GetType()][entity] = newDataBlob;
+                SetDataBlob(entity, dataBlob);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         public void RemoveEntity(int entity)
         {
-            foreach (List<IDataBlob> entityDBMap in m_dataBlobMap.Values)
+            foreach (List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
             {
                 entityDBMap[entity] = null;
             }
@@ -168,22 +168,20 @@ namespace Pulsar4X.ECSLib
         public void Clear()
         {
             m_entities = new List<int>();
-            m_dataBlobMap = new Dictionary<Type, List<IDataBlob>>();
+            m_dataBlobMap = new Dictionary<Type, List<BaseDataBlob>>();
 
             // Use reflection to setup all our dataBlobMap.
-            Type dataBlobInterface = typeof(IDataBlob);
-
-            // Find all types that implement IDataBlob
+            // Find all types that implement BaseDataBlob
             List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t =>
-                    t != dataBlobInterface &&
-                    t.GetInterfaces().ToList().Contains(dataBlobInterface)
+                    t != typeof(BaseDataBlob) &&
+                    t.IsAssignableFrom(typeof(BaseDataBlob))
                 ).ToList();
 
             // Create a list in our dataBlobMap for each discovered type.
             foreach (Type dataBlobType in dataBlobTypes)
             {
-                m_dataBlobMap[dataBlobType] = new List<IDataBlob>();
+                m_dataBlobMap[dataBlobType] = new List<BaseDataBlob>();
             }
         }
     }

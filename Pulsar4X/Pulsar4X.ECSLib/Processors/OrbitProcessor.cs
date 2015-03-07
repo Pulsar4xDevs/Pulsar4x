@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib.Processors
             {
                 PositionDB orbitOffset = GetPosition(currentOrbit, currentTime);
                 PositionDB parentPosition = currentManager.GetDataBlob<PositionDB>(currentOrbit.Parent);
-                currentManager.SetDataBlob<PositionDB>(currentOrbit.Entity, orbitOffset + parentPosition);
+                currentManager.SetDataBlob(currentOrbit.Entity, orbitOffset + parentPosition);
             }
         }
 
@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib.Processors
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(orbit.Entity, 0, 0);
+                return new PositionDB(0, 0);
             }
 
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
@@ -62,7 +62,7 @@ namespace Pulsar4X.ECSLib.Processors
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(orbit.Entity, 0, 0);
+                return new PositionDB(0, 0);
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib.Processors
             x = radius * Math.Cos(trueAnomaly);
             y = radius * Math.Sin(trueAnomaly);
 
-            return new PositionDB(orbit.Entity, x, y);
+            return new PositionDB(x, y);
         }
 
         /// <summary>

@@ -5,11 +5,8 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class PositionDB : IDataBlob
+    class PositionDB : BaseDataBlob
     {
-        public int Entity { get { return m_entityID; } }
-        private int m_entityID;
-
         /// <summary>
         /// System X coordinante in AU
         /// </summary>
@@ -19,22 +16,14 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// System Y coordinante in AU
         /// </summary>
         public double Y;
-
-        public IDataBlob UpdateEntityID(int newEntityID)
-        {
-            return new PositionDB(newEntityID, X, Y);
-        }
-
         /// <summary>
         /// Initilized constructor.
         /// </summary>
         /// <param name="system">StarSystem value.</param>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
-        public PositionDB(int entityID, double x, double y)
+        public PositionDB(double x, double y)
         {
-            m_entityID = entityID;
-
             X = x;
             Y = y;
         }
@@ -71,7 +60,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <returns></returns>
         public static PositionDB operator +(PositionDB posA, PositionDB posB)
         {
-            return new PositionDB(posA.m_entityID, posA.X + posB.X, posA.Y + posB.Y);
+            return new PositionDB(posA.X + posB.X, posA.Y + posB.Y);
         }
     }
 }
