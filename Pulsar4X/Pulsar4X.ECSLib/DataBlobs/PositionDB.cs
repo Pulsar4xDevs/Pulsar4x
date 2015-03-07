@@ -5,20 +5,20 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    struct PositionDB : IDataBlob
+    class PositionDB : IDataBlob
     {
         public int Entity { get { return m_entityID; } }
-        private readonly int m_entityID;
+        private int m_entityID;
 
         /// <summary>
         /// System X coordinante in AU
         /// </summary>
-        public readonly double X;
+        public double X;
 
         /// <summary>
         /// System Y coordinante in AU
         /// </summary>
-        public readonly double Y;
+        public double Y;
 
         public IDataBlob UpdateEntityID(int newEntityID)
         {
@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="system">StarSystem value.</param>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
-        public PositionDB(int entityID, double x, double y) : this()
+        public PositionDB(int entityID, double x, double y)
         {
             m_entityID = entityID;
 

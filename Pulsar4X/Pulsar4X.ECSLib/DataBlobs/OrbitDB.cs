@@ -7,10 +7,10 @@ using Pulsar4X.ECSLib.Helpers.GameMath;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    struct OrbitDB : IDataBlob
+    class OrbitDB : IDataBlob
     {
         public int Entity { get { return m_entityID; } }
-        private readonly int m_entityID;
+        private int m_entityID;
 
         public IDataBlob UpdateEntityID(int newEntityID)
         {
@@ -21,88 +21,88 @@ namespace Pulsar4X.ECSLib.DataBlobs
             return new OrbitDB(newEntityID, Parent, Mass, ParentMass, SemiMajorAxis, Eccentricity, Inclination, LongitudeOfAscendingNode, ArgumentOfPeriapsis, MeanAnomaly, Epoch);
         }
 
-        public readonly int Parent;
+        public int Parent;
         
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
-        public readonly double Mass;
+        public double Mass;
 
         /// <summary>
         /// Mass in KG of parent (object this orbit orbits)
         /// </summary>
-        public readonly double ParentMass;
+        public double ParentMass;
 
         /// <summary>
         /// Semimajor Axis of orbit stored in AU.
         /// Average distance of orbit from center.
         /// </summary>
-        public readonly double SemiMajorAxis;
+        public double SemiMajorAxis;
 
         /// <summary>
         /// Eccentricity of orbit.
         /// Shape of the orbit. 0 = perfectly circular, 1 = parabolic.
         /// </summary>
-        public readonly double Eccentricity;
+        public double Eccentricity;
 
         /// <summary>
         /// Angle between the orbit and the flat referance plane.
         /// Stored in degrees.
         /// </summary>
-        public readonly double Inclination;
+        public double Inclination;
 
         /// <summary>
         /// Horizontal orientation of the point where the orbit crosses
         /// the referance frame stored in degrees.
         /// </summary>
-        public readonly double LongitudeOfAscendingNode;
+        public double LongitudeOfAscendingNode;
 
         /// <summary>
         /// Angle from the Ascending Node to the Periapsis stored in degrees.
         /// </summary>
-        public readonly double ArgumentOfPeriapsis;
+        public double ArgumentOfPeriapsis;
 
         /// <summary>
         /// Definition of the position of the body in the orbit at the referance time
         /// epoch. Mathematically convienant angle does not correspond to a real angle.
         /// Stored in degrees.
         /// </summary>
-        public readonly double MeanAnomaly;
+        public double MeanAnomaly;
 
         /// <summary>
         /// Referance time. Orbital parameters are stored relative to this referance.
         /// </summary>
-        public readonly DateTime Epoch;
+        public DateTime Epoch;
 
         /// <summary>
         /// 2-Body gravitational parameter of system.
         /// </summary>
-        public readonly double GravitationalParameter;
+        public double GravitationalParameter;
 
         /// <summary>
         /// Orbital Period of orbit.
         /// </summary>
-        public readonly TimeSpan OrbitalPeriod;
+        public TimeSpan OrbitalPeriod;
 
         /// <summary>
         /// Mean Motion of orbit. Stored as Degrees/Sec.
         /// </summary>
-        public readonly double MeanMotion;
+        public double MeanMotion;
 
         /// <summary>
         /// Point in orbit furthest from the ParentBody. Measured in AU.
         /// </summary>
-        public readonly double Apoapsis;
+        public double Apoapsis;
 
         /// <summary>
         /// Point in orbit closest to the ParentBody. Measured in AU.
         /// </summary>
-        public readonly double Periapsis;
+        public double Periapsis;
 
         /// <summary>
         /// Stationary orbits don't have all of the data to update. They always return (0, 0).
         /// </summary>
-        public readonly bool IsStationary;
+        public bool IsStationary;
 
         #region Construction Interface
         /// <summary>
@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             return new OrbitDB(entityID, mass);
         }
 
-        private OrbitDB(int entityID, double mass) : this()
+        private OrbitDB(int entityID, double mass)
         {
             m_entityID = entityID;
             Parent = -1;

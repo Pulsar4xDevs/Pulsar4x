@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    struct RuinsDB : IDataBlob
+    class RuinsDB : IDataBlob
     {
         public enum RSize
         {
@@ -58,7 +58,6 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="ruinSize">How big are these ruins?</param>
         /// <param name="ruinQuality"> What shape are these ruins in?</param>
         public RuinsDB(int entityID, int ruinTechLevel, RSize ruinSize, RQuality ruinQuality)
-            : this()
         { }
     }
 }

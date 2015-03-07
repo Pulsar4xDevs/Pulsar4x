@@ -57,42 +57,37 @@ namespace Pulsar4X.ECSLib
             List<int> populatedEntities = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
 
             // Get the Population DB of a specific entity.
-            PopulationDB planetPopDB;
-            GlobalManager.TryGetDataBlob<PopulationDB>(planet, out planetPopDB);
+            PopulationDB planetPopDB = GlobalManager.GetDataBlob<PopulationDB>(planet);
 
             // Change the planet Pop.
-            planetPopDB = new PopulationDB(planetPopDB.Entity, planetPopDB.PopulationSize + 5);
+            planetPopDB.PopulationSize += 5;
 
             // Get the current value.
-            PopulationDB planetPopDB2;
-            GlobalManager.TryGetDataBlob<PopulationDB>(planet, out planetPopDB2);
+            PopulationDB planetPopDB2 = GlobalManager.GetDataBlob<PopulationDB>(planet);
 
-            if (planetPopDB.PopulationSize == planetPopDB2.PopulationSize)
+            if (planetPopDB.PopulationSize != planetPopDB2.PopulationSize)
             {
-                // Note, we wont hit this because the value didn't actually change.
+                // Note, we wont hit this because the value DID change.
                 throw new InvalidOperationException();
             }
-
-            // Update the entity with new changes.
-            GlobalManager.SetDataBlob<PopulationDB>(planet, planetPopDB);
 
             // Forget it, remove the DataBlob.
-            GlobalManager.RemoveDataBlob<PopulationDB>(planet);
+            GlobalManager.SetDataBlob<PopulationDB>(planet, null);
 
-            if (GlobalManager.TryGetDataBlob<PopulationDB>(1, out planetPopDB))
-            {
-                // Wont hit this!
-                // Entity 1 doesn't have a population, so TryGetDataBlob fails.
-                throw new InvalidOperationException();
-            }
-            else
+            if (GlobalManager.GetDataBlob<PopulationDB>(1) == null)
             {
                 // Will hit this!
-                // planetPopDB is default(PopulationDB);
+                // Entity 1 doesn't have a population, so GetDataBlob returns null.
 
                 // This crap is so you can reliably breakpoint this (even in release mode) without it being optimized away.
                 int i = 0;
                 i++;
+            }
+            else
+            {
+                // Wont hit this!
+                // Since there's no pop!
+                throw new InvalidOperationException();
             }
 
             // Remove the crap we added.

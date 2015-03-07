@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    struct PopulationDB : IDataBlob
+    class PopulationDB : IDataBlob
     {
         public int Entity { get { return m_entityID; } }
-        private readonly int m_entityID;
+        private int m_entityID;
 
-        public readonly double PopulationSize;
+        public double PopulationSize;
 
         public PopulationDB(int entityID, double popSize)
         {

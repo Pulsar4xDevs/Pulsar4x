@@ -19,51 +19,25 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Returns a COPY of the datablob of the specific entity.
+        /// Returns the datablob of the specific entity.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public bool TryGetDataBlob<T>(int entity, out T dataBlob) where T : IDataBlob
+        public T GetDataBlob<T>(int entity) where T : IDataBlob
         {
-            IDataBlob dataBlobRef = m_dataBlobMap[typeof(T)][entity];
-            if (dataBlobRef == null)
-            {
-                dataBlob = default(T);
-                return false;
-            }
-            else
-            {
-                dataBlob = (T)dataBlobRef;
-                return false;
-            }
+            return (T)m_dataBlobMap[typeof(T)][entity];
         }
 
         /// <summary>
         /// Sets the DataBlob for the specified entity.
-        /// Do not use to remove the datablob.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <param name="dataBlob"></param>
         public void SetDataBlob<T>(int entity, T dataBlob) where T : IDataBlob
         {
-            if (dataBlob == null)
-            {
-                throw new ArgumentNullException("dataBlob", "Cannot set datablob to null. Use RemoveDataBlob to remove.");
-            }
-
             m_dataBlobMap[typeof(T)][entity] = dataBlob;
-        }
-
-        /// <summary>
-        /// Removes the specified DataBlob from the entity.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="entity"></param>
-        public void RemoveDataBlob<T>(int entity) where T: IDataBlob
-        {
-            m_dataBlobMap[typeof(T)][entity] = null;
         }
 
         /// <summary>
@@ -73,19 +47,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public List<T> GetAllDataBlobsOfType<T>() where T: IDataBlob
         {
-            List<T> dataBlobs = new List<T>();
-            List<IDataBlob> storedDataBlobs = m_dataBlobMap[typeof(T)];
-
-            for (int i = 0; i < storedDataBlobs.Count; i++ )
-            {
-                IDataBlob currentDataBlob = storedDataBlobs[i];
-                if (storedDataBlobs[i] != null)
-                {
-                    dataBlobs.Add((T)currentDataBlob);
-                }
-            }
-
-            return dataBlobs;
+            return m_dataBlobMap[typeof(T)].ConvertAll<T>(v => (T)v);
         }
 
         /// <summary>

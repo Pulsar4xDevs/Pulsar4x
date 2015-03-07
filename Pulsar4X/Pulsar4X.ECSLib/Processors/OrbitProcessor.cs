@@ -14,55 +14,13 @@ namespace Pulsar4X.ECSLib.Processors
             DateTime currentTime = Game.Instance.CurrentDateTime;
             foreach (OrbitDB currentOrbit in orbits)
             {
-                // Make sure our Epoch isn't too long ago.
-                DateTime newEpoch = ClampEpoch(currentOrbit, currentTime);
-
-                OrbitDB clampedOrbit = currentOrbit;
-
-                if (newEpoch != currentOrbit.Epoch)
-                {
-                    // Update the orbit with newEpoch.
-                    currentManager.SetDataBlob<OrbitDB>(currentOrbit.Entity,
-                        OrbitDB.FromAsteroidFormat(
-                        currentOrbit.Entity,
-                        currentOrbit.Parent,
-                        currentOrbit.Mass,
-                        currentOrbit.ParentMass,
-                        currentOrbit.SemiMajorAxis,
-                        currentOrbit.Eccentricity,
-                        currentOrbit.Inclination,
-                        currentOrbit.LongitudeOfAscendingNode,
-                        currentOrbit.ArgumentOfPeriapsis,
-                        currentOrbit.MeanAnomaly,
-                        newEpoch
-                        )
-                    );
-                    currentManager.TryGetDataBlob<OrbitDB>(currentOrbit.Entity, out clampedOrbit);
-                }
-
-                PositionDB orbitOffset = GetPosition(clampedOrbit, currentTime);
-                PositionDB parentPosition;
-                currentManager.TryGetDataBlob<PositionDB>(clampedOrbit.Parent, out parentPosition);
-                currentManager.SetDataBlob<PositionDB>(clampedOrbit.Entity, orbitOffset + parentPosition);
+                PositionDB orbitOffset = GetPosition(currentOrbit, currentTime);
+                PositionDB parentPosition = currentManager.GetDataBlob<PositionDB>(currentOrbit.Parent);
+                currentManager.SetDataBlob<PositionDB>(currentOrbit.Entity, orbitOffset + parentPosition);
             }
         }
 
         #region Orbit Position Calculations
-        public static DateTime ClampEpoch(OrbitDB orbit, DateTime time)
-        {
-            TimeSpan timeSinceEpoch = time - orbit.Epoch;
-            DateTime Epoch = orbit.Epoch;
-
-            while (timeSinceEpoch > orbit.OrbitalPeriod)
-            {
-                // Don't attempt to calculate large timeframes.
-                timeSinceEpoch -= orbit.OrbitalPeriod;
-                Epoch += orbit.OrbitalPeriod;
-            }
-
-            return Epoch;
-        }
-
         /// <summary>
         /// Calculates the parent-relative cartesian coordinate of an orbit for a given time.
         /// </summary>
@@ -74,6 +32,13 @@ namespace Pulsar4X.ECSLib.Processors
             }
 
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
+
+            while (timeSinceEpoch > orbit.OrbitalPeriod)
+            {
+                // Don't attempt to calculate large timeframes.
+                timeSinceEpoch -= orbit.OrbitalPeriod;
+                orbit.Epoch += orbit.OrbitalPeriod;
+            }
 
             // http://en.wikipedia.org/wiki/Mean_anomaly (M = M0 + nT)
             // Convert MeanAnomaly to radians.
