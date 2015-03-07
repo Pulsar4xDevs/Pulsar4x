@@ -37,8 +37,36 @@ namespace Pulsar4X.ECSLib
         /// <param name="dataBlob"></param>
         public void SetDataBlob<T>(int entity, T dataBlob) where T : BaseDataBlob
         {
+            if (dataBlob == null)
+            {
+                throw new ArgumentNullException("dataBlob", "Do not use SetDataBlob to remove a datablob. Use RemoveDataBlob.")
+            }
+
             dataBlob.Entity = entity;
             m_dataBlobMap[dataBlob.GetType()][entity] = dataBlob;
+        }
+
+        /// <summary>
+        /// Removes the DataBlob from the specified entity.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        public void RemoveDataBlob<T>(int entity) where T : BaseDataBlob
+        {
+            RemoveDataBlob(entity, typeof(T));
+        }
+
+        /// <summary>
+        /// Removes the DataBlob from the specified entity.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        public void RemoveDataBlob(int entity, Type T)
+        {
+            if (T.IsSubclassOf(typeof(BaseDataBlob)))
+            {
+                m_dataBlobMap[T][entity] = null;
+            }
         }
 
         /// <summary>
@@ -154,9 +182,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         public void RemoveEntity(int entity)
         {
-            foreach (List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
+            List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entity);
+
+            foreach (BaseDataBlob dataBlob in dataBlobs)
             {
-                entityDBMap[entity] = null;
+                RemoveDataBlob(entity, dataBlob.GetType());
             }
 
             m_entities[entity] = -1;
@@ -175,7 +205,7 @@ namespace Pulsar4X.ECSLib
             List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t =>
                     t != typeof(BaseDataBlob) &&
-                    t.IsAssignableFrom(typeof(BaseDataBlob))
+                    t.IsSubclassOf(typeof(BaseDataBlob))
                 ).ToList();
 
             // Create a list in our dataBlobMap for each discovered type.
