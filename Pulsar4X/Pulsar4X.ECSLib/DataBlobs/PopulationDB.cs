@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 
 namespace Pulsar4x.ECSLib.DataBlobs
 {
-    class PopulationDB : IDataBlob
+    struct PopulationDB : IDataBlob
     {
+        private readonly bool m_isValid;
+        public bool isValid { get { return m_isValid; } }
+
         public readonly double PopulationSize;
 
-        public PopulationDB(double popSize)
+        public PopulationDB(double popSize, bool p_isValid = true)
         {
+            m_isValid = p_isValid;
             PopulationSize = popSize;
         }
     }

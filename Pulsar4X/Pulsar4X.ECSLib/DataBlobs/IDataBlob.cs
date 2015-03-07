@@ -8,5 +8,6 @@ namespace Pulsar4x.ECSLib.DataBlobs
 {
     public interface IDataBlob
     {
+        bool isValid { get; }
     }
 }

@@ -72,7 +72,16 @@ namespace Pulsar4x.ECSLib
         /// <returns></returns>
         public List<T> GetAllDataBlobsOfType<T>() where T: IDataBlob
         {
-            return m_dataBlobMap[typeof(T)].ConvertAll<T>(v => (T)v);
+            return m_dataBlobMap[typeof(T)].ConvertAll<T>(
+                v => 
+                    {
+                        if (v == null)
+                        {
+                            return default(T);
+                        }
+                        return (T)v;
+                    }
+                );
         }
 
         public List<IDataBlob> GetAllDataBlobsOfEntity(int entity)
