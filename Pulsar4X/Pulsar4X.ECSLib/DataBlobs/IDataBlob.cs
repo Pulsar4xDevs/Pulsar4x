@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar4x.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib.DataBlobs
 {
     public interface IDataBlob
     {
-        bool isValid { get; }
+        bool IsValid { get; }
     }
 }

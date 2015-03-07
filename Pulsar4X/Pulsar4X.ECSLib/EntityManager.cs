@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using Pulsar4x.ECSLib.DataBlobs;
+using Pulsar4X.ECSLib.DataBlobs;
 
-namespace Pulsar4x.ECSLib
+namespace Pulsar4X.ECSLib
 {
     public class EntityManager
     {
@@ -24,17 +24,15 @@ namespace Pulsar4x.ECSLib
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public bool TryGetDataBlob<T>(int entity, out T dataBlob) where T : IDataBlob
+        public T GetDataBlob<T>(int entity) where T : IDataBlob
         {
             if (m_dataBlobMap[typeof(T)][entity] == null)
             {
-                dataBlob = default(T);
-                return false;
+                return default(T);
             }
             else
             {
-                dataBlob = (T)m_dataBlobMap[typeof(T)][entity];
-                return true;
+                return (T)m_dataBlobMap[typeof(T)][entity];
             }
         }
 
@@ -84,6 +82,11 @@ namespace Pulsar4x.ECSLib
                 );
         }
 
+        /// <summary>
+        /// Returns a list of all DataBlobs for a given entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         public List<IDataBlob> GetAllDataBlobsOfEntity(int entity)
         {
             List<IDataBlob> entityDBs = new List<IDataBlob>();

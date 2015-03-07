@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar4x.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib.DataBlobs
 {
     struct PopulationDB : IDataBlob
     {
+        public bool IsValid { get { return m_isValid; } }
         private readonly bool m_isValid;
-        public bool isValid { get { return m_isValid; } }
 
         public readonly double PopulationSize;
 
