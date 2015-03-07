@@ -9,6 +9,7 @@ using log4net;
 #endif
 
 using Pulsar4X.Entities.Components;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.UI
 {
@@ -28,6 +29,9 @@ namespace Pulsar4X.UI
             XmlConfigurator.Configure(); // Enables Log4net based on App.config file.
             logger.Info("Program Started");
 #endif
+
+            Game game = new Game();
+            game.EntityManagerTests();
 
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();

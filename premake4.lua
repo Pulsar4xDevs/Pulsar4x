@@ -109,6 +109,31 @@ solution "Pulsar4X"
                         defines { "LOG4NET_ENABLED" }
 			flags { "Optimize" }
 			
+	project "Pulsar4X.ECSLib"
+		kind "SharedLib"
+		language "C#"
+		location "Pulsar4X/Pulsar4X.ECSLib"
+		objdir "Pulsar4X/Pulsar4X.ECSLib/obj"
+		links { -- Add any needed references here
+			"System",
+			"System.Data",
+			"System.Xml",
+			"System.Drawing",
+			}
+		files { 
+			"Pulsar4X/Pulsar4X.ECSLib/**.cs",
+			}
+			
+		configuration { "windows", "Release" }
+			
+		configuration "Debug"
+			targetdir "Pulsar4X/Pulsar4X.ECSLib/bin/Debug"
+			flags { "Symbols" }
+			
+		configuration "Release"
+			targetdir "Pulsar4X/Pulsar4X.ECSLib/bin/Release"
+			flags { "Optimize" }
+
 defaultaction "vs2010"
 
 debugoutput()
