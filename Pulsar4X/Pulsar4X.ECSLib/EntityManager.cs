@@ -24,15 +24,18 @@ namespace Pulsar4X.ECSLib
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public T GetDataBlob<T>(int entity) where T : IDataBlob
+        public bool TryGetDataBlob<T>(int entity, out T dataBlob) where T : IDataBlob
         {
-            if (m_dataBlobMap[typeof(T)][entity] == null)
+            IDataBlob dataBlobRef = m_dataBlobMap[typeof(T)][entity];
+            if (dataBlobRef == null)
             {
-                return default(T);
+                dataBlob = default(T);
+                return false;
             }
             else
             {
-                return (T)m_dataBlobMap[typeof(T)][entity];
+                dataBlob = (T)dataBlobRef;
+                return false;
             }
         }
 
@@ -70,16 +73,19 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public List<T> GetAllDataBlobsOfType<T>() where T: IDataBlob
         {
-            return m_dataBlobMap[typeof(T)].ConvertAll<T>(
-                v => 
-                    {
-                        if (v == null)
-                        {
-                            return default(T);
-                        }
-                        return (T)v;
-                    }
-                );
+            List<T> dataBlobs = new List<T>();
+            List<IDataBlob> storedDataBlobs = m_dataBlobMap[typeof(T)];
+
+            for (int i = 0; i < storedDataBlobs.Count; i++ )
+            {
+                IDataBlob currentDataBlob = storedDataBlobs[i];
+                if (storedDataBlobs[i] != null)
+                {
+                    dataBlobs.Add((T)currentDataBlob);
+                }
+            }
+
+            return dataBlobs;
         }
 
         /// <summary>
@@ -175,7 +181,8 @@ namespace Pulsar4X.ECSLib
             int entity = CreateEntity();
             foreach (IDataBlob dataBlob in dataBlobs)
             {
-                m_dataBlobMap[dataBlob.GetType()][entity] = dataBlob;
+                IDataBlob newDataBlob = dataBlob.UpdateEntityID(entity);
+                m_dataBlobMap[newDataBlob.GetType()][entity] = newDataBlob;
             }
         }
 

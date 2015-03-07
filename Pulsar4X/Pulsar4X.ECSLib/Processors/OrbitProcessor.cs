@@ -12,38 +12,40 @@ namespace Pulsar4X.ECSLib.Processors
         public static void Process(EntityManager currentManager, List<OrbitDB> orbits)
         {
             DateTime currentTime = Game.Instance.CurrentDateTime;
-            for (int entityID = 0; entityID < orbits.Count; entityID++)
+            foreach (OrbitDB currentOrbit in orbits)
             {
-                OrbitDB currentOrbit = orbits[entityID];
-                if (currentOrbit.IsValid)
+                // Make sure our Epoch isn't too long ago.
+                DateTime newEpoch = ClampEpoch(currentOrbit, currentTime);
+
+                OrbitDB clampedOrbit = currentOrbit;
+
+                if (newEpoch != currentOrbit.Epoch)
                 {
-                    // Make sure our Epoch isn't too long ago.
-                    DateTime newEpoch = ClampEpoch(currentOrbit, currentTime);
-
-                    if (newEpoch != currentOrbit.Epoch)
-                    {
-                        // Update the orbit with newEpoch.
-                        currentManager.SetDataBlob<OrbitDB>(entityID,
-                            OrbitDB.FromAsteroidFormat(
-                            currentOrbit.Parent,
-                            currentOrbit.Mass,
-                            currentOrbit.ParentMass,
-                            currentOrbit.SemiMajorAxis,
-                            currentOrbit.Eccentricity,
-                            currentOrbit.Inclination,
-                            currentOrbit.LongitudeOfAscendingNode,
-                            currentOrbit.ArgumentOfPeriapsis,
-                            currentOrbit.MeanAnomaly,
-                            newEpoch
-                            )
-                        );
-                        currentOrbit = currentManager.GetDataBlob<OrbitDB>(entityID);
-                    }
-
-                    PositionDB orbitOffset = GetPosition(currentOrbit, currentTime);
-                    PositionDB parentPosition = currentManager.GetDataBlob<PositionDB>(currentOrbit.Parent);
-                    currentManager.SetDataBlob<PositionDB>(entityID, orbitOffset + parentPosition);
+                    // Update the orbit with newEpoch.
+                    currentManager.SetDataBlob<OrbitDB>(currentOrbit.Entity,
+                        OrbitDB.FromAsteroidFormat(
+                        currentOrbit.Entity,
+                        currentOrbit.Parent,
+                        currentOrbit.Mass,
+                        currentOrbit.ParentMass,
+                        currentOrbit.SemiMajorAxis,
+                        currentOrbit.Eccentricity,
+                        currentOrbit.Inclination,
+                        currentOrbit.LongitudeOfAscendingNode,
+                        currentOrbit.ArgumentOfPeriapsis,
+                        currentOrbit.MeanAnomaly,
+                        newEpoch
+                        )
+                    );
+                    currentManager.TryGetDataBlob<OrbitDB>(currentOrbit.Entity, out clampedOrbit);
                 }
+
+
+
+                PositionDB orbitOffset = GetPosition(clampedOrbit, currentTime);
+                PositionDB parentPosition;
+                currentManager.TryGetDataBlob<PositionDB>(clampedOrbit.Parent, out parentPosition);
+                currentManager.SetDataBlob<PositionDB>(clampedOrbit.Entity, orbitOffset + parentPosition);
             }
         }
 
@@ -70,7 +72,7 @@ namespace Pulsar4X.ECSLib.Processors
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(0, 0);
+                return new PositionDB(orbit.Entity, 0, 0);
             }
 
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
@@ -97,7 +99,7 @@ namespace Pulsar4X.ECSLib.Processors
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(0, 0);
+                return new PositionDB(orbit.Entity, 0, 0);
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
@@ -114,7 +116,7 @@ namespace Pulsar4X.ECSLib.Processors
             x = radius * Math.Cos(trueAnomaly);
             y = radius * Math.Sin(trueAnomaly);
 
-            return new PositionDB(x, y);
+            return new PositionDB(orbit.Entity, x, y);
         }
 
         /// <summary>

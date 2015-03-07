@@ -9,8 +9,17 @@ namespace Pulsar4X.ECSLib.DataBlobs
 {
     struct OrbitDB : IDataBlob
     {
-        public bool IsValid { get { return m_isValid; } }
-        private readonly bool m_isValid;
+        public int Entity { get { return m_entityID; } }
+        private readonly int m_entityID;
+
+        public IDataBlob UpdateEntityID(int newEntityID)
+        {
+            if (IsStationary)
+            {
+                return new OrbitDB(newEntityID, Mass);
+            }
+            return new OrbitDB(newEntityID, Parent, Mass, ParentMass, SemiMajorAxis, Eccentricity, Inclination, LongitudeOfAscendingNode, ArgumentOfPeriapsis, MeanAnomaly, Epoch);
+        }
 
         public readonly int Parent;
         
@@ -108,7 +117,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="longitudeOfPeriapsis">Longitude of periapsis in degrees.</param>
         /// <param name="meanLongitude">Longitude of object at epoch in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        public static OrbitDB FromMajorPlanetFormat(int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromMajorPlanetFormat(int entityID, int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
             // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
@@ -116,7 +125,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             // http://en.wikipedia.org/wiki/Mean_longitude
             double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
 
-            return new OrbitDB(parentID, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            return new OrbitDB(entityID, parentID, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
         /// <summary>
@@ -131,32 +140,32 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="argumentOfPeriapsis">Argument of periapsis in degrees.</param>
         /// <param name="meanAnomaly">Mean Anomaly in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        public static OrbitDB FromAsteroidFormat(int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromAsteroidFormat(int entityID, int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
-            return new OrbitDB(parentID, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            return new OrbitDB(entityID, parentID, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
         /// <summary>
         /// Creates an orbit that never moves.
         /// </summary>
-        public static OrbitDB FromStationary(double mass)
+        public static OrbitDB FromStationary(int entityID, double mass)
         {
-            return new OrbitDB(mass);
+            return new OrbitDB(entityID, mass);
         }
 
-        private OrbitDB(double mass, bool isValid = true) : this()
+        private OrbitDB(int entityID, double mass) : this()
         {
-            m_isValid = isValid;
+            m_entityID = entityID;
             Parent = -1;
             Mass = mass;
             IsStationary = true;
         }
 
-        private OrbitDB(int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
-                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch, bool isValid = true)
+        private OrbitDB(int entityID, int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
-            m_isValid = isValid;
+            m_entityID = entityID;
             Parent = parentID;
             Mass = mass;
             ParentMass = parentMass;

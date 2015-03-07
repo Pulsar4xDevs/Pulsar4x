@@ -7,8 +7,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
 {
     struct PositionDB : IDataBlob
     {
-        public bool IsValid { get { return m_isValid; } }
-        private readonly bool m_isValid;
+        public int Entity { get { return m_entityID; } }
+        private readonly int m_entityID;
 
         /// <summary>
         /// System X coordinante in AU
@@ -20,15 +20,20 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// </summary>
         public readonly double Y;
 
+        public IDataBlob UpdateEntityID(int newEntityID)
+        {
+            return new PositionDB(newEntityID, X, Y);
+        }
+
         /// <summary>
         /// Initilized constructor.
         /// </summary>
         /// <param name="system">StarSystem value.</param>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
-        public PositionDB(double x, double y, bool isValid = true) : this()
+        public PositionDB(int entityID, double x, double y) : this()
         {
-            m_isValid = isValid;
+            m_entityID = entityID;
 
             X = x;
             Y = y;
@@ -66,7 +71,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <returns></returns>
         public static PositionDB operator +(PositionDB posA, PositionDB posB)
         {
-            return new PositionDB(posA.X + posB.X, posA.Y + posB.Y);
+            return new PositionDB(posA.m_entityID, posA.X + posB.X, posA.Y + posB.Y);
         }
     }
 }

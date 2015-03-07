@@ -8,15 +8,20 @@ namespace Pulsar4X.ECSLib.DataBlobs
 {
     struct PopulationDB : IDataBlob
     {
-        public bool IsValid { get { return m_isValid; } }
-        private readonly bool m_isValid;
+        public int Entity { get { return m_entityID; } }
+        private readonly int m_entityID;
 
         public readonly double PopulationSize;
 
-        public PopulationDB(double popSize, bool p_isValid = true)
+        public PopulationDB(int entityID, double popSize)
         {
-            m_isValid = p_isValid;
+            m_entityID = entityID;
             PopulationSize = popSize;
+        }
+
+        public IDataBlob UpdateEntityID(int newEntityID)
+        {
+            return new PopulationDB(newEntityID, PopulationSize);
         }
     }
 }
