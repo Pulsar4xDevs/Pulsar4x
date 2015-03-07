@@ -31,7 +31,7 @@ namespace Pulsar4X.UI
 #endif
 
             Game game = new Game();
-            EntityManagerTests();
+            game.EntityManagerTests();
 
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();
