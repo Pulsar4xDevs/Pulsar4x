@@ -40,8 +40,6 @@ namespace Pulsar4X.ECSLib.Processors
                     currentManager.TryGetDataBlob<OrbitDB>(currentOrbit.Entity, out clampedOrbit);
                 }
 
-
-
                 PositionDB orbitOffset = GetPosition(clampedOrbit, currentTime);
                 PositionDB parentPosition;
                 currentManager.TryGetDataBlob<PositionDB>(clampedOrbit.Parent, out parentPosition);
