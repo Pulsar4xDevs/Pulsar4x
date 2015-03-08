@@ -22,7 +22,7 @@ namespace Pulsar4X.UI
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
+        [MTAThread]
         static void Main()
         {
 #if LOG4NET_ENABLED
@@ -31,6 +31,10 @@ namespace Pulsar4X.UI
 #endif
 
             Game game = new Game();
+
+            game.StarSystems.Add(new StarSystem());
+            game.StarSystems.Add(new StarSystem());
+
             game.EntityManagerTests();
 
             // gen star system:

@@ -63,5 +63,10 @@ namespace Pulsar4X.ECSLib
             /// </summary>
             public const double KelvinToDegreesC = -273.15;
         }
+
+        public static class GameConstants
+        {
+            public const int MinimumTimestep = 5;
+        }
     }
 }

@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Pulsar4X.ECSLib.DataBlobs;
+using Pulsar4X.Helpers;
+using Pulsar4X;
+using System.Threading;
 
 namespace Pulsar4X.ECSLib
 {
@@ -15,17 +18,107 @@ namespace Pulsar4X.ECSLib
         public static Game Instance { get { return m_instance; } }
         private static Game m_instance;
 
+        public List<StarSystem> StarSystems { get; set; }
+        public List<AutoResetEvent> SystemWaitHandles;
         public DateTime CurrentDateTime { get; set; }
+
+        public SubpulseRequest NextSubpulse
+        {
+            get 
+            {
+                lock (subpulse_lockObj)
+                {
+                    return m_nextSubpulse;
+                }
+            }
+            set
+            {
+                lock (subpulse_lockObj)
+                {
+                    if (m_nextSubpulse == null)
+                    {
+                        m_nextSubpulse = value;
+                        return;
+                    }
+                    if (value.MaxSeconds < m_nextSubpulse.MaxSeconds)
+                    {
+                        // Only take the shortest subpulse.
+                        m_nextSubpulse = value;
+                    }
+                }
+            }    
+        }
+        private SubpulseRequest m_nextSubpulse;
+        private object subpulse_lockObj = new object();
+
+        public Interrupt CurrentInterrupt { get; set; }
 
         public Game()
         {
             m_globalManager = new EntityManager();
-
             m_instance = this;
+
+            StarSystems = new List<StarSystem>();
+            SystemWaitHandles = new List<AutoResetEvent>();
+
+            CurrentDateTime = DateTime.Now;
+
+            NextSubpulse = new SubpulseRequest();
+            NextSubpulse.MaxSeconds = 5;
+
+            CurrentInterrupt = new Interrupt();
+        }
+
+        public int AdvanceTime(int deltaSeconds)
+        {
+            int timeAdvanced = 0;
+
+            deltaSeconds = deltaSeconds - (deltaSeconds % GameSettings.GameConstants.MinimumTimestep);
+            if (deltaSeconds == 0)
+            {
+                deltaSeconds = GameSettings.GameConstants.MinimumTimestep;
+            }
+
+            CurrentInterrupt.StopProcessing = false;
+
+            while (!CurrentInterrupt.StopProcessing && deltaSeconds > 0)
+            {
+                int subpulseTime = NextSubpulse.MaxSeconds;
+                NextSubpulse.MaxSeconds = int.MaxValue;
+
+                CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
+
+                ExecuteSubpulse(subpulseTime);
+
+                deltaSeconds -= subpulseTime;
+                timeAdvanced += subpulseTime;
+            }
+
+            if (CurrentInterrupt.StopProcessing)
+            {
+                // Notify the user?
+                // Gamelog?
+                // <@ todo: review interrupt messages.
+            }
+            return timeAdvanced;
+        }
+
+        private void ExecuteSubpulse(int deltaSeconds)
+        {
+            foreach (StarSystem system in StarSystems)
+            {
+                ThreadPool.QueueUserWorkItem(system.Update, deltaSeconds);
+            }
+
+            // Wait for every system to be done.
+            AutoResetEvent.WaitAll(SystemWaitHandles.ToArray());
         }
 
         public void EntityManagerTests()
         {
+            AdvanceTime(20);
+
+
             // Create an entity with individual DataBlobs.
             int planet = GlobalManager.CreateEntity();
             GlobalManager.SetDataBlob(planet, OrbitDB.FromStationary(5));

@@ -9,14 +9,44 @@ namespace Pulsar4X.ECSLib.Processors
 {
     static class OrbitProcessor
     {
-        public static void Process(EntityManager currentManager, List<OrbitDB> orbits)
+        public static void Process(EntityManager currentManager)
         {
-            DateTime currentTime = Game.Instance.CurrentDateTime;
-            foreach (OrbitDB currentOrbit in orbits)
+            int orbitTypeIndex = currentManager.GetDataBlobTypeIndex<OrbitDB>();
+
+            int firstOrbital = currentManager.GetFirstEntityWithDataBlob(orbitTypeIndex);
+
+            if (firstOrbital == -1)
             {
-                PositionDB orbitOffset = GetPosition(currentOrbit, currentTime);
-                PositionDB parentPosition = currentManager.GetDataBlob<PositionDB>(currentOrbit.Parent);
-                currentManager.SetDataBlob(currentOrbit.Entity, orbitOffset + parentPosition);
+                // No orbitals in this manager.
+                return;
+            }
+
+            OrbitDB firstOrbit;
+
+            do
+            {
+                // Get the FIRST orbit.
+                firstOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital, orbitTypeIndex);
+            } while (firstOrbit.Parent != -1);
+
+
+            DateTime currentTime = Game.Instance.CurrentDateTime;
+            UpdateOrbit(currentManager, firstOrbit, currentTime, orbitTypeIndex);
+        }
+
+        private static void UpdateOrbit(EntityManager currentManager, OrbitDB orbit, DateTime currentTime, int orbitTypeIndex)
+        {
+            PositionDB orbitOffset = GetPosition(orbit, currentTime);
+            if (orbit.Parent != -1)
+            {
+                PositionDB parentPosition = currentManager.GetDataBlob<PositionDB>(orbit.Parent);
+            }
+
+            foreach (int child in orbit.Children)
+            {
+                // RECURSION!
+                OrbitDB childOrbit = currentManager.GetDataBlob<OrbitDB>(child, orbitTypeIndex);
+                UpdateOrbit(currentManager, childOrbit, currentTime, orbitTypeIndex);
             }
         }
 

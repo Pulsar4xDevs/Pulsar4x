@@ -200,6 +200,25 @@ namespace Pulsar4X.ECSLib
             return entities;
         }
 
+        public int GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
+        {
+            return GetFirstEntityWithDataBlob(GetDataBlobTypeIndex<T>());
+        }
+
+        public int GetFirstEntityWithDataBlob(int typeIndex)
+        {
+            List<BaseDataBlob> dataBlobType = m_dataBlobMap[typeIndex];
+            for (int i = 0; i < m_entities.Count; i++)
+            {
+                if (dataBlobType[i] != null)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
         /// <summary>
         /// Returns a blank DataBlob mask with the correct number of entries.
         /// </summary>

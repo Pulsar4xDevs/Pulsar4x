@@ -10,7 +10,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
     class OrbitDB : BaseDataBlob
     {
         public int Parent;
-        
+        public List<int> Children;
+
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
@@ -91,6 +92,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// Stationary orbits don't have all of the data to update. They always return (0, 0).
         /// </summary>
         public bool IsStationary;
+
 
         #region Construction Interface
         /// <summary>
