@@ -13,17 +13,25 @@ namespace Pulsar4X.ECSLib
 {
     public class Game
     {
+        /// <summary>
+        /// Global Entity Manager.
+        /// </summary>
         public EntityManager GlobalManager { get { return m_globalManager; } }
         private EntityManager m_globalManager;
 
+        /// <summary>
+        /// Singleton Instance of Game
+        /// </summary>
         public static Game Instance { get { return m_instance; } }
         private static Game m_instance;
 
+        /// <summary>
+        /// List of StarSystems currently in the game.
+        /// </summary>
         public List<StarSystem> StarSystems { get; set; }
-        public List<AutoResetEvent> SystemWaitHandles;
         public DateTime CurrentDateTime { get; set; }
 
-        public SubpulseRequest NextSubpulse
+        public SubpulseLimitRequest NextSubpulse
         {
             get 
             {
@@ -49,7 +57,7 @@ namespace Pulsar4X.ECSLib
                 }
             }    
         }
-        private SubpulseRequest m_nextSubpulse;
+        private SubpulseLimitRequest m_nextSubpulse;
         private object subpulse_lockObj = new object();
 
         public Interrupt CurrentInterrupt { get; set; }
@@ -60,39 +68,54 @@ namespace Pulsar4X.ECSLib
             m_instance = this;
 
             StarSystems = new List<StarSystem>();
-            SystemWaitHandles = new List<AutoResetEvent>();
 
             CurrentDateTime = DateTime.Now;
 
-            NextSubpulse = new SubpulseRequest();
+            NextSubpulse = new SubpulseLimitRequest();
             NextSubpulse.MaxSeconds = 5;
 
             CurrentInterrupt = new Interrupt();
 
+            // Setup time Phases.
             PhaseProcessor.Initialize();
         }
 
+        /// <summary>
+        /// Time advancement code. Attempts to advance time by the number of seconds
+        /// passed to it.
+        /// 
+        /// Interrupts may prevent the entire requested timeframe from being advanced.
+        /// </summary>
+        /// <param name="deltaSeconds">Time Advance Requested</param>
+        /// <returns>Total Time Advanced</returns>
         public int AdvanceTime(int deltaSeconds)
         {
             int timeAdvanced = 0;
 
+            // Clamp deltaSeconds to a multiple of our MinimumTimestep.
             deltaSeconds = deltaSeconds - (deltaSeconds % GameSettings.GameConstants.MinimumTimestep);
             if (deltaSeconds == 0)
             {
                 deltaSeconds = GameSettings.GameConstants.MinimumTimestep;
             }
 
+            // Clear any interrupt flag before starting the pulse.
             CurrentInterrupt.StopProcessing = false;
 
             while (!CurrentInterrupt.StopProcessing && deltaSeconds > 0)
             {
-                int subpulseTime = NextSubpulse.MaxSeconds;
+                int subpulseTime = Math.Min(NextSubpulse.MaxSeconds, deltaSeconds);
+                // Set next subpulse to max value. If it needs to be shortened, it will
+                // be shortened in the pulse execution.
                 NextSubpulse.MaxSeconds = int.MaxValue;
 
+                // Update our date.
                 CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
 
+                // Execute subpulse phases. Magic happens here.
                 PhaseProcessor.Process(subpulseTime);
 
+                // Update our remaining values.
                 deltaSeconds -= subpulseTime;
                 timeAdvanced += subpulseTime;
             }
@@ -106,11 +129,11 @@ namespace Pulsar4X.ECSLib
             return timeAdvanced;
         }
 
+        /// <summary>
+        /// Test function to demonstrate the usage of the EntityManager.
+        /// </summary>
         public void EntityManagerTests()
         {
-            AdvanceTime(20);
-
-
             // Create an entity with individual DataBlobs.
             int planet = GlobalManager.CreateEntity();
             GlobalManager.SetDataBlob(planet, OrbitDB.FromStationary(5));

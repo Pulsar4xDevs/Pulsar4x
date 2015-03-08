@@ -8,10 +8,13 @@ namespace Pulsar4X.Helpers
 {
     public class ComparableBitArray
     {
-        public bool this[int i]
+        /// <summary>
+        /// Overload of the [] operator. Allows ComparableBitArray[index]
+        /// </summary>
+        public bool this[int index]
         { 
-            get { return Get(i); }
-            set { Set(i, value); }
+            get { return Get(index); }
+            set { Set(index, value); }
         }
 
         private int[] m_backingValues;
@@ -20,6 +23,9 @@ namespace Pulsar4X.Helpers
         public int Length { get { return m_length; } }
         private readonly int m_length;
 
+        /// <summary>
+        /// Returns the bit value residing at the index location.
+        /// </summary>
         public bool Get(int index)
         {
             if (index >= m_length)
@@ -47,6 +53,9 @@ namespace Pulsar4X.Helpers
             return false;
         }
 
+        /// <summary>
+        /// Sets the bit at the specified index to value.
+        /// </summary>
         public void Set(int index, bool value)
         {
             if (value)
@@ -83,6 +92,11 @@ namespace Pulsar4X.Helpers
             m_backingValues[backingIndex] = backingValue;
         }
 
+        /// <summary>
+        /// Equality override so we are not only checking references.
+        /// 
+        /// Quickly ensures bit values are equivilent.
+        /// </summary>
         public override bool Equals(object obj)
         {
             if (Object.ReferenceEquals(this, obj))
@@ -112,23 +126,36 @@ namespace Pulsar4X.Helpers
             return true;
         }
 
+        /// <summary>
+        /// Equality override so we are not only checking references.
+        /// 
+        /// Quickly ensures bit values are equivilent.
+        /// </summary>
         public static bool operator ==(ComparableBitArray arrayA, ComparableBitArray arrayB)
         {
             return arrayA.Equals(arrayB);
         }
 
+        /// <summary>
+        /// Equality override so we are not only checking references.
+        /// 
+        /// Quickly ensures bit values are equivilent.
+        /// </summary>
         public static bool operator !=(ComparableBitArray arrayA, ComparableBitArray arrayB)
         {
             return !(arrayA == arrayB);
         }
 
-        public ComparableBitArray(int Size)
+        /// <summary>
+        /// Creates a ComparableBitArray with the specified number of bits.
+        /// </summary>
+        public ComparableBitArray(int length)
         {
             int requiredBackingValues = 1;
-            while (Size > m_bitsPerValue)
+            while (length > m_bitsPerValue)
             {
                 requiredBackingValues++;
-                Size -= m_bitsPerValue;
+                length -= m_bitsPerValue;
             }
 
             m_backingValues = new int[requiredBackingValues];
@@ -138,27 +165,67 @@ namespace Pulsar4X.Helpers
                 m_backingValues[i] = 0;
             }
 
-            m_length = Size;
+            m_length = length;
         }
 
-        public ComparableBitArray And(ComparableBitArray otherArray)
+        /// <summary>
+        /// Operator overload for bitwise AND.
+        /// </summary>
+        public static ComparableBitArray operator &(ComparableBitArray arrayA, ComparableBitArray arrayB)
         {
-            if (m_length != otherArray.m_length)
+            if (arrayA.m_length != arrayB.m_length)
             {
                 throw new ArgumentException("Cannot compare bit arrays of different lengths.");
             }
 
-            int[] combinedValues = new int[m_backingValues.Length];
+            int[] combinedValues = new int[arrayA.m_backingValues.Length];
 
-            for (int i = 0; i < m_backingValues.Length; i++)
+            for (int i = 0; i < arrayA.m_backingValues.Length; i++)
             {
-                combinedValues[i] = (m_backingValues[i] & otherArray.m_backingValues[i]);
+                combinedValues[i] = (arrayA.m_backingValues[i] & arrayB.m_backingValues[i]);
             }
 
-            ComparableBitArray retVal = new ComparableBitArray(combinedValues, m_length);
+            return new ComparableBitArray(combinedValues, arrayA.m_length);;
+        }
 
-            return retVal;
+        /// <summary>
+        /// Operator overload for bitwise OR.
+        /// </summary>
+        public static ComparableBitArray operator |(ComparableBitArray arrayA, ComparableBitArray arrayB)
+        {
+            if (arrayA.m_length != arrayB.m_length)
+            {
+                throw new ArgumentException("Cannot compare bit arrays of different lengths.");
+            }
 
+            int[] combinedValues = new int[arrayA.m_backingValues.Length];
+
+            for (int i = 0; i < arrayA.m_backingValues.Length; i++)
+            {
+                combinedValues[i] = (arrayA.m_backingValues[i] | arrayB.m_backingValues[i]);
+            }
+
+            return new ComparableBitArray(combinedValues, arrayA.m_length); ;
+        }
+
+        /// <summary>
+        /// Operator overload for bitwise XOR.
+        /// </summary>
+        public static ComparableBitArray operator ^(ComparableBitArray arrayA, ComparableBitArray arrayB)
+        {
+            if (arrayA.m_length != arrayB.m_length)
+            {
+                throw new ArgumentException("Cannot compare bit arrays of different lengths.");
+            }
+
+            int[] combinedValues = new int[arrayA.m_backingValues.Length];
+
+            for (int i = 0; i < arrayA.m_backingValues.Length; i++)
+            {
+                combinedValues[i] = (arrayA.m_backingValues[i] ^ arrayB.m_backingValues[i]);
+            }
+
+            return new ComparableBitArray(combinedValues, arrayA.m_length); ;
         }
 
         private ComparableBitArray(int[] backingValues, int length)

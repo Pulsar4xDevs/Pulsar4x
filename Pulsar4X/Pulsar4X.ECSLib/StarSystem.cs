@@ -15,15 +15,10 @@ namespace Pulsar4X.ECSLib
         public List<StarSystem> Neighbors { get { return m_neighbors; } }
         private List<StarSystem> m_neighbors;
 
-        public AutoResetEvent updateComplete;
-
         public StarSystem()
         {
             m_systemManager = new EntityManager();
             m_neighbors = new List<StarSystem>();
-
-            updateComplete = new AutoResetEvent(false);
-            Game.Instance.SystemWaitHandles.Add(updateComplete);
         }
 
         internal void ProcessPhase(object state)
@@ -32,14 +27,18 @@ namespace Pulsar4X.ECSLib
 
             if (phaseState == null)
             {
+                // This should never happen.
+                // Possible causes: Bad Programming. Check your edits.
                 throw new ArgumentNullException("state");
             }
 
+            // Run each process function for this phase.
             foreach (ProcessFunction function in phaseState.ProcessFunctions)
             {
                 function(this, phaseState.DeltaSeconds);
             }
 
+            // Announce this system's completion of this phase.
             phaseState.WaitHandle.Set();
         }
     }

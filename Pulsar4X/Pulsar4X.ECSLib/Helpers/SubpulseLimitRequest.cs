@@ -5,15 +5,13 @@ using System.Text;
 
 namespace Pulsar4X.Helpers
 {
-    public class SubpulseRequest
+    /// <summary>
+    /// Class to contain information about the current Subpulse Limit.
+    /// </summary>
+    public class SubpulseLimitRequest
     {
         public int MaxSeconds;
         public Type RequestingProcessor;
         public string Reason;
-    }
-
-    class SubpulseData
-    {
-        public int DeltaSeconds;
     }
 }
