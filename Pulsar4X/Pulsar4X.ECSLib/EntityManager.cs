@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using Pulsar4X.ECSLib.DataBlobs;
+using Pulsar4X.Helpers;
 
 namespace Pulsar4X.ECSLib
 {

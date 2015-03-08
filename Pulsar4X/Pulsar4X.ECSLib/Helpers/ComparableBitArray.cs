@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Pulsar4X
+namespace Pulsar4X.Helpers
 {
     public class ComparableBitArray
     {
@@ -13,12 +13,12 @@ namespace Pulsar4X
             get { return Get(i); }
             set { Set(i, value); }
         }
-        
-        private List<int> m_backingValues;
+
+        private int[] m_backingValues;
         private const int m_bitsPerValue = 32;
 
         public int Length { get { return m_length; } }
-        private int m_length;
+        private readonly int m_length;
 
         public bool Get(int index)
         {
@@ -97,12 +97,12 @@ namespace Pulsar4X
                 return false;
             }
 
-            if (m_backingValues.Count != bitArray.m_backingValues.Count)
+            if (m_backingValues.Length != bitArray.m_backingValues.Length)
             {
                 return false;
             }
 
-            for (int i = 0; i < m_backingValues.Count; i++)
+            for (int i = 0; i < m_backingValues.Length; i++)
             {
                 if (m_backingValues[i] != bitArray.m_backingValues[i])
                 {
@@ -122,23 +122,23 @@ namespace Pulsar4X
             return !(arrayA == arrayB);
         }
 
-        public ComparableBitArray(int initialSize)
+        public ComparableBitArray(int Size)
         {
             int requiredBackingValues = 1;
-            while (initialSize > m_bitsPerValue)
+            while (Size > m_bitsPerValue)
             {
                 requiredBackingValues++;
-                initialSize -= m_bitsPerValue;
+                Size -= m_bitsPerValue;
             }
 
-            m_backingValues = new List<int>(requiredBackingValues);
-            while (requiredBackingValues > 0)
+            m_backingValues = new int[requiredBackingValues];
+
+            for (int i = 0; i < m_backingValues.Length; i++ )
             {
-                m_backingValues.Add(0);
-                requiredBackingValues--;
+                m_backingValues[i] = 0;
             }
 
-            m_length = initialSize;
+            m_length = Size;
         }
 
         public ComparableBitArray And(ComparableBitArray otherArray)
@@ -148,11 +148,11 @@ namespace Pulsar4X
                 throw new ArgumentException("Cannot compare bit arrays of different lengths.");
             }
 
-            List<int> combinedValues = new List<int>(m_backingValues.Count);
+            int[] combinedValues = new int[m_backingValues.Length];
 
-            for (int i = 0; i < m_backingValues.Count; i++)
+            for (int i = 0; i < m_backingValues.Length; i++)
             {
-                combinedValues.Add(m_backingValues[i] & otherArray.m_backingValues[i]);
+                combinedValues[i] = (m_backingValues[i] & otherArray.m_backingValues[i]);
             }
 
             ComparableBitArray retVal = new ComparableBitArray(combinedValues, m_length);
@@ -161,7 +161,7 @@ namespace Pulsar4X
 
         }
 
-        private ComparableBitArray(List<int> backingValues, int length)
+        private ComparableBitArray(int[] backingValues, int length)
         {
             m_backingValues = backingValues;
             m_length = length;
