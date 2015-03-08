@@ -358,6 +358,12 @@ namespace Pulsar4X
                 }
             );
 
+            //fix star names for new order
+            for (int i = 0; i< starList.Count; i++)
+            {
+                starList[i].Name = GenerateStarName(system.Name, i);
+            }
+
             Star primaryStar = starList[0];
             primaryStar.UpdatePosition(0);
 
@@ -714,24 +720,29 @@ namespace Pulsar4X
                 st = GalaxyGen.StarTypeDistributionForRealStars.Select(m_RNG.NextDouble());
             else
                 st = GalaxyGen.StarTypeDistributionForFakeStars.Select(m_RNG.NextDouble());
-          
-            // generate the name:
-            string starName = system.Name + " ";
-            if (system.Stars.Count == 0)
-                starName += "A";
-            else if (system.Stars.Count == 1)
-                starName += "B";
-            else if (system.Stars.Count == 2)
-                starName += "C";
-            else if (system.Stars.Count == 3)
-                starName += "D";
-            else if (system.Stars.Count == 4)
-                starName += "E";
+
+            string starName = GenerateStarName(system.Name, system.Stars.Count);
 
             Star star = PopulateStarDataBasedOnSpectralType(st, starName, system);
 
             system.Stars.Add(star);
             return star;
+        }
+
+        /// <summary>
+        /// Generate a star name based on a name prefix and the stars position in the system 
+        /// </summary>
+        /// <param name="prefix">A name prefix, usually the system name</param>
+        /// <param name="position">The position in the system, the primary star should be 0</param>
+        /// <returns>A string with the star name</returns>
+        private static string GenerateStarName(string prefix, int position)
+        {
+            string starName = prefix + " ";
+            char[] postfix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".ToCharArray();
+            if (position < 26)
+                starName += postfix[position];
+   
+            return starName;
         }
 
         /// <summary>
