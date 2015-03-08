@@ -68,7 +68,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         /// <param name="dataBlob"></param>
         /// <param name="typeIndex"></param>
-        public void SetDataBlob(int entity, BaseDataBlob dataBlob, int typeIndex)
+        private void SetDataBlob(int entity, BaseDataBlob dataBlob, int typeIndex)
         {
             if (dataBlob == null)
             {
