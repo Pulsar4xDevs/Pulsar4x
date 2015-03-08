@@ -22,6 +22,7 @@ namespace Pulsar4X.ECSLib.Processors
                 m_orbitTypeIndex = currentManager.GetDataBlobTypeIndex<OrbitDB>();
                 m_positionTypeIndex = currentManager.GetDataBlobTypeIndex<PositionDB>();
             }
+
             // Find the first orbital entity.
             int firstOrbital = currentManager.GetFirstEntityWithDataBlob(m_orbitTypeIndex);
 
@@ -39,18 +40,24 @@ namespace Pulsar4X.ECSLib.Processors
                 firstOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital, m_orbitTypeIndex);
             } while (firstOrbit.Parent != -1);
 
-
             DateTime currentTime = Game.Instance.CurrentDateTime;
+
+            // Call recursive function to update every orbit in this system.
             UpdateOrbit(currentManager, firstOrbit, new PositionDB(0,0), currentTime);
         }
 
         private static void UpdateOrbit(EntityManager currentManager, OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
         {
+            // Get our Parent-Relative coordinates.
             PositionDB newPosition = GetPosition(orbit, currentTime);
+
+            // Get our Absolute coordinates.
             newPosition += parentPosition;
 
+            // Set our absolute coordinates.
             currentManager.SetDataBlob(orbit.Entity, newPosition, m_positionTypeIndex);
 
+            // Update our children.
             foreach (int child in orbit.Children)
             {
                 // RECURSION!
