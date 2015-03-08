@@ -72,7 +72,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // Forget it, remove the DataBlob.
-            GlobalManager.SetDataBlob<PopulationDB>(planet, null);
+            GlobalManager.RemoveDataBlob<PopulationDB>(planet);
 
             if (GlobalManager.GetDataBlob<PopulationDB>(1) == null)
             {

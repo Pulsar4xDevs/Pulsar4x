@@ -11,7 +11,10 @@ namespace Pulsar4X.ECSLib
     public class EntityManager
     {
         private List<int> m_entities;
-        private Dictionary<Type, List<BaseDataBlob>> m_dataBlobMap;
+        private List<ComparableBitArray> m_entityMasks;
+
+        private Dictionary<Type, int> m_dataBlobTypes;
+        private List<List<BaseDataBlob>> m_dataBlobMap;
 
         public EntityManager()
         {
@@ -19,14 +22,27 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Returns the datablob of the specific entity.
+        /// Fast, direct lookup of the DataBlob, after slow lookup of the typeIndex.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
         /// <returns></returns>
         public T GetDataBlob<T>(int entity) where T : BaseDataBlob
         {
-            return (T)m_dataBlobMap[typeof(T)][entity];
+            int typeIndex = GetDataBlobTypeIndex<T>();
+            return GetDataBlob<T>(entity, typeIndex);
+        }
+
+        /// <summary>
+        /// Fast, direct lookup of the DataBlob using the typeIndex.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entity"></param>
+        /// <param name="typeIndex"></param>
+        /// <returns></returns>
+        public T GetDataBlob<T>(int entity, int typeIndex) where T : BaseDataBlob
+        {
+            return (T)m_dataBlobMap[typeIndex][entity];
         }
 
         /// <summary>
@@ -37,13 +53,26 @@ namespace Pulsar4X.ECSLib
         /// <param name="dataBlob"></param>
         public void SetDataBlob<T>(int entity, T dataBlob) where T : BaseDataBlob
         {
+            int typeIndex = GetDataBlobTypeIndex<T>();
+            SetDataBlob(entity, dataBlob, typeIndex);
+        }
+
+        /// <summary>
+        /// Sets the DataBlob for the specified entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="dataBlob"></param>
+        /// <param name="typeIndex"></param>
+        public void SetDataBlob(int entity, BaseDataBlob dataBlob, int typeIndex)
+        {
             if (dataBlob == null)
             {
-                throw new ArgumentNullException("dataBlob", "Do not use SetDataBlob to remove a datablob. Use RemoveDataBlob.")
+                throw new ArgumentNullException("dataBlob", "Do not use SetDataBlob to remove a datablob. Use RemoveDataBlob.");
             }
 
             dataBlob.Entity = entity;
-            m_dataBlobMap[dataBlob.GetType()][entity] = dataBlob;
+            m_dataBlobMap[typeIndex][entity] = dataBlob;
+            m_entityMasks[entity][typeIndex] = true;
         }
 
         /// <summary>
@@ -53,20 +82,37 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         public void RemoveDataBlob<T>(int entity) where T : BaseDataBlob
         {
-            RemoveDataBlob(entity, typeof(T));
+            int typeIndex = GetDataBlobTypeIndex<T>();
+            RemoveDataBlob(entity, typeIndex);
         }
 
         /// <summary>
         /// Removes the DataBlob from the specified entity.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
+        /// <param name="T"></param>
         public void RemoveDataBlob(int entity, Type T)
         {
-            if (T.IsSubclassOf(typeof(BaseDataBlob)))
+            int typeIndex;
+            if (TryGetDataBlobTypeIndex(T, out typeIndex))
             {
-                m_dataBlobMap[T][entity] = null;
+                RemoveDataBlob(entity, typeIndex);
             }
+            else
+            {
+                throw new ArgumentException("Type not found in typeMap.");
+            }
+        }
+
+        /// <summary>
+        /// Removes the DataBlob from the specified entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="typeIndex"></param>
+        public void RemoveDataBlob(int entity, int typeIndex)
+        {
+            m_dataBlobMap[typeIndex][entity] = null;
+            m_entityMasks[entity][typeIndex] = false;
         }
 
         /// <summary>
@@ -76,7 +122,7 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public List<T> GetAllDataBlobsOfType<T>() where T: BaseDataBlob
         {
-            return m_dataBlobMap[typeof(T)].ConvertAll<T>(v => (T)v);
+            return m_dataBlobMap[GetDataBlobTypeIndex<T>()].ConvertAll<T>(v => (T)v);
         }
 
         /// <summary>
@@ -87,13 +133,13 @@ namespace Pulsar4X.ECSLib
         public List<BaseDataBlob> GetAllDataBlobsOfEntity(int entity)
         {
             List<BaseDataBlob> entityDBs = new List<BaseDataBlob>();
+            ComparableBitArray entityMask = m_entityMasks[entity];
 
-            foreach (List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
+            for (int typeIndex = 0; typeIndex < m_dataBlobTypes.Count; typeIndex++)
             {
-                BaseDataBlob currDataBlob = entityDBMap[entity];
-                if (currDataBlob != null)
+                if (entityMask[typeIndex])
                 {
-                    entityDBs.Add(currDataBlob);
+                    entityDBs.Add(GetDataBlob<BaseDataBlob>(entity, typeIndex));
                 }
             }
 
@@ -105,19 +151,54 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public List<int> GetAllEntitiesWithDataBlob<T>()
+        public List<int> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
-            List<int> entitiesWithDBType = new List<int>();
+            int typeIndex = GetDataBlobTypeIndex<T>();
 
-            for (int i = 0; i < m_entities.Count; i++)
+            ComparableBitArray dataBlobMask = BlankDataBlobMask();
+            dataBlobMask[typeIndex] = true;
+
+            return GetAllEntitiesWithDataBlobs(dataBlobMask);
+        }
+
+        /// <summary>
+        /// Returns a list of entity id's for entities that contain all dataBlobs defined by
+        /// the dataBlobMask.
+        /// </summary>
+        /// <param name="dataBlobMask"></param>
+        /// <returns></returns>
+        public List<int> GetAllEntitiesWithDataBlobs(ComparableBitArray dataBlobMask)
+        {
+            if (dataBlobMask.Length != m_dataBlobTypes.Count)
             {
-                if (m_dataBlobMap[typeof(T)][i] != null)
+                throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
+            }
+
+            List<int> entities = new List<int>();
+
+            for (int entity = 0; entity < m_entityMasks.Count; entity++)
+            {
+                
+                // Note to reader: I think this might be a performance issue once we continue increasing the number of dataBlobs.
+                // I don't know how the implementation of BitArray does its AND bit operation, hopefully it's quick, but if it's
+                // something stupid like "BitArrayReturnValue[i] = (BitArrayA[i] == BitArrayB[i]);" then we might well hit some bad
+                // performance here.
+                if (m_entityMasks[entity].And(dataBlobMask) == dataBlobMask)
                 {
-                    entitiesWithDBType.Add(i);
+                    entities.Add(entity);
                 }
             }
 
-            return entitiesWithDBType;
+            return entities;
+        }
+
+        /// <summary>
+        /// Returns a blank DataBlob mask with the correct number of entries.
+        /// </summary>
+        /// <returns></returns>
+        public ComparableBitArray BlankDataBlobMask()
+        {
+            return new ComparableBitArray(m_dataBlobTypes.Count);
         }
 
         /// <summary>
@@ -126,10 +207,10 @@ namespace Pulsar4X.ECSLib
         /// <returns>Entity ID of the new entity.</returns>
         public int CreateEntity()
         {
-            int i;
-            for (i = 0; i < m_entities.Count; i++)
+            int entityID;
+            for (entityID = 0; entityID < m_entities.Count; entityID++)
             {
-                if (i != m_entities[i])
+                if (entityID != m_entities[entityID])
                 {
                     // Space open.
                     break;
@@ -139,28 +220,29 @@ namespace Pulsar4X.ECSLib
             // Mark space claimed by making the index match the value.
             // Entities[7] == 7; on claimed spot.
             // Entities[7] == -1; on unclaimed spot.
-            if (i == m_entities.Count)
+            if (entityID == m_entities.Count)
             {
-                m_entities.Add(i);
+                m_entities.Add(entityID);
+                m_entityMasks.Add(new ComparableBitArray(m_dataBlobTypes.Count));
                 // Make sure the entityDBMaps have enough space for this entity.
-                foreach(List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
+                foreach(List<BaseDataBlob> entityDBMap in m_dataBlobMap)
                 {
                     entityDBMap.Add(null);
                 }
             }
             else
             {
-                m_entities[i] = i;
+                m_entities[entityID] = entityID;
                 // Make sure the EntityDBMaps are null for this entity.
                 // This should be done by RemoveEntity, but let's just be safe.
-                foreach (List<BaseDataBlob> entityDBMap in m_dataBlobMap.Values)
+                for (int typeIndex = 0; typeIndex < m_dataBlobTypes.Count; typeIndex++)
                 {
-                    entityDBMap[i] = null;
+                    m_dataBlobMap[typeIndex][entityID] = null;
+                    m_entityMasks[entityID][typeIndex] = false;
                 }
             }
 
-            return i;
-
+            return entityID;
         }
 
         /// <summary>
@@ -170,9 +252,12 @@ namespace Pulsar4X.ECSLib
         public void AddEntity(List<BaseDataBlob> dataBlobs)
         {
             int entity = CreateEntity();
+
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
-                SetDataBlob(entity, dataBlob);
+                int typeIndex;
+                TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
+                SetDataBlob(entity, dataBlob, typeIndex);
             }
         }
 
@@ -198,7 +283,10 @@ namespace Pulsar4X.ECSLib
         public void Clear()
         {
             m_entities = new List<int>();
-            m_dataBlobMap = new Dictionary<Type, List<BaseDataBlob>>();
+            m_entityMasks = new List<ComparableBitArray>();
+
+            m_dataBlobTypes = new Dictionary<Type, int>();
+            m_dataBlobMap = new List<List<BaseDataBlob>>();
 
             // Use reflection to setup all our dataBlobMap.
             // Find all types that implement BaseDataBlob
@@ -209,10 +297,34 @@ namespace Pulsar4X.ECSLib
                 ).ToList();
 
             // Create a list in our dataBlobMap for each discovered type.
+            int i = 0;
             foreach (Type dataBlobType in dataBlobTypes)
             {
-                m_dataBlobMap[dataBlobType] = new List<BaseDataBlob>();
+                m_dataBlobTypes.Add(dataBlobType, i);
+                m_dataBlobMap.Add(new List<BaseDataBlob>());
+                i++;
             }
+        }
+
+        /// <summary>
+        /// Returns the TypeIndex of a specified dataBlobType.
+        /// </summary>
+        /// <param name="dataBlobType"></param>
+        /// <param name="typeIndex"></param>
+        /// <returns></returns>
+        public bool TryGetDataBlobTypeIndex(Type dataBlobType, out int typeIndex)
+        {
+            return m_dataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
+        }
+
+        /// <summary>
+        /// Faster than TryGetDataBlobTypeIndex and uses generics for type safety.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public int GetDataBlobTypeIndex<T>() where T : BaseDataBlob
+        {
+            return m_dataBlobTypes[typeof(T)];
         }
     }
 }
