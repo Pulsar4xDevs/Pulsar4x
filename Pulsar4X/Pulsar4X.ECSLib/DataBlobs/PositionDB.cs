@@ -16,6 +16,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// System Y coordinante in AU
         /// </summary>
         public double Y;
+
         /// <summary>
         /// Initilized constructor.
         /// </summary>
