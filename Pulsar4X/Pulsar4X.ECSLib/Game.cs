@@ -34,11 +34,11 @@ namespace Pulsar4X.ECSLib
             // Create an entity with a DataBlobList.
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
             dataBlobs.Add(OrbitDB.FromStationary(2));
-            GlobalManager.AddEntity(dataBlobs);
+            GlobalManager.CreateEntity(dataBlobs);
 
             // Create one more, just for kicks.
             dataBlobs.Add(new PopulationDB(9));
-            GlobalManager.AddEntity(dataBlobs);
+            GlobalManager.CreateEntity(dataBlobs);
 
             // Get all DataBlobs of a specific type.
             List<PopulationDB> populations = GlobalManager.GetAllDataBlobsOfType<PopulationDB>();
@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
             GlobalManager.RemoveEntity(planet);
 
             // Add a new entity (using a list of DataBlobs.
-            GlobalManager.AddEntity(dataBlobs);
+            GlobalManager.CreateEntity(dataBlobs);
 
             // Find all entities with a specific DataBlob.
             List<int> populatedEntities = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();

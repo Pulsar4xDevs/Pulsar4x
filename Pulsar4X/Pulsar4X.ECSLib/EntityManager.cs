@@ -22,7 +22,8 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Fast, direct lookup of the DataBlob, after slow lookup of the typeIndex.
+        /// Direct lookup of an entity's DataBlob.
+        /// Slower than GetDataBlob(entity, typeIndex)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
@@ -34,7 +35,8 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Fast, direct lookup of the DataBlob using the typeIndex.
+        /// Direct lookup of an entity's DataBlob.
+        /// Fastest direct lookup available.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
@@ -47,6 +49,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Sets the DataBlob for the specified entity.
+        /// Slower than SetDataBlob(entity, dataBlob, typeIndex)
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
@@ -59,6 +62,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Sets the DataBlob for the specified entity.
+        /// Fastest DataBlob setting available.
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="dataBlob"></param>
@@ -77,6 +81,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Removes the DataBlob from the specified entity.
+        /// Slower than RemoveDataBlob(entity, typeIndex).
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="entity"></param>
@@ -88,6 +93,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Removes the DataBlob from the specified entity.
+        /// Slower than RemoveDataBlob(entity, typeIndex).
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="T"></param>
@@ -106,6 +112,7 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Removes the DataBlob from the specified entity.
+        /// Fastest DataBlob removal available.
         /// </summary>
         /// <param name="entity"></param>
         /// <param name="typeIndex"></param>
@@ -238,8 +245,9 @@ namespace Pulsar4X.ECSLib
                 for (int typeIndex = 0; typeIndex < m_dataBlobTypes.Count; typeIndex++)
                 {
                     m_dataBlobMap[typeIndex][entityID] = null;
-                    m_entityMasks[entityID][typeIndex] = false;
                 }
+
+                m_entityMasks[entityID] = new ComparableBitArray(m_dataBlobTypes.Count);
             }
 
             return entityID;
@@ -249,7 +257,7 @@ namespace Pulsar4X.ECSLib
         /// Adds an entity with the pre-existing datablobs to this EntityManager.
         /// </summary>
         /// <param name="dataBlobs"></param>
-        public void AddEntity(List<BaseDataBlob> dataBlobs)
+        public int CreateEntity(List<BaseDataBlob> dataBlobs)
         {
             int entity = CreateEntity();
 
@@ -259,6 +267,8 @@ namespace Pulsar4X.ECSLib
                 TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
                 SetDataBlob(entity, dataBlob, typeIndex);
             }
+
+            return entity;
         }
 
         /// <summary>
@@ -267,13 +277,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="entity"></param>
         public void RemoveEntity(int entity)
         {
-            List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entity);
-
-            foreach (BaseDataBlob dataBlob in dataBlobs)
+            foreach (List<BaseDataBlob> dataBlobType in m_dataBlobMap)
             {
-                RemoveDataBlob(entity, dataBlob.GetType());
+                dataBlobType[entity] = null;
             }
-
+            m_entityMasks[entity] = new ComparableBitArray(m_dataBlobTypes.Count);
             m_entities[entity] = -1;
         }
 
