@@ -7,6 +7,7 @@ using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.Helpers;
 using Pulsar4X;
 using System.Threading;
+using Pulsar4X.ECSLib.Processors;
 
 namespace Pulsar4X.ECSLib
 {
@@ -67,6 +68,8 @@ namespace Pulsar4X.ECSLib
             NextSubpulse.MaxSeconds = 5;
 
             CurrentInterrupt = new Interrupt();
+
+            PhaseProcessor.Initialize();
         }
 
         public int AdvanceTime(int deltaSeconds)
@@ -88,7 +91,7 @@ namespace Pulsar4X.ECSLib
 
                 CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
 
-                ExecuteSubpulse(subpulseTime);
+                PhaseProcessor.Process(subpulseTime);
 
                 deltaSeconds -= subpulseTime;
                 timeAdvanced += subpulseTime;
@@ -101,17 +104,6 @@ namespace Pulsar4X.ECSLib
                 // <@ todo: review interrupt messages.
             }
             return timeAdvanced;
-        }
-
-        private void ExecuteSubpulse(int deltaSeconds)
-        {
-            foreach (StarSystem system in StarSystems)
-            {
-                ThreadPool.QueueUserWorkItem(system.Update, deltaSeconds);
-            }
-
-            // Wait for every system to be done.
-            AutoResetEvent.WaitAll(SystemWaitHandles.ToArray());
         }
 
         public void EntityManagerTests()

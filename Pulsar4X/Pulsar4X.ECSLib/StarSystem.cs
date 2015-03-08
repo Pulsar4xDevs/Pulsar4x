@@ -9,10 +9,10 @@ namespace Pulsar4X.ECSLib
 {
     public class StarSystem
     {
-        EntityManager SystemManager { get { return m_systemManager; } }
+        public EntityManager SystemManager { get { return m_systemManager; } }
         private EntityManager m_systemManager;
 
-        List<StarSystem> Neighbors { get { return m_neighbors; } }
+        public List<StarSystem> Neighbors { get { return m_neighbors; } }
         private List<StarSystem> m_neighbors;
 
         public AutoResetEvent updateComplete;
@@ -26,13 +26,21 @@ namespace Pulsar4X.ECSLib
             Game.Instance.SystemWaitHandles.Add(updateComplete);
         }
 
-        public void Update(object objDeltaSeconds)
+        internal void ProcessPhase(object state)
         {
-            int deltaSeconds = (int)objDeltaSeconds;
+            PhaseState phaseState = state as PhaseState;
 
-            OrbitProcessor.Process(m_systemManager);
+            if (phaseState == null)
+            {
+                throw new ArgumentNullException("state");
+            }
 
-            updateComplete.Set();
+            foreach (ProcessFunction function in phaseState.ProcessFunctions)
+            {
+                function(this, phaseState.DeltaSeconds);
+            }
+
+            phaseState.WaitHandle.Set();
         }
     }
 }

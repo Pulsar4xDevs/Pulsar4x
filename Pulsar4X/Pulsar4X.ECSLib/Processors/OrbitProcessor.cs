@@ -9,8 +9,10 @@ namespace Pulsar4X.ECSLib.Processors
 {
     static class OrbitProcessor
     {
-        public static void Process(EntityManager currentManager)
+        public static void Process(StarSystem system, int deltaSeconds)
         {
+            EntityManager currentManager = system.SystemManager;
+
             int orbitTypeIndex = currentManager.GetDataBlobTypeIndex<OrbitDB>();
 
             int firstOrbital = currentManager.GetFirstEntityWithDataBlob(orbitTypeIndex);
