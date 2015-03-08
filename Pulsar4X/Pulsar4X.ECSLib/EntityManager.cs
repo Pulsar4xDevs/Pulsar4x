@@ -186,12 +186,7 @@ namespace Pulsar4X.ECSLib
 
             for (int entity = 0; entity < m_entityMasks.Count; entity++)
             {
-                
-                // Note to reader: I think this might be a performance issue once we continue increasing the number of dataBlobs.
-                // I don't know how the implementation of BitArray does its AND bit operation, hopefully it's quick, but if it's
-                // something stupid like "BitArrayReturnValue[i] = (BitArrayA[i] == BitArrayB[i]);" then we might well hit some bad
-                // performance here.
-                if (m_entityMasks[entity].And(dataBlobMask) == dataBlobMask)
+                if ((m_entityMasks[entity] & dataBlobMask) == dataBlobMask)
                 {
                     entities.Add(entity);
                 }
