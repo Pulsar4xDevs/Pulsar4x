@@ -90,6 +90,7 @@ solution "Pulsar4X"
 		objdir "Pulsar4X/Pulsar4X.Tests/obj"
 		links { -- Add any needed references here
 			"Pulsar4X.Lib",
+			"Pulsar4X.ECSLib",
 			"System",
 			"System.Data",
 			"System.Xml",
