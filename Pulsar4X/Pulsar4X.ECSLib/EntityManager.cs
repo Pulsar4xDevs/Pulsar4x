@@ -284,18 +284,21 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Adds an entity with the pre-existing datablobs to this EntityManager.
         /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
         public int CreateEntity(List<BaseDataBlob> dataBlobs)
         {
+            if (dataBlobs == null)
+            {
+                throw new ArgumentNullException("datablobs", "dataBlobs cannot be null. To create a blank entity use CreateEntity().");
+            }
+
             int entity = CreateEntity();
 
-            if (dataBlobs != null)
+            foreach (BaseDataBlob dataBlob in dataBlobs)
             {
-                foreach (BaseDataBlob dataBlob in dataBlobs)
-                {
-                    int typeIndex;
-                    TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
-                    SetDataBlob(entity, dataBlob, typeIndex);
-                }
+                int typeIndex;
+                TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
+                SetDataBlob(entity, dataBlob, typeIndex);
             }
 
             return entity;
