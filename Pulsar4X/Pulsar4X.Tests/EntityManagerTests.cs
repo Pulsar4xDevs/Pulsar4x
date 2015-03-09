@@ -142,7 +142,7 @@ namespace Pulsar4X.Tests
             Assert.AreNotEqual(noOfDataBlobsOfRemovedEntity, testList.Count);
 
             // now lets remove an entity that does not exist:
-            Assert.Catch(typeof(IndexOutOfRangeException), () =>
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
                 entityManager.RemoveEntity(42);
             });
