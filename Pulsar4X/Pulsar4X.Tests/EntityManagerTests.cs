@@ -46,14 +46,12 @@ namespace Pulsar4X.Tests
             dataBlobs.Clear();
             testEntity = entityManager.CreateEntity(dataBlobs);
             Assert.AreEqual(2, testEntity);
-        }
 
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void CreateBadEntity()
-        {
             // Create entity with existing datablobs, but provide a null list:
-            int testEntity = entityManager.CreateEntity(null);  // should throw ArgumentNullException
+            Assert.Catch(typeof(ArgumentNullException), () =>
+                {
+                    entityManager.CreateEntity(null); // should throw ArgumentNullException
+                });
         }
 
         [Test]
@@ -62,15 +60,13 @@ namespace Pulsar4X.Tests
             int testEntity = entityManager.CreateEntity();
             entityManager.SetDataBlob(testEntity, OrbitDB.FromStationary(5));
             entityManager.SetDataBlob(testEntity, new PopulationDB(10));
-        }
 
-        [Test]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void SetBadDataBlobs()
-        {
-            int testEntity = entityManager.CreateEntity();
-            OrbitDB bad = null;
-            entityManager.SetDataBlob(testEntity, bad);  // should throw ArgumentNullException
+            // test bad input:
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                OrbitDB bad = null;
+                entityManager.SetDataBlob(testEntity, bad); // should throw ArgumentNullException
+            });
         }
 
         [Test]
@@ -141,6 +137,8 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(0, testList.Count); // invlaid entity should have 0 data blobs
             Assert.AreNotEqual(noOfDataBlobsOfRemovedEntity, testList.Count);
 
+            Assert.IsFalse(entityManager.IsValidEntity(testEntity));
+
             // now lets remove an entity that does not exist:
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
@@ -161,6 +159,101 @@ namespace Pulsar4X.Tests
             });
         }
 
+        [Test]
+        public void DatablobLookup()
+        {
+            // Get the Population DB of a specific entity.
+            //PopulationDB planetPopDB = GlobalManager.GetDataBlob<PopulationDB>(planet);
+
+
+        }
+
+        [Test]
+        public void RemoveDataBlobs()
+        {
+            // a little setup:
+            int testEntity = entityManager.CreateEntity();
+            entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+
+            Assert.IsTrue(entityManager.GetDataBlob<PopulationDB>(testEntity) != null);  // check that it has the data blob
+            entityManager.RemoveDataBlob<PopulationDB>(testEntity);                     // Remove a data blob
+            Assert.IsTrue(entityManager.GetDataBlob<PopulationDB>(testEntity) == null); // now check that it doesn't
+
+            // now lets try remove it again:
+            entityManager.RemoveDataBlob<PopulationDB>(testEntity); 
+
+            // now lets try removal for an entity that does not exist:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+                {
+                    entityManager.RemoveDataBlob<PopulationDB>(42);  
+                });
+
+            // cannot remove baseDataBlobs, invalid data blob type:
+            // wait what?? Argument exception???
+            Assert.Catch(typeof(KeyNotFoundException), () =>
+                {
+                    entityManager.RemoveDataBlob<BaseDataBlob>(testEntity);  
+                });
+
+
+            // reset:
+            entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+
+            Assert.IsTrue(entityManager.GetDataBlob<PopulationDB>(testEntity) != null);  // check that it has the data blob
+            entityManager.RemoveDataBlob(testEntity, typeof(PopulationDB));              // Remove a data blob
+            Assert.IsTrue(entityManager.GetDataBlob<PopulationDB>(testEntity) == null); // now check that it doesn't
+
+            // now lets try remove it again:
+            entityManager.RemoveDataBlob(testEntity, typeof(PopulationDB));
+
+            // now lets try removal for an entity that does not exist:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.RemoveDataBlob(42, typeof(PopulationDB));
+            });
+
+            // cannot remove baseDataBlobs, invalid data blob type:
+            Assert.Catch(typeof(KeyNotFoundException), () =>
+            {
+                entityManager.RemoveDataBlob(testEntity, typeof(BaseDataBlob)); // throws ArgumentException??? i thought it should be KeyNotFoundException
+            });
+
+            // cannot remove basDataBlobs, invalid data blob type:
+            Assert.Catch(typeof(ArgumentException), () =>
+            {
+                entityManager.RemoveDataBlob(testEntity, typeof(Game));
+            });
+
+            // cannot remove data blob, null type:
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                entityManager.RemoveDataBlob(testEntity, null);
+            });
+
+            // note that we do not test RemoveDataBlob(int entity, int typeIndex) because that is used by both remove fuinctions tested above.
+        }
+
+        [Test]
+        public void EntityLookup()
+        {
+            // Find all entities with a specific DataBlob.
+           // List<int> populatedEntities = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+        }
+
+        [Test]
+        public void EntityValidity()
+        {
+            int testEntity = entityManager.CreateEntity();
+            Assert.IsTrue(entityManager.IsValidEntity(testEntity));
+
+            // now test invalid input:
+            Assert.IsFalse(entityManager.IsValidEntity(-42));
+            Assert.IsFalse(entityManager.IsValidEntity(42));
+
+            // and a removed entity:
+            entityManager.RemoveEntity(testEntity);
+            Assert.IsFalse(entityManager.IsValidEntity(testEntity));
+        }
 
         #region Extra Init Stuff
 
