@@ -288,11 +288,14 @@ namespace Pulsar4X.ECSLib
         {
             int entity = CreateEntity();
 
-            foreach (BaseDataBlob dataBlob in dataBlobs)
+            if (dataBlobs != null)
             {
-                int typeIndex;
-                TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
-                SetDataBlob(entity, dataBlob, typeIndex);
+                foreach (BaseDataBlob dataBlob in dataBlobs)
+                {
+                    int typeIndex;
+                    TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
+                    SetDataBlob(entity, dataBlob, typeIndex);
+                }
             }
 
             return entity;
