@@ -97,7 +97,7 @@ end
 
 -- Find the required nunit library
 function nunitlib()
-	return os.findlib("nunit.framework") or "Pulsar4X/deps/NUnit-2.6.1/bin/nunit.framework.dll"
+	return os.findlib("nunit.framework") or "Pulsar4X/deps/NUnit-2.6.4/bin/nunit.framework.dll"
 end
 
 -- Find the required OpenTK library
