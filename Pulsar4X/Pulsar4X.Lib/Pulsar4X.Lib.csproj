@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pulsar4X</RootNamespace>
+    <AssemblyName>Pulsar4X.Lib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;LOG4NET_ENABLED</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants></DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="log4net" >
+      <HintPath>../deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json" >
+      <HintPath>../deps/Json45r8/bin/Net40/Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Constants.cs" />
+    <Content Include="Data\CommanderNameThemes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Data\ShipNameThemes.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Compile Include="Entities\Commander.cs" />
+    <Compile Include="Entities\CommanderNameTheme.cs" />
+    <Compile Include="Entities\CommanderNameThemes.cs" />
+    <Compile Include="Entities\CommanderTypes.cs" />
+    <Compile Include="Entities\Components\ActiveSensor.cs" />
+    <Compile Include="Entities\Components\Armor.cs" />
+    <Compile Include="Entities\Components\BasicNewtonian.cs" />
+    <Compile Include="Entities\Components\BeamFireControlTN.cs" />
+    <Compile Include="Entities\Components\BeamTN.cs" />
+    <Compile Include="Entities\Components\BuildCost.cs" />
+    <Compile Include="Entities\Components\CIWSTN.cs" />
+    <Compile Include="Entities\Components\CargoHandlingTN.cs" />
+    <Compile Include="Entities\Components\CargoTN.cs" />
+    <Compile Include="Entities\Components\ColonyTN.cs" />
+    <Compile Include="Entities\Components\ComponentListTN.cs" />
+    <Compile Include="Entities\Components\ComponentTN.cs" />
+    <Compile Include="Entities\Components\DamageTableTN.cs" />
+    <Compile Include="Entities\Components\Engine.cs" />
+    <Compile Include="Entities\Components\GeneralComponentTN.cs" />
+    <Compile Include="Entities\Components\JumpEngine.cs" />
+    <Compile Include="Entities\Components\MagazineTN.cs" />
+    <Compile Include="Entities\Components\MissileLauncherTN.cs" />
+    <Compile Include="Entities\Components\OrdnanceTN.cs" />
+    <Compile Include="Entities\Components\PassiveSensor.cs" />
+    <Compile Include="Entities\Components\ReactorTN.cs" />
+    <Compile Include="Entities\Components\ShieldTN.cs" />
+    <Compile Include="Entities\Components\TargetTN.cs" />
+    <Compile Include="Entities\Components\TurretTN.cs" />
+    <Compile Include="Entities\ConstructionCycle.cs" />
+    <Compile Include="Entities\Faction.cs" />
+    <Compile Include="Entities\FactionCommanderTheme.cs" />
+    <Compile Include="Entities\FactionContact.cs" />
+    <Compile Include="Entities\FactionTheme.cs" />
+    <Compile Include="Entities\GameEntity.cs" />
+    <Compile Include="Entities\Installation.cs" />
+    <Compile Include="Entities\MessageEntry.cs" />
+    <Compile Include="Entities\Order.cs" />
+    <Compile Include="Entities\PointDefense.cs" />
+    <Compile Include="Entities\Ruins.cs" />
+    <Compile Include="Entities\Ship.cs" />
+    <Compile Include="Entities\ShipClass.cs" />
+    <Compile Include="Entities\SimEntity.cs" />
+    <Compile Include="Entities\Species.cs" />
+    <Compile Include="Entities\StarSystem\Atmosphere.cs" />
+    <Compile Include="Entities\StarSystem\AtmosphericGas.cs" />
+    <Compile Include="Entities\StarSystem\JumpPoint.cs" />
+    <Compile Include="Entities\StarSystem\OrbitingEntity.cs" />
+    <Compile Include="Entities\StarSystem\Population.cs" />
+    <Compile Include="Entities\StarSystem\Star.cs" />
+    <Compile Include="Entities\StarSystem\StarSystem.cs" />
+    <Compile Include="Entities\StarSystem\StarSystemEntity.cs" />
+    <Compile Include="Entities\StarSystem\SystemBody.cs" />
+    <Compile Include="Entities\StarSystem\SystemContact.cs" />
+    <Compile Include="Entities\StarSystem\TaskGroup.cs" />
+    <Compile Include="Entities\StarSystem\Waypoint.cs" />
+    <Compile Include="Entities\StarSystem\Wreck.cs" />
+    <Compile Include="Entities\TaskForce.cs" />
+    <Compile Include="GameState.cs" />
+    <Compile Include="Helpers\Databinding.cs" />
+    <Compile Include="Helpers\GameMath.cs" />
+    <Compile Include="Helpers\Orbit.cs" />
+    <Compile Include="Helpers\VerboseBindingList.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\Bootstrap.cs" />
+    <Compile Include="Storage\Store.cs" />
+    <Compile Include="SystemGen\GalaxyGen.cs" />
+    <Compile Include="SystemGen\SystemGen.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
