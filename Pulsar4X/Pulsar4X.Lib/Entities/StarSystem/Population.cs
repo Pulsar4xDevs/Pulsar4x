@@ -564,6 +564,8 @@ namespace Pulsar4X.Entities
             FighterBuildQueue = new BindingList<FighterBuildQueueItem>();
 
             IsRefining = false;
+
+            SSEntity = StarSystemEntityType.Population;
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)

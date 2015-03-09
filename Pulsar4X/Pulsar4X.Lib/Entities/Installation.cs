@@ -443,6 +443,37 @@ namespace Pulsar4X.Entities
                 DateTime EstTime;
                 TimeSpan TS;
 
+                /// <summary>
+                /// If an order for adding a set amount of tons is canceled while in progress, credit the tons that were built to the shipyard.
+                /// </summary>
+                if(CurrentActivity.Progress != 0.0m && CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                {
+                    int TonsToAdd = 0;
+                    switch (CurrentActivity.Activity)
+                    {
+                        case Constants.ShipyardInfo.ShipyardActivity.Add500Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 500.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add1000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 1000.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add2000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 2000.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add5000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 5000.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add10000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 10000.0f);
+                            break;
+                    }
+
+                    if (TonsToAdd != 0)
+                    {
+                        Tonnage = Tonnage + TonsToAdd;
+                    }
+                }
+
                 switch (NewActivity)
                 {
                     case Constants.ShipyardInfo.ShipyardActivity.AddSlipway:

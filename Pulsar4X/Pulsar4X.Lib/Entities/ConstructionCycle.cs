@@ -434,5 +434,50 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// Build and modify ships and shipyards respectively.
+        /// *** not implemented yet, or called for that matter. also missing the shipyard tabs grid work that displays ship construction progress.
+        /// </summary>
+        /// <param name="P">List of factions.</param>
+        public static void ProcessShipyards(BindingList<Faction> P)
+        {
+            foreach (Faction CurrentFaction in P)
+            {
+                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                {
+                    int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
+                    int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+
+                    for (int SYIterator = 0; SYIterator < CY; SYIterator++)
+                    {
+                        Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[SYIterator];
+
+                        if (SYInfo.CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                        {
+                        }
+
+                        foreach (Installation.ShipyardInformation.ShipyardTask Task in SYInfo.BuildingShips)
+                        {
+
+                        }
+
+                    }
+
+                    for (int SYIterator = 0; SYIterator < NY; SYIterator++)
+                    {
+                        Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[SYIterator];
+
+                        if (SYInfo.CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                        {
+                        }
+
+                        foreach (Installation.ShipyardInformation.ShipyardTask Task in SYInfo.BuildingShips)
+                        {
+
+                        }
+                    }
+                }
+            }
+        }
     }
 }

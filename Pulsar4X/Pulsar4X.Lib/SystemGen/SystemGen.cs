@@ -1546,6 +1546,8 @@ namespace Pulsar4X
 
             Star luckyStar;
 
+            List<Star> systemStars = new List<Star>(system.Stars.ToArray()); // Deep copy.
+
             /// <summary>
             /// Only the system primary will have jumppoints if this is true.
             /// </summary>
@@ -1558,7 +1560,14 @@ namespace Pulsar4X
                 do
                 {
                     luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
-                } while (luckyStar.Planets.Count != 0);
+
+                    systemStars.Remove(luckyStar);
+                } while (luckyStar.Planets.Count != 0 && systemStars.Count > 0);
+
+                if (systemStars.Count == 0)
+                {
+                    luckyStar = system.Stars[m_RNG.Next(system.Stars.Count)];
+                }
             }
 
             return GenerateJumpPoint(luckyStar);

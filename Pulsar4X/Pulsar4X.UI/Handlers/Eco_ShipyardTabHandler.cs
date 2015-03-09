@@ -99,26 +99,6 @@ namespace Pulsar4X.UI.Handlers
         private static int MaxShipyardRows { get; set; }
 
         /// <summary>
-        /// Ships in orbit that are in need of repairs.
-        /// </summary>
-        private static BindingList<ShipTN> DamagedShipList { get; set; }
-
-        /// <summary>
-        /// List of classes that can be built at this shipyard.
-        /// </summary>
-        private static BindingList<ShipClassTN> EligibleClassList { get; set; }
-
-        /// <summary>
-        /// List of classes that can be the target of a repair/refit/scrap operation.
-        /// </summary>
-        private static BindingList<ShipClassTN> ClassesInOrbit { get; set; }
-
-        /// <summary>
-        /// List of each ship assigned with a shipclass in orbit to be a potential target for a repair/refit/scrap operation. 
-        /// </summary>
-        private static BindingList<ShipTN> ShipsOfClassInOrbit { get; set; }
-
-        /// <summary>
         /// Initialize the Shipyard tab
         /// </summary>
         /// <param name="m_oSummaryPanel">The summary panel from the economics handler.</param>
@@ -139,16 +119,31 @@ namespace Pulsar4X.UI.Handlers
         /// Refresh the shipyard tab.
         /// </summary>
         /// <param name="m_oSummaryPanel">The summary panel from the economics handler.</param>
-        public static void RefreshShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo
-                                              , BindingList<ShipClassTN> RetoolTargets)
+        /// <param name="EligibleClassList">List of shipclasses that this shipyard can produce.</param>
+        /// <param name="DamagedShipList">List of damaged ships in orbit.</param>
+        /// <param name="ClassesInOrbit">List of shipclasses in orbit around CurrentPopulation.</param>
+        /// <param name="ShipsOfClassInOrbit">List of ships in the selected shipclass in orbit around CurrentPopulation.</param>
+        public static void RefreshShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo,
+                                              BindingList<ShipClassTN> RetoolTargets, ref BindingList<ShipClassTN> EligibleClassList, ref BindingList<ShipTN> DamagedShipList, 
+                                              ref BindingList<ShipClassTN> ClassesInOrbit, ref BindingList<ShipTN> ShipsOfClassInOrbit)
         {
+            /// <summary>
+            /// Yeah, just going to constantly declare new variables to pass these along...
+            /// </summary>
+            ShipsOfClassInOrbit = new BindingList<ShipTN>();
+            EligibleClassList = new BindingList<ShipClassTN>();
+            DamagedShipList = new BindingList<ShipTN>();
+            ClassesInOrbit = new BindingList<ShipClassTN>();
+
             if (CurrentFaction != null && CurrentPopulation != null && SYInfo != null)
             {
                 RefreshShipyardDataGrid(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
                 RefreshSYCGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
                 BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, RetoolTargets);
-                RefreshSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo);
-                BuildSYTRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo);
+                RefreshSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, ref EligibleClassList, ref DamagedShipList, ref ClassesInOrbit,
+                                                 ref ShipsOfClassInOrbit);
+                BuildSYTRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, SYInfo, EligibleClassList, DamagedShipList, ClassesInOrbit,
+                                                 ShipsOfClassInOrbit);
 
                 String Entry = String.Format("Shipyard Complex Activity({0})", SYInfo.Name);
                 m_oSummaryPanel.ShipyardTaskGroupBox.Text = Entry;
@@ -164,10 +159,11 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="m_oSummaryPanel">Panel from economics</param>
         /// <param name="CurrentFaction">Current Faction</param>
         /// <param name="CurrentPopulation">Current Population</param>
+        /// <param name="SYInfo">Shipyard information for the selected shipyard.</param>
         /// <param name="RetoolList">List of ships that this shipyard can be retooled to.</param>
-        private static void RefreshSYCGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo, BindingList<ShipClassTN> RetoolList)
+        private static void RefreshSYCGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, 
+                                               Installation.ShipyardInformation SYInfo, BindingList<ShipClassTN> RetoolList)
         {
-
 #warning this doesn't update when a new shipclass is added on its own. the econ page is "shared" by all factions so an event may not be possible there.
             if (RetoolList != null && CurrentFaction != null && SYInfo != null)
             {
@@ -271,7 +267,13 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="CurrentFaction">Selected faction from the economics handler.</param>
         /// <param name="CurrentPopulation">Selected population from the economics handler.</param>
         /// <param name="SYInfo">Shipyard information from the economics handler.</param>
-        public static void RefreshSYTaskGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
+        /// <param name="EligibleClassList">List of shipclasses that this shipyard can produce.</param>
+        /// <param name="DamagedShipList">List of damaged ships in orbit.</param>
+        /// <param name="ClassesInOrbit">List of shipclasses in orbit around CurrentPopulation.</param>
+        /// <param name="ShipsOfClassInOrbit">List of ships in the selected shipclass in orbit around CurrentPopulation.</param>
+        public static void RefreshSYTaskGroupBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo,
+                                                 ref BindingList<ShipClassTN> EligibleClassList, ref BindingList<ShipTN> DamagedShipList, ref BindingList<ShipClassTN> ClassesInOrbit,
+                                                 ref BindingList<ShipTN>ShipsOfClassInOrbit)
         {
             if(m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex != -1)
             {
@@ -279,8 +281,7 @@ namespace Pulsar4X.UI.Handlers
 
                 switch (CurrentSYTask)
                 {
-                    case Constants.ShipyardInfo.Task.Construction:
-                        
+                    case Constants.ShipyardInfo.Task.Construction:                        
                         /// <summary>
                         /// Fill the taskgroups in orbit combo box.
                         /// </summary>
@@ -298,7 +299,7 @@ namespace Pulsar4X.UI.Handlers
                         {
                             m_oSummaryPanel.SYNewClassComboBox.Items.Clear();
 
-                            GetEligibleClassList(CurrentFaction, SYInfo);
+                            GetEligibleClassList(CurrentFaction, SYInfo, ref EligibleClassList);
 
                             foreach (ShipClassTN CurrentClass in EligibleClassList)
                             {
@@ -310,13 +311,12 @@ namespace Pulsar4X.UI.Handlers
                             int index = CurrentFaction.ShipDesigns.IndexOf(EligibleClassList[0]);
                             String Entry = String.Format("{0} {1}", CurrentFaction.ShipDesigns[index].Name,
                                                          (CurrentFaction.ShipDesigns[index].ShipsInClass.Count + CurrentFaction.ShipDesigns[index].ShipsUnderConstruction + 1));
-                            m_oSummaryPanel.SYShipNameTextBox.Text = Entry; 
+                            m_oSummaryPanel.SYShipNameTextBox.Text = Entry;
                         }
-
                         break;
                     case Constants.ShipyardInfo.Task.Repair:
                         m_oSummaryPanel.RepairRefitScrapLabel.Text = "Repair";
-                        GetDamagedShipList(CurrentFaction, CurrentPopulation);
+                        GetDamagedShipList(CurrentFaction, CurrentPopulation, ref DamagedShipList);
                         m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
                         foreach (ShipTN CurrentShip in DamagedShipList)
                         {
@@ -327,7 +327,7 @@ namespace Pulsar4X.UI.Handlers
                         break;
                     case Constants.ShipyardInfo.Task.Refit:
                         m_oSummaryPanel.RepairRefitScrapLabel.Text = "Refit";
-                        GetShipClassesInOrbit(CurrentFaction, CurrentPopulation);
+                        GetShipClassesInOrbit(CurrentFaction, CurrentPopulation, ref ClassesInOrbit);
                         m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Clear();
                         foreach (ShipClassTN CurrentClass in ClassesInOrbit)
                         {
@@ -340,9 +340,9 @@ namespace Pulsar4X.UI.Handlers
                             CurrentRRSClass = ClassesInOrbit[m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex];
                         }
 
-                        if(CurrentRRSClass != null)
+                        if (CurrentRRSClass != null)
                         {
-                            GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass);
+                            GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass, ref ShipsOfClassInOrbit);
                             m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
                             foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
                             {
@@ -354,7 +354,7 @@ namespace Pulsar4X.UI.Handlers
                         break;
                     case Constants.ShipyardInfo.Task.Scrap:
                         m_oSummaryPanel.RepairRefitScrapLabel.Text = "Scrap";
-                        GetShipClassesInOrbit(CurrentFaction, CurrentPopulation);
+                        GetShipClassesInOrbit(CurrentFaction, CurrentPopulation, ref ClassesInOrbit);
                         m_oSummaryPanel.RepairRefitScrapClassComboBox.Items.Clear();
                         foreach (ShipClassTN CurrentClass in ClassesInOrbit)
                         {
@@ -369,7 +369,7 @@ namespace Pulsar4X.UI.Handlers
 
                         if(CurrentRRSClass != null)
                         {
-                            GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass);
+                            GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass, ref ShipsOfClassInOrbit);
                             m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
                             foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
                             {
@@ -378,10 +378,8 @@ namespace Pulsar4X.UI.Handlers
                             if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
                                 m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
                         }
-
                         break;
                 }
-
             }
         }
 
@@ -392,23 +390,26 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="m_oSummaryPanel">Current economics handler</param>
         /// <param name="CurrentFaction">Selected faction</param>
         /// <param name="CurrentPopulation">Selected population</param>
-        public static void RefreshRRSShipComboBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation)
+        /// <param name="ClassesInOrbit">List of shipclasses in orbit around CurrentPopulation.</param>
+        /// <param name="ShipsOfClassInOrbit">List of ships in the selected shipclass in orbit around CurrentPopulation.</param>
+        public static void RefreshRRSShipComboBox(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, BindingList<ShipClassTN> ClassesInOrbit,
+                                                  ref BindingList<ShipTN> ShipsOfClassInOrbit)
         {
             if (m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex != -1)
             {
-               ShipClassTN CurrentRRSClass = ClassesInOrbit[m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex];
+                ShipClassTN CurrentRRSClass = ClassesInOrbit[m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndex];
 
-               GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass);
+                GetShipsOfClassInOrbit(CurrentFaction, CurrentPopulation, CurrentRRSClass, ref ShipsOfClassInOrbit);
 
-               m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
-               foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
-               {
-                   m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Add(CurrentShip);
-                   if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
-                   {
-                       m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
-                   }
-               }
+                m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Clear();
+                foreach (ShipTN CurrentShip in ShipsOfClassInOrbit)
+                {
+                    m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Add(CurrentShip);
+                    if (m_oSummaryPanel.RepairRefitScrapShipComboBox.Items.Count != 0)
+                    {
+                        m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex = 0;
+                    }
+                }
             }
         }
 
@@ -687,7 +688,13 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="CurrentFaction">Currently selected faction.</param>
         /// <param name="CurrentPopulation">Currently selected population</param>
         /// <param name="SYInfo">Currently selected shipyard on currently selected population belonging to currently selected faction</param>
-        public static void BuildSYTRequiredMinerals(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
+        /// <param name="EligibleClassList">List of shipclasses that this shipyard can produce.</param>
+        /// <param name="DamagedShipList">List of damaged ships in orbit.</param>
+        /// <param name="ClassesInOrbit">List of shipclasses in orbit around CurrentPopulation.</param>
+        /// <param name="ShipsOfClassInOrbit">List of ships in the selected shipclass in orbit around CurrentPopulation.</param> 
+        public static void BuildSYTRequiredMinerals(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo,
+                                                    BindingList<ShipClassTN> EligibleClassList, BindingList<ShipTN> DamagedShipList, BindingList<ShipClassTN> ClassesInOrbit,
+                                                    BindingList<ShipTN> ShipsOfClassInOrbit)
         {
             if (m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex != -1 && m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex != -1 && SYInfo != null &&
                 (m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1 || m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex != -1))
@@ -739,46 +746,51 @@ namespace Pulsar4X.UI.Handlers
                     {
                         case Constants.ShipyardInfo.Task.Construction:
                             int newShipIndex = m_oSummaryPanel.SYNewClassComboBox.SelectedIndex;
-                            if (newShipIndex != -1)
+                            if (newShipIndex != -1 && EligibleClassList.Count > newShipIndex)
                             {
                                 ConstructRefit = EligibleClassList[newShipIndex];
                             }
                             break;
                         case Constants.ShipyardInfo.Task.Repair:
                             int CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
-                            if (CurrentShipIndex != -1)
+                            if (CurrentShipIndex != -1 && DamagedShipList.Count > CurrentShipIndex)
                             {
                                 CurrentShip = DamagedShipList[CurrentShipIndex];
                             }
                             break;
                         case Constants.ShipyardInfo.Task.Refit:
                             newShipIndex = m_oSummaryPanel.SYNewClassComboBox.SelectedIndex;
-                            if (newShipIndex != -1)
+                            if (newShipIndex != -1 && EligibleClassList.Count > newShipIndex)
                             {
                                 ConstructRefit = EligibleClassList[newShipIndex];
                             }
 
                             CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
-                            if (CurrentShipIndex != -1)
+                            if (CurrentShipIndex != -1 && ShipsOfClassInOrbit.Count > CurrentShipIndex)
                             {
                                 CurrentShip = ShipsOfClassInOrbit[CurrentShipIndex];
                             }
                             break;
                         case Constants.ShipyardInfo.Task.Scrap:
                             CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
-                            if (CurrentShipIndex != -1)
+                            if (CurrentShipIndex != -1 && ShipsOfClassInOrbit.Count > CurrentShipIndex)
                             {
                                 CurrentShip = ShipsOfClassInOrbit[CurrentShipIndex];
                             }
                             break;
                     }
 
+                    /// <summary>
+                    /// Faction swapping can cause some problems.
+                    /// </summary>
+                    if (CurrentShip == null && ConstructRefit == null)
+                        return;
 
                     Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, ConstructRefit);
                     CostPrototyper.BuildingShips.Add(NewTask);
 
                     m_oSummaryPanel.SYTaskCostTextBox.Text = CostPrototyper.BuildingShips[0].Cost.ToString();
-                    m_oSummaryPanel.SYTaskCompletionDateTextBox.Text = CostPrototyper.BuildingShips[0].CompletionDate.ToShortDateString();;
+                    m_oSummaryPanel.SYTaskCompletionDateTextBox.Text = CostPrototyper.BuildingShips[0].CompletionDate.ToShortDateString();
 
                     for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
                     {
@@ -791,12 +803,13 @@ namespace Pulsar4X.UI.Handlers
                             m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Add(CostString);
                         }
                     }
-
                 }
-
             }
             else
             {
+                /// <summary>
+                /// There is no cost to calculate so print this instead.
+                /// </summary>
                 m_oSummaryPanel.SYTaskCostTextBox.Text = "N/A";
                 m_oSummaryPanel.SYTaskCompletionDateTextBox.Text = "N/A";
                 m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Clear();
@@ -807,11 +820,11 @@ namespace Pulsar4X.UI.Handlers
         /// Get a list of the shipclasses in orbit. this wll be needed to help prune repair/refit/scrap operation options.
         /// </summary>
         /// <param name="CurrentFaction">Current faction from the economics handler</param>
-        /// <param name="CurrentPopulation">Current Population from the economics handler.</param>
-        private static void GetShipClassesInOrbit(Faction CurrentFaction, Population CurrentPopulation)
+        /// <param name="CurrentPopulation">Current Population from the economics handler.</param>  
+        /// <param name="ClassesInOrbit">List of shipclasses in orbit around CurrentPopulation.</param>        
+        private static void GetShipClassesInOrbit(Faction CurrentFaction, Population CurrentPopulation, ref BindingList<ShipClassTN> ClassesInOrbit)
         {
-            ClassesInOrbit = new BindingList<ShipClassTN>();
-
+            ClassesInOrbit.Clear();
             foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
             {
                 if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
@@ -831,9 +844,10 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="CurrentFaction">Economics handler selected faction.</param>
         /// <param name="CurrentPopulation">Population from the economics handler.</param>
         /// <param name="CurrentShipClass">Shipclass selected via the RepairRefitScrapClassComboBox</param>
-        private static void GetShipsOfClassInOrbit(Faction CurrentFaction, Population CurrentPopulation, ShipClassTN CurrentShipClass)
+        /// <param name="ShipsOfClassInOrbit">List of ships in the selected shipclass in orbit around CurrentPopulation.</param>
+        private static void GetShipsOfClassInOrbit(Faction CurrentFaction, Population CurrentPopulation, ShipClassTN CurrentShipClass, ref BindingList<ShipTN> ShipsOfClassInOrbit)
         {
-            ShipsOfClassInOrbit = new BindingList<ShipTN>();
+            ShipsOfClassInOrbit.Clear();
             foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
             {
                 if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
@@ -852,9 +866,9 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="CurrentPopulation">Population selected by the economics handler.</param>
         /// <param name="DamagedShipsInOrbit">list of damaged ships this function will produce.</param>
-        private static void GetDamagedShipList(Faction CurrentFaction, Population CurrentPopulation)
+        private static void GetDamagedShipList(Faction CurrentFaction, Population CurrentPopulation, ref BindingList<ShipTN> DamagedShipList)
         {
-            DamagedShipList = new BindingList<ShipTN>();
+            DamagedShipList.Clear();
             foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
             {
                 if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
@@ -877,14 +891,15 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         /// <param name="CurrentFaction">Current faction from the economics handler.</param>
         /// <param name="SYInfo">Currently selected shipyard.</param>
-        private static void GetEligibleClassList(Faction CurrentFaction, Installation.ShipyardInformation SYInfo)
+        /// <param name="EligibleClassList">List of shipclasses that this shipyard can produce.</param>
+        private static void GetEligibleClassList(Faction CurrentFaction, Installation.ShipyardInformation SYInfo, ref BindingList<ShipClassTN> EligibleClassList)
         {
             if (SYInfo.AssignedClass == null)
             {
                 return;
             }
 
-            EligibleClassList = new BindingList<ShipClassTN>();
+            EligibleClassList.Clear();
 
             /// <summary>
             /// Shipyards may always build the ship that they are tooled for.

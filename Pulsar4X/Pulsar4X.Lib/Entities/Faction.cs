@@ -2048,7 +2048,6 @@ namespace Pulsar4X.Entities
 
                 detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
 
-
                 bool det = LargeDetection(dist, detection);
 
                 /// <summary>

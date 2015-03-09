@@ -217,16 +217,14 @@ namespace Pulsar4X.Entities
 
             SSEntity = StarSystemEntityType.TaskGroup;
 
-            Contact = new SystemContact(TaskGroupFaction, this);
-
             Position.System = StartingSystem;
             Position.X = OrbitingBody.Position.X;
             Position.Y = OrbitingBody.Position.Y;
 
+            Contact = new SystemContact(TaskGroupFaction, this);
+
             Contact.LastPosition.X = Contact.Position.X;
             Contact.LastPosition.Y = Contact.Position.Y;
-
-            Contact.Position = Position;
 
             StartingSystem.SystemContactList.Add(Contact);
             DrawTravelLine = 3;
@@ -1223,6 +1221,8 @@ namespace Pulsar4X.Entities
             /// </summary>
             Contact.Position.X = OrbitingBody.Position.X;
             Contact.Position.Y = OrbitingBody.Position.Y;
+            Position.X = Contact.Position.X;
+            Position.Y = Contact.Position.Y;
         }
 
         /// <summary>
@@ -1267,8 +1267,8 @@ namespace Pulsar4X.Entities
                         dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
                         break;
                     case StarSystemEntityType.Population:
-                        dX = Contact.Position.X - TaskGroupOrders[0].target.Position.X;
-                        dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
+                        dX = Contact.Position.X - TaskGroupOrders[0].pop.Planet.Position.X;
+                        dY = Contact.Position.Y - TaskGroupOrders[0].pop.Planet.Position.Y;
                         break;
                     case StarSystemEntityType.Invalid:
                         throw new InvalidOperationException("SSEntity Invalid");
@@ -1305,8 +1305,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Contact.Position.X - TaskGroupOrders[0].target.Position.X;
-                    dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
+                    dX = Contact.Position.X - TaskGroupOrders[0].pop.Planet.Position.X;
+                    dY = Contact.Position.Y - TaskGroupOrders[0].pop.Planet.Position.Y;
                 }
                 else
                 {
@@ -1353,8 +1353,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(TaskGroupOrders[0].target.Position.X  - Contact.Position.X);
-                    dY = Math.Abs(TaskGroupOrders[0].target.Position.Y  - Contact.Position.Y);
+                    dX = Math.Abs(TaskGroupOrders[0].pop.Planet.Position.X  - Contact.Position.X);
+                    dY = Math.Abs(TaskGroupOrders[0].pop.Planet.Position.Y - Contact.Position.Y);
                 }
                 else
                 {
@@ -1491,8 +1491,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(TaskGroupOrders[OrderCount].target.Position.X - Contact.Position.X);
-                    dY = Math.Abs(TaskGroupOrders[OrderCount].target.Position.Y - Contact.Position.Y);
+                    dX = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.X - Contact.Position.X);
+                    dY = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.Y - Contact.Position.Y);
                 }
                 else
                 {
@@ -1518,8 +1518,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(TaskGroupOrders[OrderCount].target.Position.X  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.X);
-                    dY = Math.Abs(TaskGroupOrders[OrderCount].target.Position.Y  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.Y);
+                    dX = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.X  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.X);
+                    dY = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.Y  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.Y);
                 }
                 else
                 {
@@ -1543,8 +1543,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = TaskGroupOrders[OrderCount].target.Position.X;
-                    dY = TaskGroupOrders[OrderCount].target.Position.Y;
+                    dX = TaskGroupOrders[OrderCount].pop.Planet.Position.X;
+                    dY = TaskGroupOrders[OrderCount].pop.Planet.Position.Y;
                 }
                 else
                 {
@@ -1559,8 +1559,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount - 1].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(dX - TaskGroupOrders[OrderCount - 1].target.Position.X);
-                    dY = Math.Abs(dY - TaskGroupOrders[OrderCount - 1].target.Position.Y);
+                    dX = Math.Abs(dX - TaskGroupOrders[OrderCount - 1].pop.Planet.Position.X);
+                    dY = Math.Abs(dY - TaskGroupOrders[OrderCount - 1].pop.Planet.Position.Y);
                 }
                 else
                 {
@@ -1614,8 +1614,8 @@ namespace Pulsar4X.Entities
                     }
                     else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     {
-                        dX = TaskGroupOrders[0].target.Position.X;
-                        dY = TaskGroupOrders[0].target.Position.Y;
+                        dX = TaskGroupOrders[0].pop.Planet.Position.X;
+                        dY = TaskGroupOrders[0].pop.Planet.Position.Y;
                     }
                     else
                     {
@@ -2115,7 +2115,7 @@ namespace Pulsar4X.Entities
                         currentOrder.orderTimeRequirement = 0;
                         FuelPlace = 0;
 
-                        TaskGroupTN targetTG = currentOrder.target as TaskGroupTN;
+                        TaskGroupTN targetTG = currentOrder.taskGroup as TaskGroupTN;
 
                         foreach(ShipTN tankerShip in targetTG.Ships)
                         {

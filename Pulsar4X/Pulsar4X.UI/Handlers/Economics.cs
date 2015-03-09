@@ -117,6 +117,11 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         Panels.Eco_Summary m_oSummaryPanel;
 
+        /// <summary>
+        /// For shipyard activity changes when there is a current activity.
+        /// </summary>
+        Panels.ConfirmActivity m_oConfirmActivityPanel;
+
         public EconomicsViewModel VM { get; set; }
 
         /// <summary>
@@ -159,10 +164,32 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private BindingList<ShipClassTN> PotentialRetoolTargets { get; set; }
 
+        /// <summary>
+        /// Ships in orbit that are in need of repairs.
+        /// </summary>
+        public BindingList<ShipTN> DamagedShipList { get; set; }
+
+        /// <summary>
+        /// List of classes that can be built at this shipyard.
+        /// </summary>
+        public BindingList<ShipClassTN> EligibleClassList { get; set; }
+
+        /// <summary>
+        /// List of classes that can be the target of a repair/refit/scrap operation.
+        /// </summary>
+        public BindingList<ShipClassTN> ClassesInOrbit { get; set; }
+
+        /// <summary>
+        /// List of each ship assigned with a shipclass in orbit to be a potential target for a repair/refit/scrap operation. 
+        /// </summary>
+        public BindingList<ShipTN> ShipsOfClassInOrbit { get; set; }
+
+
         public Economics()
         {
             //Create the summary panel.
             m_oSummaryPanel = new Panels.Eco_Summary();
+            m_oConfirmActivityPanel = new Panels.ConfirmActivity();
 
             // Create Viewmodel:
             VM = new EconomicsViewModel();
@@ -285,12 +312,27 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ExpandCapUntilXTextBox.TextChanged += new EventHandler(ExpandCapUntilXTextBox_TextChanged);
             m_oSummaryPanel.NewShipClassComboBox.SelectedIndexChanged += new EventHandler(NewShipClassComboBox_SelectedIndexChanged);
             m_oSummaryPanel.RepairRefitScrapClassComboBox.SelectedIndexChanged += new EventHandler(RepairRefitScrapClassComboBox_SelectedIndexChanged);
+            m_oSummaryPanel.AddTaskButton.Click += new EventHandler(AddTaskButton_Click);
 
             m_oSummaryPanel.ShipyardDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ShipyardDataGrid.ColumnHeadersHeight = 34;
             m_oSummaryPanel.ShipyardTaskDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ShipyardTaskDataGrid.ColumnHeadersHeight = 34;
             Eco_ShipyardTabHandler.BuildShipyardTab(m_oSummaryPanel,m_oCurrnetFaction,m_oCurrnetPopulation,PotentialRetoolTargets);
+
+            m_oConfirmActivityPanel.YesButton.Click += new EventHandler(ConfirmYesButton_Click);
+            m_oConfirmActivityPanel.NoButton.Click += new EventHandler(ConfirmNoButton_Click);
+
+            if(CurrentSYInfo != null)
+            {
+                String Entry = String.Format("Shipyard {0} already has a task in progress. Are you sure you want to cancel the existing activity?",CurrentSYInfo.Name);
+                m_oConfirmActivityPanel.ShipyardNamePromptLabel.Text = Entry;
+            }
+
+            ShipsOfClassInOrbit = new BindingList<ShipTN>();
+            EligibleClassList = new BindingList<ShipClassTN>();
+            DamagedShipList = new BindingList<ShipTN>();
+            ClassesInOrbit = new BindingList<ShipClassTN>();
             #endregion
 
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
@@ -462,7 +504,22 @@ namespace Pulsar4X.UI.Handlers
                         break;
                 }
 
-                Eco_ShipyardTabHandler.RefreshSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo);
+                /// <summary>
+                /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                /// So. they have to be refs.
+                /// But they are properties.
+                /// So kludge.
+                /// </summary>
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                BindingList<ShipTN> DSL = DamagedShipList;
+                BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                Eco_ShipyardTabHandler.RefreshSYTaskGroupBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, ref ECL, ref DSL,
+                                                          ref CIO, ref SCO);
+                EligibleClassList = ECL;
+                ClassesInOrbit = CIO;
+                DamagedShipList = DSL;
+                ShipsOfClassInOrbit = SCO;
             }
         }
 
@@ -473,7 +530,12 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RepairRefitScrapClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Eco_ShipyardTabHandler.RefreshRRSShipComboBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+            /// <summary>
+            /// Ayep.
+            /// </summary>
+            BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+            Eco_ShipyardTabHandler.RefreshRRSShipComboBox(m_oSummaryPanel, CurrentFaction, CurrentPopulation, ClassesInOrbit, ref SCO);
+            ShipsOfClassInOrbit = SCO;
         }
 
         /// <summary>
@@ -516,10 +578,77 @@ namespace Pulsar4X.UI.Handlers
                 else
                 {
                     //pop up prompt about overwriting current activity
+                    m_oConfirmActivityPanel.ShowDialog();
+
+                    if (m_oConfirmActivityPanel.UserEntry == Panels.ConfirmActivity.UserSelection.Yes)
+                    {
+                        if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.Retool)
+                        {
+                            if (PotentialRetoolTargets.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
+                            {
+
+                                ShipClassTN RetoolTarget = PotentialRetoolTargets[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
+                                CurrentSYInfo.SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity.Retool, RetoolTarget);
+
+                            }
+                        }
+                        else if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+                        {
+                            int NewCapLimit;
+                            bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
+                            if (r == true && NewCapLimit > CurrentSYInfo.Tonnage)
+                            {
+                                CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex, null, NewCapLimit);
+                            }
+                        }
+                        else
+                        {
+                            CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex);
+                        }
+                    }
                 }
 
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+
+
+                /// <summary>
+                /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                /// So. they have to be refs.
+                /// But they are properties.
+                /// So kludge.
+                /// </summary>
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                BindingList<ShipTN> DSL = DamagedShipList;
+                BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets, ref ECL, ref DSL,
+                                                          ref CIO, ref SCO);
+                EligibleClassList = ECL;
+                ClassesInOrbit = CIO;
+                DamagedShipList = DSL;
+                ShipsOfClassInOrbit = SCO;
             }
+        }
+
+        /// <summary>
+        /// Yes change the activity.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConfirmYesButton_Click(object sender, EventArgs e)
+        {
+            m_oConfirmActivityPanel.UserEntry = Panels.ConfirmActivity.UserSelection.Yes;
+            m_oConfirmActivityPanel.Hide();
+        }
+
+        /// <summary>
+        /// Don't change activity.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ConfirmNoButton_Click(object sender, EventArgs e)
+        {
+            m_oConfirmActivityPanel.UserEntry = Panels.ConfirmActivity.UserSelection.No;
+            m_oConfirmActivityPanel.Hide();
         }
 
         /// <summary>
@@ -568,7 +697,22 @@ namespace Pulsar4X.UI.Handlers
                         m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
                     }
 
-                    Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+                    /// <summary>
+                    /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                    /// So. they have to be refs.
+                    /// But they are properties.
+                    /// So kludge.
+                    /// </summary>
+                    BindingList<ShipClassTN> ECL = EligibleClassList;
+                    BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                    BindingList<ShipTN> DSL = DamagedShipList;
+                    BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                    Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets, ref ECL, ref DSL,
+                                                              ref CIO, ref SCO);
+                    EligibleClassList = ECL;
+                    ClassesInOrbit = CIO;
+                    DamagedShipList = DSL;
+                    ShipsOfClassInOrbit = SCO;
                 }
             }
         }
@@ -583,7 +727,22 @@ namespace Pulsar4X.UI.Handlers
             Constants.ShipyardInfo.ShipyardActivity Activity = (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex;
             if (Activity == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
             {
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+                /// <summary>
+                /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                /// So. they have to be refs.
+                /// But they are properties.
+                /// So kludge.
+                /// </summary>
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                BindingList<ShipTN> DSL = DamagedShipList;
+                BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets, ref ECL, ref DSL,
+                                                          ref CIO, ref SCO);
+                EligibleClassList = ECL;
+                ClassesInOrbit = CIO;
+                DamagedShipList = DSL;
+                ShipsOfClassInOrbit = SCO;
             }
         }
 
@@ -595,6 +754,139 @@ namespace Pulsar4X.UI.Handlers
         private void NewShipClassComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             Eco_ShipyardTabHandler.BuildSYCRequiredMinerals(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets);
+        }
+
+        /// <summary>
+        /// Build, repair, refit, or scrap a ship at the selected shipyard. This will put the specified ship's taskgroup into the shipyard, which should prevent it from carrying out orders.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddTaskButton_Click(object sender, EventArgs e)
+        {
+            /// <summary>
+            /// This index should never ever be -1.
+            /// </summary>
+            if (m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex != -1 && m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex != -1 && CurrentSYInfo != null && CurrentPopulation != null && 
+                CurrentFaction != null && (m_oSummaryPanel.SYNewClassComboBox.SelectedIndex != -1 || m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex != -1))
+            {
+                m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Clear();
+
+                ShipTN CurrentShip = null;
+                ShipClassTN ConstructRefit = null;
+                TaskGroupTN TargetTG = null;
+                int TGIndex = -1;
+
+                /// <summary>
+                /// I'm not storing a faction only list of taskgroups in orbit anywhere, so lets calculate that here.
+                /// </summary>
+                foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+                {
+                    if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                    {
+                        if (TGIndex == m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex)
+                        {
+                            TargetTG = CurrentTaskGroup;
+                            break;
+                        }
+                        TGIndex++;
+                    }
+                }
+
+                /// <summary>
+                /// This is some sort of error condition, if this happens, it is much more serious than in the cost prototyper.
+                /// </summary>
+                if (TGIndex == -1)
+                    return;
+
+                Constants.ShipyardInfo.Task SYITask = (Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex;
+
+                int BaseBuildRate = CurrentSYInfo.CalcShipBuildRate(CurrentFaction, CurrentPopulation);
+
+                if ((int)SYITask != -1)
+                {
+                    switch ((Constants.ShipyardInfo.Task)SYITask)
+                    {
+                        case Constants.ShipyardInfo.Task.Construction:
+                            int newShipIndex = m_oSummaryPanel.SYNewClassComboBox.SelectedIndex;
+                            if (newShipIndex != -1)
+                            {
+                                ConstructRefit = EligibleClassList[newShipIndex];
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Repair:
+                            int CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
+                            if (CurrentShipIndex != -1)
+                            {
+                                CurrentShip = DamagedShipList[CurrentShipIndex];
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Refit:
+                            newShipIndex = m_oSummaryPanel.SYNewClassComboBox.SelectedIndex;
+                            if (newShipIndex != -1)
+                            {
+                                ConstructRefit = EligibleClassList[newShipIndex];
+                            }
+
+                            CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
+                            if (CurrentShipIndex != -1)
+                            {
+                                CurrentShip = ShipsOfClassInOrbit[CurrentShipIndex];
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Scrap:
+                            CurrentShipIndex = m_oSummaryPanel.RepairRefitScrapShipComboBox.SelectedIndex;
+                            if (CurrentShipIndex != -1)
+                            {
+                                CurrentShip = ShipsOfClassInOrbit[CurrentShipIndex];
+                            }
+                            break;
+                    }
+
+                    /// <summary>
+                    /// if a slipway is available build the new ship.
+                    /// </summary>
+                    if (CurrentSYInfo.Slipways > CurrentSYInfo.BuildingShips.Count)
+                    {
+                        Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, ConstructRefit);
+                        CurrentSYInfo.BuildingShips.Add(NewTask);
+
+                        /// <summary>
+                        /// Cost display for the new order.
+                        /// </summary>
+                        m_oSummaryPanel.SYTaskCostTextBox.Text = CurrentSYInfo.BuildingShips[0].Cost.ToString();
+                        m_oSummaryPanel.SYTaskCompletionDateTextBox.Text = CurrentSYInfo.BuildingShips[0].CompletionDate.ToShortDateString();
+
+                        for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
+                        {
+
+                            if (CurrentSYInfo.BuildingShips[0].minerialsCost[MineralIterator] != 0.0m)
+                            {
+                                string FormattedMineralTotal = CurrentSYInfo.BuildingShips[0].minerialsCost[MineralIterator].ToString("#,##0");
+
+                                String CostString = String.Format("{0} {1} ({2})", (Constants.Minerals.MinerialNames)MineralIterator, FormattedMineralTotal, CurrentPopulation.Minerials[MineralIterator]);
+                                m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Add(CostString);
+                            }
+                        }
+
+                        /// <summary>
+                        /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                        /// So. they have to be refs.
+                        /// But they are properties.
+                        /// So kludge.
+                        /// </summary>
+                        BindingList<ShipClassTN> ECL = EligibleClassList;
+                        BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                        BindingList<ShipTN> DSL = DamagedShipList;
+                        BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                        Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets, ref ECL, ref DSL,
+                                                                  ref CIO, ref SCO);
+                        EligibleClassList = ECL;
+                        ClassesInOrbit = CIO;
+                        DamagedShipList = DSL;
+                        ShipsOfClassInOrbit = SCO;
+                    }
+                }
+            }
         }
         #endregion
 
@@ -1047,8 +1339,47 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Shipyard Tab:
                 /// </summary>
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo, PotentialRetoolTargets);
+
+                /// <summary>
+                /// This needs to be cleared properly.
+                /// </summary>
+                ClearCB(m_oSummaryPanel.SYNewClassComboBox);
+                ClearCB(m_oSummaryPanel.SYTaskGroupComboBox);
+                ClearCB(m_oSummaryPanel.RepairRefitScrapClassComboBox);
+                ClearCB(m_oSummaryPanel.RepairRefitScrapShipComboBox);
+                ClearCB(m_oSummaryPanel.NewShipClassComboBox);
+                m_oSummaryPanel.SYShipNameTextBox.Clear();
+
+                
+                /// <summary>
+                /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                /// So. they have to be refs.
+                /// But they are properties.
+                /// So kludge.
+                /// </summary>
+                
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                BindingList<ShipTN> DSL = DamagedShipList;
+                BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets, ref ECL, ref DSL,
+                                                          ref CIO, ref SCO);
+                EligibleClassList = ECL;
+                ClassesInOrbit = CIO;
+                DamagedShipList = DSL;
+                ShipsOfClassInOrbit = SCO;
             }
+        }
+
+        /// <summary>
+        /// clear the specified combo box.
+        /// </summary>
+        /// <param name="BoxToClear"></param>
+        private void ClearCB(ComboBox BoxToClear)
+        {
+            BoxToClear.Items.Clear();
+            BoxToClear.Text = "";
+            BoxToClear.SelectedIndex = -1;
         }
 
         /// <summary>
@@ -1088,7 +1419,23 @@ namespace Pulsar4X.UI.Handlers
                 /// <summary>
                 /// Shipyard Tab:
                 /// </summary>
-                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, m_oCurrnetFaction, m_oCurrnetPopulation, CurrentSYInfo, PotentialRetoolTargets);
+
+                /// <summary>
+                /// So. I want the eco_SY tab handler to be able to populate these lists as needed.
+                /// So. they have to be refs.
+                /// But they are properties.
+                /// So kludge.
+                /// </summary>
+                BindingList<ShipClassTN> ECL = EligibleClassList;
+                BindingList<ShipClassTN> CIO = ClassesInOrbit;
+                BindingList<ShipTN> DSL = DamagedShipList;
+                BindingList<ShipTN> SCO = ShipsOfClassInOrbit;
+                Eco_ShipyardTabHandler.RefreshShipyardTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation, CurrentSYInfo, PotentialRetoolTargets, ref ECL, ref DSL,
+                                                          ref CIO, ref SCO);
+                EligibleClassList = ECL;
+                ClassesInOrbit = CIO;
+                DamagedShipList = DSL;
+                ShipsOfClassInOrbit = SCO;
             }
         }
 

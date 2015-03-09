@@ -319,7 +319,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// BFC
                         /// </summary>
-                        if (pair.Value == false)
+                        if (pair.Value == true)
                         {
                             foreach (BeamTN BeamWeapon in faction.OpenFireFC[pair.Key].ShipBFC[pair.Key.componentIndex].linkedWeapons)
                             {
@@ -358,7 +358,7 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// MFC
                         /// </summary>
-                        else if (pair.Value == true)
+                        else if (pair.Value == false)
                         {
                             foreach (MissileLauncherTN LaunchTube in faction.OpenFireFC[pair.Key].ShipMFC[pair.Key.componentIndex].linkedWeapons)
                             {
