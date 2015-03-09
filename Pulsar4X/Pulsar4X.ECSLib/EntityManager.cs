@@ -23,6 +23,23 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Verifies that the supplied entity is valid in this manager.
+        /// </summary>
+        /// <returns>True is the entity is considered valid.</returns>
+        public bool IsValidEntity(int entity)
+        {
+            if (entity >= m_entities.Count)
+            {
+                return false;
+            }
+            if (m_entities[entity] != entity)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Direct lookup of an entity's DataBlob.
         /// Slower than GetDataBlob(entity, typeIndex)
         /// </summary>
