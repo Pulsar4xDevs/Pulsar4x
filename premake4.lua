@@ -14,6 +14,7 @@ solution "Pulsar4X"
 		objdir "Pulsar4X/Pulsar4X.UI/obj"
 		links { -- Add any needed references here
 			"Pulsar4X.Lib",
+			"Pulsar4X.ECSLib",
 			"System",
 			"System.Data",
 			"System.Windows.Forms",
