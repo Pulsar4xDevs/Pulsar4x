@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class PlanetInfoDB : BaseDataBlob
+    public class PlanetInfoDB : BaseDataBlob
     {
         public enum PlanetType
         {

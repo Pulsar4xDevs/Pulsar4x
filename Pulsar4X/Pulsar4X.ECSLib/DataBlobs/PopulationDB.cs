@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class PopulationDB : BaseDataBlob
+    public class PopulationDB : BaseDataBlob
     {
         public double PopulationSize;
 

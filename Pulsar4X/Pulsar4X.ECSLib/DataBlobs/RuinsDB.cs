@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class RuinsDB : BaseDataBlob
+    public class RuinsDB : BaseDataBlob
     {
         /// <summary>
         /// Ruins size descriptors

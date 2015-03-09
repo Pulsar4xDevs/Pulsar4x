@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class AtmosphereDB : BaseDataBlob
+    public class AtmosphereDB : BaseDataBlob
     {
         /// <summary>
         /// Atmospheric Presure

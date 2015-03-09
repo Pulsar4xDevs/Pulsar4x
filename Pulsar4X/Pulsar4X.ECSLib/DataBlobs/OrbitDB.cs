@@ -7,7 +7,7 @@ using Pulsar4X.ECSLib.Helpers.GameMath;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class OrbitDB : BaseDataBlob
+    public class OrbitDB : BaseDataBlob
     {
         /// <summary>
         /// Entity that this orbit orbits.

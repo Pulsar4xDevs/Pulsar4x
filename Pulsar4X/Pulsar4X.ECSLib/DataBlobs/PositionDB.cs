@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class PositionDB : BaseDataBlob
+    public class PositionDB : BaseDataBlob
     {
         /// <summary>
         /// System X coordinante in AU
