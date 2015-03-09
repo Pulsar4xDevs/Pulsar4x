@@ -37,8 +37,8 @@ namespace Pulsar4X.ECSLib
         /// Direct lookup of an entity's DataBlob.
         /// Fastest direct lookup available.
         /// </summary>
-        /// <remarks>Returns malformed data if typeIndex does not match m_dataBlobTypes entry for Type T</remarks>
         /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob, or when passed an invalid entity.</exception>
+        /// <exception cref="InvalidCastException">Thrown when typeIndex does not match m_dataBlobTypes entry for Type T</exception>
         public T GetDataBlob<T>(int entity, int typeIndex) where T : BaseDataBlob
         {
             return (T)m_dataBlobMap[typeIndex][entity];
