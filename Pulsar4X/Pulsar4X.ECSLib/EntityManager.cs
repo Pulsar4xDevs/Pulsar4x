@@ -88,6 +88,7 @@ namespace Pulsar4X.ECSLib
         /// Slower than RemoveDataBlob(entity, typeIndex).
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when Type T is not derived from BaseDataBlob.</exception>
+        /// <exception cref="ArgumentNullException">Thrown when Type T is null.</exception>
         /// <exception cref="IndexOutOfRangeException">Thrown when passed an invalid entity.</exception>
         public void RemoveDataBlob(int entity, Type T)
         {
@@ -178,6 +179,7 @@ namespace Pulsar4X.ECSLib
         /// Returns a blank list if no entities have all needed DataBlobs
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
+        /// <exception cref="NullReferenceException">Thrown when dataBlobMask is null.</exception>
         public List<int> GetAllEntitiesWithDataBlobs(ComparableBitArray dataBlobMask)
         {
             if (dataBlobMask.Length != m_dataBlobTypes.Count)
