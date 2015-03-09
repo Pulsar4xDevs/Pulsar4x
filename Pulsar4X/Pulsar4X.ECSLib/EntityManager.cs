@@ -26,7 +26,8 @@ namespace Pulsar4X.ECSLib
         /// Direct lookup of an entity's DataBlob.
         /// Slower than GetDataBlob(entity, typeIndex)
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob, or when passed an invalid entity.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid entity is passed.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public T GetDataBlob<T>(int entity) where T : BaseDataBlob
         {
             int typeIndex = GetDataBlobTypeIndex<T>();
@@ -37,7 +38,7 @@ namespace Pulsar4X.ECSLib
         /// Direct lookup of an entity's DataBlob.
         /// Fastest direct lookup available.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob, or when passed an invalid entity.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
         /// <exception cref="InvalidCastException">Thrown when typeIndex does not match m_dataBlobTypes entry for Type T</exception>
         public T GetDataBlob<T>(int entity, int typeIndex) where T : BaseDataBlob
         {
@@ -47,8 +48,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Sets the DataBlob for the specified entity.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob, or when passed an invalid entity.</exception>
         /// <exception cref="ArgumentNullException">Thrown when dataBlob is null.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid entity is passed.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public void SetDataBlob<T>(int entity, T dataBlob) where T : BaseDataBlob
         {
             int typeIndex = GetDataBlobTypeIndex<T>();
@@ -58,8 +60,8 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Sets the DataBlob for the specified entity.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when passed an invalid typeIndex, or when passed an invalid entity.</exception>
         /// <exception cref="ArgumentNullException">Thrown when dataBlob is null.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
         private void SetDataBlob(int entity, BaseDataBlob dataBlob, int typeIndex)
         {
             if (dataBlob == null)
@@ -76,7 +78,8 @@ namespace Pulsar4X.ECSLib
         /// Removes the DataBlob from the specified entity.
         /// Slower than RemoveDataBlob(entity, typeIndex).
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob, or when passed an invalid entity.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid entity is passed.</exception>
         public void RemoveDataBlob<T>(int entity) where T : BaseDataBlob
         {
             int typeIndex = GetDataBlobTypeIndex<T>();
@@ -89,7 +92,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when Type T is not derived from BaseDataBlob.</exception>
         /// <exception cref="ArgumentNullException">Thrown when Type T is null.</exception>
-        /// <exception cref="IndexOutOfRangeException">Thrown when passed an invalid entity.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid entity is passed.</exception>
         public void RemoveDataBlob(int entity, Type T)
         {
             int typeIndex;
@@ -107,7 +110,7 @@ namespace Pulsar4X.ECSLib
         /// Removes the DataBlob from the specified entity.
         /// Fastest DataBlob removal available.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when passed an invalid typeIndex, or when passed an invalid entity.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
         public void RemoveDataBlob(int entity, int typeIndex)
         {
             m_dataBlobMap[typeIndex][entity] = null;
@@ -119,7 +122,7 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Returns a blank list if no DataBlobs of type T found.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public List<T> GetAllDataBlobsOfType<T>() where T: BaseDataBlob
         {
             List<T> dataBlobs = new List<T>();
@@ -161,7 +164,7 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Returns a blank list if no DataBlobs of type T exist.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public List<int> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetDataBlobTypeIndex<T>();
@@ -205,7 +208,7 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Returns -1 if no entities have the specified DataBlobType.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public int GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
         {
             return GetFirstEntityWithDataBlob(GetDataBlobTypeIndex<T>());
@@ -216,6 +219,7 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Returns -1 if no entities have the specified DataBlobType.
         /// </summary>
+        /// <exception cref="IndexOutOfRangeException">Thrown when passed an invalid typeIndex</exception>
         public int GetFirstEntityWithDataBlob(int typeIndex)
         {
             List<BaseDataBlob> dataBlobType = m_dataBlobMap[typeIndex];
@@ -309,7 +313,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Removes this entity from this entity manager.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when entity is invalid.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown when passed an invalid entity.</exception>
         public void RemoveEntity(int entity)
         {
             foreach (List<BaseDataBlob> dataBlobType in m_dataBlobMap)
@@ -363,7 +367,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Faster than TryGetDataBlobTypeIndex and uses generics for type safety.
         /// </summary>
-        /// <exception cref="IndexOutOfRangeException">Thrown when T is type BaseDataBlob.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public int GetDataBlobTypeIndex<T>() where T : BaseDataBlob
         {
             return m_dataBlobTypes[typeof(T)];
