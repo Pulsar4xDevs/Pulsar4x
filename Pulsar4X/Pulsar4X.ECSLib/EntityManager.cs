@@ -105,26 +105,6 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Removes the DataBlob from the specified entity.
-        /// Slower than RemoveDataBlob(entity, typeIndex).
-        /// </summary>
-        /// <exception cref="ArgumentException">Thrown when Type T is not derived from BaseDataBlob.</exception>
-        /// <exception cref="ArgumentNullException">Thrown when Type T is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid entity is passed.</exception>
-        public void RemoveDataBlob(int entity, Type T)
-        {
-            int typeIndex;
-            if (TryGetDataBlobTypeIndex(T, out typeIndex))
-            {
-                RemoveDataBlob(entity, typeIndex);
-            }
-            else
-            {
-                throw new ArgumentException("Type not found in typeMap.");
-            }
-        }
-
-        /// <summary>
-        /// Removes the DataBlob from the specified entity.
         /// Fastest DataBlob removal available.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
