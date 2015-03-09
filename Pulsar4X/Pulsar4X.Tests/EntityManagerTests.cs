@@ -198,39 +198,26 @@ namespace Pulsar4X.Tests
 
             // reset:
             entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+            int typeIndex = entityManager.GetDataBlobTypeIndex<PopulationDB>();
 
             Assert.IsTrue(entityManager.GetDataBlob<PopulationDB>(testEntity) != null);  // check that it has the data blob
-            entityManager.RemoveDataBlob(testEntity, typeof(PopulationDB));              // Remove a data blob
+            entityManager.RemoveDataBlob(testEntity, typeIndex);              // Remove a data blob
             Assert.IsTrue(entityManager.GetDataBlob<PopulationDB>(testEntity) == null); // now check that it doesn't
 
             // now lets try remove it again:
-            entityManager.RemoveDataBlob(testEntity, typeof(PopulationDB));
+            entityManager.RemoveDataBlob(testEntity, typeIndex);
 
-            // now lets try removal for an entity that does not exist:
+            // now lets try an invlaid entity:
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
-                entityManager.RemoveDataBlob(42, typeof(PopulationDB));
+                entityManager.RemoveDataBlob(42, typeIndex);
             });
 
-            // cannot remove baseDataBlobs, invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () =>
+            // and an invalid typeIndex:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
-                entityManager.RemoveDataBlob(testEntity, typeof(BaseDataBlob)); // throws ArgumentException??? i thought it should be KeyNotFoundException
+                entityManager.RemoveDataBlob(testEntity, -33);
             });
-
-            // cannot remove basDataBlobs, invalid data blob type:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                entityManager.RemoveDataBlob(testEntity, typeof(Game));
-            });
-
-            // cannot remove data blob, null type:
-            Assert.Catch(typeof(ArgumentNullException), () =>
-            {
-                entityManager.RemoveDataBlob(testEntity, null);
-            });
-
-            // note that we do not test RemoveDataBlob(int entity, int typeIndex) because that is used by both remove fuinctions tested above.
         }
 
         [Test]
