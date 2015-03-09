@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>True is the entity is considered valid.</returns>
         public bool IsValidEntity(int entity)
         {
-            if (entity >= m_entities.Count)
+            if (entity < 0 || entity >= m_entities.Count)
             {
                 return false;
             }
