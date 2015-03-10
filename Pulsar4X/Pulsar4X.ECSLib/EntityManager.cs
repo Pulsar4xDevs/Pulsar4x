@@ -206,29 +206,27 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="dataBlobMask"></param>
         /// <returns></returns>
-        Dictionary<int, List<BaseDataBlob>> GetEntitiesAndDataBlobs(ComparableBitArray dataBlobMask)
+        Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
         {
-            if (dataBlobMask.Length != m_dataBlobTypes.Count)
+            int typeIndexT1 = GetDataBlobTypeIndex<T1>();
+            int typeIndexT2 = GetDataBlobTypeIndex<T2>();
+
+            ComparableBitArray dataBlobMask = BlankDataBlobMask();
+            dataBlobMask[typeIndexT1] = true;
+            dataBlobMask[typeIndexT2] = true;
+
+            List<int> entities = GetAllEntitiesWithDataBlobs(dataBlobMask);
+
+            Dictionary<int, Tuple<T1, T2>> entitiesAndDataBlobs = new Dictionary<int, Tuple<T1, T2>>();
+
+            foreach (int entity in entities)
             {
-                throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
-            }
+                T1 dataBlobT1 = (T1)m_dataBlobMap[typeIndexT1][entity];
+                T2 dataBlobT2 = (T2)m_dataBlobMap[typeIndexT1][entity];
 
-            Dictionary<int, List<BaseDataBlob>> entitiesAndDataBlobs = new Dictionary<int, List<BaseDataBlob>>();
+                Tuple<T1, T2> dataBlobs = new Tuple<T1, T2>(dataBlobT1, dataBlobT2);
 
-            for (int entity = 0; entity < m_entityMasks.Count; entity++)
-            {
-                if ((m_entityMasks[entity] & dataBlobMask) == dataBlobMask)
-                {
-                    entitiesAndDataBlobs.Add(entity, new List<BaseDataBlob>());
-
-                    for (int bitIndex = 0; bitIndex < dataBlobMask.Length; bitIndex++)
-                    {
-                        if (dataBlobMask[bitIndex])
-                        {
-                            entitiesAndDataBlobs[entity].Add(m_dataBlobMap[bitIndex][entity]);
-                        }
-                    }
-                }
+                entitiesAndDataBlobs.Add(entity, dataBlobs);
             }
 
             return entitiesAndDataBlobs;
