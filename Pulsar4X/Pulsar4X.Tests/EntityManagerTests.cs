@@ -119,6 +119,62 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
+        public void GetDataBlobByEntity()
+        {
+            int testEntity = PopulateEntityManager();
+
+            // Get the Population DB of a specific entity.
+            PopulationDB popDB = entityManager.GetDataBlob<PopulationDB>(testEntity);
+            Assert.IsNotNull(popDB);
+
+            // get a DB we know the entity does not have:
+            AtmosphereDB AtmoDB = entityManager.GetDataBlob<AtmosphereDB>(testEntity);
+            Assert.IsNull(AtmoDB);
+
+            // test with invalid entity ID:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.GetDataBlob<PopulationDB>(42);
+            });
+
+            // test with invalid data blob type
+            Assert.Catch(typeof(KeyNotFoundException), () =>
+            {
+                entityManager.GetDataBlob<BaseDataBlob>(testEntity);
+            });
+
+            // and again for the second lookup type:
+            // Get the Population DB of a specific entity.
+            int typeIndex = entityManager.GetDataBlobTypeIndex<PopulationDB>();
+            popDB = entityManager.GetDataBlob<PopulationDB>(testEntity, typeIndex);
+            Assert.IsNotNull(popDB);
+
+            // get a DB we know the entity does not have:
+            typeIndex = entityManager.GetDataBlobTypeIndex<AtmosphereDB>();
+            AtmoDB = entityManager.GetDataBlob<AtmosphereDB>(testEntity, typeIndex);
+            Assert.IsNull(AtmoDB);
+
+            // test with invalid entity ID:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.GetDataBlob<AtmosphereDB>(42, typeIndex);
+            });
+
+            // test with invalid type index:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.GetDataBlob<AtmosphereDB>(testEntity, -42);
+            });
+
+            // test with invalid T vs type at typeIndex
+            typeIndex = entityManager.GetDataBlobTypeIndex<PopulationDB>();
+            Assert.Catch(typeof(InvalidCastException), () =>
+            {
+                entityManager.GetDataBlob<PlanetInfoDB>(testEntity, typeIndex);
+            });
+        }
+
+        [Test]
         public void RemoveEntities()
         {
             int testEntity = PopulateEntityManager();
@@ -156,61 +212,6 @@ namespace Pulsar4X.Tests
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
                 entityManager.GetAllDataBlobsOfEntity(testEntity);  // should throw this time
-            });
-        }
-
-        [Test]
-        public void DatablobLookup()
-        {
-            int testEntity = PopulateEntityManager();
-
-            // Get the Population DB of a specific entity.
-            PopulationDB popDB = entityManager.GetDataBlob<PopulationDB>(testEntity);
-            Assert.IsNotNull(popDB);
-
-            // get a DB we know the entity does not have:
-            AtmosphereDB AtmoDB = entityManager.GetDataBlob<AtmosphereDB>(testEntity);
-            Assert.IsNull(AtmoDB);
-
-            // test with invalid entity ID:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-                {
-                    entityManager.GetDataBlob<PopulationDB>(42);
-                });
-
-            // test with invalid data blob type
-            Assert.Catch(typeof(KeyNotFoundException), () =>
-            {
-                entityManager.GetDataBlob<BaseDataBlob>(testEntity);
-            });
-
-            // and again for the second lookup type:
-            // Get the Population DB of a specific entity.
-            int typeIndex = entityManager.GetDataBlobTypeIndex<PopulationDB>();
-            popDB = entityManager.GetDataBlob<PopulationDB>(testEntity, typeIndex);
-            Assert.IsNotNull(popDB);
-
-            // get a DB we know the entity does not have:
-            typeIndex = entityManager.GetDataBlobTypeIndex<AtmosphereDB>();
-            AtmoDB = entityManager.GetDataBlob<AtmosphereDB>(testEntity, typeIndex);
-            Assert.IsNull(AtmoDB);
-
-            // test with invalid entity ID:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-            {
-                entityManager.GetDataBlob<AtmosphereDB>(42, typeIndex);
-            });
-
-            // test with invalid type index:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-            {
-                entityManager.GetDataBlob<AtmosphereDB>(testEntity, -42);
-            });
-
-            // test with invalid T vs type at typeIndex
-            Assert.Catch(typeof(InvalidCastException), () =>
-            {
-                entityManager.GetDataBlob<PlanetInfoDB>(testEntity, typeIndex);
             });
         }
 
@@ -268,8 +269,50 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityLookup()
         {
+            PopulateEntityManager();
+
             // Find all entities with a specific DataBlob.
-           // List<int> populatedEntities = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+            List<int> entities = entityManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+            Assert.AreEqual(2, entities.Count);
+
+            // again, but look for a datablob that no entity has:
+            entities = entityManager.GetAllEntitiesWithDataBlob<AtmosphereDB>();
+            Assert.AreEqual(0, entities.Count);
+
+            // check with invalid data blob type:
+            Assert.Catch(typeof(KeyNotFoundException), () =>
+                {
+                    entityManager.GetAllEntitiesWithDataBlob<BaseDataBlob>();
+                });
+
+            // now lets lookup using a mask:
+            Pulsar4X.Helpers.ComparableBitArray dataBlobMask = entityManager.BlankDataBlobMask();
+            dataBlobMask.Set(entityManager.GetDataBlobTypeIndex<PopulationDB>(), true);
+            dataBlobMask.Set(entityManager.GetDataBlobTypeIndex<OrbitDB>(), true);
+            entities = entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            Assert.AreEqual(2, entities.Count);
+
+            // and with a mask that will not match any entities:
+            dataBlobMask.Set(entityManager.GetDataBlobTypeIndex<AtmosphereDB>(), true);
+            entities = entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            Assert.AreEqual(0, entities.Count);
+
+            // and an empty mask:
+            dataBlobMask = entityManager.BlankDataBlobMask();
+            entities = entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
+            Assert.AreEqual(0, entities.Count);
+
+            // test bad mask:
+            Pulsar4X.Helpers.ComparableBitArray badMask = new Helpers.ComparableBitArray(4242); // use a big number so we never rach that many data blobs.
+            Assert.Catch(typeof(ArgumentException), () =>
+                {
+                    entityManager.GetAllEntitiesWithDataBlobs(badMask);
+                });
+
+            Assert.Catch(typeof(NullReferenceException), () =>
+                {
+                    entityManager.GetAllEntitiesWithDataBlobs(null);
+                });
         }
 
         [Test]
