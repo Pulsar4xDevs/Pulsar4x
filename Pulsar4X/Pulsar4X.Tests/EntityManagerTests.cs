@@ -162,10 +162,56 @@ namespace Pulsar4X.Tests
         [Test]
         public void DatablobLookup()
         {
+            int testEntity = PopulateEntityManager();
+
             // Get the Population DB of a specific entity.
-            //PopulationDB planetPopDB = GlobalManager.GetDataBlob<PopulationDB>(planet);
+            PopulationDB popDB = entityManager.GetDataBlob<PopulationDB>(testEntity);
+            Assert.IsNotNull(popDB);
 
+            // get a DB we know the entity does not have:
+            AtmosphereDB AtmoDB = entityManager.GetDataBlob<AtmosphereDB>(testEntity);
+            Assert.IsNull(AtmoDB);
 
+            // test with invalid entity ID:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+                {
+                    entityManager.GetDataBlob<PopulationDB>(42);
+                });
+
+            // test with invalid data blob type
+            Assert.Catch(typeof(KeyNotFoundException), () =>
+            {
+                entityManager.GetDataBlob<BaseDataBlob>(testEntity);
+            });
+
+            // and again for the second lookup type:
+            // Get the Population DB of a specific entity.
+            int typeIndex = entityManager.GetDataBlobTypeIndex<PopulationDB>();
+            popDB = entityManager.GetDataBlob<PopulationDB>(testEntity, typeIndex);
+            Assert.IsNotNull(popDB);
+
+            // get a DB we know the entity does not have:
+            typeIndex = entityManager.GetDataBlobTypeIndex<AtmosphereDB>();
+            AtmoDB = entityManager.GetDataBlob<AtmosphereDB>(testEntity, typeIndex);
+            Assert.IsNull(AtmoDB);
+
+            // test with invalid entity ID:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.GetDataBlob<AtmosphereDB>(42, typeIndex);
+            });
+
+            // test with invalid type index:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.GetDataBlob<AtmosphereDB>(testEntity, -42);
+            });
+
+            // test with invalid T vs type at typeIndex
+            Assert.Catch(typeof(InvalidCastException), () =>
+            {
+                entityManager.GetDataBlob<PlanetInfoDB>(testEntity, typeIndex);
+            });
         }
 
         [Test]
@@ -189,7 +235,6 @@ namespace Pulsar4X.Tests
                 });
 
             // cannot remove baseDataBlobs, invalid data blob type:
-            // wait what?? Argument exception???
             Assert.Catch(typeof(KeyNotFoundException), () =>
                 {
                     entityManager.RemoveDataBlob<BaseDataBlob>(testEntity);  
@@ -216,7 +261,7 @@ namespace Pulsar4X.Tests
             // and an invalid typeIndex:
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
-                entityManager.RemoveDataBlob(testEntity, -33);
+                entityManager.RemoveDataBlob(testEntity, -42);
             });
         }
 
