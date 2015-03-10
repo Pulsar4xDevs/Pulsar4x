@@ -200,6 +200,40 @@ namespace Pulsar4X.ECSLib
             return entities;
         }
 
+
+        /// <summary>
+        /// ~jazzhands~
+        /// </summary>
+        /// <param name="dataBlobMask"></param>
+        /// <returns></returns>
+        Dictionary<int, List<BaseDataBlob>> GetEntitiesAndDataBlobs(ComparableBitArray dataBlobMask)
+        {
+            if (dataBlobMask.Length != m_dataBlobTypes.Count)
+            {
+                throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
+            }
+
+            Dictionary<int, List<BaseDataBlob>> entitiesAndDataBlobs = new Dictionary<int, List<BaseDataBlob>>();
+
+            for (int entity = 0; entity < m_entityMasks.Count; entity++)
+            {
+                if ((m_entityMasks[entity] & dataBlobMask) == dataBlobMask)
+                {
+                    entitiesAndDataBlobs.Add(entity, new List<BaseDataBlob>());
+
+                    for (int bitIndex = 0; bitIndex < dataBlobMask.Length; bitIndex++)
+                    {
+                        if (dataBlobMask[bitIndex])
+                        {
+                            entitiesAndDataBlobs[entity].Add(m_dataBlobMap[bitIndex][entity]);
+                        }
+                    }
+                }
+            }
+
+            return entitiesAndDataBlobs;
+        }
+
         /// <summary>
         /// Returns the first entity found with the specified DataBlobType.
         /// <para></para>
