@@ -200,6 +200,38 @@ namespace Pulsar4X.ECSLib
             return entities;
         }
 
+
+        /// <summary>
+        /// ~jazzhands~
+        /// </summary>
+        /// <param name="dataBlobMask"></param>
+        /// <returns></returns>
+        Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
+        {
+            int typeIndexT1 = GetDataBlobTypeIndex<T1>();
+            int typeIndexT2 = GetDataBlobTypeIndex<T2>();
+
+            ComparableBitArray dataBlobMask = BlankDataBlobMask();
+            dataBlobMask[typeIndexT1] = true;
+            dataBlobMask[typeIndexT2] = true;
+
+            List<int> entities = GetAllEntitiesWithDataBlobs(dataBlobMask);
+
+            Dictionary<int, Tuple<T1, T2>> entitiesAndDataBlobs = new Dictionary<int, Tuple<T1, T2>>();
+
+            foreach (int entity in entities)
+            {
+                T1 dataBlobT1 = (T1)m_dataBlobMap[typeIndexT1][entity];
+                T2 dataBlobT2 = (T2)m_dataBlobMap[typeIndexT1][entity];
+
+                Tuple<T1, T2> dataBlobs = new Tuple<T1, T2>(dataBlobT1, dataBlobT2);
+
+                entitiesAndDataBlobs.Add(entity, dataBlobs);
+            }
+
+            return entitiesAndDataBlobs;
+        }
+
         /// <summary>
         /// Returns the first entity found with the specified DataBlobType.
         /// <para></para>
