@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.UI", "Pulsar4X.UI\Pulsar4X.UI.csproj", "{F5FC84D7-A87C-FB4E-89AA-FE2E6D75EB65}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2} = {BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}
@@ -16,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Tests", "Pulsar4X.
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.ECSLib", "Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj", "{E716FA06-ECDF-B446-96B4-B790AAB5713B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFUI", "WPFUI\WPFUI.csproj", "{76508ABF-600E-4B86-9764-DB82D4E429B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +71,16 @@ Global
 		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E716FA06-ECDF-B446-96B4-B790AAB5713B}.Release|x86.ActiveCfg = Release|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
