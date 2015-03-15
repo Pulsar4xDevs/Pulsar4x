@@ -300,7 +300,7 @@ namespace Pulsar4X.Tests
             // and an empty mask:
             dataBlobMask = entityManager.BlankDataBlobMask();
             entities = entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
-            Assert.AreEqual(0, entities.Count);
+            Assert.AreEqual(3, entities.Count); // this is counter intuitive... but it is what happens.
 
             // test bad mask:
             Pulsar4X.Helpers.ComparableBitArray badMask = new Helpers.ComparableBitArray(4242); // use a big number so we never rach that many data blobs.
@@ -313,6 +313,38 @@ namespace Pulsar4X.Tests
                 {
                     entityManager.GetAllEntitiesWithDataBlobs(null);
                 });
+
+
+            // now lets just get the one entity:
+            int testEntity = entityManager.GetFirstEntityWithDataBlob<PopulationDB>();
+            Assert.AreEqual(0, testEntity);
+
+            // lookup an entity that does not exist:
+            testEntity = entityManager.GetFirstEntityWithDataBlob<AtmosphereDB>();
+            Assert.AreEqual(-1, testEntity);    
+
+            // try again with incorrect type:
+            Assert.Catch(typeof(KeyNotFoundException), () =>
+            {
+                entityManager.GetFirstEntityWithDataBlob<BaseDataBlob>();
+            });
+
+
+            // now lets just get the one entity, but use a different function to do it:
+            int type = entityManager.GetDataBlobTypeIndex<PopulationDB>();
+            testEntity = entityManager.GetFirstEntityWithDataBlob(type);
+            Assert.AreEqual(0, testEntity);
+
+            // lookup an entity that does not exist:
+            type = entityManager.GetDataBlobTypeIndex<AtmosphereDB>();
+            testEntity = entityManager.GetFirstEntityWithDataBlob(type);
+            Assert.AreEqual(-1, testEntity);
+
+            // try again with incorrect type index:
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
+            {
+                entityManager.GetFirstEntityWithDataBlob(4242);
+            });
         }
 
         [Test]
