@@ -32,9 +32,9 @@ namespace Pulsar4X.ECSLib
 
             public const double AuPerLightYear = KmPerLightYear / KmPerAu;
 
-            public const double KmPerAu = 149597871;
+            public const double KmPerAu = MetersPerAu / 1000;
 
-            public const double MetersPerAu = KmPerAu * 1000;
+            public const double MetersPerAu = 149597870700;  // this is exact, see: http://en.wikipedia.org/wiki/Astronomical_unit
 
             /// <summary>
             /// Plus or Minus 65Km
