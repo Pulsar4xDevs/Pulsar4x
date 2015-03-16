@@ -473,11 +473,6 @@ namespace Pulsar4X.Entities
                 Slipways = 1;
                 AssignedClass = null;
 
-                /// <summary>
-                /// create this list so that this shipyard can store its orders for tasks(built ships)
-                /// </summary>
-                BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
-
                 UpdateModRate(CurrentFaction);
             }
 

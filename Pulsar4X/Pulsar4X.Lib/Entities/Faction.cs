@@ -1588,7 +1588,12 @@ namespace Pulsar4X.Entities
 
                     if (inDict == true)
                     {
-                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, Missile.missileDef.aSD.gps,ac, (uint)GameState.Instance.CurrentSecond);
+                        int EMSig = 0;
+                        if (em == true)
+                        {
+                            EMSig = Missile.missileDef.aSD.gps;
+                        }
+                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, EMSig, ac, (uint)YearTickValue);
 
                         if (th == false && em == false && ac == false)
                         {
