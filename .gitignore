@@ -1,15 +1,6 @@
 # Pulsar Specific Folders
-Pulsar4X/Pulsar4X.Lib/obj
-Pulsar4X/Pulsar4X.Lib/bin
-Pulsar4X/Pulsar4X.UI/obj
-Pulsar4X/Pulsar4X.UI/bin
-Pulsar4X/Pulsar4X.Tests/bin
-Pulsar4X/Pulsar4X.Tests/obj
-Pulsar4X/Pulsar4X.Installer/bin
-Pulsar4X/Pulsar4X.Installer/obj
-Pulsar4X\Pulsar4X.Tests\test-results
-Pulsar4X/Pulsar4X.ECSLib/bin
-Pulsar4X/Pulsar4X.ECSLib/obj
+Pulsar4X/*/bin
+Pulsar4X/*/obj
 
 #C# Temp Files:
 *.db
