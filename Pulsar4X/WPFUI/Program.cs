@@ -1,0 +1,23 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+using Pulsar4X.ECSLib;
+
+namespace WPFUI
+{
+    static class Program
+    {
+        static void Main()
+        {
+
+            Game game = new Game();
+
+            UI_Comms uicomms = new UI_Comms(game.EngineComms);
+
+
+        }
+    }
+}
