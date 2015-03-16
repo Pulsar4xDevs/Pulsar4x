@@ -32,6 +32,7 @@ namespace Pulsar4X.ECSLib
         public DateTime CurrentDateTime { get; set; }
 
         public Engine_Comms EngineComms { get; private set; }
+        public Engine_Comms2 EngineComms2 { get; private set; }
 
         public SubpulseLimitRequest NextSubpulse
         {
@@ -79,6 +80,7 @@ namespace Pulsar4X.ECSLib
             CurrentInterrupt = new Interrupt();
 
             EngineComms = new Engine_Comms();
+            EngineComms2 = new Engine_Comms2();
 
             // Setup time Phases.
             PhaseProcessor.Initialize();
