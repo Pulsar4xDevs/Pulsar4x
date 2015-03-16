@@ -490,16 +490,6 @@ namespace Pulsar4X
             /// What should the starting wealth be?
             /// </summary>
             public const decimal StartingWealth = 100000.0m;
-
-            /// <summary>
-            /// Base ABR for 5KT ships unmodified by technology.
-            /// </summary>
-            public const decimal BaseShipBuildingRate = 400.0m;
-
-            /// <summary>
-            /// Basic SY modification rate unmodified itself by technology. Shipyard tech alters this by the same percentage that it does the building rate. 400-560 = 240-336
-            /// </summary>
-            public const int BaseModRate = 280;
         }
 
         /// <summary>
@@ -547,6 +537,11 @@ namespace Pulsar4X
             /// How often should build work be run?
             /// </summary>
             public const uint ConstructionCycle = Constants.TimeInSeconds.FiveDays;
+
+            /// <summary>
+            /// What fraction of a year does the construction cycle make up?
+            /// </summary>
+            public const float ConstructionCycleFraction = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
 
             /// <summary>
             /// How much fuel will one refined unit of Sorium yield?
@@ -615,11 +610,17 @@ namespace Pulsar4X
 
             /// <summary>
             /// Base cost unaffected by technology. The formula for cost is:
-            /// Value * (AmtTonnage / 500) * slipways. if naval * 10 if commercial AmtTonnage is AmtTonage/10
+            /// Value * (AmtTonnage / 500) * slipways. if naval * 10.
             /// New slipway Cost is:
             /// Value * (TotalTonnage/500) * slipways * 10 if Naval
+            /// All Shipyard activities(as opposed to tasks) will cost Duranium and Neutronium. if you want to change that then be sure to change the relevant code in construction cycle.
             /// </summary>
             public static decimal[] MineralCostOfExpansion = { 6.0m, 6.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m, 0.0m };
+
+            /// <summary>
+            /// cost in wealth to expand a shipyard. if naval this will be x10.
+            /// </summary>
+            public const decimal BaseTotalCostOfExpansion = 12.0m;
 
             /// <summary>
             /// Base unit of mineral cost expansion is cost per 500 tons.
@@ -627,7 +628,7 @@ namespace Pulsar4X
             public const int TonnageDenominator = 500;
 
             /// <summary>
-            /// Naval shipyard complexes cost 10x what Commercial shipyard complexes cost.
+            /// Naval shipyard complexes cost 10x what Commercial shipyard complexes cost and also how much bigger commercial shipyards are than naval yards.
             /// </summary>
             public const int NavalToCommercialRatio = 10;
 
@@ -635,7 +636,7 @@ namespace Pulsar4X
             /// <summary>
             /// The formula for shipyard modification is: AnnualSYProd = (ModRate / 200) * 834
             /// </summary>
-            public const int BaseModRate = 200;
+            public const int BaseModRateDenominator = 200;
 
             /// <summary>
             /// How many BP does a shipyard produce to modify itself for every 200 modRate?
@@ -651,6 +652,26 @@ namespace Pulsar4X
             /// Current Techlevel maximum for ship production rate.
             /// </summary>
             public const int MaxShipProductionRate = 11;
+
+            /// <summary>
+            /// This is used in mod rate formula, also navalyards should start with this, while commercial yards should get 10x this.
+            /// </summary>
+            public const int BaseShipyardTonnage = 1000;
+
+            /// <summary>
+            /// This is used in the mod rate formula.
+            /// </summary>
+            public const float ModRateTonnageMultiplier = 40.0f;
+
+            /// <summary>
+            /// Base ABR for 5KT ships unmodified by technology.
+            /// </summary>
+            public const decimal BaseShipBuildingRate = 400.0m;
+
+            /// <summary>
+            /// Basic SY modification rate unmodified itself by technology. Shipyard tech alters this by the same percentage that it does the building rate. 400-560 = 240-336
+            /// </summary>
+            public const int BaseModRate = 240;
         }
 
         /// <summary>

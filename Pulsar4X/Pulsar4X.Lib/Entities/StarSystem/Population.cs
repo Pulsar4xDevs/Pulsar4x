@@ -615,22 +615,12 @@ namespace Pulsar4X.Entities
             Installations[(int)Installation.InstallationType.MilitaryAcademy].Number = 1.0f;
             Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number = 1.0f;
 
-            Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Constants.ShipyardInfo.SYType.Naval);
-            SYI.Name = "Naval Yard #1";
-            SYI.Tonnage = 1000;
-            SYI.Slipways = 1;
-            SYI.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
-            SYI.AssignedClass = null;
-            SYI.ModRate = Constants.Faction.BaseModRate;
+            Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Faction, Constants.ShipyardInfo.SYType.Naval, 1);
 
-            /// <summary>
-            /// create this list so that this shipyard can store its orders for tasks(built ships)
-            /// </summary>
-            SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+            Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo.Add(SYI);
 
             Faction.AddNewTaskGroup("Shipyard TG", Planet, Planet.Position.System);
 
-            Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo.Add(SYI);
             Installations[(int)Installation.InstallationType.MaintenanceFacility].Number = 5.0f;
             Installations[(int)Installation.InstallationType.ResearchLab].Number = 5.0f;
 
@@ -744,19 +734,9 @@ namespace Pulsar4X.Entities
                         Number++;
                     while (Adjustment >= 1.0f)
                     {
-                        Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Constants.ShipyardInfo.SYType.Naval);
-                        SYI.Name = "Naval Yard #" + (Number++).ToString();
-                        SYI.Tonnage = 1000;
-                        SYI.Slipways = 1;
-                        SYI.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
-                        SYI.AssignedClass = null;
-                        SYI.ModRate = Constants.Faction.BaseModRate;
-
-                        /// <summary>
-                        /// create this list so that this shipyard can store its orders for tasks(built ships)
-                        /// </summary>
-                        SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
-
+                        Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Faction, Constants.ShipyardInfo.SYType.Naval, Number);
+                        Number++;
+                        
                         Installations[Index].SYInfo.Add(SYI);
 
                         Adjustment = Adjustment - 1.0f;
@@ -772,18 +752,8 @@ namespace Pulsar4X.Entities
                         Number++;
                     while (Adjustment >= 1.0f)
                     {
-                        Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Constants.ShipyardInfo.SYType.Commercial);
-                        SYI.Name = "Commercial Yard #" + (Number++).ToString();
-                        SYI.Tonnage = 10000;
-                        SYI.Slipways = 1;
-                        SYI.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
-                        SYI.AssignedClass = null;
-                        SYI.ModRate = Constants.Faction.BaseModRate;
-
-                        /// <summary>
-                        /// create this list so that this shipyard can store its orders for tasks(built ships)
-                        /// </summary>
-                        SYI.BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+                        Installation.ShipyardInformation SYI = new Installation.ShipyardInformation(Faction, Constants.ShipyardInfo.SYType.Commercial, Number);
+                        Number++;
 
                         Installations[Index].SYInfo.Add(SYI);
 
@@ -1175,6 +1145,31 @@ namespace Pulsar4X.Entities
             if (MineConvReq == true)
             {
                 Installations[(int)Installation.InstallationType.Mine].Number = Installations[(int)Installation.InstallationType.Mine].Number - Completion;
+            }
+        }
+
+        /// <summary>
+        /// HandleShipyardCost will process buildcosts from shipyard items. This is a separate function because shipyard costs may be a little different.
+        /// No installations will be required for one thing.
+        /// </summary>
+        /// <param name="ItemCost">Total Cost of the shipyard activity or task</param>
+        /// <param name="MineralCost">Total cost in minerals of the shipyards work</param>
+        public void HandleShipyardCost(decimal ItemCost, decimal[] MineralCost, float Completion)
+        {
+            /// <summary>
+            /// Wealth cost adjustment. maybe these conversions can be handled better.
+            /// </summary>
+            Faction.FactionWealth = Faction.FactionWealth - (decimal)((float)ItemCost * Completion);
+
+            /// <summary>
+            /// Mineral Cost adjustment.
+            /// </summary>
+            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+            {
+                if (MineralCost[mineralIterator] != 0.0m)
+                {
+                    m_aiMinerials[mineralIterator] = m_aiMinerials[mineralIterator] - ((float)MineralCost[mineralIterator] * Completion);
+                }
             }
         }
         #endregion

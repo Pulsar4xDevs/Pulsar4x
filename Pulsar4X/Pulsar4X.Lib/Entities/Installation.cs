@@ -43,7 +43,7 @@ namespace Pulsar4X.Entities
             InstallationCount
         }
 
-        public class ShipyardInformation
+        public class ShipyardInformation : GameEntity
         {
             public class ShipyardTask
             {
@@ -84,9 +84,14 @@ namespace Pulsar4X.Entities
                 public int ABR { get; set; }
 
                 /// <summary>
-                /// How should tasks be done in the event of a resource shortage. -1 = paused.
+                /// How should tasks be done in the event of a resource shortage.
                 /// </summary>
                 public int Priority { get; set; }
+
+                /// <summary>
+                /// Is this task paused or not?
+                /// </summary>
+                public bool Paused { get; set; }
 
                 /// <summary>
                 /// The mineral cost of this task.
@@ -128,6 +133,7 @@ namespace Pulsar4X.Entities
                     CurrentTask = TaskToPerform;
                     Progress = 0.0m;
                     Priority = 0;
+                    Paused = false;
                     ConstructRefitTarget = ConstructOrRefitTarget;
 
                     ABR = 1;
@@ -216,10 +222,12 @@ namespace Pulsar4X.Entities
 
                 /// <summary>
                 /// On tech upgrades the ABR for the task will go up, and completion time will go down.
+                /// Small ships in big yards get no bonus to their construction size, but larger ships should build faster due to the larger scale of the yard with more space and more people working on it.
                 /// </summary>
-                /// <param name="PopulationBaseBuildRate"></param>
+                /// <param name="PopulationBaseBuildRate">The Faction's ship build rate</param>
                 public void UpdateABR(int PopulationBaseBuildRate)
                 {
+#warning ABR should be updated on new technology discoveries.
                     switch (CurrentTask)
                     {
                         case Constants.ShipyardInfo.Task.Construction:
@@ -238,7 +246,24 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 public void Pause()
                 {
-                    Priority = -1;
+                    Paused = true;
+                }
+
+                /// <summary>
+                /// Continue with this task.
+                /// </summary>
+                public void UnPause()
+                {
+                    Paused = false;
+                }
+
+                /// <summary>
+                /// Priority being -1 as per Pause() means that this task should not be in production.
+                /// </summary>
+                /// <returns>True if paused, false if not paused.</returns>
+                public bool IsPaused()
+                {
+                    return Paused;
                 }
 
                 /// <summary>
@@ -307,6 +332,11 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 public int CapExpansionLimit { get; set; }
 
+                /// <summary>
+                /// Is this build activity paused or under construction?
+                /// </summary>
+                public bool Paused { get; set; }
+
 
                 /// <summary>
                 /// Default Constructor.
@@ -320,6 +350,8 @@ namespace Pulsar4X.Entities
 
                     TargetOfRetool = null;
                     CapExpansionLimit = -1;
+
+                    Paused = false;
                 }
 
                 /// <summary>
@@ -333,6 +365,8 @@ namespace Pulsar4X.Entities
 
                     TargetOfRetool = null;
                     CapExpansionLimit = -1;
+
+                    Paused = false;
                 }
 
                 /// <summary>
@@ -365,13 +399,10 @@ namespace Pulsar4X.Entities
                     {
                         TargetOfRetool = RetoolTarget;
                     }
+
+                    Paused = false;
                 }
             }
-
-            /// <summary>
-            /// Name of this Shipyard. separate from the installation data type name.
-            /// </summary>
-            public String Name { get; set; }
 
             /// <summary>
             /// Shipyard tonnage.
@@ -415,13 +446,39 @@ namespace Pulsar4X.Entities
             /// Constructor for shipyard information
             /// </summary>
             /// <param name="Type"></param>
-            public ShipyardInformation(Constants.ShipyardInfo.SYType Type)
+            public ShipyardInformation(Faction CurrentFaction, Constants.ShipyardInfo.SYType Type, int Number)
             {
+                switch (Type)
+                {
+                    case Constants.ShipyardInfo.SYType.Commercial:
+                        Name = "Commercial Yard #" + Number.ToString();
+                        Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage * Constants.ShipyardInfo.NavalToCommercialRatio;
+                        break;
+                    case Constants.ShipyardInfo.SYType.Naval:
+                        Name = "Naval Yard #" + Number.ToString();
+                        Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage;
+                        break;
+                    default:
+                        Name = "Unknown Shipyard Type #" + Number.ToString();
+                        break;
+                }
+                
                 ShipyardType = Type;
                 AssignedClass = null;
 
                 BuildingShips = new BindingList<ShipyardTask>();
                 CurrentActivity = new ShipyardActivity();
+
+                Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage;
+                Slipways = 1;
+                AssignedClass = null;
+
+                /// <summary>
+                /// create this list so that this shipyard can store its orders for tasks(built ships)
+                /// </summary>
+                BuildingShips = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+
+                UpdateModRate(CurrentFaction);
             }
 
             /// <summary>
@@ -430,7 +487,7 @@ namespace Pulsar4X.Entities
             /// <param name="NewActivity">New Activity to perform.</param>
             /// <param name="RetoolTarget">Retool target if any</param>
             /// <param name="CapLimit">Capacity Expansion Limit if any.</param>
-            public void SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity NewActivity, ShipClassTN RetoolTarget = null, int CapLimit = -1)
+            public void SetShipyardActivity(Faction CurrentFaction, Constants.ShipyardInfo.ShipyardActivity NewActivity, ShipClassTN RetoolTarget = null, int CapLimit = -1)
             {
                 decimal[] mCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
@@ -470,7 +527,7 @@ namespace Pulsar4X.Entities
 
                     if (TonsToAdd != 0)
                     {
-                        Tonnage = Tonnage + TonsToAdd;
+                        AddTonnage(CurrentFaction, Tonnage);
                     }
                 }
 
@@ -581,9 +638,35 @@ namespace Pulsar4X.Entities
             public float CalcAnnualSYProduction()
             {
 #warning does not take technology or governor bonus into account.
-                float AnnualSYProd = (ModRate / Constants.ShipyardInfo.BaseModRate) * Constants.ShipyardInfo.BaseModProd;
+                float AnnualSYProd = ((float)ModRate / (float)Constants.ShipyardInfo.BaseModRateDenominator) * (float)Constants.ShipyardInfo.BaseModProd;
 
                 return AnnualSYProd;
+            }
+
+            /// <summary>
+            /// Add tonnage and then update the mod rate.
+            /// </summary>
+            public void AddTonnage(Faction CurrentFaction, int TonsToAdd)
+            {
+                Tonnage = Tonnage + TonsToAdd;
+                UpdateModRate(CurrentFaction);
+            }
+
+            /// <summary>
+            /// Modrate should be updated whenever tonnage is added or when tech is advanced.
+            /// </summary>
+            /// <param name="CurrentFaction"></param>
+            public void UpdateModRate(Faction CurrentFaction)
+            {
+#warning Modrate needs to be updated on tech advancement. also, does the governor have an effect on mod rate?
+                int BuildTech = CurrentFaction.FactionTechLevel[(int)Faction.FactionTechnology.ShipProdRate];
+                if (BuildTech > Constants.ShipyardInfo.MaxShipProductionRate)
+                    BuildTech = Constants.ShipyardInfo.MaxShipProductionRate;
+
+                float TechAdjustment = (float)Constants.ShipyardInfo.ShipProductionRate[BuildTech] / (float)Constants.ShipyardInfo.ShipProductionRate[0];
+
+                ModRate = (int)Math.Round((Constants.ShipyardInfo.BaseModRate + ((((float)Tonnage - (float)Constants.ShipyardInfo.BaseShipyardTonnage) / (float)Constants.ShipyardInfo.BaseShipyardTonnage) *
+                                          Constants.ShipyardInfo.ModRateTonnageMultiplier)) * TechAdjustment);
             }
 
             /// <summary>

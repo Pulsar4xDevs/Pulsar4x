@@ -554,10 +554,19 @@ namespace Pulsar4X.Entities
                 /// There are some floating point normalization issues with ConstructionFactoryBuild. I could fix them by making only integer construction possible however. Not sure if I want to do that.
                 /// maybe changing construction to decimals and not floats could work. or some kind of normalization kludge.
                 /// </summary>
+                
+                /// <summary>
+                /// Mining should happen "first" since these should all happen quasi-simultaneously and mining is the only one that they all depend on to produce mineral resources.
+                /// </summary>
+                ConstructionCycle.MinePlanets(P);
+
+                /// <summary>
+                /// The rest of these don't particularly depend on one another so they can happen at any time.
+                /// </summary>
                 ConstructionCycle.ConstructionFactoryBuild(P);
                 ConstructionCycle.OrdnanceFactoryBuild(P);
-                ConstructionCycle.MinePlanets(P);
                 ConstructionCycle.RefineFuel(P);
+                ConstructionCycle.ProcessShipyards(P);
             }
 
             /// <summary>

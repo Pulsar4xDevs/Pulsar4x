@@ -552,11 +552,9 @@ namespace Pulsar4X.UI.Handlers
                     if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.Retool)
                     {
                         if (PotentialRetoolTargets.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
-                        {
-                                        
+                        {             
                             ShipClassTN RetoolTarget = PotentialRetoolTargets[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
-                            CurrentSYInfo.SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity.Retool, RetoolTarget);
-                            
+                            CurrentSYInfo.SetShipyardActivity(CurrentFaction, Constants.ShipyardInfo.ShipyardActivity.Retool, RetoolTarget);    
                         }
                     }
                     else if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
@@ -565,15 +563,13 @@ namespace Pulsar4X.UI.Handlers
                         bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
                         if (r == true && NewCapLimit > CurrentSYInfo.Tonnage)
                         {
-                            CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex, null, NewCapLimit);
+                            CurrentSYInfo.SetShipyardActivity(CurrentFaction, (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex, null, NewCapLimit);
                         }
                     }
                     else
                     {
-                        CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex);
+                        CurrentSYInfo.SetShipyardActivity(CurrentFaction, (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex);
                     }
-
-                    
                 }
                 else
                 {
@@ -586,10 +582,8 @@ namespace Pulsar4X.UI.Handlers
                         {
                             if (PotentialRetoolTargets.Count != 0 && m_oSummaryPanel.NewShipClassComboBox.SelectedIndex != -1)
                             {
-
                                 ShipClassTN RetoolTarget = PotentialRetoolTargets[m_oSummaryPanel.NewShipClassComboBox.SelectedIndex];
-                                CurrentSYInfo.SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity.Retool, RetoolTarget);
-
+                                CurrentSYInfo.SetShipyardActivity(CurrentFaction, Constants.ShipyardInfo.ShipyardActivity.Retool, RetoolTarget);
                             }
                         }
                         else if ((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
@@ -598,16 +592,15 @@ namespace Pulsar4X.UI.Handlers
                             bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
                             if (r == true && NewCapLimit > CurrentSYInfo.Tonnage)
                             {
-                                CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex, null, NewCapLimit);
+                                CurrentSYInfo.SetShipyardActivity(CurrentFaction, (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex, null, NewCapLimit);
                             }
                         }
                         else
                         {
-                            CurrentSYInfo.SetShipyardActivity((Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex);
+                            CurrentSYInfo.SetShipyardActivity(CurrentFaction, (Constants.ShipyardInfo.ShipyardActivity)m_oSummaryPanel.SYCTaskTypeComboBox.SelectedIndex);
                         }
                     }
                 }
-
 
 
                 /// <summary>

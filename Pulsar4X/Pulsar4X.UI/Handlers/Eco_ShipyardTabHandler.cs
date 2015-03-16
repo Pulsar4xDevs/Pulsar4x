@@ -172,7 +172,11 @@ namespace Pulsar4X.UI.Handlers
                 RetoolList.Clear();
                 foreach (ShipClassTN Ship in CurrentFaction.ShipDesigns)
                 {
-                    if (Ship.SizeTons <= SYInfo.Tonnage)
+                    /// <summary>
+                    /// Ships that are too big may not be in the retool list, and military ships may not be built at commercial yards.
+                    /// Naval yards may build all classes of ships, but cap expansion for naval yards is very expensive.
+                    /// </summary>
+                    if (Ship.SizeTons <= SYInfo.Tonnage && !(Ship.IsMilitary == true && SYInfo.ShipyardType == Constants.ShipyardInfo.SYType.Commercial))
                     {
                         RetoolList.Add(Ship);
                     }
@@ -510,7 +514,11 @@ namespace Pulsar4X.UI.Handlers
                     }
 
                     m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[6].Value = Constants.ShipyardInfo.ShipyardTasks[(int)SYI.CurrentActivity.Activity];
-                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[7].Value = SYI.CurrentActivity.Progress;
+
+
+                    String ProgString = String.Format("{0:N2}", (SYI.CurrentActivity.Progress * 100.0m));
+
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[7].Value = ProgString;
                     if (SYI.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                     {
                         m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator].Cells[8].Value = "N/A";
@@ -572,7 +580,10 @@ namespace Pulsar4X.UI.Handlers
                     }
 
                     m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[6].Value = Constants.ShipyardInfo.ShipyardTasks[(int)SYI.CurrentActivity.Activity];
-                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[7].Value = SYI.CurrentActivity.Progress;
+
+                    String ProgString = String.Format("{0:N2}",(SYI.CurrentActivity.Progress * 100.0m));
+
+                    m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[7].Value = ProgString;
                     if (SYI.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                     {
                         m_oSummaryPanel.ShipyardDataGrid.Rows[ShipyardIterator + row].Cells[8].Value = "N/A";
@@ -616,7 +627,7 @@ namespace Pulsar4X.UI.Handlers
 
                 if (Activity != Constants.ShipyardInfo.ShipyardActivity.CapExpansion && Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
                 {
-                    Installation.ShipyardInformation CostPrototyper = new Installation.ShipyardInformation(SYInfo.ShipyardType);
+                    Installation.ShipyardInformation CostPrototyper = new Installation.ShipyardInformation(CurrentFaction, SYInfo.ShipyardType, 1);
                     CostPrototyper.Tonnage = SYInfo.Tonnage;
                     CostPrototyper.Slipways = SYInfo.Slipways;
                     CostPrototyper.ModRate = SYInfo.ModRate;
@@ -629,7 +640,7 @@ namespace Pulsar4X.UI.Handlers
                     int NewCapLimit = -1;
                     bool r = Int32.TryParse(m_oSummaryPanel.ExpandCapUntilXTextBox.Text, out NewCapLimit);
 
-                    CostPrototyper.SetShipyardActivity(Activity, RetoolTarget, NewCapLimit);
+                    CostPrototyper.SetShipyardActivity(CurrentFaction, Activity, RetoolTarget, NewCapLimit);
 
                     for (int MineralIterator = 0; MineralIterator < Constants.Minerals.NO_OF_MINERIALS; MineralIterator++)
                     {
@@ -701,7 +712,7 @@ namespace Pulsar4X.UI.Handlers
             {
                 m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Clear();
 
-                Installation.ShipyardInformation CostPrototyper = new Installation.ShipyardInformation(SYInfo.ShipyardType);
+                Installation.ShipyardInformation CostPrototyper = new Installation.ShipyardInformation(CurrentFaction, SYInfo.ShipyardType,1);
                 CostPrototyper.Tonnage = SYInfo.Tonnage;
                 CostPrototyper.Slipways = SYInfo.Slipways;
                 CostPrototyper.ModRate = SYInfo.ModRate;
@@ -923,6 +934,12 @@ namespace Pulsar4X.UI.Handlers
                 /// Assigned class is already set to be built, and shouldn't ever be an "eligible class"
                 /// </summary>
                 if (CurrentClass == SYInfo.AssignedClass)
+                    continue;
+
+                /// <summary>
+                /// Military ships are not buildable at commercial yards. Naval yards can build commercial ships however.
+                /// </summary>
+                if (CurrentClass.IsMilitary == true && SYInfo.ShipyardType == Constants.ShipyardInfo.SYType.Commercial)
                     continue;
 
                 /// <summary>

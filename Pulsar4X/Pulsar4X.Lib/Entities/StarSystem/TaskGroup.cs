@@ -530,7 +530,6 @@ namespace Pulsar4X.Entities
             /// Refuel and ReCrew this ship here?
             /// </summary>
 
-
             if (Ships.Count == 1)
             {
                 MaxSpeed = ship.ShipClass.MaxSpeed;
@@ -556,7 +555,6 @@ namespace Pulsar4X.Entities
             UpdatePassiveSensors(ship);
 
             AddShipToSort(ship);
-
         }
 
         /// <summary>
@@ -1132,6 +1130,88 @@ namespace Pulsar4X.Entities
         /// <returns>Were nodes removed from the various linkedLists?</returns>
         public bool RemoveShipFromTaskGroup(ShipTN Ship)
         {
+            /// <summary>
+            /// Both active and passive sensors need to be updated to reflect that this ship is no longer part of the taskgroup.
+            /// </summary>
+            for(int activeIterator = 0; activeIterator < Ship.ShipASensor.Count; activeIterator++)
+            {
+                SetActiveSensor(Ships.IndexOf(Ship), activeIterator, false);
+            }
+
+            for (int passiveIterator = 0; passiveIterator < Ship.ShipPSensor.Count; passiveIterator++)
+            {
+                PassiveSensorTN PassiveS = Ship.ShipPSensor[passiveIterator];
+                /// <summary>
+                /// Performance could be improved here by storing a sorted linked list of all passive sensors if need be.
+                /// I don't believe that sensor destruction events will be common enough to necessitate that however.
+                /// </summary>
+                if (PassiveS.pSensorDef.thermalOrEM == PassiveSensorType.EM)
+                {
+                    if (PassiveS.pSensorDef.rating == BestEM.pSensorDef.rating)
+                    {
+                        BestEMCount--;
+
+                        if (BestEMCount == 0)
+                        {
+                            for (int loop = 0; loop < Ships.Count; loop++)
+                            {
+                                for (int loop2 = 0; loop2 < Ships[loop].ShipPSensor.Count; loop2++)
+                                {
+                                    if (Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.EM &&
+                                        Ships[loop].ShipPSensor[loop2].isDestroyed == false)
+                                    {
+                                        if (BestEMCount == 0 || Ships[loop].ShipPSensor[loop2].pSensorDef.rating > BestEM.pSensorDef.rating)
+                                        {
+                                            BestEM = Ships[loop].ShipPSensor[loop2];
+                                            BestEMCount = 1;
+                                        }
+                                        else if (Ships[loop].ShipPSensor[loop2].pSensorDef.rating == BestEM.pSensorDef.rating)
+                                        {
+                                            BestEMCount++;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (PassiveS.pSensorDef.rating == BestThermal.pSensorDef.rating)
+                    {
+                        BestThermalCount--;
+
+                        if (BestThermalCount == 0)
+                        {
+                            for (int loop = 0; loop < Ships.Count; loop++)
+                            {
+                                for (int loop2 = 0; loop2 < Ships[loop].ShipPSensor.Count; loop2++)
+                                {
+                                    if (Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.Thermal &&
+                                        Ships[loop].ShipPSensor[loop2].isDestroyed == false)
+                                    {
+                                        if (BestThermalCount == 0 || Ships[loop].ShipPSensor[loop2].pSensorDef.rating > BestThermal.pSensorDef.rating)
+                                        {
+                                            BestThermal = Ships[loop].ShipPSensor[loop2];
+                                            BestThermalCount = 1;
+                                        }
+                                        else if (Ships[loop].ShipPSensor[loop2].pSensorDef.rating == BestThermal.pSensorDef.rating)
+                                        {
+                                            BestThermalCount++;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Now on to the detection linked lists. Ship must be removed, and the lists must be altered to reflect the fact that ship is gone.
+            /// </summary>
             ThermalSortList.Remove(Ship.ThermalList);
             EMSortList.Remove(Ship.EMList);
             ActiveSortList.Remove(Ship.ActiveList);

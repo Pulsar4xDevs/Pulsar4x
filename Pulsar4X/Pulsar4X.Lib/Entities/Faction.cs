@@ -1670,6 +1670,25 @@ namespace Pulsar4X.Entities
             }
 #warning baseTracking is a magic number here.
             BaseTracking = 25000;
+
+            foreach (Population CurrentPopulation in Populations)
+            {
+                if (CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number >= 1.0f)
+                {
+                    foreach (Installation.ShipyardInformation SYInfo in CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo)
+                    {
+                        SYInfo.UpdateModRate(this);
+                    }
+                }
+
+                if (CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number >= 1.0f)
+                {
+                    foreach (Installation.ShipyardInformation SYInfo in CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo)
+                    {
+                        SYInfo.UpdateModRate(this);
+                    }
+                }
+            }
         }
 
         #region Detection Code
