@@ -9,19 +9,34 @@ namespace Pulsar4X.ECSLib
     public class Engine_Comms
     {
         Dictionary<Guid, Queue<Message>> _MessagesforUI = new Dictionary<Guid, Queue<Message>>();
+        Dictionary<Guid, Queue<Message>> _MessagesforLib = new Dictionary<Guid, Queue<Message>>();
 
-        Queue<Message> Messagequeue(Guid factionID)
+
+
+        public Message UIPop(Guid factionID)
         {
-            return _MessagesforUI[factionID];
+            Queue<Message> queue = _MessagesforUI[factionID];
+            return queue.Dequeue();
         }
 
-        //public Message Messageforfaction(Guid factionID)        
-        //{
-        //    Queue<Message> queue = Messagequeue(factionID);
-        //
-        //    return queue.Take(1);
-        //}
+        internal void UIPush(Guid factionID, Message message)
+        {
+            Queue<Message> queue = _MessagesforUI[factionID];
+            queue.Enqueue(message);
+        }
 
+
+        internal Message LibPop(Guid factionID)
+        {
+            Queue<Message> queue = _MessagesforLib[factionID];
+            return queue.Dequeue();
+        }
+
+        public void LibPush(Guid factionID, Message message)
+        {
+            Queue<Message> queue = _MessagesforLib[factionID];
+            queue.Enqueue(message);
+        }
     }
 
     public class Message

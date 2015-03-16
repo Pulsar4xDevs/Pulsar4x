@@ -9,7 +9,24 @@ namespace WPFUI
     class UI_Comms
     {
         Guid factionID;
-        //Message message = Engine_Comms.Messageforfaction(factionID);
+
+        public Queue<Message> LocalMessageQueue { get; set; }
+        Engine_Comms EngineComms { get; set; }
+        public UI_Comms(Engine_Comms engineComms)
+        {
+            LocalMessageQueue = new Queue<Message>();
+            EngineComms = engineComms;
+        }
+
+        public void CheckEngineMessageQueue(Guid factionID)
+        {
+            LocalMessageQueue.Enqueue(EngineComms.UIPop(factionID));
+        }
+
+        public void SendEngineMessage(Guid factionID, Message message)
+        {
+            EngineComms.LibPush(factionID, message);
+        }
 
     }
 }

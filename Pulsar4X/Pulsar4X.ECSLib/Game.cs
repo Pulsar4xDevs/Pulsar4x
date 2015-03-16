@@ -31,6 +31,8 @@ namespace Pulsar4X.ECSLib
         public List<StarSystem> StarSystems { get; set; }
         public DateTime CurrentDateTime { get; set; }
 
+        public Engine_Comms EngineComms { get; private set; }
+
         public SubpulseLimitRequest NextSubpulse
         {
             get 
@@ -75,6 +77,8 @@ namespace Pulsar4X.ECSLib
             NextSubpulse.MaxSeconds = 5;
 
             CurrentInterrupt = new Interrupt();
+
+            EngineComms = new Engine_Comms();
 
             // Setup time Phases.
             PhaseProcessor.Initialize();
