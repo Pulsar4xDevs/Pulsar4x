@@ -6,62 +6,79 @@ using System.Collections.Concurrent;
 
 namespace Pulsar4X.ECSLib
 {
+
+
+
+
     /// <summary>
-    /// this way makes it easier to hide writing to the UI queue from the UI by useing internal;
+    /// Engine side of the Lib-UI communications. 
+    /// engine needs to create one of these when instantiated, and then AddFactions as factions are added to the game.
     /// </summary>
     public class Engine_Comms
     {
-        Dictionary<Guid, ConcurrentQueue<Message>> _MessagesforUI = new Dictionary<Guid, ConcurrentQueue<Message>>();
-        Dictionary<Guid, ConcurrentQueue<Message>> _MessagesforLib = new Dictionary<Guid, ConcurrentQueue<Message>>();   
-
+        Dictionary<Guid, MessageBook> Messages = new Dictionary<Guid, MessageBook>();
 
         /// <summary>
-        /// Pop a message off the UI queue 
+        /// a dictionary of faction names and thier guids. mostly so the ui can request the correct factionid for a given faction name. 
+        /// </summary>
+        public Dictionary<string, Guid> Factions = new Dictionary<string, Guid>();
+        
+        /// <summary>
+        /// Engine_comms constructor. 
+        /// </summary>
+        internal Engine_Comms()
+        { }
+
+        public void AddFaction(Guid factionID)
+        {
+            Messages.Add(factionID, new MessageBook(factionID));
+            //Factions.Add(FactionEntity.Name, factionID)
+        }
+
+        /// <summary>
+        /// if a faction is killed off or otherwise removed from the game it needs to be removed from Engine_Comms.
+        /// </summary>
+        /// <param name="factionID"></param>
+        internal void RemoveFaction(Guid factionID)
+        {
+            Messages.Remove(factionID);
+            //Factions.Remove()
+        }
+
+        /// <summary>
+        /// later on add a password parameter to this. 
         /// </summary>
         /// <param name="factionID"></param>
         /// <returns></returns>
-        public Message UIPop(Guid factionID)
+        public MessageBook RequestMessagebook(Guid factionID)
         {
-            ConcurrentQueue<Message> queue = _MessagesforUI[factionID];
-            Message message =null;
-            queue.TryDequeue(out message);
-            return message;
+            return Messages[factionID];
         }
 
         /// <summary>
-        /// lib sends a message to the UI queue here
+        /// lib writes messages for the UI  here;
+        /// or can just get the messagebook via Messages[factionID]. 
         /// </summary>
-        /// <param name="factionID"></param>
-        /// <param name="message"></param>
-        internal void UIPush(Guid factionID, Message message)
+        /// <param name="factionID">faction the message relates to</param>
+        /// <param name="message">message object</param>
+        internal void LibWriteOutQueue(Guid factionID, Message message)
         {
-            ConcurrentQueue<Message> queue = _MessagesforUI[factionID];
-            queue.Enqueue(message);
+            Messages[factionID].OutMessageQueue.Enqueue(message);
         }
 
         /// <summary>
-        /// lib reads messages from the UI here. 
+        /// Lib reads faction messages here. 
+        /// or can just get the messagebook via Messages[factionID]. 
         /// </summary>
         /// <param name="factionID"></param>
         /// <returns></returns>
-        internal Message LibPop(Guid factionID)
+        internal Message LibReadFactionInQueue(Guid factionID)
         {
-            ConcurrentQueue<Message> queue = _MessagesforLib[factionID];
-            Message message = null;
-            queue.TryDequeue(out message);
+            Message message;  
+            Messages[factionID].InMessageQueue.TryDequeue(out message);
             return message;
         }
 
-        /// <summary>
-        /// UI writes messages to the lib here. 
-        /// </summary>
-        /// <param name="factionID"></param>
-        /// <param name="message"></param>
-        public void LibPush(Guid factionID, Message message)
-        {
-            ConcurrentQueue<Message> queue = _MessagesforLib[factionID];
-            queue.Enqueue(message);
-        }
        
     }
 
@@ -75,39 +92,17 @@ namespace Pulsar4X.ECSLib
 
 
     /// <summary>
-    /// slightly different way of doing it vs Engine_Comms this feels a bit tider; 
-    /// and probibly makes it easier to add password etc to the requestmessagebook
-    /// </summary>
-    public class Engine_Comms2
-    {
-        Dictionary<Guid, MessageBook> Messages = new Dictionary<Guid, MessageBook>();
-        public Dictionary<string, Guid> Factions = new Dictionary<string, Guid>();
-        internal Engine_Comms2()
-        { }
-
-        public void AddFaction(Guid factionID)
-        {
-            Messages.Add(factionID, new MessageBook(factionID));
-            //Factions.Add(FactionEntity.Name, factionID)
-        }
-
-        public MessageBook RequestMessagebook(Guid factionID)
-        {
-            return Messages[factionID];
-        }
-    }
-
-
-    /// <summary>
     /// 
     /// </summary>
     public class MessageBook
     {
         Guid _FactionID;
-        public ConcurrentQueue<Message> MessageQueue { get; set; }
+        public ConcurrentQueue<Message> OutMessageQueue { get; set; }
+        public ConcurrentQueue<Message> InMessageQueue { get; set; }
         internal MessageBook(Guid factionID)
         {
-            MessageQueue = new ConcurrentQueue<Message>();
+            OutMessageQueue = new ConcurrentQueue<Message>();
+            InMessageQueue = new ConcurrentQueue<Message>();
             _FactionID = factionID;
         }
         

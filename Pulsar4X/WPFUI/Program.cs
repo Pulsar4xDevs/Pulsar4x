@@ -14,8 +14,9 @@ namespace WPFUI
         {
 
             Game game = new Game();
-
-            UI_Comms uicomms = new UI_Comms(game.EngineComms);
+            Guid faction = game.EngineComms.Factions.Values.First(); //just get the ffirst one for now, till we've got ui to select.
+            
+            UI_Comms uicomms = new UI_Comms(game.EngineComms, faction);
 
             
         }
