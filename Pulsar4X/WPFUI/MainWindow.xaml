@@ -3,6 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <Menu IsMainMenu="True" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="517">
+            <MenuItem Header="_Game">
+                <MenuItem Header="_New"/>
+                <MenuItem Header="_Load"/>
+                <MenuItem Header="_Save"/>
+                          
+            </MenuItem>
+            <MenuItem Header="_Faction">
+                <MenuItem Header="_SM"/>
+            </MenuItem>
+            
+        </Menu>
+
+
     </Grid>
 </Window>

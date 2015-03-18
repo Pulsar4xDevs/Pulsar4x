@@ -26,7 +26,6 @@ namespace WPFUI
                 //what you would need is a message processor function, this function would look at the message type and then fire of an event for that message type.
                 //everthing in the UI would subscribe to the events for messages they are interested in
                 //the even would pass the data, i.e the rest of the message object, to the event delegates 
-
                 //
                 if (MessageQueue.OutMessageQueue.Count > 10)
                     Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() => CheckEnginMessageQueue()));

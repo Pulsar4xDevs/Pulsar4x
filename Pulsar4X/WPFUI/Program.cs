@@ -11,9 +11,9 @@ namespace WPFUI
 {
     static class Program
     {
-        static void Main()
+        public static void PulsarMain()
         {
-
+                    
             Game game = new Game();
             Guid faction = game.EngineComms.Factions.Values.First(); //just get the ffirst one for now, till we've got ui to select.
             
