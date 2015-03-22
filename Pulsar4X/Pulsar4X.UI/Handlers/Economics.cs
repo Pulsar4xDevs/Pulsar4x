@@ -317,7 +317,6 @@ namespace Pulsar4X.UI.Handlers
             m_oSummaryPanel.ShipyardDataGrid.RowHeadersVisible = false;
             m_oSummaryPanel.ShipyardDataGrid.ColumnHeadersHeight = 34;
             m_oSummaryPanel.ShipyardTaskDataGrid.RowHeadersVisible = false;
-            m_oSummaryPanel.ShipyardTaskDataGrid.ColumnHeadersHeight = 34;
             Eco_ShipyardTabHandler.BuildShipyardTab(m_oSummaryPanel,m_oCurrnetFaction,m_oCurrnetPopulation,PotentialRetoolTargets);
 
             m_oConfirmActivityPanel.YesButton.Click += new EventHandler(ConfirmYesButton_Click);
@@ -842,6 +841,7 @@ namespace Pulsar4X.UI.Handlers
                     {
                         Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, ConstructRefit);
                         CurrentSYInfo.BuildingShips.Add(NewTask);
+                        CurrentPopulation.ShipyardTasks.Add(NewTask, CurrentSYInfo);
 
                         /// <summary>
                         /// Cost display for the new order.

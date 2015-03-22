@@ -98,6 +98,8 @@ namespace Pulsar4X.UI.Handlers
         /// </summary>
         private static int MaxShipyardRows { get; set; }
 
+        private static int MaxShipyardTaskRows { get; set; }
+
         /// <summary>
         /// Initialize the Shipyard tab
         /// </summary>
@@ -105,6 +107,7 @@ namespace Pulsar4X.UI.Handlers
         public static void BuildShipyardTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation, BindingList<ShipClassTN> RetoolTargets)
         {
             MaxShipyardRows = 38;
+            MaxShipyardTaskRows = 38;
             //m_oSummaryPanel.
             //Populate the datagrid
             //build the SYC Groupbox
@@ -212,6 +215,16 @@ namespace Pulsar4X.UI.Handlers
                 AddColumn("Completion Date", newPadding, m_oSummaryPanel.ShipyardDataGrid, 3);
                 AddColumn("Mod Rate", newPadding, m_oSummaryPanel.ShipyardDataGrid, 3);
 
+                AddColumn("Yard", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 0);
+                AddColumn("TaskDescription", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 0);
+                AddColumn("Unit Name", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 3);
+                AddColumn("Progress", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 3);
+                AddColumn("Assigned Task Group", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 3);
+                AddColumn("Completion Date", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 3);
+                AddColumn("ABR", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 3);
+                AddColumn("Priority", newPadding, m_oSummaryPanel.ShipyardTaskDataGrid, 3);
+
+
                 // Add Rows:
                 for (int i = 0; i < MaxShipyardRows; ++i)
                 {
@@ -222,7 +235,17 @@ namespace Pulsar4X.UI.Handlers
                         row.Visible = false;
                         m_oSummaryPanel.ShipyardDataGrid.Rows.Add(row);
                     }
+
+                    using (DataGridViewRow row = new DataGridViewRow())
+                    {
+                        // setup row height. note that by default they are 22 pixels in height!
+                        row.Height = 18;
+                        row.Visible = false;
+                        m_oSummaryPanel.ShipyardTaskDataGrid.Rows.Add(row);
+                    }
                 }
+
+
             }
             catch
             {
@@ -953,6 +976,13 @@ namespace Pulsar4X.UI.Handlers
                         EligibleClassList.Add(CurrentClass);
                 }
             }
+        }
+
+
+        public static void BuildShipyardTasksTab(Faction CurrentFaction, Population CurrentPopulation)
+        {
+            List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o => o.Priority).ToList();
+            
         }
     }
 }

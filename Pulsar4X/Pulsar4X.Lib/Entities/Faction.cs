@@ -1593,7 +1593,7 @@ namespace Pulsar4X.Entities
                         {
                             EMSig = Missile.missileDef.aSD.gps;
                         }
-                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, EMSig, ac, (uint)YearTickValue);
+                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, EMSig, ac, (uint)GameState.Instance.CurrentSecond);
 
                         if (th == false && em == false && ac == false)
                         {

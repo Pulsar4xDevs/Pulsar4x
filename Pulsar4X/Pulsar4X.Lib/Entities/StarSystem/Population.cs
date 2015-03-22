@@ -486,6 +486,11 @@ namespace Pulsar4X.Entities
         /// </summary>
         public bool IsRefining { get; set; }
 
+        /// <summary>
+        /// List of every task at every shipyard at this population center.
+        /// </summary>
+        public Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation> ShipyardTasks { get; set; } 
+
         #endregion
 
         public Population(SystemBody a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
@@ -564,6 +569,8 @@ namespace Pulsar4X.Entities
             FighterBuildQueue = new BindingList<FighterBuildQueueItem>();
 
             IsRefining = false;
+
+            ShipyardTasks = new Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation>();
 
             SSEntity = StarSystemEntityType.Population;
         }

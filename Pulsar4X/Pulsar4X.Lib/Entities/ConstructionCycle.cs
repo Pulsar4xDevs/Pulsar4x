@@ -443,12 +443,16 @@ namespace Pulsar4X.Entities
                     int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
                     int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
 
+                    List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o=>o.Priority).ToList();
+
+                    BuildShips(CurrentFaction, CurrentPopulation, SortedList);
+
                     for (int SYIterator = 0; SYIterator < CY; SYIterator++)
                     {
                         Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[SYIterator];
                         PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
 
-                        BuildShips(CurrentFaction, CurrentPopulation, SYInfo);
+                        //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
                     }
 
                     for (int SYIterator = 0; SYIterator < NY; SYIterator++)
@@ -456,7 +460,7 @@ namespace Pulsar4X.Entities
                         Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[SYIterator];
                         PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
 
-                        BuildShips(CurrentFaction, CurrentPopulation, SYInfo);
+                        //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
                     }
                 }
             }
@@ -468,13 +472,10 @@ namespace Pulsar4X.Entities
         /// <param name="CurrentFaction">Faction both the population and the shipyard belong to.</param>
         /// <param name="CurrentPopulation">Population the shipyard is on</param>
         /// <param name="SYInfo">Shipyard the tasks are happening at</param>
-        private static void BuildShips(Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
+        private static void BuildShips(Faction CurrentFaction, Population CurrentPopulation, List<Installation.ShipyardInformation.ShipyardTask> SortedList)
         {
-            /// <summary>
-            /// This should already be a priority sorted list.
-            /// </summary>
             BindingList<Installation.ShipyardInformation.ShipyardTask> TasksToRemove = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
-            foreach (Installation.ShipyardInformation.ShipyardTask Task in SYInfo.BuildingShips)
+            foreach(Installation.ShipyardInformation.ShipyardTask Task in SortedList)
             {
                 if (Task.IsPaused() == true)
                     continue;
@@ -513,7 +514,7 @@ namespace Pulsar4X.Entities
                 }
                 else
                 {
-                    String Entry = String.Format("Not enough minerals to finish task {0} at Shipyard {1} on Population {2}", Task.CurrentTask, SYInfo, CurrentPopulation);
+                    String Entry = String.Format("Not enough minerals to finish task {0} at Shipyard {1} on Population {2}", Task.CurrentTask, CurrentPopulation.ShipyardTasks[Task], CurrentPopulation);
                     MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Position.System, CurrentPopulation, GameState.Instance.GameDateTime,
                                                        GameState.Instance.LastTimestep, Entry);
                     GameState.Instance.Factions[0].MessageLog.Add(NMsg);
@@ -665,7 +666,9 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 if (Task.Progress >= 1.0m)
                 {
-                    SYInfo.BuildingShips.Remove(Task);
+                    Installation.ShipyardInformation SYI = CurrentPopulation.ShipyardTasks[Task];
+                    SYI.BuildingShips.Remove(Task);
+                    CurrentPopulation.ShipyardTasks.Remove(Task);
                 }
             } 
         }
