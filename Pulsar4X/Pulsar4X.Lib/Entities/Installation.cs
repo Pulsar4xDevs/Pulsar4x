@@ -115,6 +115,11 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 public ShipClassTN ConstructRefitTarget { get; set;}
 
+                /// <summary>
+                /// What is the name of this ship going to be if this is a newly constructed ship?
+                /// </summary>
+                public String Title { get; set; }
+
 
                 /// <summary>
                 /// Constructor for task.
@@ -125,7 +130,7 @@ namespace Pulsar4X.Entities
                 /// <param name="TargetTG">Target TG which the ship will be put back in to, or in the case of a scrap operation taken from.</param>
                 /// <param name="PopulationBuildRate">What is the currently selected shipyard capable of building? population and faction should factor into this number.</param>
                 /// <param name="ConstructOrRefitTarget">If a new ship is being built, or an old ship is being refitted, what target design are we interested in?</param>
-                public ShipyardTask(ShipTN Ship, Constants.ShipyardInfo.Task TaskToPerform, TaskGroupTN TargetTG, int PopulationBuildRate, ShipClassTN ConstructOrRefitTarget=null)
+                public ShipyardTask(ShipTN Ship, Constants.ShipyardInfo.Task TaskToPerform, TaskGroupTN TargetTG, int PopulationBuildRate, String TitleToUse, ShipClassTN ConstructOrRefitTarget=null)
                 {
                     m_aiMinerialsCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
 
@@ -144,6 +149,11 @@ namespace Pulsar4X.Entities
                         AssignedTaskGroup.IsInShipyard = true;
 
                     Cost = 0.0m;
+
+                    /// <summary>
+                    /// This is only relevant for new ship construction.
+                    /// </summary>
+                    Title = TitleToUse;
 
                     switch (TaskToPerform)
                     {

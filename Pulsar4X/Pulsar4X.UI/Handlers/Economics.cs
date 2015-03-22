@@ -775,12 +775,12 @@ namespace Pulsar4X.UI.Handlers
                 {
                     if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
                     {
+                        TGIndex++;
                         if (TGIndex == m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex)
                         {
                             TargetTG = CurrentTaskGroup;
                             break;
-                        }
-                        TGIndex++;
+                        }  
                     }
                 }
 
@@ -839,7 +839,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     if (CurrentSYInfo.Slipways > CurrentSYInfo.BuildingShips.Count)
                     {
-                        Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, ConstructRefit);
+                        Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, m_oSummaryPanel.SYShipNameTextBox.Text, ConstructRefit);
                         CurrentSYInfo.BuildingShips.Add(NewTask);
                         CurrentPopulation.ShipyardTasks.Add(NewTask, CurrentSYInfo);
 

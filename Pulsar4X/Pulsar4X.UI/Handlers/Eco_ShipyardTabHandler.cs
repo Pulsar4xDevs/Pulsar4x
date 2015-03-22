@@ -153,6 +153,8 @@ namespace Pulsar4X.UI.Handlers
 
                 Entry = String.Format("Create Task({0})", SYInfo.Name);
                 m_oSummaryPanel.ShipyardCreateTaskGroupBox.Text = Entry;
+
+                RefreshShipyardTasksTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
             }
         }
 
@@ -820,7 +822,7 @@ namespace Pulsar4X.UI.Handlers
                     if (CurrentShip == null && ConstructRefit == null)
                         return;
 
-                    Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, ConstructRefit);
+                    Installation.ShipyardInformation.ShipyardTask NewTask = new Installation.ShipyardInformation.ShipyardTask(CurrentShip, SYITask, TargetTG, BaseBuildRate, m_oSummaryPanel.SYShipNameTextBox.Text, ConstructRefit);
                     CostPrototyper.BuildingShips.Add(NewTask);
 
                     m_oSummaryPanel.SYTaskCostTextBox.Text = CostPrototyper.BuildingShips[0].Cost.ToString();
@@ -849,6 +851,101 @@ namespace Pulsar4X.UI.Handlers
                 m_oSummaryPanel.ShipRequiredMaterialsListBox.Items.Clear();
             }
         }
+
+
+        /// <summary>
+        /// Build the list of shipyard tasks at this population.
+        /// </summary>
+        /// <param name="m_oSummaryPanel"></param>
+        /// <param name="CurrentFaction"></param>
+        /// <param name="CurrentPopulation"></param>
+        public static void RefreshShipyardTasksTab(Panels.Eco_Summary m_oSummaryPanel, Faction CurrentFaction, Population CurrentPopulation)
+        {
+
+            List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o => o.Priority).ToList();
+
+            int row = 0;
+            foreach (Installation.ShipyardInformation.ShipyardTask Task in SortedList)
+            {
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Visible = true;
+
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[0].Value = CurrentPopulation.ShipyardTasks[Task].Name;
+
+                String Entry = "N/A";
+
+                switch (Task.CurrentTask)
+                {
+                    case Constants.ShipyardInfo.Task.Construction:
+                        Entry = String.Format("Build {0}", Task.ConstructRefitTarget);
+                        break;
+                    case Constants.ShipyardInfo.Task.Repair:
+                        Entry = String.Format("Repair {0}", Task.CurrentShip);
+                        break;
+                    case Constants.ShipyardInfo.Task.Refit:
+                        Entry = String.Format("Refit {0} to {1}", Task.CurrentShip, Task.ConstructRefitTarget);
+                        break;
+                    case Constants.ShipyardInfo.Task.Scrap:
+                        Entry = String.Format("Scrap {0}", Task.CurrentShip);
+                        break;
+                }
+
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[1].Value = Entry;
+
+                switch (Task.CurrentTask)
+                {
+                    case Constants.ShipyardInfo.Task.Construction:
+                        Entry = String.Format("{0}", Task.Title);
+                        break;
+                    case Constants.ShipyardInfo.Task.Repair:
+                        Entry = String.Format("{0}", Task.CurrentShip);
+                        break;
+                    case Constants.ShipyardInfo.Task.Refit:
+                        Entry = String.Format("{0}", Task.CurrentShip);
+                        break;
+                    case Constants.ShipyardInfo.Task.Scrap:
+                        Entry = String.Format("{0}", Task.CurrentShip);
+                        break;
+                }
+
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[2].Value = Entry;
+
+                String ProgString = String.Format("{0:N2}", (Task.Progress * 100.0m));
+
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[3].Value = ProgString;
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[4].Value = Task.AssignedTaskGroup;
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[5].Value = Task.CompletionDate.ToShortDateString();
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[6].Value = Task.ABR;
+
+                if (Task.IsPaused() == true)
+                    m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[7].Value = "Paused";
+                else
+                    m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Cells[7].Value = Task.Priority;
+
+
+                row++;
+
+                if (row == MaxShipyardTaskRows)
+                {
+                    using (DataGridViewRow NewRow = new DataGridViewRow())
+                    {
+                        // setup row height. note that by default they are 22 pixels in height!
+                        NewRow.Height = 18;
+                        NewRow.Visible = false;
+                        m_oSummaryPanel.ShipyardTaskDataGrid.Rows.Add(NewRow);
+                    }
+                    MaxShipyardTaskRows++;
+                }
+            }
+
+            /// <summary>
+            /// Any rows that aren't being used should be set to invisible. They will still have data from previous ship tasks that I don't care to clear out since the user can't see the rows anyway.
+            /// </summary>
+            for (int rowIterator = row; row < MaxShipyardTaskRows; row++)
+            {
+                m_oSummaryPanel.ShipyardTaskDataGrid.Rows[row].Visible = false;
+            }
+        }
+
 
         /// <summary>
         /// Get a list of the shipclasses in orbit. this wll be needed to help prune repair/refit/scrap operation options.
@@ -976,13 +1073,6 @@ namespace Pulsar4X.UI.Handlers
                         EligibleClassList.Add(CurrentClass);
                 }
             }
-        }
-
-
-        public static void BuildShipyardTasksTab(Faction CurrentFaction, Population CurrentPopulation)
-        {
-            List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o => o.Priority).ToList();
-            
         }
     }
 }

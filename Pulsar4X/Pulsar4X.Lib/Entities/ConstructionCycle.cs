@@ -670,7 +670,8 @@ namespace Pulsar4X.Entities
                     SYI.BuildingShips.Remove(Task);
                     CurrentPopulation.ShipyardTasks.Remove(Task);
                 }
-            } 
+            }
+            TasksToRemove.Clear();
         }
 
         /// <summary>

@@ -567,6 +567,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oMassDriverDestinationComboBox = new System.Windows.Forms.ComboBox();
             this.m_oShipyardTab = new System.Windows.Forms.TabPage();
             this.m_oShipyardCreateTaskGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oRepairRefitScrapClassComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oRepairRefitScrapLabel = new System.Windows.Forms.Label();
             this.m_oRepairRefitScrapShipComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSYShipNameTextBox = new System.Windows.Forms.TextBox();
             this.m_oSYTaskGroupComboBox = new System.Windows.Forms.ComboBox();
@@ -624,8 +626,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oGUTab = new System.Windows.Forms.TabPage();
             this.m_oGUTrainingTab = new System.Windows.Forms.TabPage();
             this.m_oWealthTab = new System.Windows.Forms.TabPage();
-            this.m_oRepairRefitScrapLabel = new System.Windows.Forms.Label();
-            this.m_oRepairRefitScrapClassComboBox = new System.Windows.Forms.ComboBox();
             this.m_oEmpireGroupBox.SuspendLayout();
             this.m_oPopulationGroupBox.SuspendLayout();
             this.m_oIndustryControlGroupBox.SuspendLayout();
@@ -1562,6 +1562,23 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardCreateTaskGroupBox.TabStop = false;
             this.m_oShipyardCreateTaskGroupBox.Text = "Create Task(Title)";
             // 
+            // m_oRepairRefitScrapClassComboBox
+            // 
+            this.m_oRepairRefitScrapClassComboBox.FormattingEnabled = true;
+            this.m_oRepairRefitScrapClassComboBox.Location = new System.Drawing.Point(75, 45);
+            this.m_oRepairRefitScrapClassComboBox.Name = "m_oRepairRefitScrapClassComboBox";
+            this.m_oRepairRefitScrapClassComboBox.Size = new System.Drawing.Size(213, 21);
+            this.m_oRepairRefitScrapClassComboBox.TabIndex = 30;
+            // 
+            // m_oRepairRefitScrapLabel
+            // 
+            this.m_oRepairRefitScrapLabel.AutoSize = true;
+            this.m_oRepairRefitScrapLabel.Location = new System.Drawing.Point(6, 48);
+            this.m_oRepairRefitScrapLabel.Name = "m_oRepairRefitScrapLabel";
+            this.m_oRepairRefitScrapLabel.Size = new System.Drawing.Size(30, 13);
+            this.m_oRepairRefitScrapLabel.TabIndex = 29;
+            this.m_oRepairRefitScrapLabel.Text = "RRS";
+            // 
             // m_oRepairRefitScrapShipComboBox
             // 
             this.m_oRepairRefitScrapShipComboBox.FormattingEnabled = true;
@@ -1659,6 +1676,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSYTaskCompletionDateTextBox.ReadOnly = true;
             this.m_oSYTaskCompletionDateTextBox.Size = new System.Drawing.Size(534, 20);
             this.m_oSYTaskCompletionDateTextBox.TabIndex = 19;
+            this.m_oSYTaskCompletionDateTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSYTaskCostTextBox
             // 
@@ -2107,23 +2125,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oWealthTab.TabIndex = 11;
             this.m_oWealthTab.Text = "Wealth / Trade";
             this.m_oWealthTab.UseVisualStyleBackColor = true;
-            // 
-            // m_oRepairRefitScrapLabel
-            // 
-            this.m_oRepairRefitScrapLabel.AutoSize = true;
-            this.m_oRepairRefitScrapLabel.Location = new System.Drawing.Point(6, 48);
-            this.m_oRepairRefitScrapLabel.Name = "m_oRepairRefitScrapLabel";
-            this.m_oRepairRefitScrapLabel.Size = new System.Drawing.Size(30, 13);
-            this.m_oRepairRefitScrapLabel.TabIndex = 29;
-            this.m_oRepairRefitScrapLabel.Text = "RRS";
-            // 
-            // m_oRepairRefitScrapClassComboBox
-            // 
-            this.m_oRepairRefitScrapClassComboBox.FormattingEnabled = true;
-            this.m_oRepairRefitScrapClassComboBox.Location = new System.Drawing.Point(75, 45);
-            this.m_oRepairRefitScrapClassComboBox.Name = "m_oRepairRefitScrapClassComboBox";
-            this.m_oRepairRefitScrapClassComboBox.Size = new System.Drawing.Size(213, 21);
-            this.m_oRepairRefitScrapClassComboBox.TabIndex = 30;
             // 
             // Eco_Summary
             // 
