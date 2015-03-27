@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.Tests", "Pulsar4X.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.ECSLib", "Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj", "{E716FA06-ECDF-B446-96B4-B790AAB5713B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPFUI", "WPFUI\WPFUI.csproj", "{76508ABF-600E-4B86-9764-DB82D4E429B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.WPFUI", "WPFUI\Pulsar4X.WPFUI.csproj", "{76508ABF-600E-4B86-9764-DB82D4E429B0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
