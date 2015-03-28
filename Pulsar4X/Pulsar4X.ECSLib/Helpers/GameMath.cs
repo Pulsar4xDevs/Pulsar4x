@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Pulsar4X.ECSLib.Helpers.GameMath
+namespace Pulsar4X.ECSLib.Helpers
 {
     /// <summary>
     /// Small Helper Class for Angle unit Conversions
@@ -113,14 +111,16 @@ namespace Pulsar4X.ECSLib.Helpers.GameMath
     /// 
     public class WeightedList<T> : IEnumerable<WeightedValue<T>>
     {
-        List<WeightedValue<T>> m_valueList;
+        readonly List<WeightedValue<T>> m_valueList;
 
         /// <summary>
         /// Total weights of the list.
         /// </summary>
-        public double TotalWeight { get { return m_totalWeight; } }
-        double m_totalWeight;
+        public double TotalWeight { get; private set; }
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public WeightedList()
         {
             m_valueList = new List<WeightedValue<T>>();
@@ -132,13 +132,9 @@ namespace Pulsar4X.ECSLib.Helpers.GameMath
         /// <param name="weight">Weight of this value in the list.</param>
         public void Add(double weight, T value)
         {
-            WeightedValue<T> listEntry = new WeightedValue<T>();
-            listEntry.Weight = weight;
-            listEntry.Value = value;
-
+            var listEntry = new WeightedValue<T> {Weight = weight, Value = value};
             m_valueList.Add(listEntry);
-
-            m_totalWeight += weight;
+            TotalWeight += weight;
         }
 
         public IEnumerator<WeightedValue<T>> GetEnumerator() 
@@ -161,7 +157,7 @@ namespace Pulsar4X.ECSLib.Helpers.GameMath
             double cumulativeChance = 0;
             foreach (WeightedValue<T> listEntry in m_valueList)
             {
-                double realChance = listEntry.Weight / m_totalWeight;
+                double realChance = listEntry.Weight / TotalWeight;
                 cumulativeChance += realChance;
 
                 if (rngValue < cumulativeChance)

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Pulsar4X.Helpers
+namespace Pulsar4X.ECSLib.Helpers
 {
     /// <summary>
     /// Class to contain information about the current Subpulse Limit.

@@ -8,7 +8,7 @@
     <ProjectGuid>{DBB8EAB5-4DBD-B54F-94C3-3B2EEA3C8B4E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pulsar4X</RootNamespace>
+    <RootNamespace>Pulsar4X.Tests</RootNamespace>
     <AssemblyName>Pulsar4X.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

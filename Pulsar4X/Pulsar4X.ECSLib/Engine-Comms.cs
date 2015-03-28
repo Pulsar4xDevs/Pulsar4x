@@ -6,10 +6,6 @@ using System.Collections.Concurrent;
 
 namespace Pulsar4X.ECSLib
 {
-
-
-
-
     /// <summary>
     /// Engine side of the Lib-UI communications. 
     /// engine needs to create one of these when instantiated, and then AddFactions as factions are added to the game.

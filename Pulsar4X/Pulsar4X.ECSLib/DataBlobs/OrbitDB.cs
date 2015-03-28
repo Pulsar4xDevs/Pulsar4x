@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Pulsar4X.ECSLib.Helpers.GameMath;
+using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {

@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Helpers.GameMath;
+using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.Processors
 {
     static class OrbitProcessor
     {
-        static int m_orbitTypeIndex = -1;
-        static int m_positionTypeIndex = -1;
+        static int _orbitTypeIndex = -1;
+        static int _positionTypeIndex = -1;
 
         public static void Process(StarSystem system, int deltaSeconds)
         {
             EntityManager currentManager = system.SystemManager;
 
-            if (m_orbitTypeIndex == -1)
+            if (_orbitTypeIndex == -1)
             {
                 // Important for maximum performance. Otherwise we would do this lookup several times.
-                m_orbitTypeIndex = currentManager.GetDataBlobTypeIndex<OrbitDB>();
-                m_positionTypeIndex = currentManager.GetDataBlobTypeIndex<PositionDB>();
+                _orbitTypeIndex = currentManager.GetDataBlobTypeIndex<OrbitDB>();
+                _positionTypeIndex = currentManager.GetDataBlobTypeIndex<PositionDB>();
             }
 
             // Find the first orbital entity.
-            int firstOrbital = currentManager.GetFirstEntityWithDataBlob(m_orbitTypeIndex);
+            int firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
 
             if (firstOrbital == -1)
             {
@@ -37,7 +37,7 @@ namespace Pulsar4X.ECSLib.Processors
             do
             {
                 // Get the parentmost orbit.
-                firstOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital, m_orbitTypeIndex);
+                firstOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital, _orbitTypeIndex);
             } while (firstOrbit.Parent != -1);
 
             DateTime currentTime = Game.Instance.CurrentDateTime;
@@ -61,7 +61,7 @@ namespace Pulsar4X.ECSLib.Processors
             foreach (int child in orbit.Children)
             {
                 // RECURSION!
-                OrbitDB childOrbit = currentManager.GetDataBlob<OrbitDB>(child, m_orbitTypeIndex);
+                OrbitDB childOrbit = currentManager.GetDataBlob<OrbitDB>(child, _orbitTypeIndex);
                 UpdateOrbit(currentManager, childOrbit, newPosition, currentTime);
             }
         }
