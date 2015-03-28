@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.Helpers;
+using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib
 {
     public class EntityManager
     {
-        private List<int> m_entities;
-        private List<ComparableBitArray> m_entityMasks;
+        private List<int> _entities;
+        private List<ComparableBitArray> _entityMasks;
 
-        private Dictionary<Type, int> m_dataBlobTypes;
-        private List<List<BaseDataBlob>> m_dataBlobMap;
+        private Dictionary<Type, int> _dataBlobTypes;
+        private List<List<BaseDataBlob>> _dataBlobMap;
 
         public EntityManager()
         {
@@ -28,15 +26,11 @@ namespace Pulsar4X.ECSLib
         /// <returns>True is the entity is considered valid.</returns>
         public bool IsValidEntity(int entity)
         {
-            if (entity < 0 || entity >= m_entities.Count)
+            if (entity < 0 || entity >= _entities.Count)
             {
                 return false;
             }
-            if (m_entities[entity] != entity)
-            {
-                return false;
-            }
-            return true;
+            return _entities[entity] == entity;
         }
 
         /// <summary>
@@ -59,7 +53,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="InvalidCastException">Thrown when typeIndex does not match m_dataBlobTypes entry for Type T</exception>
         public T GetDataBlob<T>(int entity, int typeIndex) where T : BaseDataBlob
         {
-            return (T)m_dataBlobMap[typeIndex][entity];
+            return (T)_dataBlobMap[typeIndex][entity];
         }
 
         /// <summary>
@@ -87,8 +81,8 @@ namespace Pulsar4X.ECSLib
             }
 
             dataBlob.Entity = entity;
-            m_dataBlobMap[typeIndex][entity] = dataBlob;
-            m_entityMasks[entity][typeIndex] = true;
+            _dataBlobMap[typeIndex][entity] = dataBlob;
+            _entityMasks[entity][typeIndex] = true;
         }
 
         /// <summary>
@@ -110,8 +104,8 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
         public void RemoveDataBlob(int entity, int typeIndex)
         {
-            m_dataBlobMap[typeIndex][entity] = null;
-            m_entityMasks[entity][typeIndex] = false;
+            _dataBlobMap[typeIndex][entity] = null;
+            _entityMasks[entity][typeIndex] = false;
         }
 
         /// <summary>
@@ -122,8 +116,8 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public List<T> GetAllDataBlobsOfType<T>() where T: BaseDataBlob
         {
-            List<T> dataBlobs = new List<T>();
-            foreach (BaseDataBlob dataBlob in m_dataBlobMap[GetDataBlobTypeIndex<T>()])
+            var dataBlobs = new List<T>();
+            foreach (BaseDataBlob dataBlob in _dataBlobMap[GetDataBlobTypeIndex<T>()])
             {
                 if (dataBlob != null)
                 {
@@ -142,10 +136,10 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid entity.</exception>
         public List<BaseDataBlob> GetAllDataBlobsOfEntity(int entity)
         {
-            List<BaseDataBlob> entityDBs = new List<BaseDataBlob>();
-            ComparableBitArray entityMask = m_entityMasks[entity];
+            var entityDBs = new List<BaseDataBlob>();
+            ComparableBitArray entityMask = _entityMasks[entity];
 
-            for (int typeIndex = 0; typeIndex < m_dataBlobTypes.Count; typeIndex++)
+            for (int typeIndex = 0; typeIndex < _dataBlobTypes.Count; typeIndex++)
             {
                 if (entityMask[typeIndex])
                 {
@@ -182,16 +176,16 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="NullReferenceException">Thrown when dataBlobMask is null.</exception>
         public List<int> GetAllEntitiesWithDataBlobs(ComparableBitArray dataBlobMask)
         {
-            if (dataBlobMask.Length != m_dataBlobTypes.Count)
+            if (dataBlobMask.Length != _dataBlobTypes.Count)
             {
                 throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
             }
 
-            List<int> entities = new List<int>();
+            var entities = new List<int>();
 
-            for (int entity = 0; entity < m_entityMasks.Count; entity++)
+            for (int entity = 0; entity < _entityMasks.Count; entity++)
             {
-                if ((m_entityMasks[entity] & dataBlobMask) == dataBlobMask)
+                if ((_entityMasks[entity] & dataBlobMask) == dataBlobMask)
                 {
                     entities.Add(entity);
                 }
@@ -200,13 +194,11 @@ namespace Pulsar4X.ECSLib
             return entities;
         }
 
-
         /// <summary>
-        /// ~jazzhands~
+        /// Optimized convenience function to get entities that contain two types of DataBlobs, along with the associated DataBlobs.
         /// </summary>
-        /// <param name="dataBlobMask"></param>
         /// <returns></returns>
-        Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
+        public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
         {
             int typeIndexT1 = GetDataBlobTypeIndex<T1>();
             int typeIndexT2 = GetDataBlobTypeIndex<T2>();
@@ -217,14 +209,14 @@ namespace Pulsar4X.ECSLib
 
             List<int> entities = GetAllEntitiesWithDataBlobs(dataBlobMask);
 
-            Dictionary<int, Tuple<T1, T2>> entitiesAndDataBlobs = new Dictionary<int, Tuple<T1, T2>>();
+            var entitiesAndDataBlobs = new Dictionary<int, Tuple<T1, T2>>();
 
             foreach (int entity in entities)
             {
-                T1 dataBlobT1 = (T1)m_dataBlobMap[typeIndexT1][entity];
-                T2 dataBlobT2 = (T2)m_dataBlobMap[typeIndexT1][entity];
+                T1 dataBlobT1 = (T1)_dataBlobMap[typeIndexT1][entity];
+                T2 dataBlobT2 = (T2)_dataBlobMap[typeIndexT2][entity];
 
-                Tuple<T1, T2> dataBlobs = new Tuple<T1, T2>(dataBlobT1, dataBlobT2);
+                var dataBlobs = new Tuple<T1, T2>(dataBlobT1, dataBlobT2);
 
                 entitiesAndDataBlobs.Add(entity, dataBlobs);
             }
@@ -251,8 +243,8 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid typeIndex</exception>
         public int GetFirstEntityWithDataBlob(int typeIndex)
         {
-            List<BaseDataBlob> dataBlobType = m_dataBlobMap[typeIndex];
-            for (int i = 0; i < m_entities.Count; i++)
+            List<BaseDataBlob> dataBlobType = _dataBlobMap[typeIndex];
+            for (int i = 0; i < _entities.Count; i++)
             {
                 if (dataBlobType[i] != null)
                 {
@@ -268,7 +260,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public ComparableBitArray BlankDataBlobMask()
         {
-            return new ComparableBitArray(m_dataBlobTypes.Count);
+            return new ComparableBitArray(_dataBlobTypes.Count);
         }
 
         /// <summary>
@@ -278,9 +270,9 @@ namespace Pulsar4X.ECSLib
         public int CreateEntity()
         {
             int entityID;
-            for (entityID = 0; entityID < m_entities.Count; entityID++)
+            for (entityID = 0; entityID < _entities.Count; entityID++)
             {
-                if (entityID != m_entities[entityID])
+                if (entityID != _entities[entityID])
                 {
                     // Space open.
                     break;
@@ -290,27 +282,27 @@ namespace Pulsar4X.ECSLib
             // Mark space claimed by making the index match the value.
             // Entities[7] == 7; on claimed spot.
             // Entities[7] == -1; on unclaimed spot.
-            if (entityID == m_entities.Count)
+            if (entityID == _entities.Count)
             {
-                m_entities.Add(entityID);
-                m_entityMasks.Add(new ComparableBitArray(m_dataBlobTypes.Count));
+                _entities.Add(entityID);
+                _entityMasks.Add(new ComparableBitArray(_dataBlobTypes.Count));
                 // Make sure the entityDBMaps have enough space for this entity.
-                foreach(List<BaseDataBlob> entityDBMap in m_dataBlobMap)
+                foreach(List<BaseDataBlob> entityDBMap in _dataBlobMap)
                 {
                     entityDBMap.Add(null);
                 }
             }
             else
             {
-                m_entities[entityID] = entityID;
+                _entities[entityID] = entityID;
                 // Make sure the EntityDBMaps are null for this entity.
                 // This should be done by RemoveEntity, but let's just be safe.
-                for (int typeIndex = 0; typeIndex < m_dataBlobTypes.Count; typeIndex++)
+                for (int typeIndex = 0; typeIndex < _dataBlobTypes.Count; typeIndex++)
                 {
-                    m_dataBlobMap[typeIndex][entityID] = null;
+                    _dataBlobMap[typeIndex][entityID] = null;
                 }
 
-                m_entityMasks[entityID] = new ComparableBitArray(m_dataBlobTypes.Count);
+                _entityMasks[entityID] = new ComparableBitArray(_dataBlobTypes.Count);
             }
 
             return entityID;
@@ -324,7 +316,7 @@ namespace Pulsar4X.ECSLib
         {
             if (dataBlobs == null)
             {
-                throw new ArgumentNullException("datablobs", "dataBlobs cannot be null. To create a blank entity use CreateEntity().");
+                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity use CreateEntity().");
             }
 
             int entity = CreateEntity();
@@ -345,12 +337,12 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid entity.</exception>
         public void RemoveEntity(int entity)
         {
-            foreach (List<BaseDataBlob> dataBlobType in m_dataBlobMap)
+            foreach (List<BaseDataBlob> dataBlobType in _dataBlobMap)
             {
                 dataBlobType[entity] = null;
             }
-            m_entityMasks[entity] = new ComparableBitArray(m_dataBlobTypes.Count);
-            m_entities[entity] = -1;
+            _entityMasks[entity] = new ComparableBitArray(_dataBlobTypes.Count);
+            _entities[entity] = -1;
         }
 
         /// <summary>
@@ -358,11 +350,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void Clear()
         {
-            m_entities = new List<int>();
-            m_entityMasks = new List<ComparableBitArray>();
+            _entities = new List<int>();
+            _entityMasks = new List<ComparableBitArray>();
 
-            m_dataBlobTypes = new Dictionary<Type, int>();
-            m_dataBlobMap = new List<List<BaseDataBlob>>();
+            _dataBlobTypes = new Dictionary<Type, int>();
+            _dataBlobMap = new List<List<BaseDataBlob>>();
 
             // Use reflection to setup all our dataBlobMap.
             // Find all types that implement BaseDataBlob
@@ -376,8 +368,8 @@ namespace Pulsar4X.ECSLib
             int i = 0;
             foreach (Type dataBlobType in dataBlobTypes)
             {
-                m_dataBlobTypes.Add(dataBlobType, i);
-                m_dataBlobMap.Add(new List<BaseDataBlob>());
+                _dataBlobTypes.Add(dataBlobType, i);
+                _dataBlobMap.Add(new List<BaseDataBlob>());
                 i++;
             }
         }
@@ -390,7 +382,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown when dataBlobType is null.</exception>
         public bool TryGetDataBlobTypeIndex(Type dataBlobType, out int typeIndex)
         {
-            return m_dataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
+            return _dataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
         }
 
         /// <summary>
@@ -399,7 +391,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public int GetDataBlobTypeIndex<T>() where T : BaseDataBlob
         {
-            return m_dataBlobTypes[typeof(T)];
+            return _dataBlobTypes[typeof(T)];
         }
     }
 }
