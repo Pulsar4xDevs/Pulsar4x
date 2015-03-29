@@ -2041,32 +2041,21 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Temporary key list, will be removing these from shipordnance when done.
                         /// </summary>
-                        BindingList<OrdnanceDefTN> TempKeyList = new BindingList<OrdnanceDefTN>();
+                        Dictionary<OrdnanceDefTN,int> TempKeyList = new Dictionary<OrdnanceDefTN,int>();
 
                         /// <summary>
                         /// loop through all ordnance and determine the loadbalanced count of missiles that would be in this magazine.
+                        /// if ShipOrdnance is empty, this does not run.
                         /// </summary>
                         foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipOrdnance)
                         {
                             int Total = (int)Math.Ceiling(pair.Key.size) * pair.Value;
                             int AmtInThisMag = (int)Math.Ceiling(ThisMagPercentage * Total);
                             TempCapTotal = TempCapTotal + AmtInThisMag;
-                            ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - AmtInThisMag;
+
+                            TempKeyList.Add(pair.Key, AmtInThisMag);
+
                             WarheadTotal = WarheadTotal + pair.Key.warhead;
-
-                            if (ShipOrdnance[pair.Key] == 0)
-                            {
-                                TempKeyList.Add(pair.Key);
-                            }
-                            else if (ShipOrdnance[pair.Key] < 0)
-                            {
-
-                                TempKeyList.Add(pair.Key);
-#if LOG4NET_ENABLED
-#warning faction messagelog this?
-                                logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction.");
-#endif
-                            }
 
                             /// <summary>
                             /// Some mags will have a little more than total cap, and some will have a little less than total cap because of how this could work out.
@@ -2076,13 +2065,26 @@ namespace Pulsar4X.Entities
                         }
 
                         /// <summary>
-                        /// Remove any keys that are empty.
+                        /// I have to subtract values elsewhere because it was giving me some crap about "Collection was modified; enumeration operation may not execute"
+                        /// Atleast I hope this fixes the issue.
                         /// </summary>
                         if (TempKeyList.Count != 0)
                         {
-                            foreach (OrdnanceDefTN key in TempKeyList)
+                            foreach (KeyValuePair<OrdnanceDefTN,int> pair in TempKeyList)
                             {
-                                ShipOrdnance.Remove(key);
+                                ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - pair.Value;
+                                if (ShipOrdnance[pair.Key] <= 0)
+                                {
+                                    if (ShipOrdnance[pair.Key] < 0)
+                                    {
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
+                                        logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction.");
+#endif
+                                    }
+                                    ShipOrdnance.Remove(pair.Key);
+                                }
+                                
                             }
                         }
                     }
