@@ -770,7 +770,22 @@ namespace Pulsar4X.UI.Handlers
                 if (TGIndex == -1)
                 {
                     CurrentFaction.AddNewTaskGroup("Shipyard TG", CurrentPopulation.Planet, CurrentPopulation.Planet.Position.System);
-                    TargetTG = CurrentPopulation.Planet.TaskGroupsInOrbit[0];
+
+                    /// <summary>
+                    /// Run this loop again as a different faction could have a taskgroup in orbit.
+                    /// </summary>
+                    foreach (TaskGroupTN CurrentTaskGroup in CurrentPopulation.Planet.TaskGroupsInOrbit)
+                    {
+                        if (CurrentTaskGroup.TaskGroupFaction == CurrentFaction)
+                        {
+                            TGIndex++;
+                            if (TGIndex == m_oSummaryPanel.SYTaskGroupComboBox.SelectedIndex)
+                            {
+                                TargetTG = CurrentTaskGroup;
+                                break;
+                            }
+                        }
+                    }
                 }
 
                 Constants.ShipyardInfo.Task SYITask = (Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex;
