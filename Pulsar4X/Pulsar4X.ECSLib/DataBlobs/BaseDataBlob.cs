@@ -9,5 +9,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
     public abstract class BaseDataBlob
     {
         public int Entity { get; set; }
+
+        public object _lockObj = new object();
     }
 }
