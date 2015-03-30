@@ -12,12 +12,12 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class Engine_Comms
     {
-        Dictionary<Guid, MessageBook> Messages = new Dictionary<Guid, MessageBook>();
+        Dictionary<int, MessageBook> Messages = new Dictionary<int, MessageBook>();
 
         /// <summary>
         /// a dictionary of faction names and thier guids. mostly so the ui can request the correct factionid for a given faction name. 
         /// </summary>
-        public Dictionary<string, Guid> Factions = new Dictionary<string, Guid>();
+        public Dictionary<string, int> Factions = new Dictionary<string, int>();
         
         /// <summary>
         /// Engine_comms constructor. 
@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         internal Engine_Comms()
         { }
 
-        public void AddFaction(Guid factionID)
+        public void AddFaction(int factionID)
         {
             Messages.Add(factionID, new MessageBook(factionID));
             //Factions.Add(FactionEntity.Name, factionID)
@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib
         /// if a faction is killed off or otherwise removed from the game it needs to be removed from Engine_Comms.
         /// </summary>
         /// <param name="factionID"></param>
-        internal void RemoveFaction(Guid factionID)
+        internal void RemoveFaction(int factionID)
         {
             Messages.Remove(factionID);
             //Factions.Remove()
@@ -46,7 +46,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="factionID"></param>
         /// <returns></returns>
-        public MessageBook RequestMessagebook(Guid factionID)
+        public MessageBook RequestMessagebook(int factionID)
         {
             return Messages[factionID];
         }
@@ -57,7 +57,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="factionID">faction the message relates to</param>
         /// <param name="message">message object</param>
-        internal void LibWriteOutQueue(Guid factionID, Message message)
+        internal void LibWriteOutQueue(int factionID, Message message)
         {
             Messages[factionID].OutMessageQueue.Enqueue(message);
         }
@@ -68,14 +68,36 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="factionID"></param>
         /// <returns></returns>
-        internal Message LibReadFactionInQueue(Guid factionID)
+        internal Message LibReadFactionInQueue(int factionID)
         {
             Message message;  
             Messages[factionID].InMessageQueue.TryDequeue(out message);
             return message;
         }
 
-       
+        internal bool LibPeekFactionInQueue(int factionID, out Message message)
+        {
+            return Messages[factionID].InMessageQueue.TryPeek(out message);
+        }
+
+        internal bool LibMessagesWaiting()
+        {
+            foreach(var book in Messages)
+            {
+                if (book.Value.InMessageQueue.Count > 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        internal bool LibMessagesWaitingForFaction(int factionID)
+        {
+            if (Messages[factionID].InMessageQueue.Count > 0)
+                return true;
+
+            return false;
+        }
     }
 
     /// <summary>
@@ -83,7 +105,22 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class Message
     {
+        public enum MessageType
+        {
+            Quit,           ///< terminates the main game loop.
+            Echo,           ///< will be sent straight back to sender. Use for testing.     
+        }
 
+        public MessageType _messageType;
+        public object _data;
+
+        public Message(MessageType type, object data)
+        {
+            _messageType = type;
+            _data = data;
+        }
+
+        public Message() { }
     }
 
 
@@ -92,16 +129,19 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class MessageBook
     {
-        Guid _FactionID;
+        int _FactionID;
         public ConcurrentQueue<Message> OutMessageQueue { get; set; }
         public ConcurrentQueue<Message> InMessageQueue { get; set; }
-        internal MessageBook(Guid factionID)
+        internal MessageBook(int factionID)
         {
             OutMessageQueue = new ConcurrentQueue<Message>();
             InMessageQueue = new ConcurrentQueue<Message>();
             _FactionID = factionID;
         }
-        
 
+        public int FactionID
+        {
+            get { return _FactionID;  }
+        }
     }
 }
