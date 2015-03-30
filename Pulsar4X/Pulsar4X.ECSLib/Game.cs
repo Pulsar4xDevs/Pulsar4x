@@ -172,12 +172,12 @@ namespace Pulsar4X.ECSLib
             PopulationDB planetPopDB = GlobalManager.GetDataBlob<PopulationDB>(planet);
 
             // Change the planet Pop.
-            planetPopDB.PopulationSize += 5;
+            planetPopDB.Population += 5;
 
             // Get the current value.
             PopulationDB planetPopDB2 = GlobalManager.GetDataBlob<PopulationDB>(planet);
 
-            if (planetPopDB.PopulationSize != planetPopDB2.PopulationSize)
+            if (planetPopDB.Population != planetPopDB2.Population)
             {
                 // Note, we wont hit this because the value DID change.
                 throw new InvalidOperationException();

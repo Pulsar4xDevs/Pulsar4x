@@ -49,11 +49,11 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// </summary>
         public float SurfaceTemperature;
 
-        /// <summary>
-        /// The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
-        /// In Earth Atmospheres (atm).
-        /// </summary>
-        //public Dictionary<AtmosphericGas, float> Composition;
+         //<summary>
+         //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
+         //In Earth Atmospheres (atm).
+         //</summary>
+        public Dictionary<AtmosphericGasDB, float> Composition;
 
         /// <summary>
         /// Constructor for AtmosphereDataBlob. 
@@ -65,7 +65,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="greenhousePressue"></param>
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
-        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp)
+        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasDB,float> composition)
             : base()
         {
             Pressure = pressure;
@@ -75,6 +75,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             GreenhousePressure = greenhousePressue;
             Albedo = albedo;
             SurfaceTemperature = surfaceTemp;
+            Composition = composition;
 
         }
     }

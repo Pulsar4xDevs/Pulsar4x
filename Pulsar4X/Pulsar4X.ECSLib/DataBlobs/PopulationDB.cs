@@ -8,11 +8,15 @@ namespace Pulsar4X.ECSLib.DataBlobs
 {
     public class PopulationDB : BaseDataBlob
     {
-        public double PopulationSize;
+        public Dictionary <SpeciesDB,double> Population;
 
-        public PopulationDB(double popSize)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="popSize">Species and population number(in Million?)</param>
+        public PopulationDB(Dictionary<SpeciesDB, double> popSize)
         {
-            PopulationSize = popSize;
+            Population = popSize;
         }
     }
 }

@@ -75,6 +75,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
         public float RadiationLevel;
         public float AtmosphericDust;
 
+        public AtmosphereDB Atmosphere;
+
         /// <summary>
         /// Constructor for PlanetInfoDB
         /// </summary>
@@ -87,8 +89,9 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="baseTemp">Degrees C.</param>
         /// <param name="radLevel">not yet used?</param>
         /// <param name="atmoDust">not yet used?</param>
+        /// <param name="atmosphere">atmosphere</param>
         public PlanetInfoDB(PlanetType type, TectonicActivity tectonics, float surfaceGrav, double density, float axialTilt, 
-                            float magField, float baseTemp, float radLevel, float atmoDust)
+                            float magField, float baseTemp, float radLevel, float atmoDust, AtmosphereDB atmosphere)
         {
             Type = type;
             Tectonics = tectonics;
@@ -99,6 +102,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             BaseTemperature = baseTemp;
             RadiationLevel = radLevel;
             AtmosphericDust = atmoDust;
+            Atmosphere = atmosphere;
         }
 
     }
