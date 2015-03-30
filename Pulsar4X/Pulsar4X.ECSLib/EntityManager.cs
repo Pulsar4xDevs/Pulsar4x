@@ -77,7 +77,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public T GetDataBlob<T>(int entity) where T : BaseDataBlob
         {
-            int typeIndex = GetDataBlobTypeIndex<T>();
+            int typeIndex = GetTypeIndex<T>();
             return GetDataBlob<T>(entity, typeIndex);
         }
 
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public void SetDataBlob<T>(int entity, T dataBlob) where T : BaseDataBlob
         {
-            int typeIndex = GetDataBlobTypeIndex<T>();
+            int typeIndex = GetTypeIndex<T>();
             SetDataBlob(entity, dataBlob, typeIndex);
         }
 
@@ -126,10 +126,10 @@ namespace Pulsar4X.ECSLib
         /// Slower than RemoveDataBlob(entity, typeIndex).
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid entity is passed.</exception>
+        /// <exception cref="ArgumentException">Thrown when an invalid entity is passed.</exception>
         public void RemoveDataBlob<T>(int entity) where T : BaseDataBlob
         {
-            int typeIndex = GetDataBlobTypeIndex<T>();
+            int typeIndex = GetTypeIndex<T>();
             RemoveDataBlob(entity, typeIndex);
         }
 
@@ -137,7 +137,7 @@ namespace Pulsar4X.ECSLib
         /// Removes the DataBlob from the specified entity.
         /// Fastest DataBlob removal available.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
+        /// <exception cref="ArgumentException">Thrown when an invalid typeIndex or entity is passed.</exception>
         public void RemoveDataBlob(int entity, int typeIndex)
         {
             if (!IsValidEntity(entity))
@@ -158,7 +158,7 @@ namespace Pulsar4X.ECSLib
         public List<T> GetAllDataBlobsOfType<T>() where T: BaseDataBlob
         {
             var dataBlobs = new List<T>();
-            foreach (BaseDataBlob dataBlob in _dataBlobMap[GetDataBlobTypeIndex<T>()])
+            foreach (BaseDataBlob dataBlob in _dataBlobMap[GetTypeIndex<T>()])
             {
                 if (dataBlob != null)
                 {
@@ -204,7 +204,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public List<int> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
-            int typeIndex = GetDataBlobTypeIndex<T>();
+            int typeIndex = GetTypeIndex<T>();
 
             ComparableBitArray dataBlobMask = BlankDataBlobMask();
             dataBlobMask[typeIndex] = true;
@@ -246,8 +246,8 @@ namespace Pulsar4X.ECSLib
         /// <returns></returns>
         public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
         {
-            int typeIndexT1 = GetDataBlobTypeIndex<T1>();
-            int typeIndexT2 = GetDataBlobTypeIndex<T2>();
+            int typeIndexT1 = GetTypeIndex<T1>();
+            int typeIndexT2 = GetTypeIndex<T2>();
 
             ComparableBitArray dataBlobMask = BlankDataBlobMask();
             dataBlobMask[typeIndexT1] = true;
@@ -278,7 +278,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public int GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
         {
-            return GetFirstEntityWithDataBlob(GetDataBlobTypeIndex<T>());
+            return GetFirstEntityWithDataBlob(GetTypeIndex<T>());
         }
 
         /// <summary>
@@ -339,7 +339,7 @@ namespace Pulsar4X.ECSLib
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
                 int typeIndex;
-                TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
+                TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
                 SetDataBlob(entity, dataBlob, typeIndex);
             }
 
@@ -385,8 +385,9 @@ namespace Pulsar4X.ECSLib
                 _entityMasks[entityID] = new ComparableBitArray(_dataBlobTypes.Count);
             }
 
-            // Add the GUID to the lookup list.
+            // Add the GUID to the lookup lists.
             _globalGuidDictionary.Add(entityGuid, this);
+            _localGuidDictionary.Add(entityGuid, entityID);
             return entityID;
         }
 
@@ -402,19 +403,16 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentException("Invalid Entity.");
             }
 
-            // Mark the entity as invalid.
-            _entities[entity] = -1;
-
             // Remove the GUID from all lists.
             Guid entityGuid;
-            if (!TryGetGuidByEntity(entity, out entityGuid))
-            {
-                throw new Exception("Failed to remove entity. Entity had no Guid.");
-            }
+            TryGetGuidByEntity(entity, out entityGuid);
             _globalGuidDictionary.Remove(entityGuid);
             _localGuidDictionary.Remove(entityGuid);
 
+            // Mark the entity as invalid.
+            _entities[entity] = -1;
 
+            // Destroy references to datablobs.
             foreach (List<BaseDataBlob> dataBlobType in _dataBlobMap)
             {
                 dataBlobType[entity] = null;
@@ -426,30 +424,25 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Transfers an entity to the specified manager.
         /// </summary>
+        /// <returns>New entityID in new manager.</returns>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        /// <exception cref="Exception">Thrown when a entity is found with no Guid. (Should not be possible, possible data corruption)</exception>
-        public void TransferEntity(int entity, EntityManager manager)
+        public int TransferEntity(int entity, EntityManager manager)
         {
             List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entity);
 
             Guid entityGuid;
-            if (!TryGetGuidByEntity(entity, out entityGuid))
-            {
-                throw new Exception("Failed to transfer entity. Entity had no Guid.");
-            }
+            TryGetGuidByEntity(entity, out entityGuid);
 
             RemoveEntity(entity);
-            manager.CreateEntity(dataBlobs, entityGuid);
+            return manager.CreateEntity(dataBlobs, entityGuid);
         }
 
         /// <summary>
         /// Gets the associated EntityManager and entityID of the specified Guid.
         /// </summary>
         /// <returns>True if entity is found.</returns>
-        /// <exception cref="Exception">Thrown when Guid is located in global dictionary, but not in the referenced manager. (Should not be possible, possible data corruption)</exception>
-        public bool FindEntityByGuid(Guid entityGuid, out EntityManager manager, out int entityID)
+        public static bool FindEntityByGuid(Guid entityGuid, out EntityManager manager, out int entityID)
         {
-            manager = null;
             entityID = -1;
 
             if (!_globalGuidDictionary.TryGetValue(entityGuid, out manager))
@@ -457,10 +450,7 @@ namespace Pulsar4X.ECSLib
                 return false;
             }
 
-            if (!manager.TryGetEntityByGuid(entityGuid, out entityID))
-            {
-                throw new Exception("FindEntityByGuid Failed. Guid located in global dictionary, but not in specified manager.");
-            }
+            manager.TryGetEntityByGuid(entityGuid, out entityID);
             return true;
         }
 
@@ -477,8 +467,6 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Gets the associated Guid of the specified entityID.
-        /// <para></para>
-        /// Does not throw exceptions.
         /// </summary>
         /// <returns>True if entity exists in this manager.</returns>
         public bool TryGetGuidByEntity(int entityID, out Guid entityGuid)
@@ -490,14 +478,8 @@ namespace Pulsar4X.ECSLib
                 return false;
             }
 
-            try
-            {
-                entityGuid = _localGuidDictionary.First(kvp => kvp.Value == entityID).Key;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
+            entityGuid = _localGuidDictionary.First(kvp => kvp.Value == entityID).Key;
+
             return true;
         }
 
@@ -522,7 +504,7 @@ namespace Pulsar4X.ECSLib
         /// typeIndex parameter is set to the typeIndex of the dataBlobType if found.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when dataBlobType is null.</exception>
-        public bool TryGetDataBlobTypeIndex(Type dataBlobType, out int typeIndex)
+        public bool TryGetTypeIndex(Type dataBlobType, out int typeIndex)
         {
             return _dataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
         }
@@ -531,7 +513,7 @@ namespace Pulsar4X.ECSLib
         /// Faster than TryGetDataBlobTypeIndex and uses generics for type safety.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public int GetDataBlobTypeIndex<T>() where T : BaseDataBlob
+        public int GetTypeIndex<T>() where T : BaseDataBlob
         {
             return _dataBlobTypes[typeof(T)];
         }

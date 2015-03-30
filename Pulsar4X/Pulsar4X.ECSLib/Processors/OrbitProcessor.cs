@@ -19,8 +19,8 @@ namespace Pulsar4X.ECSLib.Processors
             if (_orbitTypeIndex == -1)
             {
                 // Important for maximum performance. Otherwise we would do this lookup several times.
-                _orbitTypeIndex = currentManager.GetDataBlobTypeIndex<OrbitDB>();
-                _positionTypeIndex = currentManager.GetDataBlobTypeIndex<PositionDB>();
+                _orbitTypeIndex = currentManager.GetTypeIndex<OrbitDB>();
+                _positionTypeIndex = currentManager.GetTypeIndex<PositionDB>();
             }
 
             // Find the first orbital entity.
