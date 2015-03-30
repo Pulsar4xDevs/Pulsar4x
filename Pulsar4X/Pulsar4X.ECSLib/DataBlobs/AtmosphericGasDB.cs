@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    class AtmosphericGasDB
+    public class AtmosphericGasDB
     {
         public string Name;
         public string ChemicalSymbol;

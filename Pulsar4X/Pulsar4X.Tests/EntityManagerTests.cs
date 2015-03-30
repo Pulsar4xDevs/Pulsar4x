@@ -11,11 +11,18 @@ namespace Pulsar4X.Tests
     class EntityManagerTests
     {
         EntityManager _entityManager;
-
+        private SpeciesDB _species1;
+        private Dictionary<SpeciesDB, double> _pop1;
+        private Dictionary<SpeciesDB, double> _pop2;
         [SetUp]
         public void Init()
         {
             _entityManager = new EntityManager();
+            _species1 = new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45);
+            _pop1 = new Dictionary<SpeciesDB, double>();
+            _pop1.Add(_species1, 10);
+            _pop2 = new Dictionary<SpeciesDB, double>();
+            _pop2.Add(_species1, 5);
         }
 
         [TearDown]
@@ -31,9 +38,9 @@ namespace Pulsar4X.Tests
             // create entity with no data blobs:
             int testEntity = _entityManager.CreateEntity();
             Assert.AreEqual(0, testEntity);
-
+;
             // Create entity with existing datablobs:
-            var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new PopulationDB(9)};
+            var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new PopulationDB(_pop1)};
             testEntity = _entityManager.CreateEntity(dataBlobs);
             Assert.AreEqual(1, testEntity);
 
@@ -54,7 +61,7 @@ namespace Pulsar4X.Tests
         {
             int testEntity = _entityManager.CreateEntity();
             _entityManager.SetDataBlob(testEntity, OrbitDB.FromStationary(5));
-            _entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+            _entityManager.SetDataBlob(testEntity, new PopulationDB(_pop1));
 
             // test bad input:
             Assert.Catch(typeof(ArgumentNullException), () =>
@@ -214,7 +221,7 @@ namespace Pulsar4X.Tests
         {
             // a little setup:
             int testEntity = _entityManager.CreateEntity();
-            _entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+            _entityManager.SetDataBlob(testEntity, new PopulationDB(_pop1));
 
             Assert.IsTrue(_entityManager.GetDataBlob<PopulationDB>(testEntity) != null);  // check that it has the data blob
             _entityManager.RemoveDataBlob<PopulationDB>(testEntity);                     // Remove a data blob
@@ -237,7 +244,7 @@ namespace Pulsar4X.Tests
 
 
             // reset:
-            _entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+            _entityManager.SetDataBlob(testEntity, new PopulationDB(_pop1));
             int typeIndex = _entityManager.GetDataBlobTypeIndex<PopulationDB>();
 
             Assert.IsTrue(_entityManager.GetDataBlob<PopulationDB>(testEntity) != null);  // check that it has the data blob
@@ -391,14 +398,14 @@ namespace Pulsar4X.Tests
             // Create an entity with individual DataBlobs.
             int testEntity = _entityManager.CreateEntity();
             _entityManager.SetDataBlob(testEntity, OrbitDB.FromStationary(5));
-            _entityManager.SetDataBlob(testEntity, new PopulationDB(10));
+            _entityManager.SetDataBlob(testEntity, new PopulationDB(_pop1));
 
             // Create an entity with a DataBlobList.
             var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2)};
             _entityManager.CreateEntity(dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs.Add(new PopulationDB(9));
+            dataBlobs.Add(new PopulationDB(_pop2));
             _entityManager.CreateEntity(dataBlobs);
 
             return testEntity;

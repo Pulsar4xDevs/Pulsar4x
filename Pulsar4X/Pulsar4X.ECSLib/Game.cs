@@ -141,7 +141,10 @@ namespace Pulsar4X.ECSLib
             // Create an entity with individual DataBlobs.
             int planet = GlobalManager.CreateEntity();
             GlobalManager.SetDataBlob(planet, OrbitDB.FromStationary(5));
-            GlobalManager.SetDataBlob(planet, new PopulationDB(10));
+            SpeciesDB species1 = new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45);
+            Dictionary<SpeciesDB,double> pop = new Dictionary<SpeciesDB, double>();
+            pop.Add(species1,10);
+            GlobalManager.SetDataBlob(planet, new PopulationDB(pop));
 
             // Create an entity with a DataBlobList.
             List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
@@ -149,7 +152,10 @@ namespace Pulsar4X.ECSLib
             GlobalManager.CreateEntity(dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs.Add(new PopulationDB(9));
+            
+            Dictionary<SpeciesDB, double> pop2 = new Dictionary<SpeciesDB, double>();
+            pop.Add(species1, 10);
+            dataBlobs.Add(new PopulationDB(pop2));
             GlobalManager.CreateEntity(dataBlobs);
 
             // Get all DataBlobs of a specific type.
@@ -172,7 +178,7 @@ namespace Pulsar4X.ECSLib
             PopulationDB planetPopDB = GlobalManager.GetDataBlob<PopulationDB>(planet);
 
             // Change the planet Pop.
-            planetPopDB.Population += 5;
+            planetPopDB.Population[species1] += 5;
 
             // Get the current value.
             PopulationDB planetPopDB2 = GlobalManager.GetDataBlob<PopulationDB>(planet);
