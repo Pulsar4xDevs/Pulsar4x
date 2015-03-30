@@ -85,6 +85,91 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Runs the game simulation in a loop. Will check for and process messages from the UI.
+        /// </summary>
+        public void MainGameLoop()
+        {
+            bool quit = false;
+            bool messageProcessed = false;
+
+            while (!quit)
+            {
+                // lets first check if there are things waiting in a queue:
+                if (EngineComms.LibMessagesWaiting() == false)
+                {
+                    // there is nothing from the UI, so lets sleep for a while before checking again.
+                    Wait();
+                    continue; // go back and check again.
+                }
+
+                // loop through all the incoming queues looking for a new message:
+                List<int> factions = m_globalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+                foreach (int faction in factions)
+                {
+                    // lets just take a peek first:
+                    Message message;
+                    if (EngineComms.LibPeekFactionInQueue(faction, out message) && IsMessageValid(message))
+                    {
+                        // we have a valid message we had better take it out of the queue:
+                        message = EngineComms.LibReadFactionInQueue(faction);
+
+                        // process it:
+                        ProcessMessage(faction, message, ref quit);
+                        messageProcessed = true;
+                    }
+                }
+
+                // lets check if we processed a valid message this time around:
+                if (messageProcessed)
+                {
+                    // so we processed a valid message, better check for a new one right away:
+                    messageProcessed = false;
+                    continue;
+                }
+                else
+                {
+                    // we didn't process a valid message... 
+                    // we should probably wait for a while for the pulse to finish or new stuff to queue up
+                    Wait();
+                }
+            }
+        }
+
+        private bool IsMessageValid(Message message)
+        {
+            return true; // we will do this until we have messages that can be invalid!!
+        }
+
+        private void ProcessMessage(int faction, Message message, ref bool quit)
+        {
+            if (message == null)
+            {
+                return;
+            }
+
+            switch (message._messageType)
+            {
+                case Message.MessageType.Quit:
+                    quit = true;                                        // cause the game to quit!
+                    break;
+                case Message.MessageType.Echo:
+                    EngineComms.LibWriteOutQueue(faction, message);     // echo chamber ;)
+                    break;
+                default:
+                    throw new System.Exception("Message of type: " + message._messageType.ToString() + ", Went unprocessed.");
+            }
+        }
+
+        private void Wait()
+        {
+            // we should have a better way of doing this
+            // is there a way for the EnginComs class to fire an event to wake the thread when 
+            // a new message come is??
+            // that would be the ideal way to do it, no wasted time, no wasted CPU usage.
+            Thread.Sleep(5);  
+        }
+
+        /// <summary>
         /// Time advancement code. Attempts to advance time by the number of seconds
         /// passed to it.
         /// 
