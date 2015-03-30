@@ -765,11 +765,13 @@ namespace Pulsar4X.UI.Handlers
                 }
 
                 /// <summary>
-                /// This is some sort of error condition. do I really care though? only if it horribly breaks the cost prototyping process.
+                /// No TG was found so create one, the shipyard will want a tg in any event.
                 /// </summary>
                 if (TGIndex == -1)
-                    return;
-
+                {
+                    CurrentFaction.AddNewTaskGroup("Shipyard TG", CurrentPopulation.Planet, CurrentPopulation.Planet.Position.System);
+                    TargetTG = CurrentPopulation.Planet.TaskGroupsInOrbit[0];
+                }
 
                 Constants.ShipyardInfo.Task SYITask = (Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex;
 

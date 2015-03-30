@@ -140,6 +140,11 @@ namespace Pulsar4X.UI.Handlers
         private int SelectedOrderIndex = -1;
         private int PrevioslySelectedOrderIndex = -1;
 
+        /// <summary>
+        /// What taskgroups are at the location of CurrentTaskGroup?
+        /// </summary>
+        private BindingList<TaskGroupTN> OrgSelectedTGList { get; set; }
+
 
         /// <summary>
         /// Constructor for this handler.
@@ -161,6 +166,8 @@ namespace Pulsar4X.UI.Handlers
             /// Bind faction Selection as well.
             /// </summary>
             VM = new ViewModels.TaskGroupViewModel();
+
+            OrgSelectedTGList = new BindingList<TaskGroupTN>();
 
             /// <summary>
             /// Set up the faction bindings. FactionSelectionComboBox is in the TaskGroup_Panel.designer.cs file.
@@ -217,6 +224,10 @@ namespace Pulsar4X.UI.Handlers
             //m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndexChanged += new EventHandler(PlottedMovesListBox_SelectedIndexChanged);
             m_oTaskGroupPanel.PlottedMovesListBox.MouseDown += new MouseEventHandler(PlottedMovesListBox_MouseDown);
             SelectedOrderIndex = m_oTaskGroupPanel.PlottedMovesListBox.SelectedIndex;
+
+            #region Organization Tab
+            m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndexChanged += new EventHandler(OrgSelectedTGComboBox_SelectedIndexChanged);
+            #endregion
 
 
             /// <summary>
@@ -566,6 +577,16 @@ namespace Pulsar4X.UI.Handlers
             m_oTaskGroupPanel.PlottedMovesListBox.Items.Clear();
             CalculateTimeDistance();
             BuildActionList();
+        }
+
+        /// <summary>
+        /// OrgSelectedTGListbox needs to be updated based on this.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OrgSelectedTGComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BuildSelectedTGListBox();
         }
 
         /// <summary>
@@ -1266,6 +1287,97 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+
+        #region Organization Tab
+        
+        /// <summary>
+        /// Specific function to just update one list box and not the other.
+        /// </summary>
+        private void BuildSelectedTGListBox()
+        {
+            int TGIndex = m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndex;
+            m_oTaskGroupPanel.OrgSelectedTGListBox.Items.Clear();
+            if (TGIndex != -1)
+            {
+                foreach (ShipTN CurrentShip in OrgSelectedTGList[TGIndex].Ships)
+                {
+                    m_oTaskGroupPanel.OrgSelectedTGListBox.Items.Add(CurrentShip);
+                }
+            }
+        }
+
+        /// <summary>
+        /// List the ships in each taskgroup for display.
+        /// </summary>
+        private void BuildOrganizationTab()
+        {
+            if (CurrentTaskGroup != null)
+            {
+                m_oTaskGroupPanel.OrgCurrentTGTextBox.Text = CurrentTaskGroup.Name;
+
+                m_oTaskGroupPanel.OrgCurrentTGListBox.Items.Clear();
+                foreach (ShipTN CurrentShip in CurrentTaskGroup.Ships)
+                {
+                    m_oTaskGroupPanel.OrgCurrentTGListBox.Items.Add(CurrentShip);
+                }
+
+                BuildSelectedTGListBox();
+            }
+        }
+
+        /// <summary>
+        /// What taskgroups are located near the current TG?
+        /// </summary>
+        private void BuildOrgSelectedTGList()
+        {
+            m_oTaskGroupPanel.OrgSelectedTGComboBox.Items.Clear();
+            OrgSelectedTGList.Clear();
+            /// <summary>
+            /// CurrentTaskgroup is around a planet, so just get that planet's taskgroups in orbit.
+            /// </summary>
+            if (CurrentTaskGroup.IsOrbiting == true)
+            {
+                SystemBody CurPlanet = CurrentTaskGroup.OrbitingBody as SystemBody;
+                foreach (TaskGroupTN CurTaskgroup in CurPlanet.TaskGroupsInOrbit)
+                {
+                    if (CurTaskgroup == CurrentTaskGroup)
+                        continue;
+
+                    if (CurTaskgroup.TaskGroupFaction == CurrentTaskGroup.TaskGroupFaction)
+                    {
+                        OrgSelectedTGList.Add(CurTaskgroup);
+                        m_oTaskGroupPanel.OrgSelectedTGComboBox.Items.Add(CurTaskgroup);
+                    }
+                }
+            }
+            /// <summary>
+            /// iterate through the system contact list looking for taskgroups of the same faction, and check their distance from CurrentTaskgroup.
+            /// </summary>
+            else
+            {
+                StarSystem CurSystem = CurrentTaskGroup.Position.System;
+
+                foreach (SystemContact CurContact in CurSystem.SystemContactList)
+                {
+                    if (CurrentTaskGroup.Contact == CurContact)
+                        continue;
+
+                    if (CurContact.SSEntity == StarSystemEntityType.TaskGroup && CurContact.faction == CurrentTaskGroup.TaskGroupFaction)
+                    {
+                        float dist;
+                        CurrentTaskGroup.Contact.DistTable.GetDistance(CurContact, out dist);
+
+                        if (dist == 0.0)
+                        {
+                            OrgSelectedTGList.Add((CurContact.Entity as TaskGroupTN));
+                            m_oTaskGroupPanel.OrgSelectedTGComboBox.Items.Add(CurContact.Name);
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Refresh the TG page.
         /// </summary>
@@ -1282,6 +1394,9 @@ namespace Pulsar4X.UI.Handlers
                 BuildPlottedMoveList();
                 BuildSystemLocationList();
                 CalculateTimeDistance();
+
+                BuildOrgSelectedTGList();
+                BuildOrganizationTab();
             }
         }
 

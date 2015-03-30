@@ -785,10 +785,14 @@ namespace Pulsar4X.UI.Handlers
                 }
 
                 /// <summary>
-                /// This is some sort of error condition, if this happens, it is much more serious than in the cost prototyper.
+                /// Ok, if there is no TG then one needs to be created here.
                 /// </summary>
                 if (TGIndex == -1)
-                    return;
+                {
+                    CurrentFaction.AddNewTaskGroup("Shipyard TG", CurrentPopulation.Planet, CurrentPopulation.Planet.Position.System);
+                    TargetTG = CurrentPopulation.Planet.TaskGroupsInOrbit[0];
+                }
+
 
                 Constants.ShipyardInfo.Task SYITask = (Constants.ShipyardInfo.Task)m_oSummaryPanel.SYTaskTypeComboBox.SelectedIndex;
 
