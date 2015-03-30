@@ -15,8 +15,44 @@ namespace Pulsar4X.ECSLib
         private Dictionary<Type, int> _dataBlobTypes;
         private List<List<BaseDataBlob>> _dataBlobMap;
 
+        private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
+        private Dictionary<Guid, int> _localGuidDictionary; 
+
+        private readonly object _lockObj;
+
         public EntityManager()
         {
+
+            _entities = new List<int>();
+            _entityMasks = new List<ComparableBitArray>();
+
+            _dataBlobTypes = new Dictionary<Type, int>();
+            _dataBlobMap = new List<List<BaseDataBlob>>();
+
+            if (_globalGuidDictionary == null)
+                _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
+
+            _localGuidDictionary = new Dictionary<Guid, int>();
+
+            _lockObj = new object();
+
+            // Use reflection to setup all our dataBlobMap.
+            // Find all types that implement BaseDataBlob
+            List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t =>
+                    t != typeof(BaseDataBlob) &&
+                    t.IsSubclassOf(typeof(BaseDataBlob))
+                ).ToList();
+
+            // Create a list in our dataBlobMap for each discovered type.
+            int i = 0;
+            foreach (Type dataBlobType in dataBlobTypes)
+            {
+                _dataBlobTypes.Add(dataBlobType, i);
+                _dataBlobMap.Add(new List<BaseDataBlob>());
+                i++;
+            }
+
             Clear();
         }
 
@@ -104,6 +140,11 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entity is passed.</exception>
         public void RemoveDataBlob(int entity, int typeIndex)
         {
+            if (!IsValidEntity(entity))
+            {
+                throw new ArgumentException("Invalid Entity.");
+            }
+
             _dataBlobMap[typeIndex][entity] = null;
             _entityMasks[entity][typeIndex] = false;
         }
@@ -133,9 +174,14 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Returns a blank list if entity has no DataBlobs.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid entity.</exception>
+        /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         public List<BaseDataBlob> GetAllDataBlobsOfEntity(int entity)
         {
+            if (!IsValidEntity(entity))
+            {
+                throw new ArgumentException("Invalid Entity.");
+            }
+
             var entityDBs = new List<BaseDataBlob>();
             ComparableBitArray entityMask = _entityMasks[entity];
 
@@ -269,6 +315,39 @@ namespace Pulsar4X.ECSLib
         /// <returns>Entity ID of the new entity.</returns>
         public int CreateEntity()
         {
+            return CreateEntity(Guid.NewGuid());
+        }
+
+        /// <summary>
+        /// Adds an entity with the pre-existing datablobs to this EntityManager.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
+        public int CreateEntity(List<BaseDataBlob> dataBlobs)
+        {
+            return CreateEntity(dataBlobs, Guid.NewGuid());
+        }
+
+        private int CreateEntity(List<BaseDataBlob> dataBlobs, Guid entityGuid)
+        {
+            if (dataBlobs == null)
+            {
+                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity use CreateEntity().");
+            }
+
+            int entity = CreateEntity(entityGuid);
+
+            foreach (BaseDataBlob dataBlob in dataBlobs)
+            {
+                int typeIndex;
+                TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
+                SetDataBlob(entity, dataBlob, typeIndex);
+            }
+
+            return entity;
+        }
+
+        private int CreateEntity(Guid entityGuid)
+        {
             int entityID;
             for (entityID = 0; entityID < _entities.Count; entityID++)
             {
@@ -285,9 +364,10 @@ namespace Pulsar4X.ECSLib
             if (entityID == _entities.Count)
             {
                 _entities.Add(entityID);
+
                 _entityMasks.Add(new ComparableBitArray(_dataBlobTypes.Count));
                 // Make sure the entityDBMaps have enough space for this entity.
-                foreach(List<BaseDataBlob> entityDBMap in _dataBlobMap)
+                foreach (List<BaseDataBlob> entityDBMap in _dataBlobMap)
                 {
                     entityDBMap.Add(null);
                 }
@@ -305,73 +385,135 @@ namespace Pulsar4X.ECSLib
                 _entityMasks[entityID] = new ComparableBitArray(_dataBlobTypes.Count);
             }
 
+            // Add the GUID to the lookup list.
+            _globalGuidDictionary.Add(entityGuid, this);
             return entityID;
-        }
-
-        /// <summary>
-        /// Adds an entity with the pre-existing datablobs to this EntityManager.
-        /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
-        public int CreateEntity(List<BaseDataBlob> dataBlobs)
-        {
-            if (dataBlobs == null)
-            {
-                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity use CreateEntity().");
-            }
-
-            int entity = CreateEntity();
-
-            foreach (BaseDataBlob dataBlob in dataBlobs)
-            {
-                int typeIndex;
-                TryGetDataBlobTypeIndex(dataBlob.GetType(), out typeIndex);
-                SetDataBlob(entity, dataBlob, typeIndex);
-            }
-
-            return entity;
         }
 
         /// <summary>
         /// Removes this entity from this entity manager.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid entity.</exception>
+        /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         public void RemoveEntity(int entity)
         {
+            // Make sure we only attempt to remove valid entities.
+            if (!IsValidEntity(entity))
+            {
+                throw new ArgumentException("Invalid Entity.");
+            }
+
+            // Mark the entity as invalid.
+            _entities[entity] = -1;
+
+            // Remove the GUID from all lists.
+            Guid entityGuid;
+            if (!TryGetGuidByEntity(entity, out entityGuid))
+            {
+                throw new Exception("Failed to remove entity. Entity had no Guid.");
+            }
+            _globalGuidDictionary.Remove(entityGuid);
+            _localGuidDictionary.Remove(entityGuid);
+
+
             foreach (List<BaseDataBlob> dataBlobType in _dataBlobMap)
             {
                 dataBlobType[entity] = null;
             }
-            _entityMasks[entity] = new ComparableBitArray(_dataBlobTypes.Count);
-            _entities[entity] = -1;
+
+            _entityMasks[entity] = BlankDataBlobMask();
         }
 
         /// <summary>
-        /// Completely clears all entities and reinitializes the DataBlob maps.
+        /// Transfers an entity to the specified manager.
+        /// </summary>
+        /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
+        /// <exception cref="Exception">Thrown when a entity is found with no Guid. (Should not be possible, possible data corruption)</exception>
+        public void TransferEntity(int entity, EntityManager manager)
+        {
+            List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entity);
+
+            Guid entityGuid;
+            if (!TryGetGuidByEntity(entity, out entityGuid))
+            {
+                throw new Exception("Failed to transfer entity. Entity had no Guid.");
+            }
+
+            RemoveEntity(entity);
+            manager.CreateEntity(dataBlobs, entityGuid);
+        }
+
+        /// <summary>
+        /// Gets the associated EntityManager and entityID of the specified Guid.
+        /// </summary>
+        /// <returns>True if entity is found.</returns>
+        /// <exception cref="Exception">Thrown when Guid is located in global dictionary, but not in the referenced manager. (Should not be possible, possible data corruption)</exception>
+        public bool FindEntityByGuid(Guid entityGuid, out EntityManager manager, out int entityID)
+        {
+            manager = null;
+            entityID = -1;
+
+            if (!_globalGuidDictionary.TryGetValue(entityGuid, out manager))
+            {
+                return false;
+            }
+
+            if (!manager.TryGetEntityByGuid(entityGuid, out entityID))
+            {
+                throw new Exception("FindEntityByGuid Failed. Guid located in global dictionary, but not in specified manager.");
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the associated entityID of the specified Guid.
+        /// <para></para>
+        /// Does not throw exceptions.
+        /// </summary>
+        /// <returns>True if entity exists in this manager.</returns>
+        public bool TryGetEntityByGuid(Guid entityGuid, out int entityID)
+        {
+            return _localGuidDictionary.TryGetValue(entityGuid, out entityID);
+        }
+
+        /// <summary>
+        /// Gets the associated Guid of the specified entityID.
+        /// <para></para>
+        /// Does not throw exceptions.
+        /// </summary>
+        /// <returns>True if entity exists in this manager.</returns>
+        public bool TryGetGuidByEntity(int entityID, out Guid entityGuid)
+        {
+            entityGuid = Guid.Empty;
+
+            if (!IsValidEntity(entityID))
+            {
+                return false;
+            }
+
+            try
+            {
+                entityGuid = _localGuidDictionary.First(kvp => kvp.Value == entityID).Key;
+            }
+            catch (InvalidOperationException)
+            {
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Completely clears all entities.
+        /// <para></para>
+        /// Does not throw exceptions.
         /// </summary>
         public void Clear()
         {
-            _entities = new List<int>();
-            _entityMasks = new List<ComparableBitArray>();
-
-            _dataBlobTypes = new Dictionary<Type, int>();
-            _dataBlobMap = new List<List<BaseDataBlob>>();
-
-            // Use reflection to setup all our dataBlobMap.
-            // Find all types that implement BaseDataBlob
-            List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t =>
-                    t != typeof(BaseDataBlob) &&
-                    t.IsSubclassOf(typeof(BaseDataBlob))
-                ).ToList();
-
-            // Create a list in our dataBlobMap for each discovered type.
-            int i = 0;
-            foreach (Type dataBlobType in dataBlobTypes)
+            for (int entityID = 0; entityID < _entities.Count; entityID++)
             {
-                _dataBlobTypes.Add(dataBlobType, i);
-                _dataBlobMap.Add(new List<BaseDataBlob>());
-                i++;
+                if (IsValidEntity(entityID))
+                    RemoveEntity(entityID);
             }
+
         }
 
         /// <summary>
