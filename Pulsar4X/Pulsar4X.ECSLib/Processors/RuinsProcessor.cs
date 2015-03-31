@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Pulsar4X.Processors
+﻿namespace Pulsar4X.ECSLib.Processors
 {
-    static class RuinsProcessor
+    internal static class RuinsProcessor
     {
         /// <summary>
         /// store some sort of TotalProgress variable, in Faction? in XenoTeam?
         /// Increment TotalProgress with RNG range 0,TotalDifficalty
         /// Xeno skill comes into this somewhere.
-        /// if TotalProgress >= TotalDifficalty, 
+        /// if TotalProgress >= TotalDifficalty,
         /// the ruins are fully researched and unlocked
         /// for that faction, ruins can then be dug up.
         /// </summary>
         public static void ResearchRuins()
         {
- 
         }
 
         /// <summary>
@@ -27,6 +21,7 @@ namespace Pulsar4X.Processors
         /// for a table, can probibly be turned into a weighted list.
         /// </summary>
         public static void DigUpRuins()
-        { }
+        {
+        }
     }
 }

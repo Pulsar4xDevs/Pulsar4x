@@ -66,6 +66,8 @@ namespace Pulsar4X.ECSLib.Processors
         /// <summary>
         /// Calculates the parent-relative cartesian coordinate of an orbit for a given time.
         /// </summary>
+        /// <param name="orbit">OrbitDB to calculate position from.</param>
+        /// <param name="time">Time position desired from.</param>
         public static PositionDB GetPosition(OrbitDB orbit, DateTime time)
         {
             if (orbit.IsStationary)
@@ -99,6 +101,7 @@ namespace Pulsar4X.ECSLib.Processors
         /// <summary>
         /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
         /// </summary>
+        /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="trueAnomaly">Angle in Radians.</param>
         public static PositionDB GetPosition(OrbitDB orbit, double trueAnomaly)
         {
@@ -117,10 +120,8 @@ namespace Pulsar4X.ECSLib.Processors
             radius = Distance.ToAU(radius);
 
             // Polar to Cartesian conversion.
-            double x,
-                   y;
-            x = radius * Math.Cos(trueAnomaly);
-            y = radius * Math.Sin(trueAnomaly);
+            double x = radius * Math.Cos(trueAnomaly);
+            double y = radius * Math.Sin(trueAnomaly);
 
             return new PositionDB(x, y);
         }
@@ -131,8 +132,8 @@ namespace Pulsar4X.ECSLib.Processors
         private static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
-            var E = new List<double>();
-            double Epsilon = 1E-12; // Plenty of accuracy.
+            var e = new List<double>();
+            const double epsilon = 1E-12; // Plenty of accuracy.
             /* Eccentricity is currently clamped @ 0.8
             if (Eccentricity > 0.8)
             {
@@ -140,7 +141,7 @@ namespace Pulsar4X.ECSLib.Processors
             } else
             */
             {
-                E.Add(currentMeanAnomaly);
+                e.Add(currentMeanAnomaly);
             }
             int i = 0;
 
@@ -154,18 +155,16 @@ namespace Pulsar4X.ECSLib.Processors
                  * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
                  * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
                 */
-                E.Add(E[i] - ((E[i] - orbit.Eccentricity * Math.Sin(E[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(E[i]))));
+                e.Add(e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]))));
                 i++;
-            } while (Math.Abs(E[i] - E[i - 1]) > Epsilon && i < 1000);
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i < 1000);
 
             if (i > 1000)
             {
                 // <? todo: Flag an error about non-convergence of Newton's method.
             }
 
-            double eccentricAnomaly = E[i - 1];
-
-            return E[i - 1];
+            return e[i - 1];
         }
 
         #endregion
