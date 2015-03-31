@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib.Processors
                     break;
                 }
             }
-            if (isToxic == true)
+            if (isToxic)
                 cost = 3;
             return cost;            
         }

@@ -44,6 +44,7 @@
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
+    <Compile Include="DataBlobs\FactionDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\PlanetInfoDB.cs" />
     <Compile Include="DataBlobs\PopulationDB.cs" />

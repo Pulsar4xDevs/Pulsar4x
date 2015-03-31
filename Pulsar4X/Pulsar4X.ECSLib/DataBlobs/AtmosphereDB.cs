@@ -65,6 +65,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="greenhousePressue"></param>
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
+        /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
         public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasDB,float> composition)
             : base()
         {
