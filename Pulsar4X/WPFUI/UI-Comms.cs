@@ -12,7 +12,7 @@ namespace WPFUI
     class UI_Comms
     {
         MessageBook MessageQueue { get; set; }
-        public UI_Comms(Engine_Comms engineComms, Guid factionID)
+        public UI_Comms(Engine_Comms engineComms, int factionID)
         {
             MessageQueue = engineComms.RequestMessagebook(factionID);
         }

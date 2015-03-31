@@ -22,7 +22,11 @@ namespace Pulsar4X.Tests
 
             // add some factions:
             List<BaseDataBlob> list = new List<BaseDataBlob>();
-            list.Add(new PopulationDB(42));
+            SpeciesDB sdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
+            Dictionary<SpeciesDB, double> pop = new Dictionary<SpeciesDB, double>();
+            pop.Add(sdb, 42);
+
+            list.Add(new PopulationDB(pop));
             int factionID = game.GlobalManager.CreateEntity(list);
             game.EngineComms.AddFaction(factionID);
 
