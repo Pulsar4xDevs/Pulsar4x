@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
 
@@ -16,10 +17,10 @@ namespace Pulsar4X.ECSLib
         private List<List<BaseDataBlob>> _dataBlobMap;
 
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
-        private Dictionary<Guid, int> _localGuidDictionary; 
+        private static ReaderWriterLockSlim _guidLock;
+        private Dictionary<Guid, int> _localGuidDictionary;
 
-        private readonly object _lockObj;
-
+        
         public EntityManager()
         {
 
@@ -34,7 +35,8 @@ namespace Pulsar4X.ECSLib
 
             _localGuidDictionary = new Dictionary<Guid, int>();
 
-            _lockObj = new object();
+            if (_guidLock == null)
+                _guidLock = new ReaderWriterLockSlim();
 
             // Use reflection to setup all our dataBlobMap.
             // Find all types that implement BaseDataBlob
@@ -315,7 +317,15 @@ namespace Pulsar4X.ECSLib
         /// <returns>Entity ID of the new entity.</returns>
         public int CreateEntity()
         {
-            return CreateEntity(Guid.NewGuid());
+            _guidLock.EnterWriteLock();
+            try
+            {
+                return CreateEntity(Guid.NewGuid());
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -324,7 +334,15 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
         public int CreateEntity(List<BaseDataBlob> dataBlobs)
         {
-            return CreateEntity(dataBlobs, Guid.NewGuid());
+            _guidLock.EnterWriteLock();
+            try
+            {
+                return CreateEntity(dataBlobs, Guid.NewGuid());
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
         }
 
         private int CreateEntity(List<BaseDataBlob> dataBlobs, Guid entityGuid)
@@ -395,32 +413,46 @@ namespace Pulsar4X.ECSLib
         /// Removes this entity from this entity manager.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        public void RemoveEntity(int entity)
+        public void RemoveEntity(int entityID)
         {
             // Make sure we only attempt to remove valid entities.
-            if (!IsValidEntity(entity))
+            if (!IsValidEntity(entityID))
             {
                 throw new ArgumentException("Invalid Entity.");
             }
+ 
+            _guidLock.EnterWriteLock();
+            try
+            {
+                Guid entityGuid = GuidFromEntity(entityID);
+                RemoveEntity(entityID, entityGuid);
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
+        }
 
+        /// <summary>
+        /// Removes the entity from this entity manager.
+        /// </summary>
+        private void RemoveEntity(int entityID, Guid entityGuid)
+        {
             // Remove the GUID from all lists.
-            Guid entityGuid;
-            TryGetGuidByEntity(entity, out entityGuid);
             _globalGuidDictionary.Remove(entityGuid);
             _localGuidDictionary.Remove(entityGuid);
-
+            
             // Mark the entity as invalid.
-            _entities[entity] = -1;
+            _entities[entityID] = -1;
 
             // Destroy references to datablobs.
             foreach (List<BaseDataBlob> dataBlobType in _dataBlobMap)
             {
-                dataBlobType[entity] = null;
+                dataBlobType[entityID] = null;
             }
 
-            _entityMasks[entity] = BlankDataBlobMask();
+            _entityMasks[entityID] = BlankDataBlobMask();
         }
-
         /// <summary>
         /// Transfers an entity to the specified manager.
         /// </summary>
@@ -430,11 +462,17 @@ namespace Pulsar4X.ECSLib
         {
             List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entity);
 
-            Guid entityGuid;
-            TryGetGuidByEntity(entity, out entityGuid);
-
-            RemoveEntity(entity);
-            return manager.CreateEntity(dataBlobs, entityGuid);
+            _guidLock.EnterWriteLock();
+            try
+            {
+                Guid entityGuid = GuidFromEntity(entity);
+                RemoveEntity(entity, entityGuid);
+                return manager.CreateEntity(dataBlobs, entityGuid);
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -445,13 +483,22 @@ namespace Pulsar4X.ECSLib
         {
             entityID = -1;
 
-            if (!_globalGuidDictionary.TryGetValue(entityGuid, out manager))
-            {
-                return false;
-            }
+            _guidLock.EnterReadLock();
 
-            manager.TryGetEntityByGuid(entityGuid, out entityID);
-            return true;
+            try
+            {
+                if (!_globalGuidDictionary.TryGetValue(entityGuid, out manager))
+                {
+                    return false;
+                }
+
+                entityID = manager._localGuidDictionary[entityGuid];
+                return true;
+            }
+            finally
+            {
+                _guidLock.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -462,7 +509,15 @@ namespace Pulsar4X.ECSLib
         /// <returns>True if entity exists in this manager.</returns>
         public bool TryGetEntityByGuid(Guid entityGuid, out int entityID)
         {
-            return _localGuidDictionary.TryGetValue(entityGuid, out entityID);
+            _guidLock.EnterReadLock();
+            try
+            {
+                return _localGuidDictionary.TryGetValue(entityGuid, out entityID);
+            }
+            finally
+            {
+                _guidLock.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -478,9 +533,25 @@ namespace Pulsar4X.ECSLib
                 return false;
             }
 
-            entityGuid = _localGuidDictionary.First(kvp => kvp.Value == entityID).Key;
+            _guidLock.EnterReadLock();
+            try
+            {
+                entityGuid = GuidFromEntity(entityID);
+                return true;
+            }
+            finally
+            {
+                _guidLock.ExitReadLock();
+            }
+        }
 
-            return true;
+        /// <summary>
+        /// Gets the associated Guid of the specified entityID.
+        /// </summary>
+        /// <remarks>No thread locking or error checking.</remarks>
+        private Guid GuidFromEntity(int entityID)
+        {
+            return _localGuidDictionary.First(kvp => kvp.Value == entityID).Key;
         }
 
         /// <summary>
