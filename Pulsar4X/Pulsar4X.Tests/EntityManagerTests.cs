@@ -496,7 +496,7 @@ namespace Pulsar4X.Tests
             _entityManager.CreateEntity(dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs.Add(new PopulationDB(_pop2));
+            dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(5), new PopulationDB(_pop2)};
             _entityManager.CreateEntity(dataBlobs);
 
             return testEntity;

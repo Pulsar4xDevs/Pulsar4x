@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
@@ -10,6 +11,6 @@ namespace Pulsar4X.ECSLib.DataBlobs
     {
         public int Entity { get; set; }
 
-        public object _lockObj = new object();
+        public ReaderWriterLockSlim LockObject = new ReaderWriterLockSlim();
     }
 }
