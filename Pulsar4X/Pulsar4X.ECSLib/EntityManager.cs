@@ -10,20 +10,16 @@ namespace Pulsar4X.ECSLib
 {
     public class EntityManager
     {
-        private List<int> _entities;
-        private List<ComparableBitArray> _entityMasks;
-
-        private Dictionary<Type, int> _dataBlobTypes;
-        private List<List<BaseDataBlob>> _dataBlobMap;
-
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
         private static ReaderWriterLockSlim _guidLock;
-        private Dictionary<Guid, int> _localGuidDictionary;
+        private readonly List<List<BaseDataBlob>> _dataBlobMap;
+        private readonly Dictionary<Type, int> _dataBlobTypes;
+        private readonly List<int> _entities;
+        private readonly List<ComparableBitArray> _entityMasks;
+        private readonly Dictionary<Guid, int> _localGuidDictionary;
 
-        
         public EntityManager()
         {
-
             _entities = new List<int>();
             _entityMasks = new List<ComparableBitArray>();
 
@@ -31,20 +27,20 @@ namespace Pulsar4X.ECSLib
             _dataBlobMap = new List<List<BaseDataBlob>>();
 
             if (_globalGuidDictionary == null)
+            {
                 _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
+            }
 
             _localGuidDictionary = new Dictionary<Guid, int>();
 
             if (_guidLock == null)
+            {
                 _guidLock = new ReaderWriterLockSlim();
+            }
 
             // Use reflection to setup all our dataBlobMap.
             // Find all types that implement BaseDataBlob
-            List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t =>
-                    t != typeof(BaseDataBlob) &&
-                    t.IsSubclassOf(typeof(BaseDataBlob))
-                ).ToList();
+            List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t != typeof(BaseDataBlob) && t.IsSubclassOf(typeof(BaseDataBlob))).ToList();
 
             // Create a list in our dataBlobMap for each discovered type.
             int i = 0;
@@ -157,7 +153,7 @@ namespace Pulsar4X.ECSLib
         /// Returns a blank list if no DataBlobs of type T found.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public List<T> GetAllDataBlobsOfType<T>() where T: BaseDataBlob
+        public List<T> GetAllDataBlobsOfType<T>() where T : BaseDataBlob
         {
             var dataBlobs = new List<T>();
             foreach (BaseDataBlob dataBlob in _dataBlobMap[GetTypeIndex<T>()])
@@ -420,7 +416,7 @@ namespace Pulsar4X.ECSLib
             {
                 throw new ArgumentException("Invalid Entity.");
             }
- 
+
             _guidLock.EnterWriteLock();
             try
             {
@@ -441,7 +437,7 @@ namespace Pulsar4X.ECSLib
             // Remove the GUID from all lists.
             _globalGuidDictionary.Remove(entityGuid);
             _localGuidDictionary.Remove(entityGuid);
-            
+
             // Mark the entity as invalid.
             _entities[entityID] = -1;
 
@@ -453,6 +449,7 @@ namespace Pulsar4X.ECSLib
 
             _entityMasks[entityID] = BlankDataBlobMask();
         }
+
         /// <summary>
         /// Transfers an entity to the specified manager.
         /// </summary>
@@ -564,9 +561,10 @@ namespace Pulsar4X.ECSLib
             for (int entityID = 0; entityID < _entities.Count; entityID++)
             {
                 if (IsValidEntity(entityID))
+                {
                     RemoveEntity(entityID);
+                }
             }
-
         }
 
         /// <summary>
