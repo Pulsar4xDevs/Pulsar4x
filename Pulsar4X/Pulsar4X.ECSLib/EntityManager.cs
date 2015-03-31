@@ -10,45 +10,45 @@ namespace Pulsar4X.ECSLib
 {
     public class EntityManager
     {
+        private static Dictionary<Type, int> _dataBlobTypes;
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
         private static ReaderWriterLockSlim _guidLock;
+
         private readonly List<List<BaseDataBlob>> _dataBlobMap;
-        private readonly Dictionary<Type, int> _dataBlobTypes;
         private readonly List<int> _entities;
         private readonly List<ComparableBitArray> _entityMasks;
         private readonly Dictionary<Guid, int> _localGuidDictionary;
 
         public EntityManager()
         {
-            _entities = new List<int>();
-            _entityMasks = new List<ComparableBitArray>();
-
-            _dataBlobTypes = new Dictionary<Type, int>();
-            _dataBlobMap = new List<List<BaseDataBlob>>();
-
-            if (_globalGuidDictionary == null)
+            // Initialize our static variables.
+            if (_dataBlobTypes == null)
             {
+                _dataBlobTypes = new Dictionary<Type, int>();
+
+                int i = 0;
+                // Use reflection to setup all our dataBlobMap.
+                // Find all types that implement BaseDataBlob
+                foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && type != typeof(BaseDataBlob)))
+                {
+                    _dataBlobTypes.Add(type, i);
+                    i++;
+                }
+
                 _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
-            }
-
-            _localGuidDictionary = new Dictionary<Guid, int>();
-
-            if (_guidLock == null)
-            {
                 _guidLock = new ReaderWriterLockSlim();
             }
 
-            // Use reflection to setup all our dataBlobMap.
-            // Find all types that implement BaseDataBlob
-            List<Type> dataBlobTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => t != typeof(BaseDataBlob) && t.IsSubclassOf(typeof(BaseDataBlob))).ToList();
+            // Initialize our instance variables.
+            _dataBlobMap = new List<List<BaseDataBlob>>(_dataBlobTypes.Count);
+            _entities = new List<int>();
+            _entityMasks = new List<ComparableBitArray>();
+            _localGuidDictionary = new Dictionary<Guid, int>();
 
-            // Create a list in our dataBlobMap for each discovered type.
-            int i = 0;
-            foreach (Type dataBlobType in dataBlobTypes)
+            // Fill out the first level of the datablob map.
+            foreach (KeyValuePair<Type, int> dataBlobTypeKVP in _dataBlobTypes)
             {
-                _dataBlobTypes.Add(dataBlobType, i);
-                _dataBlobMap.Add(new List<BaseDataBlob>());
-                i++;
+                _dataBlobMap[dataBlobTypeKVP.Value] = new List<BaseDataBlob>();
             }
 
             Clear();
@@ -573,7 +573,7 @@ namespace Pulsar4X.ECSLib
         /// typeIndex parameter is set to the typeIndex of the dataBlobType if found.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when dataBlobType is null.</exception>
-        public bool TryGetTypeIndex(Type dataBlobType, out int typeIndex)
+        public static bool TryGetTypeIndex(Type dataBlobType, out int typeIndex)
         {
             return _dataBlobTypes.TryGetValue(dataBlobType, out typeIndex);
         }
@@ -582,7 +582,7 @@ namespace Pulsar4X.ECSLib
         /// Faster than TryGetDataBlobTypeIndex and uses generics for type safety.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public int GetTypeIndex<T>() where T : BaseDataBlob
+        public static int GetTypeIndex<T>() where T : BaseDataBlob
         {
             return _dataBlobTypes[typeof(T)];
         }

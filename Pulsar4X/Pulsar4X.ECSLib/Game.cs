@@ -80,7 +80,13 @@ namespace Pulsar4X.ECSLib
 
             EngineComms = new Engine_Comms();
 
-            // Setup time Phases.
+            // Setup processors.
+            InitializeProcessors();
+        }
+
+        private static void InitializeProcessors()
+        {
+            OrbitProcessor.Initialize();
             PhaseProcessor.Initialize();
         }
 

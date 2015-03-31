@@ -1,27 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.Processors
 {
-    static class OrbitProcessor
+    internal static class OrbitProcessor
     {
-        static int _orbitTypeIndex = -1;
-        static int _positionTypeIndex = -1;
+        private static int _orbitTypeIndex = -1;
+
+        public static void Initialize()
+        {
+            _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+        }
 
         public static void Process(StarSystem system, int deltaSeconds)
         {
             EntityManager currentManager = system.SystemManager;
-
-            if (_orbitTypeIndex == -1)
-            {
-                // Important for maximum performance. Otherwise we would do this lookup several times.
-                _orbitTypeIndex = currentManager.GetTypeIndex<OrbitDB>();
-                _positionTypeIndex = currentManager.GetTypeIndex<PositionDB>();
-            }
 
             // Find the first orbital entity.
             int firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
@@ -43,7 +38,7 @@ namespace Pulsar4X.ECSLib.Processors
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
             // Call recursive function to update every orbit in this system.
-            UpdateOrbit(currentManager, firstOrbit, new PositionDB(0,0), currentTime);
+            UpdateOrbit(currentManager, firstOrbit, new PositionDB(0, 0), currentTime);
         }
 
         private static void UpdateOrbit(EntityManager currentManager, OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
@@ -67,6 +62,7 @@ namespace Pulsar4X.ECSLib.Processors
         }
 
         #region Orbit Position Calculations
+
         /// <summary>
         /// Calculates the parent-relative cartesian coordinate of an orbit for a given time.
         /// </summary>
@@ -121,7 +117,8 @@ namespace Pulsar4X.ECSLib.Processors
             radius = Distance.ToAU(radius);
 
             // Polar to Cartesian conversion.
-            double x, y;
+            double x,
+                   y;
             x = radius * Math.Cos(trueAnomaly);
             y = radius * Math.Sin(trueAnomaly);
 
@@ -134,7 +131,7 @@ namespace Pulsar4X.ECSLib.Processors
         private static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
-            List<double> E = new List<double>();
+            var E = new List<double>();
             double Epsilon = 1E-12; // Plenty of accuracy.
             /* Eccentricity is currently clamped @ 0.8
             if (Eccentricity > 0.8)

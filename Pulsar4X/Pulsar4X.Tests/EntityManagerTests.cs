@@ -145,12 +145,12 @@ namespace Pulsar4X.Tests
 
             // and again for the second lookup type:
             // Get the Population DB of a specific entity.
-            int typeIndex = _entityManager.GetTypeIndex<PopulationDB>();
+            int typeIndex = EntityManager.GetTypeIndex<PopulationDB>();
             popDB = _entityManager.GetDataBlob<PopulationDB>(testEntity, typeIndex);
             Assert.IsNotNull(popDB);
 
             // get a DB we know the entity does not have:
-            typeIndex = _entityManager.GetTypeIndex<AtmosphereDB>();
+            typeIndex = EntityManager.GetTypeIndex<AtmosphereDB>();
             atmoDB = _entityManager.GetDataBlob<AtmosphereDB>(testEntity, typeIndex);
             Assert.IsNull(atmoDB);
 
@@ -167,7 +167,7 @@ namespace Pulsar4X.Tests
             });
 
             // test with invalid T vs type at typeIndex
-            typeIndex = _entityManager.GetTypeIndex<PopulationDB>();
+            typeIndex = EntityManager.GetTypeIndex<PopulationDB>();
             Assert.Catch(typeof(InvalidCastException), () =>
             {
                 _entityManager.GetDataBlob<PlanetInfoDB>(testEntity, typeIndex);
@@ -243,7 +243,7 @@ namespace Pulsar4X.Tests
 
             // reset:
             _entityManager.SetDataBlob(testEntity, new PopulationDB(_pop1));
-            int typeIndex = _entityManager.GetTypeIndex<PopulationDB>();
+            int typeIndex = EntityManager.GetTypeIndex<PopulationDB>();
 
             Assert.IsTrue(_entityManager.GetDataBlob<PopulationDB>(testEntity) != null);  // check that it has the data blob
             _entityManager.RemoveDataBlob(testEntity, typeIndex);              // Remove a data blob
@@ -287,13 +287,13 @@ namespace Pulsar4X.Tests
 
             // now lets lookup using a mask:
             ComparableBitArray dataBlobMask = _entityManager.BlankDataBlobMask();
-            dataBlobMask.Set(_entityManager.GetTypeIndex<PopulationDB>(), true);
-            dataBlobMask.Set(_entityManager.GetTypeIndex<OrbitDB>(), true);
+            dataBlobMask.Set(EntityManager.GetTypeIndex<PopulationDB>(), true);
+            dataBlobMask.Set(EntityManager.GetTypeIndex<OrbitDB>(), true);
             entities = _entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
             Assert.AreEqual(2, entities.Count);
 
             // and with a mask that will not match any entities:
-            dataBlobMask.Set(_entityManager.GetTypeIndex<AtmosphereDB>(), true);
+            dataBlobMask.Set(EntityManager.GetTypeIndex<AtmosphereDB>(), true);
             entities = _entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
             Assert.AreEqual(0, entities.Count);
 
@@ -333,12 +333,12 @@ namespace Pulsar4X.Tests
 
 
             // now lets just get the one entity, but use a different function to do it:
-            int type = _entityManager.GetTypeIndex<PopulationDB>();
+            int type = EntityManager.GetTypeIndex<PopulationDB>();
             testEntity = _entityManager.GetFirstEntityWithDataBlob(type);
             Assert.AreEqual(0, testEntity);
 
             // lookup an entity that does not exist:
-            type = _entityManager.GetTypeIndex<AtmosphereDB>();
+            type = EntityManager.GetTypeIndex<AtmosphereDB>();
             testEntity = _entityManager.GetFirstEntityWithDataBlob(type);
             Assert.AreEqual(-1, testEntity);
 
@@ -468,11 +468,11 @@ namespace Pulsar4X.Tests
         public void TypeIndexTest()
         {
             int typeIndex;
-            Assert.Catch<ArgumentNullException>(() => _entityManager.TryGetTypeIndex(null, out typeIndex));
-            Assert.Catch<KeyNotFoundException>(() => _entityManager.GetTypeIndex<BaseDataBlob>());
+            Assert.Catch<ArgumentNullException>(() => EntityManager.TryGetTypeIndex(null, out typeIndex));
+            Assert.Catch<KeyNotFoundException>(() => EntityManager.GetTypeIndex<BaseDataBlob>());
 
-            Assert.IsTrue(_entityManager.TryGetTypeIndex(typeof(OrbitDB), out typeIndex));
-            Assert.AreEqual(_entityManager.GetTypeIndex<OrbitDB>(), typeIndex);
+            Assert.IsTrue(EntityManager.TryGetTypeIndex(typeof(OrbitDB), out typeIndex));
+            Assert.AreEqual(EntityManager.GetTypeIndex<OrbitDB>(), typeIndex);
         }
 
         #region Extra Init Stuff
