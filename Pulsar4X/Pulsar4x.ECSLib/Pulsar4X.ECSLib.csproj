@@ -52,6 +52,7 @@
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />
     <Compile Include="DataBlobs\SpeciesDB.cs" />
+    <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
     <Compile Include="Engine-Comms.cs" />
     <Compile Include="EntityManager.cs" />
     <Compile Include="Factories\SpeciesFactory.cs" />
