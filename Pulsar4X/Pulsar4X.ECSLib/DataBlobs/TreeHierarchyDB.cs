@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    internal abstract class TreeHierarchyDB : BaseDataBlob
+    public abstract class TreeHierarchyDB : BaseDataBlob
     {
         private readonly List<TreeHierarchyDB> _childDBs;
         private readonly List<Guid> _childGuids;

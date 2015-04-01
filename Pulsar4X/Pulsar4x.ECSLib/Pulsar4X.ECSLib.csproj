@@ -63,7 +63,6 @@
     <Compile Include="Helpers\Interrupt.cs" />
     <Compile Include="Helpers\SubpulseLimitRequest.cs" />
     <Compile Include="Processors\OrbitProcessor.cs" />
-    <Compile Include="Processors\PhaseProcessor.cs" />
     <Compile Include="Processors\RuinsProcessor.cs" />
     <Compile Include="Processors\SpeciesProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

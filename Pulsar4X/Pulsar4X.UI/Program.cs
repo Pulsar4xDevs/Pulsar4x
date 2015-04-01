@@ -35,8 +35,6 @@ namespace Pulsar4X.UI
             game.StarSystems.Add(new StarSystem());
             game.StarSystems.Add(new StarSystem());
 
-            game.EntityManagerTests();
-
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();
             SystemGen.CreateStressTest();
