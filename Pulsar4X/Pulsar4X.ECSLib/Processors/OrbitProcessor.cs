@@ -1,27 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.Processors
 {
-    static class OrbitProcessor
+    internal static class OrbitProcessor
     {
-        static int _orbitTypeIndex = -1;
-        static int _positionTypeIndex = -1;
+        private static int _orbitTypeIndex = -1;
+
+        public static void Initialize()
+        {
+            _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+        }
 
         public static void Process(StarSystem system, int deltaSeconds)
         {
             EntityManager currentManager = system.SystemManager;
-
-            if (_orbitTypeIndex == -1)
-            {
-                // Important for maximum performance. Otherwise we would do this lookup several times.
-                _orbitTypeIndex = currentManager.GetTypeIndex<OrbitDB>();
-                _positionTypeIndex = currentManager.GetTypeIndex<PositionDB>();
-            }
 
             // Find the first orbital entity.
             int firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
@@ -43,7 +38,7 @@ namespace Pulsar4X.ECSLib.Processors
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
             // Call recursive function to update every orbit in this system.
-            UpdateOrbit(currentManager, firstOrbit, new PositionDB(0,0), currentTime);
+            UpdateOrbit(currentManager, firstOrbit, new PositionDB(0, 0), currentTime);
         }
 
         private static void UpdateOrbit(EntityManager currentManager, OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
@@ -67,9 +62,12 @@ namespace Pulsar4X.ECSLib.Processors
         }
 
         #region Orbit Position Calculations
+
         /// <summary>
         /// Calculates the parent-relative cartesian coordinate of an orbit for a given time.
         /// </summary>
+        /// <param name="orbit">OrbitDB to calculate position from.</param>
+        /// <param name="time">Time position desired from.</param>
         public static PositionDB GetPosition(OrbitDB orbit, DateTime time)
         {
             if (orbit.IsStationary)
@@ -103,6 +101,7 @@ namespace Pulsar4X.ECSLib.Processors
         /// <summary>
         /// Calculates the cartesian coordinates (relative to it's parent) of an orbit for a given angle.
         /// </summary>
+        /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="trueAnomaly">Angle in Radians.</param>
         public static PositionDB GetPosition(OrbitDB orbit, double trueAnomaly)
         {
@@ -121,9 +120,8 @@ namespace Pulsar4X.ECSLib.Processors
             radius = Distance.ToAU(radius);
 
             // Polar to Cartesian conversion.
-            double x, y;
-            x = radius * Math.Cos(trueAnomaly);
-            y = radius * Math.Sin(trueAnomaly);
+            double x = radius * Math.Cos(trueAnomaly);
+            double y = radius * Math.Sin(trueAnomaly);
 
             return new PositionDB(x, y);
         }
@@ -134,8 +132,8 @@ namespace Pulsar4X.ECSLib.Processors
         private static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
-            List<double> E = new List<double>();
-            double Epsilon = 1E-12; // Plenty of accuracy.
+            var e = new List<double>();
+            const double epsilon = 1E-12; // Plenty of accuracy.
             /* Eccentricity is currently clamped @ 0.8
             if (Eccentricity > 0.8)
             {
@@ -143,7 +141,7 @@ namespace Pulsar4X.ECSLib.Processors
             } else
             */
             {
-                E.Add(currentMeanAnomaly);
+                e.Add(currentMeanAnomaly);
             }
             int i = 0;
 
@@ -157,18 +155,16 @@ namespace Pulsar4X.ECSLib.Processors
                  * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
                  * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
                 */
-                E.Add(E[i] - ((E[i] - orbit.Eccentricity * Math.Sin(E[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(E[i]))));
+                e.Add(e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]))));
                 i++;
-            } while (Math.Abs(E[i] - E[i - 1]) > Epsilon && i < 1000);
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i < 1000);
 
             if (i > 1000)
             {
                 // <? todo: Flag an error about non-convergence of Newton's method.
             }
 
-            double eccentricAnomaly = E[i - 1];
-
-            return E[i - 1];
+            return e[i - 1];
         }
 
         #endregion

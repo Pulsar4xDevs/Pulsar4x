@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.Processors
 {
-    public static class SpeciesProcessor
+    internal static class SpeciesProcessor
     {
-#warning Need to sit down and figure out how we're goin to cost all these properly.
         public static double ColonyCost(PlanetInfoDB planet, SpeciesDB species)
         {
             double cost = 1.0;
@@ -22,46 +17,39 @@ namespace Pulsar4X.ECSLib.Processors
             return cost;
         }
 
-        static bool ColonyGravityIsHabitible(PlanetInfoDB planet, SpeciesDB species) 
+        private static bool ColonyGravityIsHabitible(PlanetInfoDB planet, SpeciesDB species)
         {
-            bool isHabitible = false;
-            if (planet.SurfaceGravity < species.MaximumGravityConstraint && planet.SurfaceGravity > species.MinimumGravityConstraint)
-                isHabitible = true;
-            return isHabitible;            
+            return planet.SurfaceGravity < species.MaximumGravityConstraint && planet.SurfaceGravity > species.MinimumGravityConstraint;
         }
 
         /// <summary>
-        /// cost should increase with composition. there has to be a more efficent way of doing this too. 
+        /// cost should increase with composition. there has to be a more efficent way of doing this too.
         /// </summary>
         /// <param name="planet"></param>
         /// <param name="species"></param>
         /// <returns></returns>
-        static double ColonyToxidityCost(PlanetInfoDB planet, SpeciesDB species)
+        private static double ColonyToxidityCost(PlanetInfoDB planet, SpeciesDB species)
         {
-            bool isToxic = false;
             double cost = 0;
-            foreach(AtmosphericGasDB gas in planet.Atmosphere.Composition.Keys)
-            {
-                if (gas.IsToxic)
-                {
-                    isToxic = true;
-                    break;
-                }
-            }
+            bool isToxic = planet.Atmosphere.Composition.Keys.Any(gas => gas.IsToxic);
             if (isToxic)
+            {
                 cost = 3;
-            return cost;            
+            }
+            return cost;
         }
 
-        static double ColonyPressureCost(PlanetInfoDB planet)
+        private static double ColonyPressureCost(PlanetInfoDB planet)
         {
             return 1;
         }
-        static double ColonyTemperatureCost(PlanetInfoDB planet)
+
+        private static double ColonyTemperatureCost(PlanetInfoDB planet)
         {
             return 1;
         }
-        static double ColonyGasCost(PlanetInfoDB planet)
+
+        private static double ColonyGasCost(PlanetInfoDB planet)
         {
             return 1;
         }

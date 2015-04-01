@@ -80,7 +80,13 @@ namespace Pulsar4X.ECSLib
 
             EngineComms = new Engine_Comms();
 
-            // Setup time Phases.
+            // Setup processors.
+            InitializeProcessors();
+        }
+
+        private static void InitializeProcessors()
+        {
+            OrbitProcessor.Initialize();
             PhaseProcessor.Initialize();
         }
 
@@ -124,7 +130,6 @@ namespace Pulsar4X.ECSLib
                 {
                     // so we processed a valid message, better check for a new one right away:
                     messageProcessed = false;
-                    continue;
                 }
                 else
                 {
@@ -216,87 +221,6 @@ namespace Pulsar4X.ECSLib
                 // <@ todo: review interrupt messages.
             }
             return timeAdvanced;
-        }
-
-        /// <summary>
-        /// Test function to demonstrate the usage of the EntityManager.
-        /// </summary>
-        public void EntityManagerTests()
-        {
-            // Create an entity with individual DataBlobs.
-            int planet = GlobalManager.CreateEntity();
-            GlobalManager.SetDataBlob(planet, OrbitDB.FromStationary(5));
-            SpeciesDB species1 = new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45);
-            Dictionary<SpeciesDB,double> pop = new Dictionary<SpeciesDB, double>();
-            pop.Add(species1,10);
-            GlobalManager.SetDataBlob(planet, new PopulationDB(pop));
-
-            // Create an entity with a DataBlobList.
-            List<BaseDataBlob> dataBlobs = new List<BaseDataBlob>();
-            dataBlobs.Add(OrbitDB.FromStationary(2));
-            GlobalManager.CreateEntity(dataBlobs);
-
-            // Create one more, just for kicks.
-            
-            Dictionary<SpeciesDB, double> pop2 = new Dictionary<SpeciesDB, double>();
-            pop.Add(species1, 10);
-            dataBlobs.Add(new PopulationDB(pop2));
-            GlobalManager.CreateEntity(dataBlobs);
-
-            // Get all DataBlobs of a specific type.
-            List<PopulationDB> populations = GlobalManager.GetAllDataBlobsOfType<PopulationDB>();
-            List<OrbitDB> orbits = GlobalManager.GetAllDataBlobsOfType<OrbitDB>();
-
-            // Get all DataBlobs of a specific entity.
-            dataBlobs = GlobalManager.GetAllDataBlobsOfEntity(planet);
-
-            // Remove an entity.
-            GlobalManager.RemoveEntity(planet);
-
-            // Add a new entity (using a list of DataBlobs.
-            GlobalManager.CreateEntity(dataBlobs);
-
-            // Find all entities with a specific DataBlob.
-            List<int> populatedEntities = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
-
-            // Get the Population DB of a specific entity.
-            PopulationDB planetPopDB = GlobalManager.GetDataBlob<PopulationDB>(planet);
-
-            // Change the planet Pop.
-            planetPopDB.Population[species1] += 5;
-
-            // Get the current value.
-            PopulationDB planetPopDB2 = GlobalManager.GetDataBlob<PopulationDB>(planet);
-
-            if (planetPopDB.Population != planetPopDB2.Population)
-            {
-                // Note, we wont hit this because the value DID change.
-                throw new InvalidOperationException();
-            }
-
-            // Forget it, remove the DataBlob.
-            GlobalManager.RemoveDataBlob<PopulationDB>(planet);
-
-            if (GlobalManager.GetDataBlob<PopulationDB>(1) == null)
-            {
-                // Will hit this!
-                // Entity 1 doesn't have a population, so GetDataBlob returns null.
-
-                // This crap is so you can reliably breakpoint this (even in release mode) without it being optimized away.
-                int i = 0;
-                i++;
-            }
-            else
-            {
-                // Wont hit this!
-                // Since there's no pop!
-                throw new InvalidOperationException();
-            }
-
-            // Remove the crap we added.
-            GlobalManager.RemoveEntity(planet);
-            GlobalManager.RemoveEntity(planet + 1);
-            GlobalManager.RemoveEntity(planet + 2);
         }
     }
 }
