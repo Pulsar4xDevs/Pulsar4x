@@ -41,6 +41,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBlobs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
@@ -53,6 +54,7 @@
     <Compile Include="DataBlobs\SpeciesDB.cs" />
     <Compile Include="Engine-Comms.cs" />
     <Compile Include="EntityManager.cs" />
+    <Compile Include="Factories\SpeciesFactory.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameSettings.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
