@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
 
@@ -14,31 +15,28 @@ namespace Pulsar4X.ECSLib.Processors
             _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
         }
 
-        public static void Process(StarSystem system, int deltaSeconds)
+        public static void Process(List<StarSystem> systems, int deltaSeconds)
         {
-            EntityManager currentManager = system.SystemManager;
-
-            // Find the first orbital entity.
-            int firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
-
-            if (firstOrbital == -1)
-            {
-                // No orbitals in this manager.
-                return;
-            }
-
-            OrbitDB firstOrbit;
-
-            do
-            {
-                // Get the parentmost orbit.
-                firstOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital, _orbitTypeIndex);
-            } while (firstOrbit.Parent != -1);
-
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
-            // Call recursive function to update every orbit in this system.
-            UpdateOrbit(currentManager, firstOrbit, new PositionDB(0, 0), currentTime);
+            foreach (StarSystem system in systems)
+            {
+                EntityManager currentManager = system.SystemManager;
+
+                // Find the first orbital entity.
+                int firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
+
+                if (firstOrbital == -1)
+                {
+                    // No orbitals in this manager.
+                    continue;
+                }
+
+                OrbitDB rootOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital).RootDB as OrbitDB;
+
+                // Call recursive function to update every orbit in this system.
+                UpdateOrbit(currentManager, rootOrbit, new PositionDB(0, 0), currentTime);
+            }
         }
 
         private static void UpdateOrbit(EntityManager currentManager, OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
@@ -53,10 +51,9 @@ namespace Pulsar4X.ECSLib.Processors
             currentManager.SetDataBlob(orbit.Entity, newPosition);
 
             // Update our children.
-            foreach (int child in orbit.Children)
+            foreach (OrbitDB childOrbit in orbit.ChildDBs.Cast<OrbitDB>())
             {
                 // RECURSION!
-                OrbitDB childOrbit = currentManager.GetDataBlob<OrbitDB>(child, _orbitTypeIndex);
                 UpdateOrbit(currentManager, childOrbit, newPosition, currentTime);
             }
         }

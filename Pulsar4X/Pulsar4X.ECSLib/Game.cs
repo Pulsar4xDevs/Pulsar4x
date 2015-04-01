@@ -11,19 +11,19 @@ using Pulsar4X.ECSLib.Processors;
 
 namespace Pulsar4X.ECSLib
 {
+    public delegate void ProcessorFunction(List<StarSystem> systems, int deltaSeconds);
+
     public class Game
     {
         /// <summary>
         /// Global Entity Manager.
         /// </summary>
-        public EntityManager GlobalManager { get { return m_globalManager; } }
-        private EntityManager m_globalManager;
+        public EntityManager GlobalManager { get; private set; }
 
         /// <summary>
         /// Singleton Instance of Game
         /// </summary>
-        public static Game Instance { get { return m_instance; } }
-        private static Game m_instance;
+        public static Game Instance { get; private set; }
 
         /// <summary>
         /// List of StarSystems currently in the game.
@@ -37,44 +37,48 @@ namespace Pulsar4X.ECSLib
         {
             get 
             {
-                lock (subpulse_lockObj)
+                lock (_subpulseLockObj)
                 {
-                    return m_nextSubpulse;
+                    return _nextSubpulse;
                 }
             }
             set
             {
-                lock (subpulse_lockObj)
+                lock (_subpulseLockObj)
                 {
-                    if (m_nextSubpulse == null)
+                    if (_nextSubpulse == null)
                     {
-                        m_nextSubpulse = value;
+                        _nextSubpulse = value;
                         return;
                     }
-                    if (value.MaxSeconds < m_nextSubpulse.MaxSeconds)
+                    if (value.MaxSeconds < _nextSubpulse.MaxSeconds)
                     {
                         // Only take the shortest subpulse.
-                        m_nextSubpulse = value;
+                        _nextSubpulse = value;
                     }
                 }
             }    
         }
-        private SubpulseLimitRequest m_nextSubpulse;
-        private object subpulse_lockObj = new object();
+        private SubpulseLimitRequest _nextSubpulse;
+        private readonly object _subpulseLockObj = new object();
+
+        /// <summary>
+        /// List of processor functions run when time is advanced.
+        /// </summary>
+        private static List<ProcessorFunction> _processors;
 
         public Interrupt CurrentInterrupt { get; set; }
 
         public Game()
         {
-            m_globalManager = new EntityManager();
-            m_instance = this;
+            GlobalManager = new EntityManager();
+            Instance = this;
 
             StarSystems = new List<StarSystem>();
 
             CurrentDateTime = DateTime.Now;
 
-            NextSubpulse = new SubpulseLimitRequest();
-            NextSubpulse.MaxSeconds = 5;
+            NextSubpulse = new SubpulseLimitRequest {MaxSeconds = 5};
 
             CurrentInterrupt = new Interrupt();
 
@@ -84,10 +88,18 @@ namespace Pulsar4X.ECSLib
             InitializeProcessors();
         }
 
+        /// <summary>
+        /// Prepares, and defines the order that processors are run in.
+        /// </summary>
         private static void InitializeProcessors()
         {
             OrbitProcessor.Initialize();
-            PhaseProcessor.Initialize();
+
+            _processors = new List<ProcessorFunction>
+            {
+                // Defines the order that processors are run.
+                OrbitProcessor.Process
+            };
         }
 
         /// <summary>
@@ -109,7 +121,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // loop through all the incoming queues looking for a new message:
-                List<int> factions = m_globalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+                List<int> factions = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
                 foreach (int faction in factions)
                 {
                     // lets just take a peek first:
@@ -206,8 +218,11 @@ namespace Pulsar4X.ECSLib
                 // Update our date.
                 CurrentDateTime += TimeSpan.FromSeconds(subpulseTime);
 
-                // Execute subpulse phases. Magic happens here.
-                PhaseProcessor.Process(subpulseTime);
+                // Execute all processors. Magic happens here.
+                foreach (ProcessorFunction processor in _processors)
+                {
+                    processor(StarSystems, deltaSeconds);
+                }
 
                 // Update our remaining values.
                 deltaSeconds -= subpulseTime;
