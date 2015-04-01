@@ -43,16 +43,25 @@ namespace Pulsar4X.Tests
             testEntity = _entityManager.CreateEntity(dataBlobs);
             Assert.AreEqual(1, testEntity);
 
+            // Create entity with a specified Guid:
+            dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new PopulationDB(_pop1)};
+            testEntity = _entityManager.CreateEntity(dataBlobs, Guid.NewGuid());
+            Assert.AreEqual(2, testEntity);
+
             // Create entity with existing datablobs, but provide an empty list:
             dataBlobs.Clear();
             testEntity = _entityManager.CreateEntity(dataBlobs);
-            Assert.AreEqual(2, testEntity);
+            Assert.AreEqual(3, testEntity);
+
+            // Create entity with invalid Guid:
+            Assert.Catch<ArgumentException>(() => _entityManager.CreateEntity(dataBlobs, Guid.Empty));
 
             // Create entity with existing datablobs, but provide a null list:
             Assert.Catch(typeof(ArgumentNullException), () =>
                 {
                     _entityManager.CreateEntity(null); // should throw ArgumentNullException
                 });
+
         }
 
         [Test]

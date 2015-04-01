@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
             // Fill out the first level of the datablob map.
             foreach (KeyValuePair<Type, int> dataBlobTypeKVP in _dataBlobTypes)
             {
-                _dataBlobMap[dataBlobTypeKVP.Value] = new List<BaseDataBlob>();
+                _dataBlobMap.Add(new List<BaseDataBlob>());
             }
 
             Clear();
@@ -316,7 +316,7 @@ namespace Pulsar4X.ECSLib
             _guidLock.EnterWriteLock();
             try
             {
-                return CreateEntity(Guid.NewGuid());
+                return CreateEntityInternal(Guid.NewGuid());
             }
             finally
             {
@@ -333,7 +333,7 @@ namespace Pulsar4X.ECSLib
             _guidLock.EnterWriteLock();
             try
             {
-                return CreateEntity(dataBlobs, Guid.NewGuid());
+                return CreateEntityInternal(dataBlobs, Guid.NewGuid());
             }
             finally
             {
@@ -341,14 +341,32 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private int CreateEntity(List<BaseDataBlob> dataBlobs, Guid entityGuid)
+        /// <summary>
+        /// Adds an entity with the pre-existing datablobs and Guid to this EntityManager.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
+        /// <exception cref="ArgumentException">Thrown when entityGuid is Guid.Empty</exception>
+        public int CreateEntity(List<BaseDataBlob> dataBlobs, Guid entityGuid)
+        {
+            _guidLock.EnterWriteLock();
+            try
+            {
+                return CreateEntityInternal(dataBlobs, entityGuid);
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
+        }
+
+        private int CreateEntityInternal(List<BaseDataBlob> dataBlobs, Guid entityGuid)
         {
             if (dataBlobs == null)
             {
                 throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity use CreateEntity().");
             }
 
-            int entity = CreateEntity(entityGuid);
+            int entity = CreateEntityInternal(entityGuid);
 
             foreach (BaseDataBlob dataBlob in dataBlobs)
             {
@@ -360,8 +378,13 @@ namespace Pulsar4X.ECSLib
             return entity;
         }
 
-        private int CreateEntity(Guid entityGuid)
+        private int CreateEntityInternal(Guid entityGuid)
         {
+            if (entityGuid == Guid.Empty)
+            {
+                throw new ArgumentException("Cannot create entity with a Guid of 00000000-0000-0000-0000-000000000000");
+            }
+
             int entityID;
             for (entityID = 0; entityID < _entities.Count; entityID++)
             {
@@ -464,7 +487,7 @@ namespace Pulsar4X.ECSLib
             {
                 Guid entityGuid = GuidFromEntity(entity);
                 RemoveEntity(entity, entityGuid);
-                return manager.CreateEntity(dataBlobs, entityGuid);
+                return manager.CreateEntityInternal(dataBlobs, entityGuid);
             }
             finally
             {
