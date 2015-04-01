@@ -11,6 +11,6 @@ namespace Pulsar4X.ECSLib.DataBlobs
     {
         public int Entity { get; set; }
 
-        public ReaderWriterLockSlim LockObject = new ReaderWriterLockSlim();
+        public readonly object LockObject = new object();
     }
 }
