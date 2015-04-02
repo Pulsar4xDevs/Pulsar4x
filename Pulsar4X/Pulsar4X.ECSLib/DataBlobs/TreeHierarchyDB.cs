@@ -1,41 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
-        private readonly List<TreeHierarchyDB> _childDBs;
-        private readonly object _internalLock;
         private readonly int _typeIndex;
-        private TreeHierarchyDB _parentDB;
-        private TreeHierarchyDB _rootDB;
 
-        protected TreeHierarchyDB(Guid parentGuid)
+        private TreeHierarchyDB()
         {
-            _internalLock = new object();
-
             EntityManager.TryGetTypeIndex(GetType(), out _typeIndex);
-            ParentGuid = parentGuid;
+        }
 
-            ChildGuids = new List<Guid>();
+        protected TreeHierarchyDB(Guid parentGuid) : this()
+        {
+            ParentGuid = parentGuid;
+            if (parentGuid != Guid.Empty)
+            {
+                _parentDB = FindSameTypeDB(ParentGuid);
+            }
+
+            _childGuids = new List<Guid>();
             _childDBs = new List<TreeHierarchyDB>();
         }
 
-        protected TreeHierarchyDB(Guid parentGuid, List<Guid> childGuids) : this(parentGuid)
+        public Guid ParentGuid { get; private set; }
+        [JsonIgnore]
+        public TreeHierarchyDB ParentDB
         {
-            ChildGuids = childGuids;
-
-            foreach (Guid childGuid in ChildGuids)
+            get
             {
-                _childDBs.Add(FindSameTypeDB(childGuid));
+                if (_parentDB == null && ParentGuid != Guid.Empty)
+                {
+                    _parentDB = FindSameTypeDB(ParentGuid);
+                }
+
+                return _parentDB;
             }
         }
+        private TreeHierarchyDB _parentDB;
 
-        public Guid ParentGuid { get; set; }
-        public List<Guid> ChildGuids { get; set; }
-
+        [JsonIgnore]
         public TreeHierarchyDB RootDB
         {
             get
@@ -53,49 +60,41 @@ namespace Pulsar4X.ECSLib.DataBlobs
                 }
                 return _rootDB;
             }
-            private set { _rootDB = value; }
         }
+        private TreeHierarchyDB _rootDB;
 
-        public TreeHierarchyDB ParentDB
+
+        [JsonIgnore]
+        public ReadOnlyCollection<Guid> ChildGuids
         {
-            get
-            {
-                if (_parentDB == null && ParentGuid != Guid.Empty)
-                {
-                    _parentDB = FindSameTypeDB(ParentGuid);
-                }
-
-                return _parentDB;
-            }
-            private set { _parentDB = value; }
+            get { return _childGuids.AsReadOnly(); }
         }
+        [JsonProperty("ChildGuids")]
+        private readonly List<Guid> _childGuids;
 
+        [JsonIgnore]
         public ReadOnlyCollection<TreeHierarchyDB> ChildDBs
         {
             get { return _childDBs.AsReadOnly(); }
         }
+        private readonly List<TreeHierarchyDB> _childDBs;
 
+        [JsonIgnore]
         public override Guid EntityGuid
         {
-            get { return base.EntityGuid; }
+            get { return _entityGuid; }
             set
             {
                 if (ParentDB != null)
                 {
-                    int index = ParentDB.ChildGuids.FindIndex((Guid listValue) => listValue == EntityGuid);
-                    if (index != -1)
-                    {
-                        index = ParentDB.ChildGuids.IndexOf(EntityGuid);
-                        ParentDB.ChildGuids[index] = value;
-                    }
-                    else
-                    {
-                        ParentDB.ChildGuids.Add(value);
-                    }
+                    ParentDB.AddChild(value);
                 }
-                base.EntityGuid = value;
+
+                _entityGuid = value;
             }
         }
+        [JsonProperty("EntityGuid")]
+        private Guid _entityGuid;
 
         private TreeHierarchyDB FindSameTypeDB(Guid entityGuid)
         {
@@ -109,5 +108,58 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
             return entityManager.GetDataBlob<TreeHierarchyDB>(entityID, _typeIndex);
         }
+
+        public void SetParent(Guid parentGuid)
+        {
+            // Unlink us from current parent.
+            if (ParentDB != null)
+            {
+                ParentDB.RemoveChild(EntityGuid);
+            }
+
+            // Link us to the parent.
+            ParentGuid = parentGuid;
+
+            // Link parent back to us.
+            if (parentGuid != Guid.Empty)
+            {
+                _parentDB = FindSameTypeDB(parentGuid);
+                _parentDB.AddChild(EntityGuid);
+            }
+            InvalidateRoot();
+        }
+
+        private void InvalidateRoot()
+        {
+            _rootDB = null;
+            foreach (TreeHierarchyDB child in ChildDBs)
+            {
+                child.InvalidateRoot();
+            }
+        }
+
+        private void AddChild(Guid childGuid)
+        {
+            TreeHierarchyDB childDB = FindSameTypeDB(childGuid);
+            _childDBs.Add(childDB);
+            _childGuids.Add(childGuid);
+        }
+
+        private void RemoveChild(Guid childGuid)
+        {
+            TreeHierarchyDB childDB = FindSameTypeDB(childGuid);
+            _childDBs.Remove(childDB);
+            _childGuids.Remove(childGuid);
+        }
     }
+
+#if DEBUG
+    // Non-abstract class to test the TreeHierarchyDB class.
+    public class TreeHierarchyDBConcrete : TreeHierarchyDB
+    {
+        public TreeHierarchyDBConcrete(Guid parentGuid) : base(parentGuid)
+        {
+        }
+    }
+#endif
 }

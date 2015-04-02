@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 using System.Threading;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
-using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -14,19 +13,19 @@ namespace Pulsar4X.ECSLib
     {
         public GuidNotFoundException()
         {
-            
+
         }
 
         public GuidNotFoundException(string message)
             : base(message)
         {
-            
+
         }
 
         public GuidNotFoundException(string message, Exception innerException)
             : base(message, innerException)
         {
-            
+
         }
     }
 
@@ -40,7 +39,7 @@ namespace Pulsar4X.ECSLib
         private readonly List<int> _entities;
         private readonly List<ComparableBitArray> _entityMasks;
         private readonly Dictionary<Guid, int> _localGuidDictionary;
-        private readonly List<Guid> _localGuids; 
+        private readonly List<Guid> _localGuids;
 
         public EntityManager()
         {
@@ -52,7 +51,7 @@ namespace Pulsar4X.ECSLib
                 int i = 0;
                 // Use reflection to setup all our dataBlobMap.
                 // Find all types that implement BaseDataBlob
-                foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && type != typeof(BaseDataBlob)))
+                foreach (Type type in Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract))
                 {
                     _dataBlobTypes.Add(type, i);
                     i++;
@@ -138,12 +137,12 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentNullException("dataBlob", "Do not use SetDataBlob to remove a datablob. Use RemoveDataBlob.");
             }
 
+            _dataBlobMap[typeIndex][entityID] = dataBlob;
+            _entityMasks[entityID][typeIndex] = true;
+
             dataBlob.EntityID = entityID;
             dataBlob.EntityGuid = _localGuids[entityID];
             dataBlob.ContainingManager = this;
-
-            _dataBlobMap[typeIndex][entityID] = dataBlob;
-            _entityMasks[entityID][typeIndex] = true;
         }
 
         /// <summary>
@@ -269,7 +268,9 @@ namespace Pulsar4X.ECSLib
         /// Optimized convenience function to get entities that contain two types of DataBlobs, along with the associated DataBlobs.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
+        public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>()
+            where T1 : BaseDataBlob
+            where T2 : BaseDataBlob
         {
             int typeIndexT1 = GetTypeIndex<T1>();
             int typeIndexT2 = GetTypeIndex<T2>();
@@ -604,7 +605,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Faster than TryGetDataBlobTypeIndex and uses generics for type safety.
         /// </summary>
-        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
+        /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob, or is Abstract</exception>
         public static int GetTypeIndex<T>() where T : BaseDataBlob
         {
             return _dataBlobTypes[typeof(T)];
