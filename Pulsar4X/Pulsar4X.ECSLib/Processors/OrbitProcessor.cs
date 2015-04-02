@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib.Processors
             newPosition += parentPosition;
 
             // Set our absolute coordinates.
-            currentManager.SetDataBlob(orbit.Entity, newPosition);
+            currentManager.SetDataBlob(orbit.EntityID, newPosition);
 
             // Update our children.
             foreach (OrbitDB childOrbit in orbit.ChildDBs.Cast<OrbitDB>())
