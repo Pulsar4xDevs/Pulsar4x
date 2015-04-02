@@ -20,6 +20,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             ParentGuid = parentGuid;
 
             ChildGuids = new List<Guid>();
+            _childDBs = new List<TreeHierarchyDB>();
         }
 
         protected TreeHierarchyDB(Guid parentGuid, List<Guid> childGuids) : this(parentGuid)
