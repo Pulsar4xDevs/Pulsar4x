@@ -237,5 +237,15 @@ namespace Pulsar4X.ECSLib
             }
             return timeAdvanced;
         }
+
+
+        internal void PostLoad(DateTime currentDateTime, EntityManager globalManager, List<StarSystem> starSystems)
+        {
+            CurrentDateTime = currentDateTime;
+            GlobalManager = globalManager;
+            StarSystems = starSystems;
+
+            ///< @todo go throuhg all datablobs and call their postLoad functions if they have them.
+        }
     }
 }
