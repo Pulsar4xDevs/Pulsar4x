@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -14,7 +15,12 @@ namespace Pulsar4X.ECSLib
     // use: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm
     public class SaveGame
     {
-        public string File{ get; set; }
+        private string _file;
+        public string File
+        {
+            get { return _file; }
+            set { CheckAndUpdateFile(value); }
+        }
 
         private struct SaveData
         {
@@ -33,8 +39,10 @@ namespace Pulsar4X.ECSLib
             _serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented };
         }
 
-        public void Save()
+        public void Save(string file = null)
         {
+            CheckAndUpdateFile(file);
+
             // first collect the data:
             CollectGameData();
 
@@ -45,8 +53,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public void Load()
+        public void Load(string file = null)
         {
+            CheckAndUpdateFile(file);
+
             using (StreamReader sr = new StreamReader(File))
             using (JsonReader reader = new JsonTextReader(sr))
             {
@@ -56,6 +66,31 @@ namespace Pulsar4X.ECSLib
             // get the game to do its post load stuff
             Game.Instance.PostLoad(_data.GameDateTime, _data.GlobalEntityManager, _data.StarSystems);
         }
+
+        /// <summary>
+        /// Check if we have a valid file, if we do it updates the cached file record.
+        /// </summary>
+        /// <param name="file">file to check.</param>
+        private void CheckAndUpdateFile(string file)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                // check if cached file valid: 
+                if (string.IsNullOrEmpty(File))
+                {
+                    throw new ArgumentNullException("No valid file path provided.");
+                }
+            }
+            else
+            {
+                ///< @todo add more validity checks here.
+            }
+
+            // if we have a problem with the file we should throw before this...
+            File = file;
+        }
+
+
 
         private void CollectGameData()
         {

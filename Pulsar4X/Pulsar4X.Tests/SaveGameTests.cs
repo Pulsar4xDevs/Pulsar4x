@@ -58,8 +58,47 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestSaveLoad()
         {
+            // lets check some invalid strings first:
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                SaveGame invalidSave = new SaveGame(null);
+            });
+
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                const string testStr = "";
+                SaveGame invalidSave = new SaveGame(testStr);
+            });
+
+            // now lets create a good saveGame
             SaveGame save = new SaveGame(file);
 
+            // now lets try to write those bad string again:
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                save.File = null;
+            });
+
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                const string testStr = "";
+                save.File = testStr;
+            });
+
+            // now lets try to save and load while providing bad strings:
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                const string testStr = "";
+                save.Load(testStr);
+            });
+
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                const string testStr = "";
+                save.Save(testStr);
+            });
+
+            // now lets save the game:
             save.Save();
             Assert.IsTrue(File.Exists(file));
 
