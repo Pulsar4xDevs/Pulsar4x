@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -28,7 +30,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class EntityManager
+    public class EntityManager : ISerializable
     {
         private static Dictionary<Type, int> _dataBlobTypes;
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
@@ -607,5 +609,19 @@ namespace Pulsar4X.ECSLib
         {
             return _dataBlobTypes[typeof(T)];
         }
+
+        #region ISerializable Methods
+
+        public EntityManager(SerializationInfo info, StreamingContext context)
+        {
+            throw new NotImplementedException("Rod needs to impliment this.");
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            throw new NotImplementedException("Rod needs to impliment this.");
+        }
+
+        #endregion
     }
 }
