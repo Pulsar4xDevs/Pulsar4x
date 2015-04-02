@@ -7,18 +7,8 @@ using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    public class OrbitDB : BaseDataBlob
+    public class OrbitDB : TreeHierarchyDB
     {
-        /// <summary>
-        /// Entity that this orbit orbits.
-        /// </summary>
-        public int Parent;
-
-        /// <summary>
-        /// Children that orbit this entity.
-        /// </summary>
-        public List<int> Children;
-
         /// <summary>
         /// Mass in KG of this entity.
         /// </summary>
@@ -113,7 +103,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="longitudeOfPeriapsis">Longitude of periapsis in degrees.</param>
         /// <param name="meanLongitude">Longitude of object at epoch in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        public static OrbitDB FromMajorPlanetFormat(int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromMajorPlanetFormat(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
             // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
@@ -121,7 +111,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             // http://en.wikipedia.org/wiki/Mean_longitude
             double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
 
-            return new OrbitDB(parentID, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
         /// <summary>
@@ -136,10 +126,10 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="argumentOfPeriapsis">Argument of periapsis in degrees.</param>
         /// <param name="meanAnomaly">Mean Anomaly in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        public static OrbitDB FromAsteroidFormat(int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromAsteroidFormat(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
-            return new OrbitDB(parentID, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
         /// <summary>
@@ -150,17 +140,15 @@ namespace Pulsar4X.ECSLib.DataBlobs
             return new OrbitDB(mass);
         }
 
-        private OrbitDB(double mass)
+        private OrbitDB(double mass) : base(Guid.Empty)
         {
-            Parent = -1;
             Mass = mass;
             IsStationary = true;
         }
 
-        private OrbitDB(int parentID, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
-                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
+        private OrbitDB(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch) : base(parentGuid)
         {
-            Parent = parentID;
             Mass = mass;
             ParentMass = parentMass;
             SemiMajorAxis = semiMajorAxis;

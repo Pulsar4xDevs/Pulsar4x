@@ -7,124 +7,106 @@ namespace Pulsar4X.ECSLib.DataBlobs
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
         private readonly List<TreeHierarchyDB> _childDBs;
-        private readonly List<Guid> _childGuids;
         private readonly object _internalLock;
         private readonly int _typeIndex;
-        private Guid _parentGuid;
+        private TreeHierarchyDB _parentDB;
+        private TreeHierarchyDB _rootDB;
 
-        /// <summary>
-        /// A datablob type that automatically resolves references for a tree heirarchy.
-        /// </summary>
-        protected TreeHierarchyDB()
+        protected TreeHierarchyDB(Guid parentGuid)
         {
             _internalLock = new object();
 
             EntityManager.TryGetTypeIndex(GetType(), out _typeIndex);
+            ParentGuid = parentGuid;
 
-            _childDBs = new List<TreeHierarchyDB>();
-            _childGuids = new List<Guid>();
+            ChildGuids = new List<Guid>();
         }
 
-        /// <summary>
-        /// Used to resolve all Guid references after deserialization.
-        /// </summary>
-        public void ResolveGuids()
+        protected TreeHierarchyDB(Guid parentGuid, List<Guid> childGuids) : this(parentGuid)
         {
-            ParentDB = null;
+            ChildGuids = childGuids;
 
-            ParentDB = FindSameTypeDB(ParentGuid, _typeIndex);
-
-            foreach (Guid childGuid in _childGuids)
+            foreach (Guid childGuid in ChildGuids)
             {
-                _childDBs.Add(FindSameTypeDB(childGuid, _typeIndex));
+                _childDBs.Add(FindSameTypeDB(childGuid));
             }
         }
 
-        /// <summary>
-        /// Parent datablob of this datablob in the hierarchy.
-        /// </summary>
-        public TreeHierarchyDB ParentDB { get; private set; }
+        public Guid ParentGuid { get; set; }
+        public List<Guid> ChildGuids { get; set; }
 
-        /// <summary>
-        /// Root datablob of the hierarchy.
-        /// </summary>
-        public TreeHierarchyDB RootDB { get; private set; }
-
-        /// <summary>
-        /// A read-only list of child datablobs.
-        /// </summary>
-        public ReadOnlyCollection<TreeHierarchyDB> ChildDBs
+        public TreeHierarchyDB RootDB
         {
             get
             {
-                lock (_internalLock)
+                if (_rootDB == null)
                 {
-                    return _childDBs.AsReadOnly();
-                }
-            }
-        }
-
-        /// <summary>
-        /// The Guid of this datablob's parent.
-        /// </summary>
-        public Guid ParentGuid
-        {
-            get { return _parentGuid; }
-            set
-            {
-                lock (_internalLock)
-                {
-                    _parentGuid = value;
-                    if (value != Guid.Empty)
+                    if (ParentDB == null)
                     {
-                        ParentDB = FindSameTypeDB(value, _typeIndex);
-                        RootDB = ParentDB.RootDB;
+                        _rootDB = this;
                     }
                     else
                     {
-                        ParentDB = null;
-                        RootDB = this;
+                        _rootDB = ParentDB.RootDB;
                     }
                 }
+                return _rootDB;
             }
+            private set { _rootDB = value; }
         }
 
-        /// <summary>
-        /// Adds a child to this datablob hierarchy.
-        /// </summary>
-        /// <param name="childGuid">Guid of child to add.</param>
-        public void AddChild(Guid childGuid)
+        public TreeHierarchyDB ParentDB
         {
-            lock (_internalLock)
+            get
             {
-                TreeHierarchyDB child = FindSameTypeDB(childGuid, _typeIndex);
-                _childGuids.Add(childGuid);
-                _childDBs.Add(child);
+                if (_parentDB == null && ParentGuid != Guid.Empty)
+                {
+                    _parentDB = FindSameTypeDB(ParentGuid);
+                }
+
+                return _parentDB;
             }
+            private set { _parentDB = value; }
         }
 
-        /// <summary>
-        /// Removes a child from this datablob hierarchy.
-        /// </summary>
-        /// <param name="childGuid">Guid of child to remove.</param>
-        public void RemoveChild(Guid childGuid)
+        public ReadOnlyCollection<TreeHierarchyDB> ChildDBs
         {
-            lock (_internalLock)
+            get { return _childDBs.AsReadOnly(); }
+        }
+
+        public override Guid EntityGuid
+        {
+            get { return base.EntityGuid; }
+            set
             {
-                TreeHierarchyDB child = FindSameTypeDB(childGuid, _typeIndex);
-                _childGuids.Remove(childGuid);
-                _childDBs.Remove(child);
+                if (ParentDB != null)
+                {
+                    int index = ParentDB.ChildGuids.FindIndex((Guid listValue) => listValue == EntityGuid);
+                    if (index != -1)
+                    {
+                        index = ParentDB.ChildGuids.IndexOf(EntityGuid);
+                        ParentDB.ChildGuids[index] = value;
+                    }
+                    else
+                    {
+                        ParentDB.ChildGuids.Add(value);
+                    }
+                }
+                base.EntityGuid = value;
             }
         }
 
-        private static TreeHierarchyDB FindSameTypeDB(Guid entityGuid, int typeIndex)
+        private TreeHierarchyDB FindSameTypeDB(Guid entityGuid)
         {
             EntityManager entityManager;
             int entityID;
 
-            EntityManager.FindEntityByGuid(entityGuid, out entityManager, out entityID);
+            if (!EntityManager.FindEntityByGuid(entityGuid, out entityManager, out entityID))
+            {
+                throw new GuidNotFoundException();
+            }
 
-            return entityManager.GetDataBlob<TreeHierarchyDB>(entityID, typeIndex);
+            return entityManager.GetDataBlob<TreeHierarchyDB>(entityID, _typeIndex);
         }
     }
 }

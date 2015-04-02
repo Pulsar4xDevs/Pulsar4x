@@ -43,18 +43,10 @@ namespace Pulsar4X.Tests
             testEntity = _entityManager.CreateEntity(dataBlobs);
             Assert.AreEqual(1, testEntity);
 
-            // Create entity with a specified Guid:
-            dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new PopulationDB(_pop1)};
-            testEntity = _entityManager.CreateEntity(dataBlobs, Guid.NewGuid());
-            Assert.AreEqual(2, testEntity);
-
             // Create entity with existing datablobs, but provide an empty list:
             dataBlobs.Clear();
             testEntity = _entityManager.CreateEntity(dataBlobs);
-            Assert.AreEqual(3, testEntity);
-
-            // Create entity with invalid Guid:
-            Assert.Catch<ArgumentException>(() => _entityManager.CreateEntity(dataBlobs, Guid.Empty));
+            Assert.AreEqual(2, testEntity);
 
             // Create entity with existing datablobs, but provide a null list:
             Assert.Catch(typeof(ArgumentNullException), () =>
@@ -295,7 +287,7 @@ namespace Pulsar4X.Tests
             );
 
             // now lets lookup using a mask:
-            ComparableBitArray dataBlobMask = _entityManager.BlankDataBlobMask();
+            ComparableBitArray dataBlobMask = EntityManager.BlankDataBlobMask();
             dataBlobMask.Set(EntityManager.GetTypeIndex<PopulationDB>(), true);
             dataBlobMask.Set(EntityManager.GetTypeIndex<OrbitDB>(), true);
             entities = _entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
@@ -307,7 +299,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(0, entities.Count);
 
             // and an empty mask:
-            dataBlobMask = _entityManager.BlankDataBlobMask();
+            dataBlobMask = EntityManager.BlankDataBlobMask();
             entities = _entityManager.GetAllEntitiesWithDataBlobs(dataBlobMask);
             Assert.AreEqual(3, entities.Count); // this is counter intuitive... but it is what happens.
 
