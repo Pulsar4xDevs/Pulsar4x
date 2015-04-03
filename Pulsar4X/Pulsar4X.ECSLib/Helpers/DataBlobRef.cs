@@ -65,6 +65,16 @@ namespace Pulsar4X.ECSLib
              return em.GetDataBlob<T>(entityID);
          }
 
+        public bool IsNull()
+        {
+            return _ref == null;
+        }
+
+        public static DataBlobRef<T> Null()
+        {
+            return null;
+        }
+
         #region Operator Overloads
 
         public static bool operator ==(DataBlobRef<T> a, DataBlobRef<T> b)
@@ -97,12 +107,22 @@ namespace Pulsar4X.ECSLib
             return a.Ref == b;
         }
 
+        public static bool operator ==(T b, DataBlobRef<T> a)
+        {
+            return (a == b);
+        }
+
         public static bool operator !=(DataBlobRef<T> a, DataBlobRef<T> b)
         {
             return !(a == b);
         }
 
         public static bool operator !=(DataBlobRef<T> a, T b)
+        {
+            return !(a == b);
+        }
+
+        public static bool operator !=(T b, DataBlobRef<T> a)
         {
             return !(a == b);
         }
@@ -131,11 +151,16 @@ namespace Pulsar4X.ECSLib
             {
                 return true;
             }
-            if (obj.GetType() != this.GetType())
+            if (obj.GetType() == this.GetType())
             {
-                return false;
+                return Equals((DataBlobRef<T>)obj);
             }
-            return Equals((DataBlobRef<T>)obj);
+            if (obj.GetType() == _ref.GetType())
+            {
+                return Equals((T)obj);
+            }
+
+            return false;
         }
 
         public override int GetHashCode()
