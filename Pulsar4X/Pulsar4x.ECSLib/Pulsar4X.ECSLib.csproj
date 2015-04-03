@@ -63,6 +63,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="GameSettings.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
+    <Compile Include="Helpers\DataBlobRef.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\Interrupt.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />
