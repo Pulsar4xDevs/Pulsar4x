@@ -12,16 +12,16 @@ namespace Pulsar4X.Tests
     {
         EntityManager _entityManager;
         private SpeciesDB _species1;
-        private Dictionary<SpeciesDB, double> _pop1;
-        private Dictionary<SpeciesDB, double> _pop2;
+        private JDictionary<SpeciesDB, double> _pop1;
+        private JDictionary<SpeciesDB, double> _pop2;
 
         [SetUp]
         public void Init()
         {
             _entityManager = new EntityManager();
             _species1 = new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45);
-            _pop1 = new Dictionary<SpeciesDB, double> {{_species1, 10}};
-            _pop2 = new Dictionary<SpeciesDB, double> {{_species1, 5}};
+            _pop1 = new JDictionary<SpeciesDB, double> { { _species1, 10 } };
+            _pop2 = new JDictionary<SpeciesDB, double> { { _species1, 5 } };
         }
 
         [TearDown]

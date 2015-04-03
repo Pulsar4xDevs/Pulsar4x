@@ -64,6 +64,7 @@
     <Compile Include="Helpers\ComparableBitArray.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\Interrupt.cs" />
+    <Compile Include="Helpers\JSONHelper.cs" />
     <Compile Include="Helpers\SubpulseLimitRequest.cs" />
     <Compile Include="Processors\OrbitProcessor.cs" />
     <Compile Include="Processors\RuinsProcessor.cs" />

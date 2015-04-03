@@ -34,5 +34,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
             MaximumTemperatureConstraint = maxTemp;
 
         }
+
+        public SpeciesDB() : base()
+        { }
     }
 }

@@ -33,7 +33,7 @@ namespace Pulsar4X.Tests
             // add a faction:
             List<BaseDataBlob> list = new List<BaseDataBlob>();
             SpeciesDB sdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
-            Dictionary<SpeciesDB, double> pop = new Dictionary<SpeciesDB, double>();
+            JDictionary<SpeciesDB, double> pop = new JDictionary<SpeciesDB, double>();
             pop.Add(sdb, 42);
 
             list.Add(new PopulationDB(pop));
@@ -70,10 +70,10 @@ namespace Pulsar4X.Tests
 
             //and load the saved data:
             save.Load();
-            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
-            Assert.AreEqual(1, entities.Count);
             Assert.AreEqual(1, game.StarSystems.Count);
             Assert.AreEqual(testTime, game.CurrentDateTime);
+            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+            Assert.AreEqual(1, entities.Count);
         }
     }
 }
