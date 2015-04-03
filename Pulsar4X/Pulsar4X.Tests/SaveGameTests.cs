@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
 {
     using NUnit.Framework;
 
-    [TestFixture, Description("Basic Tests for the Main Game Loop.")]
+    [TestFixture, Description("Tests the game Save/Load system.")]
     class SaveGameTests
     {
         private Game game;
