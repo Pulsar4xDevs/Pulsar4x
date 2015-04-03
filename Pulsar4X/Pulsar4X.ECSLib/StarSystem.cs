@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib
 
         public StarSystem()
         {
-            SystemManager = new EntityManager();
+            SystemManager = new EntityManager(true);
             Neighbors = new List<StarSystem>();
         }
     }

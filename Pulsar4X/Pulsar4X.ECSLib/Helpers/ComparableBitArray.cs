@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib.Helpers
 {
     public sealed class ComparableBitArray
     {
 
+        [JsonProperty]
         private readonly int[] _backingValues;
         private const int BitsPerValue = 32;
 

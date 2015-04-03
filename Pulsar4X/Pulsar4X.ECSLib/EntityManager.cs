@@ -51,7 +51,11 @@ namespace Pulsar4X.ECSLib
         [JsonProperty]
         private readonly List<Guid> _localGuids;
 
-        public EntityManager()
+        public EntityManager() : this(false)
+        {
+        }
+
+        public EntityManager(bool initialize)
         {
             // Initialize our static variables.
             if (_dataBlobTypes == null)
@@ -71,6 +75,11 @@ namespace Pulsar4X.ECSLib
                 _guidLock = new ReaderWriterLockSlim();
             }
 
+            if (!initialize)
+            {
+                return;
+            }
+
             // Initialize our instance variables.
             _dataBlobMap = new List<List<BaseDataBlob>>(_dataBlobTypes.Count);
             _entities = new List<int>();
@@ -83,7 +92,6 @@ namespace Pulsar4X.ECSLib
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
-
             Clear();
         }
 
@@ -628,10 +636,37 @@ namespace Pulsar4X.ECSLib
         //    throw new NotImplementedException("Rod needs to impliment this.");
         //}
 
-        //public void GetObjectData(SerializationInfo info, StreamingContext context)
-        //{
-        //    throw new NotImplementedException("Rod needs to impliment this.");
-        //}
+        /*
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            foreach (KeyValuePair<Type, int> typeKVP in _dataBlobTypes)
+            {
+                Type dataBlobType = typeKVP.Key;
+                int typeIndex = typeKVP.Value;
+
+                // Here be dragons.
+                dynamic dataBlobList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataBlobType));
+                MethodInfo castMethod = GetType().GetMethod("Cast", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(dataBlobType);
+
+                foreach (object castedDataBlob in from dataBlob in _dataBlobMap[typeIndex]
+                                                  where dataBlob != null
+                                                  select castMethod.Invoke(null, new object[] { dataBlob }))
+                {
+                    dataBlobList.Add(castedDataBlob);
+                }
+
+                if (dataBlobList.Count > 0)
+                {
+                    info.AddValue(dataBlobType.Name, dataBlobList);
+                }
+            }
+        }
+
+        private static T Cast<T>(object o) where T : BaseDataBlob
+        {
+            return (T)o;
+        }
+        */
 
         #endregion
     }
