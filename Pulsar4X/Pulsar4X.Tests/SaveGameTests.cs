@@ -60,6 +60,31 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestSaveLoad()
         {
+            // lets create a bad save game:
+            SaveGame bad = new SaveGame();
+
+            // Check default nulls throw:
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                bad.Save();
+            });
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                bad.Load();
+            });
+
+            // check provided empty string throws:
+            const string emptyString = "";
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                bad.Save(emptyString);
+            });
+            Assert.Catch(typeof(ArgumentNullException), () =>
+            {
+                bad.Load(emptyString);
+            });
+
+            
             // lets create a good saveGame
             SaveGame save = new SaveGame(file);
 

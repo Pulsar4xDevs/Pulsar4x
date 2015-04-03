@@ -15,10 +15,10 @@ namespace Pulsar4X.ECSLib
     // use: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm
     public class SaveGame
     {
-        //private string _file;
         public string File
         {
-            get; set; }
+            get; set; 
+        }
 
         private struct SaveData
         {
@@ -99,7 +99,7 @@ namespace Pulsar4X.ECSLib
     /// <summary>
     /// A small interface that defines the PostLaod function for datablobs and other classes to use for post de-serilization work.
     /// </summary>
-    public interface IPostLaod
+    public interface IPostLoad
     {
         void PostLoad();
     }
