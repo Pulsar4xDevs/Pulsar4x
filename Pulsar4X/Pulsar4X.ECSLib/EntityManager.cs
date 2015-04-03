@@ -618,40 +618,56 @@ namespace Pulsar4X.ECSLib
 
         #region ISerializable Methods
 
+        /// <summary>
+        /// Deserialization constructor. Responsible for putting the EnitityManager together.
+        /// </summary>
         // ReSharper disable once UnusedMember.Global
         // ReSharper disable once UnusedParameter.Local
         public EntityManager(SerializationInfo info, StreamingContext context) : this()
         {
+            // Retrieve the Guid list.
             var entities = (List<Guid>)info.GetValue("Entities", typeof(List<Guid>));
 
+            // Create an entity for each Guid.
+            // Also ensures all Guid dictionaries are set.
             foreach (Guid entity in entities)
             {
                 CreateEntity(entity);
             }
 
+            // Deserialize the datablobs by type.
             foreach (KeyValuePair<Type, int> dataBlobTypeInfo in _dataBlobTypes)
             {
                 Type dataBlobType = dataBlobTypeInfo.Key;
+
+                // Little bit of magic here.
+                // We're creating a List<DerivedDataBlobType> list.
+                // We need to use the fully qualified DerivedDataBlobType (such as OrbitDB)
+                // to ensure JSON constructs the right object with the right values.
                 Type listType = typeof(List<>).MakeGenericType(dataBlobType);
+                // Actually creating the list.
                 dynamic dataBlobs = Activator.CreateInstance(listType);
 
                 try
                 {
+                    // Try to populate the list.
                     dataBlobs = info.GetValue(dataBlobType.Name, listType);
                 }
                 catch (SerializationException e)
                 {
                     if (e.Message == "Member '" + dataBlobType.Name + "' was not found.")
                     {
-                        // Harmless.
+                        // Harmless. If an EntityManager is storing 0 of a type of datablob, it wont serialize anything for it.
+                        // When we go to deserialize "nothing", we get this exception.
                     }
                     else
                     {
-                        // Not harmless. Rethrow.
+                        // Not harmless. This could be any number of normal deserialization problems.
                         throw;
                     }
                 }
 
+                // Set the dataBlobs to their proper entity using a local Guid lookup.
                 foreach (dynamic dataBlob in dataBlobs)
                 {
                     SetDataBlob(_localGuidDictionary[dataBlob.EntityGuid], dataBlob);
@@ -659,24 +675,27 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// Serialization function.
+        /// This function defines exactly how to output the EntityManager.
+        /// </summary>
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            // Serialize DataBlobs.
+            // Serialize DataBlobs by type.
             foreach (KeyValuePair<Type, int> typeKVP in _dataBlobTypes)
             {
                 Type dataBlobType = typeKVP.Key;
                 int typeIndex = typeKVP.Value;
 
-                // Here be dragons.
-                MethodInfo castMethod = GetType().GetMethod("Cast", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(dataBlobType);
+                // Find non-null datablobs in our memory structure.
+                List<object> dataBlobs = (from dataBlob in _dataBlobMap[typeIndex]
+                                          where dataBlob != null
+                                          select (object)dataBlob).ToList();
 
-                IEnumerable<object> enumerable = from dataBlob in _dataBlobMap[typeIndex]
-                                                 where dataBlob != null
-                                                 select castMethod.Invoke(null, new object[] {dataBlob});
-                IEnumerable<object> dataBlobObjects = enumerable as IList<object> ?? enumerable.ToList();
-                if (dataBlobObjects.Any())
+                // Serialize the list if not empty.
+                if (dataBlobs.Count > 0)
                 {
-                    info.AddValue(dataBlobType.Name, dataBlobObjects.ToList());
+                    info.AddValue(dataBlobType.Name, dataBlobs);
                 }
             }
             // Serialize Entities
@@ -684,13 +703,6 @@ namespace Pulsar4X.ECSLib
 
             info.AddValue("Entities", defraggedGuids);
         }
-
-        // ReSharper disable once UnusedMember.Local
-        private static T Cast<T>(object o) where T : BaseDataBlob
-        {
-            return (T)o;
-        }
-
         #endregion
     }
 }
