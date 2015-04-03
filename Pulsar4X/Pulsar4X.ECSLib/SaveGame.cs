@@ -15,12 +15,10 @@ namespace Pulsar4X.ECSLib
     // use: http://www.newtonsoft.com/json/help/html/SerializationAttributes.htm
     public class SaveGame
     {
-        private string _file;
+        //private string _file;
         public string File
         {
-            get { return _file; }
-            set { CheckAndUpdateFile(value); }
-        }
+            get; set; }
 
         private struct SaveData
         {
@@ -36,7 +34,7 @@ namespace Pulsar4X.ECSLib
         public SaveGame(string file = null)
         {
             File = file;
-            _serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented };
+            _serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, TypeNameHandling = TypeNameHandling.Auto};
         }
 
         public void Save(string file = null)
@@ -84,13 +82,11 @@ namespace Pulsar4X.ECSLib
             else
             {
                 ///< @todo add more validity checks here.
+
+                // if we have a problem with the file we should throw before this...
+                File = file;
             }
-
-            // if we have a problem with the file we should throw before this...
-            File = file;
         }
-
-
 
         private void CollectGameData()
         {

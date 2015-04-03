@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Threading;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -29,16 +30,25 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class EntityManager : ISerializable
+    [JsonObject(MemberSerialization.OptOut)]
+    public class EntityManager //: ISerializable
     {
+        [JsonIgnore]
         private static Dictionary<Type, int> _dataBlobTypes;
+        [JsonIgnore]
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
+        [JsonIgnore]
         private static ReaderWriterLockSlim _guidLock;
 
+        [JsonProperty]
         private readonly List<List<BaseDataBlob>> _dataBlobMap;
+        [JsonProperty]
         private readonly List<int> _entities;
+        [JsonProperty]
         private readonly List<ComparableBitArray> _entityMasks;
+        [JsonProperty]
         private readonly Dictionary<Guid, int> _localGuidDictionary;
+        [JsonProperty]
         private readonly List<Guid> _localGuids;
 
         public EntityManager()
@@ -613,15 +623,15 @@ namespace Pulsar4X.ECSLib
 
         #region ISerializable Methods
 
-        public EntityManager(SerializationInfo info, StreamingContext context)
-        {
-            throw new NotImplementedException("Rod needs to impliment this.");
-        }
+        //public EntityManager(SerializationInfo info, StreamingContext context)
+        //{
+        //    throw new NotImplementedException("Rod needs to impliment this.");
+        //}
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            throw new NotImplementedException("Rod needs to impliment this.");
-        }
+        //public void GetObjectData(SerializationInfo info, StreamingContext context)
+        //{
+        //    throw new NotImplementedException("Rod needs to impliment this.");
+        //}
 
         #endregion
     }
