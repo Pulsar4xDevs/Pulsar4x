@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
         public SaveGame(string file = null)
         {
             File = file;
-            _serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, TypeNameHandling = TypeNameHandling.Auto};
+            _serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented};
         }
 
         public void Save(string file = null)

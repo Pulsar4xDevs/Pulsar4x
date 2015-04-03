@@ -37,6 +37,8 @@ namespace Pulsar4X.Tests
             pop.Add(sdb, 42);
 
             list.Add(new PopulationDB(pop));
+            list.Add(new PositionDB(0,0));
+            //list.Add(OrbitDB.FromStationary(0));
             int factionID = game.GlobalManager.CreateEntity(list);
 
             // add a star system:

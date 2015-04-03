@@ -30,32 +30,19 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    [JsonObject(MemberSerialization.OptOut)]
-    public class EntityManager //: ISerializable
+    public class EntityManager : ISerializable
     {
-        [JsonIgnore]
         private static Dictionary<Type, int> _dataBlobTypes;
-        [JsonIgnore]
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
-        [JsonIgnore]
         private static ReaderWriterLockSlim _guidLock;
 
-        [JsonProperty]
         private readonly List<List<BaseDataBlob>> _dataBlobMap;
-        [JsonProperty]
         private readonly List<int> _entities;
-        [JsonProperty]
         private readonly List<ComparableBitArray> _entityMasks;
-        [JsonProperty]
         private readonly Dictionary<Guid, int> _localGuidDictionary;
-        [JsonProperty]
         private readonly List<Guid> _localGuids;
 
-        public EntityManager() : this(false)
-        {
-        }
-
-        public EntityManager(bool initialize)
+        public EntityManager()
         {
             // Initialize our static variables.
             if (_dataBlobTypes == null)
@@ -73,11 +60,6 @@ namespace Pulsar4X.ECSLib
 
                 _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
                 _guidLock = new ReaderWriterLockSlim();
-            }
-
-            if (!initialize)
-            {
-                return;
             }
 
             // Initialize our instance variables.
@@ -491,6 +473,7 @@ namespace Pulsar4X.ECSLib
 
             // Mark the entityID as invalid.
             _entities[entityID] = -1;
+            _localGuids[entityID] = Guid.Empty;
 
             // Destroy references to datablobs.
             foreach (List<BaseDataBlob> dataBlobType in _dataBlobMap)
@@ -598,7 +581,7 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Does not throw exceptions.
         /// </summary>
-        public void Clear()
+        public void Clear(bool global = false)
         {
             for (int entityID = 0; entityID < _entities.Count; entityID++)
             {
@@ -606,6 +589,20 @@ namespace Pulsar4X.ECSLib
                 {
                     RemoveEntity(entityID);
                 }
+            }
+            if (!global)
+            {
+                return;
+            }
+
+            _guidLock.EnterWriteLock();
+            try
+            {
+                _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
             }
         }
 
@@ -631,42 +628,75 @@ namespace Pulsar4X.ECSLib
 
         #region ISerializable Methods
 
-        //public EntityManager(SerializationInfo info, StreamingContext context)
-        //{
-        //    throw new NotImplementedException("Rod needs to impliment this.");
-        //}
+        public EntityManager(SerializationInfo info, StreamingContext context) : this()
+        {
+            var entities = (List<Guid>)info.GetValue("Entities", typeof(List<Guid>));
 
-        /*
+            foreach (Guid entity in entities)
+            {
+                CreateEntity(entity);
+            }
+
+            foreach (KeyValuePair<Type, int> dataBlobTypeInfo in _dataBlobTypes)
+            {
+                Type dataBlobType = dataBlobTypeInfo.Key;
+                Type listType = typeof(List<>).MakeGenericType(dataBlobType);
+                dynamic dataBlobs = Activator.CreateInstance(listType);
+
+                try
+                {
+                    dataBlobs = info.GetValue(dataBlobType.Name, listType);
+                }
+                catch (System.Runtime.Serialization.SerializationException e)
+                {
+                    if (e.Message == "Member '" + dataBlobType.Name + "' was not found.")
+                    {
+                        // Harmless.
+                    }
+                    else
+                    {
+                        // Not harmless. Rethrow.
+                        throw;
+                    }
+                }
+
+                foreach (dynamic dataBlob in dataBlobs)
+                {
+                    SetDataBlob(_localGuidDictionary[dataBlob.EntityGuid], dataBlob);
+                }
+            }
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
+            // Serialize DataBlobs.
             foreach (KeyValuePair<Type, int> typeKVP in _dataBlobTypes)
             {
                 Type dataBlobType = typeKVP.Key;
                 int typeIndex = typeKVP.Value;
 
                 // Here be dragons.
-                dynamic dataBlobList = Activator.CreateInstance(typeof(List<>).MakeGenericType(dataBlobType));
                 MethodInfo castMethod = GetType().GetMethod("Cast", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(dataBlobType);
 
-                foreach (object castedDataBlob in from dataBlob in _dataBlobMap[typeIndex]
-                                                  where dataBlob != null
-                                                  select castMethod.Invoke(null, new object[] { dataBlob }))
+                IEnumerable<object> enumerable = from dataBlob in _dataBlobMap[typeIndex]
+                                                where dataBlob != null
+                                                select castMethod.Invoke(null, new object[] { dataBlob });
+                IEnumerable<object> dataBlobObjects = enumerable as IList<object> ?? enumerable.ToList();
+                if (dataBlobObjects.Any())
                 {
-                    dataBlobList.Add(castedDataBlob);
-                }
-
-                if (dataBlobList.Count > 0)
-                {
-                    info.AddValue(dataBlobType.Name, dataBlobList);
+                    info.AddValue(dataBlobType.Name, dataBlobObjects.ToList());
                 }
             }
+            // Serialize Entities
+            var defraggedGuids = new List<Guid>(_localGuids.Where(guid => guid != Guid.Empty));
+
+            info.AddValue("Entities", defraggedGuids);
         }
 
         private static T Cast<T>(object o) where T : BaseDataBlob
         {
             return (T)o;
         }
-        */
 
         #endregion
     }

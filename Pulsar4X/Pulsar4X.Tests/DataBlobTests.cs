@@ -21,7 +21,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _manager = new EntityManager(true);
+            _manager = new EntityManager();
             //_dataBlobTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
         }
 

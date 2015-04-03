@@ -71,7 +71,8 @@ namespace Pulsar4X.ECSLib
 
         public Game()
         {
-            GlobalManager = new EntityManager(true);
+            GlobalManager = new EntityManager();
+            GlobalManager.Clear(true);
             Instance = this;
 
             StarSystems = new List<StarSystem>();

@@ -18,7 +18,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
-            _entityManager = new EntityManager(true);
+            _entityManager = new EntityManager();
             _species1 = new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45);
             _pop1 = new JDictionary<SpeciesDB, double> { { _species1, 10 } };
             _pop2 = new JDictionary<SpeciesDB, double> { { _species1, 5 } };
@@ -405,7 +405,7 @@ namespace Pulsar4X.Tests
         [Test]
         public void EntityTransfer()
         {
-            EntityManager manager2 = new EntityManager(true);
+            EntityManager manager2 = new EntityManager();
 
             PopulateEntityManager();
 

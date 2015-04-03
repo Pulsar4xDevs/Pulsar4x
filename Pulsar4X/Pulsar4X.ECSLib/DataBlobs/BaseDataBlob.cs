@@ -13,6 +13,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
     {
         [JsonIgnore]
         public virtual EntityManager ContainingManager { get; set; }
+        [JsonIgnore]
         public virtual int EntityID { get; set; }
         public virtual Guid EntityGuid { get; set; }
 
