@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 using System.Threading;
 using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Helpers;
-using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -14,19 +13,14 @@ namespace Pulsar4X.ECSLib
     {
         public GuidNotFoundException()
         {
-
         }
 
-        public GuidNotFoundException(string message)
-            : base(message)
+        public GuidNotFoundException(string message) : base(message)
         {
-
         }
 
-        public GuidNotFoundException(string message, Exception innerException)
-            : base(message, innerException)
+        public GuidNotFoundException(string message, Exception innerException) : base(message, innerException)
         {
-
         }
     }
 
@@ -35,7 +29,6 @@ namespace Pulsar4X.ECSLib
         private static Dictionary<Type, int> _dataBlobTypes;
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
         private static ReaderWriterLockSlim _guidLock;
-
         private readonly List<List<BaseDataBlob>> _dataBlobMap;
         private readonly List<int> _entities;
         private readonly List<ComparableBitArray> _entityMasks;
@@ -268,9 +261,7 @@ namespace Pulsar4X.ECSLib
         /// Optimized convenience function to get entities that contain two types of DataBlobs, along with the associated DataBlobs.
         /// </summary>
         /// <returns></returns>
-        public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>()
-            where T1 : BaseDataBlob
-            where T2 : BaseDataBlob
+        public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
         {
             int typeIndexT1 = GetTypeIndex<T1>();
             int typeIndexT2 = GetTypeIndex<T2>();
@@ -429,7 +420,6 @@ namespace Pulsar4X.ECSLib
                 {
                     _dataBlobMap[typeIndex][entityID] = null;
                 }
-
             }
 
             // Add the GUID to the lookup lists.
@@ -628,6 +618,8 @@ namespace Pulsar4X.ECSLib
 
         #region ISerializable Methods
 
+        // ReSharper disable once UnusedMember.Global
+        // ReSharper disable once UnusedParameter.Local
         public EntityManager(SerializationInfo info, StreamingContext context) : this()
         {
             var entities = (List<Guid>)info.GetValue("Entities", typeof(List<Guid>));
@@ -647,7 +639,7 @@ namespace Pulsar4X.ECSLib
                 {
                     dataBlobs = info.GetValue(dataBlobType.Name, listType);
                 }
-                catch (System.Runtime.Serialization.SerializationException e)
+                catch (SerializationException e)
                 {
                     if (e.Message == "Member '" + dataBlobType.Name + "' was not found.")
                     {
@@ -679,8 +671,8 @@ namespace Pulsar4X.ECSLib
                 MethodInfo castMethod = GetType().GetMethod("Cast", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(dataBlobType);
 
                 IEnumerable<object> enumerable = from dataBlob in _dataBlobMap[typeIndex]
-                                                where dataBlob != null
-                                                select castMethod.Invoke(null, new object[] { dataBlob });
+                                                 where dataBlob != null
+                                                 select castMethod.Invoke(null, new object[] {dataBlob});
                 IEnumerable<object> dataBlobObjects = enumerable as IList<object> ?? enumerable.ToList();
                 if (dataBlobObjects.Any())
                 {
@@ -693,6 +685,7 @@ namespace Pulsar4X.ECSLib
             info.AddValue("Entities", defraggedGuids);
         }
 
+        // ReSharper disable once UnusedMember.Local
         private static T Cast<T>(object o) where T : BaseDataBlob
         {
             return (T)o;
