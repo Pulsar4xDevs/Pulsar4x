@@ -122,7 +122,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // loop through all the incoming queues looking for a new message:
-                List<int> factions = GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+                List<int> factions = GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
                 foreach (int faction in factions)
                 {
                     // lets just take a peek first:

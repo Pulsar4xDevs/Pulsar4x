@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    public class PopulationDB : BaseDataBlob
+    public class ColonyInfoDB : BaseDataBlob
     {
         public JDictionary<SpeciesDB, double> Population;
 
@@ -14,12 +14,12 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// 
         /// </summary>
         /// <param name="popSize">Species and population number(in Million?)</param>
-        public PopulationDB(JDictionary<SpeciesDB, double> popSize)
+        public ColonyInfoDB(JDictionary<SpeciesDB, double> popSize)
         {
             Population = popSize;
         }
 
-        public PopulationDB()
+        public ColonyInfoDB()
             : base()
         { }
     }

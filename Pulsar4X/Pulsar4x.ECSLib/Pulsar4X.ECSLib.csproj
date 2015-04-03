@@ -52,7 +52,7 @@
     <Compile Include="DataBlobs\FactionDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\PlanetInfoDB.cs" />
-    <Compile Include="DataBlobs\PopulationDB.cs" />
+    <Compile Include="DataBlobs\ColonyInfoDB.cs" />
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />
     <Compile Include="DataBlobs\SpeciesDB.cs" />

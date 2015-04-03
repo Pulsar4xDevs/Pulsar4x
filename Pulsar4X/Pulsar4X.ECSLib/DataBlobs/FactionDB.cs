@@ -9,12 +9,12 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
         public List<StarSystem> KnownSystems;
 
-        public List<PopulationDB> Populations;
+        public List<ColonyInfoDB> Populations;
 
         public FactionDB(string title,
             List<SpeciesDB> species,
             List<StarSystem> knownSystems,
-            List<PopulationDB> population)
+            List<ColonyInfoDB> population)
         {
             Title = title;
             Species = species;

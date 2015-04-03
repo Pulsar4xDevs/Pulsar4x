@@ -36,7 +36,7 @@ namespace Pulsar4X.Tests
             JDictionary<SpeciesDB, double> pop = new JDictionary<SpeciesDB, double>();
             pop.Add(sdb, 42);
 
-            list.Add(new PopulationDB(pop));
+            list.Add(new ColonyInfoDB(pop));
             list.Add(new PositionDB(0,0));
             //list.Add(OrbitDB.FromStationary(0));
             int factionID = game.GlobalManager.CreateEntity(list);
@@ -74,7 +74,7 @@ namespace Pulsar4X.Tests
             save.Load();
             Assert.AreEqual(1, game.StarSystems.Count);
             Assert.AreEqual(testTime, game.CurrentDateTime);
-            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<PopulationDB>();
+            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
             Assert.AreEqual(1, entities.Count);
         }
     }

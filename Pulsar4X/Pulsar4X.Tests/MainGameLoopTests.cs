@@ -26,7 +26,7 @@ namespace Pulsar4X.Tests
             JDictionary<SpeciesDB, double> pop = new JDictionary<SpeciesDB, double>();
             pop.Add(sdb, 42);
 
-            list.Add(new PopulationDB(pop));
+            list.Add(new ColonyInfoDB(pop));
             int factionID = game.GlobalManager.CreateEntity(list);
             game.EngineComms.AddFaction(factionID);
 
