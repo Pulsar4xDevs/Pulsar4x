@@ -25,15 +25,13 @@ namespace Pulsar4X.Tests
             //_dataBlobTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
         }
 
+#if DEBUG
         [Test]
-        [Conditional("DEBUG")]
         public void TreeHierarchyTest()
         {
             Assert.Catch<GuidNotFoundException>(() =>
             {
                 Guid newNode = CreateNode(Guid.NewGuid());
-                TreeHierarchyDBConcrete nodeDB = GetNodeDataBlob(newNode);
-                nodeDB.ParentDB.SetParent(Guid.Empty);
             });
 
             Guid rootNode = CreateNode(Guid.Empty);
@@ -106,6 +104,7 @@ namespace Pulsar4X.Tests
             int entityID;
             _manager.TryGetEntityByGuid(nodeGuid, out entityID);
             return _manager.GetDataBlob<TreeHierarchyDBConcrete>(entityID);
-        }
+        } 
+#endif
     }
 }
