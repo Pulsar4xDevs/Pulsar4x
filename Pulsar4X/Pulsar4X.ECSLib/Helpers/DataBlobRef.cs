@@ -20,17 +20,11 @@ namespace Pulsar4X.ECSLib
         public T Ref
         {
             get { return _ref; }
-            set { _ref = value; }
         }
         private T _ref;
         
         // Cache for the referenced datablob owning entities Guid, so we can re-link the reference on post load.
         private Guid _refOwnerGuid;
-
-        public DataBlobRef()
-        {
-            
-        }
 
         /// <summary>
         /// Creates a DataBlob reference by looking up the datablob for the specified Entity.
@@ -163,8 +157,19 @@ namespace Pulsar4X.ECSLib
             return false;
         }
 
+        /// <summary>
+        /// Note that this hashing function is less then ideal as the hash 
+        /// can change during the on load function when the reference is set from null to a value.
+        /// see here for more info: http://blogs.msdn.com/b/ericlippert/archive/2011/02/28/guidelines-and-rules-for-gethashcode.aspx
+        /// 
+        /// It has been done this way to copy the result equals method.
+        /// @todo make this work better/safer
+        /// </summary>
         public override int GetHashCode()
         {
+            if (_ref == null)
+                return base.GetHashCode();
+
             return _ref.GetHashCode();
         }
 
@@ -182,7 +187,7 @@ namespace Pulsar4X.ECSLib
 
         #region ISerializable Methods
 
-        public DataBlobRef(SerializationInfo info, StreamingContext context) : this()
+        public DataBlobRef(SerializationInfo info, StreamingContext context)
         {
             // on de-serilaize we just want to cache the guid:
             _refOwnerGuid = (Guid)info.GetValue("_refOwnerGuid", typeof(Guid));
