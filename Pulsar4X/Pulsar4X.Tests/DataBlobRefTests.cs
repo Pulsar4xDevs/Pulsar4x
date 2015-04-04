@@ -54,8 +54,8 @@ namespace Pulsar4X.Tests
 
             // Test IsNull too:
             Assert.IsFalse(speciesRef2.IsNull());
-            speciesRef2.Ref = null;
-            Assert.IsTrue(speciesRef2.IsNull());
+            //speciesRef2.Ref = null;
+            //Assert.IsTrue(speciesRef2.IsNull());
         }
 
         [Test]
@@ -66,6 +66,7 @@ namespace Pulsar4X.Tests
             PositionDB position2 = new PositionDB(42, 42);
             DataBlobRef<PositionDB> posRef1 = new DataBlobRef<PositionDB>(position1);
             DataBlobRef<PositionDB> posRef2 = new DataBlobRef<PositionDB>(position2);
+            DataBlobRef<PositionDB> posRef3 = new DataBlobRef<PositionDB>(position1);
 
             // ref should have the same has as the actual DB:
             Assert.AreEqual(posRef1.GetHashCode(), position1.GetHashCode());
@@ -73,6 +74,9 @@ namespace Pulsar4X.Tests
 
             // refs to different dbs should have different hashes:
             Assert.IsTrue(posRef1.GetHashCode() != posRef2.GetHashCode());
+
+            // ref to the same dbs should have the same hash:
+            Assert.IsTrue(posRef1.GetHashCode() == posRef3.GetHashCode());
         }
     }
 }

@@ -8,13 +8,13 @@ namespace Pulsar4X.ECSLib.DataBlobs
 {
     public class ColonyInfoDB : BaseDataBlob
     {
-        public JDictionary<SpeciesDB, double> Population;
+        public JDictionary<DataBlobRef<SpeciesDB>, double> Population;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="popSize">Species and population number(in Million?)</param>
-        public ColonyInfoDB(JDictionary<SpeciesDB, double> popSize)
+        public ColonyInfoDB(JDictionary<DataBlobRef<SpeciesDB>, double> popSize)
         {
             Population = popSize;
         }

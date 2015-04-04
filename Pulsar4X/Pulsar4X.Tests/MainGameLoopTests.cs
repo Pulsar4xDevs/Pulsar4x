@@ -22,8 +22,8 @@ namespace Pulsar4X.Tests
 
             // add some factions:
             List<BaseDataBlob> list = new List<BaseDataBlob>();
-            SpeciesDB sdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
-            JDictionary<SpeciesDB, double> pop = new JDictionary<SpeciesDB, double>();
+            DataBlobRef<SpeciesDB> sdb = new DataBlobRef<SpeciesDB>(new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44));
+            JDictionary<DataBlobRef<SpeciesDB>, double> pop = new JDictionary<DataBlobRef<SpeciesDB>, double>();
             pop.Add(sdb, 42);
 
             list.Add(new ColonyInfoDB(pop));
