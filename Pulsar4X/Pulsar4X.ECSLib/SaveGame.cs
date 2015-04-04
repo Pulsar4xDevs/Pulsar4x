@@ -101,6 +101,9 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public interface IPostLoad
     {
+        /// <summary>
+        /// This function is called after the game has been loaded/Deserialized.
+        /// </summary>
         void PostLoad();
     }
 }
