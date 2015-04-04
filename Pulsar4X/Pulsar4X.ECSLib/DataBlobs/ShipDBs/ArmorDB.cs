@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    public class ArmorDefDB
+    public class ArmorDefDB 
     {
         public string Name;
 
@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         }
     }
 
-    public class ArmorDB
+    public class ArmorDB : BaseDataBlob
     {
         public ArmorDefDB ArmorDef;
 

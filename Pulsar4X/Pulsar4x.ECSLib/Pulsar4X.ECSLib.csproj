@@ -45,20 +45,39 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataBlobs\ArmorDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
     <Compile Include="DataBlobs\FactionDB.cs" />
+    <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
     <Compile Include="DataBlobs\PlanetInfoDB.cs" />
     <Compile Include="DataBlobs\ColonyInfoDB.cs" />
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\BeamWeaponsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\BuildCostDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\CargoDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\CrewDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\DamageDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\HangerDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\IndustryDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\MaintenanceDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\MissileWeaponsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\PowerDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\PropulsionDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\SensorProfileDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\SensorsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\SheildsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ShipInfoDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\TractorDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />
     <Compile Include="DataBlobs\SpeciesDB.cs" />
     <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
     <Compile Include="Engine-Comms.cs" />
     <Compile Include="EntityManager.cs" />
+    <Compile Include="Factories\ShipFactory.cs" />
     <Compile Include="Factories\SpeciesFactory.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameSettings.cs" />
@@ -74,6 +93,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveGame.cs" />
     <Compile Include="StarSystem.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
