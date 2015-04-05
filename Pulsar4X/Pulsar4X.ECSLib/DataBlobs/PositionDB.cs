@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 
 namespace Pulsar4X.ECSLib.DataBlobs
@@ -18,15 +19,21 @@ namespace Pulsar4X.ECSLib.DataBlobs
         public double Y;
 
         /// <summary>
+        /// System Z coordinate in AU
+        /// </summary>
+        public double Z;
+
+        /// <summary>
         /// Initilized constructor.
         /// </summary>
         /// <param name="system">StarSystem value.</param>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
-        public PositionDB(double x, double y)
+        public PositionDB(double x, double y, double z)
         {
             X = x;
             Y = y;
+            Z = z;
         }
 
         /// <summary>
@@ -35,12 +42,13 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="posA"></param>
         /// <param name="posB"></param>
         /// <returns>distance between posA and posB</returns>
-        public static float GetDistanceBetween(PositionDB posA, PositionDB posB)
+        public static double GetDistanceBetween(PositionDB posA, PositionDB posB)
         {
-            float distX = (float)(posA.X - posB.X);
-            float distY = (float)(posA.Y - posB.Y);
+            double distX = (posA.X - posB.X);
+            double distY = (posA.Y - posB.Y);
+            double distZ = (posA.Z - posB.Z);
 
-            return (float)Math.Sqrt((distX * distX) + (distY * distY));
+            return Math.Sqrt((distX * distX) + (distY * distY) + (distZ * distZ));
         }
 
         /// <summary>
@@ -61,7 +69,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <returns></returns>
         public static PositionDB operator +(PositionDB posA, PositionDB posB)
         {
-            return new PositionDB(posA.X + posB.X, posA.Y + posB.Y);
+            return new PositionDB(posA.X + posB.X, posA.Y + posB.Y, posA.Z + posB.Z);
         }
     }
 }
