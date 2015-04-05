@@ -71,7 +71,7 @@
     <Compile Include="DataBlobs\ShipDBs\PropulsionDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\SensorProfileDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\SensorsDB.cs" />
-    <Compile Include="DataBlobs\ShipDBs\SheildsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ShieldsDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ShipInfoDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\TractorDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />

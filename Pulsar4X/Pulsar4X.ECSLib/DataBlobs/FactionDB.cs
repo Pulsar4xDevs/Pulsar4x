@@ -11,6 +11,8 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
         public List<ColonyInfoDB> Populations;
 
+        public List<DataBlobRef<ShipInfoDB>> ShipClasses; 
+
         public FactionDB(string title,
             List<SpeciesDB> species,
             List<StarSystem> knownSystems,
@@ -20,6 +22,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
             Species = species;
             KnownSystems = knownSystems;
             Populations = population;
+            ShipClasses = new List<DataBlobRef<ShipInfoDB>>();
         }
     }
 }
