@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         Civilian
     }
 
-    public class CommanderDB
+    public class CommanderDB : BaseDataBlob
     {
         public CommanderNameDB Name;
 
