@@ -27,5 +27,10 @@ namespace Pulsar4X.ECSLib.DataBlobs
         {
         }
 
+        public ArmorDB()
+        {
+            
+        }
+
     }
 }
