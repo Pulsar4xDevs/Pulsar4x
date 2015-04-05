@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
     /// <summary>
     /// Holds all the generic information about a ship
     /// </summary>
-    class ShipInfoDB : BaseDataBlob
+    public class ShipInfoDB : BaseDataBlob
     {
         public string Name { get; set; }
 
@@ -36,10 +36,18 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// </summary>
         public int InternalHTK { get; set; }
 
+        public bool IsMilitary { get; set; }
+
+        /// <summary>
+        /// List of the ships components. Each component is an entity, thus the list stores its int ID.
+        /// The Components should be in the same EntityManager as the Ship.
+        /// </summary>
+        public List<int> ComponentList { get; set; } 
+
 
         public ShipInfoDB()
         {
-            
+            ComponentList = new List<int>();
         }
 
         /// <summary>

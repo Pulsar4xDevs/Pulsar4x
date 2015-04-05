@@ -3,7 +3,7 @@
     /// <summary>
     /// Info on the shields in a ship.
     /// </summary>
-    public class SheildsDB : BaseDataBlob
+    public class ShieldsDB : BaseDataBlob
     {
         public int MaximumShieldStrength { get; set; }
         public int CurrentShieldStrength { get; set; }
