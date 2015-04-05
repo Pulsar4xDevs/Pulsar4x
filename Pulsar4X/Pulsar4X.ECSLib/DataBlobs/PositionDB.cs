@@ -56,7 +56,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// </summary>
         /// <param name="otherPos"></param>
         /// <returns></returns>
-        public float GetDistanceTo(PositionDB otherPos)
+        public double GetDistanceTo(PositionDB otherPos)
         {
             return GetDistanceBetween(this, otherPos);
         }
