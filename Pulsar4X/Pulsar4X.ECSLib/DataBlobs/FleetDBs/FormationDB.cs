@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Pulsar4X.ECSLib.DataBlobs.FleetDBs
+namespace Pulsar4X.ECSLib.DataBlobs
 {
     class FormationDB : TreeHierarchyDB
     {

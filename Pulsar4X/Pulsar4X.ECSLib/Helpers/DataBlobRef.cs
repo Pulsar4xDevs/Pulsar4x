@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib
             RegisterPostLoad();
         }
 
-         private T ResolveGuid()
+        private T ResolveGuid()
          {
              if (_refOwnerGuid == Guid.Empty)
                  return null;  // this references nothing!
