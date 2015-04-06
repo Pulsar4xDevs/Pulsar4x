@@ -2,7 +2,7 @@
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib.Helpers
+namespace Pulsar4X.ECSLib
 {
     public sealed class ComparableBitArray
     {

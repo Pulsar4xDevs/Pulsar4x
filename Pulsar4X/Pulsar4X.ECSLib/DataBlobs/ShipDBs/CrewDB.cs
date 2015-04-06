@@ -1,4 +1,4 @@
-﻿namespace Pulsar4X.ECSLib.DataBlobs
+﻿namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Info about the ships crew and command centres (bridge/flag bridge/Automatic computer) on a ship.

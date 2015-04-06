@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.Tests
 {

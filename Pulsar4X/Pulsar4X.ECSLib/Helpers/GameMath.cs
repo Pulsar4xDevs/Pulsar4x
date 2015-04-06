@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pulsar4X.ECSLib.Helpers
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Small Helper Class for Angle unit Conversions

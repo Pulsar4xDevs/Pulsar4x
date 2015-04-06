@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Info on the build cost of the Ship.

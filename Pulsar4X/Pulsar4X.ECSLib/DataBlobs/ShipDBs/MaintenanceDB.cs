@@ -1,6 +1,4 @@
-﻿using System.IO.IsolatedStorage;
-
-namespace Pulsar4X.ECSLib.DataBlobs
+﻿namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Contains info on a ships maintance supplies/failure rate/etc.

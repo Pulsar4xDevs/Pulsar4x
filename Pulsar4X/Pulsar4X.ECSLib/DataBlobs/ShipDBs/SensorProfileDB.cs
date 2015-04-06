@@ -1,4 +1,4 @@
-﻿namespace Pulsar4X.ECSLib.DataBlobs
+﻿namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Info on how this ship looks to sensors.

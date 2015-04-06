@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
 
 namespace Pulsar4X.Tests
 {

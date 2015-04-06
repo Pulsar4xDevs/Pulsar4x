@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pulsar4X.ECSLib.Helpers
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Class to contain information about the current Subpulse Limit.

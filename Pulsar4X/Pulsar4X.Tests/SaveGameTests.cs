@@ -5,11 +5,9 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using NUnit.Framework.Constraints;
-using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.Tests
 {

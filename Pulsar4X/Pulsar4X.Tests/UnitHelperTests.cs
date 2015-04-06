@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Pulsar4X.ECSLib.Helpers;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {

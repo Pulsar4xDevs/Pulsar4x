@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     public class PositionDB : BaseDataBlob
     {

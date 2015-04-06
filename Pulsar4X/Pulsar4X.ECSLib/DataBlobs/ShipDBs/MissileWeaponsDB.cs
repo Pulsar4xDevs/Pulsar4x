@@ -1,4 +1,4 @@
-﻿namespace Pulsar4X.ECSLib.DataBlobs
+﻿namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Contains info on the Ships missile weapons, including Fire control and Magazine storage.

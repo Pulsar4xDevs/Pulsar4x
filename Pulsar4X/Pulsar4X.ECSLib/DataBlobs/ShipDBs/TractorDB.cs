@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// This datablob contains information on a ships ability to tractor other ships 

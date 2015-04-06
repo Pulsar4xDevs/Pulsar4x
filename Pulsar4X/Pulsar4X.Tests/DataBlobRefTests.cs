@@ -4,8 +4,6 @@ using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Text;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.Tests
 {

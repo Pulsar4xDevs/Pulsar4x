@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
