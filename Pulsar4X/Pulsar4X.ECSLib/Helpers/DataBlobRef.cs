@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
 using Pulsar4X.ECSLib.DataBlobs;
 
-namespace Pulsar4X.ECSLib
+namespace Pulsar4X.ECSLib.Helpers
 {
     /// <summary>
     /// This is a Wrapper Class for DataBlob references. It will automaticaly be re-linked when the game is loaded from disk.
