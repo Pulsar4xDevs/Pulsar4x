@@ -5,6 +5,7 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.DataBlobs;
+using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.Tests
 {
@@ -33,8 +34,8 @@ namespace Pulsar4X.Tests
             // lets start by creating a couple of data blobs:
             SpeciesDB species = new SpeciesDB();
             SpeciesDB nullSpecies = null;
-            PositionDB position1 = new PositionDB(42, 42);
-            PositionDB position2 = new PositionDB(42, 42);
+            PositionDB position1 = new PositionDB(42, 42, 42);
+            PositionDB position2 = new PositionDB(42, 42, 42);
 
             // okay now lets put them into references:
             DataBlobRef<SpeciesDB> speciesRef1 = new DataBlobRef<SpeciesDB>(species);
@@ -76,8 +77,8 @@ namespace Pulsar4X.Tests
         public void HashFunctionTest()
         {
             // create the references:
-            PositionDB position1 = new PositionDB(42, 42);
-            PositionDB position2 = new PositionDB(42, 42);
+            PositionDB position1 = new PositionDB(42, 42, 42);
+            PositionDB position2 = new PositionDB(42, 42, 42);
 
             var posRef1 = RefGenerator.MakeDataBlobRef(position1);
             var posRef2 = RefGenerator.MakeDataBlobRef(position2);

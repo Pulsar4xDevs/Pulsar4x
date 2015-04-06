@@ -1,4 +1,5 @@
 ﻿using System;
+using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {

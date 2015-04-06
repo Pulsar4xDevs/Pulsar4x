@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,8 +10,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pulsar4X</RootNamespace>
     <AssemblyName>Pulsar4X.UI</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -22,6 +23,7 @@
     <DefineConstants>DEBUG;OPENGL;SPLASHSCREEN;LOG4NET_ENABLED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,34 +33,35 @@
     <DefineConstants>OPENGL;SPLASHSCREEN;LOG4NET_ENABLED</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
+      <Project>{e716fa06-ecdf-b446-96b4-b790aab5713b}</Project>
+      <Name>Pulsar4X.ECSLib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Pulsar4X.Lib\Pulsar4X.Lib.csproj">
       <Project>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</Project>
       <Name>Pulsar4X.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Pulsar4X.ECSLib\Pulsar4X.ECSLib.csproj">
-      <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
-      <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
-    <Reference Include="log4net" >
+    <Reference Include="log4net">
       <HintPath>../deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json" >
+    <Reference Include="Newtonsoft.Json">
       <HintPath>../deps/Json45r8/bin/Net40/Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK" >
+    <Reference Include="OpenTK">
       <HintPath>../deps/OpenTK-1.1/bin/OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="OpenTK.GLControl" >
+    <Reference Include="OpenTK.GLControl">
       <HintPath>../deps/OpenTK-1.1/Bin/OpenTK.GLControl.dll</HintPath>
     </Reference>
-    <Reference Include="WeifenLuo.WinFormsUI.Docking" >
+    <Reference Include="WeifenLuo.WinFormsUI.Docking">
       <HintPath>../deps/DockPanelSuite/WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -118,7 +121,9 @@
     <EmbeddedResource Include="Forms\SubForm.resx">
       <DependentUpon>SubForm.cs</DependentUpon>
     </EmbeddedResource>
-    <Compile Include="GLUtilities\GLCanvas.cs" />
+    <Compile Include="GLUtilities\GLCanvas.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="GLUtilities\GLCircle.cs" />
     <Compile Include="GLUtilities\GLEffect.cs" />
     <Compile Include="GLUtilities\GLEffectBasic21.cs" />
@@ -306,7 +311,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
-      <DependentUpon>Properties\Resources.resx</DependentUpon>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <SubType>Designer</SubType>

@@ -35,7 +35,7 @@ namespace Pulsar4X.ECSLib.Processors
                 OrbitDB rootOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital).RootDB as OrbitDB;
 
                 // Call recursive function to update every orbit in this system.
-                UpdateOrbit(currentManager, rootOrbit, new PositionDB(0, 0), currentTime);
+                UpdateOrbit(currentManager, rootOrbit, new PositionDB(0, 0, 0), currentTime);
             }
         }
 
@@ -69,7 +69,7 @@ namespace Pulsar4X.ECSLib.Processors
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(0, 0);
+                return new PositionDB(0, 0, 0);
             }
 
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
@@ -104,7 +104,7 @@ namespace Pulsar4X.ECSLib.Processors
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(0, 0);
+                return new PositionDB(0, 0, 0);
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
@@ -119,8 +119,9 @@ namespace Pulsar4X.ECSLib.Processors
             // Polar to Cartesian conversion.
             double x = radius * Math.Cos(trueAnomaly);
             double y = radius * Math.Sin(trueAnomaly);
+            double z = 0; // <? Todo: Fix orbits for 3D. />
 
-            return new PositionDB(x, y);
+            return new PositionDB(x, y, z);
         }
 
         /// <summary>

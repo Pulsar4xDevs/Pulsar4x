@@ -9,6 +9,7 @@ using Pulsar4X.ECSLib.DataBlobs;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
 using NUnit.Framework.Constraints;
+using Pulsar4X.ECSLib.Helpers;
 
 namespace Pulsar4X.Tests
 {
@@ -42,7 +43,7 @@ namespace Pulsar4X.Tests
             pop.Add(sdb, 42);
 
             list.Add(new ColonyInfoDB(pop));
-            list.Add(new PositionDB(0,0));
+            list.Add(new PositionDB(0,0,0));
             //list.Add(OrbitDB.FromStationary(0));
             int factionID = game.GlobalManager.CreateEntity(list);
 
