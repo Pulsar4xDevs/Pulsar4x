@@ -227,6 +227,8 @@ namespace Pulsar4X.UI.Handlers
 
             #region Organization Tab
             m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndexChanged += new EventHandler(OrgSelectedTGComboBox_SelectedIndexChanged);
+            m_oTaskGroupPanel.OrgMoveLeftButton.Click += new EventHandler(OrgMoveLeftButton_Click);
+            m_oTaskGroupPanel.OrgMoveRightButton.Click += new EventHandler(OrgMoveRightButton_Click);
             #endregion
 
 
@@ -587,6 +589,66 @@ namespace Pulsar4X.UI.Handlers
         private void OrgSelectedTGComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             BuildSelectedTGListBox();
+        }
+
+        /// <summary>
+        /// Move the ship from the selected TG to the current one.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OrgMoveLeftButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentTaskGroup != null  && m_oTaskGroupPanel.OrgSelectedTGListBox.SelectedIndex != -1 &&
+                    m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndex != -1)
+            {
+                TaskGroupTN TaskGroupFrom = OrgSelectedTGList[m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndex];
+
+                if (TaskGroupFrom.Ships.Count == 0)
+                    return;
+
+                ShipTN ShipToMove = TaskGroupFrom.Ships[m_oTaskGroupPanel.OrgSelectedTGListBox.SelectedIndex];
+
+                TaskGroupFrom.TransferShipToTaskGroup(ShipToMove, CurrentTaskGroup);
+
+
+                /// <summary>
+                /// These are the following UI elements that will need to be updated in the event that a ship moves from one TG to another.
+                /// </summary>
+                m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
+                m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
+
+                RefreshShipCells();
+                CalculateTimeDistance();
+                BuildOrganizationTab();
+            }        
+        }
+
+        /// <summary>
+        /// Move the ship from the current TG to the selected one. the opposite of the above function.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OrgMoveRightButton_Click(object sender, EventArgs e)
+        {
+            if (CurrentTaskGroup != null && m_oTaskGroupPanel.OrgCurrentTGListBox.SelectedIndex != -1 && m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndex != -1 && 
+                CurrentTaskGroup.Ships.Count != 0)
+            {
+
+                ShipTN ShipToMove = CurrentTaskGroup.Ships[m_oTaskGroupPanel.OrgCurrentTGListBox.SelectedIndex];
+                TaskGroupTN TaskGroupTo = OrgSelectedTGList[m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndex];
+
+                CurrentTaskGroup.TransferShipToTaskGroup(ShipToMove, TaskGroupTo);
+
+                /// <summary>
+                /// These are the following UI elements that will need to be updated in the event that a ship moves from one TG to another.
+                /// </summary>
+                m_oTaskGroupPanel.SetSpeedTextBox.Text = CurrentTaskGroup.CurrentSpeed.ToString();
+                m_oTaskGroupPanel.MaxSpeedTextBox.Text = CurrentTaskGroup.MaxSpeed.ToString();
+
+                RefreshShipCells();
+                CalculateTimeDistance();
+                BuildOrganizationTab();
+            }
         }
 
         /// <summary>
@@ -1307,9 +1369,9 @@ namespace Pulsar4X.UI.Handlers
         }
 
         /// <summary>
-        /// List the ships in each taskgroup for display.
+        /// Function to just update the CurrentTGListBox.
         /// </summary>
-        private void BuildOrganizationTab()
+        private void BuildCurrentTGListBox()
         {
             if (CurrentTaskGroup != null)
             {
@@ -1320,9 +1382,16 @@ namespace Pulsar4X.UI.Handlers
                 {
                     m_oTaskGroupPanel.OrgCurrentTGListBox.Items.Add(CurrentShip);
                 }
-
-                BuildSelectedTGListBox();
             }
+        }
+
+        /// <summary>
+        /// List the ships in each taskgroup for display.
+        /// </summary>
+        private void BuildOrganizationTab()
+        {
+            BuildCurrentTGListBox();
+            BuildSelectedTGListBox();
         }
 
         /// <summary>
@@ -1375,6 +1444,13 @@ namespace Pulsar4X.UI.Handlers
                     }
                 }
             }
+
+
+            /// <summary>
+            /// Do this here and not in BuildOrgSelectedTGList. doing it there will cause the event handler to constantly call itself.
+            /// </summary>
+            if (m_oTaskGroupPanel.OrgSelectedTGComboBox.Items.Count != 0)
+                m_oTaskGroupPanel.OrgSelectedTGComboBox.SelectedIndex = 0;
         }
         #endregion
 

@@ -137,16 +137,13 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[1].BuildClassSummary();
 
 
-            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[0]);
-            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[0]);
-            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[1]);
+            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[0], "Warship");
+            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[0], "Backup Warship");
+            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[1], "Hammer");
             oNewFaction.TaskGroups.Last().Ships[0].Refuel(1000000.0f);
             oNewFaction.TaskGroups.Last().Ships[1].Refuel(1000000.0f);
             oNewFaction.TaskGroups.Last().Ships[2].Refuel(1000000.0f);
 
-            oNewFaction.TaskGroups.Last().Ships[0].Name = "Warship";
-            oNewFaction.TaskGroups.Last().Ships[1].Name = "Backup Warship";
-            oNewFaction.TaskGroups.Last().Ships[2].Name = "Hammer";
             foreach (KeyValuePair<OrdnanceDefTN, int> pair in oNewFaction.ShipDesigns[1].ShipClassOrdnance)
             {
                 oNewFaction.TaskGroups.Last().Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
@@ -197,16 +194,13 @@ namespace Pulsar4X.UI
             oNewFaction2.ShipDesigns[1].IsLocked = true;
             oNewFaction2.ShipDesigns[1].BuildClassSummary();
 
-            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction2.ShipDesigns[0]);
-            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction2.ShipDesigns[0]);
-            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[1]);
+            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction2.ShipDesigns[0], "Battleship");
+            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction2.ShipDesigns[0], "Backup Battleship");
+            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[1], "Crusher");
             oNewFaction2.TaskGroups.Last().Ships[0].Refuel(1000000.0f);
             oNewFaction2.TaskGroups.Last().Ships[1].Refuel(1000000.0f);
             oNewFaction2.TaskGroups.Last().Ships[2].Refuel(1000000.0f);
 
-            oNewFaction2.TaskGroups.Last().Ships[0].Name = "Battleship";
-            oNewFaction2.TaskGroups.Last().Ships[1].Name = "Backup Battleship";
-            oNewFaction2.TaskGroups.Last().Ships[2].Name = "Crusher";
             foreach (KeyValuePair<OrdnanceDefTN, int> pair in oNewFaction2.ShipDesigns[1].ShipClassOrdnance)
             {
                 oNewFaction2.TaskGroups.Last().Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);

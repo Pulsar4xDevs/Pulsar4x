@@ -530,7 +530,7 @@ namespace Pulsar4X.Entities
                     switch (Task.CurrentTask)
                     {
                         case Constants.ShipyardInfo.Task.Construction:
-                            Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget);
+                            Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget, Task.Title);
                             CurrentPopulation.FuelStockpile = Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].Refuel(CurrentPopulation.FuelStockpile);
                             break;
                         case Constants.ShipyardInfo.Task.Repair:
@@ -576,7 +576,7 @@ namespace Pulsar4X.Entities
                             /// <summary>
                             /// Add in the "new" ship.
                             /// </summary>
-                            Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget);
+                            Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget,Task.CurrentShip.Name);
                             Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].TFTraining = Task.CurrentShip.TFTraining;
                             Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].ShipGrade = Task.CurrentShip.ShipGrade;
                             CurrentPopulation.FuelStockpile = Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].Refuel(CurrentPopulation.FuelStockpile);

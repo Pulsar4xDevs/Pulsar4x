@@ -454,6 +454,30 @@ namespace Pulsar4X.UI.Panels
         #endregion
 
         #region Shipyard Tasks Tab
+
+        /// <summary>
+        /// Pause the selected Ship Task
+        /// </summary>
+        public Button SYAPauseTaskButton
+        {
+            get { return m_oSYAPauseTaskButton; }
+        }
+
+        /// <summary>
+        /// Raise the priority of the selected ship task.
+        /// </summary>
+        public Button SYARaisePriorityButton
+        {
+            get { return m_oSYARaisePriorityButton; }
+        }
+
+        /// <summary>
+        /// Lower the priority of the selected Ship task.
+        /// </summary>
+        public Button SYALowerPriorityButton
+        {
+            get { return m_oSYALowerPriorityButton; }
+        }
         #endregion
 
         #endregion

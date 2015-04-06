@@ -334,6 +334,12 @@ namespace Pulsar4X.UI.Handlers
             ClassesInOrbit = new BindingList<ShipClassTN>();
             #endregion
 
+            #region Shipyard Tasks Tab
+            m_oSummaryPanel.SYAPauseTaskButton.Click += new EventHandler(SYAPauseTaskButton_Click);
+            m_oSummaryPanel.SYALowerPriorityButton.Click += new EventHandler(SYALowerPriorityButton_Click);
+            m_oSummaryPanel.SYARaisePriorityButton.Click += new EventHandler(SYARaisePriorityButton_Click);
+            #endregion
+
             // Setup Pop Tree view. I do not know if I can bind this one, so I'll wind up doing it by hand.
             RefreshPanels();
 
@@ -650,9 +656,9 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ShipyardDataGrid_SelectionChanged(object sender, EventArgs e)
         {
-            if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell != null)
+            if (m_oSummaryPanel.ShipyardDataGrid.CurrentCell != null)
             {
-                if (m_oSummaryPanel.ConstructionDataGrid.CurrentCell.RowIndex != -1)
+                if (m_oSummaryPanel.ShipyardDataGrid.CurrentCell.RowIndex != -1)
                 {
                     int index = m_oSummaryPanel.ShipyardDataGrid.CurrentCell.RowIndex;
 
@@ -900,6 +906,71 @@ namespace Pulsar4X.UI.Handlers
                 }
             }
         }
+        #region Shipyard Tasks Tab event handlers
+        /// <summary>
+        /// Pause the currently selected task.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYAPauseTaskButton_Click(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell.RowIndex;
+
+                    if(CurrentSYInfo.BuildingShips[index].IsPaused() == true)
+                        CurrentSYInfo.BuildingShips[index].UnPause();
+                    else
+                        CurrentSYInfo.BuildingShips[index].Pause();
+
+
+                    Eco_ShipyardTabHandler.RefreshShipyardTasksTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Decrease the priority of the selected task.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYALowerPriorityButton_Click(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell.RowIndex;
+
+                    CurrentSYInfo.BuildingShips[index].DecrementPriority();
+
+                    Eco_ShipyardTabHandler.RefreshShipyardTasksTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Increase the priority of the selected task.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SYARaisePriorityButton_Click(object sender, EventArgs e)
+        {
+            if (m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell != null)
+            {
+                if (m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell.RowIndex != -1)
+                {
+                    int index = m_oSummaryPanel.ShipyardTaskDataGrid.CurrentCell.RowIndex;
+
+                    CurrentSYInfo.BuildingShips[index].IncrementPriority();
+
+                    Eco_ShipyardTabHandler.RefreshShipyardTasksTab(m_oSummaryPanel, CurrentFaction, CurrentPopulation);
+                }
+            }
+        }
+        #endregion
         #endregion
 
         #region PublicMethods

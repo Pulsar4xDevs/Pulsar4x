@@ -445,9 +445,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
-        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact)
+        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact, String Title)
         {
             int index;
+            Name = Title;
 
             /// <summary>
             /// create these or else anything that relies on a unique global id will break.

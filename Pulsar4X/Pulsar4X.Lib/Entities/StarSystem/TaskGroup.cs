@@ -521,9 +521,9 @@ namespace Pulsar4X.Entities
         /// Adds a ship to a taskgroup, will call sorting and sensor handling.
         /// </summary>
         /// <param name="shipDef">definition of the ship to be added.</param>
-        public void AddShip(ShipClassTN shipDef)
+        public void AddShip(ShipClassTN shipDef, String Title)
         {
-            ShipTN ship = new ShipTN(shipDef, Ships.Count, GameState.Instance.CurrentSecond, this, TaskGroupFaction);
+            ShipTN ship = new ShipTN(shipDef, Ships.Count, GameState.Instance.CurrentSecond, this, TaskGroupFaction, Title);
             Ships.Add(ship);
 
             /// <summary>
@@ -555,6 +555,175 @@ namespace Pulsar4X.Entities
             UpdatePassiveSensors(ship);
 
             AddShipToSort(ship);
+        }
+
+        /// <summary>
+        /// Separate from AddShip, this will add an existing ship to this taskgroup.
+        /// </summary>
+        /// <param name="Ship">Ship to be added</param>
+        public void AddShipTo(ShipTN Ship)
+        {
+            Ships.Add(Ship);
+
+            if(Ships.Count == 1)
+            {
+                MaxSpeed = Ship.ShipClass.MaxSpeed;
+                CurrentSpeed = MaxSpeed;
+            }
+            else
+            {
+                if (CurrentSpeed == MaxSpeed)
+                {
+                    if (Ship.ShipClass.MaxSpeed < MaxSpeed)
+                    {
+                        MaxSpeed = Ship.ShipClass.MaxSpeed;
+                        CurrentSpeed = MaxSpeed;
+                    }
+                }
+                /// <summary>
+                /// Current Speed is lower than the maxspeed which means that the user has set current speed below max speed already.
+                /// </summary>
+                else
+                {
+                    /// <summary>
+                    /// Set the new max speed of the taskgroup if there is one.
+                    /// </summary>
+                    if (Ship.ShipClass.MaxSpeed < MaxSpeed)
+                    {
+                        MaxSpeed = Ship.ShipClass.MaxSpeed;
+                    }
+
+                    /// <summary>
+                    /// Max speed is less than the set current speed.
+                    /// </summary>
+                    if (MaxSpeed < CurrentSpeed)
+                    {
+                        CurrentSpeed = MaxSpeed;
+                    }
+                }
+            }
+
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                Ships[loop].SetSpeed(CurrentSpeed);
+            }
+
+            /// <summary>
+            /// Update the taskgroupwide statistics here, consider moving this to its own function should it grow beyond this.
+            /// </summary>
+            TotalCargoTonnage = TotalCargoTonnage + Ship.ShipClass.TotalCargoCapacity;
+            TotalCryoCapacity = TotalCryoCapacity + Ship.ShipClass.SpareCryoBerths;
+
+            /// <summary>
+            /// Add this ship to the sensor datagroups of this taskgroup
+            /// </summary>
+            UpdatePassiveSensors(Ship);
+            AddShipToSort(Ship);
+        }
+
+        /// <summary>
+        /// Remove ship will remove a ship from this taskgroup, typically in preparation for adding it to another taskgroup. ship destruction logic is handled elsewhere.
+        /// </summary>
+        /// <param name="Ship">Ship to be removed</param>
+        public void RemoveShipFrom(ShipTN Ship)
+        {
+            /// <summary>
+            /// Update taskgroup wide statistics here. eventually this may need to be its own function.
+            /// </summary>
+            TotalCargoTonnage = TotalCargoTonnage - Ship.ShipClass.TotalCargoCapacity;
+            TotalCryoCapacity = TotalCryoCapacity - Ship.ShipClass.SpareCryoBerths;
+
+            /// <summary>
+            /// This can return false. not sure what the implications of such a return would be. other then that this function handles removing this ship from the taskgroup's sensor
+            /// data structures.
+            /// </summary>
+            RemoveShipFromTaskGroup(Ship);
+
+            Ships.Remove(Ship);
+
+            if (Ships.Count == 0)
+            {
+                MaxSpeed = 1;
+                CurrentSpeed = 1;
+            }
+            else if (Ships.Count == 1)
+            {
+                if (CurrentSpeed == MaxSpeed)
+                {
+                    MaxSpeed = Ships[0].ShipClass.MaxSpeed;
+                    CurrentSpeed = MaxSpeed;
+                }
+                else
+                    MaxSpeed = Ships[0].ShipClass.MaxSpeed;
+            }
+            else
+            {
+                /// <summary>
+                /// Only set the speed to a new potentially higher max speed if there is one, and if the user has set this taskgroup to its max speed.
+                /// The assumption is that the user will want to keep his taskgroup at its maximum speed.
+                /// </summary>
+                int lowestMax = Ships[0].ShipClass.MaxSpeed;
+                for (int loop = 1; loop < Ships.Count; loop++)
+                {
+                    if (Ships[loop].ShipClass.MaxSpeed < lowestMax)
+                    {
+                        lowestMax = Ships[loop].ShipClass.MaxSpeed;
+                    }
+                }
+                if (CurrentSpeed == MaxSpeed)
+                {
+                    MaxSpeed = lowestMax;
+                    CurrentSpeed = MaxSpeed;
+                }
+                else
+                    MaxSpeed = lowestMax;
+            }
+
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                Ships[loop].SetSpeed(CurrentSpeed);
+            }
+        }
+
+        /// <summary>
+        /// Given a ship in this taskgroup, transfer said ship to TaskGroupTo
+        /// </summary>
+        /// <param name="Ship">Ship present in this taskgroup that should be transfered</param>
+        /// <param name="TaskGroupTo">Taskgroup that will receive this ship</param>
+        public void TransferShipToTaskGroup(ShipTN Ship, TaskGroupTN TaskGroupTo)
+        {
+            /// <summary>
+            /// This ship is not in the taskgroup so return immediately.
+            /// </summary>
+            if (Ships.Contains(Ship) == false)
+                return;
+
+            BindingList<int> activeSensorIndices = new BindingList<int>();
+            for (int activeIterator = 0; activeIterator < Ship.ShipASensor.Count; activeIterator++)
+            {
+                /// <summary>
+                /// This active sensor is both active and intact, so preserve its index, and set isActive to false(the sensor will be reactivated in its new TG.
+                /// Destroyed sensors can keep their isActive state, as when they are repaired the repair function should handle reactivating them.
+                /// </summary>
+                if (Ship.ShipASensor[activeIterator].isActive == true && Ship.ShipASensor[activeIterator].isDestroyed == false)
+                {
+                    activeSensorIndices.Add(activeIterator);
+                    Ship.ShipASensor[activeIterator].isActive = false;
+                }
+            }
+
+            /// <summary>
+            /// Move the ship between the two.
+            /// </summary>
+            RemoveShipFrom(Ship);
+            TaskGroupTo.AddShipTo(Ship);
+
+            /// <summary>
+            /// reactivate any sensors that were active in the previous taskgroup.
+            /// </summary>
+            int ShipIndex = TaskGroupTo.Ships.IndexOf(Ship);
+            foreach(int activeIndex in activeSensorIndices)
+               TaskGroupTo.SetActiveSensor(ShipIndex, activeIndex, true);
         }
 
         /// <summary>
