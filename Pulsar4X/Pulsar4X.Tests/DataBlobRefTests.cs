@@ -13,6 +13,20 @@ namespace Pulsar4X.Tests
     [TestFixture, Description("Tests the DataBlobReference class. Note that it does not test the save/load/PostLoad functions, these are runtime only tests.")]
     class DataBlobRefTests
     {
+        private Game game;
+
+        [SetUp]
+        public void Init()
+        {
+            game = new Game();
+        }
+
+        [TearDown]
+        public void Cleanup()
+        {
+            game = null;
+        }
+
         [Test]
         public void EqulityTest()
         {
@@ -64,19 +78,20 @@ namespace Pulsar4X.Tests
             // create the references:
             PositionDB position1 = new PositionDB(42, 42);
             PositionDB position2 = new PositionDB(42, 42);
-            DataBlobRef<PositionDB> posRef1 = new DataBlobRef<PositionDB>(position1);
-            DataBlobRef<PositionDB> posRef2 = new DataBlobRef<PositionDB>(position2);
-            DataBlobRef<PositionDB> posRef3 = new DataBlobRef<PositionDB>(position1);
 
-            // ref should have the same has as the actual DB:
-            Assert.AreEqual(posRef1.GetHashCode(), position1.GetHashCode());
-            Assert.AreEqual(posRef2.GetHashCode(), position2.GetHashCode());
+            var posRef1 = RefGenerator.MakeDataBlobRef(position1);
+            var posRef2 = RefGenerator.MakeDataBlobRef(position2);
+            var posRef3 = RefGenerator.MakeDataBlobRef(position1);
 
             // refs to different dbs should have different hashes:
             Assert.IsTrue(posRef1.GetHashCode() != posRef2.GetHashCode());
 
-            // ref to the same dbs should have the same hash:
-            Assert.IsTrue(posRef1.GetHashCode() == posRef3.GetHashCode());
+            // ref to the same dbs should a differnt has as well hash:
+            Assert.IsTrue(posRef1.GetHashCode() != posRef3.GetHashCode());
+
+            // the same ref should have the same hash:
+            Assert.IsTrue(posRef1.GetHashCode() == posRef1.GetHashCode());
+
         }
     }
 }

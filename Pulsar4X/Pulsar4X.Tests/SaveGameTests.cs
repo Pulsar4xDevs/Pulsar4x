@@ -30,9 +30,14 @@ namespace Pulsar4X.Tests
             testTime = DateTime.Now;
             game.CurrentDateTime = testTime;
 
+            // add a species:
+            SpeciesDB speciesdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
+            int speciesEntity = game.GlobalManager.CreateEntity();
+            game.GlobalManager.SetDataBlob(speciesEntity, speciesdb);
+
             // add a faction:
             List<BaseDataBlob> list = new List<BaseDataBlob>();
-            DataBlobRef<SpeciesDB> sdb = new DataBlobRef<SpeciesDB>(new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44));
+            DataBlobRef<SpeciesDB> sdb = new DataBlobRef<SpeciesDB>(speciesdb);
             JDictionary<DataBlobRef<SpeciesDB>, double> pop = new JDictionary<DataBlobRef<SpeciesDB>, double>();
             pop.Add(sdb, 42);
 
@@ -101,6 +106,20 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(testTime, game.CurrentDateTime);
             var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
             Assert.AreEqual(1, entities.Count);
+
+            // lets check the the refs were hocked back up:
+            int faction = game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
+            var colony = game.GlobalManager.GetDataBlob<ColonyInfoDB>(faction);
+            Assert.AreEqual(1, colony.Population.Count);
+            foreach (var pop in colony.Population)
+            {
+                Assert.IsNotNull(pop.Key);
+                Assert.AreEqual(42, pop.Value);
+                Assert.IsNotNull(pop.Key.Ref);
+                Assert.AreEqual("Human", pop.Key.Ref.SpeciesName);
+                Assert.AreEqual(1.0, pop.Key.Ref.BaseGravity);
+                Assert.AreEqual(1.0, pop.Key.Ref.BasePressure);
+            }
         }
     }
 }

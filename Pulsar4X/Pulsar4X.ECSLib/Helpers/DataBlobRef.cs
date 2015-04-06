@@ -9,6 +9,7 @@ namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// This is a Wrapper Class for DataBlob references. It will automaticaly be re-linked when the game is loaded from disk.
+    /// @note DO NOT use this object as a key to a dictionary. instead use the Guid of the Datablobs entity (which you can access via DataBlob.EntityGuid)
     /// </summary>
     /// <typeparam name="T">A type of Datablob.</typeparam>
     public class DataBlobRef<T> : IPostLoad, ISerializable
@@ -34,6 +35,7 @@ namespace Pulsar4X.ECSLib
         {
             _refOwnerGuid = fromEntityGuid;
             _ref = ResolveGuid();
+            RegisterPostLoad();
         }
 
         /// <summary>
@@ -43,6 +45,7 @@ namespace Pulsar4X.ECSLib
         public DataBlobRef(T dataBlob)
         {
             _ref = dataBlob;
+            RegisterPostLoad();
         }
 
          private T ResolveGuid()
@@ -158,29 +161,32 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Note that this hashing function is less then ideal as the hash 
-        /// can change during the on load function when the reference is set from null to a value.
-        /// see here for more info: http://blogs.msdn.com/b/ericlippert/archive/2011/02/28/guidelines-and-rules-for-gethashcode.aspx
-        /// 
-        /// It has been done this way to copy the result equals method.
-        /// @todo make this work better/safer
+        /// Note that this hasing function does not match the .Equals() and == methods as
+        /// it will not return the same has as the object held in Ref. This is to make the 
+        /// object work as a key to a dictionay for JSON.net and LINQ support.
         /// </summary>
         public override int GetHashCode()
         {
-            if (_ref == null)
-                return base.GetHashCode();
-
-            return _ref.GetHashCode();
+            return base.GetHashCode();
         }
 
         #endregion
 
         #region IPostLoad
 
-        public void PostLoad()
+        public void RegisterPostLoad()
+        {
+            if (!Game.Instance.IsLoaded)
+                Game.Instance.PostLoad += new EventHandler(PostLoad);
+        }
+
+        public void PostLoad(object sender, EventArgs e)
         {
             // on post load we lookup the datablob by guid, thus re-linking the reference.
             _ref = ResolveGuid();
+
+            // De-register for post load event:
+            Game.Instance.PostLoad -= PostLoad;
         }
 
         #endregion
@@ -191,6 +197,7 @@ namespace Pulsar4X.ECSLib
         {
             // on de-serilaize we just want to cache the guid:
             _refOwnerGuid = (Guid)info.GetValue("_refOwnerGuid", typeof(Guid));
+            RegisterPostLoad();
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -206,5 +213,16 @@ namespace Pulsar4X.ECSLib
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Small factory to create DataBlobRefs without the need for specifiying the Datablob type all the time.
+    /// </summary>
+    public static class RefGenerator
+    {
+        public static DataBlobRef<T> MakeDataBlobRef<T>(T dataBlob) where T : BaseDataBlob
+        {
+            return new DataBlobRef<T>(dataBlob);
+        }
     }
 }

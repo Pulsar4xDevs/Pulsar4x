@@ -69,8 +69,13 @@ namespace Pulsar4X.ECSLib
 
         public Interrupt CurrentInterrupt { get; set; }
 
+        public event EventHandler PostLoad;
+
+        public bool IsLoaded { get; private set; }
+
         public Game()
         {
+            IsLoaded = false;
             GlobalManager = new EntityManager();
             GlobalManager.Clear(true);
             Instance = this;
@@ -240,13 +245,18 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal void PostLoad(DateTime currentDateTime, EntityManager globalManager, List<StarSystem> starSystems)
+        internal void PostGameLoad(DateTime currentDateTime, EntityManager globalManager, List<StarSystem> starSystems)
         {
             CurrentDateTime = currentDateTime;
             GlobalManager = globalManager;
             StarSystems = starSystems;
 
-            ///< @todo go throuhg all datablobs and call their postLoad functions if they have them.
+            // Invoke the Post Load event:
+            if (PostLoad != null)
+                PostLoad(this, EventArgs.Empty);
+
+            // set isLoaded to true:
+            IsLoaded = true;
         }
     }
 }
