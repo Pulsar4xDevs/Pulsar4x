@@ -81,13 +81,13 @@
     <Compile Include="DataBlobs\SpeciesDB.cs" />
     <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
     <Compile Include="Engine-Comms.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="EntityManager.cs" />
     <Compile Include="Factories\ShipFactory.cs" />
     <Compile Include="Factories\SpeciesFactory.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="GameSettings.cs" />
     <Compile Include="Helpers\ComparableBitArray.cs" />
-    <Compile Include="Helpers\DataBlobRef.cs" />
     <Compile Include="Helpers\GameMath.cs" />
     <Compile Include="Helpers\Interrupt.cs" />
     <Compile Include="Helpers\JSONHelper.cs" />

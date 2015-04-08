@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         }
     }
 
-    public class EntityManager : ISerializable
+    public partial class EntityManager : ISerializable
     {
         private static Dictionary<Type, int> _dataBlobTypes;
         private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
@@ -430,14 +430,8 @@ namespace Pulsar4X.ECSLib
         /// Removes this entityID from this entityID manager.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        public void RemoveEntity(int entityID)
+        private void RemoveEntity(int entityID)
         {
-            // Make sure we only attempt to remove valid entities.
-            if (!IsValidEntity(entityID))
-            {
-                throw new ArgumentException("Invalid Entity.");
-            }
-
             _guidLock.EnterWriteLock();
             try
             {
@@ -477,7 +471,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <returns>New entityID in new manager.</returns>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        public int TransferEntity(int entityID, EntityManager manager)
+        private int TransferEntity(int entityID, EntityManager manager)
         {
             List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entityID);
 
