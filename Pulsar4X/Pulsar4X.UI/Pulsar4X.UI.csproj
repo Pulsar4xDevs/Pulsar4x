@@ -53,7 +53,7 @@
       <HintPath>../deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>../deps/Json45r8/bin/Net40/Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK">
       <HintPath>../deps/OpenTK-1.1/bin/OpenTK.dll</HintPath>
