@@ -493,7 +493,15 @@ namespace Pulsar4X.Entities
 
         #endregion
 
-        public Population(SystemBody a_oPlanet, Faction a_oFaction, String a_oName = "Earth", Species a_oSpecies = null)
+        /// <summary>
+        /// Constructor for population.
+        /// </summary>
+        /// <param name="a_oPlanet">Planet this population is on</param>
+        /// <param name="a_oFaction">Faction this population belongs to</param>
+        /// <param name="CurrentTimeSlice">Tick this population was created</param>
+        /// <param name="a_oName">Name of the population</param>
+        /// <param name="a_oSpecies">Species that will reside on this population.</param>
+        public Population(SystemBody a_oPlanet, Faction a_oFaction, int CurrentTimeSlice, String a_oName = "Earth", Species a_oSpecies = null)
         {
             Id = Guid.NewGuid();
             // initialise minerials:
@@ -536,6 +544,10 @@ namespace Pulsar4X.Entities
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
             Planet.Position.System.Populations.Add(this);
             Contact = new SystemContact(Faction, this);
+            Contact.Position.System = Planet.Position.System;
+            Contact.Position.X = Planet.Position.X;
+            Contact.Position.Y = Planet.Position.Y;
+            Planet.Position.System.SystemContactList.Add(Contact);
 
             GovernorPresent = false;
             AdminRating = 0;
@@ -571,6 +583,17 @@ namespace Pulsar4X.Entities
             IsRefining = false;
 
             ShipyardTasks = new Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation>();
+
+            ThermalDetection = new BindingList<int>();
+            EMDetection = new BindingList<int>();
+            ActiveDetection = new BindingList<int>();
+
+            for (int loop = 0; loop < Constants.Faction.FactionMax; loop++)
+            {
+                ThermalDetection.Add(CurrentTimeSlice);
+                EMDetection.Add(CurrentTimeSlice);
+                ActiveDetection.Add(CurrentTimeSlice);
+            }
 
             SSEntity = StarSystemEntityType.Population;
         }

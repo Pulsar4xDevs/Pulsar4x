@@ -231,6 +231,15 @@ namespace Pulsar4X.Entities
                 CurrentMoon.UpdatePosition(tickValue);
             }
 
+            /// <summary>
+            /// update every population on this planet.
+            /// </summary>
+            foreach (Population Pops in Populations)
+            {
+                Pops.Contact.Position.X = Position.X;
+                Pops.Contact.Position.Y = Position.Y;
+            }
+
             ///<summary>
             ///Update taskgroup positions.
             ///</summary>

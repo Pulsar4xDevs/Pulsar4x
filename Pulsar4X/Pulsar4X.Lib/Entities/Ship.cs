@@ -445,6 +445,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
+        /// <param name="CurrentTimeSlice">tick when this ship is created.</param>
+        /// <param name="ShipTG">TG this ship belongs to.</param>
+        /// <param name="ShipFact">Faction this ship belongs to.</param>
+        /// <param name="Title">Name of the ship.</param>
         public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact, String Title)
         {
             int index;
