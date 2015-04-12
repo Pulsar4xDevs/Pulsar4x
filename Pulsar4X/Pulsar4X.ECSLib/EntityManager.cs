@@ -98,6 +98,10 @@ namespace Pulsar4X.ECSLib
                 {
                     return false;
                 }
+                if (!IsValidEntity(entity.ID))
+                {
+                    return false;
+                }
                 return _entities[entity.ID] == entity;
             }
         }
@@ -159,7 +163,7 @@ namespace Pulsar4X.ECSLib
                 _dataBlobMap[typeIndex][entityID] = dataBlob;
                 _entityMasks[entityID][typeIndex] = true;
 
-                dataBlob.Entity = _entities[entityID];
+                dataBlob.OwningEntity = _entities[entityID];
             }
         }
 
@@ -369,11 +373,14 @@ namespace Pulsar4X.ECSLib
             entity.SetID(newID);
             SetupEntitySlot(entity);
 
+            _localEntityDictionary.Add(entity.Guid, entity);
+            _globalGuidDictionary.Add(entity.Guid, this);
+
             if (dataBlobs != null)
             {
                 foreach (dynamic dataBlob in dataBlobs)
                 {
-                    entity.SetDataBlob(dataBlob);
+                    SetDataBlob(newID, dataBlob);
                 }
             }
 
@@ -412,7 +419,7 @@ namespace Pulsar4X.ECSLib
             int entityID;
             for (entityID = 0; entityID < _entities.Count; entityID++)
             {
-                if (_entities[entityID] != null)
+                if (_entities[entityID] == null)
                 {
                     break;
                 }
@@ -427,6 +434,7 @@ namespace Pulsar4X.ECSLib
             {
                 entityGuid = Guid.NewGuid();
             }
+
             return entityGuid;
         }
 
@@ -434,7 +442,7 @@ namespace Pulsar4X.ECSLib
         /// Removes this entityID from this entityID manager.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        public void RemoveEntity(Entity entity)
+        internal void RemoveEntity(Entity entity)
         {
             _guidLock.EnterWriteLock();
             try
@@ -480,16 +488,8 @@ namespace Pulsar4X.ECSLib
                 throw new ArgumentException("Entity is not valid in this manager.");
             }
 
-            _guidLock.EnterWriteLock();
-            try
-            {
-                RemoveEntity(entity);
-                manager.CreateEntity(entity, dataBlobs);
-            }
-            finally
-            {
-                _guidLock.ExitWriteLock();
-            }
+            RemoveEntity(entity);
+            manager.CreateEntity(entity, dataBlobs);
         }
 
         /// <summary>
@@ -574,11 +574,19 @@ namespace Pulsar4X.ECSLib
         /// <para></para>
         /// Does not throw exceptions.
         /// </summary>
-        public void Clear(bool global = false)
+        public void Clear(bool clearAll = false)
         {
-            foreach (Entity entity in _entities.Where(entity => entity != null))
+            for (int i = 0; i < _entities.Count; i++)
             {
-                RemoveEntity(entity);
+                if (_entities[i] != null)
+                {
+                    RemoveEntity(_entities[i]);
+                }
+            }
+
+            if (clearAll)
+            {
+                _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
             }
         }
 
@@ -656,7 +664,7 @@ namespace Pulsar4X.ECSLib
                 // Set the dataBlobs to their proper entity using a local Guid lookup.
                 foreach (dynamic dataBlob in dataBlobs)
                 {
-                    SetDataBlob(_localEntityDictionary[dataBlob.EntityGuid], dataBlob);
+                    dataBlob.OwningEntity.SetDataBlob(dataBlob);
                 }
             }
         }
@@ -685,7 +693,10 @@ namespace Pulsar4X.ECSLib
                 }
             }
             // Serialize Entities
-            var defraggedEntites = new List<Entity>(_entities.Where(entity => entity != null));
+            List<Guid> defraggedEntites = (from entity in _entities
+                                    where entity != null
+                                    select entity.Guid).ToList();
+
 
             info.AddValue("Entities", defraggedEntites);
         }

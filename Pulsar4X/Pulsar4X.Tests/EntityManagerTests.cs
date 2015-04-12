@@ -34,17 +34,21 @@ namespace Pulsar4X.Tests
         {
             // create entity with no data blobs:
             Entity testEntity = _entityManager.CreateEntity();
-            Assert.AreEqual(0, testEntity);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(1, testEntity.ID);
+            Assert.AreSame(_entityManager, testEntity.Manager);
 
             // Create entity with existing datablobs:
             var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new ColonyInfoDB(_pop1)};
             testEntity = _entityManager.CreateEntity(dataBlobs);
-            Assert.AreEqual(1, testEntity);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(2, testEntity.ID);
 
             // Create entity with existing datablobs, but provide an empty list:
             dataBlobs.Clear();
             testEntity = _entityManager.CreateEntity(dataBlobs);
-            Assert.AreEqual(2, testEntity);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(3, testEntity.ID);
 
             // Create entity with existing datablobs, but provide a null list:
             Assert.Catch(typeof(ArgumentNullException), () =>
@@ -165,7 +169,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(2, testList.Count);  // should have 2 datablobs.
 
             // Remove an entity.
-            _entityManager.RemoveEntity(testEntity);
+            testEntity.DeleteEntity();
 
             // now lets see if the entity is still there:
             Assert.Catch(typeof (ArgumentException), () =>
@@ -221,16 +225,17 @@ namespace Pulsar4X.Tests
             // now lets try remove it again:
             testEntity.RemoveDataBlob(typeIndex);
 
-            // now lets try an invlaid entity:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                testEntity.RemoveDataBlob(typeIndex);
-            });
-
             // and an invalid typeIndex:
             Assert.Catch(typeof(ArgumentException), () =>
             {
                 testEntity.RemoveDataBlob(-42);
+            });
+
+            // now lets try an invlaid entity:
+            testEntity.DeleteEntity();
+            Assert.Catch(typeof(ArgumentException), () =>
+            {
+                testEntity.RemoveDataBlob(typeIndex);
             });
 
         }
@@ -289,11 +294,11 @@ namespace Pulsar4X.Tests
 
             // now lets just get the one entity:
             Entity testEntity = _entityManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
-            Assert.AreEqual(0, testEntity);
+            Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
             testEntity = _entityManager.GetFirstEntityWithDataBlob<AtmosphereDB>();
-            Assert.AreEqual(-1, testEntity);    
+            Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type:
             Assert.Catch(typeof(KeyNotFoundException), () =>
@@ -305,12 +310,13 @@ namespace Pulsar4X.Tests
             // now lets just get the one entity, but use a different function to do it:
             int type = EntityManager.GetTypeIndex<ColonyInfoDB>();
             testEntity = _entityManager.GetFirstEntityWithDataBlob(type);
-            Assert.AreEqual(0, testEntity);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(0, testEntity.ID);
 
             // lookup an entity that does not exist:
             type = EntityManager.GetTypeIndex<AtmosphereDB>();
             testEntity = _entityManager.GetFirstEntityWithDataBlob(type);
-            Assert.AreEqual(-1, testEntity);
+            Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type index:
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
@@ -339,7 +345,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(testEntity, foundEntity);
 
             // and a removed entity:
-            _entityManager.RemoveEntity(testEntity);
+            testEntity.DeleteEntity();
             Assert.IsFalse(testEntity.IsValid);
 
             // Check back Guid lookups.
