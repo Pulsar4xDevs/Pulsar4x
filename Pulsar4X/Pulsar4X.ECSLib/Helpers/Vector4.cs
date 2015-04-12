@@ -114,7 +114,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Returns a value that indicates whether this instance and a specified object are equal. (Overrides ValueType.Equals(Object).)
         /// </summary>
-        public bool Equals(object obj)
+        public override bool Equals(object obj)
         {
             if (!(obj is Vector4))
                 return false;

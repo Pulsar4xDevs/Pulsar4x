@@ -2,13 +2,13 @@
 {
     public class ColonyInfoDB : BaseDataBlob
     {
-        public JDictionary<DataBlobRef<SpeciesDB>, double> Population;
+        public JDictionary<Entity, double> Population;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="popSize">Species and population number(in Million?)</param>
-        public ColonyInfoDB(JDictionary<DataBlobRef<SpeciesDB>, double> popSize)
+        public ColonyInfoDB(JDictionary<Entity, double> popSize)
         {
             Population = popSize;
         }

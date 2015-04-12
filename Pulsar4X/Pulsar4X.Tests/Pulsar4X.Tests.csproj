@@ -52,7 +52,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataBlobRefTests.cs" />
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="EngineCommsTests.cs" />
     <Compile Include="EntityManagerTests.cs" />

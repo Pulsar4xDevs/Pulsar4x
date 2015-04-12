@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Pulsar4X.ECSLib;
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
-using NUnit.Framework.Constraints;
 
 namespace Pulsar4X.Tests
 {
@@ -31,19 +25,18 @@ namespace Pulsar4X.Tests
 
             // add a species:
             SpeciesDB speciesdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
-            int speciesEntity = game.GlobalManager.CreateEntity();
-            game.GlobalManager.SetDataBlob(speciesEntity, speciesdb);
+            Entity speciesEntity = game.GlobalManager.CreateEntity();
+            speciesEntity.SetDataBlob(speciesdb);
 
             // add a faction:
-            List<BaseDataBlob> list = new List<BaseDataBlob>();
-            DataBlobRef<SpeciesDB> sdb = new DataBlobRef<SpeciesDB>(speciesdb);
-            JDictionary<DataBlobRef<SpeciesDB>, double> pop = new JDictionary<DataBlobRef<SpeciesDB>, double>();
-            pop.Add(sdb, 42);
+            var list = new List<BaseDataBlob>();
+            Entity sdb = game.GlobalManager.CreateEntity(new List<BaseDataBlob> {speciesdb});
+            var pop = new JDictionary<Entity, double> {{sdb, 42}};
 
             list.Add(new ColonyInfoDB(pop));
             list.Add(new PositionDB(0,0,0));
-            //list.Add(OrbitDB.FromStationary(0));
-            int factionID = game.GlobalManager.CreateEntity(list);
+            list.Add(OrbitDB.FromStationary(0));
+            Entity faction = game.GlobalManager.CreateEntity(list);
 
             // add a star system:
             game.StarSystems.Add(new StarSystem());
@@ -107,17 +100,20 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(1, entities.Count);
 
             // lets check the the refs were hocked back up:
-            int faction = game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
-            var colony = game.GlobalManager.GetDataBlob<ColonyInfoDB>(faction);
+            Entity faction = game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
+            var colony = faction.GetDataBlob<ColonyInfoDB>();
             Assert.AreEqual(1, colony.Population.Count);
             foreach (var pop in colony.Population)
             {
-                Assert.IsNotNull(pop.Key);
+                Assert.IsTrue(pop.Key.IsValid);
+
+                SpeciesDB refDB = pop.Key.GetDataBlob<SpeciesDB>();
+                Assert.IsNotNull(refDB);
+
                 Assert.AreEqual(42, pop.Value);
-                Assert.IsNotNull(pop.Key.Ref);
-                Assert.AreEqual("Human", pop.Key.Ref.SpeciesName);
-                Assert.AreEqual(1.0, pop.Key.Ref.BaseGravity);
-                Assert.AreEqual(1.0, pop.Key.Ref.BasePressure);
+                Assert.AreEqual("Human", refDB.SpeciesName);
+                Assert.AreEqual(1.0, refDB.BaseGravity);
+                Assert.AreEqual(1.0, refDB.BasePressure);
             }
         }
     }

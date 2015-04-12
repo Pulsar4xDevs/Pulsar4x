@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Pulsar4X;
 using System.Threading;
 using Pulsar4X.ECSLib.Processors;
 
@@ -125,8 +121,8 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // loop through all the incoming queues looking for a new message:
-                List<int> factions = GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
-                foreach (int faction in factions)
+                List<Entity> factions = GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
+                foreach (Entity faction in factions)
                 {
                     // lets just take a peek first:
                     Message message;
@@ -161,7 +157,7 @@ namespace Pulsar4X.ECSLib
             return true; // we will do this until we have messages that can be invalid!!
         }
 
-        private void ProcessMessage(int faction, Message message, ref bool quit)
+        private void ProcessMessage(Entity faction, Message message, ref bool quit)
         {
             if (message == null)
             {

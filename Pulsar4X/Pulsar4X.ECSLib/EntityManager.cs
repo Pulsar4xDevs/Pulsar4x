@@ -21,17 +21,19 @@ namespace Pulsar4X.ECSLib
         {
         }
     }
-
-    public partial class EntityManager : ISerializable
+    public class EntityManager : ISerializable
     {
         private static Dictionary<Type, int> _dataBlobTypes;
-        private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
-        private static ReaderWriterLockSlim _guidLock;
+
+        private readonly List<Entity> _entities;
         private readonly List<List<BaseDataBlob>> _dataBlobMap;
-        private readonly List<int> _entities;
         private readonly List<ComparableBitArray> _entityMasks;
-        private readonly Dictionary<Guid, int> _localGuidDictionary;
-        private readonly List<Guid> _localGuids;
+
+        private static Dictionary<Guid, EntityManager> _globalGuidDictionary;
+        private readonly Dictionary<Guid, Entity> _localEntityDictionary;
+
+        private static ReaderWriterLockSlim _guidLock;
+        private readonly object _entityLock;
 
         public EntityManager()
         {
@@ -55,10 +57,10 @@ namespace Pulsar4X.ECSLib
 
             // Initialize our instance variables.
             _dataBlobMap = new List<List<BaseDataBlob>>(_dataBlobTypes.Count);
-            _entities = new List<int>();
+            _entities = new List<Entity>();
             _entityMasks = new List<ComparableBitArray>();
-            _localGuidDictionary = new Dictionary<Guid, int>();
-            _localGuids = new List<Guid>();
+            _localEntityDictionary = new Dictionary<Guid, Entity>();
+            _entityLock = new object();
 
             // Fill out the first level of the datablob map.
             for (int i = 0; i < _dataBlobTypes.Count; i++)
@@ -72,13 +74,32 @@ namespace Pulsar4X.ECSLib
         /// Verifies that the supplied entityID is valid in this manager.
         /// </summary>
         /// <returns>True is the entityID is considered valid.</returns>
-        public bool IsValidEntity(int entityID)
+        private bool IsValidEntity(int entityID)
         {
-            if (entityID < 0 || entityID >= _entities.Count)
+            lock (_entityLock)
             {
-                return false;
+                if (entityID < 0 || entityID >= _entities.Count)
+                {
+                    return false;
+                }
+                return _entities[entityID] != null;
             }
-            return _entities[entityID] == entityID;
+        }
+
+        /// <summary>
+        /// Verifies that the supplied entity is valid in this manager.
+        /// </summary>
+        /// <returns>True is the entity is considered valid.</returns>
+        public bool IsValidEntity(Entity entity)
+        {
+            lock (_entityLock)
+            {
+                if (entity.Manager != this)
+                {
+                    return false;
+                }
+                return _entities[entity.ID] == entity;
+            }
         }
 
         /// <summary>
@@ -87,10 +108,13 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid entityID is passed.</exception>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public T GetDataBlob<T>(int entityID) where T : BaseDataBlob
+        internal T GetDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
-            return GetDataBlob<T>(entityID, typeIndex);
+            lock (_entityLock)
+            {
+                return GetDataBlob<T>(entityID, typeIndex);
+            }
         }
 
         /// <summary>
@@ -99,9 +123,12 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
         /// <exception cref="InvalidCastException">Thrown when typeIndex does not match m_dataBlobTypes entry for Type T</exception>
-        public T GetDataBlob<T>(int entityID, int typeIndex) where T : BaseDataBlob
+        internal T GetDataBlob<T>(int entityID, int typeIndex) where T : BaseDataBlob
         {
-            return (T)_dataBlobMap[typeIndex][entityID];
+            lock (_entityLock)
+            {
+                return (T)_dataBlobMap[typeIndex][entityID];
+            }
         }
 
         /// <summary>
@@ -110,7 +137,7 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentNullException">Thrown when dataBlob is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid entityID is passed.</exception>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public void SetDataBlob<T>(int entityID, T dataBlob) where T : BaseDataBlob
+        internal void SetDataBlob<T>(int entityID, T dataBlob) where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
             SetDataBlob(entityID, dataBlob, typeIndex);
@@ -121,19 +148,19 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when dataBlob is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
-        private void SetDataBlob(int entityID, BaseDataBlob dataBlob, int typeIndex)
+        internal void SetDataBlob(int entityID, BaseDataBlob dataBlob, int typeIndex)
         {
-            if (dataBlob == null)
+            lock (_entityLock)
             {
-                throw new ArgumentNullException("dataBlob", "Do not use SetDataBlob to remove a datablob. Use RemoveDataBlob.");
+                if (dataBlob == null)
+                {
+                    throw new ArgumentNullException("dataBlob", "Do not use SetDataBlob to remove a datablob. Use RemoveDataBlob.");
+                }
+                _dataBlobMap[typeIndex][entityID] = dataBlob;
+                _entityMasks[entityID][typeIndex] = true;
+
+                dataBlob.Entity = _entities[entityID];
             }
-
-            _dataBlobMap[typeIndex][entityID] = dataBlob;
-            _entityMasks[entityID][typeIndex] = true;
-
-            dataBlob.EntityID = entityID;
-            dataBlob.EntityGuid = _localGuids[entityID];
-            dataBlob.ContainingManager = this;
         }
 
         /// <summary>
@@ -142,10 +169,13 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         /// <exception cref="ArgumentException">Thrown when an invalid entityID is passed.</exception>
-        public void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
+        internal void RemoveDataBlob<T>(int entityID) where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
-            RemoveDataBlob(entityID, typeIndex);
+            lock (_entityLock)
+            {
+                RemoveDataBlob(entityID, typeIndex);
+            }
         }
 
         /// <summary>
@@ -153,15 +183,18 @@ namespace Pulsar4X.ECSLib
         /// Fastest DataBlob removal available.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when an invalid typeIndex or entityID is passed.</exception>
-        public void RemoveDataBlob(int entityID, int typeIndex)
+        internal void RemoveDataBlob(int entityID, int typeIndex)
         {
-            if (!IsValidEntity(entityID))
+            lock (_entityLock)
             {
-                throw new ArgumentException("Invalid Entity.");
-            }
+                if (!IsValidEntity(entityID))
+                {
+                    throw new ArgumentException("Invalid Entity.");
+                }
 
-            _dataBlobMap[typeIndex][entityID] = null;
-            _entityMasks[entityID][typeIndex] = false;
+                _dataBlobMap[typeIndex][entityID] = null;
+                _entityMasks[entityID][typeIndex] = false;
+            }
         }
 
         /// <summary>
@@ -173,42 +206,42 @@ namespace Pulsar4X.ECSLib
         public List<T> GetAllDataBlobsOfType<T>() where T : BaseDataBlob
         {
             var dataBlobs = new List<T>();
-            foreach (BaseDataBlob dataBlob in _dataBlobMap[GetTypeIndex<T>()])
+            lock (_entityLock)
             {
-                if (dataBlob != null)
-                {
-                    dataBlobs.Add((T)dataBlob);
-                }
-            }
+                dataBlobs.AddRange(_dataBlobMap[GetTypeIndex<T>()].Where(dataBlob => dataBlob != null).Cast<T>());
 
-            return dataBlobs;
+                return dataBlobs;
+            }
         }
 
         /// <summary>
         /// Returns a list of all DataBlobs for a given entity.
         /// <para></para>
-        /// Returns a blank list if entityID has no DataBlobs.
+        /// Returns a blank list if entity has no DataBlobs.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        public List<BaseDataBlob> GetAllDataBlobsOfEntity(int entityID)
+        internal List<BaseDataBlob> GetAllDataBlobsOfEntity(Entity entity)
         {
-            if (!IsValidEntity(entityID))
+            if (!IsValidEntity(entity))
             {
                 throw new ArgumentException("Invalid Entity.");
             }
 
             var entityDBs = new List<BaseDataBlob>();
-            ComparableBitArray entityMask = _entityMasks[entityID];
-
-            for (int typeIndex = 0; typeIndex < _dataBlobTypes.Count; typeIndex++)
+            lock (_entityLock)
             {
-                if (entityMask[typeIndex])
-                {
-                    entityDBs.Add(GetDataBlob<BaseDataBlob>(entityID, typeIndex));
-                }
-            }
+                ComparableBitArray entityMask = _entityMasks[entity.ID];
 
-            return entityDBs;
+                for (int typeIndex = 0; typeIndex < _dataBlobTypes.Count; typeIndex++)
+                {
+                    if (entityMask[typeIndex])
+                    {
+                        entityDBs.Add(GetDataBlob<BaseDataBlob>(entity.ID, typeIndex));
+                    }
+                }
+
+                return entityDBs;
+            }
         }
 
         /// <summary>
@@ -217,7 +250,7 @@ namespace Pulsar4X.ECSLib
         /// Returns a blank list if no DataBlobs of type T exist.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public List<int> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
+        public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
         {
             int typeIndex = GetTypeIndex<T>();
 
@@ -235,54 +268,22 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
         /// <exception cref="NullReferenceException">Thrown when dataBlobMask is null.</exception>
-        public List<int> GetAllEntitiesWithDataBlobs(ComparableBitArray dataBlobMask)
+        public List<Entity> GetAllEntitiesWithDataBlobs(ComparableBitArray dataBlobMask)
         {
-            if (dataBlobMask.Length != _dataBlobTypes.Count)
-            {
-                throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
-            }
+            var entities = new List<Entity>();
 
-            var entities = new List<int>();
-
-            for (int entityID = 0; entityID < _entityMasks.Count; entityID++)
+            lock (_entityLock)
             {
-                if ((_entityMasks[entityID] & dataBlobMask) == dataBlobMask)
+                if (dataBlobMask.Length != _dataBlobTypes.Count)
                 {
-                    entities.Add(entityID);
+                    throw new ArgumentException("dataBlobMask must contain a bit value for each dataBlobType.");
                 }
+
+                entities.AddRange(_entities.Where(entity => entity != null)
+                                           .Where(entity => (_entityMasks[entity.ID] & dataBlobMask) == dataBlobMask));
+
+                return entities;
             }
-
-            return entities;
-        }
-
-        /// <summary>
-        /// Optimized convenience function to get entities that contain two types of DataBlobs, along with the associated DataBlobs.
-        /// </summary>
-        /// <returns></returns>
-        public Dictionary<int, Tuple<T1, T2>> GetEntitiesAndDataBlobs<T1, T2>() where T1 : BaseDataBlob where T2 : BaseDataBlob
-        {
-            int typeIndexT1 = GetTypeIndex<T1>();
-            int typeIndexT2 = GetTypeIndex<T2>();
-
-            ComparableBitArray dataBlobMask = BlankDataBlobMask();
-            dataBlobMask[typeIndexT1] = true;
-            dataBlobMask[typeIndexT2] = true;
-
-            List<int> entities = GetAllEntitiesWithDataBlobs(dataBlobMask);
-
-            var entitiesAndDataBlobs = new Dictionary<int, Tuple<T1, T2>>();
-
-            foreach (int entityID in entities)
-            {
-                T1 dataBlobT1 = (T1)_dataBlobMap[typeIndexT1][entityID];
-                T2 dataBlobT2 = (T2)_dataBlobMap[typeIndexT2][entityID];
-
-                var dataBlobs = new Tuple<T1, T2>(dataBlobT1, dataBlobT2);
-
-                entitiesAndDataBlobs.Add(entityID, dataBlobs);
-            }
-
-            return entitiesAndDataBlobs;
         }
 
         /// <summary>
@@ -291,7 +292,7 @@ namespace Pulsar4X.ECSLib
         /// Returns -1 if no entities have the specified DataBlobType.
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
-        public int GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
+        public Entity GetFirstEntityWithDataBlob<T>() where T : BaseDataBlob
         {
             return GetFirstEntityWithDataBlob(GetTypeIndex<T>());
         }
@@ -302,18 +303,15 @@ namespace Pulsar4X.ECSLib
         /// Returns -1 if no entities have the specified DataBlobType.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when passed an invalid typeIndex</exception>
-        public int GetFirstEntityWithDataBlob(int typeIndex)
+        public Entity GetFirstEntityWithDataBlob(int typeIndex)
         {
             List<BaseDataBlob> dataBlobType = _dataBlobMap[typeIndex];
-            for (int i = 0; i < _entities.Count; i++)
+            lock (_entityLock)
             {
-                if (dataBlobType[i] != null)
-                {
-                    return i;
-                }
+                return _entities.Where((entity, i) => dataBlobType[i] != null)
+                                .DefaultIfEmpty(Entity.GetInvalidEntity())
+                                .FirstOrDefault();
             }
-
-            return -1;
         }
 
         /// <summary>
@@ -325,78 +323,68 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Creates an entityID with an entityID slot.
+        /// Creates an entity in this manager.
         /// </summary>
-        /// <returns>entityID ID of the new entity.</returns>
-        public int CreateEntity()
+        /// <returns>The new entity.</returns>
+        public Entity CreateEntity()
         {
             _guidLock.EnterWriteLock();
             try
             {
-                return CreateEntity(Guid.NewGuid());
+                Guid entityGuid = CreateEntityGuid();
+                return CreateEntity(new Entity(entityGuid, this));
             }
             finally
             {
                 _guidLock.ExitWriteLock();
             }
-        }
-
+        }        
+        
         /// <summary>
-        /// Adds an entityID with the pre-existing datablobs to this EntityManager.
+        /// Adds an entity with the pre-existing datablobs to this EntityManager.
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
-        public int CreateEntity(List<BaseDataBlob> dataBlobs)
-        {
-            _guidLock.EnterWriteLock();
-            try
-            {
-                return CreateEntity(dataBlobs, Guid.NewGuid());
-            }
-            finally
-            {
-                _guidLock.ExitWriteLock();
-            }
-        }
-
-        private int CreateEntity(List<BaseDataBlob> dataBlobs, Guid entityGuid)
+        public Entity CreateEntity(List<BaseDataBlob> dataBlobs)
         {
             if (dataBlobs == null)
             {
-                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entityID use CreateEntity().");
+                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity, use CreateEntity().");
             }
 
-            int entityID = CreateEntity(entityGuid);
-
-            foreach (BaseDataBlob dataBlob in dataBlobs)
+            _guidLock.EnterWriteLock();
+            try
             {
-                int typeIndex;
-                TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
-                SetDataBlob(entityID, dataBlob, typeIndex);
+                Guid entityGuid = CreateEntityGuid();
+                return CreateEntity(new Entity(entityGuid, this), dataBlobs);
             }
-
-            return entityID;
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
         }
 
-        private int CreateEntity(Guid entityGuid)
+        private Entity CreateEntity(Entity entity, List<BaseDataBlob> dataBlobs = null)
         {
-            int entityID;
-            for (entityID = 0; entityID < _entities.Count; entityID++)
+            int newID = CreateEntityID();
+            entity.SetID(newID);
+            SetupEntitySlot(entity);
+
+            if (dataBlobs != null)
             {
-                if (entityID != _entities[entityID])
+                foreach (dynamic dataBlob in dataBlobs)
                 {
-                    // Space open.
-                    break;
+                    entity.SetDataBlob(dataBlob);
                 }
             }
 
-            // Mark space claimed by making the index match the value.
-            // Entities[7] == 7; on claimed spot.
-            // Entities[7] == -1; on unclaimed spot.
-            if (entityID == _entities.Count)
-            {
-                _entities.Add(entityID);
-                _localGuids.Add(entityGuid);
+            return entity;
+        }
 
+        private void SetupEntitySlot(Entity entity)
+        {
+            if (entity.ID == _entities.Count)
+            {
+                _entities.Add(entity);
                 _entityMasks.Add(new ComparableBitArray(_dataBlobTypes.Count));
 
                 // Make sure the entityDBMaps have enough space for this entity.
@@ -407,36 +395,71 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                _entities[entityID] = entityID;
-                _localGuids[entityID] = entityGuid;
-
-                _entityMasks[entityID] = new ComparableBitArray(_dataBlobTypes.Count);
+                _entities[entity.ID] = entity;
+                _entityMasks[entity.ID] = new ComparableBitArray(_dataBlobTypes.Count);
 
                 // Make sure the EntityDBMaps are null for this entity.
                 // This should be done by RemoveentityID, but let's just be safe.
                 for (int typeIndex = 0; typeIndex < _dataBlobTypes.Count; typeIndex++)
                 {
-                    _dataBlobMap[typeIndex][entityID] = null;
+                    _dataBlobMap[typeIndex][entity.ID] = null;
                 }
             }
+        }
 
-            // Add the GUID to the lookup lists.
-            _globalGuidDictionary.Add(entityGuid, this);
-            _localGuidDictionary.Add(entityGuid, entityID);
+        private int CreateEntityID()
+        {
+            int entityID;
+            for (entityID = 0; entityID < _entities.Count; entityID++)
+            {
+                if (_entities[entityID] != null)
+                {
+                    break;
+                }
+            }
             return entityID;
+        }
+
+        private static Guid CreateEntityGuid()
+        {
+            Guid entityGuid = Guid.NewGuid();
+            while (_globalGuidDictionary.ContainsKey(entityGuid))
+            {
+                entityGuid = Guid.NewGuid();
+            }
+            return entityGuid;
         }
 
         /// <summary>
         /// Removes this entityID from this entityID manager.
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        private void RemoveEntity(int entityID)
+        public void RemoveEntity(Entity entity)
         {
             _guidLock.EnterWriteLock();
             try
             {
-                Guid entityGuid = _localGuids[entityID];
-                RemoveEntity(entityID, entityGuid);
+                if (!IsValidEntity(entity))
+                {
+                    throw new ArgumentException("Entity does not valid in this manager.");
+                }
+
+                lock (_entityLock)
+                {
+                    // Remove the GUID from all lists.
+                    _globalGuidDictionary.Remove(entity.Guid);
+                    _localEntityDictionary.Remove(entity.Guid);
+                    _entities[entity.ID] = null;
+
+                    // Destroy references to datablobs.
+                    foreach (List<BaseDataBlob> dataBlobType in entity.Manager._dataBlobMap)
+                    {
+                        dataBlobType[entity.ID] = null;
+                    }
+
+                    // Remove the entity finally.
+                    _entities[entity.ID] = null;
+                }
             }
             finally
             {
@@ -445,42 +468,23 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Removes the entityID from this entityID manager.
+        /// Transfers an entity to the specified manager.
         /// </summary>
-        private void RemoveEntity(int entityID, Guid entityGuid)
-        {
-            // Remove the GUID from all lists.
-            _globalGuidDictionary.Remove(entityGuid);
-            _localGuidDictionary.Remove(entityGuid);
-
-            // Mark the entityID as invalid.
-            _entities[entityID] = -1;
-            _localGuids[entityID] = Guid.Empty;
-
-            // Destroy references to datablobs.
-            foreach (List<BaseDataBlob> dataBlobType in _dataBlobMap)
-            {
-                dataBlobType[entityID] = null;
-            }
-
-            _entityMasks[entityID] = BlankDataBlobMask();
-        }
-
-        /// <summary>
-        /// Transfers an entityID to the specified manager.
-        /// </summary>
-        /// <returns>New entityID in new manager.</returns>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
-        private int TransferEntity(int entityID, EntityManager manager)
+        internal void TransferEntity(Entity entity, EntityManager manager)
         {
-            List<BaseDataBlob> dataBlobs = GetAllDataBlobsOfEntity(entityID);
+            List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
+
+            if (!IsValidEntity(entity))
+            {
+                throw new ArgumentException("Entity is not valid in this manager.");
+            }
 
             _guidLock.EnterWriteLock();
             try
             {
-                Guid entityGuid = _localGuids[entityID];
-                RemoveEntity(entityID, entityGuid);
-                return manager.CreateEntity(dataBlobs, entityGuid);
+                RemoveEntity(entity);
+                manager.CreateEntity(entity, dataBlobs);
             }
             finally
             {
@@ -492,20 +496,22 @@ namespace Pulsar4X.ECSLib
         /// Gets the associated EntityManager and entityID of the specified Guid.
         /// </summary>
         /// <returns>True if entityID is found.</returns>
-        public static bool FindEntityByGuid(Guid entityGuid, out EntityManager manager, out int entityID)
+        public static bool FindEntityByGuid(Guid entityGuid, out Entity entity)
         {
-            entityID = -1;
-
             _guidLock.EnterReadLock();
-
             try
             {
+                EntityManager manager;
                 if (!_globalGuidDictionary.TryGetValue(entityGuid, out manager))
                 {
+                    entity = Entity.GetInvalidEntity();
                     return false;
                 }
 
-                entityID = manager._localGuidDictionary[entityGuid];
+                if (!manager._localEntityDictionary.TryGetValue(entityGuid, out entity))
+                {
+                    throw new GuidNotFoundException();
+                }
                 return true;
             }
             finally
@@ -520,12 +526,17 @@ namespace Pulsar4X.ECSLib
         /// Does not throw exceptions.
         /// </summary>
         /// <returns>True if entityID exists in this manager.</returns>
-        public bool TryGetEntityByGuid(Guid entityGuid, out int entityID)
+        public bool TryGetEntityByGuid(Guid entityGuid, out Entity entity)
         {
             _guidLock.EnterReadLock();
             try
             {
-                return _localGuidDictionary.TryGetValue(entityGuid, out entityID);
+                if (_localEntityDictionary.TryGetValue(entityGuid, out entity))
+                {
+                    return true;
+                }
+                entity = Entity.GetInvalidEntity();
+                return false;
             }
             finally
             {
@@ -537,9 +548,9 @@ namespace Pulsar4X.ECSLib
         /// Gets the associated Guid of the specified entityID.
         /// </summary>
         /// <returns>True if entityID exists in this manager.</returns>
-        public bool TryGetGuidByEntity(int entityID, out Guid entityGuid)
+        public bool TryGetEntityByID(int entityID, out Entity entity)
         {
-            entityGuid = Guid.Empty;
+            entity = Entity.GetInvalidEntity();
 
             if (!IsValidEntity(entityID))
             {
@@ -549,7 +560,7 @@ namespace Pulsar4X.ECSLib
             _guidLock.EnterReadLock();
             try
             {
-                entityGuid = _localGuids[entityID];
+                entity = _entities[entityID];
                 return true;
             }
             finally
@@ -565,26 +576,9 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public void Clear(bool global = false)
         {
-            for (int entityID = 0; entityID < _entities.Count; entityID++)
+            foreach (Entity entity in _entities.Where(entity => entity != null))
             {
-                if (IsValidEntity(entityID))
-                {
-                    RemoveEntity(entityID);
-                }
-            }
-            if (!global)
-            {
-                return;
-            }
-
-            _guidLock.EnterWriteLock();
-            try
-            {
-                _globalGuidDictionary = new Dictionary<Guid, EntityManager>();
-            }
-            finally
-            {
-                _guidLock.ExitWriteLock();
+                RemoveEntity(entity);
             }
         }
 
@@ -618,13 +612,13 @@ namespace Pulsar4X.ECSLib
         public EntityManager(SerializationInfo info, StreamingContext context) : this()
         {
             // Retrieve the Guid list.
-            var entities = (List<Guid>)info.GetValue("Entities", typeof(List<Guid>));
+            var entityGuids = (List<Guid>)info.GetValue("Entities", typeof(List<Guid>));
 
             // Create an entity for each Guid.
             // Also ensures all Guid dictionaries are set.
-            foreach (Guid entity in entities)
+            foreach (Guid guid in entityGuids)
             {
-                CreateEntity(entity);
+                CreateEntity(new Entity(guid, this));
             }
 
             // Deserialize the datablobs by type.
@@ -662,7 +656,7 @@ namespace Pulsar4X.ECSLib
                 // Set the dataBlobs to their proper entity using a local Guid lookup.
                 foreach (dynamic dataBlob in dataBlobs)
                 {
-                    SetDataBlob(_localGuidDictionary[dataBlob.EntityGuid], dataBlob);
+                    SetDataBlob(_localEntityDictionary[dataBlob.EntityGuid], dataBlob);
                 }
             }
         }
@@ -681,8 +675,8 @@ namespace Pulsar4X.ECSLib
 
                 // Find non-null datablobs in our memory structure.
                 List<object> dataBlobs = (from dataBlob in _dataBlobMap[typeIndex]
-                                          where dataBlob != null
-                                          select (object)dataBlob).ToList();
+                                            where dataBlob != null
+                                            select (object)dataBlob).ToList();
 
                 // Serialize the list if not empty.
                 if (dataBlobs.Count > 0)
@@ -691,10 +685,26 @@ namespace Pulsar4X.ECSLib
                 }
             }
             // Serialize Entities
-            var defraggedGuids = new List<Guid>(_localGuids.Where(guid => guid != Guid.Empty));
+            var defraggedEntites = new List<Entity>(_entities.Where(entity => entity != null));
 
-            info.AddValue("Entities", defraggedGuids);
+            info.AddValue("Entities", defraggedEntites);
         }
+
         #endregion
+
+        /// <summary>
+        /// Returns the DataBlobMask for this entity.
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public ComparableBitArray GetMask(Entity entity)
+        {
+            if (!IsValidEntity(entity))
+            {
+                throw new ArgumentException("Entity is not valid for this manager.");
+            }
+
+            return _entityMasks[entity.ID];
+        }
     }
 }

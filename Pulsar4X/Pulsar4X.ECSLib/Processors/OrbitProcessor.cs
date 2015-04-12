@@ -22,18 +22,18 @@ namespace Pulsar4X.ECSLib.Processors
                 EntityManager currentManager = system.SystemManager;
 
                 // Find the first orbital entity.
-                int firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
+                Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
 
-                if (firstOrbital == -1)
+                if (!firstOrbital.IsValid)
                 {
                     // No orbitals in this manager.
                     continue;
                 }
 
-                OrbitDB rootOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital).RootDB as OrbitDB;
+                //OrbitDB rootOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital).RootDB as OrbitDB;
 
                 // Call recursive function to update every orbit in this system.
-                UpdateOrbit(currentManager, rootOrbit, new PositionDB(0, 0, 0), currentTime);
+                //UpdateOrbit(currentManager, rootOrbit, new PositionDB(0, 0, 0), currentTime);
             }
         }
 
@@ -46,13 +46,13 @@ namespace Pulsar4X.ECSLib.Processors
             newPosition += parentPosition;
 
             // Set our absolute coordinates.
-            currentManager.SetDataBlob(orbit.EntityID, newPosition);
+            //currentManager.SetDataBlob(orbit.EntityID, newPosition);
 
             // Update our children.
-            foreach (OrbitDB childOrbit in orbit.ChildDBs.Cast<OrbitDB>())
+            //foreach (OrbitDB childOrbit in orbit.ChildDBs.Cast<OrbitDB>())
             {
                 // RECURSION!
-                UpdateOrbit(currentManager, childOrbit, newPosition, currentTime);
+                //UpdateOrbit(currentManager, childOrbit, newPosition, currentTime);
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class OrbitDB : TreeHierarchyDB
+    public class OrbitDB : BaseDataBlob
     {
         /// <summary>
         /// Mass in KG of this entity.
@@ -135,14 +135,14 @@ namespace Pulsar4X.ECSLib
             return new OrbitDB(mass);
         }
 
-        private OrbitDB(double mass) : base(Guid.Empty)
+        private OrbitDB(double mass)
         {
             Mass = mass;
             IsStationary = true;
         }
 
         private OrbitDB(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
-                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch) : base(parentGuid)
+                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
             Mass = mass;
             ParentMass = parentMass;

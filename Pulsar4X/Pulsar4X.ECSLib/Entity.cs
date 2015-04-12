@@ -6,108 +6,125 @@ using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-
 namespace Pulsar4X.ECSLib
 {
-    public partial class EntityManager
+
+    public delegate void EntityManagerChangeEvent(object sender, EntityManagerChangeEventArgs args);
+
+    public class EntityManagerChangeEventArgs
     {
-        public delegate void EntityManagerChangeEvent(object sender, EntityManagerChangeEventArgs args);
+        public readonly EntityManager OldManager;
+        public readonly EntityManager NewManager;
 
-        public class EntityManagerChangeEventArgs
+        public EntityManagerChangeEventArgs(EntityManager oldManager, EntityManager newManager)
         {
-            public readonly EntityManager OldManager;
-            public readonly EntityManager NewManager;
+            OldManager = oldManager;
+            NewManager = newManager;
+        }
+    }
 
-            public EntityManagerChangeEventArgs(EntityManager oldManager, EntityManager newManager)
+    [JsonObject(MemberSerialization.OptIn)]
+    public class Entity
+    {
+        [JsonProperty("EntityGuid")]
+        public Guid Guid { get; private set; }
+        public int ID { get; private set; }
+        public EntityManager Manager { get; private set; }
+        public ComparableBitArray DataBlobMask { get { return Manager.GetMask(this); } }
+
+        public event EventHandler Deleting;
+        public event EventHandler Deleted;
+
+        public event EntityManagerChangeEvent ChangingManagers;
+        public event EntityManagerChangeEvent ChangedManagers;
+
+        internal Entity(Guid guid, EntityManager currentManager)
+        {
+            Guid = guid;
+            Manager = currentManager;
+        }
+
+        public bool IsValid { get { return Manager.IsValidEntity(this); } }
+
+        public List<BaseDataBlob> GetAllDataBlobs()
+        {
+            return Manager.GetAllDataBlobsOfEntity(this);
+        }
+
+        public T GetDataBlob<T>() where T : BaseDataBlob
+        {
+            return Manager.GetDataBlob<T>(ID);
+        }
+
+        public T GetDataBlob<T>(int typeIndex) where T : BaseDataBlob
+        {
+            return Manager.GetDataBlob<T>(ID, typeIndex);
+        }
+
+        public void SetDataBlob<T>(T dataBlob) where T : BaseDataBlob
+        {
+            Manager.SetDataBlob(ID, dataBlob);
+        }
+
+        public void SetDataBlob(BaseDataBlob dataBlob, int typeIndex)
+        {
+            Manager.SetDataBlob(ID, dataBlob, typeIndex);
+        }
+
+        public void RemoveDataBlob<T>() where T : BaseDataBlob
+        {
+            Manager.RemoveDataBlob<T>(ID);
+        }
+
+        public void RemoveDataBlob(int typeIndex)
+        {
+            Manager.RemoveDataBlob(ID, typeIndex);
+        }
+
+        public void DeleteEntity()
+        {
+            if (Deleting != null)
             {
-                OldManager = oldManager;
-                NewManager = newManager;
+                Deleting(this, EventArgs.Empty);
+            }
+
+            Manager.RemoveEntity(this);
+
+            if (Deleted != null)
+            {
+                Deleted(this, EventArgs.Empty);
             }
         }
 
-        [JsonObject(MemberSerialization.OptIn)]
-        public class Entity
+        public void TransferEntity(EntityManager newManager)
         {
-            [JsonProperty("entityGuid")] 
-            private readonly Guid _entityGuid;
-            private int _entityID;
-            private EntityManager _currentManager;
-            private ComparableBitArray _dataBlobMask;
-
-            public event EventHandler Deleting;
-            public event EventHandler Deleted;
-
-            public event EntityManagerChangeEvent ChangingManagers;
-            public event EntityManagerChangeEvent ChangedManagers;
-
-            [JsonConstructor]
-            public Entity(Guid entityGuid)
+            if (newManager == null)
             {
-                _entityGuid = entityGuid;
-                if (!EntityManager.FindEntityByGuid(entityGuid, out _currentManager, out _entityID))
-                {
-                    throw new GuidNotFoundException();
-                }
-                _dataBlobMask = _currentManager._entityMasks[_entityID];
+                throw new ArgumentNullException("newManager");
             }
 
-            public Entity(Guid entityGuid, int entityID, EntityManager currentManager)
+            if (ChangingManagers != null)
             {
-                _entityGuid = entityGuid;
-                _entityID = entityID;
-                _currentManager = currentManager;
+                ChangingManagers(this, new EntityManagerChangeEventArgs(Manager, newManager));
             }
 
-            public List<BaseDataBlob> GetAllDataBlobs()
+            Manager.TransferEntity(this, newManager);
+            Manager = newManager;
+
+            if (ChangedManagers != null)
             {
-                return _currentManager.GetAllDataBlobsOfEntity(_entityID);
+                ChangedManagers(this, new EntityManagerChangeEventArgs(Manager, newManager));
             }
+        }
 
-            public T GetDataBlob<T>() where T : BaseDataBlob
-            {
-                return _currentManager.GetDataBlob<T>(_entityID);
-            }
+        internal void SetID(int newID)
+        {
+            ID = newID;
+        }
 
-            public T GetDataBlob<T>(int typeIndex) where T : BaseDataBlob
-            {
-                return _currentManager.GetDataBlob<T>(_entityID, typeIndex);
-            }
-
-            public void SetDataBlob<T>(T dataBlob) where T : BaseDataBlob
-            {
-                _currentManager.SetDataBlob(_entityID, dataBlob);
-            }
-
-            public void DeleteEntity()
-            {
-                if (Deleting != null)
-                {
-                    Deleting(this, EventArgs.Empty);
-                }
-
-                _currentManager.RemoveEntity(_entityID);
-
-                if (Deleted != null)
-                {
-                    Deleted(this, EventArgs.Empty);
-                }
-            }
-
-            public void TransferEntity(EntityManager newManager)
-            {
-                if (ChangingManagers != null)
-                {
-                    ChangingManagers(this, new EntityManagerChangeEventArgs(_currentManager, newManager));
-                }
-
-                _entityID = _currentManager.TransferEntity(_entityID, newManager);
-                _currentManager = newManager;
-
-                if (ChangedManagers != null)
-                {
-                    ChangedManagers(this, new EntityManagerChangeEventArgs(_currentManager, newManager));
-                }
-            }
+        public static Entity GetInvalidEntity()
+        {
+            return new Entity(Guid.Empty, Game.Instance.GlobalManager) {ID = -42};
         }
     }
 }

@@ -8,13 +8,12 @@ using System.Windows.Threading;
 
 namespace WPFUI
 {
-
     class UI_Comms
     {
         MessageBook MessageQueue { get; set; }
-        public UI_Comms(Engine_Comms engineComms, int factionID)
+        public UI_Comms(Engine_Comms engineComms, Entity faction)
         {
-            MessageQueue = engineComms.RequestMessagebook(factionID);
+            MessageQueue = engineComms.RequestMessagebook(faction);
         }
         
         public void CheckEnginMessageQueue()

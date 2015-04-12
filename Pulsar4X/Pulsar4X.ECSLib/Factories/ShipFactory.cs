@@ -7,12 +7,12 @@ namespace Pulsar4X.ECSLib.Factories
 {
     internal static class ShipFactory
     {
-        private static int CreateShip(Guid classDef, EntityManager systemEM, int parentFormation)
+        private static Entity CreateShip(Guid classDef, EntityManager systemEM, int parentFormation)
         {
             throw new NotImplementedException();
         }
 
-        private static int CreateNewShipClass(int factionID, string className = null)
+        private static Entity CreateNewShipClass(int factionID, string className = null)
         {
             // lets start by creating all the Datablobs that make up a ship class:
             var shipInfo = new ShipInfoDB();
@@ -58,10 +58,10 @@ namespace Pulsar4X.ECSLib.Factories
             };
 
             // now lets create the ship class:
-            int shipClassEntity = Game.Instance.GlobalManager.CreateEntity(shipDBList);
+            Entity shipClassEntity = Game.Instance.GlobalManager.CreateEntity(shipDBList);
             // and add it to the faction:
-            var faction = Game.Instance.GlobalManager.GetDataBlob<FactionDB>(factionID);
-            faction.ShipClasses.Add(new DataBlobRef<ShipInfoDB>(shipInfo));
+            FactionDB faction = Game.Instance.GlobalManager.GetDataBlob<FactionDB>(factionID);
+            faction.ShipClasses.Add(shipClassEntity);
 
             // now lets set some ship info:
             if (string.IsNullOrEmpty(className))
