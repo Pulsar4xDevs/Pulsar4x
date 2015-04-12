@@ -1212,6 +1212,8 @@ namespace Pulsar4X.Entities.Components
                 LaunchedFrom.GetPositionFromOrbit();
             }
 
+            SSEntity = StarSystemEntityType.Missile;
+
             Position.X = LaunchedFrom.Contact.Position.X;
             Position.Y = LaunchedFrom.Contact.Position.Y;
 
@@ -1233,10 +1235,6 @@ namespace Pulsar4X.Entities.Components
                 Missile.EMDetection.Add(GameState.Instance.CurrentSecond);
                 Missile.ActiveDetection.Add(GameState.Instance.CurrentSecond);
             }
-
-
-
-            SSEntity = StarSystemEntityType.Missile;
 
             OrdnanceGroupFaction = LaunchedFrom.TaskGroupFaction;
 

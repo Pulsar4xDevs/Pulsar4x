@@ -55,6 +55,9 @@ namespace Pulsar4X.Entities
         [Browsable(false)]
         public BindingList<ShipTN> ShipsInClass { get; set; }
 
+        [Browsable(false)]
+        public int ShipsUnderConstruction { get; set; }
+
         /// <summary>
         /// Cost in BP of the ship, not its mineral cost, not doing that just yet.
         /// </summary>
@@ -934,6 +937,7 @@ namespace Pulsar4X.Entities
             Faction = ShipClassFaction;
 
             ShipsInClass = new BindingList<ShipTN>();
+            ShipsUnderConstruction = 0;
 
             /// <summary>
             /// Sanity initializations
@@ -3039,6 +3043,99 @@ namespace Pulsar4X.Entities
             }
 
             Summary = String.Format("{0}{1}", Summary, Entry);
+        }
+
+        /// <summary>
+        /// GetRefitCost determines how much a refit from this shipclass to CompareClass will cost.
+        /// </summary>
+        /// <param name="CompareClass">Shipclass to compare this one to. the refit target in other words.</param>
+        /// <param name="RefitThreshold">Eligible class calculation imposes a threshold on the refit cost which allows me to short circuit GetRefitCost if it is exceeded. do not include this variable 
+        /// if you just want the refit cost.</param>
+        /// <returns>Refit cost.</returns>
+        public decimal GetRefitCost(ShipClassTN CompareClass, decimal RefitThreshold = -1.0m)
+        {
+            /// <summary>
+            /// overhead is 1/4th the component difference cost in BP
+            /// components taken out are free
+            /// components put in are not.
+            /// if armor is of a different type then update with the cost of the whole new armor
+            /// 5 BP per 1 HS difference
+            /// compare the costs. for a refit
+            /// if the cost is 20% of the overall cost of the ship the class is eligible.
+            /// </summary>
+
+            decimal TotalRefitCost = 0.0m;
+
+            float SizeDiff = SizeHS - CompareClass.SizeHS;
+            SizeDiff = Math.Abs(SizeDiff);
+
+            decimal SizeDiffCost = (decimal)SizeDiff * 5.0m;
+            TotalRefitCost = TotalRefitCost += SizeDiffCost;
+
+            /// <summary>
+            /// size differential alone invalidates the eligibility of this class. most classes should be different enough in size for this to catch most cases.
+            /// </summary>
+            if (TotalRefitCost > RefitThreshold)
+                return TotalRefitCost;
+
+            /// <summary>
+            /// Armour test: if armorPerHS is different, then two different types of armour are being used here and therefore armour must be part of the refit cost.
+            /// if Armour is radically different then this should also throw out eligibility.
+            /// </summary>
+            if (ShipArmorDef.armorPerHS != CompareClass.ShipArmorDef.armorPerHS)
+            {
+                TotalRefitCost = TotalRefitCost + CompareClass.ShipArmorDef.cost;
+
+                if (TotalRefitCost > RefitThreshold)
+                    return TotalRefitCost;
+            }
+
+            /// <summary>
+            /// Iterate through every component and determine which components must be added to the new class for a refit. If the cost goes above the refit threshold however, then
+            /// this class is not an eligible class as far as the shipyard is concerned.
+            /// </summary>
+            for (int componentIterator = 0; componentIterator < CompareClass.ListOfComponentDefs.Count; componentIterator++)
+            {
+                ComponentDefTN TestComponent = CompareClass.ListOfComponentDefs[componentIterator];
+                int TestComponentCount = CompareClass.ListOfComponentDefsCount[componentIterator];
+
+                int index = ListOfComponentDefs.IndexOf(TestComponent);
+
+                /// <summary>
+                /// Both AssignedClass and CurrentClass have the same component definition if index is not -1.
+                /// </summary>
+                if (index != -1)
+                {
+                    /// <summary>
+                    /// If the assignedClass has more components or an equal number of components then it is not necessary to add any of said component to the total refit cost.
+                    /// otherwise this must be done.
+                    /// </summary>
+                    if (ListOfComponentDefsCount[index] < TestComponentCount)
+                    {
+                        /// <summary>
+                        /// If CurrentClass has 3 of this component, and Assigned class has only 1, then 2 must be added via refit.
+                        /// </summary>
+                        decimal CurrentComponentCost = TestComponent.cost * (TestComponentCount - ListOfComponentDefsCount[index]);
+                        TotalRefitCost = TotalRefitCost + CurrentComponentCost;
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Every component of this component definition must be added.
+                    /// </summary>
+                    decimal CurrentComponentCost = TestComponent.cost * TestComponentCount;
+                    TotalRefitCost = TotalRefitCost + CurrentComponentCost;
+                }
+
+                /// <summary>
+                /// Break out of this component iteration loop due to the refit cost being too great.
+                /// </summary>
+                if (TotalRefitCost > RefitThreshold)
+                    break;
+            }
+
+            return TotalRefitCost;
         }
     }
 }

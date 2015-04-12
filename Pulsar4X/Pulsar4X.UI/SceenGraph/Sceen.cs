@@ -351,6 +351,7 @@ namespace Pulsar4X.UI.SceenGraph
         private void SystemContactList_ListChanging(object sender, ListChangingEventArgs e)
         {
             VerboseBindingList<SystemContact> list = sender as VerboseBindingList<SystemContact>;
+
             switch (e.ListChangedType)
             {
                 case ListChangedType.ItemAdded:
@@ -541,6 +542,7 @@ namespace Pulsar4X.UI.SceenGraph
                     UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, TaskGroup.Name);
 
                     oContactElement.Lable = oNameLable;
+                    oContactElement.Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / m_fZoomScaler; //Initial taskgroup names weren't being scaled properly for whatever reason.
                     oContactElement.PrimaryPrimitive = oContactQuad;
                     oContactElement.AddPrimitive(oContactQuad);
                     oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);
@@ -564,6 +566,7 @@ namespace Pulsar4X.UI.SceenGraph
                     UIConstants.DEFAULT_TEXT_SIZE, oContact.faction.FactionColor, UIConstants.Textures.DEFAULT_GLFONT2, MissileGroup.Name);
 
                     oContactElement.Lable = oNameLable;
+                    oContactElement.Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / m_fZoomScaler; //Same problem may exist with missile labels.
                     oContactElement.PrimaryPrimitive = oContactQuad;
                     oContactElement.AddPrimitive(oContactQuad);
                     oContactElement.RealSize = new Vector2(0.0001f, 0.0001f);

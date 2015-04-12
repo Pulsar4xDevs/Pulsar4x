@@ -266,6 +266,15 @@ namespace Pulsar4X.UI.Panels
         {
             get { return m_oSetActivityButton; }
         }
+
+        /// <summary>
+        /// Sets a shipyard task. gray out if task isn't possible.
+        /// </summary>
+        public Button AddTaskButton
+        {
+            get { return m_oAddTaskButton; }
+        }
+
         /// <summary>
         /// What task will this shipyard itself be undergoing(as opposed to what will an individual slipway be doing.
         /// </summary>
@@ -323,6 +332,30 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// List of shipclasses in orbit that can be targets of Repair/refit/scrap tasks.
+        /// </summary>
+        public ComboBox RepairRefitScrapClassComboBox
+        {
+            get { return m_oRepairRefitScrapClassComboBox; }
+        }
+
+        /// <summary>
+        /// Text will change based on the selected shipyard.
+        /// </summary>
+        public GroupBox ShipyardTaskGroupBox
+        {
+            get { return m_oShipyardTaskGroupBox; }
+        }
+
+        /// <summary>
+        /// Text wll change based on the selected Shipyard.
+        /// </summary>
+        public GroupBox ShipyardCreateTaskGroupBox
+        {
+            get { return m_oShipyardCreateTaskGroupBox; }
+        }
+
+        /// <summary>
         /// This will be set to visible based on user UI selections.
         /// </summary>
         public Label SYCShipClassLabel
@@ -347,11 +380,27 @@ namespace Pulsar4X.UI.Panels
         }
 
         /// <summary>
+        /// This label will update with Repair/refit/scrap as per the currently selected activity.
+        /// </summary>
+        public Label RepairRefitScrapLabel
+        {
+            get { return m_oRepairRefitScrapLabel; }
+        }
+
+        /// <summary>
         /// Shipyard complex required resources listbox.
         /// </summary>
         public ListBox SYCRequiredMaterialsListBox
         {
             get { return m_oSYCRequiredMaterialsListBox; }
+        }
+
+        /// <summary>
+        /// Required materials for shipyard task.
+        /// </summary>
+        public ListBox ShipRequiredMaterialsListBox
+        {
+            get { return m_oShipRequiredMaterialsListBox; }
         }
 
         /// <summary>
@@ -386,9 +435,49 @@ namespace Pulsar4X.UI.Panels
             get { return m_oSYCCompletionDateTextBox; }
         }
 
+        /// <summary>
+        /// Shipyard task cost goes here.
+        /// </summary>
+        public TextBox SYTaskCostTextBox
+        {
+            get { return m_oSYTaskCostTextBox; }
+        }
+
+        /// <summary>
+        /// Estimated date of completion goes here.
+        /// </summary>
+        public TextBox SYTaskCompletionDateTextBox
+        {
+            get { return m_oSYTaskCompletionDateTextBox; }
+        }
+
         #endregion
 
         #region Shipyard Tasks Tab
+
+        /// <summary>
+        /// Pause the selected Ship Task
+        /// </summary>
+        public Button SYAPauseTaskButton
+        {
+            get { return m_oSYAPauseTaskButton; }
+        }
+
+        /// <summary>
+        /// Raise the priority of the selected ship task.
+        /// </summary>
+        public Button SYARaisePriorityButton
+        {
+            get { return m_oSYARaisePriorityButton; }
+        }
+
+        /// <summary>
+        /// Lower the priority of the selected Ship task.
+        /// </summary>
+        public Button SYALowerPriorityButton
+        {
+            get { return m_oSYALowerPriorityButton; }
+        }
         #endregion
 
         #endregion
@@ -502,6 +591,8 @@ namespace Pulsar4X.UI.Panels
             this.m_oMassDriverDestinationComboBox = new System.Windows.Forms.ComboBox();
             this.m_oShipyardTab = new System.Windows.Forms.TabPage();
             this.m_oShipyardCreateTaskGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oRepairRefitScrapClassComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oRepairRefitScrapLabel = new System.Windows.Forms.Label();
             this.m_oRepairRefitScrapShipComboBox = new System.Windows.Forms.ComboBox();
             this.m_oSYShipNameTextBox = new System.Windows.Forms.TextBox();
             this.m_oSYTaskGroupComboBox = new System.Windows.Forms.ComboBox();
@@ -1465,6 +1556,8 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oShipyardCreateTaskGroupBox
             // 
+            this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oRepairRefitScrapClassComboBox);
+            this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oRepairRefitScrapLabel);
             this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oRepairRefitScrapShipComboBox);
             this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oSYShipNameTextBox);
             this.m_oShipyardCreateTaskGroupBox.Controls.Add(this.m_oSYTaskGroupComboBox);
@@ -1492,6 +1585,23 @@ namespace Pulsar4X.UI.Panels
             this.m_oShipyardCreateTaskGroupBox.TabIndex = 2;
             this.m_oShipyardCreateTaskGroupBox.TabStop = false;
             this.m_oShipyardCreateTaskGroupBox.Text = "Create Task(Title)";
+            // 
+            // m_oRepairRefitScrapClassComboBox
+            // 
+            this.m_oRepairRefitScrapClassComboBox.FormattingEnabled = true;
+            this.m_oRepairRefitScrapClassComboBox.Location = new System.Drawing.Point(75, 45);
+            this.m_oRepairRefitScrapClassComboBox.Name = "m_oRepairRefitScrapClassComboBox";
+            this.m_oRepairRefitScrapClassComboBox.Size = new System.Drawing.Size(213, 21);
+            this.m_oRepairRefitScrapClassComboBox.TabIndex = 30;
+            // 
+            // m_oRepairRefitScrapLabel
+            // 
+            this.m_oRepairRefitScrapLabel.AutoSize = true;
+            this.m_oRepairRefitScrapLabel.Location = new System.Drawing.Point(6, 48);
+            this.m_oRepairRefitScrapLabel.Name = "m_oRepairRefitScrapLabel";
+            this.m_oRepairRefitScrapLabel.Size = new System.Drawing.Size(30, 13);
+            this.m_oRepairRefitScrapLabel.TabIndex = 29;
+            this.m_oRepairRefitScrapLabel.Text = "RRS";
             // 
             // m_oRepairRefitScrapShipComboBox
             // 
@@ -1590,6 +1700,7 @@ namespace Pulsar4X.UI.Panels
             this.m_oSYTaskCompletionDateTextBox.ReadOnly = true;
             this.m_oSYTaskCompletionDateTextBox.Size = new System.Drawing.Size(534, 20);
             this.m_oSYTaskCompletionDateTextBox.TabIndex = 19;
+            this.m_oSYTaskCompletionDateTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // m_oSYTaskCostTextBox
             // 
@@ -2236,5 +2347,7 @@ namespace Pulsar4X.UI.Panels
         private ComboBox m_oSYCNewShipClassComboBox;
         private ComboBox m_oRepairRefitScrapShipComboBox;
         private TextBox m_oExpandCapUntilXTextBox;
+        private ComboBox m_oRepairRefitScrapClassComboBox;
+        private Label m_oRepairRefitScrapLabel;
     }
 }

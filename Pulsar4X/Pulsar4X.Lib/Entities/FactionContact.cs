@@ -126,6 +126,7 @@ namespace Pulsar4X.Entities
             ship = null;
             thermal = Thermal;
             EM = em;
+            EMSignature = 0;
             active = Active;
             MessageEntry NMsg;
 
@@ -142,6 +143,7 @@ namespace Pulsar4X.Entities
                 EMTick = tick;
                 if (DetectedMissileGroup.missiles[0].missileDef.aSD != null)
                 {
+                    EMSignature =  DetectedMissileGroup.missiles[0].missileDef.aSD.gps;
                     Contact = String.Format("{0} EM Signature {1} x{2}", Contact, DetectedMissileGroup.missiles[0].missileDef.aSD.gps, DetectedMissileGroup.missiles.Count);
                 }
                 else

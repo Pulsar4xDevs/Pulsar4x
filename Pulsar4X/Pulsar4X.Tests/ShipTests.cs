@@ -25,7 +25,7 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets.Add(pl1);
 
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
-            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction);
+            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction, "Test Ship");
 
             ts2.ShipArmorDef = new ArmorDefTN("Duranium Armour");
             ts.ShipArmor = new ArmorTN(ts2.ShipArmorDef);
@@ -130,7 +130,7 @@ namespace Pulsar4X.Tests
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
             ShipClassTN ts2 = new ShipClassTN("Test", newFaction);
-            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction);
+            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction, "Test Ship");
 
             ts2.ShipEngineDef = new EngineDefTN("3137.6 EP Inertial Fusion Drive", 32, 2.65f, 0.6f, 0.75f, 2, 37, -1.0f);
             ts2.ShipEngineCount = 1;
@@ -167,7 +167,7 @@ namespace Pulsar4X.Tests
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
             ShipClassTN ts2 = new ShipClassTN("Test", newFaction);
-            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction);
+            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction, "Test Ship");
 
             PassiveSensorDefTN PSensorDefTest = new PassiveSensorDefTN("Thermal Sensor TH19-342", 19.0f, 18, PassiveSensorType.Thermal, 1.0f, 1);
 
@@ -211,7 +211,7 @@ namespace Pulsar4X.Tests
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
             ShipClassTN ts2 = new ShipClassTN("Test", newFaction);
-            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction);
+            ShipTN ts = new ShipTN(ts2, 0, 0, newTG, newFaction, "Test Ship");
 
             ActiveSensorDefTN ASensorDefTest = new ActiveSensorDefTN("Active Search Sensor MR705-R185", 6.0f, 36, 24, 185, false, 1.0f, 1);
 
@@ -321,7 +321,7 @@ namespace Pulsar4X.Tests
             TaskGroupTN newTG = new TaskGroupTN("TG", newFaction, System1.Stars[0].Planets[0], System1);
 
 
-            ShipTN testShip = new ShipTN(TestClass, 0, 0, newTG, newFaction);
+            ShipTN testShip = new ShipTN(TestClass, 0, 0, newTG, newFaction, "Test Ship");
 
             testShip.CrewQuarters[0].isDestroyed = true;
 
@@ -409,7 +409,7 @@ namespace Pulsar4X.Tests
 
                 Console.WriteLine("Speed:{0}", test.MaxSpeed);
 
-                TaskGroup1.AddShip(test);
+                TaskGroup1.AddShip(test,"Test Ship");
                 Console.WriteLine("{0} {1}", TaskGroup1, TaskGroup1.Ships[loop].ShipsTaskGroup);
             }
 
@@ -496,7 +496,7 @@ namespace Pulsar4X.Tests
                         break;
                 }
 
-                TaskGroup1.AddShip(test);
+                TaskGroup1.AddShip(test, "Test Ship");
                 Console.WriteLine("Best Thermal:{0},{1}", TaskGroup1.BestThermal.pSensorDef.rating, TaskGroup1.BestThermalCount);
             }
         }
@@ -546,7 +546,7 @@ namespace Pulsar4X.Tests
                         break;
                 }
 
-                TaskGroup1.AddShip(test);
+                TaskGroup1.AddShip(test, "Test Ship");
 
                 TaskGroup1.SetActiveSensor(loop, 0, true);
                 TaskGroup1.SetActiveSensor(loop, 1, true);
@@ -615,7 +615,7 @@ namespace Pulsar4X.Tests
             test.AddOtherComponent(Bridge, 1);
             test.AddEngine(EngDef, 1);
 
-            TaskGroup1.AddShip(test);
+            TaskGroup1.AddShip(test, "Test Ship");
 
             TaskGroup1.Ships[0].Refuel(200000.0f);
 
@@ -643,8 +643,6 @@ namespace Pulsar4X.Tests
 
             StarSystem System1 = SystemGen.CreateSol();
             StarSystem System2 = SystemGen.CreateSystem("Alpha Centauri");
-            Star S2 = new Star();
-            System2.Stars.Add(S2);
 
             SystemBody Start1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             Start1.Position.X = 1.0;
@@ -681,8 +679,8 @@ namespace Pulsar4X.Tests
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", Start1, System1);
             PlayerFaction2.AddNewTaskGroup("P2 TG 01", Start2, System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
-            PlayerFaction2.TaskGroups[0].AddShip(PlayerFaction2.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship 1");
+            PlayerFaction2.TaskGroups[0].AddShip(PlayerFaction2.ShipDesigns[0], "Test Ship 2");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
             PlayerFaction2.TaskGroups[0].Ships[0].Refuel(200000.0f);
@@ -728,15 +726,31 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
             PlayerFaction2.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            SystemGen.GenerateJumpPoint(System1);
-            SystemGen.GenerateJumpPoint(System2);
+            //this isn't needed, but also shouldn't crash now that its fixed. to test uncomment this out and run nunit or whatever tester.
+            //SystemGen.GenerateJumpPoint(System1);
+            //SystemGen.GenerateJumpPoint(System2);
+
+            JumpPoint JP1 = new JumpPoint(System1.Stars[0], 0.1, 0.2);
+            System1.JumpPoints.Add(JP1);
+            JumpPoint JP2 = new JumpPoint(System2.Stars[0], 0.2, 0.1);
+            System2.JumpPoints.Add(JP2);
 
             System1.JumpPoints[0].Connect = System2.JumpPoints[0];
             System2.JumpPoints[0].Connect = System1.JumpPoints[0];
 
-            Dictionary<JumpEngineTN, ShipTN> usedJumpEngines;
-            System1.JumpPoints[0].CanJump(PlayerFaction1.TaskGroups[0], false, out usedJumpEngines);
-            System1.JumpPoints[0].CanJump(PlayerFaction2.TaskGroups[0], true, out usedJumpEngines);
+            SystemPosition newPos = System1.JumpPoints[0].Connect.Position;
+
+            PlayerFaction1.TaskGroups[0].Position.System.SystemContactList.Remove(PlayerFaction1.TaskGroups[0].Contact);
+            newPos.System.SystemContactList.Add(PlayerFaction1.TaskGroups[0].Contact);
+
+            PlayerFaction1.TaskGroups[0].Position = newPos;
+            PlayerFaction1.TaskGroups[0].Contact.UpdateLocationAfterTransit();
+
+            PlayerFaction2.TaskGroups[0].Position.System.SystemContactList.Remove(PlayerFaction2.TaskGroups[0].Contact);
+            newPos.System.SystemContactList.Add(PlayerFaction2.TaskGroups[0].Contact);
+
+            PlayerFaction2.TaskGroups[0].Position = newPos;
+            PlayerFaction2.TaskGroups[0].Contact.UpdateLocationAfterTransit();
 
             GameState.Instance.CurrentSecond = 15;
 
@@ -773,7 +787,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -829,7 +843,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -898,7 +912,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -981,10 +995,10 @@ namespace Pulsar4X.Tests
             PlayerFaction1.AddNewTaskGroup("P1 TG 02", System1.Stars[0].Planets[1], System1);
             PlayerFaction1.AddNewTaskGroup("P1 TG 03", System1.Stars[0].Planets[1], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[2]);
-            PlayerFaction1.TaskGroups[1].AddShip(PlayerFaction1.ShipDesigns[1]);
-            PlayerFaction1.TaskGroups[2].AddShip(PlayerFaction1.ShipDesigns[2]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship 1");
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[2], "Test Ship 2");
+            PlayerFaction1.TaskGroups[1].AddShip(PlayerFaction1.ShipDesigns[1], "Test Ship 3");
+            PlayerFaction1.TaskGroups[2].AddShip(PlayerFaction1.ShipDesigns[2], "Test Ship 4");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(50000.0f);
             PlayerFaction1.TaskGroups[0].Ships[1].Refuel(50000.0f);
@@ -1091,10 +1105,10 @@ namespace Pulsar4X.Tests
             PlayerFaction1.AddNewTaskGroup("P1 TG 02", System1.Stars[0].Planets[1], System1);
             PlayerFaction1.AddNewTaskGroup("P1 TG 03", System1.Stars[0].Planets[1], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[2]);
-            PlayerFaction1.TaskGroups[1].AddShip(PlayerFaction1.ShipDesigns[1]);
-            PlayerFaction1.TaskGroups[2].AddShip(PlayerFaction1.ShipDesigns[2]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship 1");
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[2], "Test Ship 2");
+            PlayerFaction1.TaskGroups[1].AddShip(PlayerFaction1.ShipDesigns[1], "Test Ship 3");
+            PlayerFaction1.TaskGroups[2].AddShip(PlayerFaction1.ShipDesigns[2], "Test Ship 4");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(100000.0f);
             PlayerFaction1.TaskGroups[0].Ships[1].Refuel(100000.0f);
@@ -1186,7 +1200,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -1261,7 +1275,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -1376,7 +1390,7 @@ namespace Pulsar4X.Tests
 
                     for (int loop3 = 0; loop3 < ShipCount; loop3++)
                     {
-                        P1.TaskGroups[loop2].AddShip(P1.ShipDesigns[0]);
+                        P1.TaskGroups[loop2].AddShip(P1.ShipDesigns[0], "Test Ship");
                         P1.TaskGroups[loop2].Ships[loop3].Refuel(200000.0f);
                         P1.TaskGroups[loop2].SetActiveSensor(loop3, 0, true);
                     }
@@ -1771,7 +1785,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -1859,7 +1873,7 @@ namespace Pulsar4X.Tests
 
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship");
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
 
@@ -1932,7 +1946,10 @@ namespace Pulsar4X.Tests
             /// <summary>
             /// No StarSystem no contacts!
             /// </summary>
-            StarSystem System1 = SystemGen.CreateSol();
+            StarSystem System1 = new StarSystem("This is not Sol", 0);
+            System1.Populations = new BindingList<Population>();
+            Star S1 = new Star();
+            System1.Stars.Add(S1);
 
             PlayerFaction1.AddNewContactList(System1);
             PlayerFaction2.AddNewContactList(System1);
@@ -1947,6 +1964,8 @@ namespace Pulsar4X.Tests
             /// </summary>
             SystemBody pl1 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
             SystemBody pl2 = new SystemBody(System1.Stars[0], SystemBody.PlanetType.Terrestrial);
+            pl1.Position.System = System1;
+            pl2.Position.System = System1;
             System1.Stars[0].Planets.Add(pl1);
             System1.Stars[0].Planets.Add(pl2);
 
@@ -1956,8 +1975,8 @@ namespace Pulsar4X.Tests
             System1.Stars[0].Planets[0].Position.X = 1.0;
             System1.Stars[0].Planets[0].Position.Y = 1.0;
 
-            System1.Stars[0].Planets[1].Position.X = 1.05;
-            System1.Stars[0].Planets[1].Position.Y = 1.05;
+            System1.Stars[0].Planets[1].Position.X = 1.04;
+            System1.Stars[0].Planets[1].Position.Y = 1.04;
 
 
             PlayerFaction1.AddNewShipDesign("Blucher");
@@ -1968,7 +1987,8 @@ namespace Pulsar4X.Tests
             OrdnanceSeriesTN Series = new OrdnanceSeriesTN("BLANK STANDIN");
             OrdnanceDefTN TestMissile = new OrdnanceDefTN("Test Missile", Series, 1.0f, 0, 1.0f, 1.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 0.0f, 0, 1, 0, 0.0f, 0.0f, 0, false, 0, false, 0, TestMissileEngine, 1);
 
-            ActiveSensorDefTN Spotter = new ActiveSensorDefTN("Spotter", 5.0f, 10, 5, 18, false, 1.0f, 0);
+            ActiveSensorDefTN Spotter = new ActiveSensorDefTN("Spotter", 6.0f, 12, 6, 19, false, 1.0f, 0);
+            ActiveSensorDefTN FControl = new ActiveSensorDefTN("FCtrl", 6.0f, 12, 6, 19, true, 1.0f, 0);
 
             PlayerFaction1.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
             PlayerFaction1.ShipDesigns[0].AddCrewQuarters(PlayerFaction1.ComponentList.CrewQuarters[0], 2);
@@ -1977,7 +1997,7 @@ namespace Pulsar4X.Tests
             PlayerFaction1.ShipDesigns[0].AddOtherComponent(PlayerFaction1.ComponentList.OtherComponents[0], 1);
             PlayerFaction1.ShipDesigns[0].AddMagazine(PlayerFaction1.ComponentList.MagazineDef[0], 1);
             PlayerFaction1.ShipDesigns[0].AddLauncher(PlayerFaction1.ComponentList.MLauncherDef[0], 1);
-            PlayerFaction1.ShipDesigns[0].AddMFC(PlayerFaction1.ComponentList.MissileFireControlDef[0], 1);
+            PlayerFaction1.ShipDesigns[0].AddMFC(FControl, 1);
             PlayerFaction1.ShipDesigns[0].AddActiveSensor(Spotter, 1);
 
             PlayerFaction2.ShipDesigns[0].AddEngine(PlayerFaction1.ComponentList.Engines[0], 1);
@@ -1992,8 +2012,9 @@ namespace Pulsar4X.Tests
             PlayerFaction1.AddNewTaskGroup("P1 TG 01", System1.Stars[0].Planets[0], System1);
             PlayerFaction2.AddNewTaskGroup("P2 TG 01", System1.Stars[0].Planets[1], System1);
 
-            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0]);
-            PlayerFaction2.TaskGroups[0].AddShip(PlayerFaction2.ShipDesigns[0]);
+
+            PlayerFaction1.TaskGroups[0].AddShip(PlayerFaction1.ShipDesigns[0], "Test Ship 1");
+            PlayerFaction2.TaskGroups[0].AddShip(PlayerFaction2.ShipDesigns[0], "Test Ship 2");
 
 
             PlayerFaction1.TaskGroups[0].Ships[0].Refuel(200000.0f);
@@ -2016,31 +2037,48 @@ namespace Pulsar4X.Tests
             PlayerFaction1.TaskGroups[0].Ships[0].ShipMLaunchers[0].loadedOrdnance = TestMissile;
 
             PlayerFaction1.TaskGroups[0].Ships[0].ShipMLaunchers[0].AssignMFC(PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0]);
+            PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0].assignLaunchTube(PlayerFaction1.TaskGroups[0].Ships[0].ShipMLaunchers[0]);
 
             PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0].assignTarget(PlayerFaction2.TaskGroups[0].Ships[0]);
             PlayerFaction1.TaskGroups[0].Ships[0].ShipMFC[0].openFire = true;
             PlayerFaction1.TaskGroups[0].SetActiveSensor(0, 0, true);
 
-            PlayerFaction1.SensorSweep();
-
-            PlayerFaction1.TaskGroups[0].Ships[0].ShipFireWeapons(RNG);
-
 
             GameState.Instance.CurrentSecond += 10;
+            GameState.Instance.LastTimestep = 10;
+
+            PlayerFaction1.SensorSweep();
+
+
+
+            bool ret = PlayerFaction1.TaskGroups[0].Ships[0].ShipFireWeapons(RNG);
+
+
+            Console.WriteLine("Did we fire: {0} Detected Contacts:{1}", ret, PlayerFaction1.DetectedContactLists.Count);
+
 
             bool done = false;
             while (!done)
             {
-                Console.WriteLine("{0}", GameState.Instance.CurrentSecond);
+                Console.WriteLine("TimeStep:{0} {1} Detected Contacts:{2}", GameState.Instance.CurrentSecond, GameState.Instance.LastTimestep, PlayerFaction1.DetectedContactLists.Count);
+
                 PlayerFaction1.SensorSweep();
+
                 PlayerFaction1.MissileGroups[0].ProcessOrder((uint)GameState.Instance.LastTimestep, RNG);
 
-                Console.WriteLine("{0} {1} {2} {3} {4} {5}", PlayerFaction1.MissileGroups[0].currentHeading, PlayerFaction1.MissileGroups[0].currentSpeedX,
-                    PlayerFaction1.MissileGroups[0].currentSpeedY, PlayerFaction1.MissileGroups[0].timeReq, PlayerFaction1.MissileGroups[0].dx, PlayerFaction1.MissileGroups[0].dy);
+                Console.WriteLine("{0} {1} {2} {3} {4} {5} {6} {7}", PlayerFaction1.MissileGroups[0].currentHeading, PlayerFaction1.MissileGroups[0].currentSpeedX,
+                    PlayerFaction1.MissileGroups[0].currentSpeedY, PlayerFaction1.MissileGroups[0].timeReq, PlayerFaction1.MissileGroups[0].dx, PlayerFaction1.MissileGroups[0].dy,
+                    PlayerFaction1.MissileGroups[0].missiles.Count, PlayerFaction1.MissileGroups[0].missilesDestroyed);
 
                 GameState.Instance.CurrentSecond += 5;
+                GameState.Instance.LastTimestep = 5;
 
-                if (PlayerFaction1.MissileGroups[0].missiles.Count == 0)
+
+
+
+
+
+                if (PlayerFaction1.MissileGroups[0].missiles.Count == PlayerFaction1.MissileGroups[0].missilesDestroyed)
                 {
                     PlayerFaction1.MissileGroups.Clear();
                     done = true;
