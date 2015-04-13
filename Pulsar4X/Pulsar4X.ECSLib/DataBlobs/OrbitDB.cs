@@ -149,10 +149,11 @@ namespace Pulsar4X.ECSLib
         private OrbitDB(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                         double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch, bool isStationary)
         {
-            if (isStationary)//Most worst solution. Added to be able to use constructor OrbitDB(OrbitDB) 
+            if (isStationary)//Worst solution. Added to be able to use constructor OrbitDB(OrbitDB) 
             {
                 Mass = mass;
                 IsStationary = true;
+                return;
             }
 
             Mass = mass;
