@@ -10,5 +10,17 @@
 
         public int FuelStorageCapicity { get; set; }
         public int CurrentFuelStored { get; set; }
+
+        public PropulsionDB()
+        {
+        }
+
+        public PropulsionDB(PropulsionDB propulsionDB)
+        {
+            MaximumSpeed = propulsionDB.MaximumSpeed;
+            CurrentSpeed = propulsionDB.CurrentSpeed;
+            FuelStorageCapicity = propulsionDB.FuelStorageCapicity;
+            CurrentFuelStored = propulsionDB.CurrentFuelStored;
+        }
     }
 }

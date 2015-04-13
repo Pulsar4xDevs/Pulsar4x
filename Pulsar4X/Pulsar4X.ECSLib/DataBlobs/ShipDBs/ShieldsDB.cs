@@ -8,5 +8,16 @@
         public int MaximumShieldStrength { get; set; }
         public int CurrentShieldStrength { get; set; }
         public int RechargeRate { get; set; }
+
+        public ShieldsDB()
+        {
+        }
+
+        public ShieldsDB(ShieldsDB shieldsDB)
+        {
+            MaximumShieldStrength = shieldsDB.MaximumShieldStrength;
+            CurrentShieldStrength = shieldsDB.CurrentShieldStrength;
+            RechargeRate = shieldsDB.RechargeRate;
+        }
     }
 }

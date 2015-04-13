@@ -21,5 +21,16 @@
         public int NormalCombatDropCapicity { get; set; }
         public int CryoCombatDropCapicity { get; set; }
 
+        public TroopTransportDB()
+        {
+        }
+
+        public TroopTransportDB(TroopTransportDB troopTransportDB)
+        {
+            NormalCapicity = troopTransportDB.NormalCapicity;
+            CryoCapicity = troopTransportDB.CryoCapicity;
+            NormalCombatDropCapicity = troopTransportDB.NormalCombatDropCapicity;
+            CryoCombatDropCapicity = troopTransportDB.CryoCombatDropCapicity;
+        }
     }
 }

@@ -53,7 +53,7 @@
         /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
         /// In Microtesla (uT)
         /// </summary>
-        public float MagneticFeild;
+        public float MagneticField;
 
         /// <summary>
         /// Temperature of the planet BEFORE greenhouse effects are taken into considuration. 
@@ -93,12 +93,18 @@
             SurfaceGravity = surfaceGrav;
             Density = density;
             AxialTilt = axialTilt;
-            MagneticFeild = magField;
+            MagneticField = magField;
             BaseTemperature = baseTemp;
             RadiationLevel = radLevel;
             AtmosphericDust = atmoDust;
             Atmosphere = atmosphere;
         }
 
+        public PlanetInfoDB(PlanetInfoDB planetInfoDB)
+            : this(planetInfoDB.Type, planetInfoDB.Tectonics, planetInfoDB.SurfaceGravity, planetInfoDB.Density,
+            planetInfoDB.AxialTilt, planetInfoDB.MagneticField, planetInfoDB.BaseTemperature, planetInfoDB.RadiationLevel,
+            planetInfoDB.AtmosphericDust, new AtmosphereDB(planetInfoDB.Atmosphere))
+        {
+        }
     }
 }

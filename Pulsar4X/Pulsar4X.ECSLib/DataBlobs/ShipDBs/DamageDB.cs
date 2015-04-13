@@ -6,5 +6,14 @@
     public class DamageDB : BaseDataBlob
     {
          public int DamageControlRating { get; set; }
+
+        public DamageDB()
+        {
+        }
+
+        public DamageDB(DamageDB damageDB)
+        {
+            DamageControlRating = damageDB.DamageControlRating;
+        }
     }
 }

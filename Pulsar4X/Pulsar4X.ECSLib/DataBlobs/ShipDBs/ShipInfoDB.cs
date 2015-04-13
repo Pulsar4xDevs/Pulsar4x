@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         public string Name { get; set; }
 
         /// <summary>
-        /// The guid of the ship class, if this is a ship calss then the Guid will be empty. 
+        /// The guid of the ship class, if this is a ship class then the Guid will be empty. 
         /// use IsClassDefinition() to determin if this is a ship class definmition
         /// </summary>
         public Guid ShipClassDefinition { get; set; }
@@ -48,6 +48,23 @@ namespace Pulsar4X.ECSLib
             ComponentList = new List<int>();
         }
 
+        public ShipInfoDB(ShipInfoDB shipInfoDB)
+        {
+            Name = shipInfoDB.Name;
+            if (shipInfoDB.ShipClassDefinition == Guid.Empty) //Class
+                ShipClassDefinition = shipInfoDB.OwningEntity.Guid;
+            else //Ship
+                ShipClassDefinition = shipInfoDB.ShipClassDefinition;
+            ClassName = shipInfoDB.ClassName;
+            Obsolete = shipInfoDB.Obsolete;
+            Conscript = shipInfoDB.Conscript;
+            Tanker = shipInfoDB.Tanker;
+            Collier = shipInfoDB.Collier;
+            SupplyShip = shipInfoDB.SupplyShip;
+            InternalHTK = shipInfoDB.InternalHTK;
+            IsMilitary = shipInfoDB.IsMilitary;
+        }
+
         /// <summary>
         /// Returns true if this is a definition of a class.
         /// </summary>
@@ -58,5 +75,7 @@ namespace Pulsar4X.ECSLib
 
             return true;
         }
+
+
     }
 }

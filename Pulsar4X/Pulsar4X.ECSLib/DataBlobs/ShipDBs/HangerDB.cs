@@ -9,5 +9,14 @@
         /// Total amount of hanger space in the ship, in tons.
         /// </summary>
         public int HangerSpace { get; set; }
+
+        public HangerDB()
+        {
+        }
+
+        public HangerDB(HangerDB hangerDB)
+        {
+            HangerSpace = hangerDB.HangerSpace;
+        }
     }
 }

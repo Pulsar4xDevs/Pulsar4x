@@ -16,5 +16,11 @@
             BoilingPoint = boilingPoint;
             MeltingPoint = meltingPoint;
         }
+
+        public AtmosphericGasDB(AtmosphericGasDB atmosphericGasDB)
+            : this(atmosphericGasDB.Name, atmosphericGasDB.ChemicalSymbol, atmosphericGasDB.IsToxic, 
+            atmosphericGasDB.BoilingPoint, atmosphericGasDB.MeltingPoint)
+        {
+        }
     }
 }

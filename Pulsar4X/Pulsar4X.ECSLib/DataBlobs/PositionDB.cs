@@ -105,6 +105,11 @@ namespace Pulsar4X.ECSLib
             Position = Vector4.Zero;
         }
 
+        public PositionDB(PositionDB positionDB)
+            : this(positionDB.X, positionDB.Y, positionDB.Z)
+        {
+        }
+
         /// <summary>
         /// Static function to find the distance between two positions.
         /// </summary>

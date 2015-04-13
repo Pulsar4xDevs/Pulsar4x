@@ -18,5 +18,24 @@
         public bool HasBridge { get; set; }
         public bool HasFlagBridge { get; set; }
 
+        public CrewDB()
+        {
+        }
+
+        public CrewDB(CrewDB crewDB)
+        {
+            DeploymentTime = crewDB.DeploymentTime;
+            CrewBerths = crewDB.CrewBerths;
+            RequiredCrew = crewDB.RequiredCrew;
+            CurrentCrew = crewDB.CurrentCrew;
+            SpareBerths = crewDB.SpareBerths;
+            CryoCrewberths = crewDB.CryoCrewberths;
+            CrewInCryo = crewDB.CrewInCryo;
+            CrewGrade = crewDB.CrewGrade;
+
+            //Not sure
+            HasBridge = crewDB.HasBridge;
+            HasFlagBridge = crewDB.HasFlagBridge;
+        }
     }
 }

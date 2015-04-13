@@ -8,5 +8,16 @@
         public int TotalCrossSection { get; set; }
         public int ThermalSignature { get; set; }
         public int EMSignature { get; set; }
+
+        public SensorProfileDB()
+        {
+        }
+
+        public SensorProfileDB(SensorProfileDB sensorProfileDB)
+        {
+            TotalCrossSection = sensorProfileDB.TotalCrossSection;
+            ThermalSignature = sensorProfileDB.ThermalSignature;
+            EMSignature = sensorProfileDB.EMSignature;
+        }
     }
 }

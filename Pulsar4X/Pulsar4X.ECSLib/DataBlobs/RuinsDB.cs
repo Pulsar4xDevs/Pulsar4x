@@ -62,5 +62,10 @@
             RuinSize = ruinSize;
             RuinQuality = ruinQuality;
         }
+
+        public RuinsDB(RuinsDB ruinsDB)
+            : this(ruinsDB.RuinCount, ruinsDB.RuinTechLevel, ruinsDB.RuinSize, ruinsDB.RuinQuality)
+        {
+        }
     }
 }

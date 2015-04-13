@@ -11,5 +11,18 @@
         public int MaximumRepairCost { get; set; }
         public double AnnualFailureRate { get; set; }
         public double IncrementalFailureRate { get; set; }
+
+        public MaintenanceDB()
+        {
+        }
+
+        public MaintenanceDB(MaintenanceDB maintenanceDB)
+        {
+            MaintenanceStorageCapicity = maintenanceDB.MaintenanceStorageCapicity;
+            CurrentMSP = maintenanceDB.CurrentMSP;
+            MaximumRepairCost = maintenanceDB.MaximumRepairCost;
+            AnnualFailureRate = maintenanceDB.AnnualFailureRate;
+            IncrementalFailureRate = maintenanceDB.IncrementalFailureRate;
+        }
     }
 }
