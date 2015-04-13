@@ -86,14 +86,6 @@ namespace Pulsar4X.ECSLib
             entry => entry.Value
             ))
         {
-            Pressure = atmosphereDB.Pressure;
-            Hydrosphere = atmosphereDB.Hydrosphere;
-            HydrosphereExtent = atmosphereDB.HydrosphereExtent;
-            GreenhouseFactor = atmosphereDB.GreenhouseFactor;
-            GreenhousePressure = atmosphereDB.GreenhousePressure;
-            Albedo = atmosphereDB.Albedo;
-            SurfaceTemperature = atmosphereDB.SurfaceTemperature;
-            Composition = atmosphereDB.Composition;
         }
     }
 }
