@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
@@ -12,18 +9,32 @@ namespace Pulsar4X.Tests
 {
     [TestFixture]
     [Description("DataBlob Tests")]
-    class DataBlobTests
+    internal class DataBlobTests
     {
-        private List<Type> _dataBlobTypes;
-        private EntityManager _manager;
+        private static readonly List<Type> DataBlobTypes = new List<Type>(Assembly.GetAssembly(typeof(BaseDataBlob)).GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
+        private static EntityManager _manager = new EntityManager();
 
         [SetUp]
         public void Init()
         {
             _manager = new EntityManager();
-            _dataBlobTypes = new List<Type>(Assembly.GetExecutingAssembly().GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
         }
 
+        [Test]
+        public void TypeCount()
+        {
+            Assert.AreEqual(DataBlobTypes.Count, EntityManager.BlankDataBlobMask().Length);
+        }
 
+        [Test]
+        [TestCaseSource("DataBlobTypes")]
+        public void DeepCopyConstructor(Type dataBlobType)
+        {
+            ConstructorInfo constructor = dataBlobType.GetConstructor(new[] {dataBlobType});
+            if (constructor == null)
+            {
+                Assert.Fail(dataBlobType + " does not have a Deep Copy constructor.");
+            }
+        }
     }
 }
