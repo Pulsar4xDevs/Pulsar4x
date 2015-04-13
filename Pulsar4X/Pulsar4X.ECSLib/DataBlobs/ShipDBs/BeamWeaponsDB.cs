@@ -5,6 +5,13 @@
     /// </summary>
     public class BeamWeaponsDB : BaseDataBlob
     {
-         
+        public BeamWeaponsDB()
+        {
+        }
+
+        public BeamWeaponsDB(BeamWeaponsDB beamWeaponsDB)
+        {
+            
+        }
     }
 }

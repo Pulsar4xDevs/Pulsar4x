@@ -7,5 +7,15 @@
     {
         public int MaximumMagazineCapicity { get; set; } // in MSP
         public int UsedMagazineCapicity { get; set; }
+
+        public MissileWeaponsDB()
+        {
+        }
+
+        public MissileWeaponsDB(MissileWeaponsDB missleWeaponDB)
+        {
+            MaximumMagazineCapicity = missleWeaponDB.MaximumMagazineCapicity;
+            UsedMagazineCapicity = missleWeaponDB.UsedMagazineCapicity;
+        }
     }
 }

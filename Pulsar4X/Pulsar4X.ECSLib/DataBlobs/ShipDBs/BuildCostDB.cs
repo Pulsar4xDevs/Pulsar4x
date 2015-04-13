@@ -11,5 +11,15 @@ namespace Pulsar4X.ECSLib
         public double BuildPointCost { get; set; }
  
         // add minerials
+
+        public BuildCostDB()
+        {
+        }
+
+        public BuildCostDB(BuildCostDB buildCostDB)
+        {
+            BuildTime = buildCostDB.BuildTime; //Struct
+            BuildPointCost = buildCostDB.BuildPointCost;
+        }
     }
 }

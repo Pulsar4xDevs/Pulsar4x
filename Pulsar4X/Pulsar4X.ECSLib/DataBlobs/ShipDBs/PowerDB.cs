@@ -6,5 +6,14 @@
     public class PowerDB : BaseDataBlob
     {
         public double TotalPowerOutput { get; set; }
+
+        public PowerDB()
+        {
+        }
+
+        public PowerDB(PowerDB powerDB)
+        {
+            TotalPowerOutput = powerDB.TotalPowerOutput;
+        }
     }
 }

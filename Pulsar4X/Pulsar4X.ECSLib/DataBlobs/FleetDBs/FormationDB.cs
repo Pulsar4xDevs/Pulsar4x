@@ -14,5 +14,10 @@ namespace Pulsar4X.ECSLib
         {
             
         }
+
+        public FormationDB(FormationDB formationDB)
+        {
+            
+        }
     }
 }

@@ -11,5 +11,17 @@
         public double TerraformingRate { get; set; }
         public double JumpGateConstructionRate { get; set; }
 
+        public IndustryDB()
+        {
+        }
+
+        public IndustryDB(IndustryDB indusrtyDB)
+        {
+            MiningRate = indusrtyDB.MiningRate;
+            FuelHarvestingRate = indusrtyDB.FuelHarvestingRate;
+            SalvageRate = indusrtyDB.SalvageRate;
+            TerraformingRate = indusrtyDB.TerraformingRate;
+            JumpGateConstructionRate = indusrtyDB.JumpGateConstructionRate;
+        }
     }
 }

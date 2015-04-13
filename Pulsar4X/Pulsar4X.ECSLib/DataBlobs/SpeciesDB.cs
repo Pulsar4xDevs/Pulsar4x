@@ -14,7 +14,6 @@
         public double MaximumTemperatureConstraint;
 
         public SpeciesDB(string speciesName, double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
-            : base()
         {
             // set default values:
             SpeciesName = speciesName;
@@ -30,7 +29,16 @@
 
         }
 
-        public SpeciesDB() : base()
-        { }
+        public SpeciesDB()
+        {
+        }
+
+        public SpeciesDB(SpeciesDB speciesDB)
+            : this(speciesDB.SpeciesName, 
+            speciesDB.BaseGravity, speciesDB.MinimumGravityConstraint, speciesDB.MaximumGravityConstraint, 
+            speciesDB.BasePressure, speciesDB.MinimumPressureConstraint, speciesDB.MaximumPressureConstraint,
+            speciesDB.BaseTemperature, speciesDB.MinimumTemperatureConstraint, speciesDB.MaximumTemperatureConstraint)
+        {
+        }
     }
 }

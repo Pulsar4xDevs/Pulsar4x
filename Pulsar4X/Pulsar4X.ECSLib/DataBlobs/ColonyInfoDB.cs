@@ -14,7 +14,12 @@
         }
 
         public ColonyInfoDB()
-            : base()
-        { }
+        { 
+        }
+
+        public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
+        {
+            Population = new JDictionary<Entity, double>();//Yeah it's empty
+        }
     }
 }

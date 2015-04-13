@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -64,7 +65,6 @@ namespace Pulsar4X.ECSLib
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
         public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasDB,float> composition)
-            : base()
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
@@ -75,6 +75,25 @@ namespace Pulsar4X.ECSLib
             SurfaceTemperature = surfaceTemp;
             Composition = composition;
 
+        }
+
+        public AtmosphereDB(AtmosphereDB atmosphereDB)
+            : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent, 
+            atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, atmosphereDB.Albedo, 
+            atmosphereDB.SurfaceTemperature, 
+            atmosphereDB.Composition.ToDictionary(
+            entry => new AtmosphericGasDB(entry.Key), 
+            entry => entry.Value
+            ))
+        {
+            Pressure = atmosphereDB.Pressure;
+            Hydrosphere = atmosphereDB.Hydrosphere;
+            HydrosphereExtent = atmosphereDB.HydrosphereExtent;
+            GreenhouseFactor = atmosphereDB.GreenhouseFactor;
+            GreenhousePressure = atmosphereDB.GreenhousePressure;
+            Albedo = atmosphereDB.Albedo;
+            SurfaceTemperature = atmosphereDB.SurfaceTemperature;
+            Composition = atmosphereDB.Composition;
         }
     }
 }

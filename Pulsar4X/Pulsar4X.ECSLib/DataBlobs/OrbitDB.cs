@@ -106,7 +106,7 @@ namespace Pulsar4X.ECSLib
             // http://en.wikipedia.org/wiki/Mean_longitude
             double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
 
-            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch, false);
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Pulsar4X.ECSLib
         public static OrbitDB FromAsteroidFormat(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
-            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
+            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch, false);
         }
 
         /// <summary>
@@ -135,6 +135,11 @@ namespace Pulsar4X.ECSLib
             return new OrbitDB(mass);
         }
 
+        public OrbitDB(OrbitDB orbitDB) : this(Guid.Empty, orbitDB.Mass, orbitDB.ParentMass, orbitDB.SemiMajorAxis, orbitDB.Eccentricity, orbitDB.Inclination,
+            orbitDB.LongitudeOfAscendingNode, orbitDB.ArgumentOfPeriapsis, orbitDB.MeanAnomaly, orbitDB.Epoch, orbitDB.IsStationary)
+        {
+        }
+
         private OrbitDB(double mass)
         {
             Mass = mass;
@@ -142,8 +147,14 @@ namespace Pulsar4X.ECSLib
         }
 
         private OrbitDB(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
-                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
+                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch, bool isStationary)
         {
+            if (isStationary)//Most worst solution. Added to be able to use constructor OrbitDB(OrbitDB) 
+            {
+                Mass = mass;
+                IsStationary = true;
+            }
+
             Mass = mass;
             ParentMass = parentMass;
             SemiMajorAxis = semiMajorAxis;

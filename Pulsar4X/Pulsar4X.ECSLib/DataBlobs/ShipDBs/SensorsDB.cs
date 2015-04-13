@@ -5,6 +5,12 @@
     /// </summary>
     public class SensorsDB : BaseDataBlob
     {
-         
+        public SensorsDB()
+        {
+        }
+
+        public SensorsDB(SensorsDB sensorsDB)
+        {
+        }
     }
 }

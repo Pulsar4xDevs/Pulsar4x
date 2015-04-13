@@ -7,9 +7,29 @@ namespace Pulsar4X.ECSLib.Factories
 {
     internal static class ShipFactory
     {
-        private static Entity CreateShip(Guid classDef, EntityManager systemEM, int parentFormation)
+        private static Entity CreateShip(Guid classDef, EntityManager systemEntityManager, int parentFormation)
         {
-            throw new NotImplementedException();
+            Entity classEntity;
+            if (!Game.Instance.GlobalManager.TryGetEntityByGuid(classDef, out classEntity))
+                throw new Exception("Ship class is not found.");
+
+            List<BaseDataBlob> shipDataBlobs = new List<BaseDataBlob>();
+
+            List<BaseDataBlob> classDataBlobs = classEntity.GetAllDataBlobs(); //Are we sure we have only class specified data blobs?
+
+
+            foreach (BaseDataBlob dataBlob in classDataBlobs)
+            {
+                BaseDataBlob shipDataBlob = null;//dataBlob.Clone(); 
+                shipDataBlobs.Add(shipDataBlob); 
+            }
+
+            Entity shipEntity = systemEntityManager.CreateEntity(shipDataBlobs);
+
+            
+
+            return shipEntity;
+            //throw new NotImplementedException();
         }
 
         private static Entity CreateNewShipClass(int factionID, string className = null)

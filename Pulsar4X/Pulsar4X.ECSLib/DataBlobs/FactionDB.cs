@@ -24,5 +24,19 @@ namespace Pulsar4X.ECSLib
             Populations = population;
             ShipClasses = new List<Entity>();
         }
+
+        public FactionDB()
+        {
+        }
+
+        public FactionDB(FactionDB factionDB)
+        {
+            Title = factionDB.Title;
+
+            Species = new List<SpeciesDB>();
+            KnownSystems = new List<StarSystem>();
+            Populations = new List<ColonyInfoDB>();
+            ShipClasses = new List<Entity>();
+        }
     }
 }
