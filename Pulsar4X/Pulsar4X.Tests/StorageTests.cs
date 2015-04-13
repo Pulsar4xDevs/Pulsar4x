@@ -9,7 +9,7 @@ using System.ComponentModel;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture]
+    //[TestFixture]
     public class StorageTests
     {
         private GameState _gameState;
@@ -72,20 +72,20 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test, ExpectedException]
+        //[Test, ExpectedException]
         public void Save_Throws_Without_GameName()
         {
             var s = new Store("", _saveFolder);
         }
 
-        [Test]
+        //[Test]
         public void Save_GameState_To_JSON()
         {
             var s = new Store("TestGameFile", _saveFolder);
             s.SaveGame(_gameState);
         }
 
-        [Test]
+        //[Test]
         public void Load_GameState_From_JSON()
         {
             var s = new Store("TestGameFile", _saveFolder);
@@ -96,7 +96,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotNull(gs);
         }
 
-        [Test]
+        //[Test]
         public void Save_And_Load_CommanderNameThemes_To_JSON()
         {
             var bs = new Bootstrap();

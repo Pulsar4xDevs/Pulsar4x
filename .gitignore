@@ -1,17 +1,6 @@
 # Pulsar Specific Folders
-Pulsar4X/Pulsar4X.Lib/obj
-Pulsar4X/Pulsar4X.Lib/bin
-Pulsar4X/Pulsar4X.WinForms/obj
-Pulsar4X/Pulsar4X.WinForms/bin
-Pulsar4X/Pulsar4X.UI/obj
-Pulsar4X/Pulsar4X.UI/bin
-Pulsar4X/Pulsar4X.Tests/bin
-Pulsar4X/Pulsar4X.Tests/obj
-Pulsar4x/Pulsar4X.GTKForms/obj
-Pulsar4x/Pulsar4X.GTKForms/bin
-Pulsar4X/Pulsar4X.Installer/bin
-Pulsar4X/Pulsar4X.Installer/obj
-Pulsar4X\Pulsar4X.Tests\test-results
+Pulsar4X/*/bin
+Pulsar4X/*/obj
 
 #C# Temp Files:
 *.db
@@ -19,8 +8,6 @@ Pulsar4X\Pulsar4X.Tests\test-results
 *.user
 _ReSharper.Pulsar4X
 _ReSharper.AuroraExtract
-*.sln
-*.csproj
 
 # Build results
 *_i.c

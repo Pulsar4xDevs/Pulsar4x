@@ -10,10 +10,10 @@ using Pulsar4X.Helpers.GameMath;
 
 namespace Pulsar4X.Tests
 {
-    [TestFixture]
+    //[TestFixture]
     public class shipTests
     {
-        [Test]
+        //[Test]
         public void testArmor()
         {
             Faction newFaction = new Faction(0);
@@ -71,7 +71,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ts.ShipArmor.armorDef.cost, ts.ShipArmor.armorDef.area, ts.ShipArmor.armorDef.size);
         }
 
-        [Test]
+        //[Test]
         public void testArmorNA()
         {
             ArmorDefNA ArmorTestDefNA = new ArmorDefNA("High Density Duranium", 80);
@@ -116,7 +116,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Cost: {0}, Area: {1},Size: {2}", ArmorTestNA.armorDef.cost, ArmorTestNA.armorDef.area, ArmorTestNA.armorDef.m_oUnitMass);
         }
 
-        [Test]
+        //[Test]
         public void testEngine()
         {
 
@@ -153,7 +153,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("Cost: {0}", tst.cost);
         }
 
-        [Test]
+        //[Test]
         public void testPSensor()
         {
 
@@ -197,7 +197,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test]
+        //[Test]
         public void testASensor()
         {
 
@@ -241,7 +241,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test]
+        //[Test]
         public void testShip()
         {
             Faction newFaction = new Faction(0);
@@ -371,7 +371,7 @@ namespace Pulsar4X.Tests
 
         }
 
-        [Test]
+        //[Test]
         public void TGActiveSortThermalSortTest()
         {
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
@@ -453,7 +453,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test]
+        //[Test]
         public void TGPassivesTest()
         {
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
@@ -501,7 +501,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test]
+        //[Test]
         public void TGActiveTest()
         {
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
@@ -583,7 +583,7 @@ namespace Pulsar4X.Tests
         }
 
         //Issue/Follow Orders Test
-        [Test]
+        //[Test]
         public void TGOrdersTest()
         {
             EngineDefTN EngDef = new EngineDefTN("25 EP Nuclear Thermal Engine", 5, 1.0f, 1.0f, 1.0f, 1, 5, -1.0f);
@@ -635,7 +635,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test]
+        //[Test]
         public void FactionSystemTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -763,7 +763,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("{0} {1}", PlayerFaction1.TaskGroups[0].Ships[0].ActiveDetection[1], PlayerFaction2.TaskGroups[0].Ships[0].ActiveDetection[0]);
         }
 
-        [Test]
+        //[Test]
         public void CargoLoadUnloadTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -812,7 +812,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("CargoList dictionary count after unload:{0}", PlayerFaction1.TaskGroups[0].Ships[0].CargoList.Count);
         }
 
-        [Test]
+        //[Test]
         public void CargoOrdersTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -881,7 +881,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test]
+        //[Test]
         public void ColonyOrdersTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -942,7 +942,7 @@ namespace Pulsar4X.Tests
     System1.Stars[0].Planets[1].Populations[0].CivilianPopulation);
         }
 
-        [Test]
+        //[Test]
         public void TaskGroupFuelOrdersTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -1052,7 +1052,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test]
+        //[Test]
         public void TaskGroupMSPOrdersTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -1169,7 +1169,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test]
+        //[Test]
         public void ComponentLoadUnloadTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -1239,7 +1239,7 @@ namespace Pulsar4X.Tests
             Console.WriteLine("CargoList count on Ships[0] after unload :{0}", PlayerFaction1.TaskGroups[0].Ships[0].CargoComponentList.Count);
         }
 
-        [Test]
+        //[Test]
         public void ShipDamageModel()
         {
             DamageValuesTN.init();
@@ -1586,7 +1586,7 @@ namespace Pulsar4X.Tests
             return done;
         }
 
-        [Test]
+        //[Test]
         public void SimulationTest()
         {
             /// <summary>
@@ -1750,7 +1750,7 @@ namespace Pulsar4X.Tests
             }
         }
 
-        [Test]
+        //[Test]
         public void MesonMicrowaveShieldTest()
         {
             DamageValuesTN.init();
@@ -1837,7 +1837,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test]
+        //[Test]
         public void CollierOrdersTest()
         {
             Faction PlayerFaction1 = new Faction(0);
@@ -1924,7 +1924,7 @@ namespace Pulsar4X.Tests
         }
 
 
-        [Test]
+        //[Test]
         public void OrdnanceTest()
         {
             /// <summary>

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pulsar4X.ECSLib</RootNamespace>
+    <AssemblyName>Pulsar4X.ECSLib</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DataBlobs\CommanderDB.cs" />
+    <Compile Include="DataBlobs\CommanderNameDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
+    <Compile Include="DataBlobs\AtmosphereDB.cs" />
+    <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
+    <Compile Include="DataBlobs\BaseDataBlob.cs" />
+    <Compile Include="DataBlobs\FactionDB.cs" />
+    <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
+    <Compile Include="DataBlobs\OrbitDB.cs" />
+    <Compile Include="DataBlobs\PlanetInfoDB.cs" />
+    <Compile Include="DataBlobs\ColonyInfoDB.cs" />
+    <Compile Include="DataBlobs\PositionDB.cs" />
+    <Compile Include="DataBlobs\RuinsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\BeamWeaponsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\BuildCostDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\CargoDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\CrewDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\DamageDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\HangerDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\IndustryDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\MaintenanceDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\MissileWeaponsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\PowerDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\PropulsionDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\SensorProfileDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\SensorsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ShieldsDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\ShipInfoDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\TractorDB.cs" />
+    <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />
+    <Compile Include="DataBlobs\SpeciesDB.cs" />
+    <Compile Include="Engine-Comms.cs" />
+    <Compile Include="Entity.cs" />
+    <Compile Include="EntityManager.cs" />
+    <Compile Include="Factories\ShipFactory.cs" />
+    <Compile Include="Factories\SpeciesFactory.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="GameSettings.cs" />
+    <Compile Include="Helpers\ComparableBitArray.cs" />
+    <Compile Include="Helpers\GameMath.cs" />
+    <Compile Include="Helpers\Interrupt.cs" />
+    <Compile Include="Helpers\JSONHelper.cs" />
+    <Compile Include="Helpers\SubpulseLimitRequest.cs" />
+    <Compile Include="Helpers\Vector4.cs" />
+    <Compile Include="Processors\OrbitProcessor.cs" />
+    <Compile Include="Processors\RuinsProcessor.cs" />
+    <Compile Include="Processors\SpeciesProcessor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SaveGame.cs" />
+    <Compile Include="StarSystem.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
