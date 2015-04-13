@@ -30,32 +30,29 @@ namespace Pulsar4X.Tests
     [Description("DataBlob Tests")]
     class DataBlobTests
     {
-        private List<Type> _dataBlobTypes;
-        private EntityManager _manager;
+
+        private static readonly List<Type> DataBlobTypes = new List<Type>(Assembly.GetAssembly(typeof(BaseDataBlob)).GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract)); 
+        private static EntityManager _manager = new EntityManager();
 
         [SetUp]
         public void Init()
         {
             _manager = new EntityManager();
-            _dataBlobTypes = new List<Type>(Assembly.GetAssembly(typeof(BaseDataBlob)).GetTypes().Where(type => type.IsSubclassOf(typeof(BaseDataBlob)) && !type.IsAbstract));
         }
 
         [Test]
         public void TypeCount()
         {
-            Assert.AreEqual(_dataBlobTypes.Count, EntityManager.BlankDataBlobMask().Length);
+            Assert.AreEqual(DataBlobTypes.Count, EntityManager.BlankDataBlobMask().Length);
         }
 
-        [Test]
-        public void DeepCopyConstructor()
+        [Test, TestCaseSource("DataBlobTypes")]
+        public void DeepCopyConstructor(Type dataBlobType)
         {
-            foreach (Type dbType in _dataBlobTypes)
+            ConstructorInfo constructor = dataBlobType.GetConstructor(new []{dataBlobType});
+            if (constructor == null)
             {
-                ConstructorInfo constructor = dbType.GetConstructor(new []{dbType});
-                if (constructor == null)
-                {
-                    throw new DataBlobTestException(dbType.ToString() + " does not have a Deep Copy constructor.");
-                }
+                throw new DataBlobTestException(dataBlobType.ToString() + " does not have a Deep Copy constructor.");
             }
         }
 
