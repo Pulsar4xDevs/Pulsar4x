@@ -9,6 +9,7 @@ namespace Pulsar4X.ECSLib.Factories
     {
         private static Entity CreateShip(Guid classDef, EntityManager systemEntityManager, int parentFormation)
         {
+            /*
             Entity classEntity;
             if (!Game.Instance.GlobalManager.TryGetEntityByGuid(classDef, out classEntity))
                 throw new Exception("Ship class is not found.");
@@ -20,7 +21,7 @@ namespace Pulsar4X.ECSLib.Factories
 
             foreach (BaseDataBlob dataBlob in classDataBlobs)
             {
-                BaseDataBlob shipDataBlob = null;//dataBlob.Clone(); 
+                BaseDataBlob shipDataBlob = 
                 shipDataBlobs.Add(shipDataBlob); 
             }
 
@@ -29,7 +30,8 @@ namespace Pulsar4X.ECSLib.Factories
             
 
             return shipEntity;
-            //throw new NotImplementedException();
+            */
+            throw new NotImplementedException();
         }
 
         private static Entity CreateNewShipClass(int factionID, string className = null)

@@ -51,7 +51,10 @@ namespace Pulsar4X.ECSLib
         public ShipInfoDB(ShipInfoDB shipInfoDB)
         {
             Name = shipInfoDB.Name;
-            //ShipClassDefinition = shipInfoDB.OwningEntity.Guid; //Return here later
+            if (shipInfoDB.ShipClassDefinition == Guid.Empty) //Class
+                ShipClassDefinition = shipInfoDB.OwningEntity.Guid;
+            else //Ship
+                ShipClassDefinition = shipInfoDB.ShipClassDefinition;
             ClassName = shipInfoDB.ClassName;
             Obsolete = shipInfoDB.Obsolete;
             Conscript = shipInfoDB.Conscript;
