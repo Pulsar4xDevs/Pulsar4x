@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System.Collections.Generic;
+
+namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
@@ -19,7 +21,11 @@
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            Population = new JDictionary<Entity, double>();//Yeah it's empty
+            Population = new JDictionary<Entity, double>();
+            foreach (KeyValuePair<Entity, double> keyValue in Population)
+            {
+                Population.Add(keyValue.Key, keyValue.Value);
+            }
         }
     }
 }
