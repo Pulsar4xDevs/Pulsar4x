@@ -24,5 +24,9 @@ namespace Pulsar4X.ECSLib.DataBlobs
             Name.Add(primaryFaction, primaryName);
         }
 
+        public NameDB(NameDB nameDB)
+        {
+            Name = nameDB.Name.ToDictionary(entry => entry.Key, entry => entry.Value);
+        }
     }
 }
