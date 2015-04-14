@@ -137,6 +137,13 @@ namespace Pulsar4X.ECSLib
         {
             return new Entity(Guid.Empty, _invalidManager) {ID = -1};
         }
+
+#if DEBUG
+        public override string ToString()
+        {
+            return Guid.ToString();
+        }
+#endif
     }
 
     public class EntityConverter : JsonConverter

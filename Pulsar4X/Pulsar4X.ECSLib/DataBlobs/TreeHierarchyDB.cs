@@ -12,7 +12,29 @@ namespace Pulsar4X.ECSLib
 #endif
         class TreeHierarchyDB : BaseDataBlob
     {
-        public Entity Parent { get; set; }
+        public Entity Parent
+        {
+            get { return _parent; }
+            set
+            {
+                if (OwningEntity == null)
+                {
+                    _parent = value;
+                    return;
+                }
+
+                if (Parent != null)
+                {
+                    ParentDB.RemoveChild(OwningEntity);
+                }
+                _parent = value;
+                if (Parent != null)
+                {
+                    ParentDB.AddChild(OwningEntity);
+                }
+            }
+        }
+        private Entity _parent;
 
         [JsonIgnore]
         public TreeHierarchyDB ParentDB
@@ -45,7 +67,7 @@ namespace Pulsar4X.ECSLib
             get { return GetSameTypeDB(Root); }
         }
 
-        public List<Entity> Children { get; set; }
+        public List<Entity> Children { get; private set; }
 
         [JsonIgnore]
         public List<TreeHierarchyDB> ChildrenDBs
