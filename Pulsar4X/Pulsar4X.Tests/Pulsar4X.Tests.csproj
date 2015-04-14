@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
+    <Compile Include="ECSShipTests.cs" />
     <Compile Include="EngineCommsTests.cs" />
     <Compile Include="EntityManagerTests.cs" />
     <Compile Include="MainGameLoopTests.cs" />
