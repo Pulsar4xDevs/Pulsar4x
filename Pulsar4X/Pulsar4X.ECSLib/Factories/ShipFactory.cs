@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Pulsar4X.ECSLib.DataBlobs;
 
 namespace Pulsar4X.ECSLib.Factories
 {
     public static class ShipFactory
     {
-        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, int parentFormation, string shipName = null)
+        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, string shipName = null)
         {
+            // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
             List<BaseDataBlob> classDataBlobs = classEntity.GetAllDataBlobs(); //Are we sure we have in class only ship specified data blobs?
             List<BaseDataBlob> shipDataBlobs = new List<BaseDataBlob>();
 
@@ -17,20 +19,31 @@ namespace Pulsar4X.ECSLib.Factories
             }
 
             Entity ship = systemEntityManager.CreateEntity(shipDataBlobs);
-            ShipInfoDB shipInfoDB = ship.GetDataBlob<ShipInfoDB>();
 
+            ShipInfoDB shipInfoDB = ship.GetDataBlob<ShipInfoDB>();
             shipInfoDB.ShipClassDefinition = classEntity.Guid;
+
+            NameDB nameDB = ship.GetDataBlob<NameDB>();
             if (shipName == null)
             {
                 shipName = "Ship Name";
             }
-            shipInfoDB.Name = shipName;
+            nameDB.Name.Clear();
+            nameDB.Name.Add(ownerFaction, shipName);
+            
 
             return ship;
         }
 
         public static Entity CreateNewShipClass(Entity faction, string className = null)
         {
+            //check className before any to use it in NameDB constructor
+            if (string.IsNullOrEmpty(className))
+            {
+                ///< @todo source the class name from faction theme.
+                className = "New Class"; // <- Hack for now.
+            }
+
             // lets start by creating all the Datablobs that make up a ship class:
             var shipInfo = new ShipInfoDB();
             var armor = new ArmorDB();
@@ -50,6 +63,7 @@ namespace Pulsar4X.ECSLib.Factories
             var shields = new ShieldsDB();
             var tractor = new TractorDB();
             var troopTransport = new TroopTransportDB();
+            var name = new NameDB(faction, className);
 
             // now lets create a list of all these datablobs so we can create our new entity:
             List<BaseDataBlob> shipDBList = new List<BaseDataBlob>()
@@ -71,24 +85,20 @@ namespace Pulsar4X.ECSLib.Factories
                 sensors,
                 shields,
                 tractor,
-                troopTransport
+                troopTransport,
+                name
             };
 
             // now lets create the ship class:
             Entity shipClassEntity = Game.Instance.GlobalManager.CreateEntity(shipDBList);
+
             // also gets factionDB:
             FactionDB factionDB = faction.GetDataBlob<FactionDB>();
+
             // and add it to the faction:
             factionDB.ShipClasses.Add(shipClassEntity);
 
             // now lets set some ship info:
-            if (string.IsNullOrEmpty(className))
-            {
-                ///< @todo source the class name from faction theme.
-                className = "New Class"; // <- Hack for now.
-            }
-            shipInfo.ClassName = className;
-            shipInfo.Name = className;
             shipInfo.ShipClassDefinition = Guid.Empty; // just make sure it is marked as a class and not a ship.
 
             // now lets add some components:

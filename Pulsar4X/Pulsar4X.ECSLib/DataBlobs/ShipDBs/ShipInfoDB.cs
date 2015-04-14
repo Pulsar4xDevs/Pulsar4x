@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -8,18 +9,11 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class ShipInfoDB : BaseDataBlob
     {
-        public string Name { get; set; }
-
         /// <summary>
         /// The guid of the ship class, if this is a ship class then the Guid will be empty. 
         /// use IsClassDefinition() to determin if this is a ship class definmition
         /// </summary>
         public Guid ShipClassDefinition { get; set; }
-
-        /// <summary>
-        /// The name of the class to which this ship belongs.
-        /// </summary>
-        public string ClassName { get; set; }
 
         public bool Obsolete { get; set; }
         public bool Conscript { get; set; }
@@ -50,12 +44,10 @@ namespace Pulsar4X.ECSLib
 
         public ShipInfoDB(ShipInfoDB shipInfoDB)
         {
-            Name = shipInfoDB.Name;
             if (shipInfoDB.ShipClassDefinition == Guid.Empty) //Class
                 ShipClassDefinition = shipInfoDB.OwningEntity.Guid;
             else //Ship
                 ShipClassDefinition = shipInfoDB.ShipClassDefinition;
-            ClassName = shipInfoDB.ClassName;
             Obsolete = shipInfoDB.Obsolete;
             Conscript = shipInfoDB.Conscript;
             Tanker = shipInfoDB.Tanker;
@@ -63,6 +55,7 @@ namespace Pulsar4X.ECSLib
             SupplyShip = shipInfoDB.SupplyShip;
             InternalHTK = shipInfoDB.InternalHTK;
             IsMilitary = shipInfoDB.IsMilitary;
+            ComponentList = shipInfoDB.ComponentList.ToList();
         }
 
         /// <summary>
