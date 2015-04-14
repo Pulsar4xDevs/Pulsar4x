@@ -5,36 +5,36 @@ using System.Text;
 
 namespace Pulsar4X.ECSLib.Factories
 {
-    internal static class ShipFactory
+    public static class ShipFactory
     {
-        private static Entity CreateShip(Guid classDef, EntityManager systemEntityManager, int parentFormation)
+        public static Entity CreateShip(Guid classDef, EntityManager systemEntityManager, string shipName, int parentFormation)
         {
-            /*
+            
             Entity classEntity;
             if (!Game.Instance.GlobalManager.TryGetEntityByGuid(classDef, out classEntity))
                 throw new Exception("Ship class is not found.");
 
             List<BaseDataBlob> shipDataBlobs = new List<BaseDataBlob>();
 
-            List<BaseDataBlob> classDataBlobs = classEntity.GetAllDataBlobs(); //Are we sure we have only class specified data blobs?
+            List<BaseDataBlob> classDataBlobs = classEntity.GetAllDataBlobs(); //Are we sure we have in class only ship specified data blobs?
 
 
             foreach (BaseDataBlob dataBlob in classDataBlobs)
             {
-                BaseDataBlob shipDataBlob = 
-                shipDataBlobs.Add(shipDataBlob); 
+                dynamic clonnedDataBlob = Activator.CreateInstance(dataBlob.GetType(), dataBlob);
+                shipDataBlobs.Add(clonnedDataBlob); 
             }
 
-            Entity shipEntity = systemEntityManager.CreateEntity(shipDataBlobs);
+            Entity ship = systemEntityManager.CreateEntity(shipDataBlobs);
 
-            
+            ShipInfoDB shipInfoDB = ship.GetDataBlob<ShipInfoDB>();
+            shipInfoDB.ShipClassDefinition = classEntity.Guid;
+            shipInfoDB.Name = shipName;
 
-            return shipEntity;
-            */
-            throw new NotImplementedException();
+            return ship;
         }
 
-        private static Entity CreateNewShipClass(int factionID, string className = null)
+        public static Entity CreateNewShipClass(int factionID, string className = null)
         {
             // lets start by creating all the Datablobs that make up a ship class:
             var shipInfo = new ShipInfoDB();

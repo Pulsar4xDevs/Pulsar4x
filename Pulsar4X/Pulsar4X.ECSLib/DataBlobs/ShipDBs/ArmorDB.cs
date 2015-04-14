@@ -30,9 +30,13 @@ namespace Pulsar4X.ECSLib
 
         public ArmorDB(ArmorDB armorDB)
         {
-            ArmorDef = new ArmorDefDB() {Name = armorDB.ArmorDef.Name, Strenght = armorDB.ArmorDef.Strenght};
-            ArmorStatus = new BitArray[armorDB.ArmorStatus.Length];
-            armorDB.ArmorStatus.CopyTo(ArmorStatus, 0);
+            if(armorDB.ArmorDef != null)
+                ArmorDef = new ArmorDefDB() {Name = armorDB.ArmorDef.Name, Strenght = armorDB.ArmorDef.Strenght};
+            if (armorDB.ArmorStatus != null)
+            {
+                ArmorStatus = new BitArray[armorDB.ArmorStatus.Length];
+                armorDB.ArmorStatus.CopyTo(ArmorStatus, 0);
+            }
         }
     }
 }
