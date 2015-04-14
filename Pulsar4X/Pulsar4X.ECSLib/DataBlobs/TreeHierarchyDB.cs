@@ -5,10 +5,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-#if DEBUG
-    abstract
-#endif
-    public class TreeHierarchyDB : BaseDataBlob
+    public abstract class TreeHierarchyDB : BaseDataBlob
     {
         public Entity Parent
         {
@@ -120,6 +117,18 @@ namespace Pulsar4X.ECSLib
             EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
 
             return entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
+        }
+    }
+
+    /// <summary>
+    /// For use by Unit Tests only.
+    /// </summary>
+    public sealed class ConcreteTreeHierarchyDB : TreeHierarchyDB
+    {
+        public ConcreteTreeHierarchyDB(Entity parent)
+            : base(parent)
+        {
+
         }
     }
 }

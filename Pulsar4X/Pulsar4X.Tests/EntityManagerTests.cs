@@ -44,7 +44,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(EntityManager.BlankDataBlobMask(), testEntity.DataBlobMask);
 
             // Create entity with existing datablobs:
-            var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new ColonyInfoDB(_pop1)};
+            var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1)};
             testEntity = Entity.Create(_entityManager, dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
             Assert.AreEqual(2, testEntity.ID);
@@ -69,7 +69,7 @@ namespace Pulsar4X.Tests
         public void SetDataBlobs()
         {
             Entity testEntity = Entity.Create(_entityManager);
-            testEntity.SetDataBlob(OrbitDB.FromStationary(5));
+            testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1));
             testEntity.SetDataBlob(new PositionDB(0, 0, 0), EntityManager.GetTypeIndex<PositionDB>());
 
@@ -98,7 +98,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(3, orbits.Count);
 
             // and of a type we know is not in the entity manager:
-            List<PlanetInfoDB> planetBlobs = _entityManager.GetAllDataBlobsOfType<PlanetInfoDB>();
+            List<SystemBodyDB> planetBlobs = _entityManager.GetAllDataBlobsOfType<SystemBodyDB>();
             Assert.AreEqual(0, planetBlobs.Count);  // shoul be 0 as there are none of them.
 
             // and of all types, should throw as you cannot do this:
@@ -163,7 +163,7 @@ namespace Pulsar4X.Tests
             typeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
             Assert.Catch(typeof(InvalidCastException), () =>
             {
-                testEntity.GetDataBlob<PlanetInfoDB>(typeIndex);
+                testEntity.GetDataBlob<SystemBodyDB>(typeIndex);
             });
         }
 
@@ -447,15 +447,15 @@ namespace Pulsar4X.Tests
 
             // Create an entity with individual DataBlobs.
             Entity testEntity = Entity.Create(_entityManager);
-            testEntity.SetDataBlob(OrbitDB.FromStationary(5));
+            testEntity.SetDataBlob(new OrbitDB());
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1));
 
             // Create an entity with a DataBlobList.
-            var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2)};
+            var dataBlobs = new List<BaseDataBlob> { new OrbitDB() };
             Entity.Create(_entityManager, dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(5), new ColonyInfoDB(_pop2)};
+            dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2) };
             Entity.Create(_entityManager, dataBlobs);
 
             return testEntity;

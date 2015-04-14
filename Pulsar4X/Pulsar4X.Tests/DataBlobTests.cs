@@ -40,9 +40,12 @@ namespace Pulsar4X.Tests
         [Test]
         public void TreeHierarchyTest()
         {
+            Type entityManagerType = typeof(EntityManager);
+
+
             // Create the "Root" entity.
             Entity rootNode = CreateNode(null);
-            TreeHierarchyDB rootDB = rootNode.GetDataBlob<TreeHierarchyDB>();
+            ConcreteTreeHierarchyDB rootDB = rootNode.GetDataBlob<ConcreteTreeHierarchyDB>();
 
             // Make sure the root has a root, itself.
             Assert.AreSame(rootDB, rootDB.RootDB);
@@ -66,13 +69,13 @@ namespace Pulsar4X.Tests
             var Parent2_childEntitys = new List<Entity> { Parent2_child1, Parent2_child2 };
 
             // Get the dataBlobs of each child.
-            TreeHierarchyDB Parent1DB = Parent1_node.GetDataBlob<TreeHierarchyDB>();
-            TreeHierarchyDB Parent1_child1DB = Parent1_child1.GetDataBlob<TreeHierarchyDB>();
-            TreeHierarchyDB Parent1_child2DB = Parent1_child2.GetDataBlob<TreeHierarchyDB>();
+            ConcreteTreeHierarchyDB Parent1DB = Parent1_node.GetDataBlob<ConcreteTreeHierarchyDB>();
+            ConcreteTreeHierarchyDB Parent1_child1DB = Parent1_child1.GetDataBlob<ConcreteTreeHierarchyDB>();
+            ConcreteTreeHierarchyDB Parent1_child2DB = Parent1_child2.GetDataBlob<ConcreteTreeHierarchyDB>();
 
-            TreeHierarchyDB Parent2DB = Parent2_node.GetDataBlob<TreeHierarchyDB>();
-            TreeHierarchyDB Parent2_child1DB = Parent2_child1.GetDataBlob<TreeHierarchyDB>();
-            TreeHierarchyDB Parent2_child2DB = Parent2_child2.GetDataBlob<TreeHierarchyDB>();
+            ConcreteTreeHierarchyDB Parent2DB = Parent2_node.GetDataBlob<ConcreteTreeHierarchyDB>();
+            ConcreteTreeHierarchyDB Parent2_child1DB = Parent2_child1.GetDataBlob<ConcreteTreeHierarchyDB>();
+            ConcreteTreeHierarchyDB Parent2_child2DB = Parent2_child2.GetDataBlob<ConcreteTreeHierarchyDB>();
 
             // Ensure the root is the same across the branches.
             Assert.AreSame(rootDB, Parent1_child1DB.RootDB);
@@ -83,8 +86,8 @@ namespace Pulsar4X.Tests
             Assert.AreSame(Parent2DB, Parent2_child1DB.ParentDB);
 
             // Store a list of dataBlobs for later comparison.
-            var Parent1_children = new List<TreeHierarchyDB> { Parent1_child1DB, Parent1_child2DB };
-            var Parent2_children = new List<TreeHierarchyDB> { Parent2_child1DB, Parent2_child2DB };
+            var Parent1_children = new List<ConcreteTreeHierarchyDB> { Parent1_child1DB, Parent1_child2DB };
+            var Parent2_children = new List<ConcreteTreeHierarchyDB> { Parent2_child1DB, Parent2_child2DB };
 
             // Ensure listed child entities concur with our child list.
             Assert.AreEqual(Parent1DB.Children, Parent1_childEntitys);
@@ -109,7 +112,7 @@ namespace Pulsar4X.Tests
 
             // Create a new root.
             Entity root2Node = CreateNode(null);
-            TreeHierarchyDB root2DB = root2Node.GetDataBlob<TreeHierarchyDB>();
+            ConcreteTreeHierarchyDB root2DB = root2Node.GetDataBlob<ConcreteTreeHierarchyDB>();
 
             // Assign P2 to the new root.
             Parent2DB.Parent = root2Node;
@@ -120,7 +123,7 @@ namespace Pulsar4X.Tests
 
         private Entity CreateNode(Entity parentEntity)
         {
-            TreeHierarchyDB nodeDB = new TreeHierarchyDB(parentEntity);
+            ConcreteTreeHierarchyDB nodeDB = new ConcreteTreeHierarchyDB(parentEntity);
             Entity nodeEntity = Entity.Create(_manager);
             nodeEntity.SetDataBlob(nodeDB);
 
