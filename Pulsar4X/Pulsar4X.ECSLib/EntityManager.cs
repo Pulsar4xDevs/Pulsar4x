@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -465,8 +466,6 @@ namespace Pulsar4X.ECSLib
 
             List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
 
-            
-
             RemoveEntity(entity);
             manager.CreateEntity(entity, dataBlobs);
         }
@@ -607,7 +606,22 @@ namespace Pulsar4X.ECSLib
             // Also ensures all Guid dictionaries are set.
             foreach (Guid guid in entityGuids)
             {
-                CreateEntity(new Entity(guid, this), null);
+                Entity entity;
+                if (FindEntityByGuid(guid, out entity))
+                {
+                    // Entity already created. Likey because it was referenced by a datablob in another manager.
+                    // Entity should be residing in the global manager.
+                    if (entity.Manager != Game.Instance.GlobalManager)
+                    {
+                        throw new JsonSerializationException("Entity already exists in non-global manager.");
+                    }
+                    entity.TransferEntity(this);
+                }
+                else
+                {
+                    // First time this Guid has been encountered.
+                    CreateEntity(new Entity(guid, this), null);
+                }
             }
 
             // Deserialize the datablobs by type.
