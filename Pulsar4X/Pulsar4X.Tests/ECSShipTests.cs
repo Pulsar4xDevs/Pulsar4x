@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 using Pulsar4X.ECSLib.Factories;
@@ -23,12 +20,12 @@ namespace Pulsar4X.Tests
             _game = new Game();
 
             var list = new List<BaseDataBlob>();
-            Entity sdb = _game.GlobalManager.CreateEntity(new List<BaseDataBlob> {new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44),});
+            Entity sdb = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> { new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44), });
             var pop = new JDictionary<Entity, double> { { sdb, 42 } };
 
             list.Add(new ColonyInfoDB(pop));
             list.Add(new FactionDB("Terran", new List<SpeciesDB>(), new List<StarSystem>(), new List<ColonyInfoDB>()));
-            _faction = _game.GlobalManager.CreateEntity(list);
+            _faction = Entity.Create(_game.GlobalManager, list);
             _game.EngineComms.AddFaction(_faction);
 
             _starSystem = new StarSystem();
