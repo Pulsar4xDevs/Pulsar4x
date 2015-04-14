@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib.Factories
             return species;
         }
 
-        private static SpeciesDB CreateSpecies(SystemBodyDB planetInfo, int? seed = null)
+        private static SpeciesDB CreateSpecies(Entity planetEntity, int? seed = null)
         {
             Random rnd;
             if (seed != null) 
@@ -37,25 +37,29 @@ namespace Pulsar4X.ECSLib.Factories
             else 
                 rnd = new Random();
 
+            MassVolumeDB masvolinfo = planetEntity.GetDataBlob<MassVolumeDB>();
+            SystemBodyDB sysbodyinfo = planetEntity.GetDataBlob<SystemBodyDB>();
+            AtmosphereDB atmoinfo = planetEntity.GetDataBlob<AtmosphereDB>();
+
             string Name = "somerace"; //create name from planet name or something. 
 
-            throw new NotImplementedException();
-            //double BaseGravity = planetInfo.SurfaceGravity;
+            //throw new NotImplementedException();
+            double BaseGravity = masvolinfo.SurfaceGravity;
             double MinimumGravityConstraint = 0.1;//rnd.Next(planetInfo.SurfaceGravity, 0.1);
             double MaximumGravityConstraint = 1.9;
-            //double BasePressure = planetInfo.Atmosphere.Pressure;
+            double BasePressure = atmoinfo.Pressure;
             double MinimumPressureConstraint = 0.4;
             double MaximumPressureConstraint = 4.0;
-            double BaseTemperature = planetInfo.BaseTemperature;
+            double BaseTemperature = sysbodyinfo.BaseTemperature;
             double MinimumTemperatureConstraint = -15.0;
             double MaximumTemperatureConstraint = 45.0;
-            //SpeciesDB species = new SpeciesDB(Name, BaseGravity,
-            //    MinimumGravityConstraint, MaximumGravityConstraint,
-            //    BasePressure, MinimumPressureConstraint,
-            //    MaximumPressureConstraint, BaseTemperature,
-            //    MinimumTemperatureConstraint, MaximumTemperatureConstraint);
+            SpeciesDB species = new SpeciesDB(Name, BaseGravity,
+                MinimumGravityConstraint, MaximumGravityConstraint,
+                BasePressure, MinimumPressureConstraint,
+                MaximumPressureConstraint, BaseTemperature,
+                MinimumTemperatureConstraint, MaximumTemperatureConstraint);
 
-            //return species;
+            return species;
         }
     }
 }
