@@ -25,18 +25,18 @@ namespace Pulsar4X.Tests
 
             // add a species:
             SpeciesDB speciesdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
-            Entity speciesEntity = game.GlobalManager.CreateEntity();
+            Entity speciesEntity = Entity.Create(game.GlobalManager);
             speciesEntity.SetDataBlob(speciesdb);
 
             // add a faction:
             var list = new List<BaseDataBlob>();
-            Entity sdb = game.GlobalManager.CreateEntity(new List<BaseDataBlob> {speciesdb});
+            Entity sdb = Entity.Create(game.GlobalManager, new List<BaseDataBlob> {speciesdb});
             var pop = new JDictionary<Entity, double> {{sdb, 42}};
 
             list.Add(new ColonyInfoDB(pop));
             list.Add(new PositionDB(0,0,0));
             //list.Add(OrbitDB.FromStationary(0));
-            Entity faction = game.GlobalManager.CreateEntity(list);
+            Entity faction = Entity.Create(game.GlobalManager, list);
 
             // add a star system:
             game.StarSystems.Add(new StarSystem());

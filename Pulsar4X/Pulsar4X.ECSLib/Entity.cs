@@ -128,6 +128,11 @@ namespace Pulsar4X.ECSLib
             ID = newID;
         }
 
+        public static Entity Create(EntityManager manager, List<BaseDataBlob> dataBlobs = null)
+        {
+            return manager.CreateEntity(dataBlobs);
+        }
+
         public static Entity GetInvalidEntity()
         {
             return new Entity(Guid.Empty, _invalidManager) {ID = -1};

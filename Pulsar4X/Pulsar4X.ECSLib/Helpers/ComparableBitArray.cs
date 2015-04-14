@@ -6,7 +6,6 @@ namespace Pulsar4X.ECSLib
 {
     public sealed class ComparableBitArray
     {
-
         [JsonProperty]
         private readonly int[] _backingValues;
         private const int BitsPerValue = 32;

@@ -324,37 +324,13 @@ namespace Pulsar4X.ECSLib
         public static ComparableBitArray BlankDataBlobMask()
         {
             return new ComparableBitArray(_dataBlobTypes.Count);
-        }
-
-        /// <summary>
-        /// Creates an entity in this manager.
-        /// </summary>
-        /// <returns>The new entity.</returns>
-        public Entity CreateEntity()
-        {
-            _guidLock.EnterWriteLock();
-            try
-            {
-                Guid entityGuid = CreateEntityGuid();
-                return CreateEntity(new Entity(entityGuid, this));
-            }
-            finally
-            {
-                _guidLock.ExitWriteLock();
-            }
-        }        
+        }       
         
         /// <summary>
         /// Adds an entity with the pre-existing datablobs to this EntityManager.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
-        public Entity CreateEntity(List<BaseDataBlob> dataBlobs)
+        internal Entity CreateEntity(List<BaseDataBlob> dataBlobs)
         {
-            if (dataBlobs == null)
-            {
-                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity, use CreateEntity().");
-            }
-
             _guidLock.EnterWriteLock();
             try
             {
@@ -367,7 +343,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private Entity CreateEntity(Entity entity, List<BaseDataBlob> dataBlobs = null)
+        private Entity CreateEntity(Entity entity, List<BaseDataBlob> dataBlobs)
         {
             int newID = CreateEntityID();
             entity.SetID(newID);
@@ -631,7 +607,7 @@ namespace Pulsar4X.ECSLib
             // Also ensures all Guid dictionaries are set.
             foreach (Guid guid in entityGuids)
             {
-                CreateEntity(new Entity(guid, this));
+                CreateEntity(new Entity(guid, this), null);
             }
 
             // Deserialize the datablobs by type.
