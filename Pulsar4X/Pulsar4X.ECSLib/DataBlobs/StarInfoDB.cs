@@ -47,5 +47,23 @@ namespace Pulsar4X.ECSLib
         public SpectralType SpectralType { get; set; }
         public ushort SpectralSubDivision { get; set; }       // number from  0 (hottest) to 9 (coolest)
         public LuminosityClass LuminosityClass { get; set; }
+
+        public StarInfoDB()
+        {
+            
+        }
+
+        public StarInfoDB(StarInfoDB starInfoDB)
+        {
+            Age = starInfoDB.Age;
+            Temperature = starInfoDB.Temperature;
+            Luminosity = starInfoDB.Luminosity;
+            Class = starInfoDB.Class;
+
+            SpectralType = starInfoDB.SpectralType;
+            SpectralSubDivision = starInfoDB.SpectralSubDivision;
+            LuminosityClass = starInfoDB.LuminosityClass;
+
+        }
     }
 }

@@ -71,5 +71,18 @@ namespace Pulsar4X.ECSLib
         {
 
         }
+
+        public SystemBodyDB(SystemBodyDB systemBodyDB)
+        {
+            Type = systemBodyDB.Type;
+            Tectonics = systemBodyDB.Tectonics;
+            AxialTilt = systemBodyDB.AxialTilt;
+            MagneticFeild = systemBodyDB.MagneticFeild;
+            BaseTemperature = systemBodyDB.BaseTemperature;
+            RadiationLevel = systemBodyDB.RadiationLevel;
+            AtmosphericDust = systemBodyDB.AtmosphericDust;
+            SupportsPopulations = systemBodyDB.SupportsPopulations;
+            LengthOfDay = systemBodyDB.LengthOfDay;
+        }
     }
 }

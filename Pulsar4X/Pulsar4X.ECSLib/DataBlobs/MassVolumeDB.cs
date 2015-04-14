@@ -55,5 +55,11 @@ namespace Pulsar4X.ECSLib
             Mass = mass;
             Density = density;
         }
+
+        public MassVolumeDB(MassVolumeDB massVolumeDB)
+            :this(massVolumeDB.Mass, massVolumeDB.Density)
+        {
+            
+        }
     }
 }
