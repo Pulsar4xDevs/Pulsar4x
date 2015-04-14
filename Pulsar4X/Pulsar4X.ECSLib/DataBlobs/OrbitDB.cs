@@ -2,18 +2,8 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public class OrbitDB : BaseDataBlob
+    public class OrbitDB : TreeHierarchyDB
     {
-        /// <summary>
-        /// Mass in KG of this entity.
-        /// </summary>
-        public double Mass;
-
-        /// <summary>
-        /// Mass in KG of parent (object this orbit orbits)
-        /// </summary>
-        public double ParentMass;
-
         /// <summary>
         /// Semimajor Axis of orbit stored in AU.
         /// Average distance of orbit from center.
@@ -89,8 +79,6 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Returns an orbit representing the defined parameters.
         /// </summary>
-        /// <param name="mass">Mass of this object in KG.</param>
-        /// <param name="parentMass">Mass of parent object in KG.</param>
         /// <param name="semiMajorAxis">SemiMajorAxis of orbit in AU.</param>
         /// <param name="eccentricity">Eccentricity of orbit.</param>
         /// <param name="inclination">Inclination of orbit in degrees.</param>
@@ -98,7 +86,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="longitudeOfPeriapsis">Longitude of periapsis in degrees.</param>
         /// <param name="meanLongitude">Longitude of object at epoch in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        public static OrbitDB FromMajorPlanetFormat(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromMajorPlanetFormat(Entity parent, MassVolumeDB parentMVDB, MassVolumeDB myMVDB, double semiMajorAxis, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
             // http://en.wikipedia.org/wiki/Longitude_of_the_periapsis
@@ -106,14 +94,12 @@ namespace Pulsar4X.ECSLib
             // http://en.wikipedia.org/wiki/Mean_longitude
             double meanAnomaly = meanLongitude - (longitudeOfAscendingNode + argumentOfPeriapsis);
 
-            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch, false);
+            return new OrbitDB(parent, parentMVDB, myMVDB, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
         /// <summary>
         /// Returns an orbit representing the defined parameters.
         /// </summary>
-        /// <param name="mass">Mass of this object in KG.</param>
-        /// <param name="parentMass">Mass of parent object in KG.</param>
         /// <param name="semiMajorAxis">SemiMajorAxis of orbit in AU.</param>
         /// <param name="eccentricity">Eccentricity of orbit.</param>
         /// <param name="inclination">Inclination of orbit in degrees.</param>
@@ -121,55 +107,29 @@ namespace Pulsar4X.ECSLib
         /// <param name="argumentOfPeriapsis">Argument of periapsis in degrees.</param>
         /// <param name="meanAnomaly">Mean Anomaly in degrees.</param>
         /// <param name="epoch">Referance time for these orbital elements.</param>
-        public static OrbitDB FromAsteroidFormat(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
+        public static OrbitDB FromAsteroidFormat(Entity parent, MassVolumeDB parentMVDB, MassVolumeDB myMVDB, double semiMajorAxis, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {
-            return new OrbitDB(parentGuid, mass, parentMass, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch, false);
+            return new OrbitDB(parent, parentMVDB, myMVDB, semiMajorAxis, eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, epoch);
         }
 
-        /// <summary>
-        /// Creates an orbit that never moves.
-        /// </summary>
-        public static OrbitDB FromStationary(double mass)
+        public OrbitDB(Entity parent, MassVolumeDB parentMVDB, MassVolumeDB myMVDB, double semiMajorAxis, double eccentricity, double inclination,
+                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch) 
+            : base(parent)
         {
-            return new OrbitDB(mass);
-        }
-
-        public OrbitDB(OrbitDB orbitDB) : this(Guid.Empty, orbitDB.Mass, orbitDB.ParentMass, orbitDB.SemiMajorAxis, orbitDB.Eccentricity, orbitDB.Inclination,
-            orbitDB.LongitudeOfAscendingNode, orbitDB.ArgumentOfPeriapsis, orbitDB.MeanAnomaly, orbitDB.Epoch, orbitDB.IsStationary)
-        {
-        }
-
-        private OrbitDB(double mass)
-        {
-            Mass = mass;
-            IsStationary = true;
-        }
-
-        private OrbitDB(Guid parentGuid, double mass, double parentMass, double semiMajorAxis, double eccentricity, double inclination,
-                        double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch, bool isStationary)
-        {
-            if (isStationary)//Worst solution. Added to be able to use constructor OrbitDB(OrbitDB) 
-            {
-                Mass = mass;
-                IsStationary = true;
-                return;
-            }
-
-            Mass = mass;
-            ParentMass = parentMass;
             SemiMajorAxis = semiMajorAxis;
-            Eccentricity = Math.Min(eccentricity, 0.8D); // Max eccentricity is 0.8 Orbit code has issues at higher eccentricity. (Note: If restriction lifed, fix code in GetEccentricAnomaly)
+            Eccentricity = eccentricity;
             Inclination = inclination;
             LongitudeOfAscendingNode = longitudeOfAscendingNode;
             ArgumentOfPeriapsis = argumentOfPeriapsis;
             MeanAnomaly = meanAnomaly;
             Epoch = epoch;
-            IsStationary = false;
-            
+
+
+
             // Calculate extended parameters.
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
-            GravitationalParameter = GameSettings.Science.GravitationalConstant * (ParentMass + Mass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
+            GravitationalParameter = GameSettings.Science.GravitationalConstant * (parentMVDB.Mass + myMVDB.Mass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2
 
             // http://en.wikipedia.org/wiki/Orbital_period#Two_bodies_orbiting_each_other
             double orbitalPeriod = 2 * Math.PI * Math.Sqrt(Math.Pow(Distance.ToKm(SemiMajorAxis), 3) / (GravitationalParameter));
@@ -188,6 +148,35 @@ namespace Pulsar4X.ECSLib
 
             Apoapsis = (1 + Eccentricity) * SemiMajorAxis;
             Periapsis = (1 - Eccentricity) * SemiMajorAxis;
+        }
+
+        public OrbitDB()
+            : base(null)
+        {
+            IsStationary = true;
+        }
+
+        public OrbitDB(OrbitDB toCopy)
+            : base (toCopy.Parent)
+        {
+            if (toCopy.IsStationary)
+            {
+                IsStationary = true;
+                return;
+            }
+
+            SemiMajorAxis = toCopy.SemiMajorAxis;
+            Eccentricity = toCopy.Eccentricity;
+            Inclination = toCopy.Inclination;
+            LongitudeOfAscendingNode = toCopy.LongitudeOfAscendingNode;
+            ArgumentOfPeriapsis = toCopy.ArgumentOfPeriapsis;
+            MeanAnomaly = toCopy.MeanAnomaly;
+            Epoch = toCopy.Epoch;
+            GravitationalParameter = toCopy.GravitationalParameter;
+            OrbitalPeriod = toCopy.OrbitalPeriod;
+            MeanMotion = toCopy.MeanMotion;
+            Apoapsis = toCopy.Apoapsis;
+            Periapsis = toCopy.Periapsis;
         }
         #endregion
     }

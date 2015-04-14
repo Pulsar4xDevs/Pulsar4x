@@ -2,22 +2,23 @@
 
 namespace Pulsar4X.ECSLib
 {
-    class FormationDB : BaseDataBlob
+    class FormationDB : TreeHierarchyDB
     {
         /// <summary>
         /// The Commander of this Formation (or ship if it is a single ship)
-        /// @todo Swap this with a reference to the actual Commander entity
         /// </summary>
         public Entity CommandingOfficer { get; set; }
 
-        public FormationDB(Guid parentGuid)
+        public FormationDB(Entity parent)
+            : base(parent)
         {
             
         }
 
-        public FormationDB(FormationDB formationDB)
+        public FormationDB(FormationDB toCopy)
+            : base(toCopy.Parent)
         {
-            
+            CommandingOfficer = toCopy.CommandingOfficer;
         }
     }
 }

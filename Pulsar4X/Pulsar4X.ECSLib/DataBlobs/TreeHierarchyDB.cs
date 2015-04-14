@@ -6,11 +6,9 @@ using Newtonsoft.Json;
 namespace Pulsar4X.ECSLib
 {
 #if DEBUG
-    public
-#else
-    internal abstract
+    abstract
 #endif
-        class TreeHierarchyDB : BaseDataBlob
+    public class TreeHierarchyDB : BaseDataBlob
     {
         public Entity Parent
         {

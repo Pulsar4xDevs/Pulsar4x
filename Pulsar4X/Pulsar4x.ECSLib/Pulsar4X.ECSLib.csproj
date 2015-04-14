@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\CommanderNameDB.cs" />
+    <Compile Include="DataBlobs\MassVolumeDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
@@ -57,7 +58,8 @@
     <Compile Include="DataBlobs\FactionDB.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
     <Compile Include="DataBlobs\OrbitDB.cs" />
-    <Compile Include="DataBlobs\PlanetInfoDB.cs" />
+    <Compile Include="DataBlobs\StarInfoDB.cs" />
+    <Compile Include="DataBlobs\SystemBodyDB.cs" />
     <Compile Include="DataBlobs\ColonyInfoDB.cs" />
     <Compile Include="DataBlobs\PositionDB.cs" />
     <Compile Include="DataBlobs\RuinsDB.cs" />
