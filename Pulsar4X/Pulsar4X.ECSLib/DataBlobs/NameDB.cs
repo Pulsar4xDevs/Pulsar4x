@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib.DataBlobs
 {
-    public class NameDB
+    public class NameDB : BaseDataBlob
     {
         /// <summary>
         /// Each faction can have a different name for whatever entity  has this blob.

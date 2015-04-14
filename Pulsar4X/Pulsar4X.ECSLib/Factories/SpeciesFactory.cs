@@ -2,13 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Pulsar4X.ECSLib.DataBlobs;
 
 namespace Pulsar4X.ECSLib.Factories
 {
     internal static class SpeciesFactory
     {
+        public static Entity CreateSpeciesHuman(Entity faction, EntityManager systemEntityManager)
+        {
+            NameDB name = new NameDB(faction, "Human");
+            SpeciesDB speciesDB = CreateSpeciesDB_Human();
+            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
+            blobs.Add(name);
+            blobs.Add(speciesDB);
+            Entity species = systemEntityManager.CreateEntity(blobs);
 
-        private static SpeciesDB CreateSpecies_Human()
+            return species;
+        }
+
+        private static SpeciesDB CreateSpeciesDB_Human()
         {
             string Name = "Human";
             double BaseGravity = 1.0;
@@ -29,7 +41,20 @@ namespace Pulsar4X.ECSLib.Factories
             return species;
         }
 
-        private static SpeciesDB CreateSpecies(Entity planetEntity, int? seed = null)
+
+        public static Entity CreateSpeciesForPlanet(Entity faction, EntityManager systemEntityManager, Entity planetEntity)
+        {
+            NameDB name = new NameDB(faction, "somename"); //where should we get the name from? maybe we shoudl pass a string here.
+            SpeciesDB speciesDB = CreateSpeciesDB_FromPlanet(planetEntity);
+            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
+            blobs.Add(name);
+            blobs.Add(speciesDB);
+            Entity species = systemEntityManager.CreateEntity(blobs);
+
+            return species;
+        }
+
+        private static SpeciesDB CreateSpeciesDB_FromPlanet(Entity planetEntity, int? seed = null)
         {
             Random rnd;
             if (seed != null) 
