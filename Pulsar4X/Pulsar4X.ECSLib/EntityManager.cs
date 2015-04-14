@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -324,37 +325,13 @@ namespace Pulsar4X.ECSLib
         public static ComparableBitArray BlankDataBlobMask()
         {
             return new ComparableBitArray(_dataBlobTypes.Count);
-        }
-
-        /// <summary>
-        /// Creates an entity in this manager.
-        /// </summary>
-        /// <returns>The new entity.</returns>
-        public Entity CreateEntity()
-        {
-            _guidLock.EnterWriteLock();
-            try
-            {
-                Guid entityGuid = CreateEntityGuid();
-                return CreateEntity(new Entity(entityGuid, this));
-            }
-            finally
-            {
-                _guidLock.ExitWriteLock();
-            }
-        }        
+        }       
         
         /// <summary>
         /// Adds an entity with the pre-existing datablobs to this EntityManager.
         /// </summary>
-        /// <exception cref="ArgumentNullException">Thrown when dataBlobs is null.</exception>
-        public Entity CreateEntity(List<BaseDataBlob> dataBlobs)
+        internal Entity CreateEntity(List<BaseDataBlob> dataBlobs)
         {
-            if (dataBlobs == null)
-            {
-                throw new ArgumentNullException("dataBlobs", "dataBlobs cannot be null. To create a blank entity, use CreateEntity().");
-            }
-
             _guidLock.EnterWriteLock();
             try
             {
@@ -367,7 +344,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private Entity CreateEntity(Entity entity, List<BaseDataBlob> dataBlobs = null)
+        private Entity CreateEntity(Entity entity, List<BaseDataBlob> dataBlobs)
         {
             int newID = CreateEntityID();
             entity.SetID(newID);
@@ -432,6 +409,7 @@ namespace Pulsar4X.ECSLib
             Guid entityGuid = Guid.NewGuid();
             while (_globalGuidDictionary.ContainsKey(entityGuid))
             {
+                // Good luck testing this.
                 entityGuid = Guid.NewGuid();
             }
 
@@ -481,12 +459,12 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         internal void TransferEntity(Entity entity, EntityManager manager)
         {
-            List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
-
             if (!IsValidEntity(entity))
             {
                 throw new ArgumentException("Entity is not valid in this manager.");
             }
+
+            List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
 
             RemoveEntity(entity);
             manager.CreateEntity(entity, dataBlobs);
@@ -510,6 +488,8 @@ namespace Pulsar4X.ECSLib
 
                 if (!manager._localEntityDictionary.TryGetValue(entityGuid, out entity))
                 {
+                    // Can only be reached if memory corruption or somehow the _guidLock thread syncronization fails.
+                    // Entity must be removed from the local manager, but not the global list. Should not be possible.
                     throw new GuidNotFoundException();
                 }
                 return true;
@@ -626,7 +606,22 @@ namespace Pulsar4X.ECSLib
             // Also ensures all Guid dictionaries are set.
             foreach (Guid guid in entityGuids)
             {
-                CreateEntity(new Entity(guid, this));
+                Entity entity;
+                if (FindEntityByGuid(guid, out entity))
+                {
+                    // Entity already created. Likey because it was referenced by a datablob in another manager.
+                    // Entity should be residing in the global manager.
+                    if (entity.Manager != Game.Instance.GlobalManager)
+                    {
+                        throw new JsonSerializationException("Entity already exists in non-global manager.");
+                    }
+                    entity.TransferEntity(this);
+                }
+                else
+                {
+                    // First time this Guid has been encountered.
+                    CreateEntity(new Entity(guid, this), null);
+                }
             }
 
             // Deserialize the datablobs by type.
@@ -657,6 +652,7 @@ namespace Pulsar4X.ECSLib
                     else
                     {
                         // Not harmless. This could be any number of normal deserialization problems.
+                        // Most likely malformed input.
                         throw;
                     }
                 }

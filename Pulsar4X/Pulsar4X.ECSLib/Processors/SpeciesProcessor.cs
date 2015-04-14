@@ -1,10 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.CodeDom;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib.Processors
 {
     internal static class SpeciesProcessor
     {
-        public static double ColonyCost(PlanetInfoDB planet, SpeciesDB species)
+        public static double ColonyCost(SystemBodyDB planet, SpeciesDB species)
         {
             double cost = 1.0;
 
@@ -16,9 +18,10 @@ namespace Pulsar4X.ECSLib.Processors
             return cost;
         }
 
-        private static bool ColonyGravityIsHabitible(PlanetInfoDB planet, SpeciesDB species)
+        private static bool ColonyGravityIsHabitible(SystemBodyDB planet, SpeciesDB species)
         {
-            return planet.SurfaceGravity < species.MaximumGravityConstraint && planet.SurfaceGravity > species.MinimumGravityConstraint;
+            throw new NotImplementedException();
+            //return planet.SurfaceGravity < species.MaximumGravityConstraint && planet.SurfaceGravity > species.MinimumGravityConstraint;
         }
 
         /// <summary>
@@ -27,30 +30,32 @@ namespace Pulsar4X.ECSLib.Processors
         /// <param name="planet"></param>
         /// <param name="species"></param>
         /// <returns></returns>
-        private static double ColonyToxidityCost(PlanetInfoDB planet, SpeciesDB species)
+        private static double ColonyToxidityCost(SystemBodyDB planet, SpeciesDB species)
         {
+            throw new NotImplementedException();
             double cost = 0;
-            bool isToxic = planet.Atmosphere.Composition.Keys.Any(gas => gas.IsToxic);
-            if (isToxic)
+            //bool isToxic = planet.Atmosphere.Composition.Keys.Any(gas => gas.IsToxic);
+            //if (isToxic)
             {
                 cost = 3;
             }
             return cost;
         }
 
-        private static double ColonyPressureCost(PlanetInfoDB planet)
+        private static double ColonyPressureCost(SystemBodyDB planet)
         {
-            return 1;
+            throw new NotImplementedException();
         }
 
-        private static double ColonyTemperatureCost(PlanetInfoDB planet)
+        private static double ColonyTemperatureCost(SystemBodyDB planet)
         {
-            return 1;
+            throw new NotImplementedException();
         }
 
-        private static double ColonyGasCost(PlanetInfoDB planet)
+        private static double ColonyGasCost(SystemBodyDB planet)
         {
-            return 1;
+
+            throw new NotImplementedException();
         }
     }
 }

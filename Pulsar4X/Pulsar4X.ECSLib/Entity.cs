@@ -128,15 +128,22 @@ namespace Pulsar4X.ECSLib
             ID = newID;
         }
 
+        public static Entity Create(EntityManager manager, List<BaseDataBlob> dataBlobs = null)
+        {
+            return manager.CreateEntity(dataBlobs);
+        }
+
         public static Entity GetInvalidEntity()
         {
             return new Entity(Guid.Empty, _invalidManager) {ID = -1};
         }
 
+#if DEBUG
         public override string ToString()
         {
             return Guid.ToString();
         }
+#endif
     }
 
     public class EntityConverter : JsonConverter
@@ -149,8 +156,14 @@ namespace Pulsar4X.ECSLib
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             Entity entity;
-            EntityManager.FindEntityByGuid(Guid.Parse(reader.Value.ToString()), out entity);
-            return entity;
+            Guid entityGuid = Guid.Parse(reader.Value.ToString());
+            if (EntityManager.FindEntityByGuid(entityGuid, out entity))
+                return entity;
+
+            // If we couldn't find the Guid (Entity is in a manager that hasn't loaded)
+            // create the entity in the Global Manager. We'll transfer it to the correct manager
+            // when we deserialize it.
+            return new Entity(entityGuid, Game.Instance.GlobalManager);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

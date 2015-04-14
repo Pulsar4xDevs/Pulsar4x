@@ -21,23 +21,23 @@ namespace Pulsar4X.Tests
 
             // add some factions:
             var list = new List<BaseDataBlob>();
-            Entity sdb = game.GlobalManager.CreateEntity(new List<BaseDataBlob>{new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44)});
+            Entity sdb = Entity.Create(game.GlobalManager, new List<BaseDataBlob>{new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44)});
             var pop = new JDictionary<Entity, double> {{sdb, 42}};
 
             list.Add(new ColonyInfoDB(pop));
-            Entity faction = game.GlobalManager.CreateEntity(list);
+            Entity faction = Entity.Create(game.GlobalManager, list);
             game.EngineComms.AddFaction(faction);
 
-            faction = game.GlobalManager.CreateEntity(list);
+            faction = Entity.Create(game.GlobalManager, list);
             game.EngineComms.AddFaction(faction);
 
-            faction = game.GlobalManager.CreateEntity(list);
+            faction = Entity.Create(game.GlobalManager, list);
             game.EngineComms.AddFaction(faction);
 
-            faction = game.GlobalManager.CreateEntity(list);
+            faction = Entity.Create(game.GlobalManager, list);
             game.EngineComms.AddFaction(faction);
 
-            faction = game.GlobalManager.CreateEntity(list);
+            faction = Entity.Create(game.GlobalManager, list);
             game.EngineComms.AddFaction(faction);
         }
 
