@@ -163,6 +163,8 @@ namespace Pulsar4X.ECSLib
         {
             Entity entity;
             Guid entityGuid = Guid.Parse(reader.Value.ToString());
+            if (entityGuid == Guid.Empty)
+                return Entity.GetInvalidEntity();
             if (EntityManager.FindEntityByGuid(entityGuid, out entity))
                 return entity;
 
