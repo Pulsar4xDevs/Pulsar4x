@@ -1,23 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Pulsar4X.ECSLib.Factories
 {
     public static class ShipFactory
     {
-        public static Entity CreateShip(Guid classDef, EntityManager systemEntityManager, string shipName, int parentFormation)
+        public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, int parentFormation, string shipName = null)
         {
-            
-            Entity classEntity;
-            if (!Game.Instance.GlobalManager.TryGetEntityByGuid(classDef, out classEntity))
-                throw new Exception("Ship class is not found.");
-
-            List<BaseDataBlob> shipDataBlobs = new List<BaseDataBlob>();
-
             List<BaseDataBlob> classDataBlobs = classEntity.GetAllDataBlobs(); //Are we sure we have in class only ship specified data blobs?
-
+            List<BaseDataBlob> shipDataBlobs = new List<BaseDataBlob>();
 
             foreach (BaseDataBlob dataBlob in classDataBlobs)
             {
@@ -26,15 +17,19 @@ namespace Pulsar4X.ECSLib.Factories
             }
 
             Entity ship = systemEntityManager.CreateEntity(shipDataBlobs);
-
             ShipInfoDB shipInfoDB = ship.GetDataBlob<ShipInfoDB>();
+
             shipInfoDB.ShipClassDefinition = classEntity.Guid;
+            if (shipName == null)
+            {
+                shipName = "Ship Name";
+            }
             shipInfoDB.Name = shipName;
 
             return ship;
         }
 
-        public static Entity CreateNewShipClass(int factionID, string className = null)
+        public static Entity CreateNewShipClass(Entity faction, string className = null)
         {
             // lets start by creating all the Datablobs that make up a ship class:
             var shipInfo = new ShipInfoDB();
@@ -81,9 +76,10 @@ namespace Pulsar4X.ECSLib.Factories
 
             // now lets create the ship class:
             Entity shipClassEntity = Game.Instance.GlobalManager.CreateEntity(shipDBList);
+            // also gets factionDB:
+            FactionDB factionDB = faction.GetDataBlob<FactionDB>();
             // and add it to the faction:
-            FactionDB faction = Game.Instance.GlobalManager.GetDataBlob<FactionDB>(factionID);
-            faction.ShipClasses.Add(shipClassEntity);
+            factionDB.ShipClasses.Add(shipClassEntity);
 
             // now lets set some ship info:
             if (string.IsNullOrEmpty(className))

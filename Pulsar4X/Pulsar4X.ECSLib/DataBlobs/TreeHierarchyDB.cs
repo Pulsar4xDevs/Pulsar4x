@@ -130,5 +130,10 @@ namespace Pulsar4X.ECSLib
         {
 
         }
+
+        public ConcreteTreeHierarchyDB(ConcreteTreeHierarchyDB concreteTreeHierarchyDB)
+            : base(concreteTreeHierarchyDB.Parent)
+        {
+        }
     }
 }
