@@ -79,6 +79,7 @@
     <Compile Include="DataBlobs\ShipDBs\TractorDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\TroopTransportDB.cs" />
     <Compile Include="DataBlobs\SpeciesDB.cs" />
+    <Compile Include="DataBlobs\TreeHierarchyDB.cs" />
     <Compile Include="Engine-Comms.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EntityManager.cs" />
