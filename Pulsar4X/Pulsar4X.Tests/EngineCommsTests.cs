@@ -15,7 +15,7 @@ namespace Pulsar4X.Tests
         MessageBook _messageBook;
         readonly Entity _fakeFaction = Entity.GetInvalidEntity();
 
-         [SetUp]
+        [SetUp]
         public void Init()
         {
             _game = new Game();
