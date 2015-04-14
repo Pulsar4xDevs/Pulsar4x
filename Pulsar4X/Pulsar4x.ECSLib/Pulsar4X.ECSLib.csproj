@@ -51,6 +51,7 @@
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\CommanderNameDB.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
+    <Compile Include="DataBlobs\NameDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
     <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
