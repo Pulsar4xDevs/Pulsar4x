@@ -63,13 +63,6 @@ namespace Pulsar4X.Tests
             testEntity = Entity.Create(_entityManager, dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
             Assert.AreEqual(3, testEntity.ID);
-
-            // Create entity with existing datablobs, but provide a null list:
-            Assert.Catch(typeof(ArgumentNullException), () =>
-                {
-                    Entity.Create(_entityManager, null); // should throw ArgumentNullException
-                });
-
         }
 
         [Test]
