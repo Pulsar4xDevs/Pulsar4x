@@ -432,6 +432,7 @@ namespace Pulsar4X.ECSLib
             Guid entityGuid = Guid.NewGuid();
             while (_globalGuidDictionary.ContainsKey(entityGuid))
             {
+                // Good luck testing this.
                 entityGuid = Guid.NewGuid();
             }
 
@@ -481,12 +482,14 @@ namespace Pulsar4X.ECSLib
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         internal void TransferEntity(Entity entity, EntityManager manager)
         {
-            List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
-
             if (!IsValidEntity(entity))
             {
                 throw new ArgumentException("Entity is not valid in this manager.");
             }
+
+            List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
+
+            
 
             RemoveEntity(entity);
             manager.CreateEntity(entity, dataBlobs);
@@ -510,6 +513,8 @@ namespace Pulsar4X.ECSLib
 
                 if (!manager._localEntityDictionary.TryGetValue(entityGuid, out entity))
                 {
+                    // Can only be reached if memory corruption or somehow the _guidLock thread syncronization fails.
+                    // Entity must be removed from the local manager, but not the global list. Should not be possible.
                     throw new GuidNotFoundException();
                 }
                 return true;
@@ -657,6 +662,7 @@ namespace Pulsar4X.ECSLib
                     else
                     {
                         // Not harmless. This could be any number of normal deserialization problems.
+                        // Most likely malformed input.
                         throw;
                     }
                 }

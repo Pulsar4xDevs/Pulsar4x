@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Channels;
+using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -38,11 +40,23 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(1, testEntity.ID);
             Assert.AreSame(_entityManager, testEntity.Manager);
 
+            // Check the mask.
+            Assert.AreEqual(EntityManager.BlankDataBlobMask(), testEntity.DataBlobMask);
+
             // Create entity with existing datablobs:
             var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new ColonyInfoDB(_pop1)};
             testEntity = _entityManager.CreateEntity(dataBlobs);
             Assert.IsTrue(testEntity.IsValid);
             Assert.AreEqual(2, testEntity.ID);
+
+            // Check the mask.
+            ComparableBitArray expectedMask = EntityManager.BlankDataBlobMask();
+            int orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+            int colonyTypeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
+            expectedMask[orbitTypeIndex] = true;
+            expectedMask[colonyTypeIndex] = true;
+
+            Assert.AreEqual(expectedMask, testEntity.DataBlobMask);
 
             // Create entity with existing datablobs, but provide an empty list:
             dataBlobs.Clear();
@@ -64,6 +78,7 @@ namespace Pulsar4X.Tests
             Entity testEntity = _entityManager.CreateEntity();
             testEntity.SetDataBlob(OrbitDB.FromStationary(5));
             testEntity.SetDataBlob(new ColonyInfoDB(_pop1));
+            testEntity.SetDataBlob(new PositionDB(0, 0, 0), EntityManager.GetTypeIndex<PositionDB>());
 
             // test bad input:
             Assert.Catch(typeof(ArgumentNullException), () =>
@@ -168,8 +183,18 @@ namespace Pulsar4X.Tests
             List<BaseDataBlob> testList = testEntity.GetAllDataBlobs();
             Assert.AreEqual(2, testList.Count);  // should have 2 datablobs.
 
+
+            // Register the events.
+            bool DeletingEventCalled = false;
+            bool DeletedEventCalled = false;
+            testEntity.Deleting += (sender, args) => DeletingEventCalled = true;
+            testEntity.Deleted += (sender, args) => DeletedEventCalled = true;
+
             // Remove an entity.
             testEntity.DeleteEntity();
+
+            Assert.IsTrue(DeletingEventCalled);
+            Assert.IsTrue(DeletingEventCalled);
 
             // now lets see if the entity is still there:
             Assert.Catch(typeof (ArgumentException), () =>
@@ -178,6 +203,9 @@ namespace Pulsar4X.Tests
             });
    
             Assert.IsFalse(_entityManager.IsValidEntity(testEntity));
+
+            // Try to get a bad mask.
+            Assert.Catch<ArgumentException>(() => { ComparableBitArray mask = testEntity.DataBlobMask; });
 
             // add a new entity:
             testEntity = _entityManager.CreateEntity();
@@ -191,6 +219,9 @@ namespace Pulsar4X.Tests
             {
                 testEntity.GetAllDataBlobs();  // should throw this time
             });
+
+            // Now try to remove the entity. Again.
+            Assert.Catch<ArgumentException>(testEntity.DeleteEntity);
         }
 
         [Test]
@@ -226,17 +257,11 @@ namespace Pulsar4X.Tests
             testEntity.RemoveDataBlob(typeIndex);
 
             // and an invalid typeIndex:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                testEntity.RemoveDataBlob(-42);
-            });
+            Assert.Catch(typeof(ArgumentException), () => testEntity.RemoveDataBlob(-42));
 
             // now lets try an invlaid entity:
             testEntity.DeleteEntity();
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                testEntity.RemoveDataBlob(typeIndex);
-            });
+            Assert.Catch(typeof(ArgumentException), () => testEntity.RemoveDataBlob(typeIndex));
 
         }
 
@@ -254,11 +279,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(0, entities.Count);
 
             // check with invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () =>
-                {
-                    _entityManager.GetAllEntitiesWithDataBlob<BaseDataBlob>();
-                }
-            );
+            Assert.Catch(typeof(KeyNotFoundException), () => _entityManager.GetAllEntitiesWithDataBlob<BaseDataBlob>());
 
             // now lets lookup using a mask:
             ComparableBitArray dataBlobMask = EntityManager.BlankDataBlobMask();
@@ -279,17 +300,9 @@ namespace Pulsar4X.Tests
 
             // test bad mask:
             ComparableBitArray badMask = new ComparableBitArray(4242); // use a big number so we never rach that many data blobs.
-            Assert.Catch(typeof(ArgumentException), () =>
-                {
-                    _entityManager.GetAllEntitiesWithDataBlobs(badMask);
-                }
-            );
+            Assert.Catch(typeof(ArgumentException), () => _entityManager.GetAllEntitiesWithDataBlobs(badMask));
 
-            Assert.Catch(typeof(NullReferenceException), () =>
-                {
-                    _entityManager.GetAllEntitiesWithDataBlobs(null);
-                }
-            );
+            Assert.Catch(typeof(NullReferenceException), () => _entityManager.GetAllEntitiesWithDataBlobs(null));
 
 
             // now lets just get the one entity:
@@ -319,10 +332,7 @@ namespace Pulsar4X.Tests
             Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type index:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-            {
-                _entityManager.GetFirstEntityWithDataBlob(4242);
-            });
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () => _entityManager.GetFirstEntityWithDataBlob(4242));
         }
 
         [Test]
@@ -371,8 +381,20 @@ namespace Pulsar4X.Tests
             // Store the current GUID.
             Guid entityGuid = testEntity.Guid;
 
+            // Register the events.
+            bool ChangingEventCalled = false;
+            bool ChangedEventCalled = false;
+            testEntity.ChangingManagers += (sender, args) => ChangingEventCalled = true;
+            testEntity.ChangedManagers += (sender, args) => ChangedEventCalled = true;
+
+            // Try to transfer to a null Manager.
+            Assert.Catch<ArgumentNullException>(() => testEntity.TransferEntity(null));
+
             // Transfer the entity to a new EntityManager
             testEntity.TransferEntity(manager2);
+
+            Assert.IsTrue(ChangingEventCalled);
+            Assert.IsTrue(ChangedEventCalled);
 
             // Ensure the original manager no longer has the entity.
             Assert.IsFalse(_entityManager.IsValidEntity(testEntity));
@@ -401,6 +423,10 @@ namespace Pulsar4X.Tests
                 }
                 Assert.IsTrue(matchFound);
             }
+
+            // Try to transfer an invalid entity.
+            testEntity.DeleteEntity();
+            Assert.Catch<ArgumentException>(() => testEntity.TransferEntity(_entityManager));
 
         }
 
