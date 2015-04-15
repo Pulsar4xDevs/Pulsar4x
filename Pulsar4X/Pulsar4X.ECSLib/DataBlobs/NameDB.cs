@@ -26,10 +26,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
         public NameDB(NameDB nameDB)
         {
-            //Name = (JDictionary<Entity,string>)nameDB.Name.ToDictionary(entry => entry.Key, entry => entry.Value);
-            Name = new JDictionary<Entity, string>();
-            foreach (KeyValuePair<Entity, string> keyValue in nameDB.Name)
-                Name.Add(keyValue.Key, keyValue.Value);
+            Name = new JDictionary<Entity, string>(nameDB.Name);
         }
     }
 }
