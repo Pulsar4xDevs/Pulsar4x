@@ -11,22 +11,30 @@ namespace Pulsar4X.ECSLib
 
     public class CommanderDB : BaseDataBlob
     {
-        public CommanderNameDB Name;
+        public CommanderNameSD Name { get; set; }
 
-        public int Rank; //maybe rank/title should be part of name
+        public int Rank { get; set; }//maybe rank/title should be part of name
 
-        public CommanderTypes Type;
+        public CommanderTypes Type { get; set; }
 
-        public Dictionary<string, int> Bonuses; //bonuses should be blobs of thier own maybe.
+        public Dictionary<string, int> Bonuses { get; set; }//bonuses should be blobs of thier own maybe.
 
         public CommanderDB()
         {
         }
 
+        public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type, Dictionary<string, int> bonuses)
+        {
+            Name = name;
+            Rank = rank;
+            Type = type;
+            Bonuses = bonuses;
+        }
+
         public CommanderDB(CommanderDB commanderDB)
         {
             //Should we create new commander? I think no but we have rank in there and same commander with different ranks is not good.
-            Name = new CommanderNameDB(Name);
+            Name = commanderDB.Name;
 
             Rank = commanderDB.Rank;
             Type = commanderDB.Type;

@@ -49,7 +49,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBlobs\CommanderDB.cs" />
-    <Compile Include="DataBlobs\CommanderNameDB.cs" />
+    <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="StaticData\CommanderNameDB.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
     <Compile Include="DataBlobs\NameDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
