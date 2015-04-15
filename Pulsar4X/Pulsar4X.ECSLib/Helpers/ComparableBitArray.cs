@@ -141,7 +141,7 @@ namespace Pulsar4X.ECSLib
                 _backingValues[i] = 0;
             }
 
-            Length = length;
+            Length = length + ((requiredBackingValues * BitsPerValue) - BitsPerValue);
         }
 
         /// <summary>
