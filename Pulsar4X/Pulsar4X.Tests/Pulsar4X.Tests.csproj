@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
+    <Compile Include="FactoryTests.cs" />
     <Compile Include="ShipTests.cs" />
     <Compile Include="EngineCommsTests.cs" />
     <Compile Include="EntityManagerTests.cs" />
