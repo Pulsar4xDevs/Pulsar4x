@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib.Factories
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(scientist);
         
-            Entity officer = entityManager.CreateEntity(blobs);
+            Entity officer = Entity.Create(entityManager, blobs);
 
             return officer;    
         }
