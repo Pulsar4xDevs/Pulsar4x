@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
             }
 
             int backingIndex = 0;
-            while (index > BitsPerValue)
+            while (index >= BitsPerValue)
             {
                 backingIndex++;
                 index -= BitsPerValue;
