@@ -6,7 +6,7 @@ using Pulsar4X.ECSLib.DataBlobs;
 
 namespace Pulsar4X.ECSLib.Factories
 {
-    internal static class SpeciesFactory
+    public static class SpeciesFactory
     {
         public static Entity CreateSpeciesHuman(Entity faction, EntityManager systemEntityManager)
         {

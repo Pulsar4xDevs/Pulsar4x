@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib.Factories
 
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             NameDB name = new NameDB(Entity.GetInvalidEntity(), factionName);
-            FactionDB factionDB = new FactionDB(factionName, new List<Entity>(), new List<StarSystem>(), new List<Entity>());
+            FactionDB factionDB = new FactionDB(new List<Entity>(), new List<StarSystem>(), new List<Entity>());
             blobs.Add(name);
             blobs.Add(factionDB);
             Entity factionEntity = Entity.Create(globalManager, blobs);
