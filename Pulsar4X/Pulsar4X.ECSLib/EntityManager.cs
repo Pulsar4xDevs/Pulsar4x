@@ -466,8 +466,16 @@ namespace Pulsar4X.ECSLib
 
             List<BaseDataBlob> dataBlobs = entity.GetAllDataBlobs();
 
-            RemoveEntity(entity);
-            manager.CreateEntity(entity, dataBlobs);
+
+            RemoveEntity(entity); _guidLock.EnterWriteLock();
+            try
+            {
+                manager.CreateEntity(entity, dataBlobs);
+            }
+            finally
+            {
+                _guidLock.ExitWriteLock();
+            }
         }
 
         /// <summary>

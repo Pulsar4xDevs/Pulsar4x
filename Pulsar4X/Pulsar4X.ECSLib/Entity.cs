@@ -40,6 +40,8 @@ namespace Pulsar4X.ECSLib
         public event EntityManagerChangeEvent ChangedManagers;
 
         private static EntityManager _invalidManager;
+        private static Entity _invalidEntity;
+
 
         internal Entity(Guid guid, EntityManager currentManager)
         {
@@ -48,6 +50,7 @@ namespace Pulsar4X.ECSLib
 
             if (_invalidManager == null)
                 _invalidManager = new EntityManager();
+
         }
 
         public bool IsValid { get { return Manager.IsValidEntity(this); } }
@@ -135,7 +138,10 @@ namespace Pulsar4X.ECSLib
 
         public static Entity GetInvalidEntity()
         {
-            return new Entity(Guid.Empty, _invalidManager) {ID = -1};
+
+            if (_invalidEntity == null)
+                _invalidEntity = new Entity(Guid.Empty, _invalidManager);
+            return _invalidEntity;
         }
 
 #if DEBUG
@@ -157,6 +163,8 @@ namespace Pulsar4X.ECSLib
         {
             Entity entity;
             Guid entityGuid = Guid.Parse(reader.Value.ToString());
+            if (entityGuid == Guid.Empty)
+                return Entity.GetInvalidEntity();
             if (EntityManager.FindEntityByGuid(entityGuid, out entity))
                 return entity;
 

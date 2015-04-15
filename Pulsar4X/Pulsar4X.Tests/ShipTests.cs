@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.DataBlobs;
 using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
@@ -54,7 +55,8 @@ namespace Pulsar4X.Tests
                 typeof(SensorsDB),
                 typeof(ShieldsDB),
                 typeof(TractorDB),
-                typeof(TroopTransportDB)
+                typeof(TroopTransportDB),
+                typeof(NameDB)
             };
 
             Entity shipClass = ShipFactory.CreateNewShipClass(_faction, shipClassName);
@@ -65,16 +67,16 @@ namespace Pulsar4X.Tests
             }
 
             ShipInfoDB shipClassInfo = shipClass.GetDataBlob<ShipInfoDB>();
-
             Assert.IsTrue(shipClassInfo.ShipClassDefinition == Guid.Empty, "Ship Class ShipInfoDB must have empty ShipClassDefinition Guid");
-            Assert.IsTrue(shipClassInfo.ClassName == shipClassName);
-            Assert.IsTrue(shipClassInfo.Name == shipClassName);
+
+            NameDB shipClassNameDB = shipClass.GetDataBlob<NameDB>();
+            Assert.IsTrue(shipClassNameDB.Name[_faction] == shipClassName);
 
             string shipName = "USC Winterblossom"; //Still X Universe
 
             /////Ship/////
 
-            Entity ship = ShipFactory.CreateShip(shipClass, _starSystem.SystemManager, -1, shipName); //Do something with parentFormation
+            Entity ship = ShipFactory.CreateShip(shipClass, _starSystem.SystemManager, _faction, shipName);
 
             foreach (BaseDataBlob shipDataBlob in ship.GetAllDataBlobs())
             {
@@ -82,10 +84,10 @@ namespace Pulsar4X.Tests
             }
 
             ShipInfoDB shipInfo = ship.GetDataBlob<ShipInfoDB>();
-
             Assert.IsTrue(shipInfo.ShipClassDefinition == shipClass.Guid, "ShipClassDefinition guid must be same as ship class entity guid");
-            Assert.IsTrue(shipInfo.Name == shipName);
-            Assert.IsTrue(shipInfo.ClassName == shipClassName);
+
+            NameDB shipNameDB = ship.GetDataBlob<NameDB>();
+            Assert.IsTrue(shipNameDB.Name[_faction] == shipName);
         }
     }
 }
