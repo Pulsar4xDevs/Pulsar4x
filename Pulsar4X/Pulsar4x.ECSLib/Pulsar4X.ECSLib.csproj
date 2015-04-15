@@ -50,12 +50,12 @@
   <ItemGroup>
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CommanderNameDB.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
     <Compile Include="DataBlobs\NameDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
-    <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
     <Compile Include="DataBlobs\FactionDB.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />
