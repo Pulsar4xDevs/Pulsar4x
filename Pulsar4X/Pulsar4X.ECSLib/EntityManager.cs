@@ -110,6 +110,10 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Direct lookup of an entity's DataBlob.
         /// Slower than GetDataBlob(entityID, typeIndex)
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.GetDataBlob<T>();
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid entityID is passed.</exception>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
@@ -125,6 +129,10 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Direct lookup of an entity's DataBlob.
         /// Fastest direct lookup available.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.GetDataBlob<T>(typeIndex);
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
         /// <exception cref="InvalidCastException">Thrown when typeIndex does not match m_dataBlobTypes entry for Type T</exception>
@@ -138,6 +146,10 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Sets the DataBlob for the specified entity.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.SetDataBlob(dataBlob);
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when dataBlob is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid entityID is passed.</exception>
@@ -150,6 +162,10 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Sets the DataBlob for the specified entity.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.SetDataBlob(dataBlob typeIndex);
         /// </summary>
         /// <exception cref="ArgumentNullException">Thrown when dataBlob is null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
@@ -171,6 +187,10 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Removes the DataBlob from the specified entity.
         /// Slower than RemoveDataBlob(entityID, typeIndex).
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.RemoveDataBlob<T>();
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         /// <exception cref="ArgumentException">Thrown when an invalid entityID is passed.</exception>
@@ -186,6 +206,10 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Removes the DataBlob from the specified entity.
         /// Fastest DataBlob removal available.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.RemoveDataBlob(typeIndex);
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when an invalid typeIndex or entityID is passed.</exception>
         internal void RemoveDataBlob(int entityID, int typeIndex)
@@ -223,6 +247,10 @@ namespace Pulsar4X.ECSLib
         /// Returns a list of all DataBlobs for a given entity.
         /// <para></para>
         /// Returns a blank list if entity has no DataBlobs.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.GetAllDataBlobs();
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         internal List<BaseDataBlob> GetAllDataBlobsOfEntity(Entity entity)
@@ -329,6 +357,9 @@ namespace Pulsar4X.ECSLib
         
         /// <summary>
         /// Adds an entity with the pre-existing datablobs to this EntityManager.
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use Entity.Create(manager, dataBlobs);
         /// </summary>
         internal Entity CreateEntity(List<BaseDataBlob> dataBlobs)
         {
@@ -418,6 +449,10 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Removes this entityID from this entityID manager.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.Delete();
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         internal void RemoveEntity(Entity entity)
@@ -455,6 +490,10 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Transfers an entity to the specified manager.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.Transfer(newManager);
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed an invalid entity.</exception>
         internal void TransferEntity(Entity entity, EntityManager manager)
@@ -623,7 +662,7 @@ namespace Pulsar4X.ECSLib
                     {
                         throw new JsonSerializationException("Entity already exists in non-global manager.");
                     }
-                    entity.TransferEntity(this);
+                    entity.Transfer(this);
                 }
                 else
                 {
