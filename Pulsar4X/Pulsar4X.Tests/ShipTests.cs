@@ -20,7 +20,7 @@ namespace Pulsar4X.Tests
             _game = new Game();
 
             var list = new List<BaseDataBlob>();
-            Entity sdb = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> { new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44), });
+            Entity sdb = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> { new SpeciesDB(1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44), });
             var pop = new JDictionary<Entity, double> { { sdb, 42 } };
 
             list.Add(new ColonyInfoDB(pop));

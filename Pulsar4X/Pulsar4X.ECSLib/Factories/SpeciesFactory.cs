@@ -22,7 +22,6 @@ namespace Pulsar4X.ECSLib.Factories
 
         private static SpeciesDB CreateSpeciesDB_Human()
         {
-            string Name = "Human";
             double BaseGravity = 1.0;
             double MinimumGravityConstraint = 0.1;
             double MaximumGravityConstraint = 1.9;
@@ -32,7 +31,7 @@ namespace Pulsar4X.ECSLib.Factories
             double BaseTemperature = 14.0;
             double MinimumTemperatureConstraint = -15.0;
             double MaximumTemperatureConstraint = 45.0;
-            SpeciesDB species = new SpeciesDB(Name, BaseGravity, 
+            SpeciesDB species = new SpeciesDB(BaseGravity, 
                 MinimumGravityConstraint, MaximumGravityConstraint, 
                 BasePressure, MinimumPressureConstraint,
                 MaximumPressureConstraint, BaseTemperature, 
@@ -66,7 +65,6 @@ namespace Pulsar4X.ECSLib.Factories
             SystemBodyDB sysbodyinfo = planetEntity.GetDataBlob<SystemBodyDB>();
             AtmosphereDB atmoinfo = planetEntity.GetDataBlob<AtmosphereDB>();
 
-            string Name = "somerace"; //create name from planet name or something. 
 
             //throw new NotImplementedException();
             double BaseGravity = masvolinfo.SurfaceGravity;
@@ -78,7 +76,7 @@ namespace Pulsar4X.ECSLib.Factories
             double BaseTemperature = sysbodyinfo.BaseTemperature;
             double MinimumTemperatureConstraint = -15.0;
             double MaximumTemperatureConstraint = 45.0;
-            SpeciesDB species = new SpeciesDB(Name, BaseGravity,
+            SpeciesDB species = new SpeciesDB(BaseGravity,
                 MinimumGravityConstraint, MaximumGravityConstraint,
                 BasePressure, MinimumPressureConstraint,
                 MaximumPressureConstraint, BaseTemperature,

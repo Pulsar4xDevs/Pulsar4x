@@ -5,23 +5,23 @@ namespace Pulsar4X.ECSLib
     public class FactionDB : BaseDataBlob
     {
         public string Title;
-        public List<SpeciesDB> Species;
+        public List<Entity> Species;
 
         public List<StarSystem> KnownSystems;
 
-        public List<ColonyInfoDB> Populations;
+        public List<Entity> Colonies;
 
         public List<Entity> ShipClasses; 
 
         public FactionDB(string title,
-            List<SpeciesDB> species,
+            List<Entity> species,
             List<StarSystem> knownSystems,
-            List<ColonyInfoDB> population)
+            List<Entity> population)
         {
             Title = title;
             Species = species;
             KnownSystems = knownSystems;
-            Populations = population;
+            Colonies = population;
             ShipClasses = new List<Entity>();
         }
 
@@ -33,9 +33,9 @@ namespace Pulsar4X.ECSLib
         {
             Title = factionDB.Title;
 
-            Species = new List<SpeciesDB>();
+            Species = new List<Entity>();
             KnownSystems = new List<StarSystem>();
-            Populations = new List<ColonyInfoDB>();
+            Colonies = new List<Entity>();
             ShipClasses = new List<Entity>();
         }
     }

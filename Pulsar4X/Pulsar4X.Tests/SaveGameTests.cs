@@ -24,7 +24,7 @@ namespace Pulsar4X.Tests
             game.CurrentDateTime = testTime;
 
             // add a species:
-            SpeciesDB speciesdb = new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
+            SpeciesDB speciesdb = new SpeciesDB(1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
             Entity speciesEntity = Entity.Create(game.GlobalManager);
             speciesEntity.SetDataBlob(speciesdb);
 

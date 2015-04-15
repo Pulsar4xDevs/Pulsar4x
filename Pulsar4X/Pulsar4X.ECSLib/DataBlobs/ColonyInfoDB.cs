@@ -4,19 +4,25 @@ namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
-        public JDictionary<Entity, double> Population;
+        public JDictionary<Entity, double> Population { get; set; }
+
+        public Entity PlanetEntity { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="popSize">Species and population number(in Million?)</param>
-        public ColonyInfoDB(JDictionary<Entity, double> popSize)
+        /// <param name="planet"> the planet entity this colony is on</param>
+        public ColonyInfoDB(JDictionary<Entity, double> popSize, Entity planet)
         {
             Population = popSize;
+            PlanetEntity = planet;
         }
 
-        public ColonyInfoDB()
-        { 
+        public ColonyInfoDB(Entity species, double populationInMillions, Entity planet)
+        {
+            Population = new JDictionary<Entity, double> {{species, populationInMillions}};
+            PlanetEntity = planet;
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)

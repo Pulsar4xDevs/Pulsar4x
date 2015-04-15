@@ -86,6 +86,8 @@
     <Compile Include="Engine-Comms.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="EntityManager.cs" />
+    <Compile Include="Factories\ColonyFactory.cs" />
+    <Compile Include="Factories\FactionFactory.cs" />
     <Compile Include="Factories\ShipFactory.cs" />
     <Compile Include="Factories\SpeciesFactory.cs" />
     <Compile Include="Game.cs" />

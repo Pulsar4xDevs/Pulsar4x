@@ -19,7 +19,7 @@ namespace Pulsar4X.Tests
         public void Init()
         {
             _entityManager = new EntityManager();
-            _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
+            _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
             _pop1 = new JDictionary<Entity, double> { { _species1, 10 } };
             _pop2 = new JDictionary<Entity, double> { { _species1, 5 } };
         }
