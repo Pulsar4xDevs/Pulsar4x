@@ -27,6 +27,10 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(DataBlobTypes.Count, EntityManager.BlankDataBlobMask().Length);
         }
 
+        /// <summary>
+        /// This test ensures our DataBlobs have a deep copy constructor. DataBlobs need the ability to be deep copied so they can be passed
+        /// to the UI or used by AI simulations without chaning the original values.
+        /// </summary>
         [Test]
         [TestCaseSource("DataBlobTypes")]
         public void DeepCopyConstructor(Type dataBlobType)
@@ -38,6 +42,10 @@ namespace Pulsar4X.Tests
             }
         }
 
+        /// <summary>
+        /// This test ensures our DataBlobs can be created by Json during deserialization.
+        /// Any type that fails this test cannot be instantiated by Json, and thus will throw an exception if you try to deserialize it.
+        /// </summary>
         [Test]
         [TestCaseSource("DataBlobTypes")]
         public void JSONConstructor(Type dataBlobType)
@@ -71,6 +79,9 @@ namespace Pulsar4X.Tests
 
         }
 
+        /// <summary>
+        /// This test verifies the integrity of the TreeHierarchy datablob to maintain it's hierarchy during switches.
+        /// </summary>
         [Test]
         public void TreeHierarchyTest()
         {
@@ -155,6 +166,9 @@ namespace Pulsar4X.Tests
 
         }
 
+        /// <summary>
+        /// Helper function for TreeHierarchyTest
+        /// </summary>
         private Entity CreateNode(Entity parentEntity)
         {
             ConcreteTreeHierarchyDB nodeDB = new ConcreteTreeHierarchyDB(parentEntity);
