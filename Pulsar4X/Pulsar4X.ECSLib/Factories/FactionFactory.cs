@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib.Factories
             Entity factionEntity = Entity.Create(globalManager, blobs);
 
             //factionEntity didn't exsist when we created the NameDB, so we have to recreate the name dictionary here.
-            name.Name = new Dictionary<Entity, string>() { { factionEntity, factionName } };
+            name.Name = new JDictionary<Entity, string>() { { factionEntity, factionName } };
             
             return factionEntity;
         }

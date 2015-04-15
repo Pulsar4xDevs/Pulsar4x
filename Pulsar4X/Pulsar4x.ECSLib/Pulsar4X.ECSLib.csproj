@@ -54,7 +54,7 @@
     <Compile Include="DataBlobs\NameDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
     <Compile Include="DataBlobs\AtmosphereDB.cs" />
-    <Compile Include="DataBlobs\AtmosphericGasDB.cs" />
+    <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="DataBlobs\BaseDataBlob.cs" />
     <Compile Include="DataBlobs\FactionDB.cs" />
     <Compile Include="DataBlobs\FleetDBs\FormationDB.cs" />

@@ -10,6 +10,8 @@ and ECS "Systems" to "Processors"
 Can DataBlobs contain other DataBlobs?
 No, DataBlobs should not contain other DataBlobs, but they can however contain Entities, Dictionaries of Entities and Lists of Entities. 
 
+
+
 How do I create an new Entity?
 Create a new static class in the Factories folder, see the other Factories in the folder for examples.
 Note that the class should be:
@@ -17,10 +19,11 @@ public static
 Should take an EntityManager class (though this can in some cases be derived from an Entity).
 Return an Entity.
 
-in most cases you'll be passing in a faction entity.
+In most cases you'll be passing in a faction entity.
 to create the entity itself, you'll need a list of DataBlobs that make up the entity.
 the entity is then created in the following manner: Entity foo = Entity.Create(entityManager, listofDataBlobs);
 
+Note that an entity can have only one datablob of a given type
 
 What EntityManager should be used to create an Entity?
 That depends on what the entity does and where it operates: 

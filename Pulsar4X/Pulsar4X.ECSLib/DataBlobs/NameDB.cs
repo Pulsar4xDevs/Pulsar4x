@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <summary>
         /// Each faction can have a different name for whatever entity has this blob.
         /// </summary>
-        public Dictionary<Entity, string> Name { get; set; }
+        public JDictionary<Entity, string> Name { get; set; }
 
         /// <summary>
         /// Each faction can have a different name for whatever entity has this blob.
@@ -20,13 +20,13 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="primaryName">The name this faction uses for this entity</param>
         public NameDB(Entity primaryFaction, string primaryName)
         {
-            Name = new Dictionary<Entity, string>();
+            Name = new JDictionary<Entity, string>();
             Name.Add(primaryFaction, primaryName);
         }
 
         public NameDB(NameDB nameDB)
         {
-            Name = nameDB.Name.ToDictionary(entry => entry.Key, entry => entry.Value);
+            Name = (JDictionary<Entity,string>)nameDB.Name.ToDictionary(entry => entry.Key, entry => entry.Value);
         }
     }
 }

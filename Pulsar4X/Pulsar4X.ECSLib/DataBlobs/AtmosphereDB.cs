@@ -51,7 +51,7 @@ namespace Pulsar4X.ECSLib
          //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
          //In Earth Atmospheres (atm).
          //</summary>
-        public Dictionary<AtmosphericGasDB, float> Composition;
+        public JDictionary<AtmosphericGasSD, float> Composition;
 
         /// <summary>
         /// Constructor for AtmosphereDataBlob. 
@@ -64,7 +64,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasDB,float> composition)
+        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, JDictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
@@ -81,11 +81,12 @@ namespace Pulsar4X.ECSLib
             : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent, 
             atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, atmosphereDB.Albedo, 
             atmosphereDB.SurfaceTemperature, 
-            atmosphereDB.Composition.ToDictionary(
-            entry => new AtmosphericGasDB(entry.Key), 
+            (JDictionary<AtmosphericGasSD,float>)atmosphereDB.Composition.ToDictionary(
+            entry => new AtmosphericGasSD(), 
             entry => entry.Value
             ))
         {
+
         }
     }
 }
