@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         public TechDB(TechDB techDB)
         {
             ResearchedTechs = techDB.ResearchedTechs.ToList();
-            ResearchableTechs = (JDictionary<TechSD, int>)techDB.ResearchableTechs.ToDictionary(entry => entry.Key, entry => entry.Value);
+            ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
         }
     }
 }
