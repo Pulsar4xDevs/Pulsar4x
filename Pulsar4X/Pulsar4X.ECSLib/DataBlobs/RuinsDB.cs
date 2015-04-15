@@ -49,7 +49,15 @@
         public RQuality RuinQuality;
 
         /// <summary>
-        /// Constructor for RuinsDataBlob
+        /// Empty constructor for RuinsDataBlob.
+        /// </summary>
+        public RuinsDB()
+        {
+            
+        }
+
+        /// <summary>
+        /// Constructor for RuinsDataBlob.
         /// </summary>
         /// <param name="ruinCount"></param>
         /// <param name="ruinTechLevel"> What kinds of things should be found in this ruin? including sophistication of killbots?</param>

@@ -125,6 +125,12 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public sealed class ConcreteTreeHierarchyDB : TreeHierarchyDB
     {
+        public ConcreteTreeHierarchyDB() 
+            : base(null)
+        {
+
+        }
+
         public ConcreteTreeHierarchyDB(Entity parent)
             : base(parent)
         {

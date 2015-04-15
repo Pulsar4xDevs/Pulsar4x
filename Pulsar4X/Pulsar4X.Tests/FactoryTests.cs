@@ -25,7 +25,12 @@ namespace Pulsar4X.Tests
         {
             string factionName = "Terran";
 
-            var requiredDataBlobs = new List<Type>() {typeof(FactionDB), typeof(NameDB)};
+            var requiredDataBlobs = new List<Type>()
+            {
+                typeof(FactionDB), 
+                typeof(NameDB),
+                typeof(TechDB)
+            };
 
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
@@ -43,7 +48,11 @@ namespace Pulsar4X.Tests
             Entity starSystem = Entity.Create(_game.GlobalManager);
             Entity planet = Entity.Create(starSystem.Manager, new List<BaseDataBlob>());
 
-            var requiredDataBlobs = new List<Type>() {typeof(ColonyInfoDB), typeof(NameDB)};
+            var requiredDataBlobs = new List<Type>()
+            {
+                typeof(ColonyInfoDB), 
+                typeof(NameDB)
+            };
 
             Entity colony = ColonyFactory.CreateColony(faction, planet);
             ColonyInfoDB colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();

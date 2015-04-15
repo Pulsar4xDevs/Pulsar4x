@@ -54,6 +54,14 @@ namespace Pulsar4X.ECSLib
         public JDictionary<AtmosphericGasSD, float> Composition;
 
         /// <summary>
+        /// Empty constructor for AtmosphereDataBlob.
+        /// </summary>
+        public AtmosphereDB()
+        {
+            Composition = new JDictionary<AtmosphericGasSD, float>();
+        }
+
+        /// <summary>
         /// Constructor for AtmosphereDataBlob. 
         /// </summary>
         /// <param name="pressure">In Earth Atmospheres (atm).</param>

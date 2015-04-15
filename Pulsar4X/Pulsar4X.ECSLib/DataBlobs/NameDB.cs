@@ -13,6 +13,11 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// </summary>
         public JDictionary<Entity, string> Name { get; set; }
 
+        public NameDB()
+        {
+            Name = new JDictionary<Entity, string>();
+        }
+
         /// <summary>
         /// Each faction can have a different name for whatever entity has this blob.
         /// </summary>

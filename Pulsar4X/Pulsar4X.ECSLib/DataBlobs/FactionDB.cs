@@ -10,7 +10,13 @@ namespace Pulsar4X.ECSLib
 
         public List<Entity> Colonies;
 
-        public List<Entity> ShipClasses; 
+        public List<Entity> ShipClasses;
+
+        public FactionDB()
+            : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>())
+        {
+
+        }
 
         public FactionDB(
             List<Entity> species,
@@ -22,10 +28,7 @@ namespace Pulsar4X.ECSLib
             Colonies = population;
             ShipClasses = new List<Entity>();
         }
-
-        public FactionDB()
-        {
-        }
+        
 
         public FactionDB(FactionDB factionDB)
         {

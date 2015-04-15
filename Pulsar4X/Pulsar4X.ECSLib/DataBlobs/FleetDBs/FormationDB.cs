@@ -9,6 +9,12 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public Entity CommandingOfficer { get; set; }
 
+        public FormationDB() 
+            : base(null)
+        {
+            
+        }
+
         public FormationDB(Entity parent)
             : base(parent)
         {

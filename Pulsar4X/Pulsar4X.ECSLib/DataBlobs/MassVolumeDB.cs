@@ -50,6 +50,10 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        public MassVolumeDB()
+        {
+        }
+
         public MassVolumeDB(double mass, double density)
         {
             Mass = mass;
