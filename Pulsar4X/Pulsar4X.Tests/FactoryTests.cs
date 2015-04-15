@@ -25,11 +25,7 @@ namespace Pulsar4X.Tests
         {
             string factionName = "Terran";
 
-            var requiredDataBlobs = new List<Type>()
-            {
-                typeof(FactionDB),
-                typeof(NameDB)
-            };
+            var requiredDataBlobs = new List<Type>() {typeof(FactionDB), typeof(NameDB)};
 
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
@@ -47,11 +43,7 @@ namespace Pulsar4X.Tests
             Entity starSystem = Entity.Create(_game.GlobalManager);
             Entity planet = Entity.Create(starSystem.Manager, new List<BaseDataBlob>());
 
-            var requiredDataBlobs = new List<Type>()
-            {
-                typeof(ColonyInfoDB),
-                typeof(NameDB)
-            };
+            var requiredDataBlobs = new List<Type>() {typeof(ColonyInfoDB), typeof(NameDB)};
 
             Entity colony = ColonyFactory.CreateColony(faction, planet);
             ColonyInfoDB colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();
@@ -59,6 +51,22 @@ namespace Pulsar4X.Tests
 
             Assert.IsTrue(HasAllRequiredDatablobs(colony, requiredDataBlobs), "Colony Entity doesn't contains all required datablobs");
             Assert.IsTrue(colonyInfoDB.PlanetEntity == planet, "ColonyInfoDB.PlanetEntity refs to wrong entity");
+        }
+
+        [Test]
+        [Description("CommanderFactory test. This one use FactionFactory.CreateFaction")]
+        public void CreateScientist()
+        {
+            Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terran");
+
+            var requiredDataBlobs = new List<Type>()
+            {
+                typeof(CommanderDB)
+            };
+
+            Entity scientist = CommanderFactory.CreateScientist(_game.GlobalManager, faction);
+
+            Assert.IsTrue(HasAllRequiredDatablobs(scientist, requiredDataBlobs), "Scientist Entity doesn't contains all required datablobs");
         }
 
         [Test]

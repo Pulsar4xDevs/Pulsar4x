@@ -32,13 +32,8 @@ namespace Pulsar4X.ECSLib
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            Population = new JDictionary<Entity, double>();
+            Population = new JDictionary<Entity, double>(Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
-            foreach (KeyValuePair<Entity, double> keyValue in colonyInfoDB.Population)
-            {
-                Population.Add(keyValue.Key, keyValue.Value);
-            }
-
         }
     }
 }

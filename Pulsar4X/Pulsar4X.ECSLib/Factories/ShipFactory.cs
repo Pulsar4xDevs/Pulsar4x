@@ -14,7 +14,7 @@ namespace Pulsar4X.ECSLib.Factories
 
             foreach (BaseDataBlob dataBlob in classDataBlobs)
             {
-                dynamic clonnedDataBlob = Activator.CreateInstance(dataBlob.GetType(), dataBlob);
+                BaseDataBlob clonnedDataBlob = (BaseDataBlob)Activator.CreateInstance(dataBlob.GetType(), dataBlob);
                 shipDataBlobs.Add(clonnedDataBlob); 
             }
 
