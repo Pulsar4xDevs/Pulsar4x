@@ -28,6 +28,7 @@ namespace Pulsar4X.Tests
             //list.Add(new FactionDB(new List<SpeciesDB>(), new List<StarSystem>(), new List<Entity>()));
             
             _faction = FactionFactory.CreateFaction(_game.GlobalManager, "factionName"); //Entity.Create(_game.GlobalManager, list);
+            _faction.SetDataBlob(new FactionDB("Terran", new List<Entity>(), new List<StarSystem>(), new List<Entity>()));
             _game.EngineComms.AddFaction(_faction);
 
             _starSystem = new StarSystem();
