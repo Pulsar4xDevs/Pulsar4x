@@ -24,9 +24,10 @@ namespace Pulsar4X.Tests
             Entity sdb = Entity.Create(_game.GlobalManager, new List<BaseDataBlob> { new SpeciesDB(1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44), });
             var pop = new JDictionary<Entity, double> { { sdb, 42 } };
 
-            list.Add(new ColonyInfoDB(pop));
-            list.Add(new FactionDB("Terran", new List<SpeciesDB>(), new List<StarSystem>(), new List<ColonyInfoDB>()));
-            _faction = Entity.Create(_game.GlobalManager, list);
+            list.Add(new ColonyInfoDB(pop, Entity.GetInvalidEntity()));
+            //list.Add(new FactionDB(new List<SpeciesDB>(), new List<StarSystem>(), new List<Entity>()));
+            
+            _faction = FactionFactory.CreateFaction(_game.GlobalManager, "factionName"); //Entity.Create(_game.GlobalManager, list);
             _game.EngineComms.AddFaction(_faction);
 
             _starSystem = new StarSystem();

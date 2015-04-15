@@ -24,7 +24,7 @@ namespace Pulsar4X.Tests
             Entity sdb = Entity.Create(game.GlobalManager, new List<BaseDataBlob>{new SpeciesDB( 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44)});
             var pop = new JDictionary<Entity, double> {{sdb, 42}};
 
-            list.Add(new ColonyInfoDB(pop));
+            list.Add(new ColonyInfoDB(pop, Entity.GetInvalidEntity()));
             Entity faction = Entity.Create(game.GlobalManager, list);
             game.EngineComms.AddFaction(faction);
 
