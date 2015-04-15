@@ -90,7 +90,7 @@ namespace Pulsar4X.ECSLib
             Manager.RemoveDataBlob(ID, typeIndex);
         }
 
-        public void DeleteEntity()
+        public void Delete()
         {
             if (Deleting != null)
             {
@@ -105,7 +105,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        public void TransferEntity(EntityManager newManager)
+        public void Transfer(EntityManager newManager)
         {
             if (newManager == null)
             {

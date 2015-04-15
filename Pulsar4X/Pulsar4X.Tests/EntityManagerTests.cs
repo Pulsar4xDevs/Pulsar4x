@@ -184,7 +184,7 @@ namespace Pulsar4X.Tests
             testEntity.Deleted += (sender, args) => DeletedEventCalled = true;
 
             // Remove an entity.
-            testEntity.DeleteEntity();
+            testEntity.Delete();
 
             Assert.IsTrue(DeletingEventCalled);
             Assert.IsTrue(DeletedEventCalled);
@@ -214,7 +214,7 @@ namespace Pulsar4X.Tests
             });
 
             // Now try to remove the entity. Again.
-            Assert.Catch<ArgumentException>(testEntity.DeleteEntity);
+            Assert.Catch<ArgumentException>(testEntity.Delete);
         }
 
         [Test]
@@ -253,7 +253,7 @@ namespace Pulsar4X.Tests
             Assert.Catch(typeof(ArgumentException), () => testEntity.RemoveDataBlob(-42));
 
             // now lets try an invlaid entity:
-            testEntity.DeleteEntity();
+            testEntity.Delete();
             Assert.Catch(typeof(ArgumentException), () => testEntity.RemoveDataBlob(typeIndex));
 
         }
@@ -348,7 +348,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(testEntity, foundEntity);
 
             // and a removed entity:
-            testEntity.DeleteEntity();
+            testEntity.Delete();
             Assert.IsFalse(testEntity.IsValid);
 
             // Check back Guid lookups.
@@ -381,10 +381,10 @@ namespace Pulsar4X.Tests
             testEntity.ChangedManagers += (sender, args) => ChangedEventCalled = true;
 
             // Try to transfer to a null Manager.
-            Assert.Catch<ArgumentNullException>(() => testEntity.TransferEntity(null));
+            Assert.Catch<ArgumentNullException>(() => testEntity.Transfer(null));
 
             // Transfer the entity to a new EntityManager
-            testEntity.TransferEntity(manager2);
+            testEntity.Transfer(manager2);
 
             Assert.IsTrue(ChangingEventCalled);
             Assert.IsTrue(ChangedEventCalled);
@@ -418,8 +418,8 @@ namespace Pulsar4X.Tests
             }
 
             // Try to transfer an invalid entity.
-            testEntity.DeleteEntity();
-            Assert.Catch<ArgumentException>(() => testEntity.TransferEntity(_entityManager));
+            testEntity.Delete();
+            Assert.Catch<ArgumentException>(() => testEntity.Transfer(_entityManager));
 
         }
 
