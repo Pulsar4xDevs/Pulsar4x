@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
 using System.IO;
+using Pulsar4X.ECSLib.DataBlobs;
+using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -23,21 +25,22 @@ namespace Pulsar4X.Tests
             testTime = DateTime.Now;
             game.CurrentDateTime = testTime;
 
-            // add a species:
-            SpeciesDB speciesdb = new SpeciesDB(1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44);
-            Entity speciesEntity = Entity.Create(game.GlobalManager);
-            speciesEntity.SetDataBlob(speciesdb);
-
             // add a faction:
-            var list = new List<BaseDataBlob>();
-            Entity sdb = Entity.Create(game.GlobalManager, new List<BaseDataBlob> {speciesdb});
-            var pop = new JDictionary<Entity, double> {{sdb, 42}};
+            Entity humanFaction = FactionFactory.CreateFaction(game.GlobalManager, "New Terran Utopian Empire");
 
-            list.Add(new ColonyInfoDB(pop, Entity.GetInvalidEntity()));
-            list.Add(new PositionDB(0,0,0));
-            //list.Add(OrbitDB.FromStationary(0));
-            Entity faction = Entity.Create(game.GlobalManager, list);
+            // add a species:
+            Entity humanSpecies = SpeciesFactory.CreateSpeciesHuman(humanFaction, game.GlobalManager);
 
+            // add another faction:
+            Entity greyAlienFaction = FactionFactory.CreateFaction(game.GlobalManager, "The Grey Empire");
+            // Add another species:
+            Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, game.GlobalManager);
+
+            // Greys Name the Humans.
+            humanSpecies.GetDataBlob<NameDB>().Name.Add(greyAlienFaction, "Stupid Terrans");
+            // Humans name the Greys.
+            greyAlienSpecies.GetDataBlob<NameDB>().Name.Add(humanFaction, "Space bugs");
+            
             // add a star system:
             game.StarSystems.Add(new StarSystem());
         }
