@@ -69,11 +69,11 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan LengthOfDay { get; set; }
 
-        public List<MineralSD> Minerals;
+        public Dictionary<string, MineralSD> Minerals; //Maybe enum instead of string?
 
         public SystemBodyDB()
         {
-
+            Minerals = new Dictionary<string, MineralSD>();
         }
 
         public SystemBodyDB(SystemBodyDB systemBodyDB)
@@ -87,7 +87,7 @@ namespace Pulsar4X.ECSLib
             AtmosphericDust = systemBodyDB.AtmosphericDust;
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
-            Minerals = systemBodyDB.Minerals.ToList();
+            Minerals = systemBodyDB.Minerals.ToDictionary(entry => entry.Key, entry => entry.Value);
         }
 
         public override object Clone()
