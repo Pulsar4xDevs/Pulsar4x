@@ -52,6 +52,7 @@
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
+    <Compile Include="Factories\SystemBodyFactory.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CommanderNameSD.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
@@ -110,6 +111,7 @@
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
     <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
+    <Compile Include="StaticData\MineralSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
   </ItemGroup>
   <ItemGroup>

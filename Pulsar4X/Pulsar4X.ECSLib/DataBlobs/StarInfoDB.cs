@@ -29,7 +29,7 @@ namespace Pulsar4X.ECSLib
         D,          // White Dwarfs
     }
 
-    class StarInfoDB : BaseDataBlob
+    public class StarInfoDB : BaseDataBlob
     {
         public double Age { get; set; }
         public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.

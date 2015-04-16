@@ -21,6 +21,7 @@ namespace Pulsar4X.ECSLib
 
         public CommanderDB()
         {
+            Bonuses = new Dictionary<string, int>();
         }
 
         public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type, Dictionary<string, int> bonuses)

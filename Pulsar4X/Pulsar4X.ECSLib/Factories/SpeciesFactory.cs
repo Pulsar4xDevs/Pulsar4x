@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib.Factories
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(name);
             blobs.Add(speciesDB);
-            Entity species = systemEntityManager.CreateEntity(blobs);
+            Entity species = Entity.Create(systemEntityManager, blobs);
 
             return species;
         }
@@ -48,7 +48,7 @@ namespace Pulsar4X.ECSLib.Factories
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(name);
             blobs.Add(speciesDB);
-            Entity species = systemEntityManager.CreateEntity(blobs);
+            Entity species = Entity.Create(systemEntityManager, blobs);
 
             return species;
         }

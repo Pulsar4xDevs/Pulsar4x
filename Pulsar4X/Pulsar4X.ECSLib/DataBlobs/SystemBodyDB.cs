@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -67,6 +69,8 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan LengthOfDay { get; set; }
 
+        public List<MineralSD> Minerals;
+
         public SystemBodyDB()
         {
 
@@ -83,6 +87,7 @@ namespace Pulsar4X.ECSLib
             AtmosphericDust = systemBodyDB.AtmosphericDust;
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
+            Minerals = systemBodyDB.Minerals.ToList();
         }
 
         public override object Clone()
