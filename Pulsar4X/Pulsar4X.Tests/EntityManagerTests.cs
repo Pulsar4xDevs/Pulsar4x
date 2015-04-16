@@ -4,6 +4,7 @@ using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -18,6 +19,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
+            Game game = new Game();
             _entityManager = new EntityManager();
             _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
             _pop1 = new JDictionary<Entity, double> { { _species1, 10 } };
@@ -28,6 +30,20 @@ namespace Pulsar4X.Tests
         public void Cleanup()
         {
             _entityManager = null;
+        }
+
+        [Test]
+        [Ignore("Stress Test.")]
+        public void CloneStress()
+        {
+            Entity humanFaction = FactionFactory.CreateFaction(Game.Instance.GlobalManager, "Humans");
+            Entity harbingerShipClass =  ShipFactory.CreateNewShipClass(humanFaction, "Harbinger");
+            List<Entity> reapers = new List<Entity>(1000000);
+            for (int i = 0; i < 1000000; i++)
+            {
+                reapers.Add(harbingerShipClass.Clone(_entityManager));
+            }
+            reapers.Clear();
         }
 
 

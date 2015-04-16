@@ -135,7 +135,12 @@ namespace Pulsar4X.ECSLib
         public Entity Clone(EntityManager toManager)
         {
             List<BaseDataBlob> dataBlobs = GetAllDataBlobs();
-            List<BaseDataBlob> clonedDataBlobs = dataBlobs.Select(dataBlob => (BaseDataBlob)Activator.CreateInstance(dataBlob.GetType(), dataBlob)).ToList();
+            List<BaseDataBlob> clonedDataBlobs = new List<BaseDataBlob>(dataBlobs.Count);
+
+            foreach (BaseDataBlob baseDataBlob in dataBlobs)
+            {
+                clonedDataBlobs.Add((BaseDataBlob) baseDataBlob.Clone());
+            } 
 
             return Create(toManager, clonedDataBlobs);
         }
