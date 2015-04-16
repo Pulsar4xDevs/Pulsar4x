@@ -51,6 +51,7 @@
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="GameVersionInfo.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CommanderNameSD.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
@@ -106,10 +107,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SaveGame.cs" />
     <Compile Include="StarSystem.cs" />
+    <Compile Include="StaticData\CommanderNameThemeSD.cs" />
+    <Compile Include="StaticData\StaticDataManager.cs" />
+    <Compile Include="StaticData\StaticDataStore.cs" />
     <Compile Include="StaticData\TechSD.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataBlobs\ShipDBs\ShipAbilityDBs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

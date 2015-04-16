@@ -137,6 +137,16 @@ namespace Pulsar4X.ECSLib
             TotalWeight += weight;
         }
 
+        /// <summary>
+        /// Adds the contents of another weighted list to this one.
+        /// </summary>
+        /// <param name="otherList">The list to add.</param>
+        public void AddRange(WeightedList<T> otherList)
+        {
+            m_valueList.AddRange(otherList.m_valueList);
+            TotalWeight += otherList.TotalWeight;
+        }
+
         public IEnumerator<WeightedValue<T>> GetEnumerator() 
         {
             return m_valueList.GetEnumerator();
