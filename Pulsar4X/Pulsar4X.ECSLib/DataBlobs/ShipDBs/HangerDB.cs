@@ -18,5 +18,10 @@
         {
             HangerSpace = hangerDB.HangerSpace;
         }
+
+        public override object Clone()
+        {
+            return new HangerDB(this);
+        }
     }
 }

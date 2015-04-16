@@ -37,5 +37,10 @@ namespace Pulsar4X.ECSLib
             Colonies = new List<Entity>();
             ShipClasses = new List<Entity>();
         }
+
+        public override object Clone()
+        {
+            return new FactionDB(this);
+        }
     }
 }

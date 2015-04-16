@@ -15,5 +15,10 @@
         {
             TotalPowerOutput = powerDB.TotalPowerOutput;
         }
+
+        public override object Clone()
+        {
+            return new PowerDB(this);
+        }
     }
 }

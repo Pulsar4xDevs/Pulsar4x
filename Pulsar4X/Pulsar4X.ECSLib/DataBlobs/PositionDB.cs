@@ -153,5 +153,10 @@ namespace Pulsar4X.ECSLib
         {
             return new PositionDB(posA.Position + posB.Position);
         }
+
+        public override object Clone()
+        {
+            return new PositionDB(this);
+        }
     }
 }

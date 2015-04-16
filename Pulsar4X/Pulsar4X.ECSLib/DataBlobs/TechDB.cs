@@ -34,5 +34,10 @@ namespace Pulsar4X.ECSLib.DataBlobs
             ResearchedTechs = techDB.ResearchedTechs.ToList();
             ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
         }
+
+        public override object Clone()
+        {
+            return new TechDB(this);
+        }
     }
 }

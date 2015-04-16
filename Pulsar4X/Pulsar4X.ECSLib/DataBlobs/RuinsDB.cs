@@ -75,5 +75,10 @@
             : this(ruinsDB.RuinCount, ruinsDB.RuinTechLevel, ruinsDB.RuinSize, ruinsDB.RuinQuality)
         {
         }
+
+        public override object Clone()
+        {
+            return new RuinsDB(this);
+        }
     }
 }

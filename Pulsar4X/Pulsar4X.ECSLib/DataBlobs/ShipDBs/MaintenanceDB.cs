@@ -24,5 +24,10 @@
             AnnualFailureRate = maintenanceDB.AnnualFailureRate;
             IncrementalFailureRate = maintenanceDB.IncrementalFailureRate;
         }
+
+        public override object Clone()
+        {
+            return new MaintenanceDB(this);
+        }
     }
 }

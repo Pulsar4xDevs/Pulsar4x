@@ -32,5 +32,10 @@
             NormalCombatDropCapicity = troopTransportDB.NormalCombatDropCapicity;
             CryoCombatDropCapicity = troopTransportDB.CryoCombatDropCapicity;
         }
+
+        public override object Clone()
+        {
+            return new TroopTransportDB(this);
+        }
     }
 }

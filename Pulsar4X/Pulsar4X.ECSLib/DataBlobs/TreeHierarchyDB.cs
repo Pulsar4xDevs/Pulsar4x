@@ -141,5 +141,10 @@ namespace Pulsar4X.ECSLib
             : base(concreteTreeHierarchyDB.Parent)
         {
         }
+
+        public override object Clone()
+        {
+            return new ConcreteTreeHierarchyDB(this);
+        }
     }
 }

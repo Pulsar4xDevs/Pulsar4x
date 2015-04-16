@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System.Runtime.Remoting.Messaging;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Contains info on a ships beam weapons, including Firecontrol and turret(s).
@@ -12,6 +14,11 @@
         public BeamWeaponsDB(BeamWeaponsDB beamWeaponsDB)
         {
             
+        }
+
+        public override object Clone()
+        {
+            return new BeamWeaponsDB(this);
         }
     }
 }

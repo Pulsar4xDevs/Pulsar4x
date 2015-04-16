@@ -65,5 +65,10 @@ namespace Pulsar4X.ECSLib
         {
             
         }
+
+        public override object Clone()
+        {
+            return new MassVolumeDB(this);
+        }
     }
 }

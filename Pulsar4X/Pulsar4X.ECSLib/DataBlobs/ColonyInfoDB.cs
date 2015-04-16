@@ -35,5 +35,10 @@ namespace Pulsar4X.ECSLib
             Population = new JDictionary<Entity, double>(Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
         }
+
+        public override object Clone()
+        {
+            return new ColonyInfoDB(this);
+        }
     }
 }

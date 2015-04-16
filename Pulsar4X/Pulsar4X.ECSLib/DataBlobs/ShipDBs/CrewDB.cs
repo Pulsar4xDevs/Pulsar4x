@@ -37,5 +37,10 @@
             HasBridge = crewDB.HasBridge;
             HasFlagBridge = crewDB.HasFlagBridge;
         }
+
+        public override object Clone()
+        {
+            return new CrewDB(this);
+        }
     }
 }

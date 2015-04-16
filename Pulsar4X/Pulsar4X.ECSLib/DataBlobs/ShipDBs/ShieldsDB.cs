@@ -19,5 +19,10 @@
             CurrentShieldStrength = shieldsDB.CurrentShieldStrength;
             RechargeRate = shieldsDB.RechargeRate;
         }
+
+        public override object Clone()
+        {
+            return new ShieldsDB(this);
+        }
     }
 }

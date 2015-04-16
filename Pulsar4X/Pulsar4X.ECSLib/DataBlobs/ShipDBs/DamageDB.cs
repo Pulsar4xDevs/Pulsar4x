@@ -15,5 +15,10 @@
         {
             DamageControlRating = damageDB.DamageControlRating;
         }
+
+        public override object Clone()
+        {
+            return new DamageDB(this);
+        }
     }
 }
