@@ -126,6 +126,20 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// Clones this entity into the specified entity manager, returns the new clone.
+        /// </summary>
+        /// <param name="toManager">Manager you want to place the new clone into.</param>
+        /// <returns>The new clone.</returns>
+        /// <exception cref="System.ArgumentNullException"></exception>
+        public Entity Clone(EntityManager toManager)
+        {
+            List<BaseDataBlob> dataBlobs = GetAllDataBlobs();
+            List<BaseDataBlob> clonedDataBlobs = dataBlobs.Select(dataBlob => (BaseDataBlob)Activator.CreateInstance(dataBlob.GetType(), dataBlob)).ToList();
+
+            return Create(toManager, clonedDataBlobs);
+        }
+
         internal void SetID(int newID)
         {
             ID = newID;
@@ -133,6 +147,10 @@ namespace Pulsar4X.ECSLib
 
         public static Entity Create(EntityManager manager, List<BaseDataBlob> dataBlobs = null)
         {
+            if (manager == null)
+            {
+                throw new ArgumentNullException("manager");
+            }
             return manager.CreateEntity(dataBlobs);
         }
 
