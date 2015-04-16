@@ -52,7 +52,7 @@
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
-    <Compile Include="StaticData\CommanderNameDB.cs" />
+    <Compile Include="StaticData\CommanderNameSD.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
     <Compile Include="DataBlobs\NameDB.cs" />
     <Compile Include="DataBlobs\ShipDBs\ArmorDB.cs" />
