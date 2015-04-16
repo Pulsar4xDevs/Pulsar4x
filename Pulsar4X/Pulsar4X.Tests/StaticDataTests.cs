@@ -33,20 +33,21 @@ namespace Pulsar4X.Tests
 
             List<CommanderNameThemeSD> nameThemes = new List<CommanderNameThemeSD>();
             CommanderNameThemeSD nameTheme = new CommanderNameThemeSD();
-            nameTheme.Names = new List<CommanderNameSD>();
+            nameTheme.NameList = new List<CommanderNameSD>();
+            nameTheme.ThemeName = "The Creators";
 
             CommanderNameSD name = new CommanderNameSD();
             name.First = "Greg";
             name.Last = "Nott";
             name.IsFemale = false;
 
-            nameTheme.Names.Add(name);
+            nameTheme.NameList.Add(name);
 
             name.First = "Rod";
             name.Last = "Serling";
-            name.IsFemale = true;
+            name.IsFemale = false;
 
-            nameTheme.Names.Add(name);
+            nameTheme.NameList.Add(name);
 
             StaticDataManager.ExportStaticData(nameTheme, "./CommanderNameThemeExportTest.json");
         }

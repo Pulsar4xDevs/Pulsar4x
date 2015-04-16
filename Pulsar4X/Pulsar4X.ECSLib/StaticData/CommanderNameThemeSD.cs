@@ -4,6 +4,7 @@ namespace Pulsar4X.ECSLib
 {
     public struct CommanderNameThemeSD
     {
-        public List<CommanderNameSD> Names;
+        public string ThemeName;
+        public List<CommanderNameSD> NameList;
     }
 }
