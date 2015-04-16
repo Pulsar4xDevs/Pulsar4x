@@ -25,5 +25,10 @@
             CryoTransportCapicity = cargoDB.CryoTransportCapicity;
             LuxuryTransportCapicity = cargoDB.LuxuryTransportCapicity;
         }
+
+        public override object Clone()
+        {
+            return new CargoDB(this);
+        }
     }
 }

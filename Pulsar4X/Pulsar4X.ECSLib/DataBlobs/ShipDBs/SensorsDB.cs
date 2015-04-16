@@ -12,5 +12,10 @@
         public SensorsDB(SensorsDB sensorsDB)
         {
         }
+
+        public override object Clone()
+        {
+            return new SensorsDB(this);
+        }
     }
 }

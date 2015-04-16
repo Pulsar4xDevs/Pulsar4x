@@ -179,5 +179,10 @@ namespace Pulsar4X.ECSLib
             Periapsis = toCopy.Periapsis;
         }
         #endregion
+
+        public override object Clone()
+        {
+            return new OrbitDB(this);
+        }
     }
 }

@@ -19,5 +19,10 @@
             ThermalSignature = sensorProfileDB.ThermalSignature;
             EMSignature = sensorProfileDB.EMSignature;
         }
+
+        public override object Clone()
+        {
+            return new SensorProfileDB(this);
+        }
     }
 }

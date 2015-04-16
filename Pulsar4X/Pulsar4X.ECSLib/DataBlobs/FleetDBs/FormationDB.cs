@@ -26,5 +26,10 @@ namespace Pulsar4X.ECSLib
         {
             CommandingOfficer = toCopy.CommandingOfficer;
         }
+
+        public override object Clone()
+        {
+            return new FormationDB(this);
+        }
     }
 }

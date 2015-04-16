@@ -84,5 +84,10 @@ namespace Pulsar4X.ECSLib
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
         }
+
+        public override object Clone()
+        {
+            return new SystemBodyDB(this);
+        }
     }
 }

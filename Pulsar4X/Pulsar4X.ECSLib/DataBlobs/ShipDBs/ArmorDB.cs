@@ -38,5 +38,10 @@ namespace Pulsar4X.ECSLib
                 armorDB.ArmorStatus.CopyTo(ArmorStatus, 0);
             }
         }
+
+        public override object Clone()
+        {
+            return new ArmorDB(this);
+        }
     }
 }

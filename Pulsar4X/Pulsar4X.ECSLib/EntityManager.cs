@@ -27,6 +27,7 @@ namespace Pulsar4X.ECSLib
         private static Dictionary<Type, int> _dataBlobTypes;
 
         private readonly List<Entity> _entities;
+        private int _nextEntityID;
         private readonly List<List<BaseDataBlob>> _dataBlobMap;
         private readonly List<ComparableBitArray> _entityMasks;
 
@@ -68,6 +69,8 @@ namespace Pulsar4X.ECSLib
             {
                 _dataBlobMap.Add(new List<BaseDataBlob>());
             }
+
+            _nextEntityID = 0;
             Clear();
         }
 
@@ -141,6 +144,23 @@ namespace Pulsar4X.ECSLib
             lock (_entityLock)
             {
                 return (T)_dataBlobMap[typeIndex][entityID];
+            }
+        }
+
+        /// <summary>
+        /// Direct lookup of an entity's DataBlob.
+        /// Fastest direct lookup available.
+        /// 
+        /// NOT FOR USE OUTSIDE ENTITY.CS
+        /// 
+        /// Use entity.GetDataBlob<T>(typeIndex);
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when an invalid typeIndex or entityID is passed.</exception>
+        internal BaseDataBlob GetDataBlob(int entityID, int typeIndex)
+        {
+            lock (_entityLock)
+            {
+                return _dataBlobMap[typeIndex][entityID];
             }
         }
 
@@ -261,16 +281,14 @@ namespace Pulsar4X.ECSLib
             }
 
             var entityDBs = new List<BaseDataBlob>();
+
             lock (_entityLock)
             {
                 ComparableBitArray entityMask = _entityMasks[entity.ID];
 
-                for (int typeIndex = 0; typeIndex < _dataBlobTypes.Count; typeIndex++)
+                foreach (int setBit in entityMask.SetBits)
                 {
-                    if (entityMask[typeIndex])
-                    {
-                        entityDBs.Add(GetDataBlob<BaseDataBlob>(entity.ID, typeIndex));
-                    }
+                    entityDBs.Add(GetDataBlob(entity.ID, setBit));
                 }
 
                 return entityDBs;
@@ -386,9 +404,11 @@ namespace Pulsar4X.ECSLib
 
             if (dataBlobs != null)
             {
-                foreach (dynamic dataBlob in dataBlobs)
+                foreach (BaseDataBlob dataBlob in dataBlobs)
                 {
-                    SetDataBlob(newID, dataBlob);
+                    int typeIndex;
+                    TryGetTypeIndex(dataBlob.GetType(), out typeIndex);
+                    SetDataBlob(newID, dataBlob, typeIndex);
                 }
             }
 
@@ -425,13 +445,14 @@ namespace Pulsar4X.ECSLib
         private int CreateEntityID()
         {
             int entityID;
-            for (entityID = 0; entityID < _entities.Count; entityID++)
+            for (entityID = _nextEntityID; entityID < _entities.Count; entityID++)
             {
                 if (_entities[entityID] == null)
                 {
                     break;
                 }
             }
+            _nextEntityID = entityID + 1;
             return entityID;
         }
 
@@ -471,6 +492,11 @@ namespace Pulsar4X.ECSLib
                     _globalGuidDictionary.Remove(entity.Guid);
                     _localEntityDictionary.Remove(entity.Guid);
                     _entities[entity.ID] = null;
+
+                    if (_nextEntityID > entity.ID)
+                    {
+                        _nextEntityID = entity.ID;
+                    }
 
                     // Destroy references to datablobs.
                     foreach (List<BaseDataBlob> dataBlobType in entity.Manager._dataBlobMap)

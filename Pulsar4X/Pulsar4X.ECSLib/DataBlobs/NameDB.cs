@@ -33,5 +33,10 @@ namespace Pulsar4X.ECSLib.DataBlobs
         {
             Name = new JDictionary<Entity, string>(nameDB.Name);
         }
+
+        public override object Clone()
+        {
+            return new NameDB(this);
+        }
     }
 }

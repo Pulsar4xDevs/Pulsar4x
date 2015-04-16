@@ -33,5 +33,10 @@ namespace Pulsar4X.ECSLib
             NoOfTractors = tractorDB.NoOfTractors;
             TractoredShips = new List<Guid>(NoOfTractors); //Even if we copy datablob we shouldn't copy list of tractored ship
         }
+
+        public override object Clone()
+        {
+            return new TractorDB(this);
+        }
     }
 }

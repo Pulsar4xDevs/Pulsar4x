@@ -7,10 +7,12 @@ namespace Pulsar4X.ECSLib.Processors
     internal static class OrbitProcessor
     {
         private static int _orbitTypeIndex = -1;
+        private static int _starInfoTypeIndex = -1;
 
         public static void Initialize()
         {
             _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+            _starInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
         }
 
         public static void Process(List<StarSystem> systems, int deltaSeconds)
@@ -22,7 +24,7 @@ namespace Pulsar4X.ECSLib.Processors
                 EntityManager currentManager = system.SystemManager;
 
                 // Find the first orbital entity.
-                Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_orbitTypeIndex);
+                Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
 
                 if (!firstOrbital.IsValid)
                 {
@@ -30,14 +32,14 @@ namespace Pulsar4X.ECSLib.Processors
                     continue;
                 }
 
-                //OrbitDB rootOrbit = currentManager.GetDataBlob<OrbitDB>(firstOrbital).RootDB as OrbitDB;
+                OrbitDB rootOrbit = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).RootDB as OrbitDB;
 
                 // Call recursive function to update every orbit in this system.
-                //UpdateOrbit(currentManager, rootOrbit, new PositionDB(0, 0, 0), currentTime);
+                UpdateOrbit(rootOrbit, new PositionDB(0, 0, 0), currentTime);
             }
         }
 
-        private static void UpdateOrbit(EntityManager currentManager, OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
+        private static void UpdateOrbit(OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
         {
             // Get our Parent-Relative coordinates.
             PositionDB newPosition = GetPosition(orbit, currentTime);
@@ -46,13 +48,13 @@ namespace Pulsar4X.ECSLib.Processors
             newPosition += parentPosition;
 
             // Set our absolute coordinates.
-            //currentManager.SetDataBlob(orbit.EntityID, newPosition);
+            orbit.OwningEntity.SetDataBlob(newPosition);
 
             // Update our children.
-            //foreach (OrbitDB childOrbit in orbit.ChildDBs.Cast<OrbitDB>())
+            foreach (OrbitDB childOrbit in orbit.ChildrenDBs.Cast<OrbitDB>())
             {
                 // RECURSION!
-                //UpdateOrbit(currentManager, childOrbit, newPosition, currentTime);
+                UpdateOrbit(childOrbit, newPosition, currentTime);
             }
         }
 
@@ -110,14 +112,15 @@ namespace Pulsar4X.ECSLib.Processors
 
             // Adjust TrueAnomaly by the Argument of Periapsis (converted to radians)
             trueAnomaly += Angle.ToRadians(orbit.ArgumentOfPeriapsis);
+            double inclination = Angle.ToRadians(orbit.Inclination);
 
             // Convert KM to AU
             radius = Distance.ToAU(radius);
 
-            // Polar to Cartesian conversion.
-            double x = radius * Math.Cos(trueAnomaly);
-            double y = radius * Math.Sin(trueAnomaly);
-            double z = 0; // <? Todo: Fix orbits for 3D. />
+            // Spherical to Cartesian conversion.
+            double x = radius * Math.Sin(inclination) * Math.Cos(trueAnomaly);
+            double y = radius * Math.Sin(inclination) * Math.Sin(trueAnomaly);
+            double z = radius * Math.Cos(inclination);
 
             return new PositionDB(x, y, z);
         }
@@ -130,12 +133,10 @@ namespace Pulsar4X.ECSLib.Processors
             //Kepler's Equation
             var e = new List<double>();
             const double epsilon = 1E-12; // Plenty of accuracy.
-            /* Eccentricity is currently clamped @ 0.8
-            if (Eccentricity > 0.8)
+            if (orbit.Eccentricity > 0.8)
             {
-                E.Add(Math.PI);
+                e.Add(Math.PI);
             } else
-            */
             {
                 e.Add(currentMeanAnomaly);
             }

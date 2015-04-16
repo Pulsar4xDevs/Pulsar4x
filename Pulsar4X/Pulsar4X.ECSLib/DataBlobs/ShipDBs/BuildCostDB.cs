@@ -21,5 +21,10 @@ namespace Pulsar4X.ECSLib
             BuildTime = buildCostDB.BuildTime; //Struct
             BuildPointCost = buildCostDB.BuildPointCost;
         }
+
+        public override object Clone()
+        {
+            return new BuildCostDB(this);
+        }
     }
 }

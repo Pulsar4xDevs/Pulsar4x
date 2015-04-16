@@ -65,5 +65,10 @@ namespace Pulsar4X.ECSLib
             LuminosityClass = starInfoDB.LuminosityClass;
 
         }
+
+        public override object Clone()
+        {
+            return new StarInfoDB(this);
+        }
     }
 }

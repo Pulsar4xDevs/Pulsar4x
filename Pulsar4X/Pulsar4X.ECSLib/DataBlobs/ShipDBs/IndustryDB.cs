@@ -23,5 +23,10 @@
             TerraformingRate = indusrtyDB.TerraformingRate;
             JumpGateConstructionRate = indusrtyDB.JumpGateConstructionRate;
         }
+
+        public override object Clone()
+        {
+            return new IndustryDB(this);
+        }
     }
 }

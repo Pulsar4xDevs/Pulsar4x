@@ -17,5 +17,10 @@
             MaximumMagazineCapicity = missleWeaponDB.MaximumMagazineCapicity;
             UsedMagazineCapicity = missleWeaponDB.UsedMagazineCapicity;
         }
+
+        public override object Clone()
+        {
+            return new MissileWeaponsDB(this);
+        }
     }
 }

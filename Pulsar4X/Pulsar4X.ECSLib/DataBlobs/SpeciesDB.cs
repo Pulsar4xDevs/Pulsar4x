@@ -37,5 +37,10 @@
             speciesDB.BaseTemperature, speciesDB.MinimumTemperatureConstraint, speciesDB.MaximumTemperatureConstraint)
         {
         }
+
+        public override object Clone()
+        {
+            return new SpeciesDB(this);
+        }
     }
 }

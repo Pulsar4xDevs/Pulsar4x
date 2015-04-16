@@ -22,5 +22,10 @@
             FuelStorageCapicity = propulsionDB.FuelStorageCapicity;
             CurrentFuelStored = propulsionDB.CurrentFuelStored;
         }
+
+        public override object Clone()
+        {
+            return new PropulsionDB(this);
+        }
     }
 }
