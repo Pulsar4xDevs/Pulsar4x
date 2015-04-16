@@ -99,25 +99,17 @@ namespace Pulsar4X.Tests
             save.Load();
             Assert.AreEqual(1, game.StarSystems.Count);
             Assert.AreEqual(testTime, game.CurrentDateTime);
-            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
-            Assert.AreEqual(1, entities.Count);
+            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
+            Assert.AreEqual(2, entities.Count);
+            entities = game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>();
+            Assert.AreEqual(2, entities.Count);
 
             // lets check the the refs were hocked back up:
-            Entity faction = game.GlobalManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
-            var colony = faction.GetDataBlob<ColonyInfoDB>();
-            Assert.AreEqual(1, colony.Population.Count);
-            foreach (var pop in colony.Population)
-            {
-                Assert.IsTrue(pop.Key.IsValid);
+            Entity species = game.GlobalManager.GetFirstEntityWithDataBlob<SpeciesDB>();
+            NameDB speciesName = species.GetDataBlob<NameDB>();
+            Assert.AreSame(speciesName.OwningEntity, species);
 
-                SpeciesDB refDB = pop.Key.GetDataBlob<SpeciesDB>();
-                Assert.IsNotNull(refDB);
-
-                Assert.AreEqual(42, pop.Value);
-                //Assert.AreEqual("Human", refDB.SpeciesName);
-                Assert.AreEqual(1.0, refDB.BaseGravity);
-                Assert.AreEqual(1.0, refDB.BasePressure);
-            }
+            // <?TODO: Expand this out to cover many more DB's, entities, and cases.
         }
     }
 }
