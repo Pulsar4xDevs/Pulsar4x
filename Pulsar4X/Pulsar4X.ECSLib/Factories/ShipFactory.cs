@@ -9,16 +9,7 @@ namespace Pulsar4X.ECSLib.Factories
         public static Entity CreateShip(Entity classEntity, EntityManager systemEntityManager, Entity ownerFaction, string shipName = null)
         {
             // @todo replace ownerFaction with formationDB later. Now ownerFaction used just to add name 
-            List<BaseDataBlob> classDataBlobs = classEntity.GetAllDataBlobs(); //Are we sure we have in class only ship specified data blobs?
-            List<BaseDataBlob> shipDataBlobs = new List<BaseDataBlob>();
-
-            foreach (BaseDataBlob dataBlob in classDataBlobs)
-            {
-                BaseDataBlob clonnedDataBlob = (BaseDataBlob)Activator.CreateInstance(dataBlob.GetType(), dataBlob);
-                shipDataBlobs.Add(clonnedDataBlob); 
-            }
-
-            Entity ship = systemEntityManager.CreateEntity(shipDataBlobs);
+            Entity ship = classEntity.Clone(systemEntityManager);
 
             ShipInfoDB shipInfoDB = ship.GetDataBlob<ShipInfoDB>();
             shipInfoDB.ShipClassDefinition = classEntity.Guid;
@@ -30,7 +21,6 @@ namespace Pulsar4X.ECSLib.Factories
             }
             nameDB.Name.Clear();
             nameDB.Name.Add(ownerFaction, shipName);
-            
 
             return ship;
         }

@@ -56,7 +56,7 @@ namespace Pulsar4X.Tests
 
             Entity colony = ColonyFactory.CreateColony(faction, planet);
             ColonyInfoDB colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();
-            NameDB nameDB = colony.GetDataBlob<NameDB>();
+            //NameDB nameDB = colony.GetDataBlob<NameDB>();
 
             Assert.IsTrue(HasAllRequiredDatablobs(colony, requiredDataBlobs), "Colony Entity doesn't contains all required datablobs");
             Assert.IsTrue(colonyInfoDB.PlanetEntity == planet, "ColonyInfoDB.PlanetEntity refs to wrong entity");
@@ -128,6 +128,47 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(HasAllRequiredDatablobs(ship, requiredDataBlobs), "Ship Entity doesn't contains all required datablobs");
             Assert.IsTrue(shipInfo.ShipClassDefinition == shipClass.Guid, "ShipClassDefinition guid must be same as ship class entity guid");
             Assert.IsTrue(shipNameDB.Name[faction] == shipName);
+        }
+
+        [Test]
+        [Description("SystemBodyFactory tests")]
+        public void CreateAndFillStarSystem()
+        {
+            StarSystem starSystem = new StarSystem();
+
+            var starDataBlobTypes = new List<Type>()
+            {
+                typeof(NameDB),
+                typeof(StarInfoDB),
+                typeof(MassVolumeDB),
+                typeof(OrbitDB)
+            };
+
+            var planetDataBlobTypes = new List<Type>()
+            {
+                typeof(NameDB),
+                typeof(SystemBodyDB),
+                typeof(MassVolumeDB),
+                typeof(OrbitDB)
+            };
+
+            Entity mainStar = SystemBodyFactory.CreateMainStar(starSystem.SystemManager, starSystem, "Sonra");
+            Entity subStar = SystemBodyFactory.CreateSubStar(starSystem.SystemManager, mainStar, "Another little star");
+            Entity planet = SystemBodyFactory.CreatePlanet(starSystem.SystemManager, mainStar, "Argon Prime");
+
+            Assert.IsTrue(HasAllRequiredDatablobs(mainStar, starDataBlobTypes), "Main Star doesn't contains all required datablobs");
+            Assert.IsTrue(HasAllRequiredDatablobs(subStar, starDataBlobTypes), "Sub Star doesn't contains all required datablobs");
+            Assert.IsTrue(HasAllRequiredDatablobs(planet, planetDataBlobTypes), "Planet doesn't contains all required datablobs");
+
+            OrbitDB mainStarOrbitDB = mainStar.GetDataBlob<OrbitDB>();
+            OrbitDB subStarOrbitDB = subStar.GetDataBlob<OrbitDB>();
+            OrbitDB planetOrbitDB = subStar.GetDataBlob<OrbitDB>();
+
+            Assert.IsTrue(mainStarOrbitDB.Parent == null);
+            Assert.IsTrue(subStarOrbitDB.Parent == mainStar);
+            Assert.IsTrue(planetOrbitDB.Parent == mainStar);
+
+
         }
 
         private static bool HasAllRequiredDatablobs(Entity toCheck, List<Type> datablobTypes)
