@@ -21,6 +21,7 @@ namespace Pulsar4X.ECSLib
 
         private struct SaveData
         {
+            public VersionInfo Version;
             public DateTime GameDateTime;
             public EntityManager GlobalEntityManager;
             public List<StarSystem> StarSystems;
@@ -60,6 +61,14 @@ namespace Pulsar4X.ECSLib
                 _data = (SaveData)_serializer.Deserialize(reader, typeof(SaveData));
             }
 
+            // check the version info:
+            if (_data.Version.IsCompatibleWith(VersionInfo.PulsarVersionInfo) == false)
+            {
+                string e = String.Format("The save file is not supported. the save is from version {0}, the game only supports versions: {1}", _data.Version.VersionString, VersionInfo.PulsarVersionInfo.CompatibileVersions);
+
+                throw new System.NotSupportedException(e);
+            }
+
             // get the game to do its post load stuff
             Game.Instance.PostGameLoad(_data.GameDateTime, _data.GlobalEntityManager, _data.StarSystems);
         }
@@ -89,6 +98,7 @@ namespace Pulsar4X.ECSLib
 
         private void CollectGameData()
         {
+            _data.Version = VersionInfo.PulsarVersionInfo;
             _data.GlobalEntityManager = Game.Instance.GlobalManager;
             _data.StarSystems = Game.Instance.StarSystems;
             _data.GameDateTime = Game.Instance.CurrentDateTime;

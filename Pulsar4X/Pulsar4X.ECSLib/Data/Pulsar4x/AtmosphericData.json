@@ -1,0 +1,24 @@
+[
+  {
+    "Weight": 50.0,
+    "Value": {
+      "Name": "Hydrogen",
+      "ChemicalSymbol": "H",
+      "IsToxic": false,
+      "BoilingPoint": -252.879,
+      "MeltingPoint": -259.16,
+      "GreenhouseEffect": 1.0
+    }
+  },
+  {
+    "Weight": 50.0,
+    "Value": {
+      "Name": "Helium",
+      "ChemicalSymbol": "He",
+      "IsToxic": false,
+      "BoilingPoint": -268.928,
+      "MeltingPoint": -272.20,
+      "GreenhouseEffect": 0.0
+    }
+  }
+]
