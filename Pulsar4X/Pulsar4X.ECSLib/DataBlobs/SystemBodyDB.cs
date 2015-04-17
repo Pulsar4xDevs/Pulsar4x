@@ -26,6 +26,15 @@ namespace Pulsar4X.ECSLib
         NA
     }
 
+    /// <summary>
+    /// Small struct to store specifics of a minerial deposit.
+    /// </summary>
+    public struct MineralDepositInfo
+    {
+        public int Amount;
+        public double Accessibility;
+    }
+
     public class SystemBodyDB : BaseDataBlob
     {
         public BodyType Type;
@@ -69,7 +78,11 @@ namespace Pulsar4X.ECSLib
 
         public TimeSpan LengthOfDay { get; set; }
 
-        public Dictionary<string, MineralSD> Minerals; //Maybe enum instead of string?
+        /// <summary>
+        /// Stores the amount of the variopus minerials. the guid can be used to lookup the
+        /// minerial definition (MineralSD) from the StaticDataStore.
+        /// </summary>
+        public Dictionary<Guid, MineralDepositInfo> Minerals;
 
         public SystemBodyDB()
         {

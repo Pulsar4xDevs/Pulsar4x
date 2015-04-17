@@ -1,9 +1,11 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+
+namespace Pulsar4X.ECSLib
 {
     public struct MineralSD
     {
         public string Name;
-        public int Amount;
-        public double Accessibility;
+        public Guid ID;
+        public JDictionary<BodyType, double> Abundance; 
     }
 }
