@@ -65,7 +65,7 @@ namespace Pulsar4X.Tests
             min.Abundance.Add(BodyType.IceGiant, 0.5);
             min.Abundance.Add(BodyType.Moon, 0.5);
             min.Abundance.Add(BodyType.Terrestrial, 1.0);
-            min.ID = new Guid();
+            min.ID = Guid.NewGuid();
             min.Name = "Sorium";
             minList.Add(min);
 

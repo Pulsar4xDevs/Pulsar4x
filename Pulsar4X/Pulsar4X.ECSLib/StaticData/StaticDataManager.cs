@@ -12,8 +12,17 @@ namespace Pulsar4X.ECSLib
         public static StaticDataStore StaticDataStore = new StaticDataStore();
 
         private const string defaultDataDirectory = "./Data";
-        private static JsonSerializer serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented};
 
+        /// <summary>
+        /// the subdirectory of defaultDataDirectory that contains the offical game data.
+        /// We will want to laod this first so that mods overwrite our game files.
+        /// </summary>
+        private const string officialDataDirectory = "/Pulsar4x";
+
+        private static JsonSerializer serializer = new JsonSerializer
+        {
+            NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
+        };
 
         /// <summary>
         /// Loads all dtat from the default static data directory.
@@ -103,12 +112,5 @@ namespace Pulsar4X.ECSLib
                 serializer.Serialize(writer, staticData);
             }
         }
-
-        
-
-
-
-
-
     }
 }

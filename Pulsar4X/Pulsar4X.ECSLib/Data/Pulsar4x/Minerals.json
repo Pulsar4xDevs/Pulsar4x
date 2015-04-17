@@ -1,38 +1,38 @@
 [
   {
     "Name": "Sorium",
-    "ID": "00000000-0000-0000-0000-000000000000",
+    "ID": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
     "Abundance": [
       {
-        "Key": 6,
+        "Key": "Asteroid",
         "Value": 0.01
       },
       {
-        "Key": 7,
+        "Key": "Comet",
         "Value": 0.05
       },
       {
-        "Key": 3,
+        "Key": "DwarfPlanet",
         "Value": 0.075
       },
       {
-        "Key": 4,
+        "Key": "GasDwarf",
         "Value": 0.1
       },
       {
-        "Key": 1,
+        "Key": "GasGiant",
         "Value": 1.0
       },
       {
-        "Key": 2,
+        "Key": "IceGiant",
         "Value": 0.5
       },
       {
-        "Key": 5,
+        "Key": "Moon",
         "Value": 0.5
       },
       {
-        "Key": 0,
+        "Key": "Terrestrial",
         "Value": 1.0
       }
     ]
