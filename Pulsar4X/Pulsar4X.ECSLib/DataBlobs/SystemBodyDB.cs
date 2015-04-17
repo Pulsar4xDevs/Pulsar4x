@@ -82,11 +82,11 @@ namespace Pulsar4X.ECSLib
         /// Stores the amount of the variopus minerials. the guid can be used to lookup the
         /// minerial definition (MineralSD) from the StaticDataStore.
         /// </summary>
-        public Dictionary<Guid, MineralDepositInfo> Minerals;
+        public JDictionary<Guid, MineralDepositInfo> Minerals;
 
         public SystemBodyDB()
         {
-            Minerals = new Dictionary<string, MineralSD>();
+            Minerals = new JDictionary<Guid, MineralDepositInfo>();
         }
 
         public SystemBodyDB(SystemBodyDB systemBodyDB)
@@ -100,7 +100,7 @@ namespace Pulsar4X.ECSLib
             AtmosphericDust = systemBodyDB.AtmosphericDust;
             SupportsPopulations = systemBodyDB.SupportsPopulations;
             LengthOfDay = systemBodyDB.LengthOfDay;
-            Minerals = systemBodyDB.Minerals.ToDictionary(entry => entry.Key, entry => entry.Value);
+            Minerals = new JDictionary<Guid, MineralDepositInfo>(systemBodyDB.Minerals);
         }
 
         public override object Clone()
