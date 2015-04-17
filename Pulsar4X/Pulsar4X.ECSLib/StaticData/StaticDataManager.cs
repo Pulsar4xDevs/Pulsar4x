@@ -66,6 +66,10 @@ namespace Pulsar4X.ECSLib
                     else if (type == StaticDataStore.CommanderNameThemesType)
                     {
                         StaticDataStore.Store(obj);                        
+                    }
+                    else if (type == StaticDataStore.MineralsType)
+                    {
+                        StaticDataStore.Store(obj);
                     }  
                     // ... more here.
                 }

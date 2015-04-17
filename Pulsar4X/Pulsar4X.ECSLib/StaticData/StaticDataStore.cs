@@ -16,12 +16,16 @@ namespace Pulsar4X.ECSLib
         public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
         public Type CommanderNameThemesType;
 
+        public List<MineralSD> Minerals = new List<MineralSD>();
+        public Type MineralsType;
+
         /// @todo add a whole bunch more static data.
 
         public StaticDataStore()
         {
             AtmosphericGasesType = AtmosphericGases.GetType();
             CommanderNameThemesType = CommanderNameThemes.GetType();
+            MineralsType = Minerals.GetType();
         }
 
 
@@ -35,6 +39,12 @@ namespace Pulsar4X.ECSLib
         {
             if (commanderNameThemes != null)
                 CommanderNameThemes.AddRange(commanderNameThemes);
+        }
+
+        public void Store(List<MineralSD> minerals)
+        {
+            if (minerals != null)
+                Minerals.AddRange(minerals);
         }
     }
 }

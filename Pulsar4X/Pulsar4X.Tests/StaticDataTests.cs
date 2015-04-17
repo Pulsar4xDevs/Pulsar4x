@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -50,6 +51,26 @@ namespace Pulsar4X.Tests
             nameTheme.NameList.Add(name);
 
             StaticDataManager.ExportStaticData(nameTheme, "./CommanderNameThemeExportTest.json");
+
+            StaticDataManager.ExportStaticData(VersionInfo.PulsarVersionInfo, "./VersionInfoExportTest.vinfo");
+
+            List<MineralSD> minList = new List<MineralSD>();
+            MineralSD min = new MineralSD();
+            min.Abundance = new JDictionary<BodyType, double>();
+            min.Abundance.Add(BodyType.Asteroid, 0.01);
+            min.Abundance.Add(BodyType.Comet, 0.05);
+            min.Abundance.Add(BodyType.DwarfPlanet, 0.075);
+            min.Abundance.Add(BodyType.GasDwarf, 0.1);
+            min.Abundance.Add(BodyType.GasGiant, 1.0);
+            min.Abundance.Add(BodyType.IceGiant, 0.5);
+            min.Abundance.Add(BodyType.Moon, 0.5);
+            min.Abundance.Add(BodyType.Terrestrial, 1.0);
+            min.ID = new Guid();
+            min.Name = "Sorium";
+            minList.Add(min);
+
+            StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
+
         }
     }
 }
