@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace WPFUI
+namespace Pulsar4X.WPFUI
 {
     /// <summary>
     /// Interaction logic for App.xaml

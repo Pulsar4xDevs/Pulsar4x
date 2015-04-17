@@ -1,14 +1,14 @@
-﻿<Window x:Class="WPFUI.MainWindow"
+﻿<Window x:Class="Pulsar4X.WPFUI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Pulsar4X" Height="350" Width="525">
+        Title="Pulsar4X" Height="350" Width="525" Closing="Window_Closing">
     <Grid>
         <Menu IsMainMenu="True" HorizontalAlignment="Left" Height="20" VerticalAlignment="Top" Width="517">
             <MenuItem Header="_Game">
-                <MenuItem Header="_New"/>
-                <MenuItem Header="_Load"/>
-                <MenuItem Header="_Save"/>
-                          
+                <MenuItem Header="_New" Click="NewGame_Click"/>
+                <MenuItem Header="_Load" Click="LoadGame_Click"/>
+                <MenuItem Header="_Save" Click="SaveGame_Click"/>
+
             </MenuItem>
             <MenuItem Header="_Faction">
                 <MenuItem Header="_SM"/>
@@ -29,9 +29,11 @@
             <MenuItem Header="_Help">
                 <MenuItem Header="_About"/>
             </MenuItem>
-
         </Menu>
-
-
+        <StatusBar VerticalAlignment="Bottom">
+            <StatusBarItem>
+                <TextBlock Name="StatusBarText" Text="Status: "/>
+            </StatusBarItem>
+        </StatusBar>
     </Grid>
 </Window>

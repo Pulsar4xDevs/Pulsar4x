@@ -172,6 +172,10 @@ namespace Pulsar4X.ECSLib
                 case Message.MessageType.Echo:
                     EngineComms.LibWriteOutQueue(faction, message);     // echo chamber ;)
                     break;
+                case Message.MessageType.ForceStart:
+                    MessageBook defaultMessageBook = EngineComms.FirstOrDefault();
+                    defaultMessageBook.InMessageQueue.Enqueue(new Message(Message.MessageType.Quit, null));
+                    break;
                 default:
                     throw new System.Exception("Message of type: " + message._messageType.ToString() + ", Went unprocessed.");
             }

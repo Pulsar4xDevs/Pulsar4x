@@ -7,7 +7,7 @@ using System.Windows.Threading;
 
 using Pulsar4X.ECSLib;
 
-namespace WPFUI
+namespace Pulsar4X.WPFUI
 {
     static class Program
     {
@@ -18,7 +18,7 @@ namespace WPFUI
             Entity faction = game.EngineComms.FirstOrDefault().Faction; //just get the first one for now, till we've got ui to select.
             
             UI_Comms uicomms = new UI_Comms(game.EngineComms, faction);
-            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => uicomms.CheckEnginMessageQueue()));
+            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => uicomms.CheckEngineMessageQueue()));
 
             
         }
