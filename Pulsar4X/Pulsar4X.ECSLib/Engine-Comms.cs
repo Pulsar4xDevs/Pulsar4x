@@ -103,8 +103,6 @@ namespace Pulsar4X.ECSLib
     {
         public enum MessageType
         {
-            ForceStart,     /// force to the main game loop, ignoring is game started already or not
-            Start,          /// starts main game loop. Could be cause of some problems if main game loop is already started
             Quit,           /// terminates the main game loop.
             Echo,           /// will be sent straight back to sender. Use for testing.     
         }
