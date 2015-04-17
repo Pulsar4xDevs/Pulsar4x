@@ -12,12 +12,12 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class Engine_Comms
     {
-        Dictionary<int, MessageBook> Messages = new Dictionary<int, MessageBook>();
+        Dictionary<Entity, MessageBook> Messages = new Dictionary<Entity, MessageBook>();
 
         /// <summary>
         /// a dictionary of faction names and thier guids. mostly so the ui can request the correct factionid for a given faction name. 
         /// </summary>
-        public Dictionary<string, int> Factions = new Dictionary<string, int>();
+        public Dictionary<string, Entity> Factions = new Dictionary<string, Entity>();
         
         /// <summary>
         /// Engine_comms constructor. 
@@ -25,78 +25,74 @@ namespace Pulsar4X.ECSLib
         internal Engine_Comms()
         { }
 
-        public void AddFaction(int factionID)
+        public void AddFaction(Entity faction)
         {
-            Messages.Add(factionID, new MessageBook(factionID));
+            Messages.Add(faction, new MessageBook(faction));
             //Factions.Add(FactionEntity.Name, factionID)
         }
 
         /// <summary>
         /// if a faction is killed off or otherwise removed from the game it needs to be removed from Engine_Comms.
         /// </summary>
-        /// <param name="factionID"></param>
-        internal void RemoveFaction(int factionID)
+        /// <param name="faction"></param>
+        internal void RemoveFaction(Entity faction)
         {
-            Messages.Remove(factionID);
+            Messages.Remove(faction);
             //Factions.Remove()
         }
 
         /// <summary>
         /// later on add a password parameter to this. 
         /// </summary>
-        /// <param name="factionID"></param>
+        /// <param name="faction"></param>
         /// <returns></returns>
-        public MessageBook RequestMessagebook(int factionID)
+        public MessageBook RequestMessagebook(Entity faction)
         {
-            return Messages[factionID];
+            return Messages[faction];
+        }
+
+        public MessageBook FirstOrDefault()
+        {
+            return Messages.FirstOrDefault().Value;
         }
 
         /// <summary>
         /// lib writes messages for the UI  here;
         /// or can just get the messagebook via Messages[factionID]. 
         /// </summary>
-        /// <param name="factionID">faction the message relates to</param>
+        /// <param name="faction">faction the message relates to</param>
         /// <param name="message">message object</param>
-        internal void LibWriteOutQueue(int factionID, Message message)
+        internal void LibWriteOutQueue(Entity faction, Message message)
         {
-            Messages[factionID].OutMessageQueue.Enqueue(message);
+            Messages[faction].OutMessageQueue.Enqueue(message);
         }
 
         /// <summary>
         /// Lib reads faction messages here. 
         /// or can just get the messagebook via Messages[factionID]. 
         /// </summary>
-        /// <param name="factionID"></param>
+        /// <param name="faction"></param>
         /// <returns></returns>
-        internal Message LibReadFactionInQueue(int factionID)
+        internal Message LibReadFactionInQueue(Entity faction)
         {
             Message message;  
-            Messages[factionID].InMessageQueue.TryDequeue(out message);
+            Messages[faction].InMessageQueue.TryDequeue(out message);
             return message;
         }
 
-        internal bool LibPeekFactionInQueue(int factionID, out Message message)
+        internal bool LibPeekFactionInQueue(Entity faction, out Message message)
         {
-            return Messages[factionID].InMessageQueue.TryPeek(out message);
+            return Messages[faction].InMessageQueue.TryPeek(out message);
         }
 
         internal bool LibMessagesWaiting()
         {
-            foreach(var book in Messages)
-            {
-                if (book.Value.InMessageQueue.Count > 0)
-                    return true;
-            }
-
-            return false;
+            return Messages.Any(book => book.Value.InMessageQueue.Count > 0);
         }
 
-        internal bool LibMessagesWaitingForFaction(int factionID)
+        internal bool LibMessagesWaitingForFaction(Entity faction)
         {
-            if (Messages[factionID].InMessageQueue.Count > 0)
-                return true;
-
-            return false;
+            return Messages[faction].InMessageQueue.Count > 0;
         }
     }
 
@@ -129,19 +125,14 @@ namespace Pulsar4X.ECSLib
     /// </summary>
     public class MessageBook
     {
-        int _FactionID;
+        public Entity Faction { get; private set; }
         public ConcurrentQueue<Message> OutMessageQueue { get; set; }
         public ConcurrentQueue<Message> InMessageQueue { get; set; }
-        internal MessageBook(int factionID)
+        internal MessageBook(Entity faction)
         {
             OutMessageQueue = new ConcurrentQueue<Message>();
             InMessageQueue = new ConcurrentQueue<Message>();
-            _FactionID = factionID;
-        }
-
-        public int FactionID
-        {
-            get { return _FactionID;  }
+            Faction = faction;
         }
     }
 }

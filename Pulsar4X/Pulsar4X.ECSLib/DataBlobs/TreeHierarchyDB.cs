@@ -1,165 +1,150 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Linq;
 using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
-        private readonly int _typeIndex;
-
-        private TreeHierarchyDB()
+        public Entity Parent
         {
-            EntityManager.TryGetTypeIndex(GetType(), out _typeIndex);
-        }
-
-        protected TreeHierarchyDB(Guid parentGuid) : this()
-        {
-            ParentGuid = parentGuid;
-            if (parentGuid != Guid.Empty)
+            get { return _parent; }
+            set
             {
-                _parentDB = FindSameTypeDB(ParentGuid);
+                if (OwningEntity == null)
+                {
+                    _parent = value;
+                    return;
+                }
+
+                if (Parent != null)
+                {
+                    ParentDB.RemoveChild(OwningEntity);
+                }
+                _parent = value;
+                if (Parent != null)
+                {
+                    ParentDB.AddChild(OwningEntity);
+                }
             }
-
-            _childGuids = new List<Guid>();
-            _childDBs = new List<TreeHierarchyDB>();
         }
+        private Entity _parent;
 
-        public Guid ParentGuid { get; private set; }
         [JsonIgnore]
         public TreeHierarchyDB ParentDB
         {
             get
             {
-                if (_parentDB == null && ParentGuid != Guid.Empty)
-                {
-                    _parentDB = FindSameTypeDB(ParentGuid);
-                }
+                if (Parent == null)
+                    return null;
 
-                return _parentDB;
+                return GetSameTypeDB(Parent);
             }
         }
-        private TreeHierarchyDB _parentDB;
+
+        public Entity Root
+        {
+            get
+            {
+                if (Parent == null)
+                {
+                    return OwningEntity;
+                }
+
+                return ParentDB.Root;
+            }
+        }
 
         [JsonIgnore]
         public TreeHierarchyDB RootDB
         {
-            get
-            {
-                if (_rootDB == null)
-                {
-                    if (ParentDB == null)
-                    {
-                        _rootDB = this;
-                    }
-                    else
-                    {
-                        _rootDB = ParentDB.RootDB;
-                    }
-                }
-                return _rootDB;
-            }
+            get { return GetSameTypeDB(Root); }
         }
-        private TreeHierarchyDB _rootDB;
 
+        public List<Entity> Children { get; private set; }
 
         [JsonIgnore]
-        public ReadOnlyCollection<Guid> ChildGuids
+        public List<TreeHierarchyDB> ChildrenDBs
         {
-            get { return _childGuids.AsReadOnly(); }
+            get { return Children.Select(GetSameTypeDB).ToList(); }
         }
-        [JsonProperty("ChildGuids")]
-        private readonly List<Guid> _childGuids;
 
-        [JsonIgnore]
-        public ReadOnlyCollection<TreeHierarchyDB> ChildDBs
+        public override Entity OwningEntity
         {
-            get { return _childDBs.AsReadOnly(); }
-        }
-        private readonly List<TreeHierarchyDB> _childDBs;
-
-        [JsonIgnore]
-        public override Guid EntityGuid
-        {
-            get { return _entityGuid; }
+            get { return _owningEntity; }
             set
             {
-                if (ParentDB != null)
+                if (_owningEntity != null && Parent != null)
                 {
-                    ParentDB.AddChild(value);
+                    ParentDB.RemoveChild(_owningEntity);
                 }
 
-                _entityGuid = value;
+                _owningEntity = value;
+
+                if (Parent != null)
+                {
+                    ParentDB.AddChild(_owningEntity);
+                }
             }
         }
-        [JsonProperty("EntityGuid")]
-        private Guid _entityGuid;
+        private Entity _owningEntity;
 
-        private TreeHierarchyDB FindSameTypeDB(Guid entityGuid)
+        public TreeHierarchyDB(Entity parent)
         {
-            EntityManager entityManager;
-            int entityID;
+            Parent = parent;
+            Children = new List<Entity>();
+        }
 
-            if (!EntityManager.FindEntityByGuid(entityGuid, out entityManager, out entityID))
+        private void AddChild(Entity child)
+        {
+            Children.Add(child);
+        }
+
+        private bool RemoveChild(Entity child)
+        {
+            return Children.Remove(child);
+        }
+
+        private TreeHierarchyDB GetSameTypeDB(Entity entity)
+        {
+            if (!entity.IsValid)
             {
-                throw new GuidNotFoundException();
+                throw new ArgumentException("Invalid Entity");
             }
 
-            return entityManager.GetDataBlob<TreeHierarchyDB>(entityID, _typeIndex);
-        }
+            int typeIndex;
+            EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
 
-        public void SetParent(Guid parentGuid)
-        {
-            // Unlink us from current parent.
-            if (ParentDB != null)
-            {
-                ParentDB.RemoveChild(EntityGuid);
-            }
-
-            // Link us to the parent.
-            ParentGuid = parentGuid;
-
-            // Link parent back to us.
-            if (parentGuid != Guid.Empty)
-            {
-                _parentDB = FindSameTypeDB(parentGuid);
-                _parentDB.AddChild(EntityGuid);
-            }
-            InvalidateRoot();
-        }
-
-        private void InvalidateRoot()
-        {
-            _rootDB = null;
-            foreach (TreeHierarchyDB child in ChildDBs)
-            {
-                child.InvalidateRoot();
-            }
-        }
-
-        private void AddChild(Guid childGuid)
-        {
-            TreeHierarchyDB childDB = FindSameTypeDB(childGuid);
-            _childDBs.Add(childDB);
-            _childGuids.Add(childGuid);
-        }
-
-        private void RemoveChild(Guid childGuid)
-        {
-            TreeHierarchyDB childDB = FindSameTypeDB(childGuid);
-            _childDBs.Remove(childDB);
-            _childGuids.Remove(childGuid);
+            return entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
         }
     }
 
-#if DEBUG
-    // Non-abstract class to test the TreeHierarchyDB class.
-    public class TreeHierarchyDBConcrete : TreeHierarchyDB
+    /// <summary>
+    /// For use by Unit Tests only.
+    /// </summary>
+    public sealed class ConcreteTreeHierarchyDB : TreeHierarchyDB
     {
-        public TreeHierarchyDBConcrete(Guid parentGuid) : base(parentGuid)
+        public ConcreteTreeHierarchyDB() 
+            : base(null)
+        {
+
+        }
+
+        public ConcreteTreeHierarchyDB(Entity parent)
+            : base(parent)
+        {
+
+        }
+
+        public ConcreteTreeHierarchyDB(ConcreteTreeHierarchyDB concreteTreeHierarchyDB)
+            : base(concreteTreeHierarchyDB.Parent)
         {
         }
+
+        public override object Clone()
+        {
+            return new ConcreteTreeHierarchyDB(this);
+        }
     }
-#endif
 }

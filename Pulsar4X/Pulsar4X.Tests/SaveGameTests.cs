@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
-using NUnit.Framework.Constraints;
+using Pulsar4X.ECSLib.DataBlobs;
+using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -31,16 +26,21 @@ namespace Pulsar4X.Tests
             game.CurrentDateTime = testTime;
 
             // add a faction:
-            List<BaseDataBlob> list = new List<BaseDataBlob>();
-            DataBlobRef<SpeciesDB> sdb = new DataBlobRef<SpeciesDB>(new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44));
-            JDictionary<DataBlobRef<SpeciesDB>, double> pop = new JDictionary<DataBlobRef<SpeciesDB>, double>();
-            pop.Add(sdb, 42);
+            Entity humanFaction = FactionFactory.CreateFaction(game.GlobalManager, "New Terran Utopian Empire");
 
-            list.Add(new ColonyInfoDB(pop));
-            list.Add(new PositionDB(0,0));
-            //list.Add(OrbitDB.FromStationary(0));
-            int factionID = game.GlobalManager.CreateEntity(list);
+            // add a species:
+            Entity humanSpecies = SpeciesFactory.CreateSpeciesHuman(humanFaction, game.GlobalManager);
 
+            // add another faction:
+            Entity greyAlienFaction = FactionFactory.CreateFaction(game.GlobalManager, "The Grey Empire");
+            // Add another species:
+            Entity greyAlienSpecies = SpeciesFactory.CreateSpeciesHuman(greyAlienFaction, game.GlobalManager);
+
+            // Greys Name the Humans.
+            humanSpecies.GetDataBlob<NameDB>().Name.Add(greyAlienFaction, "Stupid Terrans");
+            // Humans name the Greys.
+            greyAlienSpecies.GetDataBlob<NameDB>().Name.Add(humanFaction, "Space bugs");
+            
             // add a star system:
             game.StarSystems.Add(new StarSystem());
         }
@@ -99,8 +99,17 @@ namespace Pulsar4X.Tests
             save.Load();
             Assert.AreEqual(1, game.StarSystems.Count);
             Assert.AreEqual(testTime, game.CurrentDateTime);
-            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
-            Assert.AreEqual(1, entities.Count);
+            var entities = game.GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
+            Assert.AreEqual(2, entities.Count);
+            entities = game.GlobalManager.GetAllEntitiesWithDataBlob<SpeciesDB>();
+            Assert.AreEqual(2, entities.Count);
+
+            // lets check the the refs were hocked back up:
+            Entity species = game.GlobalManager.GetFirstEntityWithDataBlob<SpeciesDB>();
+            NameDB speciesName = species.GetDataBlob<NameDB>();
+            Assert.AreSame(speciesName.OwningEntity, species);
+
+            // <?TODO: Expand this out to cover many more DB's, entities, and cases.
         }
     }
 }

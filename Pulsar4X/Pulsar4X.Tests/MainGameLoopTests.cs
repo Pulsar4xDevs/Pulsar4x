@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
 
 namespace Pulsar4X.Tests
 {
@@ -21,26 +20,25 @@ namespace Pulsar4X.Tests
             game = new Game();
 
             // add some factions:
-            List<BaseDataBlob> list = new List<BaseDataBlob>();
-            DataBlobRef<SpeciesDB> sdb = new DataBlobRef<SpeciesDB>(new SpeciesDB("Human", 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44));
-            JDictionary<DataBlobRef<SpeciesDB>, double> pop = new JDictionary<DataBlobRef<SpeciesDB>, double>();
-            pop.Add(sdb, 42);
+            var list = new List<BaseDataBlob>();
+            Entity sdb = Entity.Create(game.GlobalManager, new List<BaseDataBlob>{new SpeciesDB( 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44)});
+            var pop = new JDictionary<Entity, double> {{sdb, 42}};
 
-            list.Add(new ColonyInfoDB(pop));
-            int factionID = game.GlobalManager.CreateEntity(list);
-            game.EngineComms.AddFaction(factionID);
+            list.Add(new ColonyInfoDB(pop, Entity.GetInvalidEntity()));
+            Entity faction = Entity.Create(game.GlobalManager, list);
+            game.EngineComms.AddFaction(faction);
 
-            factionID = game.GlobalManager.CreateEntity(list);
-            game.EngineComms.AddFaction(factionID);
+            faction = Entity.Create(game.GlobalManager, list);
+            game.EngineComms.AddFaction(faction);
 
-            factionID = game.GlobalManager.CreateEntity(list);
-            game.EngineComms.AddFaction(factionID);
+            faction = Entity.Create(game.GlobalManager, list);
+            game.EngineComms.AddFaction(faction);
 
-            factionID = game.GlobalManager.CreateEntity(list);
-            game.EngineComms.AddFaction(factionID);
+            faction = Entity.Create(game.GlobalManager, list);
+            game.EngineComms.AddFaction(faction);
 
-            factionID = game.GlobalManager.CreateEntity(list);
-            game.EngineComms.AddFaction(factionID);
+            faction = Entity.Create(game.GlobalManager, list);
+            game.EngineComms.AddFaction(faction);
         }
 
         [TearDown]
@@ -55,27 +53,27 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMainGameLoop()
         {
-             // lets start the main game loop in a different thread:
-             gameThread = new System.Threading.Thread(game.MainGameLoop);
-             gameThread.Start();
-             Assert.AreEqual(true, gameThread.ThreadState != System.Threading.ThreadState.Unstarted); // has it started?
+            // lets start the main game loop in a different thread:
+            gameThread = new System.Threading.Thread(game.MainGameLoop);
+            gameThread.Start();
+            Assert.AreEqual(true, gameThread.ThreadState != System.Threading.ThreadState.Unstarted); // has it started?
 
-             MessageBook mb0 = game.EngineComms.RequestMessagebook(0); // lets try get the message book for the first faction.
-             Assert.NotNull(mb0);
+            MessageBook mb0 = game.EngineComms.FirstOrDefault(); // lets try get the message book for the first faction.
+            Assert.NotNull(mb0);
 
-             // lets try an echo:
-             mb0.InMessageQueue.Enqueue(new Message(Message.MessageType.Echo, 42));
-             System.Threading.Thread.Sleep(100); // give the game time to echo!!
-             Message message = null;
-             Assert.IsTrue(mb0.OutMessageQueue.TryDequeue(out message), "Lib did not return echo message.");
-             Assert.NotNull(message);
-             Assert.AreEqual(42, Convert.ToInt32(message._data));
+            // lets try an echo:
+            mb0.InMessageQueue.Enqueue(new Message(Message.MessageType.Echo, 42));
+            System.Threading.Thread.Sleep(100); // give the game time to echo!!
+            Message message;
+            Assert.IsTrue(mb0.OutMessageQueue.TryDequeue(out message), "Lib did not return echo message.");
+            Assert.NotNull(message);
+            Assert.AreEqual(42, Convert.ToInt32(message._data));
 
-             // now lets try quiting:
-             mb0.InMessageQueue.Enqueue(new Message(Message.MessageType.Quit, null));
-             gameThread.Join();
-             System.Threading.Thread.Sleep(100); // give the game time to quit!!
-             Assert.AreEqual(true, gameThread.ThreadState == System.Threading.ThreadState.Stopped); // has it stopped?
+            // now lets try quiting:
+            mb0.InMessageQueue.Enqueue(new Message(Message.MessageType.Quit, null));
+            gameThread.Join();
+            System.Threading.Thread.Sleep(100); // give the game time to quit!!
+            Assert.AreEqual(true, gameThread.ThreadState == System.Threading.ThreadState.Stopped); // has it stopped?
         }
     }
 }

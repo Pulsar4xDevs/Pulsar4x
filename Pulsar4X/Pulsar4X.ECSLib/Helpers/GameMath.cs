@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pulsar4X.ECSLib.Helpers
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Small Helper Class for Angle unit Conversions
@@ -135,6 +135,16 @@ namespace Pulsar4X.ECSLib.Helpers
             var listEntry = new WeightedValue<T> {Weight = weight, Value = value};
             m_valueList.Add(listEntry);
             TotalWeight += weight;
+        }
+
+        /// <summary>
+        /// Adds the contents of another weighted list to this one.
+        /// </summary>
+        /// <param name="otherList">The list to add.</param>
+        public void AddRange(WeightedList<T> otherList)
+        {
+            m_valueList.AddRange(otherList.m_valueList);
+            TotalWeight += otherList.TotalWeight;
         }
 
         public IEnumerator<WeightedValue<T>> GetEnumerator() 

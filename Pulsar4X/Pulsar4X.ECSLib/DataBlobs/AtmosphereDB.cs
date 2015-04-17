@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     public class AtmosphereDB : BaseDataBlob
     {
@@ -53,7 +51,15 @@ namespace Pulsar4X.ECSLib.DataBlobs
          //The composition of the atmosphere, i.e. what gases make it up and in what ammounts.
          //In Earth Atmospheres (atm).
          //</summary>
-        public Dictionary<AtmosphericGasDB, float> Composition;
+        public JDictionary<AtmosphericGasSD, float> Composition;
+
+        /// <summary>
+        /// Empty constructor for AtmosphereDataBlob.
+        /// </summary>
+        public AtmosphereDB()
+        {
+            Composition = new JDictionary<AtmosphericGasSD, float>();
+        }
 
         /// <summary>
         /// Constructor for AtmosphereDataBlob. 
@@ -66,8 +72,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// <param name="albedo">from 0 to 1.</param>
         /// <param name="surfaceTemp">AFTER greenhouse effects, In Degrees C.</param>
         /// <param name="composition">a Dictionary of gas types as keys and amounts as values</param>
-        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, Dictionary<AtmosphericGasDB,float> composition)
-            : base()
+        public AtmosphereDB(float pressure, bool hydrosphere, short hydroExtent, float greenhouseFactor, float greenhousePressue, float albedo, float surfaceTemp, JDictionary<AtmosphericGasSD,float> composition)
         {
             Pressure = pressure;
             Hydrosphere = hydrosphere;
@@ -78,6 +83,23 @@ namespace Pulsar4X.ECSLib.DataBlobs
             SurfaceTemperature = surfaceTemp;
             Composition = composition;
 
+        }
+
+        public AtmosphereDB(AtmosphereDB atmosphereDB)
+            : this(atmosphereDB.Pressure, atmosphereDB.Hydrosphere, atmosphereDB.HydrosphereExtent, 
+            atmosphereDB.GreenhouseFactor, atmosphereDB.GreenhousePressure, atmosphereDB.Albedo, 
+            atmosphereDB.SurfaceTemperature, 
+            (JDictionary<AtmosphericGasSD,float>)atmosphereDB.Composition.ToDictionary(
+            entry => new AtmosphericGasSD(), 
+            entry => entry.Value
+            ))
+        {
+
+        }
+
+        public override object Clone()
+        {
+            return new AtmosphereDB(this);
         }
     }
 }

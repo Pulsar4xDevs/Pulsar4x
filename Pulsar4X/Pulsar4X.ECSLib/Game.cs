@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X;
 using System.Threading;
-using Pulsar4X.ECSLib.Helpers;
 using Pulsar4X.ECSLib.Processors;
 
 namespace Pulsar4X.ECSLib
@@ -69,8 +63,13 @@ namespace Pulsar4X.ECSLib
 
         public Interrupt CurrentInterrupt { get; set; }
 
+        public event EventHandler PostLoad;
+
+        public bool IsLoaded { get; private set; }
+
         public Game()
         {
+            IsLoaded = false;
             GlobalManager = new EntityManager();
             GlobalManager.Clear(true);
             Instance = this;
@@ -122,8 +121,8 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // loop through all the incoming queues looking for a new message:
-                List<int> factions = GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
-                foreach (int faction in factions)
+                List<Entity> factions = GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
+                foreach (Entity faction in factions)
                 {
                     // lets just take a peek first:
                     Message message;
@@ -158,7 +157,7 @@ namespace Pulsar4X.ECSLib
             return true; // we will do this until we have messages that can be invalid!!
         }
 
-        private void ProcessMessage(int faction, Message message, ref bool quit)
+        private void ProcessMessage(Entity faction, Message message, ref bool quit)
         {
             if (message == null)
             {
@@ -240,13 +239,18 @@ namespace Pulsar4X.ECSLib
         }
 
 
-        internal void PostLoad(DateTime currentDateTime, EntityManager globalManager, List<StarSystem> starSystems)
+        internal void PostGameLoad(DateTime currentDateTime, EntityManager globalManager, List<StarSystem> starSystems)
         {
             CurrentDateTime = currentDateTime;
             GlobalManager = globalManager;
             StarSystems = starSystems;
 
-            ///< @todo go throuhg all datablobs and call their postLoad functions if they have them.
+            // Invoke the Post Load event:
+            if (PostLoad != null)
+                PostLoad(this, EventArgs.Empty);
+
+            // set isLoaded to true:
+            IsLoaded = true;
         }
     }
 }

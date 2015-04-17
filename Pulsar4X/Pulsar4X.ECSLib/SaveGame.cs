@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 using System.IO;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Pulsar4X.ECSLib
 {
@@ -22,6 +21,7 @@ namespace Pulsar4X.ECSLib
 
         private struct SaveData
         {
+            public VersionInfo Version;
             public DateTime GameDateTime;
             public EntityManager GlobalEntityManager;
             public List<StarSystem> StarSystems;
@@ -61,8 +61,16 @@ namespace Pulsar4X.ECSLib
                 _data = (SaveData)_serializer.Deserialize(reader, typeof(SaveData));
             }
 
+            // check the version info:
+            if (_data.Version.IsCompatibleWith(VersionInfo.PulsarVersionInfo) == false)
+            {
+                string e = String.Format("The save file is not supported. the save is from version {0}, the game only supports versions: {1}", _data.Version.VersionString, VersionInfo.PulsarVersionInfo.CompatibileVersions);
+
+                throw new System.NotSupportedException(e);
+            }
+
             // get the game to do its post load stuff
-            Game.Instance.PostLoad(_data.GameDateTime, _data.GlobalEntityManager, _data.StarSystems);
+            Game.Instance.PostGameLoad(_data.GameDateTime, _data.GlobalEntityManager, _data.StarSystems);
         }
 
         /// <summary>
@@ -90,6 +98,7 @@ namespace Pulsar4X.ECSLib
 
         private void CollectGameData()
         {
+            _data.Version = VersionInfo.PulsarVersionInfo;
             _data.GlobalEntityManager = Game.Instance.GlobalManager;
             _data.StarSystems = Game.Instance.StarSystems;
             _data.GameDateTime = Game.Instance.CurrentDateTime;
@@ -98,12 +107,26 @@ namespace Pulsar4X.ECSLib
 
     /// <summary>
     /// A small interface that defines the PostLaod function for datablobs and other classes to use for post de-serilization work.
+    /// It also defines the RegisterPostLoad function that should be called in all an implimenters constructors.
     /// </summary>
     public interface IPostLoad
     {
         /// <summary>
-        /// This function is called after the game has been loaded/Deserialized.
+        /// This function should be added to all of an implimenters constructors.
+        /// To impliment this function simply add the lines
+        /// <code>
+        /// if(!Game.Instance.IsLoaded)
+        ///     Game.Instance.PostLoad += new EventHandler(PostLoad);
+        /// </code>
+        /// to the method body.
         /// </summary>
-        void PostLoad();
+        void RegisterPostLoad();
+
+        /// <summary>
+        /// This function is called after the game has been loaded/Deserialized.
+        /// Make sure you unsubscribe from the post Load event at the end of this function by using the following:
+        /// <code>Game.Instance.PostLoad -= PostLoad;</code>
+        /// </summary>
+        void PostLoad(object sender, EventArgs e);
     }
 }

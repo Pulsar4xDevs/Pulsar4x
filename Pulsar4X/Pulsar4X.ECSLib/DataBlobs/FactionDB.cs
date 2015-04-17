@@ -1,25 +1,46 @@
 ﻿using System.Collections.Generic;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     public class FactionDB : BaseDataBlob
     {
-        public string Title;
-        public List<SpeciesDB> Species;
+        public List<Entity> Species;
 
         public List<StarSystem> KnownSystems;
 
-        public List<ColonyInfoDB> Populations;
+        public List<Entity> Colonies;
 
-        public FactionDB(string title,
-            List<SpeciesDB> species,
-            List<StarSystem> knownSystems,
-            List<ColonyInfoDB> population)
+        public List<Entity> ShipClasses;
+
+        public FactionDB()
+            : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>())
         {
-            Title = title;
+
+        }
+
+        public FactionDB(
+            List<Entity> species,
+            List<StarSystem> knownSystems,
+            List<Entity> population)
+        {
             Species = species;
             KnownSystems = knownSystems;
-            Populations = population;
+            Colonies = population;
+            ShipClasses = new List<Entity>();
+        }
+        
+
+        public FactionDB(FactionDB factionDB)
+        {
+            Species = new List<Entity>();
+            KnownSystems = new List<StarSystem>();
+            Colonies = new List<Entity>();
+            ShipClasses = new List<Entity>();
+        }
+
+        public override object Clone()
+        {
+            return new FactionDB(this);
         }
     }
 }

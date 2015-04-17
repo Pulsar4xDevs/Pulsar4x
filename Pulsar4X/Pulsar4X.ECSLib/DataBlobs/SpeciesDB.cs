@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Pulsar4X.ECSLib.DataBlobs
+﻿namespace Pulsar4X.ECSLib
 {
     public class SpeciesDB : BaseDataBlob
     {
-        public string SpeciesName;
         public double BaseGravity;
         public double MinimumGravityConstraint;
         public double MaximumGravityConstraint;
@@ -18,11 +12,9 @@ namespace Pulsar4X.ECSLib.DataBlobs
         public double MinimumTemperatureConstraint;
         public double MaximumTemperatureConstraint;
 
-        public SpeciesDB(string speciesName, double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
-            : base()
+        public SpeciesDB(double baseGravity, double minGravity, double maxGravity, double basePressure, double minPressure, double maxPressure, double baseTemp, double minTemp, double maxTemp)
         {
             // set default values:
-            SpeciesName = speciesName;
             BaseGravity = baseGravity;
             MinimumGravityConstraint = minGravity;
             MaximumGravityConstraint = maxGravity;
@@ -35,7 +27,20 @@ namespace Pulsar4X.ECSLib.DataBlobs
 
         }
 
-        public SpeciesDB() : base()
-        { }
+        public SpeciesDB()
+        {
+        }
+
+        public SpeciesDB(SpeciesDB speciesDB)
+            : this(speciesDB.BaseGravity, speciesDB.MinimumGravityConstraint, speciesDB.MaximumGravityConstraint, 
+            speciesDB.BasePressure, speciesDB.MinimumPressureConstraint, speciesDB.MaximumPressureConstraint,
+            speciesDB.BaseTemperature, speciesDB.MinimumTemperatureConstraint, speciesDB.MaximumTemperatureConstraint)
+        {
+        }
+
+        public override object Clone()
+        {
+            return new SpeciesDB(this);
+        }
     }
 }

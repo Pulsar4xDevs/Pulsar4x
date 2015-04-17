@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Pulsar4X.ECSLib.Helpers;
+using Pulsar4X.ECSLib;
 
 namespace Pulsar4X.Tests
 {
     using NUnit.Framework;
 
-    [TestFixture, Description("Tests for the unit conversion helpers in Pulsar4X.ECSLib.Helpers.GameMath")]
+    [TestFixture, Description("Tests for the unit conversion helpers in GameMath.cs")]
     class UnitHelperTests
     {
         [TestCase(90, Math.PI / 2.0, true)]
@@ -21,11 +21,11 @@ namespace Pulsar4X.Tests
         {
             if (toRadians)
             {
-                Assert.That(to, Is.EqualTo(Angle.ToRadians(from)).Within(0.0000000001));
+                Assert.That(Angle.ToRadians(from), Is.EqualTo(to).Within(0.0000000001));
             }
             else
             {
-                Assert.That(to, Is.EqualTo(Angle.ToDegrees(from)).Within(0.0000000001));
+                Assert.That(Angle.ToDegrees(from), Is.EqualTo(to).Within(0.0000000001));
             }
         }
 
@@ -40,11 +40,11 @@ namespace Pulsar4X.Tests
         {
             if (toAU)
             {
-                Assert.That(to, Is.EqualTo(Distance.ToAU(from)).Within(1).Ulps);  // ulps mean units in the last place.
+                Assert.That(Distance.ToAU(from), Is.EqualTo(to).Within(1).Ulps);  // ulps mean units in the last place.
             }
             else
             {
-                Assert.That(to, Is.EqualTo(Distance.ToKm(from)).Within(1).Ulps);
+                Assert.That(Distance.ToKm(from), Is.EqualTo(to).Within(1).Ulps);
             }
         }
 
@@ -59,11 +59,11 @@ namespace Pulsar4X.Tests
         {
             if (toKelvin)
             {
-                Assert.That(to, Is.EqualTo(Temperature.ToKelvin(from)).Within(0.000000001)); 
+                Assert.That(Temperature.ToKelvin(from), Is.EqualTo(to).Within(0.000000001)); 
             }
             else
             {
-                Assert.That(to, Is.EqualTo(Temperature.ToCelsius(from)).Within(0.000000001));
+                Assert.That(Temperature.ToCelsius(from), Is.EqualTo(to).Within(0.000000001));
             }
         }
 
@@ -77,11 +77,11 @@ namespace Pulsar4X.Tests
         {
             if (toKelvin)
             {
-                Assert.That(to, Is.EqualTo(Temperature.ToKelvin(from)).Within(0.0001)); 
+                Assert.That(Temperature.ToKelvin(from), Is.EqualTo(to).Within(0.0001)); 
             }
             else
             {
-                Assert.That(to, Is.EqualTo(Temperature.ToCelsius(from)).Within(0.0001));
+                Assert.That(Temperature.ToCelsius(from), Is.EqualTo(to).Within(0.0001));
             }
         }
     }

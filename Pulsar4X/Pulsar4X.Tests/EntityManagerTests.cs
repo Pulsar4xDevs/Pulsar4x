@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Remoting.Channels;
+using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Helpers;
+using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -11,17 +12,18 @@ namespace Pulsar4X.Tests
     class EntityManagerTests
     {
         EntityManager _entityManager;
-        private DataBlobRef<SpeciesDB> _species1;
-        private JDictionary<DataBlobRef<SpeciesDB>, double> _pop1;
-        private JDictionary<DataBlobRef<SpeciesDB>, double> _pop2;
+        private Entity _species1;
+        private JDictionary<Entity, double> _pop1;
+        private JDictionary<Entity, double> _pop2;
 
         [SetUp]
         public void Init()
         {
+            Game game = new Game();
             _entityManager = new EntityManager();
-            _species1 = new DataBlobRef<SpeciesDB>(new SpeciesDB("Human", 1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45));
-            _pop1 = new JDictionary<DataBlobRef<SpeciesDB>, double> { { _species1, 10 } };
-            _pop2 = new JDictionary<DataBlobRef<SpeciesDB>, double> { { _species1, 5 } };
+            _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
+            _pop1 = new JDictionary<Entity, double> { { _species1, 10 } };
+            _pop2 = new JDictionary<Entity, double> { { _species1, 5 } };
         }
 
         [TearDown]
@@ -30,43 +32,67 @@ namespace Pulsar4X.Tests
             _entityManager = null;
         }
 
+        [Test]
+        [Ignore("Stress Test.")]
+        public void CloneStress()
+        {
+            Entity humanFaction = FactionFactory.CreateFaction(Game.Instance.GlobalManager, "Humans");
+            Entity harbingerShipClass =  ShipFactory.CreateNewShipClass(humanFaction, "Harbinger");
+            List<Entity> reapers = new List<Entity>(1000000);
+            for (int i = 0; i < 1000000; i++)
+            {
+                reapers.Add(harbingerShipClass.Clone(_entityManager));
+            }
+            reapers.Clear();
+        }
+
 
         [Test]
         public void CreateEntity()
         {
             // create entity with no data blobs:
-            int testEntity = _entityManager.CreateEntity();
-            Assert.AreEqual(0, testEntity);
+            Entity testEntity = Entity.Create(_entityManager);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(1, testEntity.ID);
+            Assert.AreSame(_entityManager, testEntity.Manager);
+
+            // Check the mask.
+            Assert.AreEqual(EntityManager.BlankDataBlobMask(), testEntity.DataBlobMask);
 
             // Create entity with existing datablobs:
-            var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2), new ColonyInfoDB(_pop1)};
-            testEntity = _entityManager.CreateEntity(dataBlobs);
-            Assert.AreEqual(1, testEntity);
+            var dataBlobs = new List<BaseDataBlob> {new OrbitDB(), new ColonyInfoDB(_pop1, Entity.GetInvalidEntity())};
+            testEntity = Entity.Create(_entityManager, dataBlobs);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(2, testEntity.ID);
+
+            // Check the mask.
+            ComparableBitArray expectedMask = EntityManager.BlankDataBlobMask();
+            int orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+            int colonyTypeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
+            expectedMask[orbitTypeIndex] = true;
+            expectedMask[colonyTypeIndex] = true;
+
+            Assert.AreEqual(expectedMask, testEntity.DataBlobMask);
 
             // Create entity with existing datablobs, but provide an empty list:
             dataBlobs.Clear();
-            testEntity = _entityManager.CreateEntity(dataBlobs);
-            Assert.AreEqual(2, testEntity);
-
-            // Create entity with existing datablobs, but provide a null list:
-            Assert.Catch(typeof(ArgumentNullException), () =>
-                {
-                    _entityManager.CreateEntity(null); // should throw ArgumentNullException
-                });
-
+            testEntity = Entity.Create(_entityManager, dataBlobs);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(3, testEntity.ID);
         }
 
         [Test]
         public void SetDataBlobs()
         {
-            int testEntity = _entityManager.CreateEntity();
-            _entityManager.SetDataBlob(testEntity, OrbitDB.FromStationary(5));
-            _entityManager.SetDataBlob(testEntity, new ColonyInfoDB(_pop1));
+            Entity testEntity = Entity.Create(_entityManager);
+            testEntity.SetDataBlob(new OrbitDB());
+            testEntity.SetDataBlob(new ColonyInfoDB(_pop1,Entity.GetInvalidEntity()));
+            testEntity.SetDataBlob(new PositionDB(0, 0, 0), EntityManager.GetTypeIndex<PositionDB>());
 
             // test bad input:
             Assert.Catch(typeof(ArgumentNullException), () =>
             {
-                _entityManager.SetDataBlob(testEntity, (OrbitDB)null); // should throw ArgumentNullException
+                testEntity.SetDataBlob((OrbitDB)null); // should throw ArgumentNullException
             });
         }
 
@@ -88,7 +114,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(3, orbits.Count);
 
             // and of a type we know is not in the entity manager:
-            List<PlanetInfoDB> planetBlobs = _entityManager.GetAllDataBlobsOfType<PlanetInfoDB>();
+            List<SystemBodyDB> planetBlobs = _entityManager.GetAllDataBlobsOfType<SystemBodyDB>();
             Assert.AreEqual(0, planetBlobs.Count);  // shoul be 0 as there are none of them.
 
             // and of all types, should throw as you cannot do this:
@@ -101,108 +127,97 @@ namespace Pulsar4X.Tests
         [Test]
         public void GetDataBlobsByEntity()
         {
-            int testEntity = PopulateEntityManager();  // make sure we have something in there.
+            Entity testEntity = PopulateEntityManager();  // make sure we have something in there.
 
             // Get all DataBlobs of a specific entity.
-            List<BaseDataBlob> dataBlobs = _entityManager.GetAllDataBlobsOfEntity(testEntity);
+            List<BaseDataBlob> dataBlobs = testEntity.GetAllDataBlobs();
             Assert.AreEqual(2, dataBlobs.Count);
 
             // empty entity mean empty list.
-            testEntity = _entityManager.CreateEntity();  // create empty entity.
-            dataBlobs = _entityManager.GetAllDataBlobsOfEntity(testEntity);
+            testEntity = Entity.Create(_entityManager);  // create empty entity.
+            dataBlobs = testEntity.GetAllDataBlobs();
             Assert.AreEqual(0, dataBlobs.Count);
-
-            // and of an entity that does not exist??
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                _entityManager.GetAllDataBlobsOfEntity(42);
-            });
         }
 
         [Test]
         public void GetDataBlobByEntity()
         {
-            int testEntity = PopulateEntityManager();
+            Entity testEntity = PopulateEntityManager();
 
             // Get the Population DB of a specific entity.
-            ColonyInfoDB popDB = _entityManager.GetDataBlob<ColonyInfoDB>(testEntity);
+            ColonyInfoDB popDB = testEntity.GetDataBlob<ColonyInfoDB>();
             Assert.IsNotNull(popDB);
 
             // get a DB we know the entity does not have:
-            AtmosphereDB atmoDB = _entityManager.GetDataBlob<AtmosphereDB>(testEntity);
+            AtmosphereDB atmoDB = testEntity.GetDataBlob<AtmosphereDB>();
             Assert.IsNull(atmoDB);
-
-            // test with invalid entity ID:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-            {
-                _entityManager.GetDataBlob<ColonyInfoDB>(42);
-            });
 
             // test with invalid data blob type
             Assert.Catch(typeof(KeyNotFoundException), () =>
             {
-                _entityManager.GetDataBlob<BaseDataBlob>(testEntity);
+                testEntity.GetDataBlob<BaseDataBlob>();
             });
 
             // and again for the second lookup type:
             // Get the Population DB of a specific entity.
             int typeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
-            popDB = _entityManager.GetDataBlob<ColonyInfoDB>(testEntity, typeIndex);
+            popDB = testEntity.GetDataBlob<ColonyInfoDB>(typeIndex);
             Assert.IsNotNull(popDB);
 
             // get a DB we know the entity does not have:
             typeIndex = EntityManager.GetTypeIndex<AtmosphereDB>();
-            atmoDB = _entityManager.GetDataBlob<AtmosphereDB>(testEntity, typeIndex);
+            atmoDB = testEntity.GetDataBlob<AtmosphereDB>(typeIndex);
             Assert.IsNull(atmoDB);
-
-            // test with invalid entity ID:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-            {
-                _entityManager.GetDataBlob<AtmosphereDB>(42, typeIndex);
-            });
 
             // test with invalid type index:
             Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
             {
-                _entityManager.GetDataBlob<AtmosphereDB>(testEntity, -42);
+                testEntity.GetDataBlob<AtmosphereDB>(-42);
             });
 
             // test with invalid T vs type at typeIndex
             typeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
             Assert.Catch(typeof(InvalidCastException), () =>
             {
-                _entityManager.GetDataBlob<PlanetInfoDB>(testEntity, typeIndex);
+                testEntity.GetDataBlob<SystemBodyDB>(typeIndex);
             });
         }
 
         [Test]
         public void RemoveEntities()
         {
-            int testEntity = PopulateEntityManager();
+            Entity testEntity = PopulateEntityManager();
 
             // lets check the entity at index testEntity
-            List<BaseDataBlob> testList = _entityManager.GetAllDataBlobsOfEntity(testEntity);
+            List<BaseDataBlob> testList = testEntity.GetAllDataBlobs();
             Assert.AreEqual(2, testList.Count);  // should have 2 datablobs.
 
+
+            // Register the events.
+            bool DeletingEventCalled = false;
+            bool DeletedEventCalled = false;
+            testEntity.Deleting += (sender, args) => DeletingEventCalled = true;
+            testEntity.Deleted += (sender, args) => DeletedEventCalled = true;
+
             // Remove an entity.
-            _entityManager.RemoveEntity(testEntity);
+            testEntity.Delete();
+
+            Assert.IsTrue(DeletingEventCalled);
+            Assert.IsTrue(DeletedEventCalled);
 
             // now lets see if the entity is still there:
             Assert.Catch(typeof (ArgumentException), () =>
             {
-                testList = _entityManager.GetAllDataBlobsOfEntity(testEntity);
+                testList = testEntity.GetAllDataBlobs();
             });
    
             Assert.IsFalse(_entityManager.IsValidEntity(testEntity));
 
-            // now lets remove an entity that does not exist:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                _entityManager.RemoveEntity(42);
-            });
+            // Try to get a bad mask.
+            Assert.Catch<ArgumentException>(() => { ComparableBitArray mask = testEntity.DataBlobMask; });
 
             // add a new entity:
-            testEntity = _entityManager.CreateEntity();
+            testEntity = Entity.Create(_entityManager);
 
             // now lets clear the entity manager:
             _entityManager.Clear();
@@ -211,59 +226,52 @@ namespace Pulsar4X.Tests
             // now lets see if that entity is still there:
             Assert.Catch(typeof(ArgumentException), () =>
             {
-                _entityManager.GetAllDataBlobsOfEntity(testEntity);  // should throw this time
+                testEntity.GetAllDataBlobs();  // should throw this time
             });
+
+            // Now try to remove the entity. Again.
+            Assert.Catch<ArgumentException>(testEntity.Delete);
         }
 
         [Test]
         public void RemoveDataBlobs()
         {
             // a little setup:
-            int testEntity = _entityManager.CreateEntity();
-            _entityManager.SetDataBlob(testEntity, new ColonyInfoDB(_pop1));
+            Entity testEntity = Entity.Create(_entityManager);
+            testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.GetInvalidEntity()));
 
-            Assert.IsTrue(_entityManager.GetDataBlob<ColonyInfoDB>(testEntity) != null);  // check that it has the data blob
-            _entityManager.RemoveDataBlob<ColonyInfoDB>(testEntity);                     // Remove a data blob
-            Assert.IsTrue(_entityManager.GetDataBlob<ColonyInfoDB>(testEntity) == null); // now check that it doesn't
+            Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() != null);  // check that it has the data blob
+            testEntity.RemoveDataBlob<ColonyInfoDB>();                     // Remove a data blob
+            Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() == null); // now check that it doesn't
 
             // now lets try remove it again:
-            _entityManager.RemoveDataBlob<ColonyInfoDB>(testEntity); 
-
-            // now lets try removal for an entity that does not exist:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                _entityManager.RemoveDataBlob<ColonyInfoDB>(42);  
-            });
+            testEntity.RemoveDataBlob<ColonyInfoDB>(); 
 
             // cannot remove baseDataBlobs, invalid data blob type:
             Assert.Catch(typeof(KeyNotFoundException), () =>
             {
-                _entityManager.RemoveDataBlob<BaseDataBlob>(testEntity);  
+                testEntity.RemoveDataBlob<BaseDataBlob>();  
             });
 
 
             // reset:
-            _entityManager.SetDataBlob(testEntity, new ColonyInfoDB(_pop1));
+            testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.GetInvalidEntity()));
             int typeIndex = EntityManager.GetTypeIndex<ColonyInfoDB>();
 
-            Assert.IsTrue(_entityManager.GetDataBlob<ColonyInfoDB>(testEntity) != null);  // check that it has the data blob
-            _entityManager.RemoveDataBlob(testEntity, typeIndex);              // Remove a data blob
-            Assert.IsTrue(_entityManager.GetDataBlob<ColonyInfoDB>(testEntity) == null); // now check that it doesn't
+            Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() != null);  // check that it has the data blob
+            testEntity.RemoveDataBlob(typeIndex);              // Remove a data blob
+            Assert.IsTrue(testEntity.GetDataBlob<ColonyInfoDB>() == null); // now check that it doesn't
 
             // now lets try remove it again:
-            _entityManager.RemoveDataBlob(testEntity, typeIndex);
-
-            // now lets try an invlaid entity:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                _entityManager.RemoveDataBlob(42, typeIndex);
-            });
+            testEntity.RemoveDataBlob(typeIndex);
 
             // and an invalid typeIndex:
-            Assert.Catch(typeof(ArgumentException), () =>
-            {
-                _entityManager.RemoveDataBlob(testEntity, -42);
-            });
+            Assert.Catch(typeof(ArgumentException), () => testEntity.RemoveDataBlob(-42));
+
+            // now lets try an invlaid entity:
+            testEntity.Delete();
+            Assert.Catch(typeof(ArgumentException), () => testEntity.RemoveDataBlob(typeIndex));
+
         }
 
         [Test]
@@ -272,7 +280,7 @@ namespace Pulsar4X.Tests
             PopulateEntityManager();
 
             // Find all entities with a specific DataBlob.
-            List<int> entities = _entityManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
+            List<Entity> entities = _entityManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
             Assert.AreEqual(2, entities.Count);
 
             // again, but look for a datablob that no entity has:
@@ -280,11 +288,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(0, entities.Count);
 
             // check with invalid data blob type:
-            Assert.Catch(typeof(KeyNotFoundException), () =>
-                {
-                    _entityManager.GetAllEntitiesWithDataBlob<BaseDataBlob>();
-                }
-            );
+            Assert.Catch(typeof(KeyNotFoundException), () => _entityManager.GetAllEntitiesWithDataBlob<BaseDataBlob>());
 
             // now lets lookup using a mask:
             ComparableBitArray dataBlobMask = EntityManager.BlankDataBlobMask();
@@ -305,26 +309,18 @@ namespace Pulsar4X.Tests
 
             // test bad mask:
             ComparableBitArray badMask = new ComparableBitArray(4242); // use a big number so we never rach that many data blobs.
-            Assert.Catch(typeof(ArgumentException), () =>
-                {
-                    _entityManager.GetAllEntitiesWithDataBlobs(badMask);
-                }
-            );
+            Assert.Catch(typeof(ArgumentException), () => _entityManager.GetAllEntitiesWithDataBlobs(badMask));
 
-            Assert.Catch(typeof(NullReferenceException), () =>
-                {
-                    _entityManager.GetAllEntitiesWithDataBlobs(null);
-                }
-            );
+            Assert.Catch(typeof(NullReferenceException), () => _entityManager.GetAllEntitiesWithDataBlobs(null));
 
 
             // now lets just get the one entity:
-            int testEntity = _entityManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
-            Assert.AreEqual(0, testEntity);
+            Entity testEntity = _entityManager.GetFirstEntityWithDataBlob<ColonyInfoDB>();
+            Assert.IsTrue(testEntity.IsValid);
 
             // lookup an entity that does not exist:
             testEntity = _entityManager.GetFirstEntityWithDataBlob<AtmosphereDB>();
-            Assert.AreEqual(-1, testEntity);    
+            Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type:
             Assert.Catch(typeof(KeyNotFoundException), () =>
@@ -336,70 +332,45 @@ namespace Pulsar4X.Tests
             // now lets just get the one entity, but use a different function to do it:
             int type = EntityManager.GetTypeIndex<ColonyInfoDB>();
             testEntity = _entityManager.GetFirstEntityWithDataBlob(type);
-            Assert.AreEqual(0, testEntity);
+            Assert.IsTrue(testEntity.IsValid);
+            Assert.AreEqual(0, testEntity.ID);
 
             // lookup an entity that does not exist:
             type = EntityManager.GetTypeIndex<AtmosphereDB>();
             testEntity = _entityManager.GetFirstEntityWithDataBlob(type);
-            Assert.AreEqual(-1, testEntity);
+            Assert.IsFalse(testEntity.IsValid);
 
             // try again with incorrect type index:
-            Assert.Catch(typeof(ArgumentOutOfRangeException), () =>
-            {
-                _entityManager.GetFirstEntityWithDataBlob(4242);
-            });
+            Assert.Catch(typeof(ArgumentOutOfRangeException), () => _entityManager.GetFirstEntityWithDataBlob(4242));
         }
 
         [Test]
-        public void EntityValidity()
+        public void EntityGuid()
         {
-            Guid entityGuid;
-            EntityManager foundManager;
-            int foundID;
+            Entity foundEntity;
+            Entity testEntity = Entity.Create(_entityManager);
 
-            int testEntity = _entityManager.CreateEntity();
-            Assert.IsTrue(_entityManager.IsValidEntity(testEntity));
-
+            Assert.IsTrue(testEntity.IsValid);
             // Check Guid local lookup.
-            Assert.IsTrue(_entityManager.TryGetGuidByEntity(testEntity, out entityGuid));
+            Assert.IsTrue(_entityManager.TryGetEntityByID(testEntity.ID, out foundEntity));
+            Assert.IsTrue(testEntity == foundEntity);
 
             // Check Guid local reverse lookup
-            Assert.IsTrue(_entityManager.TryGetEntityByGuid(entityGuid, out foundID));
-            Assert.AreEqual(testEntity, foundID);
+            Assert.IsTrue(_entityManager.TryGetEntityByGuid(testEntity.Guid, out foundEntity));
+            Assert.AreEqual(testEntity, foundEntity);
             
             // Check Guid global lookup.
-            Assert.IsTrue(EntityManager.FindEntityByGuid(entityGuid, out foundManager, out foundID));
-            Assert.AreSame(_entityManager, foundManager);
-            Assert.AreEqual(testEntity, foundID);
-
-            // now test invalid input:
-            Assert.IsFalse(_entityManager.IsValidEntity(-42));
-            Assert.IsFalse(_entityManager.IsValidEntity(42));
+            Assert.IsTrue(EntityManager.FindEntityByGuid(testEntity.Guid, out foundEntity));
+            Assert.AreEqual(testEntity, foundEntity);
 
             // and a removed entity:
-            _entityManager.RemoveEntity(testEntity);
-            Assert.IsFalse(_entityManager.IsValidEntity(testEntity));
-        }
+            testEntity.Delete();
+            Assert.IsFalse(testEntity.IsValid);
 
-        [Test]
-        public void EntityConvenienceFunctions()
-        {
-            PopulateEntityManager();
-
-            Dictionary<int, Tuple<OrbitDB, ColonyInfoDB>> entityDBMap = _entityManager.GetEntitiesAndDataBlobs<OrbitDB, ColonyInfoDB>();
-
-            // Make sure we found the rightn number of entities.
-            Assert.AreEqual(2, entityDBMap.Count);
-
-            foreach (KeyValuePair<int, Tuple<OrbitDB, ColonyInfoDB>> entityMap in entityDBMap)
-            {
-                // Make sure we got the same datablobs.
-                OrbitDB orbit = _entityManager.GetDataBlob<OrbitDB>(entityMap.Key);
-                Assert.AreSame(orbit, entityMap.Value.Item1);
-
-                ColonyInfoDB position = _entityManager.GetDataBlob<ColonyInfoDB>(entityMap.Key);
-                Assert.AreSame(position, entityMap.Value.Item2);
-            }
+            // Check back Guid lookups.
+            Assert.IsFalse(_entityManager.TryGetEntityByGuid(testEntity.Guid, out foundEntity));
+            Assert.IsFalse(_entityManager.TryGetEntityByID(-1, out foundEntity));
+            Assert.IsFalse(EntityManager.FindEntityByGuid(Guid.Empty, out foundEntity));
         }
 
         [Test]
@@ -410,30 +381,43 @@ namespace Pulsar4X.Tests
             PopulateEntityManager();
 
             // Get an entity from the manager.
-            int testEntity = _entityManager.GetFirstEntityWithDataBlob<OrbitDB>();
+            Entity testEntity = _entityManager.GetFirstEntityWithDataBlob<OrbitDB>();
+            // Ensure we got a valid entity.
+            Assert.IsTrue(testEntity.IsValid);
             // Store it's datablobs for later.
-            List<BaseDataBlob> testEntityDataBlobs = _entityManager.GetAllDataBlobsOfEntity(testEntity);
+            List<BaseDataBlob> testEntityDataBlobs = testEntity.GetAllDataBlobs();
             
             // Store the current GUID.
-            Guid entityGuid;
-            _entityManager.TryGetGuidByEntity(testEntity, out entityGuid);
+            Guid entityGuid = testEntity.Guid;
+
+            // Register the events.
+            bool ChangingEventCalled = false;
+            bool ChangedEventCalled = false;
+            testEntity.ChangingManagers += (sender, args) => ChangingEventCalled = true;
+            testEntity.ChangedManagers += (sender, args) => ChangedEventCalled = true;
+
+            // Try to transfer to a null Manager.
+            Assert.Catch<ArgumentNullException>(() => testEntity.Transfer(null));
 
             // Transfer the entity to a new EntityManager
-            int transferredEntity = _entityManager.TransferEntity(testEntity, manager2);
+            testEntity.Transfer(manager2);
+
+            Assert.IsTrue(ChangingEventCalled);
+            Assert.IsTrue(ChangedEventCalled);
 
             // Ensure the original manager no longer has the entity.
             Assert.IsFalse(_entityManager.IsValidEntity(testEntity));
-            int entityByGuid;
-            Assert.IsFalse(_entityManager.TryGetEntityByGuid(entityGuid, out entityByGuid));
+            Entity foundEntity;
+            Assert.IsFalse(_entityManager.TryGetEntityByGuid(entityGuid, out foundEntity));
 
             // Ensure the new manager has the entity.
-            Assert.IsTrue(manager2.IsValidEntity(transferredEntity));
-            Assert.IsTrue(manager2.TryGetEntityByGuid(entityGuid, out entityByGuid));
-            Assert.AreEqual(transferredEntity, entityByGuid);
+            Assert.IsTrue(manager2.IsValidEntity(testEntity));
+            Assert.IsTrue(manager2.TryGetEntityByGuid(entityGuid, out foundEntity));
+            Assert.AreSame(testEntity, foundEntity);
 
             // Get the transferredEntity's datablobs.
-            List<BaseDataBlob> transferredEntityDataBlobs = manager2.GetAllDataBlobsOfEntity(transferredEntity);
-
+            List<BaseDataBlob> transferredEntityDataBlobs = testEntity.GetAllDataBlobs();
+            
             // Compare the old datablobs with the new datablobs.
             foreach (BaseDataBlob testEntityDataBlob in testEntityDataBlobs)
             {
@@ -449,20 +433,10 @@ namespace Pulsar4X.Tests
                 Assert.IsTrue(matchFound);
             }
 
-        }
+            // Try to transfer an invalid entity.
+            testEntity.Delete();
+            Assert.Catch<ArgumentException>(() => testEntity.Transfer(_entityManager));
 
-        [Test]
-        public void InvalidGuidLookups()
-        {
-            PopulateEntityManager();
-
-            int trashEntity;
-            Guid trashGuid;
-            EntityManager trashManager;
-
-            Assert.IsFalse(_entityManager.TryGetEntityByGuid(Guid.Empty, out trashEntity));
-            Assert.IsFalse(_entityManager.TryGetGuidByEntity(-1, out trashGuid));
-            Assert.IsFalse(EntityManager.FindEntityByGuid(Guid.Empty, out trashManager, out trashEntity));
         }
 
         [Test]
@@ -482,23 +456,23 @@ namespace Pulsar4X.Tests
         /// This functions creates 3 entities with a total of 5 data blobs (3 orbits and 2 populations).
         /// </summary>
         /// <returns>It returns a reference to the first entity (containing 1 orbit and 1 pop)</returns>
-        private int PopulateEntityManager()
+        private Entity PopulateEntityManager()
         {
             // Clear out any previous test results.
             _entityManager.Clear();
 
             // Create an entity with individual DataBlobs.
-            int testEntity = _entityManager.CreateEntity();
-            _entityManager.SetDataBlob(testEntity, OrbitDB.FromStationary(5));
-            _entityManager.SetDataBlob(testEntity, new ColonyInfoDB(_pop1));
+            Entity testEntity = Entity.Create(_entityManager);
+            testEntity.SetDataBlob(new OrbitDB());
+            testEntity.SetDataBlob(new ColonyInfoDB(_pop1, Entity.GetInvalidEntity()));
 
             // Create an entity with a DataBlobList.
-            var dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(2)};
-            _entityManager.CreateEntity(dataBlobs);
+            var dataBlobs = new List<BaseDataBlob> { new OrbitDB() };
+            Entity.Create(_entityManager, dataBlobs);
 
             // Create one more, just for kicks.
-            dataBlobs = new List<BaseDataBlob> {OrbitDB.FromStationary(5), new ColonyInfoDB(_pop2)};
-            _entityManager.CreateEntity(dataBlobs);
+            dataBlobs = new List<BaseDataBlob> { new OrbitDB(), new ColonyInfoDB(_pop2, Entity.GetInvalidEntity()) };
+            Entity.Create(_entityManager, dataBlobs);
 
             return testEntity;
         }

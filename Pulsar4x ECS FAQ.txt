@@ -1,0 +1,47 @@
+ECS FAQ:
+
+What is ECS?
+ECS stands for Entity Component System. read:
+http://en.wikipedia.org/wiki/Entity_component_system
+http://gameprogrammingpatterns.com/component.html
+Since the game has "Components" and "Systems", to avoid confusion we've changed the name of the ECS "Components" to "DataBlobs"
+and ECS "Systems" to "Processors"
+
+Can DataBlobs contain other DataBlobs?
+No, DataBlobs should not contain other DataBlobs, but they can however contain Entities, Dictionaries of Entities and Lists of Entities. 
+
+
+
+How do I create an new Entity?
+Create a new static class in the Factories folder, see the other Factories in the folder for examples.
+Note that the class should be:
+public static
+Should take an EntityManager class (though this can in some cases be derived from an Entity).
+Return an Entity.
+
+In most cases you'll be passing in a faction entity.
+to create the entity itself, you'll need a list of DataBlobs that make up the entity.
+the entity is then created in the following manner: Entity foo = Entity.Create(entityManager, listofDataBlobs);
+
+Note that an entity can have only one datablob of a given type
+
+What EntityManager should be used to create an Entity?
+That depends on what the entity does and where it operates: 
+
+12:40 <Rod-Serling> Facitons, ShipClasses, Technologies, Species, ComponentDefs
+12:40 <Rod-Serling> All stuff that should be on the GlobalManager
+12:40 <Rod-Serling> Ships, Populations, Components, those are things that should be on a system manager.
+12:41 <Rod-Serling> Ships needs a shipyard entity to spawn at, you're going to be getting the shipyard location, so pass in the shipyard entity and use it's manager.
+12:41 <Rod-Serling> Populations, the planet.
+12:41 <Rod-Serling> Components, the ship.
+12:42 <Rod-Serling> SystemManager is for concrete things
+12:42 <Rod-Serling> GlobalManager is for blueprints, prototypes, and ideas.
+
+
+
+[2015-04-13 12:39:42] <intercross> From where Processor's Process are called?
+
+[2015-04-13 12:40:24] <Rod-Serling> Lines 222-225 in Game.cs
+[2015-04-13 12:41:26] <Rod-Serling> To add a processor to that list, add it manually around lines 99-102 of Game.cs
+
+

@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Pulsar4X.ECSLib.Helpers
+namespace Pulsar4X.ECSLib
 {
     public sealed class ComparableBitArray
     {
-
         [JsonProperty]
         private readonly int[] _backingValues;
         private const int BitsPerValue = 32;
+        public List<int> SetBits; 
 
         public int Length { get; private set; }
 
@@ -80,7 +81,7 @@ namespace Pulsar4X.ECSLib.Helpers
             }
 
             int backingIndex = 0;
-            while (index > BitsPerValue)
+            while (index >= BitsPerValue)
             {
                 backingIndex++;
                 index -= BitsPerValue;
@@ -121,6 +122,15 @@ namespace Pulsar4X.ECSLib.Helpers
 
             backingValue ^= (-value ^ backingValue) & (1 << index);
             _backingValues[backingIndex] = backingValue;
+
+            if (value == 1)
+            {
+                SetBits.Add(index);
+            }
+            else
+            {
+                SetBits.Remove(index);
+            }
         }
 
         /// <summary>
@@ -128,6 +138,8 @@ namespace Pulsar4X.ECSLib.Helpers
         /// </summary>
         public ComparableBitArray(int length)
         {
+            SetBits = new List<int>();
+
             int requiredBackingValues = 1;
             while (length > BitsPerValue)
             {
@@ -142,7 +154,7 @@ namespace Pulsar4X.ECSLib.Helpers
                 _backingValues[i] = 0;
             }
 
-            Length = length;
+            Length = length + ((requiredBackingValues * BitsPerValue) - BitsPerValue);
         }
 
         /// <summary>

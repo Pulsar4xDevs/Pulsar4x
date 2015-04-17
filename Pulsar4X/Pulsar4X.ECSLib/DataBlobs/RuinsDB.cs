@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Pulsar4X.ECSLib.DataBlobs
+﻿namespace Pulsar4X.ECSLib
 {
     public class RuinsDB : BaseDataBlob
     {
@@ -54,7 +49,15 @@ namespace Pulsar4X.ECSLib.DataBlobs
         public RQuality RuinQuality;
 
         /// <summary>
-        /// Constructor for RuinsDataBlob
+        /// Empty constructor for RuinsDataBlob.
+        /// </summary>
+        public RuinsDB()
+        {
+            
+        }
+
+        /// <summary>
+        /// Constructor for RuinsDataBlob.
         /// </summary>
         /// <param name="ruinCount"></param>
         /// <param name="ruinTechLevel"> What kinds of things should be found in this ruin? including sophistication of killbots?</param>
@@ -66,6 +69,16 @@ namespace Pulsar4X.ECSLib.DataBlobs
             RuinTechLevel = ruinTechLevel;
             RuinSize = ruinSize;
             RuinQuality = ruinQuality;
+        }
+
+        public RuinsDB(RuinsDB ruinsDB)
+            : this(ruinsDB.RuinCount, ruinsDB.RuinTechLevel, ruinsDB.RuinSize, ruinsDB.RuinQuality)
+        {
+        }
+
+        public override object Clone()
+        {
+            return new RuinsDB(this);
         }
     }
 }
