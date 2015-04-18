@@ -103,8 +103,13 @@ namespace Pulsar4X.ECSLib
     {
         public enum MessageType
         {
-            Quit,           /// terminates the main game loop.
-            Echo,           /// will be sent straight back to sender. Use for testing.     
+                                /// InQueue
+            Quit,               /// terminates the main game loop.
+            Save,               /// saves game 
+            Load,               /// loads game
+            Echo,               /// will be sent straight back to sender. Use for testing.     
+                                /// OutQueue
+            GameStatusUpdate    /// 
         }
 
         public MessageType _messageType;

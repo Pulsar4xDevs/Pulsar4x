@@ -121,7 +121,7 @@ namespace Pulsar4X.ECSLib
                 }
 
                 // loop through all the incoming queues looking for a new message:
-                List<Entity> factions = GlobalManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>();
+                List<Entity> factions = GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
                 foreach (Entity faction in factions)
                 {
                     // lets just take a peek first:
@@ -168,6 +168,22 @@ namespace Pulsar4X.ECSLib
             {
                 case Message.MessageType.Quit:
                     quit = true;                                        // cause the game to quit!
+                    break;
+                case Message.MessageType.Save:
+                    string savePath = message._data as string;
+                    if(string.IsNullOrWhiteSpace(savePath))
+                        break;
+                    SaveGame saveGame = new SaveGame(savePath);
+                    saveGame.Save();
+                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(Message.MessageType.GameStatusUpdate, "Saved to " + savePath));
+                    break;
+                case Message.MessageType.Load:
+                    string loadPath = message._data as string;
+                    if(string.IsNullOrWhiteSpace(loadPath))
+                        break;
+                    SaveGame loadGame = new SaveGame(loadPath);
+                    loadGame.Load(loadPath);
+                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(Message.MessageType.GameStatusUpdate, "Loaded from " + loadPath));
                     break;
                 case Message.MessageType.Echo:
                     EngineComms.LibWriteOutQueue(faction, message);     // echo chamber ;)

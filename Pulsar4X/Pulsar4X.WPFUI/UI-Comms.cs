@@ -14,7 +14,7 @@ namespace Pulsar4X.WPFUI
         internal static UI_Comms Instance { get; set; }
         internal static Thread MainLoopThread { get; private set; }
 
-        MessageBook MessageQueue { get; set; }
+        private MessageBook MessageQueue { get; set; }
 
         public UI_Comms(Engine_Comms engineComms, Entity faction)
         {
@@ -31,6 +31,13 @@ namespace Pulsar4X.WPFUI
                 //everthing in the UI would subscribe to the events for messages they are interested in
                 //the even would pass the data, i.e the rest of the message object, to the event delegates 
 
+                switch(message._messageType)
+                {
+                    case (Message.MessageType.GameStatusUpdate):
+
+                        break;
+                }
+
                 if (MessageQueue.OutMessageQueue.Count > 10)
                     Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() => CheckEngineMessageQueue()));
                 else
@@ -38,6 +45,11 @@ namespace Pulsar4X.WPFUI
             }
             else
                 Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => CheckEngineMessageQueue()));
+        }
+
+        public void SendMessage(Message message)
+        {
+            MessageQueue.InMessageQueue.Enqueue(message);
         }
 
         private void FireEngine()
