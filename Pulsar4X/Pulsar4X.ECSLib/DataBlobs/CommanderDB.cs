@@ -17,19 +17,18 @@ namespace Pulsar4X.ECSLib
 
         public CommanderTypes Type { get; set; }
 
-        public Dictionary<string, int> Bonuses { get; set; }//bonuses should be blobs of thier own maybe.
 
         public CommanderDB()
         {
-            Bonuses = new Dictionary<string, int>();
+          
         }
 
-        public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type, Dictionary<string, int> bonuses)
+        public CommanderDB(CommanderNameSD name, int rank, CommanderTypes type)
         {
             Name = name;
             Rank = rank;
             Type = type;
-            Bonuses = bonuses;
+            
         }
 
         public CommanderDB(CommanderDB commanderDB)
@@ -39,12 +38,6 @@ namespace Pulsar4X.ECSLib
 
             Rank = commanderDB.Rank;
             Type = commanderDB.Type;
-
-            Bonuses = new Dictionary<string, int>();
-            foreach (KeyValuePair<string, int> keyValue in commanderDB.Bonuses)
-            {
-                Bonuses.Add(keyValue.Key, keyValue.Value);
-            }
 
         }
 

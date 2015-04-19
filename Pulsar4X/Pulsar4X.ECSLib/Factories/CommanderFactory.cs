@@ -17,13 +17,13 @@ namespace Pulsar4X.ECSLib.Factories
             CommanderTypes type = CommanderTypes.Civilian;
 
             //this is going to have to be thought out properly.
-            Dictionary<string, int> bonuses = new Dictionary<string,int>();
-            bonuses.Add("PP", 10);
-            bonuses.Add("Teamsize", 25);
+            Dictionary<ResearchCategories, int> bonuses = new Dictionary<ResearchCategories, int>();
+            bonuses.Add(ResearchCategories.PowerAndPropulsion, 10);
+            int maxTeamSize = 25;
 
             //create the blob.
-            CommanderDB scientist = new CommanderDB(name, 1, type, bonuses);
-            
+            CommanderDB scientist = new CommanderDB(name, 1, type);
+            ScientistBonusDB bonus = new ScientistBonusDB(bonuses, maxTeamSize);
    
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
             blobs.Add(scientist);
