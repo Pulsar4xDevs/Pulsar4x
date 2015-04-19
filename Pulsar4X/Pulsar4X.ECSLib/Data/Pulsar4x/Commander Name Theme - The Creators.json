@@ -1,15 +1,20 @@
 {
-  "ThemeName": "The Creators",
-  "NameList": [
+  "Type": "CommanderNameThemes",
+  "Data": [
     {
-      "First": "Greg",
-      "Last": "Nott",
-      "IsFemale": false
-    },
-    {
-      "First": "Rod",
-      "Last": "Serling",
-      "IsFemale": false
+      "ThemeName": "The Creators",
+      "NameList": [
+        {
+          "First": "Greg",
+          "Last": "Nott",
+          "IsFemale": false
+        },
+        {
+          "First": "Rod",
+          "Last": "Serling",
+          "IsFemale": false
+        }
+      ]
     }
   ]
 }

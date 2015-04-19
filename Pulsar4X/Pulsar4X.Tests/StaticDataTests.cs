@@ -50,7 +50,9 @@ namespace Pulsar4X.Tests
 
             nameTheme.NameList.Add(name);
 
-            StaticDataManager.ExportStaticData(nameTheme, "./CommanderNameThemeExportTest.json");
+            nameThemes.Add(nameTheme);
+
+            StaticDataManager.ExportStaticData(nameThemes, "./CommanderNameThemeExportTest.json");
 
             StaticDataManager.ExportStaticData(VersionInfo.PulsarVersionInfo, "./VersionInfoExportTest.vinfo");
 
@@ -71,6 +73,15 @@ namespace Pulsar4X.Tests
 
             StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
 
+        }
+
+        [Test]
+        public void TestLoadDefaultData()
+        {
+            StaticDataManager.LoadFromDefaultDataDirectory();
+            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.AtmosphericGases);
+            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
+            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
         }
     }
 }
