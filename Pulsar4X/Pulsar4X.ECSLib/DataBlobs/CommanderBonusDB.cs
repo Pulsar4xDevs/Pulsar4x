@@ -9,6 +9,8 @@ namespace Pulsar4X.ECSLib
         public Dictionary<ResearchCategories, float> Bonuses { get; set; }
         public int MaxLabs { get; set; }
 
+        public ScientistBonusDB() { } // needed by json
+
         public ScientistBonusDB(Dictionary<ResearchCategories,float> bonuses, int maxLabs )
         {
             Bonuses = bonuses;

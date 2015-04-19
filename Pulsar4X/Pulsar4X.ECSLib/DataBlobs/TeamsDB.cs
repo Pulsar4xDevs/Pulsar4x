@@ -13,6 +13,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public object TeamTask { get; set; }
 
+        public TeamsDB() { } // need by json
+
         public TeamsDB(int maxTeamsize)
         {
             Teamsize = 0;
