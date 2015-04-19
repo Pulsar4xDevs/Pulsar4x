@@ -8,7 +8,8 @@ namespace Pulsar4X.ECSLib.Factories
     {
         public static Entity Create(EntityManager systemEntityManager)
         {
-            
+            throw new NotImplementedException();
+            return null;
         }
     }
 }

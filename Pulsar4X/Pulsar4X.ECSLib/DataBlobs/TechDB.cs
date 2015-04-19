@@ -43,6 +43,11 @@ namespace Pulsar4X.ECSLib
             ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
         }
 
+        public TechDB()
+        {
+            
+        }
+
         public override object Clone()
         {
             return new TechDB(this);
