@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -30,6 +32,22 @@ namespace Pulsar4X.ECSLib
         /// <remarks>Acts as a deep copy constructor.</remarks>
         public JDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary)
         {
+        }
+    }
+
+    /// <summary>
+    /// This class can be used by a Json.net serializer to get around the problem of it ignoreing ISerializable in favor of IEnumarble.
+    /// </summary>
+    public class ForceUseISerializable : DefaultContractResolver
+    {
+        protected override JsonContract CreateContract(Type objectType)
+        {
+            if (typeof(ISerializable).IsAssignableFrom(objectType))
+            {
+                return CreateISerializableContract(objectType);
+            }
+
+            return base.CreateContract(objectType);
         }
     }
 }
