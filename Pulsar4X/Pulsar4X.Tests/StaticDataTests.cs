@@ -69,6 +69,7 @@ namespace Pulsar4X.Tests
             min.Abundance.Add(BodyType.Terrestrial, 1.0);
             min.ID = Guid.NewGuid();
             min.Name = "Sorium";
+            min.Description = "des";
             minList.Add(min);
 
             StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
