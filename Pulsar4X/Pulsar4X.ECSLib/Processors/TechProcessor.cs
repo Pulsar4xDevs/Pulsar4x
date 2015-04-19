@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib.Processors
     internal static class TechProcessor
     {
         /// <summary>
-        /// maybe techsd should link up as well as down. it would make this more efficent.
+        /// maybe techsd should link up as well as down. it would make this more efficent, but harder on the modder. 
         /// </summary>
         /// <param name="techdb"></param>
         internal static void MakeResearchable(TechDB techdb)
@@ -38,14 +38,21 @@ namespace Pulsar4X.ECSLib.Processors
             }
         }
 
-        internal static void DoResearch(Entity scientist, TechDB factionTechs, DateTime deltaTime)
+        /// <summary>
+        /// adds research points to a scientists project for a given change in time. 
+        /// </summary>
+        /// <param name="faction"></param>
+        /// <param name="scientist"></param>
+        /// <param name="factionTechs"></param>
+        /// <param name="deltaTime">the time since last this was run may need rethinking</param>
+        internal static void DoResearch(FactionDB faction, Entity scientist, TechDB factionTechs, int deltaTime)
         {
             TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
             int teamsize = scientist.GetDataBlob<TeamsDB>().Teamsize;
-            int bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];           
+            float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];           
             int researchmax = research.Cost;
 
-            int amountthisdelta = 10; //somethingsomething teamsize bonus deltatime
+            int amountthisdelta = (int)(faction.factionBaseResearchRate * teamsize * bonus * deltaTime);
             if (factionTechs.ResearchableTechs.ContainsKey(research))
             {
                 factionTechs.ResearchableTechs[research] += amountthisdelta;
