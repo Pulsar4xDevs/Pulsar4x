@@ -30,7 +30,7 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// For now this is a stub for where ships will be created.
         /// </summary>
-        public SystemBody Capitol { get; set; }
+        public Population Capitol { get; set; }
 
         public FactionTheme FactionTheme { get; set; }
         public FactionCommanderTheme CommanderTheme { get; set; }
@@ -548,8 +548,7 @@ namespace Pulsar4X.Entities
                 /// <summary>
                 /// No point in running the detection statistics if this population does not have a DSTS.
                 /// </summary>
-                int DSTS = (int)Math.Floor(Populations[loop].Installations[(int)
-Installation.InstallationType.DeepSpaceTrackingStation].Number);
+                int DSTS = (int)Math.Floor(Populations[loop].Installations[(int)Installation.InstallationType.DeepSpaceTrackingStation].Number);
                 if (DSTS != 0)
                 {
                     Population CurrentPopulation = Populations[loop];
@@ -1025,6 +1024,12 @@ Installation.InstallationType.DeepSpaceTrackingStation].Number);
                 /// may thwart that. I'd recommend just banning taskgroup reorganization while jumpsick.
                 /// </summary>
                 if (CurrentTaskGroup.IsJumpSick())
+                    continue;
+
+                /// <summary>
+                /// A taskgroup with no ships cannot detect anything.
+                /// </summary>
+                if (CurrentTaskGroup.Ships.Count == 0)
                     continue;
 
                 StarSystem System = CurrentTaskGroup.Contact.Position.System;
@@ -2113,7 +2118,7 @@ Installation.InstallationType.DeepSpaceTrackingStation].Number);
             for (int loop3 = 0; loop3 < DetPopList.Count; loop3++)
             {
                 Population CurrentPopulation = DetPopList[loop3];
-                StarSystem System = DetPopList[loop3].Position.System;
+                StarSystem System = DetPopList[loop3].Contact.Position.System;
 
                 if (CurrentPopulation.Faction != this)
                 {

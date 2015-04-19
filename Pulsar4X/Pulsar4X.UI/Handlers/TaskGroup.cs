@@ -339,7 +339,7 @@ namespace Pulsar4X.UI.Handlers
         private void NewTaskGroupButton_Click(object sender, EventArgs e)
         {
             String Title = String.Format("New Taskgroup #{0}", m_oCurrnetFaction.TaskGroups.Count);
-            m_oCurrnetFaction.AddNewTaskGroup(Title, m_oCurrnetFaction.Capitol, m_oCurrnetFaction.Capitol.Position.System);
+            m_oCurrnetFaction.AddNewTaskGroup(Title, m_oCurrnetFaction.Capitol.Planet, m_oCurrnetFaction.Capitol.Planet.Position.System);
 
             m_oTaskGroupPanel.TaskGroupSelectionComboBox.SelectedIndex = (m_oTaskGroupPanel.TaskGroupSelectionComboBox.Items.Count - 1);
         }
@@ -888,7 +888,6 @@ namespace Pulsar4X.UI.Handlers
 
                 if (m_oTaskGroupPanel.DisplayWaypointsCheckBox.Checked == true)
                     AddWaypointsToList(targetsystem);
-                AddColonysToList(targetsystem);
             }
             m_oTaskGroupPanel.SystemLocationsListBox.DataSource = SystemLocationGuidDict.Values.ToList();
         }
@@ -1028,13 +1027,38 @@ namespace Pulsar4X.UI.Handlers
             {
                 foreach (SystemBody planet in star.Planets)
                 {
-                    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
-                    string keyName = planet.Name;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
-                    StarSystemEntity entObj = planet;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
-                    SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
-                    SystemListObject valueObj = new SystemListObject(entType, entObj);
-                    SystemLocationGuidDict.Add(entObj.Id, keyName);
-                    SystemLocationDict.Add(entObj.Id, valueObj);
+                    int PopCount = 0;
+                    string keyName = "N/A";
+                    foreach(Population CurrentPopulation in planet.Populations)
+                    {
+                        if (CurrentPopulation.Faction == CurrentFaction)
+                        {
+                            keyName = string.Format("{0} - {1}",CurrentPopulation.Name, CurrentPopulation.Species.Name);
+                            if(CurrentFaction.Capitol == CurrentPopulation)
+                                keyName = string.Format("{0}(Capitol)", keyName);
+
+                            keyName = string.Format("{0}: {1:n2}m", keyName, CurrentPopulation.CivilianPopulation);
+
+                            StarSystemEntity entObj = CurrentPopulation;
+                            SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Colonies;
+                            SystemListObject valueObj = new SystemListObject(entType, entObj);
+                            SystemLocationGuidDict.Add(entObj.Id, keyName);
+                            SystemLocationDict.Add(entObj.Id, valueObj);
+
+                            PopCount++;
+                        }
+                    }
+
+                    if (PopCount == 0)
+                    {
+                        //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2]);
+                        keyName = planet.Name;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2].Name;
+                        StarSystemEntity entObj = planet;//CurrentTaskGroup.Contact.Position.System.Stars[loop].Planets[loop2];
+                        SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Planets;
+                        SystemListObject valueObj = new SystemListObject(entType, entObj);
+                        SystemLocationGuidDict.Add(entObj.Id, keyName);
+                        SystemLocationDict.Add(entObj.Id, valueObj);
+                    }
                 }
             }
         }
@@ -1077,6 +1101,35 @@ namespace Pulsar4X.UI.Handlers
                     if (pair.Value.active == true)
                     {
                         ACT = String.Format("[ACT {0}]", pair.Key.TotalCrossSection);
+                    }
+
+                    String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
+
+                    //m_oTaskGroupPanel.SystemLocationsListBox.Items.Add(Entry);
+                    SystemListObject.ListEntityType entType = SystemListObject.ListEntityType.Contacts;
+                    SystemListObject valueObj = new SystemListObject(entType, pair.Key); //maybe this should be the value? though with the key I can *get* the value easly anyway.
+                    SystemLocationGuidDict.Add(pair.Key.Id, Entry);
+                    SystemLocationDict.Add(pair.Key.Id, valueObj);
+                }
+
+                foreach (KeyValuePair<Population, FactionContact> pair in CurrentFaction.DetectedContactLists[CurrentTaskGroup.Contact.Position.System].DetectedPopContacts)
+                {
+                    String TH = "";
+                    if (pair.Value.thermal == true)
+                    {
+                        TH = String.Format("[Thermal {0}]", pair.Key.ThermalSignature);
+                    }
+
+                    String EM = "";
+                    if (pair.Value.EM == true)
+                    {
+                        EM = String.Format("[EM {0}]", pair.Key.EMSignature);
+                    }
+
+                    String ACT = "";
+                    if (pair.Value.active == true)
+                    {
+                        ACT = String.Format("[Active Ping]");
                     }
 
                     String Entry = String.Format("{0} {1}{2}{3}", pair.Key.Name, TH, EM, ACT);
@@ -1131,20 +1184,7 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
-        /// <summary>
-        /// Adds Colonys to the locationList.
-        /// </summary>
-        private void AddColonysToList(StarSystem starsystem)
-        {
-            foreach (Population colony in starsystem.Populations)
-            {
-                string keyName = colony.Name;
-                StarSystemEntity entObj = colony;
-                SystemListObject valueObj = new SystemListObject(SystemListObject.ListEntityType.Colonies, entObj);
-                SystemLocationGuidDict.Add(entObj.Id, keyName);
-                SystemLocationDict.Add(entObj.Id, valueObj);
-            }
-        }
+
 
         /// <summary>
         /// Time and distance or orders should be calculated here based on the radio button selection choices.

@@ -541,6 +541,9 @@ namespace Pulsar4X.Entities
             {
                 Species = a_oSpecies;
             }
+
+            SSEntity = StarSystemEntityType.Population;
+
             Planet.Populations.Add(this); // add us to the list of pops on the planet!
             Planet.Position.System.Populations.Add(this);
             Contact = new SystemContact(Faction, this);
@@ -594,8 +597,6 @@ namespace Pulsar4X.Entities
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
             }
-
-            SSEntity = StarSystemEntityType.Population;
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)

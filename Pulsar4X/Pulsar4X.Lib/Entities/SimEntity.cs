@@ -570,6 +570,22 @@ namespace Pulsar4X.Entities
             }
 
             /// <summary>
+            /// Update the thermal and EM signatures of every population.
+            /// Detection characteristics will change as a result of construction cycle activity, and as a result of ships completing orders. Combat will also effect detection characteristics.
+            /// This can be updated to only run for populations that have constructed something, and to only run if a population had something put on it or taken off of it.
+            /// For now it will just be calculated here.
+            /// </summary>
+#warning update and potentially optimize this. see comments just above.
+            foreach (Faction faction in P)
+            {
+                foreach (Population CurrentPopulation in faction.Populations)
+                {
+                    CurrentPopulation.CalcThermalSignature();
+                    CurrentPopulation.CalcEMSignature();
+                }
+            }
+
+            /// <summary>
             /// Missiles should check to see if they have a target, move towards it, and hit it. If they have no target then they should check their sensor and either move to new target,
             /// or more towards last known firing location. ProcessOrder should handle all of these.
             /// </summary>
