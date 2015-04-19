@@ -43,6 +43,7 @@ namespace Pulsar4X.WPFUI
             Game.Instance.EngineComms.AddFaction(playerFaction);
             /* Stuff to replace */
 
+
             UI_Comms.Instance = new UI_Comms(Game.Instance.EngineComms, playerFaction);
             StatusBarText.Text = "Status: Engine fired"; //Should changing through Message StatusUpdate
         }
