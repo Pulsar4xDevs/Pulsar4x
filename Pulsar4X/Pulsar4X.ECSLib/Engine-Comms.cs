@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
     /// Engine side of the Lib-UI communications. 
     /// engine needs to create one of these when instantiated, and then AddFactions as factions are added to the game.
     /// </summary>
-    public class Engine_Comms
+    public class EngineComms
     {
         Dictionary<Entity, MessageBook> Messages = new Dictionary<Entity, MessageBook>();
 
@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Engine_comms constructor. 
         /// </summary>
-        internal Engine_Comms()
+        internal EngineComms()
         { }
 
         public void AddFaction(Entity faction)
@@ -103,22 +103,22 @@ namespace Pulsar4X.ECSLib
     {
         public enum MessageType
         {
-                                /// InQueue
-            Quit,               /// terminates the main game loop.
-            Save,               /// saves game 
-            Load,               /// loads game
-            Echo,               /// will be sent straight back to sender. Use for testing.     
-                                /// OutQueue
-            GameStatusUpdate    /// 
+                                // InQueue
+            Quit,               // terminates the main game loop.
+            Save,               // saves game 
+            Load,               // loads game
+            Echo,               // will be sent straight back to sender. Use for testing.     
+                                // OutQueue
+            GameStatusUpdate    //
         }
 
-        public MessageType _messageType;
-        public object _data;
+        public MessageType Type;
+        public object Data;
 
         public Message(MessageType type, object data)
         {
-            _messageType = type;
-            _data = data;
+            Type = type;
+            Data = data;
         }
 
         public Message() { }
@@ -133,6 +133,7 @@ namespace Pulsar4X.ECSLib
         public Entity Faction { get; private set; }
         public ConcurrentQueue<Message> OutMessageQueue { get; set; }
         public ConcurrentQueue<Message> InMessageQueue { get; set; }
+
         internal MessageBook(Entity faction)
         {
             OutMessageQueue = new ConcurrentQueue<Message>();

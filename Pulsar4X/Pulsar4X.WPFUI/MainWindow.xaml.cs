@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,29 +24,22 @@ namespace Pulsar4X.WPFUI
     public partial class MainWindow : Window
     {
         public MainWindow()
-        {      
+        {
             InitializeComponent();
+            Program.PulsarMain(); // todo: replace
+            UIComms.Instance.OnStatusUpdate += (status) => { StatusBarText.Text = status; };
         }
 
         private void NewGame_Click(object sender, RoutedEventArgs e)
         {
-            if(UI_Comms.MainLoopThread != null && UI_Comms.MainLoopThread.IsAlive)
+            if(UIComms.Instance.IsEngineFired())
             {
                 MessageBoxResult result = MessageBox.Show("Game is already started. Are you sure you want start a new game?", "New Game", MessageBoxButton.YesNo);
                 if(result == MessageBoxResult.No)
                     return;
+                UIComms.Instance.HaltEngine();
             }
-            /* Stuff to replace */
-            new Game();
-            Entity playerFaction = Game.Instance.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>();
-            if(playerFaction == Entity.GetInvalidEntity())
-                playerFaction = ECSLib.Factories.FactionFactory.CreateFaction(Game.Instance.GlobalManager, "playerFaction");
-            Game.Instance.EngineComms.AddFaction(playerFaction);
-            /* Stuff to replace */
-
-
-            UI_Comms.Instance = new UI_Comms(Game.Instance.EngineComms, playerFaction);
-            StatusBarText.Text = "Status: Engine fired"; //Should changing through Message StatusUpdate
+            UIComms.Instance.FireEngine();
         }
 
         private void LoadGame_Click(object sender, RoutedEventArgs e)
@@ -55,8 +49,7 @@ namespace Pulsar4X.WPFUI
             if(fileDialog.ShowDialog() == true)
             {
                 string pathToFile = fileDialog.FileName;
-                UI_Comms.Instance.SendMessage(new Message(Message.MessageType.Load, pathToFile));
-                StatusBarText.Text = "Status: Loaded from " + pathToFile; //Should changing through Message StatusUpdate
+                UIComms.Instance.SendMessage(new Message(Message.MessageType.Load, pathToFile));
             }
         }
 
@@ -67,15 +60,13 @@ namespace Pulsar4X.WPFUI
             if(fileDialog.ShowDialog() == true)
             {
                 string pathToFile = fileDialog.FileName;
-                UI_Comms.Instance.SendMessage(new Message(Message.MessageType.Save, pathToFile));
-                StatusBarText.Text = "Status: Saved to " + pathToFile; //Should changing through Message StatusUpdate
+                UIComms.Instance.SendMessage(new Message(Message.MessageType.Save, pathToFile));
             }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(UI_Comms.MainLoopThread != null)
-                UI_Comms.MainLoopThread.Abort();
+            UIComms.Instance.HaltEngine();
         }
     }
 }

@@ -89,7 +89,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                ///< @todo add more validity checks here.
+                // @todo add more validity checks here.
 
                 // if we have a problem with the file we should throw before this...
                 File = file;

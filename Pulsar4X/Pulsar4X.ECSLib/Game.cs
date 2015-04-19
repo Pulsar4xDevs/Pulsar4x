@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
         public List<StarSystem> StarSystems { get; set; }
         public DateTime CurrentDateTime { get; set; }
 
-        public Engine_Comms EngineComms { get; private set; }       
+        public EngineComms EngineComms { get; private set; }       
 
         public SubpulseLimitRequest NextSubpulse
         {
@@ -82,7 +82,7 @@ namespace Pulsar4X.ECSLib
 
             CurrentInterrupt = new Interrupt();
 
-            EngineComms = new Engine_Comms();
+            EngineComms = new EngineComms();
 
             // Setup processors.
             InitializeProcessors();
@@ -164,13 +164,13 @@ namespace Pulsar4X.ECSLib
                 return;
             }
 
-            switch (message._messageType)
+            switch (message.Type)
             {
                 case Message.MessageType.Quit:
                     quit = true;                                        // cause the game to quit!
                     break;
                 case Message.MessageType.Save:
-                    string savePath = message._data as string;
+                    string savePath = message.Data as string;
                     if(string.IsNullOrWhiteSpace(savePath))
                         break;
                     SaveGame saveGame = new SaveGame(savePath);
@@ -178,7 +178,7 @@ namespace Pulsar4X.ECSLib
                     EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(Message.MessageType.GameStatusUpdate, "Saved to " + savePath));
                     break;
                 case Message.MessageType.Load:
-                    string loadPath = message._data as string;
+                    string loadPath = message.Data as string;
                     if(string.IsNullOrWhiteSpace(loadPath))
                         break;
                     SaveGame loadGame = new SaveGame(loadPath);
@@ -189,7 +189,7 @@ namespace Pulsar4X.ECSLib
                     EngineComms.LibWriteOutQueue(faction, message);     // echo chamber ;)
                     break;
                 default:
-                    throw new System.Exception("Message of type: " + message._messageType.ToString() + ", Went unprocessed.");
+                    throw new System.Exception("Message of type: " + message.Type.ToString() + ", Went unprocessed.");
             }
         }
 
@@ -249,7 +249,7 @@ namespace Pulsar4X.ECSLib
             {
                 // Notify the user?
                 // Gamelog?
-                // <@ todo: review interrupt messages.
+                // todo: review interrupt messages.
             }
             return timeAdvanced;
         }

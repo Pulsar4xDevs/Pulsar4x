@@ -67,7 +67,7 @@ namespace Pulsar4X.Tests
             Message message;
             Assert.IsTrue(mb0.OutMessageQueue.TryDequeue(out message), "Lib did not return echo message.");
             Assert.NotNull(message);
-            Assert.AreEqual(42, Convert.ToInt32(message._data));
+            Assert.AreEqual(42, Convert.ToInt32(message.Data));
 
             // now lets try quiting:
             mb0.InMessageQueue.Enqueue(new Message(Message.MessageType.Quit, null));

@@ -9,17 +9,25 @@ using System.Windows.Threading;
 
 namespace Pulsar4X.WPFUI
 {
-    internal class UI_Comms
+    internal delegate void StatusUpdate(string message);
+    internal class UIComms
     {
-        internal static UI_Comms Instance { get; set; }
-        internal static Thread MainLoopThread { get; private set; }
+        internal static UIComms Instance { get; private set; }
+
+        #region Events
+
+        internal StatusUpdate OnStatusUpdate;
+
+        #endregion
+        
+        internal Thread MainLoopThread { get; private set; }
 
         private MessageBook MessageQueue { get; set; }
 
-        public UI_Comms(Engine_Comms engineComms, Entity faction)
+        public UIComms(EngineComms engineComms, Entity faction)
         {
+            Instance = this;
             MessageQueue = engineComms.RequestMessagebook(faction);
-            FireEngine();
         }
         
         public void CheckEngineMessageQueue()
@@ -31,10 +39,11 @@ namespace Pulsar4X.WPFUI
                 //everthing in the UI would subscribe to the events for messages they are interested in
                 //the even would pass the data, i.e the rest of the message object, to the event delegates 
 
-                switch(message._messageType)
+                switch(message.Type)
                 {
                     case (Message.MessageType.GameStatusUpdate):
-
+                        if(OnStatusUpdate != null)
+                            OnStatusUpdate.Invoke((string)message.Data);
                         break;
                 }
 
@@ -47,17 +56,48 @@ namespace Pulsar4X.WPFUI
                 Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => CheckEngineMessageQueue()));
         }
 
-        public void SendMessage(Message message)
+        public void SendMessage(Message message, bool forceEngineFire = true)
         {
+            if(forceEngineFire && !IsEngineFired())
+                FireEngine();
             MessageQueue.InMessageQueue.Enqueue(message);
         }
 
-        private void FireEngine()
+        public void FireEngine()
         {
-            if(MainLoopThread != null)
-                MainLoopThread.Abort(); //Could be cause of problems
+            if(IsEngineFired())
+                return;
             MainLoopThread = new Thread(Game.Instance.MainGameLoop);//Replace it with something better later
             MainLoopThread.Start();
+        }
+
+        public void HaltEngine()
+        {
+            if(!IsEngineFired())
+                return;
+            if (MainLoopThread != null)
+            {
+                if (MainLoopThread.ThreadState == ThreadState.Stopped) //we can safely abort it to make sure everything is ok
+                    MainLoopThread.Abort();
+                else
+                {
+                    SendMessage(new Message(Message.MessageType.Quit, null));
+                    Thread.Sleep(100);
+                    if (MainLoopThread.ThreadState == ThreadState.Stopped)
+                        MainLoopThread.Abort();
+                    else
+                        throw new Exception("Game Loop can't be stopped");
+                }
+            }
+        }
+
+        public bool IsEngineFired()
+        {
+            if(MainLoopThread == null)
+                return false;
+            if(MainLoopThread.ThreadState == ThreadState.Stopped)
+                return false;
+            return true;
         }
     }
 }
