@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
@@ -108,10 +112,10 @@ namespace Pulsar4X.ECSLib
     /// print(fruitSelection); // "Tomatoe"
     /// </code>
     /// </example>
-    /// 
-    public class WeightedList<T> : IEnumerable<WeightedValue<T>>
+    //[JsonObjectAttribute]
+    public class WeightedList<T> : IEnumerable<WeightedValue<T>>, ISerializable
     {
-        readonly List<WeightedValue<T>> m_valueList;
+        private List<WeightedValue<T>> m_valueList;
 
         /// <summary>
         /// Total weights of the list.
@@ -184,6 +188,23 @@ namespace Pulsar4X.ECSLib
         public T SelectAt(int index)
         {
             return m_valueList[index].Value;
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Values", m_valueList);
+        }
+
+        public WeightedList(SerializationInfo info, StreamingContext context)
+        {
+            m_valueList = (List<WeightedValue<T>>)info.GetValue("Values", typeof(List<WeightedValue<T>>));
+
+            // rebuild total weight:
+            TotalWeight = 0;
+            foreach (var w in m_valueList)
+            {
+                TotalWeight += w.Weight;
+            }
         }
     }
 
