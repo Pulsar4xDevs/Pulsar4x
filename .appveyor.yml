@@ -1,6 +1,8 @@
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 #online YAML parser: http://yaml-online-parser.appspot.com/
 
+version: 0.4.{build}
+
 branches:
   except:
     - master
