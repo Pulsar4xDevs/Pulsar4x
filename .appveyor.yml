@@ -1,9 +1,5 @@
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 
-branches:
-  except:
-    - master
-
 os: 
   - Windows Server 2012
 
