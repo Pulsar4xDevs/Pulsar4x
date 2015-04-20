@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pulsar4X.ECSLib;
+using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -19,25 +20,19 @@ namespace Pulsar4X.Tests
         {
             game = new Game();
 
-            // add some factions:
-            var list = new List<BaseDataBlob>();
-            Entity sdb = Entity.Create(game.GlobalManager, new List<BaseDataBlob>{new SpeciesDB( 1.0, 0.5, 1.5, 1.0, 0.5, 1.5, 22, 0, 44)});
-            var pop = new JDictionary<Entity, double> {{sdb, 42}};
-
-            list.Add(new ColonyInfoDB(pop, Entity.GetInvalidEntity()));
-            Entity faction = Entity.Create(game.GlobalManager, list);
+            Entity faction = FactionFactory.CreateFaction(game.GlobalManager, "1");
             game.EngineComms.AddFaction(faction);
 
-            faction = Entity.Create(game.GlobalManager, list);
+            faction = FactionFactory.CreateFaction(game.GlobalManager, "2");
             game.EngineComms.AddFaction(faction);
 
-            faction = Entity.Create(game.GlobalManager, list);
+            faction = FactionFactory.CreateFaction(game.GlobalManager, "3");
             game.EngineComms.AddFaction(faction);
 
-            faction = Entity.Create(game.GlobalManager, list);
+            faction = FactionFactory.CreateFaction(game.GlobalManager, "4");
             game.EngineComms.AddFaction(faction);
 
-            faction = Entity.Create(game.GlobalManager, list);
+            faction = FactionFactory.CreateFaction(game.GlobalManager, "5");
             game.EngineComms.AddFaction(faction);
         }
 
@@ -67,7 +62,7 @@ namespace Pulsar4X.Tests
             Message message;
             Assert.IsTrue(mb0.OutMessageQueue.TryDequeue(out message), "Lib did not return echo message.");
             Assert.NotNull(message);
-            Assert.AreEqual(42, Convert.ToInt32(message._data));
+            Assert.AreEqual(42, Convert.ToInt32(message.Data));
 
             // now lets try quiting:
             mb0.InMessageQueue.Enqueue(new Message(Message.MessageType.Quit, null));

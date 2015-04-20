@@ -42,7 +42,7 @@ namespace Pulsar4X.Tests
             Message message = null;
             Assert.IsTrue(_messageBook.InMessageQueue.TryDequeue(out message));
             Assert.IsNotNull(message);
-            Assert.AreEqual(42, Convert.ToInt32(message._data));
+            Assert.AreEqual(42, Convert.ToInt32(message.Data));
             Assert.AreEqual(0, _messageBook.InMessageQueue.Count);
 
 
@@ -52,7 +52,7 @@ namespace Pulsar4X.Tests
             message = null;
             Assert.IsTrue(_messageBook.OutMessageQueue.TryDequeue(out message));
             Assert.IsNotNull(message);
-            Assert.AreEqual(42, Convert.ToInt32(message._data));
+            Assert.AreEqual(42, Convert.ToInt32(message.Data));
             Assert.AreEqual(0, _messageBook.OutMessageQueue.Count);
         }
     }

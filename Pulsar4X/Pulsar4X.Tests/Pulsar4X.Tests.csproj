@@ -54,6 +54,7 @@
     <Reference Include="nunit.framework">
       <HintPath>../deps/NUnit-2.6.4/bin/nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
