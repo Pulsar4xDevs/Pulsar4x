@@ -5,8 +5,7 @@ branches:
   except:
     - master
 
-os: 
-  - Windows Server 2012
+os: Windows Server 2012
 
 build:
-  - Pulsar4X/Pulsar4X.sln
+  project: Pulsar4X/Pulsar4X.sln
