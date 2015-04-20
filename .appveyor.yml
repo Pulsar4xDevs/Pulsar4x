@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
-=======
+
 branches:
   except:
     -master
