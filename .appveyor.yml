@@ -20,7 +20,7 @@ notifications:
 #####if someone wants to get ALL ststus change messages then just add your email
 ##### - your@email.com
     subject: 'Build {{status}}'                  
-    message: "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%"
+    message: $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL
 ####on_build_status_changed: true
     on_build_success: true
     on_build_failure: true
