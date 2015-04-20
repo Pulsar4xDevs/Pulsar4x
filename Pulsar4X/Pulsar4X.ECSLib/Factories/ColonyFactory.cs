@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib.Factories
             blobs.Add(colonyInfoDB);
 
             Entity colonyEntity = Entity.Create(planetEntity.Manager, blobs);
-
+            factionEntity.GetDataBlob<FactionDB>().Colonies.Add(colonyEntity);
             return colonyEntity;
         }
     }

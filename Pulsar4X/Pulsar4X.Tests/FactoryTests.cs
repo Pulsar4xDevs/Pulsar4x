@@ -35,6 +35,7 @@ namespace Pulsar4X.Tests
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, factionName);
             NameDB nameDB = faction.GetDataBlob<NameDB>();
             //FactionDB factionDB = faction.GetDataBlob<FactionDB>();
+            Entity factioncopy = faction.Clone(faction.Manager);
 
             Assert.IsTrue(HasAllRequiredDatablobs(faction, requiredDataBlobs));
             Assert.IsTrue(nameDB.Name[faction] == factionName);
@@ -54,7 +55,9 @@ namespace Pulsar4X.Tests
                 typeof(NameDB)
             };
 
-            Entity colony = ColonyFactory.CreateColony(faction, planet);
+            //Entity colony = ColonyFactory.CreateColony(faction, planet);
+            ColonyFactory.CreateColony(faction, planet);
+            Entity colony = faction.GetDataBlob<FactionDB>().Colonies[0];
             ColonyInfoDB colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();
             //NameDB nameDB = colony.GetDataBlob<NameDB>();
 

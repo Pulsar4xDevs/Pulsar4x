@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib.Processors
             float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];           
             int researchmax = research.Cost;
 
-            int amountthisdelta = (int)(faction.factionBaseResearchRate * numLabs * bonus * deltaTime);
+            int amountthisdelta = (int)(faction.BaseResearchRate * numLabs * bonus * deltaTime);
             if (factionTechs.ResearchableTechs.ContainsKey(research))
             {
                 factionTechs.ResearchableTechs[research] += amountthisdelta;
