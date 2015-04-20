@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib.Processors
             {
                 bool requrementsMet = false;
                 foreach (var requrement in tech.Reqirements)
-                {                    
+                {                       
                     if (techdb.ResearchedTechs.Contains(requrement))
                     {
                         requrementsMet = true;
@@ -48,18 +48,21 @@ namespace Pulsar4X.ECSLib.Processors
         internal static void DoResearch(FactionDB faction, Entity scientist, TechDB factionTechs, int deltaTime)
         {
             TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
-            int teamsize = scientist.GetDataBlob<TeamsDB>().Teamsize;
+            int numLabs = scientist.GetDataBlob<TeamsDB>().Teamsize;
             float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];           
             int researchmax = research.Cost;
 
-            int amountthisdelta = (int)(faction.factionBaseResearchRate * teamsize * bonus * deltaTime);
+            int amountthisdelta = (int)(faction.factionBaseResearchRate * numLabs * bonus * deltaTime);
             if (factionTechs.ResearchableTechs.ContainsKey(research))
             {
                 factionTechs.ResearchableTechs[research] += amountthisdelta;
                 if (factionTechs.ResearchableTechs[research] >= researchmax)
                 {
-                    MakeResearchable(factionTechs);
-                    scientist.GetDataBlob<TeamsDB>().TeamTask = null;
+                    
+                    factionTechs.ResearchedTechs.Add(research.Id); //add the tech to researched list
+                    factionTechs.ResearchableTechs.Remove(research); //remove the tech from researchable dict
+                    MakeResearchable(factionTechs);//check for new researchable techs
+                    scientist.GetDataBlob<TeamsDB>().TeamTask = null;//team task is now nothing. 
                 }
             }            
         }     
