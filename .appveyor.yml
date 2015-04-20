@@ -1,13 +1,21 @@
-#appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
-#online YAML parser: http://yaml-online-parser.appspot.com/
+#.appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
+#.appveyor.yml validation: https://ci.appveyor.com/tools/validate-yaml
 
 version: 0.4.{build}
 
 branches:
   except:
     - master
-
+ 
 os: Windows Server 2012
 
 build:
   project: Pulsar4X/Pulsar4X.sln
+
+notifications:
+  - provider: Email
+    to:
+      - "{{commitAuthorEmail}}"
+    subject: 'Build {{status}}'                  
+    message: "{{message}}, {{commitId}}, ..."
+    on_build_status_changed: true
