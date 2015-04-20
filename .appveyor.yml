@@ -16,9 +16,9 @@ build:
 notifications:
   - provider: Email
     to:
-      - APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL 
+      - intercross21@gmail.com
 #####if someone wants to get ALL ststus change messages then just add your email
 ##### - your@email.com
     subject: 'Build {{status}}'                  
-    message: "{{message}}, {{commitId}}"
+    message: APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL 
     on_build_status_changed: true
