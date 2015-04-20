@@ -16,7 +16,7 @@ build:
 notifications:
   - provider: Email
     to:
-      - "{{commitAuthorEmail}}"
+      - APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL 
 #####if someone wants to get ALL ststus change messages then just add your email
 ##### - your@email.com
     subject: 'Build {{status}}'                  
