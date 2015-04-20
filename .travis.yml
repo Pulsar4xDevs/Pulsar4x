@@ -4,5 +4,5 @@ install:
   - nuget restore Pulsar4X/Pulsar4X.sln
   - nuget install NUnit.Runners -Version 2.6.4 -OutputDirectory testrunner
 script:
-  - xbuild /p:Configuration=Debug Pulsar4X.sln
+  - xbuild /p:Configuration=Debug Pulsar4X/Pulsar4X.sln
   - mono ./testrunner/NUnit.Runners.2.6.4/tools/nunit-console.exe ./Pulsar4X/Pulsar4X.Tests/bin/Debug/Pulsar4X.Tests.dll
