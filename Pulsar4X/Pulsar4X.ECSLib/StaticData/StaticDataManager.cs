@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -85,20 +86,31 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public static void LoadFromDirectory(string directory)
         {
-            // we start by looking for a version file, no verion file, no load.
-            if (CheckDataDirectoryVersion(directory, VersionInfo.PulsarVersionInfo) == false)
-                return; ///< @todo log failure to import due to incompatible version.
-
-            // now we can move on to looking for json files:
-            var files = Directory.GetFiles(directory, "*.json");
-
-            if (files.GetLength(0) < 1)
-                return;
-
-            foreach (var file in files)
+            try
             {
-                JObject obj = Load(file);
-                StoreObject(obj);
+                // we start by looking for a version file, no verion file, no load.
+                if (CheckDataDirectoryVersion(directory, VersionInfo.PulsarVersionInfo) == false)
+                    return; ///< @todo log failure to import due to incompatible version.
+
+                // now we can move on to looking for json files:
+                var files = Directory.GetFiles(directory, "*.json");
+
+                if (files.GetLength(0) < 1)
+                    return;
+
+                foreach (var file in files)
+                {
+                    JObject obj = Load(file);
+                    StoreObject(obj);
+                }
+            }
+            catch (Exception e)
+            {
+                if (e.GetType() == typeof(Newtonsoft.Json.JsonSerializationException))
+                    throw new StaticDataLoadException("Bad Json provided in directory: " + directory, e);
+
+                if (e.GetType() == typeof(DirectoryNotFoundException))
+                    throw new StaticDataLoadException("Directory not found: " + directory, e);
             }
         }
 
@@ -209,5 +221,29 @@ namespace Pulsar4X.ECSLib
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Exception which is thown when an error occurs during loading of atatic data.
+    /// usually InnerException is set to the original exception which caused the error. 
+    /// </summary>
+    public class StaticDataLoadException : Exception
+    {
+        public StaticDataLoadException()
+            : base("Unknown error occured during Static Data load.")
+        { }
+
+        public StaticDataLoadException(string message)
+            : base("Error while loading static data: " + message)
+        { }
+
+        public StaticDataLoadException(string message, Exception inner)
+            : base("Error while loading static data: " + message, inner)
+        { }
+
+        // This constructor is needed for serialization.
+        public StaticDataLoadException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        { }
     }
 }
