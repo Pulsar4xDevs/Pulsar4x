@@ -7,7 +7,6 @@ http://gameprogrammingpatterns.com/component.html
 Since the game has "Components" and "Systems", to avoid confusion we've changed the name of the ECS "Components" to "DataBlobs"
 and ECS "Systems" to "Processors"
 
-
 How do I create an new Entity?
 Create a new static class in the Factories folder, see the other Factories in the folder for examples.
 Note that the class should be:

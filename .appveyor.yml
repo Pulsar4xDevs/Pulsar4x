@@ -1,8 +1,10 @@
+<<<<<<< HEAD
 #appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
-
+=======
 branches:
-  except:
-    - master
+  only:
+    - CI
+>>>>>>> parent of 4f67382... Now let's use CI with all branches except master and which contains appveyor.yml(just for sure)
 
 os: 
   - Windows Server 2012
