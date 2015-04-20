@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pulsar4X.ECSLib.DataBlobs
+namespace Pulsar4X.ECSLib
 {
     public class TechDB : BaseDataBlob
     {
@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib.DataBlobs
         /// list of technolagies that have been fully researched.
         /// techs will be added to this list by the processor once research is compleate.
         /// </summary>
-        public List<TechSD> ResearchedTechs{get;set;}
+        public List<Guid> ResearchedTechs{get;set;}
 
         /// <summary>
         /// dictionary of technowlagies that are availible to research, or are being researched. 
@@ -21,18 +21,31 @@ namespace Pulsar4X.ECSLib.DataBlobs
         public Dictionary<TechSD, int> ResearchableTechs {get;set;}
 
         /// <summary>
-        /// 
+        /// a list of techs not yet meeting the reqirements to research
         /// </summary>
-        public TechDB()
+        public List<TechSD> UnavilableTechs { get; set; } 
+
+        /// <summary>
+        /// Constructor for datablob, this should only be used when a new faction is created.
+        /// </summary>
+        /// <param name="alltechs">a list of all possible techs in game</param>
+        public TechDB(List<TechSD> alltechs )
         {
-            ResearchedTechs = new List<TechSD>();
+            UnavilableTechs = alltechs.ToList();
+            ResearchedTechs = new List<Guid>();
             ResearchableTechs = new Dictionary<TechSD, int>();
         }
 
         public TechDB(TechDB techDB)
         {
+            UnavilableTechs = techDB.UnavilableTechs.ToList();
             ResearchedTechs = techDB.ResearchedTechs.ToList();
             ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
+        }
+
+        public TechDB()
+        {
+            
         }
 
         public override object Clone()

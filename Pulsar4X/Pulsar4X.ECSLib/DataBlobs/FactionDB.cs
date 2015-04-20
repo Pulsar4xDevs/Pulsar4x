@@ -12,8 +12,10 @@ namespace Pulsar4X.ECSLib
 
         public List<Entity> ShipClasses;
 
+        public int factionBaseResearchRate { get; set; }
+
         public FactionDB()
-            : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>())
+            : this(new List<Entity>(), new List<StarSystem>(), new List<Entity>(), 100 )
         {
 
         }
@@ -21,7 +23,8 @@ namespace Pulsar4X.ECSLib
         public FactionDB(
             List<Entity> species,
             List<StarSystem> knownSystems,
-            List<Entity> population)
+            List<Entity> population,
+            int baseResearchRate)
         {
             Species = species;
             KnownSystems = knownSystems;
@@ -36,6 +39,7 @@ namespace Pulsar4X.ECSLib
             KnownSystems = new List<StarSystem>();
             Colonies = new List<Entity>();
             ShipClasses = new List<Entity>();
+            factionBaseResearchRate = factionDB.factionBaseResearchRate;
         }
 
         public override object Clone()

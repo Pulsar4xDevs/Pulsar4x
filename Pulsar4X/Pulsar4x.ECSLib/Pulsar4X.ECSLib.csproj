@@ -48,11 +48,15 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBlobs\CommanderBonusDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
+    <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
     <Compile Include="Factories\SystemBodyFactory.cs" />
+    <Compile Include="Processors\TechProcessor.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CommanderNameSD.cs" />
     <Compile Include="DataBlobs\MassVolumeDB.cs" />
