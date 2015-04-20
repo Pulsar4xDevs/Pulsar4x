@@ -1,5 +1,6 @@
 #.appveyor.yml reference: http://www.appveyor.com/docs/appveyor-yml
 #.appveyor.yml validation: https://ci.appveyor.com/tools/validate-yaml
+#verify WHOLE file after EVERY change or it could crash cause of whitespaces or tabulation
 
 version: 0.4.{build}
 
@@ -16,6 +17,8 @@ notifications:
   - provider: Email
     to:
       - "{{commitAuthorEmail}}"
+#####if someone wants to get ALL ststus change messages then just add your email
+##### - your@email.com
     subject: 'Build {{status}}'                  
-    message: "{{message}}, {{commitId}}, ..."
+    message: "{{message}}, {{commitId}}"
     on_build_status_changed: true
