@@ -73,7 +73,6 @@ namespace Pulsar4X.Tests
             minList.Add(min);
 
             StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
-
         }
 
         [Test]
@@ -83,6 +82,18 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
+
+            // now lets test some malformed data folders.
+            Assert.Catch(typeof(StaticDataLoadException), () =>
+            {
+                StaticDataManager.LoadFromDirectory("./TestData/MalformedData");
+            });
+
+            // now ,lets try for a directory that does not exist.
+            Assert.Catch(typeof(StaticDataLoadException), () =>
+            {
+                StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist");
+            });
         }
     }
 }
