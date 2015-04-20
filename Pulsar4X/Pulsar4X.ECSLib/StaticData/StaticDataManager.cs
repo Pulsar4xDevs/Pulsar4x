@@ -9,14 +9,24 @@ using Newtonsoft.Json.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// A small helper for exporting static data.
+    /// </summary>
     public struct DataExportContainer
     {
         public string Type;
         public dynamic Data;
     }
 
+    /// <summary>
+    /// This class manages the games static data. This includes import/export of static data 
+    /// for an existing game as well as the initial import of the static data for a new game.
+    /// </summary>
     public class StaticDataManager
     {
+        /// <summary>
+        /// The static data store.
+        /// </summary>
         public static StaticDataStore StaticDataStore = new StaticDataStore();
 
         /// <summary>
@@ -33,6 +43,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private const string officialDataDirectory = "\\Pulsar4x";
 
+        // Serilizer, specifically configured for static data.
         private static JsonSerializer serializer = new JsonSerializer
         {
             NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
@@ -69,6 +80,9 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// Loads all data from the specified directory.
+        /// </summary>
         public static void LoadFromDirectory(string directory)
         {
             // we start by looking for a version file, no verion file, no load.
@@ -107,16 +121,19 @@ namespace Pulsar4X.ECSLib
             return loadedVinfo.IsCompatibleWith(vinfo);
         }
 
-        // use dynamic here to avoid having to know/use the exact the types.
-        // we are alreading checking the types via StaticDataStore.*Type, so we 
-        // can rely on there being an overload of StaticDataStore.Store
-        // that supports that type.
+        /// <summary>
+        /// Stores the data in the provided JObject if it is valid.
+        /// </summary>
         private static void StoreObject(JObject obj)
         {
             // we need to work out the type:
             Type type = StaticDataStore.GetType(obj.First.ToObject<string>());
             
             // grab the data:
+            // use dynamic here to avoid having to know/use the exact the types.
+            // we are alreading checking the types via StaticDataStore.*Type, so we 
+            // can rely on there being an overload of StaticDataStore.Store
+            // that supports that type.
             dynamic data = obj["Data"].ToObject(type, serializer);
 
             if (type == StaticDataStore.AtmosphericGasesType)
@@ -131,9 +148,16 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataStore.Store(data);
             }
+            else if (type == StaticDataStore.TechsType)
+            {
+                StaticDataStore.Store(data);
+            }
             // ... more here.
         }
 
+        /// <summary>
+        /// Loads the specified file into a JObject for further processing.
+        /// </summary>
         static JObject Load(string file)
         {
             JObject obj = null;
@@ -146,6 +170,9 @@ namespace Pulsar4X.ECSLib
             return obj;
         }
 
+        /// <summary>
+        /// Loads the specified object into a VersionInfo struct.
+        /// </summary>
         static VersionInfo LoadVinfo(string file)
         {
             VersionInfo info;
@@ -164,6 +191,9 @@ namespace Pulsar4X.ECSLib
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Exports the provided static data into the specified file.
+        /// </summary>
         public static void ExportStaticData(object staticData, string file)
         {
             var data = new DataExportContainer();
