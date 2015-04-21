@@ -69,6 +69,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="EntityHolder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="UI-Comms.cs" />
     <Page Include="MainWindow.xaml">

@@ -113,6 +113,7 @@
     <Compile Include="SaveGame.cs" />
     <Compile Include="StarSystem.cs" />
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
+    <Compile Include="StaticData\PlayerSD.cs" />
     <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
     <Compile Include="StaticData\MineralSD.cs" />

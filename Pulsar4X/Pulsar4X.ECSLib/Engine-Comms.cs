@@ -107,9 +107,11 @@ namespace Pulsar4X.ECSLib
             Quit,               // terminates the main game loop.
             Save,               // saves game 
             Load,               // loads game
-            Echo,               // will be sent straight back to sender. Use for testing.     
+            Echo,               // will be sent straight back to sender. Use for testing.    
+            GameState,          // will return full (not just updates) snapshot of current game state to UI
                                 // OutQueue
-            GameStatusUpdate    //
+            GameStatusFresh,    // contains EntityManager with full snapshot of current game state
+            GameStatusUpdate    // contains EntityManager with updates 
         }
 
         public MessageType Type;

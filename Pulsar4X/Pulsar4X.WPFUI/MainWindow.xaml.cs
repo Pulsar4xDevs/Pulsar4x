@@ -27,7 +27,6 @@ namespace Pulsar4X.WPFUI
         {
             InitializeComponent();
             Program.PulsarMain(); // todo: replace
-            UIComms.Instance.OnStatusUpdate += (status) => { StatusBarText.Text = status; };
         }
 
         private void NewGame_Click(object sender, RoutedEventArgs e)

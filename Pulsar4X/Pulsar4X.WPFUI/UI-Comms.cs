@@ -14,26 +14,20 @@ namespace Pulsar4X.WPFUI
     {
         internal static UIComms Instance { get; private set; }
 
-        #region Events
-
-        internal StatusUpdate OnStatusUpdate;
-
-        #endregion
-        
-        internal Thread MainLoopThread { get; private set; }
-
-        private MessageBook MessageQueue { get; set; }
+        private Thread _mainLoopThread;
+        private MessageBook _messageQueue;
 
         public UIComms(EngineComms engineComms, Entity faction)
         {
             Instance = this;
-            MessageQueue = engineComms.RequestMessagebook(faction);
+            _messageQueue = engineComms.RequestMessagebook(faction);
+            GlobalManager = new EntityManager();
         }
         
         public void CheckEngineMessageQueue()
         {
             Message message;
-            if (MessageQueue.OutMessageQueue.TryDequeue(out message))
+            if (_messageQueue.OutMessageQueue.TryDequeue(out message))
             {
                 //what you would need is a message processor function, this function would look at the message type and then fire of an event for that message type.
                 //everthing in the UI would subscribe to the events for messages they are interested in
@@ -42,12 +36,10 @@ namespace Pulsar4X.WPFUI
                 switch(message.Type)
                 {
                     case (Message.MessageType.GameStatusUpdate):
-                        if(OnStatusUpdate != null)
-                            OnStatusUpdate.Invoke((string)message.Data);
                         break;
                 }
 
-                if (MessageQueue.OutMessageQueue.Count > 10)
+                if (_messageQueue.OutMessageQueue.Count > 10)
                     Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Send, new Action(() => CheckEngineMessageQueue()));
                 else
                     Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() => CheckEngineMessageQueue()));
@@ -56,35 +48,37 @@ namespace Pulsar4X.WPFUI
                 Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => CheckEngineMessageQueue()));
         }
 
+        #region Communications
+
         public void SendMessage(Message message, bool forceEngineFire = true)
         {
             if(forceEngineFire && !IsEngineFired())
                 FireEngine();
-            MessageQueue.InMessageQueue.Enqueue(message);
+            _messageQueue.InMessageQueue.Enqueue(message);
         }
 
         public void FireEngine()
         {
             if(IsEngineFired())
                 return;
-            MainLoopThread = new Thread(Game.Instance.MainGameLoop);//Replace it with something better later
-            MainLoopThread.Start();
+            _mainLoopThread = new Thread(Game.Instance.MainGameLoop);//Replace it with something better later
+            _mainLoopThread.Start();
         }
 
         public void HaltEngine()
         {
             if(!IsEngineFired())
                 return;
-            if (MainLoopThread != null)
+            if (_mainLoopThread != null)
             {
-                if (MainLoopThread.ThreadState == ThreadState.Stopped) //we can safely abort it to make sure everything is ok
-                    MainLoopThread.Abort();
+                if (_mainLoopThread.ThreadState == ThreadState.Stopped) //we can safely abort it to make sure everything is ok
+                    _mainLoopThread.Abort();
                 else
                 {
                     SendMessage(new Message(Message.MessageType.Quit, null));
                     Thread.Sleep(100);
-                    if (MainLoopThread.ThreadState == ThreadState.Stopped)
-                        MainLoopThread.Abort();
+                    if (_mainLoopThread.ThreadState == ThreadState.Stopped)
+                        _mainLoopThread.Abort();
                     else
                         throw new Exception("Game Loop can't be stopped");
                 }
@@ -93,11 +87,23 @@ namespace Pulsar4X.WPFUI
 
         public bool IsEngineFired()
         {
-            if(MainLoopThread == null)
+            if(_mainLoopThread == null)
                 return false;
-            if(MainLoopThread.ThreadState == ThreadState.Stopped)
+            if(_mainLoopThread.ThreadState == ThreadState.Stopped)
                 return false;
             return true;
         }
+
+        #endregion
+
+        #region Data
+
+        public EntityManager GlobalManager { get; private set; }
+
+        #endregion
+
+        #region Events
+
+        #endregion
     }
 }
