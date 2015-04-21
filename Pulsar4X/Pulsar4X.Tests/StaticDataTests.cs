@@ -74,14 +74,14 @@ namespace Pulsar4X.Tests
 
             StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
 
-            List<TechSD> techs = new List<TechSD>();
+            JDictionary<Guid, TechSD> techs = new JDictionary<Guid, TechSD>();
             TechSD tech1 = new TechSD();
             tech1.Name = "Trans-Newtonian Technology";
             tech1.Reqirements = new List<Guid>();
             tech1.Description = "Unlocks almost all other technology.";
             tech1.Cost = 1000;
             tech1.Category = ResearchCategories.ConstructionProduction;
-            tech1.Id = new Guid();
+            tech1.Id = Guid.NewGuid();
 
             TechSD tech2 = new TechSD();
             tech2.Name = "Construction Rate";
@@ -90,7 +90,10 @@ namespace Pulsar4X.Tests
             tech2.Description = "Boosts Construction Rate by 12 BP";
             tech2.Cost = 3000;
             tech2.Category = ResearchCategories.ConstructionProduction;
-            tech2.Id = new Guid();
+            tech2.Id = Guid.NewGuid();
+
+            techs.Add(tech1.Id, tech1);
+            techs.Add(tech2.Id, tech2);
 
             StaticDataManager.ExportStaticData(techs, "./TechnologyData.json");
         }
