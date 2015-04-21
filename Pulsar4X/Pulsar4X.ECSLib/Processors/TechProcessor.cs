@@ -18,7 +18,7 @@ namespace Pulsar4X.ECSLib.Processors
             foreach (var tech in techdb.UnavailableTechs)
             {
                 bool requrementsMet = false;
-                foreach (var requrement in tech.Reqirements)
+                foreach (var requrement in tech.Requirements)
                 {                       
                     if (techdb.ResearchedTechs.Contains(requrement))
                     {

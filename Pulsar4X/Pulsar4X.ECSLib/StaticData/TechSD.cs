@@ -31,7 +31,7 @@ namespace Pulsar4X.ECSLib
         public string Description;
         public ResearchCategories Category;
         public Guid Id;
-        public List<Guid> Reqirements;
+        public List<Guid> Requirements;
         public int Cost;
     }
 }
