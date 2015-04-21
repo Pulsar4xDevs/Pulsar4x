@@ -23,29 +23,31 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// a list of techs not yet meeting the reqirements to research
         /// </summary>
-        public List<TechSD> UnavilableTechs { get; set; } 
+        public List<TechSD> UnavailableTechs { get; set; } 
 
         /// <summary>
         /// Constructor for datablob, this should only be used when a new faction is created.
         /// </summary>
         /// <param name="alltechs">a list of all possible techs in game</param>
-        public TechDB(List<TechSD> alltechs )
+        public TechDB(List<TechSD> alltechs)
         {
-            UnavilableTechs = alltechs.ToList();
+            UnavailableTechs = alltechs.ToList();
             ResearchedTechs = new List<Guid>();
             ResearchableTechs = new Dictionary<TechSD, int>();
         }
 
         public TechDB(TechDB techDB)
         {
-            UnavilableTechs = techDB.UnavilableTechs.ToList();
+            UnavailableTechs = techDB.UnavailableTechs.ToList();
             ResearchedTechs = techDB.ResearchedTechs.ToList();
             ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
         }
 
         public TechDB()
         {
-            
+            UnavailableTechs = new List<TechSD>();
+            ResearchedTechs = new List<Guid>();
+            ResearchableTechs = new Dictionary<TechSD, int>();
         }
 
         public override object Clone()

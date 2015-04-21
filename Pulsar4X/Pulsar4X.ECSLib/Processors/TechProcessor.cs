@@ -15,7 +15,7 @@ namespace Pulsar4X.ECSLib.Processors
         /// <param name="techdb"></param>
         internal static void MakeResearchable(TechDB techdb)
         {
-            foreach (var tech in techdb.UnavilableTechs)
+            foreach (var tech in techdb.UnavailableTechs)
             {
                 bool requrementsMet = false;
                 foreach (var requrement in tech.Reqirements)
@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib.Processors
                 if (requrementsMet)
                 {
                     techdb.ResearchableTechs.Add(tech, 0);
-                    techdb.UnavilableTechs.Remove(tech);
+                    techdb.UnavailableTechs.Remove(tech);
                 }
             }
         }
