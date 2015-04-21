@@ -48,12 +48,29 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.core">
+      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\nunit.core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="nunit.core.interfaces">
+      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\nunit.core.interfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="nunit.framework, Version=2.6.4.14350, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NUnit.2.6.4\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.util">
+      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\nunit.util.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="NUnit.VisualStudio.TestAdapter">
+      <HintPath>..\packages\NUnitTestAdapter.2.0.0\lib\NUnit.VisualStudio.TestAdapter.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="nunit.framework">
-      <HintPath>../deps/NUnit-2.6.4/bin/nunit.framework.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +92,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="TestData\MalformedData\CommanderNameTheme.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

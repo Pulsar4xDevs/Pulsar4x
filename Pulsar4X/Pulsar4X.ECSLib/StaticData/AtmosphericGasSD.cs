@@ -1,4 +1,9 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+
+namespace Pulsar4X.ECSLib
 {
     public struct AtmosphericGasSD
     {

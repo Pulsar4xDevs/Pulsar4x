@@ -28,6 +28,7 @@ namespace Pulsar4X.ECSLib
     public struct TechSD
     {
         public string Name;
+        public string Description;
         public ResearchCategories Category;
         public Guid Id;
         public List<Guid> Reqirements;

@@ -73,6 +73,26 @@ namespace Pulsar4X.Tests
             minList.Add(min);
 
             StaticDataManager.ExportStaticData(minList, "./MineralsExportTest.json");
+
+            List<TechSD> techs = new List<TechSD>();
+            TechSD tech1 = new TechSD();
+            tech1.Name = "Trans-Newtonian Technology";
+            tech1.Reqirements = new List<Guid>();
+            tech1.Description = "Unlocks almost all other technology.";
+            tech1.Cost = 1000;
+            tech1.Category = ResearchCategories.ConstructionProduction;
+            tech1.Id = new Guid();
+
+            TechSD tech2 = new TechSD();
+            tech2.Name = "Construction Rate";
+            tech2.Reqirements = new List<Guid>();
+            tech2.Reqirements.Add(tech1.Id);
+            tech2.Description = "Boosts Construction Rate by 12 BP";
+            tech2.Cost = 3000;
+            tech2.Category = ResearchCategories.ConstructionProduction;
+            tech2.Id = new Guid();
+
+            StaticDataManager.ExportStaticData(techs, "./TechnologyData.json");
         }
 
         [Test]
@@ -82,7 +102,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
-
+            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Techs);
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>
             {
