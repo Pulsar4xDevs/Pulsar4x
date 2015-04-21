@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.ECSLib", "Pulsar4X
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pulsar4X.WPFUI", "Pulsar4X.WPFUI\Pulsar4X.WPFUI.csproj", "{76508ABF-600E-4B86-9764-DB82D4E429B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModdingTools.JsonDataEditor", "ModdingTools.JsonDataEditor\ModdingTools.JsonDataEditor.csproj", "{12B34A79-0285-41C9-9BAD-7902E562234D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,16 @@ Global
 		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{76508ABF-600E-4B86-9764-DB82D4E429B0}.Release|x86.ActiveCfg = Release|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{12B34A79-0285-41C9-9BAD-7902E562234D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
