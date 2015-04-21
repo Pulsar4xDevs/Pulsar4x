@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -42,11 +43,26 @@ namespace Pulsar4X.ECSLib
     {
         protected override JsonContract CreateContract(Type objectType)
         {
+            // make sure we use default Json datTime converter
+            // otherwise import will fail.
+            if (typeof(DateTime).IsAssignableFrom(objectType))  
+            {
+                return base.CreateContract(objectType);
+            }
+
+            // make sure we use default dictionary import converter 
+            // otherwise import will fail.
+            if (typeof(IDictionary).IsAssignableFrom(objectType))
+            {
+                return base.CreateContract(objectType);
+            }
+            // now we can force iserialible to be used.
             if (typeof(ISerializable).IsAssignableFrom(objectType))
             {
                 return CreateISerializableContract(objectType);
             }
 
+            // if we don't match any of the above just use the default.
             return base.CreateContract(objectType);
         }
     }

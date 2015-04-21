@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -16,21 +17,27 @@ namespace Pulsar4X.ECSLib
         /// List which stores all the atmospheric gases.
         /// </summary>
         public WeightedList<AtmosphericGasSD> AtmosphericGases = new WeightedList<AtmosphericGasSD>();
+        [JsonIgnore]
         public Type AtmosphericGasesType;
+        [JsonIgnore]
         private const string AtmosphericGasesTypeString = "AtmosphericGases";
 
         /// <summary>
         /// List which stores all the Commander Name themes.
         /// </summary>
         public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
+        [JsonIgnore]
         public Type CommanderNameThemesType;
+        [JsonIgnore]
         private const string CommanderNameThemesTypeString = "CommanderNameThemes";
 
         /// <summary>
         /// List which stores all the Minerals.
         /// </summary>
         public List<MineralSD> Minerals = new List<MineralSD>();
+        [JsonIgnore]
         public Type MineralsType;
+        [JsonIgnore]
         private const string MineralsTypeString = "Minerals";
 
         /// <summary>
@@ -38,7 +45,9 @@ namespace Pulsar4X.ECSLib
         /// stored in a dictionary to allow fast lookup of a specifc Technology based on its guid.
         /// </summary>
         public JDictionary<Guid, TechSD> Techs = new JDictionary<Guid, TechSD>();
+        [JsonIgnore]
         public Type TechsType;
+        [JsonIgnore]
         private const string TechsTypeString = "Techs";
 
 

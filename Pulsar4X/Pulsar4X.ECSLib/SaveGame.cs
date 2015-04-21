@@ -25,7 +25,7 @@ namespace Pulsar4X.ECSLib
             public DateTime GameDateTime;
             public EntityManager GlobalEntityManager;
             public List<StarSystem> StarSystems;
-            
+            public StaticDataStore StaticData;
         }
 
         private SaveData _data;
@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
         public SaveGame(string file = null)
         {
             File = file;
-            _serializer = new JsonSerializer {NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented};
+            _serializer = new JsonSerializer { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable() };
         }
 
         public void Save(string file = null)
@@ -69,6 +69,9 @@ namespace Pulsar4X.ECSLib
                 throw new System.NotSupportedException(e);
             }
 
+            // set the static data:
+            StaticDataManager.StaticDataStore = _data.StaticData;
+
             // get the game to do its post load stuff
             Game.Instance.PostGameLoad(_data.GameDateTime, _data.GlobalEntityManager, _data.StarSystems);
         }
@@ -102,6 +105,7 @@ namespace Pulsar4X.ECSLib
             _data.GlobalEntityManager = Game.Instance.GlobalManager;
             _data.StarSystems = Game.Instance.StarSystems;
             _data.GameDateTime = Game.Instance.CurrentDateTime;
+            _data.StaticData = StaticDataManager.StaticDataStore;
         }
     }
 
