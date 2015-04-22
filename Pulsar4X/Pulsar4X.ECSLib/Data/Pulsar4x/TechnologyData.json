@@ -1,36 +1,31 @@
 {
   "Type": "Techs",
-  "Data": [
-	  {
-		"Version": 2,
-		"Comparer": {},
-		"HashSize": 3,
-		"KeyValuePairs": [
-		  {
-			"Key": "8f34ba1e-97a0-492b-a148-a28dc42c11d4",
-			"Value": {
-			  "Name": "Trans-Newtonian Technology",
-			  "Description": "Unlocks almost all other technology.",
-			  "Category": "ConstructionProduction",
-			  "Id": "8f34ba1e-97a0-492b-a148-a28dc42c11d4",
-			  "Requirements": [],
-			  "Cost": 1000
-			}
-		  },
-		  {
-			"Key": "bad40c83-9b83-4742-b8ad-056e636e6581",
-			"Value": {
-			  "Name": "Construction Rate",
-			  "Description": "Boosts Construction Rate by 12 BP",
-			  "Category": "ConstructionProduction",
-			  "Id": "bad40c83-9b83-4742-b8ad-056e636e6581",
-			  "Requirements": [
-				"8f34ba1e-97a0-492b-a148-a28dc42c11d4"
-			  ],
-			  "Cost": 3000
-			}
-		  }
-		]
-	  }
-   ]
+  "Data": {
+    "List": [
+      {
+        "Key": "1650cf17-a4f3-4766-a56f-652f9b770ab6",
+        "Value": {
+          "Name": "Trans-Newtonian Technology",
+          "Description": "Unlocks almost all other technology.",
+          "Category": "ConstructionProduction",
+          "Id": "1650cf17-a4f3-4766-a56f-652f9b770ab6",
+          "Requirements": [],
+          "Cost": 1000
+        }
+      },
+      {
+        "Key": "b3d82c9a-cfc2-47ef-b407-c7215abee922",
+        "Value": {
+          "Name": "Construction Rate",
+          "Description": "Boosts Construction Rate by 12 BP",
+          "Category": "ConstructionProduction",
+          "Id": "b3d82c9a-cfc2-47ef-b407-c7215abee922",
+          "Requirements": [
+            "1650cf17-a4f3-4766-a56f-652f9b770ab6"
+          ],
+          "Cost": 3000
+        }
+      }
+    ]
+  }
 }
