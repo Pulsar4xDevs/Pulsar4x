@@ -6,7 +6,7 @@
         "Key": "59057d34-d3d4-40cc-b2cc-ceb826a33922",
         "Value": {
           "Name": "Genome Sequence Research",
-          "Description": "Description",
+          "Description": "A background tech that allows research into the creation of new species.",
           "Category": "BiologyGenetics",
           "Id": "59057d34-d3d4-40cc-b2cc-ceb826a33922",
           "Requirements": [],
@@ -17,7 +17,7 @@
         "Key": "7b11f81c-de9f-4cdb-85f9-f6944f0f6eeb",
         "Value": {
           "Name": "Genome Sequence: Base Gravity +10%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "7b11f81c-de9f-4cdb-85f9-f6944f0f6eeb",
           "Requirements": [
@@ -31,7 +31,7 @@
         "Key": "5be19a04-699c-4a7f-b674-c88381c58262",
         "Value": {
           "Name": "Genome Sequence: Base Gravity +20%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "5be19a04-699c-4a7f-b674-c88381c58262",
           "Requirements": [
@@ -44,7 +44,7 @@
         "Key": "d6a8f74d-ec3b-47e8-bd2a-369503f1c314",
         "Value": {
           "Name": "Genome Sequence: Base Gravity +30%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "d6a8f74d-ec3b-47e8-bd2a-369503f1c314",
           "Requirements": [
@@ -57,7 +57,7 @@
         "Key": "603398b3-d81c-42a1-9a7e-7ec804f4790d",
         "Value": {
           "Name": "Genome Sequence: Base Gravity +40%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "603398b3-d81c-42a1-9a7e-7ec804f4790d",
           "Requirements": [
@@ -70,7 +70,7 @@
         "Key": "87a146ef-e1d4-4f4c-971a-bd503cf92497",
         "Value": {
           "Name": "Genome Sequence: Base Gravity +50%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "87a146ef-e1d4-4f4c-971a-bd503cf92497",
           "Requirements": [
@@ -83,7 +83,7 @@
         "Key": "e1d5fedb-95d1-4967-b03e-85e7bc610e05",
         "Value": {
           "Name": "Genome Sequence: Base Gravity -10%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "e1d5fedb-95d1-4967-b03e-85e7bc610e05",
           "Requirements": [
@@ -97,7 +97,7 @@
         "Key": "a313fba5-0cc9-4636-864a-873afbd97d74",
         "Value": {
           "Name": "Genome Sequence: Base Gravity -20%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "a313fba5-0cc9-4636-864a-873afbd97d74",
           "Requirements": [
@@ -110,7 +110,7 @@
         "Key": "b5fe28ea-e600-4af1-8e0c-9fc637b82a60",
         "Value": {
           "Name": "Genome Sequence: Base Gravity -30%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "b5fe28ea-e600-4af1-8e0c-9fc637b82a60",
           "Requirements": [
@@ -123,7 +123,7 @@
         "Key": "64739872-0ac7-4536-af5b-22ddc242d11e",
         "Value": {
           "Name": "Genome Sequence: Base Gravity -40%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "64739872-0ac7-4536-af5b-22ddc242d11e",
           "Requirements": [
@@ -136,7 +136,7 @@
         "Key": "a0dd7fc9-817f-4065-9338-ca78898095cb",
         "Value": {
           "Name": "Genome Sequence: Base Gravity -50%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the gravity tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "a0dd7fc9-817f-4065-9338-ca78898095cb",
           "Requirements": [
@@ -149,7 +149,7 @@
         "Key": "5d6de2ac-a75a-42de-b819-154b149a1852",
         "Value": {
           "Name": "Genome Seauence: Base Oxygen Level +10%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "5d6de2ac-a75a-42de-b819-154b149a1852",
           "Requirements": [
@@ -163,7 +163,7 @@
         "Key": "988c34c1-2b59-4c99-9701-54f274338a6d",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level +20%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "988c34c1-2b59-4c99-9701-54f274338a6d",
           "Requirements": [
@@ -176,7 +176,7 @@
         "Key": "dc68c605-2bdf-4e10-a695-e3c038427c90",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level +30%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "dc68c605-2bdf-4e10-a695-e3c038427c90",
           "Requirements": [
@@ -189,7 +189,7 @@
         "Key": "eb819bad-45cc-4c71-80ce-786ab34bb0af",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level +40%.",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "eb819bad-45cc-4c71-80ce-786ab34bb0af",
           "Requirements": [
@@ -202,7 +202,7 @@
         "Key": "66c4264e-9545-48f8-8d56-82aa4c3b7532",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level +50%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "66c4264e-9545-48f8-8d56-82aa4c3b7532",
           "Requirements": [
@@ -215,7 +215,7 @@
         "Key": "ec0de940-0be9-4633-9ecb-0995e1a9c217",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level +60%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "ec0de940-0be9-4633-9ecb-0995e1a9c217",
           "Requirements": [
@@ -228,7 +228,7 @@
         "Key": "709be52d-56e7-4734-b23d-c37340648f8c",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level -10%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "709be52d-56e7-4734-b23d-c37340648f8c",
           "Requirements": [
@@ -242,7 +242,7 @@
         "Key": "516b7bc2-ff71-4832-9f2d-224d11cfcf9b",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level -20%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "516b7bc2-ff71-4832-9f2d-224d11cfcf9b",
           "Requirements": [
@@ -255,7 +255,7 @@
         "Key": "67630b41-42bd-41b9-a666-acc2022efeb5",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level -30%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "67630b41-42bd-41b9-a666-acc2022efeb5",
           "Requirements": [
@@ -268,7 +268,7 @@
         "Key": "50adafc8-42b9-4721-aaf0-9d1bf866d9a0",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level -40%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "50adafc8-42b9-4721-aaf0-9d1bf866d9a0",
           "Requirements": [
@@ -281,7 +281,7 @@
         "Key": "506ebf9d-77f5-4598-a7c5-795a780ba3d3",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level -50%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "506ebf9d-77f5-4598-a7c5-795a780ba3d3",
           "Requirements": [
@@ -294,7 +294,7 @@
         "Key": "5447ded9-36d7-48bd-82fa-229951f68232",
         "Value": {
           "Name": "Genome Sequence: Base Oxygen Level -60%",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "5447ded9-36d7-48bd-82fa-229951f68232",
           "Requirements": [
@@ -307,7 +307,7 @@
         "Key": "2b35b381-6d4b-43ec-b4a7-4d9edc61e7c9",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +10C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "2b35b381-6d4b-43ec-b4a7-4d9edc61e7c9",
           "Requirements": [
@@ -321,7 +321,7 @@
         "Key": "0a57ecf4-4daa-471e-9170-4ac20a1a8551",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +20C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "0a57ecf4-4daa-471e-9170-4ac20a1a8551",
           "Requirements": [
@@ -334,7 +334,7 @@
         "Key": "7ee284fc-82ca-4c64-ab21-2b43c967ecd2",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +30C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "7ee284fc-82ca-4c64-ab21-2b43c967ecd2",
           "Requirements": [
@@ -347,7 +347,7 @@
         "Key": "6b23cb3e-f5bb-431e-b6d2-2c96defc9504",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +40C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "6b23cb3e-f5bb-431e-b6d2-2c96defc9504",
           "Requirements": [
@@ -360,7 +360,7 @@
         "Key": "f9d2f593-9bea-4ed0-b03f-bf54f6ee3ce1",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +50C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "f9d2f593-9bea-4ed0-b03f-bf54f6ee3ce1",
           "Requirements": [
@@ -373,7 +373,7 @@
         "Key": "695f9668-4aef-476c-909b-c18059c31ea2",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +60C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "695f9668-4aef-476c-909b-c18059c31ea2",
           "Requirements": [
@@ -386,7 +386,7 @@
         "Key": "8d7bc8b5-b1a0-4a36-a9f7-7824c56a875f",
         "Value": {
           "Name": "Genome Sequence: Base Temperature +80C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "8d7bc8b5-b1a0-4a36-a9f7-7824c56a875f",
           "Requirements": [
@@ -399,7 +399,7 @@
         "Key": "efee94b5-af6f-4ed3-97e6-c5a5c0494a7e",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -10C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "efee94b5-af6f-4ed3-97e6-c5a5c0494a7e",
           "Requirements": [
@@ -413,7 +413,7 @@
         "Key": "57e3df20-9a05-4e10-b48b-aca3010a6321",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -20C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "57e3df20-9a05-4e10-b48b-aca3010a6321",
           "Requirements": [
@@ -426,7 +426,7 @@
         "Key": "ff5db49a-5568-440c-bc77-72f4ea70ed9e",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -30C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "ff5db49a-5568-440c-bc77-72f4ea70ed9e",
           "Requirements": [
@@ -439,7 +439,7 @@
         "Key": "930db4d1-2d98-42d3-95ca-3e7f68a1730f",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -40C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "930db4d1-2d98-42d3-95ca-3e7f68a1730f",
           "Requirements": [
@@ -452,7 +452,7 @@
         "Key": "c05aef30-b785-4bd0-b241-550214ef58e9",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -50C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "c05aef30-b785-4bd0-b241-550214ef58e9",
           "Requirements": [
@@ -465,7 +465,7 @@
         "Key": "9d2ebdb0-2507-4207-87bf-8cb513014de1",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -60C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "9d2ebdb0-2507-4207-87bf-8cb513014de1",
           "Requirements": [
@@ -478,7 +478,7 @@
         "Key": "8a1d5b26-7c42-4e6f-b69b-a8cc80bf5c64",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -80C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "8a1d5b26-7c42-4e6f-b69b-a8cc80bf5c64",
           "Requirements": [
@@ -491,7 +491,7 @@
         "Key": "92b15945-f0ac-4da3-b2e3-a6f3eec302e5",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -100C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "92b15945-f0ac-4da3-b2e3-a6f3eec302e5",
           "Requirements": [
@@ -504,7 +504,7 @@
         "Key": "0a5d3483-3f33-4e33-ac63-bb594717081c",
         "Value": {
           "Name": "Genome Sequence: Base Temperature -120C",
-          "Description": "",
+          "Description": "The amount by which the new midpoint of the temperature tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "Id": "0a5d3483-3f33-4e33-ac63-bb594717081c",
           "Requirements": [
@@ -561,7 +561,7 @@
         "Key": "1bf799a7-d023-43e6-9e58-276b414c4def",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +1 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "1bf799a7-d023-43e6-9e58-276b414c4def",
           "Requirements": [
@@ -575,7 +575,7 @@
         "Key": "38c5d62b-8e81-4643-a815-68c180f794fb",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +2 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "38c5d62b-8e81-4643-a815-68c180f794fb",
           "Requirements": [
@@ -588,7 +588,7 @@
         "Key": "45f64f56-aaac-46f4-b715-8d46cbbd3f8b",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +3 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "45f64f56-aaac-46f4-b715-8d46cbbd3f8b",
           "Requirements": [
@@ -601,7 +601,7 @@
         "Key": "257f0beb-75c3-4fd9-8867-4d479d963024",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +4 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "257f0beb-75c3-4fd9-8867-4d479d963024",
           "Requirements": [
@@ -614,7 +614,7 @@
         "Key": "8d844591-9cf0-4a0f-a981-db9bab520d58",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +5 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "8d844591-9cf0-4a0f-a981-db9bab520d58",
           "Requirements": [
@@ -627,7 +627,7 @@
         "Key": "7323ea37-9798-44ea-b9c9-19206c532e94",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +6 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "7323ea37-9798-44ea-b9c9-19206c532e94",
           "Requirements": [
@@ -640,7 +640,7 @@
         "Key": "0766f861-e402-4c85-815d-585eb31f0f03",
         "Value": {
           "Name": "Genome Sequence: Temperature Range +8 degrees",
-          "Description": "",
+          "Description": "The numbers of degrees by which this new species exceeds the range tolerance of the base species.",
           "Category": "BiologyGenetics",
           "Id": "0766f861-e402-4c85-815d-585eb31f0f03",
           "Requirements": [
@@ -653,7 +653,7 @@
         "Key": "ec5d8644-d815-4162-9ce8-84b337b93184",
         "Value": {
           "Name": "Terraforming Module",
-          "Description": "",
+          "Description": "A ship component that allows a ship to perform the same task as a terraforming installation when it is in orbit of a colony.",
           "Category": "BiologyGenetics",
           "Id": "ec5d8644-d815-4162-9ce8-84b337b93184",
           "Requirements": [
@@ -666,7 +666,7 @@
         "Key": "b3197190-3c11-4c26-beaa-9f7cd93acf3f",
         "Value": {
           "Name": "Terraforming Rate 0.0012 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "b3197190-3c11-4c26-beaa-9f7cd93acf3f",
           "Requirements": [
@@ -679,7 +679,7 @@
         "Key": "07515fbe-47be-4bb5-87a2-69b3911f038e",
         "Value": {
           "Name": "Terraforming Rate 0.0015 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "07515fbe-47be-4bb5-87a2-69b3911f038e",
           "Requirements": [
@@ -692,7 +692,7 @@
         "Key": "e111ad14-51aa-4872-88b4-edb45d1d5bcd",
         "Value": {
           "Name": "Terraforming Rate 0.002 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "e111ad14-51aa-4872-88b4-edb45d1d5bcd",
           "Requirements": [
@@ -705,7 +705,7 @@
         "Key": "908d4a3e-0c8a-499f-81d8-c82177517331",
         "Value": {
           "Name": "Terraforming Rate 0.0025 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "908d4a3e-0c8a-499f-81d8-c82177517331",
           "Requirements": [
@@ -718,7 +718,7 @@
         "Key": "129a7370-64e7-4244-bc63-9aaec0ab5fc8",
         "Value": {
           "Name": "Terraforming Rate 0.003 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "129a7370-64e7-4244-bc63-9aaec0ab5fc8",
           "Requirements": [
@@ -731,7 +731,7 @@
         "Key": "96e68b55-2952-4062-b79a-6d644070c4ea",
         "Value": {
           "Name": "Terraforming Rate 0.0035 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "96e68b55-2952-4062-b79a-6d644070c4ea",
           "Requirements": [
@@ -744,7 +744,7 @@
         "Key": "7ac77aaf-c152-462e-9266-abd01e37c3ff",
         "Value": {
           "Name": "Terraforming Rate 0.004 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "7ac77aaf-c152-462e-9266-abd01e37c3ff",
           "Requirements": [
@@ -757,7 +757,7 @@
         "Key": "ad029908-2f85-4d8b-8e73-aaefc61b1127",
         "Value": {
           "Name": "Terraforming Rate 0.0045 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "ad029908-2f85-4d8b-8e73-aaefc61b1127",
           "Requirements": [
@@ -770,7 +770,7 @@
         "Key": "ec7b4faa-3b76-4ec9-b58e-a446fb3379d4",
         "Value": {
           "Name": "Terraforming Rate 0.005 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "ec7b4faa-3b76-4ec9-b58e-a446fb3379d4",
           "Requirements": [
@@ -783,7 +783,7 @@
         "Key": "193611b3-a792-43fd-bb3d-7c6220f6a88e",
         "Value": {
           "Name": "Terraforming Rate 0.006 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "193611b3-a792-43fd-bb3d-7c6220f6a88e",
           "Requirements": [
@@ -796,7 +796,7 @@
         "Key": "17005349-7c70-43fb-8a45-f0b99ec9851c",
         "Value": {
           "Name": "Terraforming Rate 0.007 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "17005349-7c70-43fb-8a45-f0b99ec9851c",
           "Requirements": [
@@ -809,7 +809,7 @@
         "Key": "38f423f8-c55f-4d26-8ffb-5b5ac80aca1f",
         "Value": {
           "Name": "Terraforming Rate 0.008 atm",
-          "Description": "",
+          "Description": "The amount of gas (measured in atmospheric pressure) produced in one year by one terraforming installation or terraforming module.",
           "Category": "BiologyGenetics",
           "Id": "38f423f8-c55f-4d26-8ffb-5b5ac80aca1f",
           "Requirements": [
@@ -1395,7 +1395,9 @@
           "Description": "",
           "Category": "ConstructionProduction",
           "Id": "9fdc5b1a-49cf-4c0c-a8ee-9362b399557d",
-          "Requirements": [],
+          "Requirements": [
+            "6c4ea02c-3d5b-4e92-b16c-ed5981377c20"
+          ],
           "Cost": 2500
         }
       },
