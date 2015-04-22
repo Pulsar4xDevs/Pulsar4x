@@ -95,7 +95,7 @@ namespace Pulsar4X.Tests
             techs.Add(tech1.Id, tech1);
             techs.Add(tech2.Id, tech2);
 
-            StaticDataManager.ExportStaticData(techs, "./TechnologyData.json");
+            StaticDataManager.ExportStaticData(techs, "./TechnologyDataExportTest.json");
         }
 
         [Test]
