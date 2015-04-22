@@ -92,7 +92,12 @@ namespace ModdingTools.JsonDataEditor
 
             string newName = nameTextBox.Text;
             if(!string.IsNullOrWhiteSpace(newName))
+            {
                 newTechSD.Name = newName;
+                nameTextBox.BackColor = Color.White;
+            }
+            else
+                nameTextBox.BackColor = Color.Red;
 
             string newDesc = descTextBox.Text;
             if(!string.IsNullOrWhiteSpace(newDesc))
