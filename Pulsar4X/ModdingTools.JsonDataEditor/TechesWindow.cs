@@ -73,7 +73,7 @@ namespace ModdingTools.JsonDataEditor
 
             foreach (TechDataHolder tech in _allDataHolders.Values)
             {
-                if(string.IsNullOrWhiteSpace(searchPattern) || tech.Name.Contains(searchPattern))
+                if(string.IsNullOrWhiteSpace(searchPattern) || tech.Name.ToLower().Contains(searchPattern.ToLower()))
                     availibleTechs.Items.Add(tech);
             }
 
