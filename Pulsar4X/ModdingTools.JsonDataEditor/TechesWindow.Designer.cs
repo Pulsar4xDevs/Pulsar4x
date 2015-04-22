@@ -48,6 +48,9 @@
             this.removeRequirementButton = new System.Windows.Forms.Button();
             this.newTechButton = new System.Windows.Forms.Button();
             this.selectTechButton = new System.Windows.Forms.Button();
+            this.removeTechButton = new System.Windows.Forms.Button();
+            this.guidLabel = new System.Windows.Forms.Label();
+            this.guidDataLabel = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.costUpDown)).BeginInit();
             this.SuspendLayout();
             // 
@@ -73,17 +76,18 @@
             // 
             // availibleTechs
             // 
+            this.availibleTechs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.availibleTechs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.availibleTechs.FormattingEnabled = true;
-            this.availibleTechs.Location = new System.Drawing.Point(356, 30);
+            this.availibleTechs.Location = new System.Drawing.Point(356, 69);
             this.availibleTechs.Name = "availibleTechs";
-            this.availibleTechs.Size = new System.Drawing.Size(241, 418);
+            this.availibleTechs.Size = new System.Drawing.Size(241, 379);
             this.availibleTechs.TabIndex = 2;
             // 
             // searchBox
             // 
             this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.searchBox.Location = new System.Drawing.Point(400, 4);
+            this.searchBox.Location = new System.Drawing.Point(400, 43);
             this.searchBox.Name = "searchBox";
             this.searchBox.Size = new System.Drawing.Size(197, 20);
             this.searchBox.TabIndex = 3;
@@ -93,7 +97,7 @@
             // 
             this.techName.AutoSize = true;
             this.techName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.techName.Location = new System.Drawing.Point(34, 35);
+            this.techName.Location = new System.Drawing.Point(28, 35);
             this.techName.Name = "techName";
             this.techName.Size = new System.Drawing.Size(35, 13);
             this.techName.TabIndex = 4;
@@ -102,7 +106,7 @@
             // nameTextBox
             // 
             this.nameTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.nameTextBox.Location = new System.Drawing.Point(75, 32);
+            this.nameTextBox.Location = new System.Drawing.Point(72, 33);
             this.nameTextBox.Name = "nameTextBox";
             this.nameTextBox.Size = new System.Drawing.Size(247, 20);
             this.nameTextBox.TabIndex = 5;
@@ -111,7 +115,7 @@
             // descTextBox
             // 
             this.descTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.descTextBox.Location = new System.Drawing.Point(75, 58);
+            this.descTextBox.Location = new System.Drawing.Point(72, 59);
             this.descTextBox.Multiline = true;
             this.descTextBox.Name = "descTextBox";
             this.descTextBox.Size = new System.Drawing.Size(247, 121);
@@ -122,7 +126,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Location = new System.Drawing.Point(34, 58);
+            this.label1.Location = new System.Drawing.Point(31, 59);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 7;
@@ -131,7 +135,7 @@
             // searchLabel
             // 
             this.searchLabel.AutoSize = true;
-            this.searchLabel.Location = new System.Drawing.Point(353, 7);
+            this.searchLabel.Location = new System.Drawing.Point(353, 46);
             this.searchLabel.Name = "searchLabel";
             this.searchLabel.Size = new System.Drawing.Size(41, 13);
             this.searchLabel.TabIndex = 8;
@@ -142,7 +146,7 @@
             this.categoryComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.categoryComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.categoryComboBox.FormattingEnabled = true;
-            this.categoryComboBox.Location = new System.Drawing.Point(75, 186);
+            this.categoryComboBox.Location = new System.Drawing.Point(72, 187);
             this.categoryComboBox.Name = "categoryComboBox";
             this.categoryComboBox.Size = new System.Drawing.Size(247, 21);
             this.categoryComboBox.TabIndex = 9;
@@ -151,7 +155,7 @@
             // categoryLabel
             // 
             this.categoryLabel.AutoSize = true;
-            this.categoryLabel.Location = new System.Drawing.Point(20, 189);
+            this.categoryLabel.Location = new System.Drawing.Point(14, 190);
             this.categoryLabel.Name = "categoryLabel";
             this.categoryLabel.Size = new System.Drawing.Size(49, 13);
             this.categoryLabel.TabIndex = 10;
@@ -160,7 +164,7 @@
             // costUpDown
             // 
             this.costUpDown.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.costUpDown.Location = new System.Drawing.Point(75, 214);
+            this.costUpDown.Location = new System.Drawing.Point(72, 215);
             this.costUpDown.Maximum = new decimal(new int[] {
             100000,
             0,
@@ -184,7 +188,7 @@
             // costLabel
             // 
             this.costLabel.AutoSize = true;
-            this.costLabel.Location = new System.Drawing.Point(41, 216);
+            this.costLabel.Location = new System.Drawing.Point(35, 217);
             this.costLabel.Name = "costLabel";
             this.costLabel.Size = new System.Drawing.Size(28, 13);
             this.costLabel.TabIndex = 12;
@@ -193,7 +197,7 @@
             // requirementsListBox
             // 
             this.requirementsListBox.FormattingEnabled = true;
-            this.requirementsListBox.Location = new System.Drawing.Point(75, 240);
+            this.requirementsListBox.Location = new System.Drawing.Point(72, 241);
             this.requirementsListBox.Name = "requirementsListBox";
             this.requirementsListBox.Size = new System.Drawing.Size(247, 121);
             this.requirementsListBox.TabIndex = 13;
@@ -202,7 +206,7 @@
             // requirementsLabel
             // 
             this.requirementsLabel.AutoSize = true;
-            this.requirementsLabel.Location = new System.Drawing.Point(2, 240);
+            this.requirementsLabel.Location = new System.Drawing.Point(-3, 241);
             this.requirementsLabel.Name = "requirementsLabel";
             this.requirementsLabel.Size = new System.Drawing.Size(72, 13);
             this.requirementsLabel.TabIndex = 14;
@@ -215,48 +219,79 @@
             // 
             // addRequirementButton
             // 
-            this.addRequirementButton.Location = new System.Drawing.Point(75, 367);
+            this.addRequirementButton.Location = new System.Drawing.Point(72, 368);
             this.addRequirementButton.Name = "addRequirementButton";
-            this.addRequirementButton.Size = new System.Drawing.Size(75, 23);
+            this.addRequirementButton.Size = new System.Drawing.Size(108, 23);
             this.addRequirementButton.TabIndex = 15;
-            this.addRequirementButton.Text = "Add";
+            this.addRequirementButton.Text = "Add Requirement";
             this.addRequirementButton.UseVisualStyleBackColor = true;
             this.addRequirementButton.Click += new System.EventHandler(this.addRequirementButton_Click);
             // 
             // removeRequirementButton
             // 
-            this.removeRequirementButton.Location = new System.Drawing.Point(247, 367);
+            this.removeRequirementButton.Location = new System.Drawing.Point(186, 368);
             this.removeRequirementButton.Name = "removeRequirementButton";
-            this.removeRequirementButton.Size = new System.Drawing.Size(75, 23);
+            this.removeRequirementButton.Size = new System.Drawing.Size(133, 23);
             this.removeRequirementButton.TabIndex = 16;
-            this.removeRequirementButton.Text = "Remove";
+            this.removeRequirementButton.Text = "Remove Requirement";
             this.removeRequirementButton.UseVisualStyleBackColor = true;
             this.removeRequirementButton.Click += new System.EventHandler(this.removeRequirementButton_Click);
             // 
             // newTechButton
             // 
-            this.newTechButton.Location = new System.Drawing.Point(75, 3);
+            this.newTechButton.Location = new System.Drawing.Point(356, 3);
             this.newTechButton.Name = "newTechButton";
-            this.newTechButton.Size = new System.Drawing.Size(75, 23);
+            this.newTechButton.Size = new System.Drawing.Size(71, 23);
             this.newTechButton.TabIndex = 17;
-            this.newTechButton.Text = "New";
+            this.newTechButton.Text = "New Tech";
             this.newTechButton.UseVisualStyleBackColor = true;
             this.newTechButton.Click += new System.EventHandler(this.newTechButton_Click);
             // 
             // selectTechButton
             // 
-            this.selectTechButton.Location = new System.Drawing.Point(247, 2);
+            this.selectTechButton.Location = new System.Drawing.Point(524, 3);
             this.selectTechButton.Name = "selectTechButton";
-            this.selectTechButton.Size = new System.Drawing.Size(75, 23);
+            this.selectTechButton.Size = new System.Drawing.Size(73, 23);
             this.selectTechButton.TabIndex = 18;
-            this.selectTechButton.Text = "Select";
+            this.selectTechButton.Text = "Select Tech";
             this.selectTechButton.UseVisualStyleBackColor = true;
             this.selectTechButton.Click += new System.EventHandler(this.selectTechButton_Click);
+            // 
+            // removeTechButton
+            // 
+            this.removeTechButton.Location = new System.Drawing.Point(433, 3);
+            this.removeTechButton.Name = "removeTechButton";
+            this.removeTechButton.Size = new System.Drawing.Size(85, 23);
+            this.removeTechButton.TabIndex = 19;
+            this.removeTechButton.Text = "Remove Tech";
+            this.removeTechButton.UseVisualStyleBackColor = true;
+            this.removeTechButton.Click += new System.EventHandler(this.removeTechButton_Click);
+            // 
+            // guidLabel
+            // 
+            this.guidLabel.AutoSize = true;
+            this.guidLabel.Location = new System.Drawing.Point(34, 13);
+            this.guidLabel.Name = "guidLabel";
+            this.guidLabel.Size = new System.Drawing.Size(29, 13);
+            this.guidLabel.TabIndex = 20;
+            this.guidLabel.Text = "Guid";
+            // 
+            // guidDataLabel
+            // 
+            this.guidDataLabel.AutoSize = true;
+            this.guidDataLabel.Location = new System.Drawing.Point(69, 13);
+            this.guidDataLabel.Name = "guidDataLabel";
+            this.guidDataLabel.Size = new System.Drawing.Size(31, 13);
+            this.guidDataLabel.TabIndex = 21;
+            this.guidDataLabel.Text = "0000";
             // 
             // TechesWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.guidDataLabel);
+            this.Controls.Add(this.guidLabel);
+            this.Controls.Add(this.removeTechButton);
             this.Controls.Add(this.selectTechButton);
             this.Controls.Add(this.newTechButton);
             this.Controls.Add(this.removeRequirementButton);
@@ -306,6 +341,9 @@
         private System.Windows.Forms.Button removeRequirementButton;
         private System.Windows.Forms.Button newTechButton;
         private System.Windows.Forms.Button selectTechButton;
+        private System.Windows.Forms.Button removeTechButton;
+        private System.Windows.Forms.Label guidLabel;
+        private System.Windows.Forms.Label guidDataLabel;
 
     }
 }
