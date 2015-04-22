@@ -1,12 +1,6 @@
 {
   "Type": "Techs",
-  "Data": [
-	  {
-		"Version": 2,
-		"Comparer": {},
-		"HashSize": 3,
-		"KeyValuePairs": [
-		  {
+  "Data": [{
 			"Key": "8f34ba1e-97a0-492b-a148-a28dc42c11d4",
 			"Value": {
 			  "Name": "Trans-Newtonian Technology",
@@ -30,7 +24,5 @@
 			  "Cost": 3000
 			}
 		  }
-		]
-	  }
    ]
 }

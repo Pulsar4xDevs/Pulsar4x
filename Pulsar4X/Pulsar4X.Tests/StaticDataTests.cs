@@ -106,7 +106,6 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Techs);
-            throw new ArgumentNullException("Before removing this exception make sure StaticDataStore.Techs contains not only one empty guid");
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>
             {
