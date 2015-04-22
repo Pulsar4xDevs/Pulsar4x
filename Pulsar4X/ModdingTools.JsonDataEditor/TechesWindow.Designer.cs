@@ -39,7 +39,6 @@
             this.searchLabel = new System.Windows.Forms.Label();
             this.categoryComboBox = new System.Windows.Forms.ComboBox();
             this.categoryLabel = new System.Windows.Forms.Label();
-            this.costUpDown = new System.Windows.Forms.NumericUpDown();
             this.costLabel = new System.Windows.Forms.Label();
             this.requirementsListBox = new System.Windows.Forms.ListBox();
             this.requirementsLabel = new System.Windows.Forms.Label();
@@ -51,7 +50,7 @@
             this.removeTechButton = new System.Windows.Forms.Button();
             this.guidLabel = new System.Windows.Forms.Label();
             this.guidDataLabel = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.costUpDown)).BeginInit();
+            this.costTextBox = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // loadButton
@@ -161,30 +160,6 @@
             this.categoryLabel.TabIndex = 10;
             this.categoryLabel.Text = "Category";
             // 
-            // costUpDown
-            // 
-            this.costUpDown.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.costUpDown.Location = new System.Drawing.Point(72, 215);
-            this.costUpDown.Maximum = new decimal(new int[] {
-            100000,
-            0,
-            0,
-            0});
-            this.costUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.costUpDown.Name = "costUpDown";
-            this.costUpDown.Size = new System.Drawing.Size(247, 20);
-            this.costUpDown.TabIndex = 11;
-            this.costUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.costUpDown.ValueChanged += new System.EventHandler(this.costUpDown_ValueChanged);
-            // 
             // costLabel
             // 
             this.costLabel.AutoSize = true;
@@ -285,10 +260,19 @@
             this.guidDataLabel.TabIndex = 21;
             this.guidDataLabel.Text = "0000";
             // 
+            // costTextBox
+            // 
+            this.costTextBox.Location = new System.Drawing.Point(72, 214);
+            this.costTextBox.Name = "costTextBox";
+            this.costTextBox.Size = new System.Drawing.Size(247, 20);
+            this.costTextBox.TabIndex = 22;
+            this.costTextBox.TextChanged += new System.EventHandler(this.costTextBox_TextChanged);
+            // 
             // TechesWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.costTextBox);
             this.Controls.Add(this.guidDataLabel);
             this.Controls.Add(this.guidLabel);
             this.Controls.Add(this.removeTechButton);
@@ -299,7 +283,6 @@
             this.Controls.Add(this.requirementsLabel);
             this.Controls.Add(this.requirementsListBox);
             this.Controls.Add(this.costLabel);
-            this.Controls.Add(this.costUpDown);
             this.Controls.Add(this.categoryLabel);
             this.Controls.Add(this.categoryComboBox);
             this.Controls.Add(this.searchLabel);
@@ -313,7 +296,6 @@
             this.Controls.Add(this.loadButton);
             this.Name = "TechesWindow";
             this.Size = new System.Drawing.Size(600, 460);
-            ((System.ComponentModel.ISupportInitialize)(this.costUpDown)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -332,7 +314,6 @@
         private System.Windows.Forms.Label searchLabel;
         private System.Windows.Forms.ComboBox categoryComboBox;
         private System.Windows.Forms.Label categoryLabel;
-        private System.Windows.Forms.NumericUpDown costUpDown;
         private System.Windows.Forms.Label costLabel;
         private System.Windows.Forms.ListBox requirementsListBox;
         private System.Windows.Forms.Label requirementsLabel;
@@ -344,6 +325,7 @@
         private System.Windows.Forms.Button removeTechButton;
         private System.Windows.Forms.Label guidLabel;
         private System.Windows.Forms.Label guidDataLabel;
+        private System.Windows.Forms.TextBox costTextBox;
 
     }
 }

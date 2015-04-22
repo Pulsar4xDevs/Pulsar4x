@@ -17,6 +17,7 @@ namespace ModdingTools.JsonDataEditor
     public partial class TechesWindow : UserControl
     {
         private bool _isLoaded = false;
+        private bool _updating = false;
         private string _fileName;
         private Guid _selectedItemGuid;
 
@@ -83,6 +84,10 @@ namespace ModdingTools.JsonDataEditor
         {
             if(_selectedItemGuid == Guid.Empty)
                 return;
+
+            if(_updating)
+                return;
+
             TechSD newTechSD = _allTechs[_selectedItemGuid];
 
             string newName = nameTextBox.Text;
@@ -95,9 +100,14 @@ namespace ModdingTools.JsonDataEditor
 
             newTechSD.Category = (ResearchCategories)categoryComboBox.SelectedItem;
 
-            int newCost = (int)Math.Round(costUpDown.Value);
-            if(newCost > 0)
+            int newCost;
+            if(Int32.TryParse(costTextBox.Text, out newCost) && newCost > 0)
+            {
                 newTechSD.Cost = newCost;
+                costTextBox.BackColor = Color.White;
+            }
+            else
+                costTextBox.BackColor = Color.Red;
 
             List<TechDataHolder> requirements = requirementsListBox.Items.Cast<TechDataHolder>().ToList();
             newTechSD.Requirements = requirements.ConvertAll(entry => entry.Guid);
@@ -110,6 +120,8 @@ namespace ModdingTools.JsonDataEditor
 
         private void UpdateSelectedItem()
         {
+            _updating = true;
+
             TechSD techSD;
             if(_selectedItemGuid == Guid.Empty)
                 techSD = new TechSD {Name = "Name", Description = "Description", Category = ResearchCategories.BiologyGenetics, Id = Guid.Empty, Cost = 1000, Requirements = new List<Guid>()};
@@ -120,7 +132,7 @@ namespace ModdingTools.JsonDataEditor
             nameTextBox.Text = techSD.Name;
             descTextBox.Text = techSD.Description;
             categoryComboBox.SelectedItem = techSD.Category;
-            costUpDown.Value = techSD.Cost;
+            costTextBox.Text = techSD.Cost.ToString();
 
             requirementsListBox.BeginUpdate();
             requirementsListBox.Items.Clear();
@@ -129,6 +141,8 @@ namespace ModdingTools.JsonDataEditor
                 requirementsListBox.Items.Add(_allDataHolders[requirementGuid]);
             }
             requirementsListBox.EndUpdate();
+
+            _updating = false;
         }
 
         private void TrySave(bool noButton = false)
@@ -201,6 +215,9 @@ namespace ModdingTools.JsonDataEditor
 
                 JDictionary<Guid, TechSD> dict = jobj["Data"].ToObject < JDictionary<Guid, TechSD>>(serializer);
 
+                _allTechs.Clear();
+                _allDataHolders.Clear();
+
                 foreach(TechSD techSD in dict.Values)
                 {
                     _allTechs[techSD.Id] = techSD;
@@ -238,7 +255,7 @@ namespace ModdingTools.JsonDataEditor
             GatherAndUpdateData();
         }
 
-        private void costUpDown_ValueChanged(object sender, EventArgs e)
+        private void costTextBox_TextChanged(object sender, EventArgs e)
         {
             GatherAndUpdateData();
         }
