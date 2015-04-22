@@ -139,8 +139,8 @@ namespace Pulsar4X.ECSLib
         private static void StoreObject(JObject obj)
         {
             // we need to work out the type:
-            Type type = StaticDataStore.GetType(obj.First.ToObject<string>());
-            
+            Type type = StaticDataStore.GetType(obj["Type"].ToString());
+
             // grab the data:
             // use dynamic here to avoid having to know/use the exact the types.
             // we are alreading checking the types via StaticDataStore.*Type, so we 
@@ -164,6 +164,7 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataStore.Store(data);
             }
+
             // ... more here.
         }
 

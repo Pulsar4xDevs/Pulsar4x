@@ -9,7 +9,7 @@ namespace Pulsar4X.ECSLib
         ConstructionProduction,
         DefensiveSystems,
         EnergyWeapons,
-        Logistics,
+        LogisticsGroundCombat,
         MissilesKineticWeapons,
         PowerAndPropulsion,
         SensorsAndFireControl,
