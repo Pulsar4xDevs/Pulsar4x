@@ -59,13 +59,15 @@ namespace Pulsar4X.ECSLib.Factories
             var systemBodyDB = new SystemBodyDB();
             var massVolumeDB = new MassVolumeDB(1, 1);
             var orbitDB = OrbitDB.FromMajorPlanetFormat(parentBody, parentMassVolumeDB, massVolumeDB, 1, 1, 0, 0, 0, 0, new DateTime());
+            var atmosphereDB = new AtmosphereDB(0, false, 0, 0, 0, 0, 0, new JDictionary<AtmosphericGasSD, float>());
 
             var blobs = new List<BaseDataBlob>()
             {
                 nameDB,
                 systemBodyDB,
                 massVolumeDB,
-                orbitDB
+                orbitDB,
+                atmosphereDB
             };
 
             Entity planetEntity = Entity.Create(starSystemManager, blobs);
