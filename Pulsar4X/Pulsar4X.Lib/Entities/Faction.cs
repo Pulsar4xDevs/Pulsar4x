@@ -567,8 +567,8 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// This System contact is not owned by my faction, and it isn't fully detected yet. Populations only have thermal and EM detection characteristics here.
                         /// </summary>
-                        if (this != System.SystemContactList[detListIterator].faction && System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond &&
-                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond)
+                        if (this != System.SystemContactList[detListIterator].faction && (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond ||
+                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond))
                         {
                             /// <summary>
                             /// Get the distance from the current population to systemContactList[detListIterator] and store it for this tick.
@@ -1041,11 +1041,10 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// Check if System.SystemContactList[detListIterator] is in the same faction, and it hasn't been fully detected yet.
                     /// </summary>
-                    if (this != System.SystemContactList[detListIterator].faction && System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond &&
-                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond)
+                    if (this != System.SystemContactList[detListIterator].faction && (System.FactionDetectionLists[FactionID].Thermal[detListIterator] != GameState.Instance.CurrentSecond ||
+                        System.FactionDetectionLists[FactionID].EM[detListIterator] != GameState.Instance.CurrentSecond || System.FactionDetectionLists[FactionID].Active[detListIterator] != GameState.Instance.CurrentSecond))
                     {
                         float dist;
-
                         // Check to see if our distance table is updated for this contact.
                         if (!CurrentTaskGroup.Contact.DistTable.GetDistance(System.SystemContactList[detListIterator], out dist))
                         {
@@ -1058,42 +1057,47 @@ namespace Pulsar4X.Entities
                                 /// <summary>
                                 /// player created empty taskgroups should not get checked here.
                                 /// </summary>
-                                if (TaskGroup.Ships.Count == 0)
-                                    continue;
-
-                                /// <summary>
-                                /// how far could this TG travel within a single day?
-                                /// </summary>
-                                float TaskGroupDistance = (float)Distance.ToAU(CurrentTaskGroup.CurrentSpeed) * Constants.TimeInSeconds.Day;
-
-
+                                if (TaskGroup.Ships.Count != 0)
+                                {
+                                    /// <summary>
+                                    /// how far could this TG travel within a single day?
+                                    /// </summary>
+                                    float TaskGroupDistance = (float)Distance.ToAU(CurrentTaskGroup.CurrentSpeed) * Constants.TimeInSeconds.Day;
 
 #warning fleet intercept preemption magic number here, if less than 5 days travel time currently.
 #warning fleet intercept needs to only process for hostile or unknown taskgroups, not all taskgroups.
 
-                                int ShipID = TaskGroup.ActiveSortList.Last();
-                                ShipTN LargestContactTCS = TaskGroup.Ships[ShipID];
+                                    int ShipID = TaskGroup.ActiveSortList.Last();
+                                    ShipTN LargestContactTCS = TaskGroup.Ships[ShipID];
 
-                                /// <summary>
-                                /// If this Taskgroup isn't already detected, and the distance is short enough, put it in the fleet intercept preempt list.
-                                /// </summary>
-                                if (TaskGroupDistance >= (dist / 5.0) && (DetectedContactLists.ContainsKey(System) == false ||
-                                    (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) ||
-                                     DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false))))
-                                {
-#warning Update this fleet intercept list for planets/populations
-                                    GameState.SE.FleetInterceptionPreemptTick = GameState.Instance.CurrentSecond;
-
-                                    GameState.SE.AddFleetToPreemptList(CurrentTaskGroup);
-                                    if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
+                                    /// <summary>
+                                    /// If this Taskgroup isn't already detected, and the distance is short enough, put it in the fleet intercept preempt list.
+                                    /// </summary>
+                                    if (TaskGroupDistance >= (dist / 5.0) && (DetectedContactLists.ContainsKey(System) == false ||
+                                        (DetectedContactLists.ContainsKey(System) == true && (!DetectedContactLists[System].DetectedContacts.ContainsKey(LargestContactTCS) ||
+                                         DetectedContactLists[System].DetectedContacts[LargestContactTCS].active == false))))
                                     {
+#warning Update this fleet intercept list for planets/populations
+                                        GameState.SE.FleetInterceptionPreemptTick = GameState.Instance.CurrentSecond;
 
-                                        GameState.SE.AddFleetToPreemptList(TaskGroup);
+                                        GameState.SE.AddFleetToPreemptList(CurrentTaskGroup);
+                                        if (System.SystemContactList[detListIterator].SSEntity == StarSystemEntityType.TaskGroup)
+                                        {
+                                            GameState.SE.AddFleetToPreemptList(TaskGroup);
+                                        }
                                     }
+                                }
+                                else
+                                {
+                                    /// <summary>
+                                    /// TaskGroupToTest is going to be empty so it can't be detected.
+                                    /// </summary>
+                                    continue;
                                 }
 
                             } // /Fleet Interception Check
                         } // distance Table Update.
+
 
                         /// <summary>
                         /// Now to find the biggest signature in the contact. The biggest for planets is just the planetary pop itself since
@@ -1406,8 +1410,8 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// I don't own loop2, and it hasn't been fully detected yet. And this missile can actually detect things.
                     /// </summary>
-                    if (this != System.SystemContactList[loop2].faction && System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond &&
-                        System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond && System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond &&
+                    if (this != System.SystemContactList[loop2].faction && (System.FactionDetectionLists[FactionID].Thermal[loop2] != GameState.Instance.CurrentSecond ||
+                        System.FactionDetectionLists[FactionID].EM[loop2] != GameState.Instance.CurrentSecond || System.FactionDetectionLists[FactionID].Active[loop2] != GameState.Instance.CurrentSecond )&&
                         (Missile.missileDef.thermalStr != 0.0f || Missile.missileDef.eMStr != 0.0f || Missile.missileDef.activeStr != 0.0f))
                     {
                         float dist;

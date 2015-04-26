@@ -489,7 +489,17 @@ namespace Pulsar4X.Entities
         /// <summary>
         /// List of every task at every shipyard at this population center.
         /// </summary>
-        public Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation> ShipyardTasks { get; set; } 
+        public Dictionary<Installation.ShipyardInformation.ShipyardTask, Installation.ShipyardInformation> ShipyardTasks { get; set; }
+
+        /// <summary>
+        /// Populations can't be "destroyed" by enemy action, but they can be deleted
+        /// </summary>
+        public BindingList<ShipTN> ShipsTargetting { get; set; }
+
+        /// <summary>
+        /// Missiles targeted on this population.
+        /// </summary>
+        public BindingList<OrdnanceGroupTN> MissilesInFlight { get; set; }
 
         #endregion
 
@@ -597,6 +607,9 @@ namespace Pulsar4X.Entities
                 EMDetection.Add(CurrentTimeSlice);
                 ActiveDetection.Add(CurrentTimeSlice);
             }
+
+            ShipsTargetting = new BindingList<ShipTN>();
+            MissilesInFlight = new BindingList<OrdnanceGroupTN>();
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
