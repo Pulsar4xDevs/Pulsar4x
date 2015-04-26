@@ -538,10 +538,7 @@ namespace Pulsar4X.Entities
             GameState.SE.ClearFleetPreemptList();
 
             /// <summary>
-            /// Loop through all DSTS. ***
-            /// </summary>
-            /// <summary>
-            /// Loop through all population centers with deep space tracking arrays..
+            /// Loop through all population centers with deep space tracking arrays.
             /// </summary>
             for (int loop = 0; loop < Populations.Count; loop++)
             {

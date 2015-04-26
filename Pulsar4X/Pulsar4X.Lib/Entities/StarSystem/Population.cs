@@ -1217,5 +1217,23 @@ namespace Pulsar4X.Entities
             }
         }
         #endregion
+
+        #region Population damage due to combat
+        public bool OnDamaged(DamageTypeTN Type, ushort Value, ShipTN FiringShip)
+        {
+            /// <summary>
+            /// Populations are damaged in several ways.
+            /// Civilian Population will die off, about 50k per point of damage.
+            /// Atmospheric dust will be kicked into the atmosphere(regardless of whether or not there is an atmosphere) lowering temperature for a while.
+            /// Some beam weapons are blocked(partially or in whole) by atmosphere(Lasers,Gauss,Railguns,particle beams, plasma), some are not(Mesons), and some have no effect(microwaves) on populations.
+            /// PDCs will be similarly defended by this atmospheric blocking but are vulnerable to microwaves.
+            /// Missiles will increase the radiation value of the colony. Enhanced Radiation warheads will add more for less overall damage done. Radiation is of course harmful to life on the world. but
+            /// not immediately so.
+            /// Installations will have a chance at being destroyed. bigger installations should be more resilient to damage, but even infrastructure should have a chance to survive.
+            /// Shipyards must be targetted in orbit around the colony. Special handling will be required for that.
+            /// </summary>
+            return false;
+        }
+        #endregion
     }
 }
