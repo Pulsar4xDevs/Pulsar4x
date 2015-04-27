@@ -6,6 +6,13 @@ namespace Pulsar4X.ECSLib
     {
         public JDictionary<Entity, double> Population { get; set; }
 
+        public JDictionary<MineralSD, int> MineralStockpile { get; set; }
+
+        // JDictionary ShipComponentStockpile
+        // JDictionary OrdananceStockpile
+        // JDictionary FighterStockpile
+        // JDictionary PDC_ComponentsStockpile
+
         public Entity PlanetEntity { get; set; }
 
 
@@ -22,18 +29,21 @@ namespace Pulsar4X.ECSLib
         {
             Population = popSize;
             PlanetEntity = planet;
+            MineralStockpile = new JDictionary<MineralSD, int>();
         }
 
         public ColonyInfoDB(Entity species, double populationInMillions, Entity planet)
         {
             Population = new JDictionary<Entity, double> {{species, populationInMillions}};
             PlanetEntity = planet;
+            MineralStockpile = new JDictionary<MineralSD, int>();
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            Population = new JDictionary<Entity, double>(Population);
+            Population = new JDictionary<Entity, double>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
+            MineralStockpile = new JDictionary<MineralSD, int>(colonyInfoDB.MineralStockpile);
         }
 
         public override object Clone()

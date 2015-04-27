@@ -48,6 +48,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBlobs\ColonyDBs\Mining.cs" />
     <Compile Include="DataBlobs\CommanderBonusDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="SaveGame.cs" />
     <Compile Include="StarSystem.cs" />
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
+    <Compile Include="StaticData\InstalationSD.cs" />
     <Compile Include="StaticData\PlayerSD.cs" />
     <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
