@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib.Factories
             };
 
             // now lets create the ship class:
-            Entity shipClassEntity = Game.Instance.GlobalManager.CreateEntity(shipDBList);
+            Entity shipClassEntity = Entity.Create(Game.Instance.GlobalManager, shipDBList); 
 
             // also gets factionDB:
             FactionDB factionDB = faction.GetDataBlob<FactionDB>();
