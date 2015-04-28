@@ -30,8 +30,8 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public int PopulationReqired;
         public int CargoSize;
-        public InstalationAbilityType AbilityType;
-        public int AbilityAmount;
+        public JDictionary<InstalationAbilityType, int> AbilityType;
+        
         /// <summary>
         /// research ID Requirements to build.
         /// </summary>

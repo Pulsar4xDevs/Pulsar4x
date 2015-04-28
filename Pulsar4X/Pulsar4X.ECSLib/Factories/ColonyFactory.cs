@@ -19,6 +19,8 @@ namespace Pulsar4X.ECSLib.Factories
             NameDB name = new NameDB(factionEntity, "somestring");
             ColonyInfoDB colonyInfoDB = new ColonyInfoDB(Entity.GetInvalidEntity(), 0, planetEntity);
             blobs.Add(colonyInfoDB);
+            InstalationsDB colonyInstalationsDB = new InstalationsDB();
+            blobs.Add(colonyInstalationsDB);
 
             Entity colonyEntity = Entity.Create(planetEntity.Manager, blobs);
             factionEntity.GetDataBlob<FactionDB>().Colonies.Add(colonyEntity);

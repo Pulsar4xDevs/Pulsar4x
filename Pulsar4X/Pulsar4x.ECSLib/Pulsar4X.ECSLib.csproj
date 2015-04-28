@@ -48,7 +48,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DataBlobs\ColonyDBs\Mining.cs" />
+    <Compile Include="DataBlobs\InstalationsDB.cs" />
     <Compile Include="DataBlobs\CommanderBonusDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
     <Compile Include="DataBlobs\TeamsDB.cs" />
