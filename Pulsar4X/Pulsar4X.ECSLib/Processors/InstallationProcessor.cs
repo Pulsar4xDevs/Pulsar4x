@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
             float factionConstructionAbility = 1.0f; //factionEntity.GetDataBlob<FactionAbilitiesDB>(); todo when this is in
             foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
             {
-                int installationConstructionAbility = TotalAbilityofType(InstallationAbilityType.InstalationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
+                int installationConstructionAbility = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
 
             }
         }
