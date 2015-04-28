@@ -53,7 +53,9 @@ namespace Pulsar4X.Tests
             var requiredDataBlobs = new List<Type>()
             {
                 typeof(ColonyInfoDB), 
-                typeof(NameDB)
+                typeof(NameDB),
+                typeof(InstallationsDB)
+
             };
 
             //Entity colony = ColonyFactory.CreateColony(faction, planet);
