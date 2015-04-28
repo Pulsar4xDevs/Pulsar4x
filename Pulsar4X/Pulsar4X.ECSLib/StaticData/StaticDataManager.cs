@@ -164,6 +164,10 @@ namespace Pulsar4X.ECSLib
             {
                 StaticDataStore.Store(data);
             }
+            else if (type == StaticDataStore.InstallationsType)
+            {
+                StaticDataStore.Store(data);
+            }
 
             // ... more here.
         }

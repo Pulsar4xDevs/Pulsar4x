@@ -8,15 +8,15 @@ namespace Pulsar4X.ECSLib
 {
     public enum InstallationAbilityType
     {
-        ShipMaintanance,
-        InstalationConstruction,
+        ShipMaintenance,
+        InstallationConstruction,
         OrdnanceConstruction,
         FighterConstruction,
-        FuelRefinary,
+        FuelRefinery,
         Mine,
         AtmosphericModification,
         Research,
-        Comercial, //ie aurora "Finance Center" 
+        Commercial, //ie aurora "Finance Center" 
         MassDriver,
 
     }
@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// the amount of pop required for this installation to operate.
         /// </summary>
-        public int PopulationReqired;
+        public int PopulationRequired;
         public int CargoSize;
         public JDictionary<InstallationAbilityType, int> BaseAbilityAmounts;
         

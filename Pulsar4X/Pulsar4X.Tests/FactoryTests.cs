@@ -153,7 +153,8 @@ namespace Pulsar4X.Tests
                 typeof(NameDB),
                 typeof(SystemBodyDB),
                 typeof(MassVolumeDB),
-                typeof(OrbitDB)
+                typeof(OrbitDB),
+                typeof(AtmosphereDB)
             };
 
             Entity mainStar = SystemBodyFactory.CreateMainStar(starSystem.SystemManager, starSystem, "Sonra");

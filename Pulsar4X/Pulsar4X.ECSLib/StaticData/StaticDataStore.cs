@@ -50,6 +50,15 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         private const string TechsTypeString = "Techs";
 
+        /// <summary>
+        /// List which stores all of the installations
+        /// </summary>
+        public List<InstallationSD> Installations = new List<InstallationSD>();
+        [JsonIgnore]
+        public Type InstallationsType;
+        [JsonIgnore]
+        private const string InstallationsTypeString = "Installations";
+
 
         ///< @todo add a whole bunch more static data.
 
@@ -62,6 +71,7 @@ namespace Pulsar4X.ECSLib
             CommanderNameThemesType = CommanderNameThemes.GetType();
             MineralsType = Minerals.GetType();
             TechsType = Techs.GetType();
+            InstallationsType = Installations.GetType();
         }
 
         /// <summary>
@@ -112,6 +122,14 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        /// <summary>
+        /// Stores Installation Static Data.
+        /// </summary>
+        public void Store(List<InstallationSD> installations)
+        {
+            if (installations != null)
+                Installations.AddRange(installations);
+        }
 
         /// <summary>
         /// Returns a type custom string for a type of static data. This string is used to tell 
@@ -135,6 +153,10 @@ namespace Pulsar4X.ECSLib
             {
                 return TechsTypeString;
             }
+            else if (type == InstallationsType)
+            {
+                return InstallationsTypeString;
+            }
 
             return null;
         }
@@ -155,6 +177,8 @@ namespace Pulsar4X.ECSLib
                     return MineralsType;
                 case TechsTypeString:
                     return TechsType;
+                case InstallationsTypeString:
+                    return InstallationsType;
                 default:
                     return null;
             }

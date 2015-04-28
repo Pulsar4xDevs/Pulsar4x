@@ -96,6 +96,25 @@ namespace Pulsar4X.Tests
             techs.Add(tech2.Id, tech2);
 
             StaticDataManager.ExportStaticData(techs, "./TechnologyDataExportTest.json");
+
+            List<InstallationSD> installations = new List<InstallationSD>();
+            InstallationSD install = new InstallationSD();
+            install.Name = "Mine";
+            install.Description = "Employs population to mine transnewtonian resources.";
+            install.PopulationRequired = 1;
+            install.CargoSize = 1;
+            install.BaseAbilityAmounts = new JDictionary<InstallationAbilityType, int>();
+            install.BaseAbilityAmounts.Add(InstallationAbilityType.Mine, 1);
+            install.Requirements = new List<Guid>();
+            install.Requirements.Add(tech1.Id); //use trans-newtonian techology you just added to the tech list
+            install.ResourceCosts = new JDictionary<Guid, int>();
+            install.ResourceCosts.Add(min.ID,60); //use Sorium that you just added to the mineral list
+            install.WealthCost = 120;
+            install.BuildPoints = 120;
+
+            installations.Add(install);
+
+            StaticDataManager.ExportStaticData(installations, "./InstallationExportTest.json");
         }
 
         [Test]
@@ -106,6 +125,7 @@ namespace Pulsar4X.Tests
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Techs);
+            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Installations);
 
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>
