@@ -48,6 +48,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataBlobs\FactionAbilitiesDB.cs" />
     <Compile Include="DataBlobs\InstallationsDB.cs" />
     <Compile Include="DataBlobs\CommanderBonusDB.cs" />
     <Compile Include="DataBlobs\CommanderDB.cs" />
@@ -137,7 +138,7 @@
     </None>
     <None Include="Data\Pulsar4x\InstallationData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	</None>
+    </None>
     <None Include="Data\Pulsar4x\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

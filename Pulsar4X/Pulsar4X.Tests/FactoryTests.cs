@@ -27,7 +27,8 @@ namespace Pulsar4X.Tests
 
             var requiredDataBlobs = new List<Type>()
             {
-                typeof(FactionDB), 
+                typeof(FactionDB),
+                typeof(FactionAbilitiesDB),
                 typeof(NameDB),
                 typeof(TechDB)
             };
