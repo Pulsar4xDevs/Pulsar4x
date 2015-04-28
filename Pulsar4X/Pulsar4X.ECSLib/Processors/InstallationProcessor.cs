@@ -40,11 +40,42 @@ namespace Pulsar4X.ECSLib
         internal static void Construct(Entity factionEntity)
         {
             float factionConstructionAbility = 1.0f; //factionEntity.GetDataBlob<FactionAbilitiesDB>(); todo when this is in
+            float sectorGovenerAbility = 1.025f; //these guys dont exsist yet
+            float planetGovenerAbility = 1.05f; //these guys dont exsist yet
+            float totalBonusMultiplier = factionConstructionAbility * sectorGovenerAbility * planetGovenerAbility;
             foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
             {
-                int installationConstructionAbility = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
+                var colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
+                var constructionJobs = colonyEntity.GetDataBlob<InstallationsDB>().InstallationConstructionJobs;
+                float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
+                constructionPoints *= totalBonusMultiplier;
+                List<InstallationSD> constructionDone = new List<InstallationSD>();
+                foreach (var kvp in constructionJobs)
+                {
+                    PercentValue<float> value = kvp.Value;
+                    float constructiononthisjob = constructionPoints * value.Percent;
+                    float pointsUsed = Math.Min(value.Value, constructiononthisjob);
 
+                    int pointsPerThisInstallation = kvp.Key.BuildPoints;
+                    float percent_built = pointsUsed / pointsPerThisInstallation;
+                    value.Value -= percent_built;
+                    colonyInstallations.Installations[kvp.Key] += percent_built;
+                    constructionPoints -= pointsUsed;
+
+                    if (value.Value <= 0)
+                        constructionDone.Add(kvp.Key);
+
+                }
+                foreach (var job in constructionDone)
+                {
+                    constructionJobs.Remove(job);
+                }
             }
+        }
+
+        internal static void ConstructionPriority(Entity colonyEntity, Message neworder)
+        {
+            //idk...
         }
 
         private static int TotalAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
