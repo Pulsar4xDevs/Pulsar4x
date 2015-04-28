@@ -1,0 +1,81 @@
+﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/Description/@EntryValue">Pulsar4x Processor</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/Text/@EntryValue">using System;&#xD;
+&#xD;
+namespace Pulsar4X.ECSLib&#xD;
+{&#xD;
+    internal static class Processor&#xD;
+    {&#xD;
+        internal static void someprocess()&#xD;
+        {&#xD;
+		}&#xD;
+	}&#xD;
+}</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/CustomProperties/=FileName/@EntryIndexedValue">Processor</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/CustomProperties/=Extension/@EntryIndexedValue">cs</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/CustomProperties/=ValidateFileName/@EntryIndexedValue">False</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/Applicability/=File/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/Scope/=E8F0594528C33E45BBFEC6CFE851095D/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=6916D6516057AC4588464EBEEE32A2E9/Scope/=E8F0594528C33E45BBFEC6CFE851095D/Type/@EntryValue">InCSharpProjectFile</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/Description/@EntryValue">Pulsar4x DataBlob</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/Text/@EntryValue">using System.Collections.Generic;&#xD;
+using System.Linq;&#xD;
+&#xD;
+namespace Pulsar4X.ECSLib&#xD;
+{&#xD;
+	public class  DB : BaseDataBlob&#xD;
+    {&#xD;
+&#xD;
+		public DB()&#xD;
+		{&#xD;
+&#xD;
+		}&#xD;
+&#xD;
+		public DB(DB db)&#xD;
+		{&#xD;
+&#xD;
+		}&#xD;
+&#xD;
+		public override object Clone()&#xD;
+        {&#xD;
+            return new DB(this);&#xD;
+        }&#xD;
+	}&#xD;
+}</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/CustomProperties/=FileName/@EntryIndexedValue">DataBlob</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/CustomProperties/=Extension/@EntryIndexedValue">cs</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/CustomProperties/=ValidateFileName/@EntryIndexedValue">False</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/Applicability/=File/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/Scope/=E8F0594528C33E45BBFEC6CFE851095D/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=2F3DE37FB511F6448554649894DADE65/Scope/=E8F0594528C33E45BBFEC6CFE851095D/Type/@EntryValue">InCSharpProjectFile</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/Description/@EntryValue">Pulsar4x Factory</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/Text/@EntryValue">using System;&#xD;
+using System.Collections.Generic;&#xD;
+&#xD;
+&#xD;
+namespace Pulsar4X.ECSLib&#xD;
+{&#xD;
+    public static class Factory&#xD;
+    {&#xD;
+		public static Entity Create(EntityManager systemEntityManager)&#xD;
+		{&#xD;
+&#xD;
+		}&#xD;
+	}&#xD;
+&#xD;
+}</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/Reformat/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/ShortenQualifiedReferences/@EntryValue">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/CustomProperties/=FileName/@EntryIndexedValue">Factory</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/CustomProperties/=Extension/@EntryIndexedValue">cs</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/CustomProperties/=ValidateFileName/@EntryIndexedValue">False</s:String>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/Applicability/=File/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/Scope/=E8F0594528C33E45BBFEC6CFE851095D/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/PatternsAndTemplates/LiveTemplates/Template/=77DDE5F606873A44A0794A9D1918D081/Scope/=E8F0594528C33E45BBFEC6CFE851095D/Type/@EntryValue">InCSharpProjectFile</s:String></wpf:ResourceDictionary>

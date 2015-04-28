@@ -37,10 +37,20 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        internal static void Construct(Entity factionEntity)
+        {
+            float factionConstructionAbility = 1.0f; //factionEntity.GetDataBlob<FactionAbilitiesDB>(); todo when this is in
+            foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
+            {
+                int installationConstructionAbility = TotalAbilityofType(InstallationAbilityType.InstalationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
+
+            }
+        }
+
         private static int TotalAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
         {            
             int totalAbilityValue = 0;
-            foreach (KeyValuePair<InstallationSD, float> kvp in installationsDB.Instalations.Where(item => item.Key.BaseAbilityAmounts.ContainsKey(type)))
+            foreach (KeyValuePair<InstallationSD, float> kvp in installationsDB.Installations.Where(item => item.Key.BaseAbilityAmounts.ContainsKey(type)))
             {
                 totalAbilityValue += kvp.Key.BaseAbilityAmounts[type] * (int)kvp.Value; //the decimal is an incomplete instalation, so ignore it. 
             }

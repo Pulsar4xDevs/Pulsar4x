@@ -6,20 +6,18 @@ namespace Pulsar4X.ECSLib
     public class InstallationsDB : BaseDataBlob
     {
         /// <summary>
-        /// a dictionary of instalationtype, and the number of that specific type including partial instalations.
+        /// a dictionary of installationtype, and the number of that specific type including partial instalations.
         /// </summary>
-        public JDictionary<InstallationSD, float> Instalations { get; set; }
-
-
+        public JDictionary<InstallationSD, float> Installations { get; set; }
 
         public InstallationsDB()
         {
-            Instalations = new JDictionary<InstallationSD, float>();
+            Installations = new JDictionary<InstallationSD, float>();
         }
 
         public InstallationsDB(InstallationsDB db)
         {
-            Instalations = new JDictionary<InstallationSD, float>(db.Instalations);
+            Installations = new JDictionary<InstallationSD, float>(db.Installations);
         }
 
         public override object Clone()
