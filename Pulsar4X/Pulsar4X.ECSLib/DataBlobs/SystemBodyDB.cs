@@ -32,6 +32,7 @@ namespace Pulsar4X.ECSLib
     public struct MineralDepositInfo
     {
         public int Amount;
+        public int HalfOrigionalAmount;
         public double Accessibility;
     }
 

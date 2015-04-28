@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -6,7 +8,7 @@ namespace Pulsar4X.ECSLib
     {
         public JDictionary<Entity, double> Population { get; set; }
 
-        public JDictionary<MineralSD, int> MineralStockpile { get; set; }
+        public JDictionary<Guid, int> MineralStockpile { get; set; }
 
         // JDictionary ShipComponentStockpile
         // JDictionary OrdananceStockpile
@@ -29,21 +31,23 @@ namespace Pulsar4X.ECSLib
         {
             Population = popSize;
             PlanetEntity = planet;
-            MineralStockpile = new JDictionary<MineralSD, int>();
+            MineralStockpile = new JDictionary<Guid, int>();
+            MineralStockpile = (JDictionary<Guid, int>)StaticDataManager.StaticDataStore.Minerals.ToDictionary(key => key.ID, val => 0);
+
         }
 
         public ColonyInfoDB(Entity species, double populationInMillions, Entity planet)
         {
             Population = new JDictionary<Entity, double> {{species, populationInMillions}};
             PlanetEntity = planet;
-            MineralStockpile = new JDictionary<MineralSD, int>();
+            MineralStockpile = new JDictionary<Guid, int>();
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
             Population = new JDictionary<Entity, double>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
-            MineralStockpile = new JDictionary<MineralSD, int>(colonyInfoDB.MineralStockpile);
+            MineralStockpile = new JDictionary<Guid, int>(colonyInfoDB.MineralStockpile);
         }
 
         public override object Clone()

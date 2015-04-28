@@ -57,6 +57,7 @@
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
     <Compile Include="Factories\SystemBodyFactory.cs" />
+    <Compile Include="Processors\InstallationProcessor.cs" />
     <Compile Include="Processors\TechProcessor.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />
     <Compile Include="StaticData\CommanderNameSD.cs" />
