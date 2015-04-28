@@ -29,34 +29,12 @@ namespace ModdingTools.JsonDataEditor
 
         private JDictionary<Guid, TechSD> _allTechs = new JDictionary<Guid, TechSD>();
         private Dictionary<Guid, TechDataHolder> _allDataHolders = new Dictionary<Guid, TechDataHolder>();
-        private List<ResearchCategories> _categories;
 
         public TechesWindow()
         {
             InitializeComponent();
 
-            _categories = new List<ResearchCategories>
-            {
-                ResearchCategories.BiologyGenetics, 
-                ResearchCategories.ConstructionProduction, 
-                ResearchCategories.DefensiveSystems, 
-                ResearchCategories.EnergyWeapons, 
-                ResearchCategories.LogisticsGroundCombat, 
-                ResearchCategories.MissilesKineticWeapons, 
-                ResearchCategories.PowerAndPropulsion, 
-                ResearchCategories.SensorsAndFireControl, 
-                ResearchCategories.FromStaticData00, 
-                ResearchCategories.FromStaticData01, 
-                ResearchCategories.FromStaticData02, 
-                ResearchCategories.FromStaticData03, 
-                ResearchCategories.FromStaticData04, 
-                ResearchCategories.FromStaticData05, 
-                ResearchCategories.FromStaticData06, 
-                ResearchCategories.FromStaticData07, 
-                ResearchCategories.FromStaticData08, 
-                ResearchCategories.FromStaticData09,
-            };
-            foreach(ResearchCategories cat in _categories)
+            foreach(ResearchCategories cat in Enum.GetValues(typeof(ResearchCategories)))
                 categoryComboBox.Items.Add(cat);
 
             UpdateSelectedItem();
