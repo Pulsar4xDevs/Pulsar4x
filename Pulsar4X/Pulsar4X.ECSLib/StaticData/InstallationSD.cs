@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    public enum InstalationAbilityType
+    public enum InstallationAbilityType
     {
         ShipMaintanance,
         InstalationConstruction,
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
 
     }
 
-    public struct InstalationSD
+    public struct InstallationSD
     {
         public string Name;
         public string Description;
@@ -30,7 +30,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public int PopulationReqired;
         public int CargoSize;
-        public JDictionary<InstalationAbilityType, int> AbilityType;
+        public JDictionary<InstallationAbilityType, int> AbilityType;
         
         /// <summary>
         /// research ID Requirements to build.
