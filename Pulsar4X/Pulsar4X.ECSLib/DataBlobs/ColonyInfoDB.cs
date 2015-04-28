@@ -31,9 +31,14 @@ namespace Pulsar4X.ECSLib
         {
             Population = popSize;
             PlanetEntity = planet;
-            MineralStockpile = new JDictionary<Guid, int>();
-            MineralStockpile = (JDictionary<Guid, int>)StaticDataManager.StaticDataStore.Minerals.ToDictionary(key => key.ID, val => 0);
-
+            
+            MineralStockpile =  new JDictionary<Guid, int>();
+            foreach (var mineral in StaticDataManager.StaticDataStore.Minerals)
+            {
+                MineralStockpile.Add(mineral.ID,0);
+            }
+            //MineralStockpile = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Minerals.ToDictionary(key => key.ID, val => 0));
+            
         }
 
         public ColonyInfoDB(Entity species, double populationInMillions, Entity planet)
