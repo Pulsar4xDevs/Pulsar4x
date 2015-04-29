@@ -6,23 +6,23 @@ namespace Pulsar4X.ECSLib
     public class FactionAbilitiesDB : BaseDataBlob
     {
 
-        public int BaseConstructionRate { get; set; }
+        public float BaseConstructionBonus { get; set; }
 
-        public int BaseFighterRate { get; set; }
+        public float BaseFighterBonus { get; set; }
 
-        public int BaseMiningRate { get; set; }
+        public float BaseMiningBonus { get; set; }
 
-        public int BaseOrdnanceRate { get; set; }
+        public float BaseOrdnanceBonus { get; set; }
 
-        public int BaseResearchRate { get; set; }
+        public float BaseResearchBonus { get; set; }
 
-        public int BaseShipBuildingRate { get; set; }
+        public float BaseShipBuildingBonus { get; set; }
 
-        public float BaseTerraformingRate { get; set; }
+        public float BaseTerraformingBonus { get; set; }
 
         public int BasePlanetarySensorStrength { get; set; }
 
-        public int BaseGroundUnitStrength { get; set; }
+        public float BaseGroundUnitStrengthBonus { get; set; }
 
         /// <summary>
         /// To determine final colony costs, from the Colonization Cost Reduction X% techs.
@@ -33,45 +33,45 @@ namespace Pulsar4X.ECSLib
         /// Default faction abilities constructor.
         /// </summary>
         public FactionAbilitiesDB()
-            : this(10, 10, 10, 10, 200, 400, 0.001f, 250, 10, 1.0f)
+            : this(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.001f, 250, 1.0f, 1.0f)
         {
 
         }
 
-        public FactionAbilitiesDB(int baseConstructionRate,
-            int baseFighterRate,
-            int baseMiningRate,
-            int baseOrdnanceRate,
-            int baseResearchRate,
-            int baseShipBuildingRate,
-            float baseTerraformingRate,
+        public FactionAbilitiesDB(float baseConstructionBonus,
+            float baseFighterBonus,
+            float baseMiningBonus,
+            float baseOrdnanceBonus,
+            float baseResearchBonus,
+            float baseShipBuildingBonus,
+            float baseTerraformingBonus,
             int basePlanetarySensorStrength,
-            int baseGroundUnitStrength,
+            float baseGroundUnitStrengthBonus,
             float colonyCostMultiplier)
         {
-            BaseConstructionRate = baseConstructionRate;
-            BaseFighterRate = baseFighterRate;
-            BaseMiningRate = baseMiningRate;
-            BaseOrdnanceRate = baseOrdnanceRate;
-            BaseResearchRate = baseResearchRate;
-            BaseShipBuildingRate = baseShipBuildingRate;
-            BaseTerraformingRate = baseTerraformingRate;
+            BaseConstructionBonus = baseConstructionBonus;
+            BaseFighterBonus = baseFighterBonus;
+            BaseMiningBonus = baseMiningBonus;
+            BaseOrdnanceBonus = baseOrdnanceBonus;
+            BaseResearchBonus = baseResearchBonus;
+            BaseShipBuildingBonus = baseShipBuildingBonus;
+            BaseTerraformingBonus = baseTerraformingBonus;
             BasePlanetarySensorStrength = basePlanetarySensorStrength;
-            BaseGroundUnitStrength = baseGroundUnitStrength;
+            BaseGroundUnitStrengthBonus = baseGroundUnitStrengthBonus;
             ColonyCostMultiplier = colonyCostMultiplier;
         }
 
         public FactionAbilitiesDB(FactionAbilitiesDB db)
         {
-            BaseConstructionRate = db.BaseConstructionRate;
-            BaseFighterRate = db.BaseFighterRate;
-            BaseMiningRate = db.BaseMiningRate;
-            BaseOrdnanceRate = db.BaseOrdnanceRate;
-            BaseResearchRate = db.BaseResearchRate;
-            BaseShipBuildingRate = db.BaseShipBuildingRate;
-            BaseTerraformingRate = db.BaseTerraformingRate;
+            BaseConstructionBonus = db.BaseConstructionBonus;
+            BaseFighterBonus = db.BaseFighterBonus;
+            BaseMiningBonus = db.BaseMiningBonus;
+            BaseOrdnanceBonus = db.BaseOrdnanceBonus;
+            BaseResearchBonus = db.BaseResearchBonus;
+            BaseShipBuildingBonus = db.BaseShipBuildingBonus;
+            BaseTerraformingBonus = db.BaseTerraformingBonus;
             BasePlanetarySensorStrength = db.BasePlanetarySensorStrength;
-            BaseGroundUnitStrength = db.BaseGroundUnitStrength;
+            BaseGroundUnitStrengthBonus = db.BaseGroundUnitStrengthBonus;
             ColonyCostMultiplier = db.ColonyCostMultiplier;
         }
 

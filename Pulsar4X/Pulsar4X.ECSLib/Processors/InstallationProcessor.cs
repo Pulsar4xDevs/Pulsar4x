@@ -13,7 +13,11 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionEntity"></param>
         internal static void Mine(Entity factionEntity)
         {
-            float factionMineingAbility = 1.0f;//factionEntity.GetDataBlob<FactionAbilitiesDB>(); todo when this is in
+            float factionMineingAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseMiningBonus;
+            float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
+            float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
+            float totalBonusMultiplier = factionMineingAbility * sectorGovenerAbility * planetGovenerAbility;
+
             foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
             {
                 Entity planet = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
@@ -26,7 +30,7 @@ namespace Pulsar4X.ECSLib
                     Guid mineralGuid = kvp.Key;
                     int amountOnPlanet = kvp.Value.Amount;
                     double accessibility = kvp.Value.Accessibility;
-                    double abilitiestoMine = installationMineingAbility * factionMineingAbility * accessibility;
+                    double abilitiestoMine = installationMineingAbility * totalBonusMultiplier * accessibility;
                     int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
                     mineralStockpile[mineralGuid] += amounttomine;
                     MineralDepositInfo mineralDeposit = kvp.Value;
@@ -39,14 +43,16 @@ namespace Pulsar4X.ECSLib
 
         internal static void Construct(Entity factionEntity)
         {
-            float factionConstructionAbility = 1.0f; //factionEntity.GetDataBlob<FactionAbilitiesDB>(); todo when this is in
-            float sectorGovenerAbility = 1.025f; //these guys dont exsist yet
-            float planetGovenerAbility = 1.05f; //these guys dont exsist yet
+            float factionConstructionAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseConstructionBonus;
+            float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
+            float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
             float totalBonusMultiplier = factionConstructionAbility * sectorGovenerAbility * planetGovenerAbility;
             foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
             {
-                var colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
-                var constructionJobs = colonyEntity.GetDataBlob<InstallationsDB>().InstallationConstructionJobs;
+                InstallationsDB colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
+                JDictionary<InstallationSD, PercentValue<float>> constructionJobs = colonyInstallations.InstallationConstructionJobs;
+                JDictionary<Guid, int> resourceStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+
                 float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
                 constructionPoints *= totalBonusMultiplier;
                 List<InstallationSD> constructionDone = new List<InstallationSD>();
@@ -57,12 +63,12 @@ namespace Pulsar4X.ECSLib
                     float pointsUsed = Math.Min(value.Value, constructiononthisjob);
 
                     int pointsPerThisInstallation = kvp.Key.BuildPoints;
-                    float percent_built = pointsUsed / pointsPerThisInstallation;
-                    value.Value -= percent_built;
-                    colonyInstallations.Installations[kvp.Key] += percent_built;
+                    float percentBuilt = pointsUsed / pointsPerThisInstallation;
+                    value.Value -= percentBuilt;
+                    colonyInstallations.Installations[kvp.Key] += percentBuilt;
                     constructionPoints -= pointsUsed;
 
-                    if (value.Value <= 0)
+                    if (value.Value <= 0) //if there's no more construction to do on this, remove it from the construction list.
                         constructionDone.Add(kvp.Key);
 
                 }
