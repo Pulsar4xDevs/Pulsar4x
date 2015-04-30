@@ -44,10 +44,13 @@
       <Project>{BFAAE0E4-05BF-4D42-8411-A92CA05A39E2}</Project>
       <Name>Pulsar4X.Lib</Name>
     </ProjectReference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="log4net">
       <HintPath>../deps/log4net-1.2.11/bin/net/4.0/release/log4net.dll</HintPath>
@@ -64,6 +67,7 @@
     <Reference Include="WeifenLuo.WinFormsUI.Docking">
       <HintPath>../deps/DockPanelSuite/WeifenLuo.WinFormsUI.Docking.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
