@@ -125,8 +125,6 @@ namespace Pulsar4X.ECSLib
             MeanAnomaly = meanAnomaly;
             Epoch = epoch;
 
-
-
             // Calculate extended parameters.
             // http://en.wikipedia.org/wiki/Standard_gravitational_parameter#Two_bodies_orbiting_each_other
             GravitationalParameter = GameSettings.Science.GravitationalConstant * (parentMVDB.Mass + myMVDB.Mass) / (1000 * 1000 * 1000); // Normalize GravitationalParameter from m^3/s^2 to km^3/s^2

@@ -55,9 +55,12 @@
     <Compile Include="DataBlobs\TeamsDB.cs" />
     <Compile Include="DataBlobs\TechDB.cs" />
     <Compile Include="Factories\CommanderFactory.cs" />
+    <Compile Include="Factories\SystemGen\GalaxyFactory.cs" />
+    <Compile Include="Factories\SystemGen\StarFactory.cs" />
+    <Compile Include="Factories\SystemGen\SystemBodyFactory.cs" />
+    <Compile Include="Factories\SystemGen\SystemFactory.cs" />
     <Compile Include="Factories\TechFactory.cs" />
     <Compile Include="GameVersionInfo.cs" />
-    <Compile Include="Factories\SystemBodyFactory.cs" />
     <Compile Include="Processors\InstallationProcessor.cs" />
     <Compile Include="Processors\TechProcessor.cs" />
     <Compile Include="StaticData\AtmosphericGasSD.cs" />

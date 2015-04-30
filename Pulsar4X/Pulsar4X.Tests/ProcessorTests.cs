@@ -4,7 +4,6 @@ using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {

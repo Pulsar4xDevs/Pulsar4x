@@ -32,8 +32,8 @@ namespace Pulsar4X.UI
 
             Game game = new Game();
 
-            game.StarSystems.Add(new StarSystem());
-            game.StarSystems.Add(new StarSystem());
+            game.StarSystems.Add(new StarSystem("Sol", -1));
+            game.StarSystems.Add(new StarSystem("Sol", -1));
 
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();

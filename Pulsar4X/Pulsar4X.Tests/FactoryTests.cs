@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -89,7 +88,7 @@ namespace Pulsar4X.Tests
         public void CreateClassAndShip()
         {
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terran");
-            StarSystem starSystem = new StarSystem();
+            StarSystem starSystem = new StarSystem("Sol", -1);
 
             string shipClassName = "M6 Corvette"; //X Universe ;3
             string shipName = "USC Winterblossom"; //Still X Universe
@@ -140,7 +139,9 @@ namespace Pulsar4X.Tests
         [Description("SystemBodyFactory tests")]
         public void CreateAndFillStarSystem()
         {
-            StarSystem starSystem = new StarSystem();
+            throw new NotImplementedException("SystemGen not fully functional.");
+
+            StarSystem starSystem = new StarSystem("Sol", -1);
 
             var starDataBlobTypes = new List<Type>()
             {
@@ -158,7 +159,7 @@ namespace Pulsar4X.Tests
                 typeof(OrbitDB),
                 typeof(AtmosphereDB)
             };
-
+            /*
             Entity mainStar = SystemBodyFactory.CreateMainStar(starSystem.SystemManager, starSystem, "Sonra");
             Entity subStar = SystemBodyFactory.CreateSubStar(starSystem.SystemManager, mainStar, "Another little star");
             Entity planet = SystemBodyFactory.CreatePlanet(starSystem.SystemManager, mainStar, "Argon Prime");
@@ -175,7 +176,7 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(subStarOrbitDB.Parent == mainStar);
             Assert.IsTrue(planetOrbitDB.Parent == mainStar);
 
-
+            */
         }
 
         private static bool HasAllRequiredDatablobs(Entity toCheck, List<Type> datablobTypes)

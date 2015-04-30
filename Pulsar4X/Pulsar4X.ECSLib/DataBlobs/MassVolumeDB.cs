@@ -10,65 +10,77 @@ namespace Pulsar4X.ECSLib
         public double Mass { get; set; }
 
         /// <summary>
-        /// The density of the body in g/cm^3
-        /// </summary> 
-        public double Density { get; set; }
+        /// Volume of this entity.
+        /// </summary>
+        public double Volume { get; set; }
 
         /// <summary>
-        /// The Average Radius (in AU)
-        /// </summary>
-        public double Radius
+        /// The density of the body in kg/cm^3
+        /// </summary> 
+        public double Density
         {
-            get
-            {
-                // r = ((3M)/(4pD))^(1/3)
-                // Where p = PI, D = Density, and M = Mass.
-                // density / 1000 changes it from g/cm2 to Kg/cm3, needed because mass in is KG. 
-                // 0.3333333333 should be 1/3 but 1/3 gives radius of 0.999999 for any mass/density pair, so i used 0.3333333333
-                return Distance.ToAU(Math.Pow((3 * Mass) / (4 * Math.PI * (Density / 1000)), 0.3333333333) / 1000 / 100); // convert from cm to AU.
-            }
+            get { return GetDensity(Mass, Volume); }
         }
 
         /// <summary>
-        /// The Average Radius (in km)
+        /// The Average Radius
         /// </summary>
-        public double RadiusinKM
+        public double Radius
         {
-            get { return Distance.ToKm(Radius); }
+            get { return GetRadius(Volume); }
         }
 
         /// <summary>
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
-        public float SurfaceGravity
+        public double SurfaceGravity
         {
-            get
-            {
-                // see: http://nova.stanford.edu/projects/mod-x/ad-surfgrav.html
-                return (float)((GameSettings.Science.GravitationalConstant * Mass) / (Radius * GameSettings.Units.MetersPerAu) * (Radius * GameSettings.Units.MetersPerAu));
-            }
+            get { return GMath.GetStandardGravitationAttraction(Mass, Radius); }
         }
 
         public MassVolumeDB()
         {
         }
 
-        public MassVolumeDB(double mass, double density)
+        public MassVolumeDB(double mass, double volume)
         {
             Mass = mass;
-            Density = density;
+            Volume = volume;
         }
 
         public MassVolumeDB(MassVolumeDB massVolumeDB)
-            :this(massVolumeDB.Mass, massVolumeDB.Density)
+            :this(massVolumeDB.Mass, massVolumeDB.Volume)
         {
-            
         }
 
         public override object Clone()
         {
             return new MassVolumeDB(this);
+        }
+
+        public static double GetMass(double volume, double density)
+        {
+            return density * volume;
+        }
+
+        public static double GetVolume(double mass, double density)
+        {
+            return mass / density;
+        }
+
+        public static double GetDensity(double mass, double volume)
+        {
+            return mass / volume;
+        }
+
+        public static double GetRadius(double volume)
+        {
+            // v = (4pi r^3)/3
+            // v = 4/3pi * r^3
+            // r^3 = V / (4/3pi)
+            // r = (V / (4/3pi)) ^ (1/3)
+            return Math.Pow(volume / (4/3 * Math.PI), (1/3));
         }
     }
 }

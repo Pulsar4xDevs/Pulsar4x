@@ -17,7 +17,7 @@ namespace Pulsar4X.WPFUI
             Game game = new Game();
             Entity playerFaction = game.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>();
             if (playerFaction == Entity.GetInvalidEntity())
-                playerFaction = ECSLib.Factories.FactionFactory.CreateFaction(game.GlobalManager, "playerFaction");
+                playerFaction = FactionFactory.CreateFaction(game.GlobalManager, "playerFaction");
             game.EngineComms.AddFaction(playerFaction);
             Entity faction = game.EngineComms.FirstOrDefault().Faction; //just get the first one for now, till we've got ui to select.
             /* Stuff to replace */

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
-
-namespace Pulsar4X.ECSLib.Factories
+namespace Pulsar4X.ECSLib
 {
     public static class FactionFactory
     {
