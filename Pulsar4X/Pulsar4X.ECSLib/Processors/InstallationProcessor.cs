@@ -50,31 +50,37 @@ namespace Pulsar4X.ECSLib
             foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
             {
                 InstallationsDB colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
-                JDictionary<InstallationSD, PercentValue<float>> constructionJobs = colonyInstallations.InstallationConstructionJobs;
+                List<ConstructionJob> constructionJobs = colonyInstallations.InstallationJobs;
                 JDictionary<Guid, int> resourceStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
 
                 float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
                 constructionPoints *= totalBonusMultiplier;
-                List<InstallationSD> constructionDone = new List<InstallationSD>();
-                foreach (var kvp in constructionJobs)
+                List<ConstructionJob> constructionJobs_newList = new List<ConstructionJob>();
+                foreach (ConstructionJob job in constructionJobs)
                 {
-                    PercentValue<float> value = kvp.Value;
-                    float constructiononthisjob = constructionPoints * value.Percent;
-                    float pointsUsed = Math.Min(value.Value, constructiononthisjob);
 
-                    int pointsPerThisInstallation = kvp.Key.BuildPoints;
+                    var type = StaticDataManager.StaticDataStore.Installations[job.Type];
+                    float constructiononthisjob = constructionPoints * job.PriorityPercent.Percent;
+                    float pointsUsed = Math.Min(job.ItemsRemaining, constructiononthisjob);
+
+                    int pointsPerThisInstallation = type.BuildPoints;
                     float percentBuilt = pointsUsed / pointsPerThisInstallation;
-                    value.Value -= percentBuilt;
-                    colonyInstallations.Installations[kvp.Key] += percentBuilt;
+
+                    colonyInstallations.Installations[type] += percentBuilt;
                     constructionPoints -= pointsUsed;
 
-                    if (value.Value <= 0) //if there's no more construction to do on this, remove it from the construction list.
-                        constructionDone.Add(kvp.Key);
-
-                }
-                foreach (var job in constructionDone)
-                {
-                    constructionJobs.Remove(job);
+                    if (job.ItemsRemaining > 0) //if there's still itemsremaining...
+                    {
+                        //+becuase it's a struct, we have to re-create it.
+                        ConstructionJob newStruct = new ConstructionJob 
+                        {
+                            ItemsRemaining = job.ItemsRemaining - percentBuilt, 
+                            PriorityPercent = job.PriorityPercent, 
+                            Type = job.Type
+                        };
+                        constructionJobs_newList.Add(newStruct);//+then add it to the new list;
+                    }
+                    colonyInstallations.InstallationJobs = constructionJobs_newList; //+and finaly, replace the list.
                 }
             }
         }

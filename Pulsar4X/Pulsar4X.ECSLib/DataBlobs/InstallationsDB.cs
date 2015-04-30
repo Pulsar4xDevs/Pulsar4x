@@ -4,6 +4,13 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    public struct ConstructionJob
+    {        
+        public Guid Type;
+        public float ItemsRemaining;
+        public PercentValue PriorityPercent;
+    }
+
     public class InstallationsDB : BaseDataBlob
     {
         /// <summary>
@@ -14,9 +21,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// guid for installationtype, and a weighted list for priority and amount remaining.
         /// </summary>
-        public JDictionary<InstallationSD, PercentValue<float>> InstallationConstructionJobs { get; set; }
-        public JDictionary<Guid, PercentValue<float>> OrdnanceConstructionJobs { get; set; }
-        public JDictionary<Guid, PercentValue<float>> FighterConstructionJobs { get; set; }
+        public List<ConstructionJob> InstallationJobs { get; set; }
+        public List<ConstructionJob> OrdnanceJobs { get; set; }
+        public List<ConstructionJob> FigherJobs { get; set; }
 
         public InstallationsDB()
         {

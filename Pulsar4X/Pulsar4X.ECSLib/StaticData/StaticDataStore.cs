@@ -53,7 +53,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// List which stores all of the installations
         /// </summary>
-        public List<InstallationSD> Installations = new List<InstallationSD>();
+        public JDictionary<Guid, InstallationSD> Installations = new JDictionary<Guid, InstallationSD>();
         [JsonIgnore]
         public Type InstallationsType;
         [JsonIgnore]
@@ -125,10 +125,13 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Stores Installation Static Data.
         /// </summary>
-        public void Store(List<InstallationSD> installations)
+        public void Store(JDictionary<Guid, InstallationSD> installations)
         {
             if (installations != null)
-                Installations.AddRange(installations);
+            {
+                foreach (var facility in installations)
+                    Installations[facility.Key] = facility.Value;               
+            }
         }
 
         /// <summary>

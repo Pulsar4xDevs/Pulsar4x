@@ -4,8 +4,9 @@
     {
       "Name": "Mine",
       "Description": "Employs population to mine transnewtonian resources.",
-      "PopulationRequired": 1,
-      "CargoSize": 1,
+      "ID": "406E22B5-65DB-4C7E-B956-B120B0466503",
+      "PopulationRequired": 50000,
+      "CargoSize": 25000,
       "BaseAbilityAmounts": {
         "List": [
           {
@@ -15,19 +16,15 @@
         ]
       },
       "Requirements": [
-        "2832a0d5-3660-4417-9066-08c06c2c4991"
+        "68543934-467f-401a-9945-ca558437f969"
       ],
       "ResourceCosts": {
-          "List": [
-              {
-                  "Key": "2dfc78ea-f8a4-4257-bc04-47279bf104ef",
-                  "Value": 60
-              },
-              {
-                  "Key": "2ae2a928-3e14-45d5-befc-5bd6ed16ec0a",
-                  "Value": 60
-              }
-          ]
+        "List": [
+          {
+            "Key": "4eb4cea1-f226-4275-8776-dcca0d165444",
+            "Value": 60
+          }
+        ]
       },
       "WealthCost": 120,
       "BuildPoints": 120

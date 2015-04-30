@@ -66,10 +66,10 @@ namespace Pulsar4X.ECSLib
     }
 
     /// <summary>
-    /// used for holding a percentage and value. stores as a byte so 255 bits precision in the percent.
+    /// Used for holding a percentage stores as a byte so 255 bits precision.
+    /// Takes and Returns 0.0 to 1.0 for easy multiplcation math.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class PercentValue<T>
+    public class PercentValue
     {
         private byte _percent;
 
@@ -81,7 +81,6 @@ namespace Pulsar4X.ECSLib
             get {return _percent / 255f;} 
             set { _percent = (byte)(value * 255); }
         }
-        public T Value { get; set; }
     }
 
     public class WeightedValue<T>
