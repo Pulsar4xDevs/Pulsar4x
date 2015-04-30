@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Pulsar4X.ECSLib.DataBlobs;
 
 namespace Pulsar4X.ECSLib.Factories
 {
