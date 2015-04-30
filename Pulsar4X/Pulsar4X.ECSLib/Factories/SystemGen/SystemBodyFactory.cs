@@ -328,59 +328,76 @@ namespace Pulsar4X.ECSLib
 
         private static void FinalizeAsteroidBelt(StarSystem system, Entity body, int bodyCount)
         {
-            // WIP, not completed.
-            bool quit = false;
-            bool firstFailure = false;
-
             MassVolumeDB beltMVDB = body.GetDataBlob<MassVolumeDB>();
+            OrbitDB referenceOrbit = body.GetDataBlob<OrbitDB>();
 
-            while (!quit)
+            while (beltMVDB.Mass > 0)
             {
-                double asteroidMass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[BodyType.Asteroid]);
+                Entity newBody = CreateBaseBody(system);
+                SystemBodyDB newBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
-                if (asteroidMass > beltMVDB.Mass)
+                if (system.RNG.NextDouble() > (1 / GalaxyFactory.Settings.NumberOfAsteroidsPerDwarfPlanet))
                 {
-                    if (firstFailure)
-                    {
-                        quit = true;
-                    }
-                    firstFailure = true;
-                    continue;
+                    newBodyDB.Type = BodyType.Asteroid;
+                }
+                else
+                {
+                    newBodyDB.Type = BodyType.DwarfPlanet;
                 }
 
-                
+                MassVolumeDB newBodyMVDB = newBody.GetDataBlob<MassVolumeDB>();
+
+                newBodyMVDB.Mass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[newBodyDB.Type]);
+
+                FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
+                FinalizeSystemBodyDB(system, newBody);
+                FinalizeMassVolumeDB(system, newBody);
+                FinalizeNameDB(system, newBody, referenceOrbit.Parent, bodyCount);
+
+                beltMVDB.Mass -= newBodyMVDB.Mass;
             }
-            /*
-             * This is stuff from old systemgen.
-             * 
-            // lets calculate how many asteriods in this belt:
-            int noOfAsteroids = (int)Math.Round(system.RNG.NextDouble() * GalaxyFactory.Settings.MaxNoOfAsteroidsPerBelt);
+        }
 
-            // Generate the asteriods:
-            for (int i = 0; i < noOfAsteroids; ++i)
-            {
-                Entity asteroid = CreateBaseBody(system);
-                asteroid.Name = star.Name + " - Asteriod " + beltNo.ToString() + "-" + i.ToString();
+        /// <summary>
+        /// Generates an orbit for an Asteroid or Dwarf SystemBody. The orbit will be a slight deviation of the reference orbit provided.
+        /// </summary>
+        private static void FinalizeAsteroidOrbit(StarSystem system, Entity newBody, OrbitDB referenceOrbit)
+        {
+            // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
 
-                // Generate the asteriod:
-                FinalizeSystemBodyGeneration(star, asteroid, null, referenceBody.Orbit);
-                star.Planets.Add(asteroid);
-            }
+            // Create smeiMajorAxis:
+            double deviation = referenceOrbit.SemiMajorAxis * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
+            double min = referenceOrbit.SemiMajorAxis - deviation;
+            double max = referenceOrbit.SemiMajorAxis + deviation;
+            double semiMajorAxis = GMath.RNG_NextDoubleRange(system.RNG, min, max);  // dont need to raise to power, reference orbit already did that.
 
-            // now lets work out how many dwarf planets there should be:
-            int noOfDwarfPlanets = noOfAsteroids / GalaxyFactory.Settings.NumberOfAsteroidsPerDwarfPlanet;
-            double fuzziness = system.RNG.NextDouble() + 0.5;
-            noOfDwarfPlanets = (int)Math.Round(noOfDwarfPlanets * fuzziness);
-            for (int i = 0; i < noOfDwarfPlanets; ++i)
-            {
-                SystemBody dwarf = new SystemBody(star, SystemBody.PlanetType.Asteroid);
-                dwarf.Name = star.Name + " - Dwarf Planet" + beltNo.ToString() + "-" + i.ToString();
+            deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyFactory.Settings.MaxAsteroidOrbitDeviation, 2);
+            min = referenceOrbit.Eccentricity - deviation;
+            max = referenceOrbit.Eccentricity + deviation;
+            double eccentricity = GMath.RNG_NextDoubleRange(system.RNG, min, max); // get random eccentricity needs better distrubution.
 
-                // Generate the asteriod:
-                FinalizeSystemBodyGeneration(star, dwarf, null, referenceBody.Orbit);
-                star.Planets.Add(dwarf);
-            }
-            */
+            deviation = referenceOrbit.Inclination * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.Inclination - deviation;
+            max = referenceOrbit.Inclination + deviation;
+            double inclination = GMath.RNG_NextDoubleRange(system.RNG, min, max); // doesn't do much at the moment but may as well be there. Neet better Dist.
+
+            deviation = referenceOrbit.ArgumentOfPeriapsis * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.ArgumentOfPeriapsis - deviation;
+            max = referenceOrbit.ArgumentOfPeriapsis + deviation;
+            double argumentOfPeriapsis = GMath.RNG_NextDoubleRange(system.RNG, min, max);
+
+            deviation = referenceOrbit.LongitudeOfAscendingNode * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
+            min = referenceOrbit.LongitudeOfAscendingNode - deviation;
+            max = referenceOrbit.LongitudeOfAscendingNode + deviation;
+            double longitudeOfAscendingNode = GMath.RNG_NextDoubleRange(system.RNG, min, max);
+
+            // Keep the starting point of the orbit completly random.
+            double meanAnomaly = system.RNG.NextDouble() * 360;
+
+            // now Create the orbit:
+            newBody.SetDataBlob(OrbitDB.FromAsteroidFormat(referenceOrbit.Parent, referenceOrbit.Parent.GetDataBlob<MassVolumeDB>(),
+                                                    newBody.GetDataBlob<MassVolumeDB>(), semiMajorAxis, eccentricity, inclination,
+                                                    longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, Game.Instance.CurrentDateTime));
         }
 
         private static void FinalizeSystemBodyDB(StarSystem system, Entity body)
