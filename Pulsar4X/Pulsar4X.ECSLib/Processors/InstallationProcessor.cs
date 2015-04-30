@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    internal static class InstallationProcessor
+    public static class InstallationProcessor
     {
 
         /// <summary>
         /// should be called when new facilitys are added, 
         /// facilies are enabled or disabled, 
         /// or if population changes significantly.
+        /// Or maybe just check at the beginning of every econ tick.
         /// </summary>
         /// <param name="colonyEntity"></param>
-        internal static void Employment(Entity colonyEntity)
+        public static void Employment(Entity colonyEntity)
         {
             var employablePopulationlist = colonyEntity.GetDataBlob<ColonyInfoDB>().Population.Values;
             int employable = (int)(employablePopulationlist.Sum() * 1000000); //because it's in millions I think...maybe we should change.
@@ -35,11 +35,11 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// run every ??? 
+        /// run every econ tic 
         /// extracts minerals from planet surface by mineing ability;
         /// </summary>
         /// <param name="factionEntity"></param>
-        internal static void Mine(Entity factionEntity)
+        public static void Mine(Entity factionEntity)
         {
             float factionMineingAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseMiningBonus;
             float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
@@ -69,7 +69,14 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal static void Construct(Entity factionEntity)
+
+        /// <summary>
+        /// Can this be made more generic, and reused for 
+        /// ordnance and fighter production too?
+        /// 
+        /// </summary>
+        /// <param name="factionEntity"></param>
+        public static void Construct(Entity factionEntity)
         {
             float factionConstructionAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseConstructionBonus;
             float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
@@ -121,7 +128,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        internal static void ConstructionPriority(Entity colonyEntity, Message neworder)
+        public static void ConstructionPriority(Entity colonyEntity, Message neworder)
         {
             //idk... needs to be something in the message about whether it's Construction, Ordnance or Fighers...  
             //I think if it's a valid list we can just chuck it straight in.
