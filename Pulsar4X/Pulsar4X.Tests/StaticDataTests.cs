@@ -120,13 +120,19 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLoadDefaultData()
         {
+            int mineralsNum;
             StaticDataManager.LoadFromDefaultDataDirectory();
+            mineralsNum = StaticDataManager.StaticDataStore.Minerals.Count;
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Techs);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Installations);
 
+
+
+
+            Assert.AreEqual(mineralsNum, StaticDataManager.StaticDataStore.Minerals.Count);
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>
             {

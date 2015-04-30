@@ -19,7 +19,7 @@ namespace Pulsar4X.ECSLib
         public JDictionary<InstallationSD, float> Installations { get; set; }
 
         /// <summary>
-        /// guid for installationtype, and a weighted list for priority and amount remaining.
+        /// list of ConstructionJob Structs.
         /// </summary>
         public List<ConstructionJob> InstallationJobs { get; set; }
         public List<ConstructionJob> OrdnanceJobs { get; set; }
