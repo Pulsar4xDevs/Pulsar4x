@@ -1,11 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
     internal static class InstallationProcessor
     {
+
+        /// <summary>
+        /// should be called when new facilitys are added, 
+        /// facilies are enabled or disabled, 
+        /// or if population changes significantly.
+        /// </summary>
+        /// <param name="colonyEntity"></param>
+        internal static void Employment(Entity colonyEntity)
+        {
+            var employablePopulationlist = colonyEntity.GetDataBlob<ColonyInfoDB>().Population.Values;
+            int employable = (int)(employablePopulationlist.Sum() * 1000000); //because it's in millions I think...maybe we should change.
+            InstallationsDB installationsDB = colonyEntity.GetDataBlob<InstallationsDB>();
+            //int totalReq = 0;
+            JDictionary<Guid,int> workingInstallations  = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Installations.Keys.ToDictionary(key => key, val => 0));
+            foreach (var type in installationsDB.EmploymentList)
+            {
+                //totalReq += type.Key.PopulationRequired * (int)type.Value;
+                var fac = StaticDataManager.StaticDataStore.Installations[type.Type];
+                if (type.Enabled && employable >= fac.PopulationRequired)
+                {
+                    employable -= fac.PopulationRequired;
+                    workingInstallations[type.Type] += 1;
+                }
+            }
+            installationsDB.WorkingInstallations = workingInstallations;
+        }
+
         /// <summary>
         /// run every ??? 
         /// extracts minerals from planet surface by mineing ability;
@@ -66,8 +94,16 @@ namespace Pulsar4X.ECSLib
                     int pointsPerThisInstallation = type.BuildPoints;
                     float percentBuilt = pointsUsed / pointsPerThisInstallation;
 
+                    //this confusing block of code below checks if there's a fully constructed installation
+                    //if so, it adds it to the employment list, which is used to check pop requrements etc. 
+                    int fullColInstallations = (int)colonyInstallations.Installations[type];
                     colonyInstallations.Installations[type] += percentBuilt;
+                    if ((int)colonyInstallations.Installations[type] > fullColInstallations)
+                    {
+                        colonyInstallations.EmploymentList.Add(new InstallationEmployment{Enabled = true,Type = type.ID});
+                    }
                     constructionPoints -= pointsUsed;
+
 
                     if (job.ItemsRemaining > 0) //if there's still itemsremaining...
                     {
@@ -87,15 +123,27 @@ namespace Pulsar4X.ECSLib
 
         internal static void ConstructionPriority(Entity colonyEntity, Message neworder)
         {
-            //idk...
+            //idk... needs to be something in the message about whether it's Construction, Ordnance or Fighers...  
+            //I think if it's a valid list we can just chuck it straight in.
+            try
+            {
+                colonyEntity.GetDataBlob<InstallationsDB>().InstallationJobs = (List<ConstructionJob>)neworder.Data;                
+            }
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
 
         private static int TotalAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
         {            
             int totalAbilityValue = 0;
-            foreach (KeyValuePair<InstallationSD, float> kvp in installationsDB.Installations.Where(item => item.Key.BaseAbilityAmounts.ContainsKey(type)))
+            foreach (KeyValuePair<Guid, int> kvp in installationsDB.WorkingInstallations)//.Where(item => item.Key.BaseAbilityAmounts.ContainsKey(type)))
             {
-                totalAbilityValue += kvp.Key.BaseAbilityAmounts[type] * (int)kvp.Value; //the decimal is an incomplete instalation, so ignore it. 
+                InstallationSD facility = StaticDataManager.StaticDataStore.Installations[kvp.Key];
+                if(facility.BaseAbilityAmounts.ContainsKey(type))
+                    totalAbilityValue += facility.BaseAbilityAmounts[type] * kvp.Value;  
             }
             return totalAbilityValue;           
         }
