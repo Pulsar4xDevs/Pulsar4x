@@ -87,9 +87,107 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="About.xaml.cs">
+      <DependentUpon>About.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Combat.xaml.cs">
+      <DependentUpon>Combat.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\DebugLog.xaml.cs">
+      <DependentUpon>DebugLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\EventLog.xaml.cs">
+      <DependentUpon>EventLog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\GalaticMap.xaml.cs">
+      <DependentUpon>GalaticMap.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Intelligence.xaml.cs">
+      <DependentUpon>Intelligence.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ITabControl.cs" />
+    <Compile Include="UserControls\Leaders.xaml.cs">
+      <DependentUpon>Leaders.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Populations.xaml.cs">
+      <DependentUpon>Populations.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ShipDesign.xaml.cs">
+      <DependentUpon>ShipDesign.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\Ships.xaml.cs">
+      <DependentUpon>Ships.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\SystemView.xaml.cs">
+      <DependentUpon>SystemView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\SystemMap.xaml.cs">
+      <DependentUpon>SystemMap.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TaskForces.xaml.cs">
+      <DependentUpon>TaskForces.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\TaskGroups.xaml.cs">
+      <DependentUpon>TaskGroups.xaml</DependentUpon>
+    </Compile>
     <Compile Include="EntityHolder.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="UI-Comms.cs" />
+    <Page Include="About.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Combat.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\DebugLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\EventLog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\GalaticMap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Intelligence.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Leaders.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Populations.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\ShipDesign.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Ships.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\SystemView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\SystemMap.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\TaskForces.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\TaskGroups.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
