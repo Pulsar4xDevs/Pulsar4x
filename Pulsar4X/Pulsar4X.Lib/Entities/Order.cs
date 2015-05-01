@@ -213,7 +213,7 @@ namespace Pulsar4X.Entities
         public Order(Constants.ShipTN.OrderType TypeOrder, int SecondaryOrder, int TertiaryOrder, int Delay, Population PopOrder)
         {
             TypeOf = TypeOrder;
-            Target = PopOrder.Planet;
+            Target = PopOrder;
             Secondary = SecondaryOrder;
             Tertiary = TertiaryOrder;
             Pop = PopOrder;

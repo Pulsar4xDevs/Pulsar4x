@@ -31,7 +31,7 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="contact"></param>
         /// <param name="distance"></param>
-        /// <returns>true if distance was already in table. False if it distance was calculated.</returns>
+        /// <returns>true if distance was already in table. False if it distance was calculated. distance is in AUs.</returns>
         public bool GetDistance(SystemContact contact, out float distance)
         {
             if (m_distances.TryGetValue(contact, out distance))

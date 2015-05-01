@@ -535,6 +535,11 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void AddButton_Click(object sender, EventArgs e)
         {
+            if (CurrentShipClass.IsLocked == true)
+            {
+                UpdateDisplay();
+                return;
+            }
             if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)
             {
                 if (m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value != null)
@@ -641,6 +646,12 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ComponentDataGrid_DoubleClick(object sender, EventArgs e)
         {
+            if (CurrentShipClass.IsLocked == true)
+            {
+                UpdateDisplay();
+                return;
+            }
+
             if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)
             {
                 if (m_oOptionsPanel.ComponentDataGrid.Rows[m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex].Cells[(int)ComponentCell.CIndex].Value != null)
@@ -663,6 +674,12 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void ComponentsListBox_DoubleClick(object sender, EventArgs e)
         {
+            if (CurrentShipClass.IsLocked == true)
+            {
+                UpdateDisplay();
+                return;
+            }
+
             ComponentDefListTN List = _CurrnetFaction.ComponentList;
             int SelIndex = -1;
             int CT = -1;
@@ -698,6 +715,12 @@ namespace Pulsar4X.UI.Handlers
         /// <param name="e"></param>
         private void RemoveButton_Click(object sender, EventArgs e)
         {
+            if (CurrentShipClass.IsLocked == true)
+            {
+                UpdateDisplay();
+                return;
+            }
+
             int CAmt = -1 * ComponentAmt;
 
             if (m_oOptionsPanel.ComponentDataGrid.CurrentCell.RowIndex != -1)

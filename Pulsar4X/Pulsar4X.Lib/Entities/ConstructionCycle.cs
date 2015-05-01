@@ -32,8 +32,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// How much construction work per day does this colony do? default should be 5 day construction cycle.
                     /// </summary>
-                    float TimeAdjust = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
-                    float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * TimeAdjust;
+                    float CurrentIndustry = CurrentPopulation.CalcTotalIndustry() * Constants.Colony.ConstructionCycleFraction;
                     float BuildPercentage = 0.0f;
 
                     foreach (ConstructionBuildQueueItem CurrentConstruction in CurrentPopulation.ConstructionBuildQueue)
@@ -232,8 +231,7 @@ namespace Pulsar4X.Entities
                     /// <summary>
                     /// How much construction work per day does this colony do? default should be 5 day construction cycle.
                     /// </summary>
-                    float TimeAdjust = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
-                    float CurrentIndustry = CurrentPopulation.CalcTotalOrdnanceIndustry() * TimeAdjust;
+                    float CurrentIndustry = CurrentPopulation.CalcTotalOrdnanceIndustry() * Constants.Colony.ConstructionCycleFraction;
                     float BuildPercentage = 0.0f;
 
                     foreach (MissileBuildQueueItem CurrentConstruction in CurrentPopulation.MissileBuildQueue)
@@ -341,10 +339,8 @@ namespace Pulsar4X.Entities
                         {
                             /// <summary>
                             /// Calculate the construction time cycle sliver of the year to use. all production is done annually so this must be adjusted here.
-                            /// Potential place to save some cpu cycles?
                             /// </summary>
-                            float TimeAdjust = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
-                            float CurrentMining = CurrentPopulation.CalcTotalMining() * TimeAdjust;
+                            float CurrentMining = CurrentPopulation.CalcTotalMining() * Constants.Colony.ConstructionCycleFraction;
 
                             /// <summary>
                             /// Don't run this loop if no mining can be done.
@@ -399,8 +395,7 @@ namespace Pulsar4X.Entities
                     if (CurrentPopulation.IsRefining == false)
                         continue;
 
-                    float TimeAdjust = (float)Constants.Colony.ConstructionCycle / (float)Constants.TimeInSeconds.Year;
-                    float CurrentRefining = CurrentPopulation.CalcTotalRefining() * TimeAdjust;
+                    float CurrentRefining = CurrentPopulation.CalcTotalRefining() * Constants.Colony.ConstructionCycleFraction;
 
                     /// <summary>
                     /// If the planet has no refineries or no sorium then no refining happens.
@@ -434,5 +429,422 @@ namespace Pulsar4X.Entities
             }
         }
 
+        /// <summary>
+        /// Build and modify ships and shipyards respectively.
+        /// *** also missing the shipyard tabs grid work that displays ship construction progress.
+        /// </summary>
+        /// <param name="P">List of factions.</param>
+        public static void ProcessShipyards(BindingList<Faction> P)
+        {
+            foreach (Faction CurrentFaction in P)
+            {
+                foreach (Population CurrentPopulation in CurrentFaction.Populations)
+                {
+                    int CY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number);
+                    int NY = (int)Math.Floor(CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number);
+
+                    List<Installation.ShipyardInformation.ShipyardTask> SortedList = CurrentPopulation.ShipyardTasks.Keys.ToList().OrderBy(o=>o.Priority).ToList();
+
+                    BuildShips(CurrentFaction, CurrentPopulation, SortedList);
+
+                    for (int SYIterator = 0; SYIterator < CY; SYIterator++)
+                    {
+                        Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo[SYIterator];
+                        PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
+
+                        //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
+                    }
+
+                    for (int SYIterator = 0; SYIterator < NY; SYIterator++)
+                    {
+                        Installation.ShipyardInformation SYInfo = CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo[SYIterator];
+                        PerformShipyardActivity(CurrentFaction, CurrentPopulation, SYInfo);
+
+                        //BuildShips(CurrentFaction, CurrentPopulation, SYInfo); //build the ships above from the sorted list, not here.
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Do all of the tasks that this shipyard has assigned to it.
+        /// </summary>
+        /// <param name="CurrentFaction">Faction both the population and the shipyard belong to.</param>
+        /// <param name="CurrentPopulation">Population the shipyard is on</param>
+        /// <param name="SYInfo">Shipyard the tasks are happening at</param>
+        private static void BuildShips(Faction CurrentFaction, Population CurrentPopulation, List<Installation.ShipyardInformation.ShipyardTask> SortedList)
+        {
+            BindingList<Installation.ShipyardInformation.ShipyardTask> TasksToRemove = new BindingList<Installation.ShipyardInformation.ShipyardTask>();
+            foreach(Installation.ShipyardInformation.ShipyardTask Task in SortedList)
+            {
+                if (Task.IsPaused() == true)
+                    continue;
+
+                /// <summary>
+                /// the Annual Build Rate(ABR) is the number of BP per year that will be devoted to this activity. this is the number of BP produced only this cycle.
+                /// </summary>
+                float CycleBuildRate = Task.ABR * Constants.Colony.ConstructionCycleFraction;
+
+                /// <summary>
+                /// How much of this task will be completed this construction cycle?
+                /// </summary>
+                float CurrentProgress = CycleBuildRate / (float)Task.Cost;
+                if ((Task.Progress + (decimal)CurrentProgress) > 1.0m)
+                {
+                    CurrentProgress = (float)(1.0m - Task.Progress);
+                }
+
+                /// <summary>
+                /// Can this shipyard Task be built this construction cycle?
+                /// </summary>
+                bool CanBuild = CurrentPopulation.MineralRequirement(Task.minerialsCost, CurrentProgress);
+
+                if (CanBuild == true && Task.CurrentTask != Constants.ShipyardInfo.Task.Scrap)
+                {
+                    CurrentPopulation.HandleShipyardCost(Task.Cost, Task.minerialsCost, CurrentProgress);
+                    Task.Progress = Task.Progress + (decimal)CurrentProgress;
+                }
+                else if (Task.CurrentTask == Constants.ShipyardInfo.Task.Scrap)
+                {
+                    /// <summary>
+                    /// Return money to the population from the scrap.
+                    /// </summary>
+                    CurrentPopulation.HandleShipyardCost(Task.Cost, Task.minerialsCost, (CurrentProgress * -1.0f));
+                    Task.Progress = Task.Progress + (decimal)CurrentProgress;
+                }
+                else
+                {
+                    String Entry = String.Format("Not enough minerals to finish task {0} at Shipyard {1} on Population {2}", Task.CurrentTask, CurrentPopulation.ShipyardTasks[Task], CurrentPopulation);
+                    MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Position.System, CurrentPopulation, GameState.Instance.GameDateTime,
+                                                       GameState.Instance.LastTimestep, Entry);
+                    GameState.Instance.Factions[0].MessageLog.Add(NMsg);
+                }
+
+
+                /// <summary>
+                /// handle standard task completion here.
+                /// </summary>
+                if (Task.Progress >= 1.0m)
+                {
+                    TasksToRemove.Add(Task);
+                    switch (Task.CurrentTask)
+                    {
+                        case Constants.ShipyardInfo.Task.Construction:
+                            Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget, Task.Title);
+                            CurrentPopulation.FuelStockpile = Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].Refuel(CurrentPopulation.FuelStockpile);
+                            break;
+                        case Constants.ShipyardInfo.Task.Repair:
+                            /// <summary>
+                            /// Set the Armor to fully repaired, set all components as not destroyed, and reduce the maintenance clock by a certain amount.
+                            /// </summary>
+#warning maintenance clock work should be performed here and in refit as well.
+                            Task.CurrentShip.ShipArmor.RepairAllArmor();
+                            foreach (ComponentTN CurComp in Task.CurrentShip.ShipComponents)
+                            {
+                                CurComp.isDestroyed = false;
+                            }
+                            break;
+                        case Constants.ShipyardInfo.Task.Refit:
+                            /// <summary>
+                            /// need to remove the old ship, put in the new ship, copy over important information, adjust refueling,MSP,etc?
+                            /// </summary>
+
+                            /// <summary>
+                            /// Credit the population with the fuel and ordnance on the ship. the old ships MSP will be considered where the new ship got its MSP from.
+                            /// </summary>
+                            CurrentPopulation.FuelStockpile = CurrentPopulation.FuelStockpile + Task.CurrentShip.CurrentFuel;
+                            foreach (KeyValuePair<OrdnanceDefTN, int> OrdnancePair in Task.CurrentShip.ShipOrdnance)
+                            {
+                                CurrentPopulation.LoadMissileToStockpile(OrdnancePair.Key, (float)OrdnancePair.Value);
+                            }
+                            /// <summary>
+                            /// Destroy the ship. just use the existing code to remove the ship from the simulation, no point in reduplicating all of it.
+                            /// </summary>
+                            Task.CurrentShip.IsDestroyed = true;
+                            if (CurrentFaction.RechargeList.ContainsKey(Task.CurrentShip) == true)
+                            {
+                                if ((CurrentFaction.RechargeList[Task.CurrentShip] & (int)Faction.RechargeStatus.Destroyed) != (int)Faction.RechargeStatus.Destroyed)
+                                {
+                                    CurrentFaction.RechargeList[Task.CurrentShip] = CurrentFaction.RechargeList[Task.CurrentShip] + (int)Faction.RechargeStatus.Destroyed;
+                                }
+                            }
+                            else
+                            {
+                                CurrentFaction.RechargeList.Add(Task.CurrentShip, (int)Faction.RechargeStatus.Destroyed);
+                            }
+
+                            /// <summary>
+                            /// Add in the "new" ship.
+                            /// </summary>
+                            Task.AssignedTaskGroup.AddShip(Task.ConstructRefitTarget,Task.CurrentShip.Name);
+                            Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].TFTraining = Task.CurrentShip.TFTraining;
+                            Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].ShipGrade = Task.CurrentShip.ShipGrade;
+                            CurrentPopulation.FuelStockpile = Task.AssignedTaskGroup.Ships[Task.AssignedTaskGroup.Ships.Count - 1].Refuel(CurrentPopulation.FuelStockpile);
+                            break;
+                        case Constants.ShipyardInfo.Task.Scrap:
+                            /// <summary>
+                            /// All non-destroyed components from the ship need to be put into the population stockpile.
+                            /// This further includes fuel, MSP, and ordnance as well as eventually officers and crew.
+                            /// </summary>
+#warning Handle officers and crew on ship scrapping.
+                            BindingList<ComponentDefTN> CompDefList = Task.CurrentShip.ShipClass.ListOfComponentDefs;
+                            BindingList<short> CompDefCount = Task.CurrentShip.ShipClass.ListOfComponentDefsCount;
+                            BindingList<ComponentTN> ShipCompList = Task.CurrentShip.ShipComponents;
+                            BindingList<ushort> ComponentDefIndex = Task.CurrentShip.ComponentDefIndex;
+                            int DefCount = Task.CurrentShip.ShipClass.ListOfComponentDefs.Count;
+                            for (int CompDefIndex = 0; CompDefIndex < DefCount; CompDefIndex++)
+                            {
+                                ComponentDefTN CurrentCompDef = CompDefList[CompDefIndex];
+                                short CurrentCompCount = CompDefCount[CompDefIndex];
+
+                                int destCount = 0;
+                                for (int CompIndex = 0; CompIndex < CurrentCompCount; CompIndex++)
+                                {
+                                    if (ShipCompList[ComponentDefIndex[CompDefIndex] + CompIndex].isDestroyed == true)
+                                    {
+                                        destCount++;
+                                    }
+                                }
+
+                                if (destCount != CurrentCompCount)
+                                {
+                                    CurrentPopulation.AddComponentsToStockpile(CurrentCompDef, (float)(CurrentCompCount - destCount));
+                                }
+                            }
+
+                            CurrentPopulation.FuelStockpile = CurrentPopulation.FuelStockpile + Task.CurrentShip.CurrentFuel;
+                            CurrentPopulation.MaintenanceSupplies = CurrentPopulation.MaintenanceSupplies + Task.CurrentShip.CurrentMSP;
+                            foreach (KeyValuePair<OrdnanceDefTN, int> OrdnancePair in Task.CurrentShip.ShipOrdnance)
+                            {
+                                CurrentPopulation.LoadMissileToStockpile(OrdnancePair.Key, (float)OrdnancePair.Value);
+                            }
+
+                            /// <summary>
+                            /// Finally destroy the ship. just use the existing code to remove the ship from the simulation, no point in reduplicating all of it.
+                            /// </summary>
+                            Task.CurrentShip.IsDestroyed = true;
+                            if (CurrentFaction.RechargeList.ContainsKey(Task.CurrentShip) == true)
+                            {
+                                if ((CurrentFaction.RechargeList[Task.CurrentShip] & (int)Faction.RechargeStatus.Destroyed) != (int)Faction.RechargeStatus.Destroyed)
+                                {
+                                    CurrentFaction.RechargeList[Task.CurrentShip] = CurrentFaction.RechargeList[Task.CurrentShip] + (int)Faction.RechargeStatus.Destroyed;
+                                }
+                            }
+                            else
+                            {
+                                CurrentFaction.RechargeList.Add(Task.CurrentShip, (int)Faction.RechargeStatus.Destroyed);
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// Update the timer since this project won't finish just yet.
+                    /// </summary>
+                    decimal CostLeft = Task.Cost * (1.0m - Task.Progress);
+                    float YearsOfProduction = (float)CostLeft / Task.ABR;
+                    DateTime EstTime = GameState.Instance.GameDateTime;
+                    if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                    {
+                        float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                        int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                        TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                        EstTime = EstTime.Add(TS);
+                    }
+                    Task.CompletionDate = EstTime;
+                }
+            }
+
+            /// <summary>
+            /// Remove all the tasks that are now completed.
+            /// </summary>
+            foreach (Installation.ShipyardInformation.ShipyardTask Task in TasksToRemove)
+            {
+                /// <summary>
+                /// Sanity check here.
+                /// </summary>
+                if (Task.Progress >= 1.0m)
+                {
+                    Installation.ShipyardInformation SYI = CurrentPopulation.ShipyardTasks[Task];
+                    SYI.BuildingShips.Remove(Task);
+                    CurrentPopulation.ShipyardTasks.Remove(Task);
+                }
+            }
+            TasksToRemove.Clear();
+        }
+
+        /// <summary>
+        /// Shipyard modifications are done here.
+        /// </summary>
+        /// <param name="CurrentFaction">Current faction this shipyard belongs to.</param>
+        /// <param name="CurrentPopulation">Current population this shipyard is on.</param>
+        /// <param name="SYInfo">The shipyard itself.</param>
+        private static void PerformShipyardActivity(Faction CurrentFaction, Population CurrentPopulation, Installation.ShipyardInformation SYInfo)
+        {
+            if (SYInfo.CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity && SYInfo.CurrentActivity.Paused == false)
+            {
+                float SYBP = SYInfo.CalcAnnualSYProduction() * Constants.Colony.ConstructionCycleFraction;
+
+                int Adjustment = 1;
+                if (SYInfo.ShipyardType == Constants.ShipyardInfo.SYType.Naval)
+                {
+                    Adjustment = Constants.ShipyardInfo.NavalToCommercialRatio;
+                }
+
+                /// <summary>
+                /// Don't bother with completion date, or progress, just add the capacity.
+                /// </summary>
+                if (SYInfo.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.CapExpansion || SYInfo.CurrentActivity.Activity ==
+                     Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+                {
+                    /// <summary>
+                    /// How many tons could this shipyard expand capacity by in this time increment? SYBP is the number of BP produced this cycle. BaseTotalCostOfExpansion is the cost for 500 tons.
+                    /// Adjustment is the factor that accounts for whether or not this is a commercial yard or a naval yard.
+                    /// </summary>
+                    float BaseCostIncrement = SYBP / (float)(Constants.ShipyardInfo.BaseTotalCostOfExpansion * Adjustment);
+                    float TonsPerCycle = BaseCostIncrement * (float)Constants.ShipyardInfo.TonnageDenominator;
+
+                    /// <summary>
+                    /// Don't build more than this many tons if the activity is CapX.
+                    /// </summary>
+                    if (SYInfo.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+                    {
+                        if (SYInfo.Tonnage + (int)Math.Floor(TonsPerCycle) > SYInfo.CurrentActivity.CapExpansionLimit)
+                        {
+                            TonsPerCycle = SYInfo.CurrentActivity.CapExpansionLimit - SYInfo.Tonnage;
+                        }
+
+                        SYInfo.CurrentActivity.Progress = 1.0m - (((decimal)SYInfo.CurrentActivity.CapExpansionLimit - (decimal)(SYInfo.Tonnage + TonsPerCycle)) / (decimal)SYInfo.CurrentActivity.CapExpansionLimit);
+                    }
+
+                    decimal Cost = (Constants.ShipyardInfo.BaseTotalCostOfExpansion*Adjustment) * ((decimal)TonsPerCycle / (decimal)Constants.ShipyardInfo.TonnageDenominator) * SYInfo.Slipways * Adjustment;
+                    decimal[] mCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+                    mCost[(int)Constants.Minerals.MinerialNames.Duranium] = Cost / 2.0m;
+                    mCost[(int)Constants.Minerals.MinerialNames.Neutronium] = Cost / 2.0m;
+
+                    /// <summary>
+                    /// Can I build this tick's worth of production?
+                    /// </summary>
+                    bool CanBuild = CurrentPopulation.MineralRequirement(mCost, 1.0f);
+
+                    if (CanBuild == true)
+                    {
+                        CurrentPopulation.HandleShipyardCost(Cost, mCost, 1.0f);
+                        SYInfo.AddTonnage(CurrentFaction, (int)Math.Floor(TonsPerCycle));
+                    }
+                    else
+                    {
+                        String Entry = String.Format("Not enough minerals to finish task {0} at Shipyard {1} on Population {2}", SYInfo.CurrentActivity.Activity, SYInfo, CurrentPopulation);
+                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Position.System, CurrentPopulation, GameState.Instance.GameDateTime,
+                                                           GameState.Instance.LastTimestep, Entry);
+                        GameState.Instance.Factions[0].MessageLog.Add(NMsg);
+                    }
+                }
+                else
+                {
+                    /// <summary>
+                    /// BP produced this construction cycle / the total cost of the activity.
+                    /// </summary>
+                    float CurrentProgress = SYBP / (float)SYInfo.CurrentActivity.CostOfActivity;
+
+                    if ((SYInfo.CurrentActivity.Progress + (decimal)CurrentProgress) > 1.0m)
+                    {
+                        CurrentProgress = (float)(1.0m - SYInfo.CurrentActivity.Progress);
+                    }
+
+                    bool CanBuild = CurrentPopulation.MineralRequirement(SYInfo.CurrentActivity.minerialsCost, CurrentProgress);
+
+                    if (CanBuild == true)
+                    {
+                        CurrentPopulation.HandleShipyardCost(SYInfo.CurrentActivity.CostOfActivity, SYInfo.CurrentActivity.minerialsCost, CurrentProgress);
+                        SYInfo.CurrentActivity.Progress = SYInfo.CurrentActivity.Progress + (decimal)CurrentProgress;
+                    }
+                    else
+                    {
+                        String Entry = String.Format("Not enough minerals to finish task {0} at Shipyard {1} on Population {2}", SYInfo.CurrentActivity.Activity, SYInfo, CurrentPopulation);
+                        MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.ColonyLacksMinerals, CurrentPopulation.Position.System, CurrentPopulation, GameState.Instance.GameDateTime,
+                                                           GameState.Instance.LastTimestep, Entry);
+                        GameState.Instance.Factions[0].MessageLog.Add(NMsg);
+                    }
+
+                    /// <summary>
+                    /// handle standard task completion here.
+                    /// </summary>
+                    if (SYInfo.CurrentActivity.Progress >= 1.0m)
+                    {
+                        switch (SYInfo.CurrentActivity.Activity)
+                        {
+                            case Constants.ShipyardInfo.ShipyardActivity.AddSlipway:
+                                SYInfo.Slipways = SYInfo.Slipways + 1;
+                                break;
+                            case Constants.ShipyardInfo.ShipyardActivity.Add500Tons:
+                                SYInfo.AddTonnage(CurrentFaction, Constants.ShipyardInfo.TonnageDenominator);
+                                break;
+                            case Constants.ShipyardInfo.ShipyardActivity.Add1000Tons:
+                                SYInfo.AddTonnage(CurrentFaction, (Constants.ShipyardInfo.TonnageDenominator * 2));
+                                break;
+                            case Constants.ShipyardInfo.ShipyardActivity.Add2000Tons:
+                                SYInfo.AddTonnage(CurrentFaction, (Constants.ShipyardInfo.TonnageDenominator * 4));
+                                break;
+                            case Constants.ShipyardInfo.ShipyardActivity.Add5000Tons:
+                                SYInfo.AddTonnage(CurrentFaction, (Constants.ShipyardInfo.TonnageDenominator * 10));
+                                break;
+                            case Constants.ShipyardInfo.ShipyardActivity.Add10000Tons:
+                                SYInfo.AddTonnage(CurrentFaction, (Constants.ShipyardInfo.TonnageDenominator * 20));
+                                break;
+                            case Constants.ShipyardInfo.ShipyardActivity.Retool:
+                                SYInfo.AssignedClass = SYInfo.CurrentActivity.TargetOfRetool;
+                                if (SYInfo.AssignedClass.IsLocked == false)
+                                    SYInfo.AssignedClass.IsLocked = true;
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        /// <summary>
+                        /// Update the timer since this project won't finish just yet.
+                        /// </summary>
+                        decimal CostLeft = SYInfo.CurrentActivity.CostOfActivity * (1.0m - SYInfo.CurrentActivity.Progress);
+                        float YearsOfProduction = (float)CostLeft / SYInfo.CalcAnnualSYProduction();
+                        
+                        DateTime EstTime = GameState.Instance.GameDateTime;
+                        if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                        {
+                            float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
+                            int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                            TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                            EstTime = EstTime.Add(TS);
+                        }
+                        SYInfo.CurrentActivity.CompletionDate = EstTime;
+                    }
+                }
+
+                /// <summary>
+                /// Lastly clean up any completed activities.
+                /// </summary>
+                if (SYInfo.CurrentActivity.Activity == Constants.ShipyardInfo.ShipyardActivity.CapExpansionUntilX)
+                {
+                    if (SYInfo.Tonnage >= SYInfo.CurrentActivity.CapExpansionLimit)
+                    {
+                        /// <summary>
+                        /// This activity has completed so end it.
+                        /// </summary>
+                        SYInfo.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
+                    }
+                }
+                else if (SYInfo.CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.CapExpansion &&
+                        SYInfo.CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                {
+                    if (SYInfo.CurrentActivity.Progress >= 1.0m)
+                    {
+                        /// <summary>
+                        /// This activity has completed so end it.
+                        /// </summary>
+                        SYInfo.CurrentActivity = new Installation.ShipyardInformation.ShipyardActivity();
+                    }
+                }
+            }
+        }
     }
 }

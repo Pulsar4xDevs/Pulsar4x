@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.ComponentModel;
 using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.Entities
 {
@@ -42,7 +43,7 @@ namespace Pulsar4X.Entities
             InstallationCount
         }
 
-        public class ShipyardInformation
+        public class ShipyardInformation : GameEntity
         {
             public class ShipyardTask
             {
@@ -53,7 +54,7 @@ namespace Pulsar4X.Entities
                 public Constants.ShipyardInfo.Task CurrentTask { get; set; }
 
                 /// <summary>
-                /// What Ship is being built/repaired/refitted/scrapped
+                /// What Ship is being repaired/refitted/scrapped. Construction makes a new ship that does not exist yet.
                 /// </summary>
                 public ShipTN CurrentShip { get; set; }
 
@@ -68,6 +69,11 @@ namespace Pulsar4X.Entities
                 public TaskGroupTN AssignedTaskGroup { get; set; }
 
                 /// <summary>
+                /// How much will this task cost?
+                /// </summary>
+                public decimal Cost { get; set; }
+
+                /// <summary>
                 /// Estimate of when this task will be completed.
                 /// </summary>
                 public DateTime CompletionDate { get; set; }
@@ -78,31 +84,169 @@ namespace Pulsar4X.Entities
                 public int ABR { get; set; }
 
                 /// <summary>
-                /// How should tasks be done in the event of a resource shortage. -1 = paused.
+                /// How should tasks be done in the event of a resource shortage.
                 /// </summary>
                 public int Priority { get; set; }
 
                 /// <summary>
-                /// Constructor for task.
+                /// Is this task paused or not?
                 /// </summary>
-                /// <param name="Ship">Ship to Build/Refit/Repair/Scrap</param>
-                /// <param name="TargetTG">Target TG if applicable</param>
-                public ShipyardTask(ShipTN Ship, Constants.ShipyardInfo.Task TaskToPerform, TaskGroupTN TargetTG = null)
+                public bool Paused { get; set; }
+
+                /// <summary>
+                /// The mineral cost of this task.
+                /// </summary>
+                private decimal[] m_aiMinerialsCost;
+                public decimal[] minerialsCost
                 {
+                    get
+                    {
+                        return m_aiMinerialsCost;
+                    }
+                    set
+                    {
+                        m_aiMinerialsCost = value;
+                    }
+                }
+
+                /// <summary>
+                /// If this is a new ship construction, what ship do we want to construct?
+                /// If this is a refit task, what are we refitting the ship to?
+                /// </summary>
+                public ShipClassTN ConstructRefitTarget { get; set;}
+
+                /// <summary>
+                /// What is the name of this ship going to be if this is a newly constructed ship?
+                /// </summary>
+                public String Title { get; set; }
+
+
+                /// <summary>
+                /// Constructor for task.
+                /// ABR = Normal shipbuilding rate x (1+(((Class Size / 100) - 1)/2)) 
+                /// Scrap Formula is ((0.25 * ShipCost) / ABR) * Year = days involved.
+                /// </summary>
+                /// <param name="Ship">Ship to repair/refit/scrap. build will be handled elsewhere.</param>
+                /// <param name="TargetTG">Target TG which the ship will be put back in to, or in the case of a scrap operation taken from.</param>
+                /// <param name="PopulationBuildRate">What is the currently selected shipyard capable of building? population and faction should factor into this number.</param>
+                /// <param name="ConstructOrRefitTarget">If a new ship is being built, or an old ship is being refitted, what target design are we interested in?</param>
+                public ShipyardTask(ShipTN Ship, Constants.ShipyardInfo.Task TaskToPerform, TaskGroupTN TargetTG, int PopulationBuildRate, String TitleToUse, ShipClassTN ConstructOrRefitTarget=null)
+                {
+                    m_aiMinerialsCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
+
                     CurrentShip = Ship;
                     CurrentTask = TaskToPerform;
                     Progress = 0.0m;
                     Priority = 0;
+                    Paused = false;
+                    ConstructRefitTarget = ConstructOrRefitTarget;
+
+                    ABR = 1;
+
+                    AssignedTaskGroup = TargetTG;
+
+                    if(AssignedTaskGroup != null)
+                        AssignedTaskGroup.IsInShipyard = true;
+
+                    Cost = 0.0m;
+
+                    /// <summary>
+                    /// This is only relevant for new ship construction.
+                    /// </summary>
+                    Title = TitleToUse;
 
                     switch (TaskToPerform)
                     {
                         case Constants.ShipyardInfo.Task.Construction:
+                            ABR = (int)Math.Round(PopulationBuildRate * (1.0f + (((ConstructRefitTarget.SizeHS / 100.0f) - 1.0f) / 2.0f)));
+                            Cost = ConstructRefitTarget.BuildPointCost;
+                            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                            {
+                                m_aiMinerialsCost[mineralIterator] = ConstructRefitTarget.minerialsCost[mineralIterator];
+                            }        
                             break;
                         case Constants.ShipyardInfo.Task.Repair:
+                            ABR = (int)Math.Round(PopulationBuildRate * (1.0f + (((Ship.ShipClass.SizeHS / 100.0f) - 1.0f) / 2.0f)));
+                            /// <summary>
+                            /// Repair will just cost money. Two reasons. 1st: Laziness. I'd have to get all the component costs as well.
+                            /// 2nd:Ships require continuous resource outlays via routine maintenance, that should and will cover the actual cost of repairing the ship above and beyond the money required.
+                            /// </summary>
+                            for(int componentIterator = 0; componentIterator < Ship.DestroyedComponents.Count; componentIterator++)
+                            {
+                                ushort ID = Ship.DestroyedComponents[componentIterator];
+                                ComponentTypeTN CType = Ship.DestroyedComponentsType[componentIterator];
+                                Cost = Cost + Ship.GetDamagedComponentsRepairCost(ID,CType);
+                            }
+
+                            if(Ship.ShipArmor.isDamaged == true)
+                            {
+                                int totalDamage = 0;
+                                int max = Ship.ShipArmor.armorDef.cNum * Ship.ShipArmor.armorDef.depth;
+                                foreach (KeyValuePair<ushort, ushort> pair in Ship.ShipArmor.armorDamage)
+                                {
+                                    totalDamage = totalDamage + pair.Value;
+                                }
+
+                                float damageFraction = ((float)totalDamage / (float)max);
+
+                                Cost = Cost + ((decimal)damageFraction * Ship.ShipArmor.armorDef.cost);
+                            }
+
+                            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                            {
+                                m_aiMinerialsCost[mineralIterator] = 0.0m;
+                            }
+                               
                             break;
                         case Constants.ShipyardInfo.Task.Refit:
+                            ABR = (int)Math.Round(PopulationBuildRate * (1.0f + (((ConstructRefitTarget.SizeHS / 100.0f) - 1.0f) / 2.0f)));
+                            Cost = ConstructRefitTarget.BuildPointCost;
+                            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                            {
+                                m_aiMinerialsCost[mineralIterator] = ConstructRefitTarget.minerialsCost[mineralIterator];
+                            }
                             break;
                         case Constants.ShipyardInfo.Task.Scrap:
+                            ABR = (int)Math.Round(PopulationBuildRate * (1.0f + (((Ship.ShipClass.SizeHS / 100.0f) - 1.0f) / 2.0f)));
+                            Cost = Ship.ShipClass.BuildPointCost * -0.25m;
+                            for (int mineralIterator = 0; mineralIterator < (int)Constants.Minerals.MinerialNames.MinerialCount; mineralIterator++)
+                            {
+                                m_aiMinerialsCost[mineralIterator] = Ship.ShipClass.minerialsCost[mineralIterator] * -0.25m;
+                            }
+                            break;
+                    }
+                    /// <summary>
+                    /// How long will this retool take?
+                    /// </summary>
+                    float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day; 
+                    float YearsOfProduction = (float)Math.Abs(Cost) / (float)ABR;
+                    DateTime EstTime = GameState.Instance.GameDateTime;
+                    if (YearsOfProduction < Constants.Colony.TimerYearMax)
+                    {
+                        int TimeToBuild = (int)Math.Floor(YearsOfProduction * DaysInYear);
+                        TimeSpan TS = new TimeSpan(TimeToBuild, 0, 0, 0);
+                        EstTime = EstTime.Add(TS);
+                    }
+                    CompletionDate = EstTime;
+                }
+
+                /// <summary>
+                /// On tech upgrades the ABR for the task will go up, and completion time will go down.
+                /// Small ships in big yards get no bonus to their construction size, but larger ships should build faster due to the larger scale of the yard with more space and more people working on it.
+                /// </summary>
+                /// <param name="PopulationBaseBuildRate">The Faction's ship build rate</param>
+                public void UpdateABR(int PopulationBaseBuildRate)
+                {
+#warning ABR should be updated on new technology discoveries.
+                    switch (CurrentTask)
+                    {
+                        case Constants.ShipyardInfo.Task.Construction:
+                        case Constants.ShipyardInfo.Task.Refit:
+                            ABR = (int)Math.Round(PopulationBaseBuildRate * (1.0f + (((ConstructRefitTarget.SizeHS / 100.0f) - 1.0f) / 2.0f)));
+                            break;
+                        case Constants.ShipyardInfo.Task.Repair:
+                        case Constants.ShipyardInfo.Task.Scrap:
+                            ABR = (int)Math.Round(PopulationBaseBuildRate * (1.0f + (((CurrentShip.ShipClass.SizeHS / 100.0f) - 1.0f) / 2.0f)));
                             break;
                     }
                 }
@@ -112,7 +256,24 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 public void Pause()
                 {
-                    Priority = -1;
+                    Paused = true;
+                }
+
+                /// <summary>
+                /// Continue with this task.
+                /// </summary>
+                public void UnPause()
+                {
+                    Paused = false;
+                }
+
+                /// <summary>
+                /// Priority being -1 as per Pause() means that this task should not be in production.
+                /// </summary>
+                /// <returns>True if paused, false if not paused.</returns>
+                public bool IsPaused()
+                {
+                    return Paused;
                 }
 
                 /// <summary>
@@ -181,6 +342,11 @@ namespace Pulsar4X.Entities
                 /// </summary>
                 public int CapExpansionLimit { get; set; }
 
+                /// <summary>
+                /// Is this build activity paused or under construction?
+                /// </summary>
+                public bool Paused { get; set; }
+
 
                 /// <summary>
                 /// Default Constructor.
@@ -194,6 +360,8 @@ namespace Pulsar4X.Entities
 
                     TargetOfRetool = null;
                     CapExpansionLimit = -1;
+
+                    Paused = false;
                 }
 
                 /// <summary>
@@ -207,6 +375,8 @@ namespace Pulsar4X.Entities
 
                     TargetOfRetool = null;
                     CapExpansionLimit = -1;
+
+                    Paused = false;
                 }
 
                 /// <summary>
@@ -239,13 +409,10 @@ namespace Pulsar4X.Entities
                     {
                         TargetOfRetool = RetoolTarget;
                     }
+
+                    Paused = false;
                 }
             }
-
-            /// <summary>
-            /// Name of this Shipyard. separate from the installation data type name.
-            /// </summary>
-            public String Name { get; set; }
 
             /// <summary>
             /// Shipyard tonnage.
@@ -289,13 +456,34 @@ namespace Pulsar4X.Entities
             /// Constructor for shipyard information
             /// </summary>
             /// <param name="Type"></param>
-            public ShipyardInformation(Constants.ShipyardInfo.SYType Type)
+            public ShipyardInformation(Faction CurrentFaction, Constants.ShipyardInfo.SYType Type, int Number)
             {
+                switch (Type)
+                {
+                    case Constants.ShipyardInfo.SYType.Commercial:
+                        Name = "Commercial Yard #" + Number.ToString();
+                        Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage * Constants.ShipyardInfo.NavalToCommercialRatio;
+                        break;
+                    case Constants.ShipyardInfo.SYType.Naval:
+                        Name = "Naval Yard #" + Number.ToString();
+                        Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage;
+                        break;
+                    default:
+                        Name = "Unknown Shipyard Type #" + Number.ToString();
+                        break;
+                }
+                
                 ShipyardType = Type;
                 AssignedClass = null;
 
                 BuildingShips = new BindingList<ShipyardTask>();
                 CurrentActivity = new ShipyardActivity();
+
+                Tonnage = Constants.ShipyardInfo.BaseShipyardTonnage;
+                Slipways = 1;
+                AssignedClass = null;
+
+                UpdateModRate(CurrentFaction);
             }
 
             /// <summary>
@@ -304,7 +492,7 @@ namespace Pulsar4X.Entities
             /// <param name="NewActivity">New Activity to perform.</param>
             /// <param name="RetoolTarget">Retool target if any</param>
             /// <param name="CapLimit">Capacity Expansion Limit if any.</param>
-            public void SetShipyardActivity(Constants.ShipyardInfo.ShipyardActivity NewActivity, ShipClassTN RetoolTarget = null, int CapLimit = -1)
+            public void SetShipyardActivity(Faction CurrentFaction, Constants.ShipyardInfo.ShipyardActivity NewActivity, ShipClassTN RetoolTarget = null, int CapLimit = -1)
             {
                 decimal[] mCost = new decimal[(int)Constants.Minerals.MinerialNames.MinerialCount];
                 float DaysInYear = (float)Constants.TimeInSeconds.RealYear / (float)Constants.TimeInSeconds.Day;
@@ -316,6 +504,37 @@ namespace Pulsar4X.Entities
                 int TimeToBuild = 0;
                 DateTime EstTime;
                 TimeSpan TS;
+
+                /// <summary>
+                /// If an order for adding a set amount of tons is canceled while in progress, credit the tons that were built to the shipyard.
+                /// </summary>
+                if(CurrentActivity.Progress != 0.0m && CurrentActivity.Activity != Constants.ShipyardInfo.ShipyardActivity.NoActivity)
+                {
+                    int TonsToAdd = 0;
+                    switch (CurrentActivity.Activity)
+                    {
+                        case Constants.ShipyardInfo.ShipyardActivity.Add500Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 500.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add1000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 1000.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add2000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 2000.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add5000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 5000.0f);
+                            break;
+                        case Constants.ShipyardInfo.ShipyardActivity.Add10000Tons:
+                            TonsToAdd = (int)Math.Round((float)CurrentActivity.Progress * 10000.0f);
+                            break;
+                    }
+
+                    if (TonsToAdd != 0)
+                    {
+                        AddTonnage(CurrentFaction, Tonnage);
+                    }
+                }
 
                 switch (NewActivity)
                 {
@@ -368,14 +587,16 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// One free retool. Hypothetically this shipyard was built with this shipclass in mind.
                         /// </summary>
-                        if (AssignedClass == null)
+                        if (AssignedClass == null && RetoolTarget != null)
                         {
                             AssignedClass = RetoolTarget;
+                            if (AssignedClass.IsLocked == false)
+                                AssignedClass.IsLocked = true;
                         }
                         /// <summary>
                         /// Lengthy retool process as the shipyard converts to build the new vessel.
                         /// </summary>
-                        else
+                        else if(AssignedClass != null && RetoolTarget != null)
                         {
                             /// <summary>
                             /// Caclulate the cost of this retool:
@@ -396,6 +617,9 @@ namespace Pulsar4X.Entities
                                 EstTime = EstTime.Add(TS);
                             }
                             CurrentActivity = new ShipyardActivity(NewActivity, CostToRetool, mCost, EstTime, RetoolTarget);
+
+                            if (RetoolTarget.IsLocked == false)
+                                RetoolTarget.IsLocked = true;
                         }
                         break;
                     case Constants.ShipyardInfo.ShipyardActivity.CapExpansion:
@@ -418,9 +642,51 @@ namespace Pulsar4X.Entities
             /// <returns></returns>
             public float CalcAnnualSYProduction()
             {
-                float AnnualSYProd = (ModRate / Constants.ShipyardInfo.BaseModRate) * Constants.ShipyardInfo.BaseModProd;
+#warning does not take technology or governor bonus into account.
+                float AnnualSYProd = ((float)ModRate / (float)Constants.ShipyardInfo.BaseModRateDenominator) * (float)Constants.ShipyardInfo.BaseModProd;
 
                 return AnnualSYProd;
+            }
+
+            /// <summary>
+            /// Add tonnage and then update the mod rate.
+            /// </summary>
+            public void AddTonnage(Faction CurrentFaction, int TonsToAdd)
+            {
+                Tonnage = Tonnage + TonsToAdd;
+                UpdateModRate(CurrentFaction);
+            }
+
+            /// <summary>
+            /// Modrate should be updated whenever tonnage is added or when tech is advanced.
+            /// </summary>
+            /// <param name="CurrentFaction"></param>
+            public void UpdateModRate(Faction CurrentFaction)
+            {
+#warning Modrate needs to be updated on tech advancement. also, does the governor have an effect on mod rate?
+                int BuildTech = CurrentFaction.FactionTechLevel[(int)Faction.FactionTechnology.ShipProdRate];
+                if (BuildTech > Constants.ShipyardInfo.MaxShipProductionRate)
+                    BuildTech = Constants.ShipyardInfo.MaxShipProductionRate;
+
+                float TechAdjustment = (float)Constants.ShipyardInfo.ShipProductionRate[BuildTech] / (float)Constants.ShipyardInfo.ShipProductionRate[0];
+
+                ModRate = (int)Math.Round((Constants.ShipyardInfo.BaseModRate + ((((float)Tonnage - (float)Constants.ShipyardInfo.BaseShipyardTonnage) / (float)Constants.ShipyardInfo.BaseShipyardTonnage) *
+                                          Constants.ShipyardInfo.ModRateTonnageMultiplier)) * TechAdjustment);
+            }
+
+            /// <summary>
+            /// How many BP will this shipyard produce for building new ships?
+            /// </summary>
+            /// <param name="CurrentFaction">Current faction that owns this shipyard</param>
+            /// <param name="CurrentPopulation">Current population this shipyard at.</param>
+            /// <returns>The build rate for this shipyard.</returns>
+            public int CalcShipBuildRate(Faction CurrentFaction, Population CurrentPopulation)
+            {
+#warning Does not take into effect governor bonus
+                int BuildTech = CurrentFaction.FactionTechLevel[(int)Faction.FactionTechnology.ShipProdRate];
+                if (BuildTech > Constants.ShipyardInfo.MaxShipProductionRate)
+                    BuildTech = Constants.ShipyardInfo.MaxShipProductionRate;
+                return Constants.ShipyardInfo.ShipProductionRate[BuildTech];
             }
 
             /// <summary>
