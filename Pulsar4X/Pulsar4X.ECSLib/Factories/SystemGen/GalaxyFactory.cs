@@ -668,6 +668,7 @@ namespace Pulsar4X.ECSLib
                 {BodyType.GasDwarf, 0.99},
                 {BodyType.Terrestrial, 0.5},
                 {BodyType.DwarfPlanet, 0.0001},
+                {BodyType.Moon, -1},
             };
 
             public static Dictionary<BodyType, double> MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>()

@@ -224,9 +224,9 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static OrbitDB FindClearOrbit(StarSystem system, Entity star, MassVolumeDB myMVDB, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance)
+        private static OrbitDB FindClearOrbit(StarSystem system, Entity parent, MassVolumeDB myMVDB, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance)
         {
-            MassVolumeDB parentMVDB = star.GetDataBlob<MassVolumeDB>();
+            MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
             double parentMass = parentMVDB.Mass;
 
             // Adjust minDistance
@@ -274,7 +274,7 @@ namespace Pulsar4X.ECSLib
             // Now scale down eccentricity by a random factor.
             double eccentricity = system.RNG.NextDouble() * maxApoEccentricity;
 
-            return new OrbitDB(star, parentMVDB, myMVDB, sma, eccentricity, system.RNG.NextDouble() * GalaxyFactory.Settings.MaxPlanetInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, Game.Instance.CurrentDateTime);
+            return new OrbitDB(parent, parentMVDB, myMVDB, sma, eccentricity, system.RNG.NextDouble() * GalaxyFactory.Settings.MaxPlanetInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, Game.Instance.CurrentDateTime);
         }
 
         private static void FinalizeBodies(StarSystem system, Entity body, int bodyCount)
@@ -292,7 +292,7 @@ namespace Pulsar4X.ECSLib
             FinalizeMassVolumeDB(system, body);
             FinalizeNameDB(system, body, bodyOrbit.Parent, bodyCount);
 
-            GenerateMoons(system, body, bodyCount);
+            GenerateMoons(system, body);
 
             // Recursive call to finalize children.
             int recusiveBodyCount = 1;
@@ -318,12 +318,51 @@ namespace Pulsar4X.ECSLib
 
             // Fill the MVDB.Volume property by solving from a density selection.
             massVolumeDB.Volume = MassVolumeDB.GetVolume(massVolumeDB.Mass, GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyDensityByType[systemBodyDB.Type]));
-
         }
 
-        private static void GenerateMoons(StarSystem system, Entity body, int bodyCount)
+        private static void GenerateMoons(StarSystem system, Entity parent)
         {
-            throw new NotImplementedException();
+            SystemBodyDB parentBodyDB = parent.GetDataBlob<SystemBodyDB>();
+
+            // first lets see if this planet gets moons:
+            if (system.RNG.NextDouble() > GalaxyFactory.Settings.MoonGenerationChanceByPlanetType[parentBodyDB.Type])
+                return; // no moons for you :(
+
+            // Okay lets work out the number of moons based on:
+            // The mass of the parent in proportion to the maximum mass for a planet of that type.
+            // The MaxNoOfMoonsByPlanetType
+            // And a random number for randomness.
+            MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
+            double massRatioOfParent = parentMVDB.Mass / GalaxyFactory.Settings.SystemBodyMassByType[parentBodyDB.Type].Max;
+            double moonGenChance = massRatioOfParent * system.RNG.NextDouble() * GalaxyFactory.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.Type];
+            moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyFactory.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.Type]);
+            int numMoons = (int)Math.Round(moonGenChance);
+
+            // now we need to work out the moon type
+            // we will do this by looking at the base temp of the parent.
+            // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
+            // i.e. a planet hotter then GalaxyFactory.Settings.IceMoonMaximumParentTemperature will always have PlanetType.Moon.
+            double tempRatio = Temperature.ToKelvin(parentBodyDB.BaseTemperature) / GalaxyFactory.Settings.IceMoonMaximumParentTemperature;
+
+            // first pass to gen mass etc:
+            var moons = new List<Entity>(numMoons);
+            while (numMoons > 0)
+            {
+                Entity newMoon = CreateBaseBody(system);
+
+                MassVolumeDB newMoonMVDB = newMoon.GetDataBlob<MassVolumeDB>();
+                SystemBodyDB newMoonBodyDB = newMoon.GetDataBlob<SystemBodyDB>();
+
+                newMoonBodyDB.Type = BodyType.Moon;
+                newMoonMVDB.Mass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[newMoonBodyDB.Type]);
+
+                moons.Add(newMoon);
+            }
+
+            double minMoonOrbitDist = parentMVDB.Radius * GalaxyFactory.Settings.MinMoonOrbitMultiplier;
+            double maxMoonDistance = GalaxyFactory.Settings.MaxMoonOrbitDistanceByPlanetType[parentBodyDB.Type] * massRatioOfParent;
+
+            GenerateOrbitsForBodies(system, parent, moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<Entity>());
         }
 
         private static void FinalizeAsteroidBelt(StarSystem system, Entity body, int bodyCount)
