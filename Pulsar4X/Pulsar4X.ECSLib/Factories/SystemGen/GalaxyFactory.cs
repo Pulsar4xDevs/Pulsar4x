@@ -12,7 +12,7 @@ namespace Pulsar4X.ECSLib
 
     public static class GalaxyFactory
     {
-        public static Random SeedRNG;
+        public static Random SeedRNG = new Random();
 
         public static class Settings
         {

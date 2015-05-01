@@ -13,7 +13,7 @@ namespace Pulsar4X.ECSLib
 
         public List<StarSystem> Neighbors { get; private set; }
 
-        public NameDB Names { get; private set; }
+        public NameDB NameDB { get; private set; }
 
         public int Seed { get; private set; }
 
@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
         {
             SystemManager = new EntityManager();
             Neighbors = new List<StarSystem>();
-            Names = new NameDB(Entity.GetInvalidEntity(), name);
+            NameDB = new NameDB(Entity.GetInvalidEntity(), name);
             Seed = seed;
             RNG = new Random(seed);
         }

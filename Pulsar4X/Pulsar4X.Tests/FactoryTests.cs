@@ -139,44 +139,7 @@ namespace Pulsar4X.Tests
         [Description("SystemBodyFactory tests")]
         public void CreateAndFillStarSystem()
         {
-            throw new NotImplementedException("SystemGen not fully functional.");
-
-            StarSystem starSystem = new StarSystem("Sol", -1);
-
-            var starDataBlobTypes = new List<Type>()
-            {
-                typeof(NameDB),
-                typeof(StarInfoDB),
-                typeof(MassVolumeDB),
-                typeof(OrbitDB)
-            };
-
-            var planetDataBlobTypes = new List<Type>()
-            {
-                typeof(NameDB),
-                typeof(SystemBodyDB),
-                typeof(MassVolumeDB),
-                typeof(OrbitDB),
-                typeof(AtmosphereDB)
-            };
-            /*
-            Entity mainStar = SystemBodyFactory.CreateMainStar(starSystem.SystemManager, starSystem, "Sonra");
-            Entity subStar = SystemBodyFactory.CreateSubStar(starSystem.SystemManager, mainStar, "Another little star");
-            Entity planet = SystemBodyFactory.CreatePlanet(starSystem.SystemManager, mainStar, "Argon Prime");
-
-            Assert.IsTrue(HasAllRequiredDatablobs(mainStar, starDataBlobTypes), "Main Star doesn't contains all required datablobs");
-            Assert.IsTrue(HasAllRequiredDatablobs(subStar, starDataBlobTypes), "Sub Star doesn't contains all required datablobs");
-            Assert.IsTrue(HasAllRequiredDatablobs(planet, planetDataBlobTypes), "Planet doesn't contains all required datablobs");
-
-            OrbitDB mainStarOrbitDB = mainStar.GetDataBlob<OrbitDB>();
-            OrbitDB subStarOrbitDB = subStar.GetDataBlob<OrbitDB>();
-            OrbitDB planetOrbitDB = subStar.GetDataBlob<OrbitDB>();
-
-            Assert.IsTrue(mainStarOrbitDB.Parent == null);
-            Assert.IsTrue(subStarOrbitDB.Parent == mainStar);
-            Assert.IsTrue(planetOrbitDB.Parent == mainStar);
-
-            */
+            StarSystemFactory.CreateSystem("Argon Prime"); // Keeping with the X3 theme :P
         }
 
         private static bool HasAllRequiredDatablobs(Entity toCheck, List<Type> datablobTypes)

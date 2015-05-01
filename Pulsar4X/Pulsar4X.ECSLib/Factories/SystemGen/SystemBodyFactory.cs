@@ -207,7 +207,6 @@ namespace Pulsar4X.ECSLib
                 double maxDistance = remainingDistance * massRatio + minDistance;
 
                 OrbitDB currentOrbit = FindClearOrbit(system, star, currentMVDB, insideApoapsis, outsidePeriapsis, insideMass, outsideMass, minDistance, maxDistance);
-                currentBody.SetDataBlob(currentOrbit);
 
                 remainingBandMass -= currentMVDB.Mass;
 
@@ -218,6 +217,7 @@ namespace Pulsar4X.ECSLib
                     i--;
                     continue;
                 }
+                currentBody.SetDataBlob(currentOrbit);
 
                 insideMass = currentMVDB.Mass;
                 insideApoapsis = currentOrbit.Apoapsis;
@@ -357,6 +357,7 @@ namespace Pulsar4X.ECSLib
                 newMoonMVDB.Mass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[newMoonBodyDB.Type]);
 
                 moons.Add(newMoon);
+                numMoons--;
             }
 
             double minMoonOrbitDist = parentMVDB.Radius * GalaxyFactory.Settings.MinMoonOrbitMultiplier;
@@ -375,7 +376,7 @@ namespace Pulsar4X.ECSLib
                 Entity newBody = CreateBaseBody(system);
                 SystemBodyDB newBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
-                if (system.RNG.NextDouble() > (1 / GalaxyFactory.Settings.NumberOfAsteroidsPerDwarfPlanet))
+                if (system.RNG.NextDouble() > (1.0 / GalaxyFactory.Settings.NumberOfAsteroidsPerDwarfPlanet))
                 {
                     newBodyDB.Type = BodyType.Asteroid;
                 }

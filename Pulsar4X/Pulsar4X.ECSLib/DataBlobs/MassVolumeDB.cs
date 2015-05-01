@@ -80,7 +80,7 @@ namespace Pulsar4X.ECSLib
             // v = 4/3pi * r^3
             // r^3 = V / (4/3pi)
             // r = (V / (4/3pi)) ^ (1/3)
-            return Math.Pow(volume / (4/3 * Math.PI), (1/3));
+            return Math.Pow(volume / ((float)4/3 * Math.PI), ((float)1/3));
         }
     }
 }

@@ -99,8 +99,13 @@ namespace Pulsar4X.ECSLib
             OrbitDB anchorOrbit = new OrbitDB();
             previousStar.SetDataBlob(anchorOrbit);
 
+            int starIndex = 0;
             foreach (Entity currentStar in stars)
             {
+                StarInfoDB currentStarInfo = currentStar.GetDataBlob<StarInfoDB>();
+                NameDB currentStarNameDB = new NameDB(Entity.GetInvalidEntity(), system.NameDB.Name[Entity.GetInvalidEntity()] + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
+                currentStar.SetDataBlob(currentStarNameDB);
+
                 if (previousStar == currentStar)
                 {
                     // This is the "Anchor Star"
@@ -109,9 +114,8 @@ namespace Pulsar4X.ECSLib
 
                 OrbitDB previousOrbit = previousStar.GetDataBlob<OrbitDB>();
                 StarInfoDB previousStarInfo = previousStar.GetDataBlob<StarInfoDB>();
-                StarInfoDB currentStarInfo = currentStar.GetDataBlob<StarInfoDB>();
                 MassVolumeDB currentStarMVDB = currentStar.GetDataBlob<MassVolumeDB>();
-                
+
                 double minDistance = GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[previousStarInfo.SpectralType].Max 
                                     + GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[currentStarInfo.SpectralType].Max
                                     + previousOrbit.SemiMajorAxis;
@@ -121,7 +125,9 @@ namespace Pulsar4X.ECSLib
 
                 OrbitDB currentOrbit = new OrbitDB(anchorOrbit.OwningEntity, anchorMVDB, currentStarMVDB, sma, eccentricity, GalaxyFactory.Settings.MaxPlanetInclination * system.RNG.NextDouble(), system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, Game.Instance.CurrentDateTime);
                 currentStar.SetDataBlob(currentOrbit);
+
                 previousStar = currentStar;
+                starIndex++;
             }
             return stars;
         }
