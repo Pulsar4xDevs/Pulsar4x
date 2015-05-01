@@ -78,13 +78,14 @@ namespace Pulsar4X.ECSLib
         /// <param name="ablityPointsThisColony"></param>
         /// <param name="rawMaterials"></param>
         /// <param name="stockpileOut"></param>
-        public static void ConstructionJobs(Entity factionEntity, Entity colonyEntity, List<ConstructionJob> jobList ,double ablityPointsThisColony, JDictionary<Guid,int> rawMaterials, JDictionary<Guid,int> stockpileOut  )
+        private static void ConstructionJobs(double ablityPointsThisColony, ref List<ConstructionJob> jobList, ref JDictionary<Guid,int> rawMaterials, ref JDictionary<Guid,int> stockpileOut)
         {
             List<ConstructionJob> newJobList = new List<ConstructionJob>();
 
             foreach (ConstructionJob job in jobList)
             {
                 double pointsToUseThisJob = Math.Min(job.BuildPointsRemaining, (ablityPointsThisColony * job.PriorityPercent.Percent));
+                double pointsUsedThisJob = 0;
                 double pointsPerIngrediant = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
                 foreach (var ingredientPair in job.RawMaterialsRemaining)
                 {
@@ -93,22 +94,35 @@ namespace Pulsar4X.ECSLib
 
                     int maxIng = Math.Min(ingredientPair.Value, rawMaterials[ingGuid]);
                     
-                    double maxPoint = Math.Min(maxIng, pointsPerIngrediant);
+                    double maxPoint = pointsPerIngrediant * maxIng; //is this right?
 
-                    int ingUsed = Math.Min(maxIng, 123);
-
-                    double pointsUsed = Math.Min(maxPoint, 123);
+                    int ingUsed = Math.Min(maxIng, 123); //ikd...
+                    double pointsUsed = Math.Min(maxPoint, pointsToUseThisJob); //I think;
 
 
                     job.RawMaterialsRemaining[ingGuid] -= ingUsed; //needs to be an int
                     rawMaterials[ingGuid] -= ingUsed; //needs to be an int
+                    pointsUsedThisJob += pointsUsed;
                     pointsToUseThisJob -= pointsUsed;
-                    ablityPointsThisColony -= pointsUsed;
+                    
                                         
                 }
+                ablityPointsThisColony -= pointsUsedThisJob;
+                float itemsLeft = job.ItemsRemaining - ((float)job.BuildPointsRemaining / job.BuildPointsPerItem);
+                //add to stockpile out if I've crated a whole item.
+                ConstructionJob newJob = new ConstructionJob
+                {
+                    Type = job.Type,
+                    ItemsRemaining = itemsLeft, 
+                    PriorityPercent = job.PriorityPercent,
+                    RawMaterialsRemaining = job.RawMaterialsRemaining, //check this one. mutability?                    
+                    BuildPointsRemaining = job.BuildPointsRemaining - (int)Math.Ceiling(pointsUsedThisJob),
+                    BuildPointsPerItem = job.BuildPointsPerItem
+                };
+                newJobList.Add(newJob);
                 
             }
-
+            jobList = newJobList;
         }
 
         /// <summary>

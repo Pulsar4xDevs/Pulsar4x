@@ -10,6 +10,7 @@ namespace Pulsar4X.ECSLib
         public PercentValue PriorityPercent;
         public JDictionary<Guid, int> RawMaterialsRemaining;
         public int BuildPointsRemaining;
+        public int BuildPointsPerItem;
     }
 
     /// <summary>
