@@ -71,7 +71,7 @@ namespace Pulsar4X.Tests
             
             
             InstallationProcessor.Employment(colonyEntity); //do employment check;
-            InstallationProcessor.Mine(_faction); //run mines
+            InstallationProcessor.Mine(_faction, colonyEntity); //run mines
             
             Assert.AreEqual(mineralstockpile, mineralstockpilePreMined);
 
@@ -81,7 +81,7 @@ namespace Pulsar4X.Tests
             colonyInfo.Population[species[0]] = 5; //5mil pop
 
             InstallationProcessor.Employment(colonyEntity); //do employment check;
-            InstallationProcessor.Mine(_faction); //run mines
+            InstallationProcessor.Mine(_faction, colonyEntity); //run mines
 
             Assert.AreNotEqual(mineralstockpile, mineralstockpilePreMined);
 
