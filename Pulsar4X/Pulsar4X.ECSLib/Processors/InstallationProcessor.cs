@@ -86,42 +86,55 @@ namespace Pulsar4X.ECSLib
             {
                 double pointsToUseThisJob = Math.Min(job.BuildPointsRemaining, (ablityPointsThisColony * job.PriorityPercent.Percent));
                 double pointsUsedThisJob = 0;
-                double pointsPerIngrediant = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
-                foreach (var ingredientPair in job.RawMaterialsRemaining)
+                //the points per requred resources.
+                double pointsPerResourcees = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
+                foreach (var resourcePair in job.RawMaterialsRemaining)
                 {
-                    Guid ingGuid = ingredientPair.Key;
-                    
-                    //maximum rawMaterials needed or availible whichever is less
-                    int maxIng = Math.Min(ingredientPair.Value, rawMaterials[ingGuid]);
-                    
-                    double maxPoint = pointsPerIngrediant * maxIng; //is this right?
+                    Guid resourceGuid = resourcePair.Key;
 
-                    double pointsUsed = Math.Min(maxPoint, pointsToUseThisJob); //I think;
-                    int ingUsed = (int)(pointsUsed / pointsPerIngrediant);//I think?
+                    double pointsPerThisResource = (double)job.BuildPointsRemaining / resourcePair.Value;
+
+                    //maximum rawMaterials needed or availible whichever is less
+                    int maxResource = Math.Min(resourcePair.Value, rawMaterials[resourceGuid]);
+                    
+                    //maximum buildpoints I can use for this resource
+                    //should I be using pointsPerResources or pointsPerThisResource?
+                    double maxPoint = pointsPerResourcees * maxResource; //is this right?
+
+                    double usedPoints = Math.Min(maxPoint, pointsToUseThisJob); //I think;
+                    int usedResource = (int)(usedPoints / pointsPerResourcees);//I think?
                     //this is going to not work because ints.
-                    job.RawMaterialsRemaining[ingGuid] -= ingUsed; //needs to be an int
-                    rawMaterials[ingGuid] -= ingUsed; //needs to be an int
-                    pointsUsedThisJob += pointsUsed;
-                    pointsToUseThisJob -= pointsUsed;
+                    
+                    job.RawMaterialsRemaining[resourceGuid] -= usedResource; //needs to be an int
+                    rawMaterials[resourceGuid] -= usedResource; //needs to be an int
+                    pointsUsedThisJob += usedPoints;
+                    pointsToUseThisJob -= usedPoints;
                     
                                         
                 }
                 ablityPointsThisColony -= pointsUsedThisJob;
                 float itemsLeft = job.ItemsRemaining - ((float)job.BuildPointsRemaining / job.BuildPointsPerItem);
-                //add to stockpile out if I've crated a whole item.
-                ConstructionJob newJob = new ConstructionJob
-                {
-                    Type = job.Type,
-                    ItemsRemaining = itemsLeft, 
-                    PriorityPercent = job.PriorityPercent,
-                    RawMaterialsRemaining = job.RawMaterialsRemaining, //check this one. mutability?                    
-                    BuildPointsRemaining = job.BuildPointsRemaining - (int)Math.Ceiling(pointsUsedThisJob),
-                    BuildPointsPerItem = job.BuildPointsPerItem
-                };
-                newJobList.Add(newJob);
                 
+                //todo add to stockpileOut if I've crated a whole item.
+                //stockpileOut[job.Type] +=
+
+                if (itemsLeft > 0)
+                {
+                    //recreate constructionJob because it's a struct.
+                    ConstructionJob newJob = new ConstructionJob 
+                    {
+                        Type = job.Type, 
+                        ItemsRemaining = itemsLeft, 
+                        PriorityPercent = job.PriorityPercent, 
+                        RawMaterialsRemaining = job.RawMaterialsRemaining, //check this one. mutability?                    
+                        BuildPointsRemaining = job.BuildPointsRemaining - (int)Math.Ceiling(pointsUsedThisJob),
+                        BuildPointsPerItem = job.BuildPointsPerItem
+                    };
+                    newJobList.Add(newJob); //then add it to the new list
+                }
+
             }
-            jobList = newJobList;
+            jobList = newJobList; //old list gets replaced with new
         }
 
         /// <summary>
