@@ -10,7 +10,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="systemEntityManager"></param>
         /// <param name="factionEntity"></param>
         /// <returns></returns>
-        public static Entity CreateColony(Entity factionEntity, Entity planetEntity)
+        public static Entity CreateColony(Entity factionEntity, Entity speciesEntity, Entity planetEntity)
         {
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
 

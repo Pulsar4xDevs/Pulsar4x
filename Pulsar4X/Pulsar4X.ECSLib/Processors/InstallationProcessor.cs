@@ -63,7 +63,7 @@ namespace Pulsar4X.ECSLib
                     mineralStockpile[mineralGuid] += amounttomine;
                     MineralDepositInfo mineralDeposit = kvp.Value;
                     mineralDeposit.Amount -= amounttomine;
-                    double accecability = Math.Pow(mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 2) * mineralDeposit.Accessibility;
+                    double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 2) * mineralDeposit.Accessibility;
                     mineralDeposit.Accessibility = Math.Max(accecability, 0.1);
                 }
             }

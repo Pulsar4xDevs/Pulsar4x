@@ -25,9 +25,15 @@ namespace Pulsar4X.Tests
             _faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terrian");
 
 
-            StarSystem starSystem = StarSystemFactory.CreateSystem("Sol", 1);
-            Entity planetEntity = SystemBodyFactory.CreateBaseBody(starSystem);
-            SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
+            //StarSystem starSystem = StarSystemFactory.CreateSystem("Sol", 1);
+            //Entity planetEntity = SystemBodyFactory.CreateBaseBody(starSystem);
+            //SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
+            List<BaseDataBlob> blobs = new List<BaseDataBlob>();
+            SystemBodyDB planetDB = new SystemBodyDB();
+            planetDB.SupportsPopulations = true;
+
+            blobs.Add(planetDB);
+            Entity planetEntity = Entity.Create(_entityManager, blobs);
 
             JDictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
@@ -39,7 +45,9 @@ namespace Pulsar4X.Tests
             MineralSD corundium = StaticDataManager.StaticDataStore.Minerals.Find(m => m.Name == "Corundium");
             minerals.Add(corundium.ID, corundiumDeposit);
 
-            Entity colony = ColonyFactory.CreateColony(_faction, planetEntity);
+            Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
+
+            Entity colony = ColonyFactory.CreateColony(_faction, species, planetEntity);
 
             InstallationsDB installationsDB = colony.GetDataBlob<InstallationsDB>();
             
