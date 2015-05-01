@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         public static void Employment(Entity colonyEntity)
         {
             var employablePopulationlist = colonyEntity.GetDataBlob<ColonyInfoDB>().Population.Values;
-            int employable = (int)(employablePopulationlist.Sum() * 1000000); //because it's in millions I think...maybe we should change.
+            long employable = (long)(employablePopulationlist.Sum() * 1000000); //because it's in millions I think...maybe we should change.
             InstallationsDB installationsDB = colonyEntity.GetDataBlob<InstallationsDB>();
             //int totalReq = 0;
             JDictionary<Guid,int> workingInstallations  = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Installations.Keys.ToDictionary(key => key, val => 0));
@@ -63,8 +63,8 @@ namespace Pulsar4X.ECSLib
                     mineralStockpile[mineralGuid] += amounttomine;
                     MineralDepositInfo mineralDeposit = kvp.Value;
                     mineralDeposit.Amount -= amounttomine;
-                    double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 2) * mineralDeposit.Accessibility;
-                    mineralDeposit.Accessibility = Math.Max(accecability, 0.1);
+                    double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 3) * mineralDeposit.Accessibility;
+                    mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
                 }
             }
         }

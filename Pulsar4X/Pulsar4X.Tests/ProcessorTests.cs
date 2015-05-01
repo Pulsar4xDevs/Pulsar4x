@@ -68,9 +68,22 @@ namespace Pulsar4X.Tests
             InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
             JDictionary<Guid, int> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             JDictionary<Guid, int> mineralstockpilePreMined = new JDictionary<Guid, int>(mineralstockpile);
-            InstallationProcessor.Mine(_faction);
-
+            
+            
+            InstallationProcessor.Employment(colonyEntity); //do employment check;
+            InstallationProcessor.Mine(_faction); //run mines
+            
             Assert.AreEqual(mineralstockpile, mineralstockpilePreMined);
+
+            ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
+            JDictionary<Entity, double> pop = colonyInfo.Population;
+            var species = pop.Keys.ToList();
+            colonyInfo.Population[species[0]] = 5; //5mil pop
+
+            InstallationProcessor.Employment(colonyEntity); //do employment check;
+            InstallationProcessor.Mine(_faction); //run mines
+
+            Assert.AreNotEqual(mineralstockpile, mineralstockpilePreMined);
 
         }
     }
