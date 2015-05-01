@@ -39,36 +39,77 @@ namespace Pulsar4X.ECSLib
         /// extracts minerals from planet surface by mineing ability;
         /// </summary>
         /// <param name="factionEntity"></param>
-        public static void Mine(Entity factionEntity)
+        public static void Mine(Entity factionEntity, Entity colonyEntity)
         {
             float factionMineingAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseMiningBonus;
             float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
             float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
             float totalBonusMultiplier = factionMineingAbility * sectorGovenerAbility * planetGovenerAbility;
 
-            foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
+            Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+            SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
+            JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            int installationMineingAbility = TotalAbilityofType(InstallationAbilityType.Mine, colonyEntity.GetDataBlob<InstallationsDB>());
+            JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
+
+            foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
             {
-                Entity planet = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-                JDictionary<Guid, int> mineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-                int installationMineingAbility = TotalAbilityofType(InstallationAbilityType.Mine, colonyEntity.GetDataBlob<InstallationsDB>());
-                SystemBodyDB systemBody = planet.GetDataBlob<SystemBodyDB>();
-                JDictionary<Guid, MineralDepositInfo> minerals = systemBody.Minerals;
-                foreach (KeyValuePair<Guid, MineralDepositInfo> kvp in minerals)
-                {
-                    Guid mineralGuid = kvp.Key;
-                    int amountOnPlanet = kvp.Value.Amount;
-                    double accessibility = kvp.Value.Accessibility;
-                    double abilitiestoMine = installationMineingAbility * totalBonusMultiplier * accessibility;
-                    int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
-                    mineralStockpile[mineralGuid] += amounttomine;
-                    MineralDepositInfo mineralDeposit = kvp.Value;
-                    mineralDeposit.Amount -= amounttomine;
-                    double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 3) * mineralDeposit.Accessibility;
-                    mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
-                }
+                Guid mineralGuid = depositKeyValuePair.Key;
+                int amountOnPlanet = depositKeyValuePair.Value.Amount;
+                double accessibility = depositKeyValuePair.Value.Accessibility;
+                double abilitiestoMine = installationMineingAbility * totalBonusMultiplier * accessibility;
+                int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
+                colonyMineralStockpile[mineralGuid] += amounttomine;
+                MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
+                mineralDeposit.Amount -= amounttomine;
+                double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 3) * mineralDeposit.Accessibility;
+                mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
             }
+            
         }
 
+
+        /// <summary>
+        /// an attempt at a more generic constructionProcessor.
+        /// </summary>
+        /// <param name="factionEntity"></param>
+        /// <param name="colonyEntity"></param>
+        /// <param name="jobList"></param>
+        /// <param name="ablityPointsThisColony"></param>
+        /// <param name="rawMaterials"></param>
+        /// <param name="stockpileOut"></param>
+        public static void ConstructionJobs(Entity factionEntity, Entity colonyEntity, List<ConstructionJob> jobList ,double ablityPointsThisColony, JDictionary<Guid,int> rawMaterials, JDictionary<Guid,int> stockpileOut  )
+        {
+            List<ConstructionJob> newJobList = new List<ConstructionJob>();
+
+            foreach (ConstructionJob job in jobList)
+            {
+                double pointsToUseThisJob = Math.Min(job.BuildPointsRemaining, (ablityPointsThisColony * job.PriorityPercent.Percent));
+                double pointsPerIngrediant = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
+                foreach (var ingredientPair in job.RawMaterialsRemaining)
+                {
+                    Guid ingGuid = ingredientPair.Key;
+                    
+
+                    int maxIng = Math.Min(ingredientPair.Value, rawMaterials[ingGuid]);
+                    
+                    double maxPoint = Math.Min(maxIng, pointsPerIngrediant);
+
+                    int ingUsed = Math.Min(maxIng, 123);
+
+                    double pointsUsed = Math.Min(maxPoint, 123);
+
+
+                    job.RawMaterialsRemaining[ingGuid] -= ingUsed; //needs to be an int
+                    rawMaterials[ingGuid] -= ingUsed; //needs to be an int
+                    pointsToUseThisJob -= pointsUsed;
+                    ablityPointsThisColony -= pointsUsed;
+                                        
+                }
+                
+            }
+
+        }
 
         /// <summary>
         /// Can this be made more generic, and reused for 
@@ -76,56 +117,58 @@ namespace Pulsar4X.ECSLib
         /// 
         /// </summary>
         /// <param name="factionEntity"></param>
-        public static void Construct(Entity factionEntity)
+        /// <param name="colonyEntity"></param>
+        public static void Construct(Entity factionEntity, Entity colonyEntity)
         {
             float factionConstructionAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseConstructionBonus;
             float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
             float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
             float totalBonusMultiplier = factionConstructionAbility * sectorGovenerAbility * planetGovenerAbility;
-            foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
+
+            InstallationsDB colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
+            List<ConstructionJob> constructionJobs = colonyInstallations.InstallationJobs;
+            List<ConstructionJob> constructionJobs_newList = new List<ConstructionJob>();
+
+            JDictionary<Guid, int> resourceStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+
+            float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
+            constructionPoints *= totalBonusMultiplier;
+            
+            foreach (ConstructionJob job in constructionJobs)
             {
-                InstallationsDB colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
-                List<ConstructionJob> constructionJobs = colonyInstallations.InstallationJobs;
-                JDictionary<Guid, int> resourceStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
 
-                float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
-                constructionPoints *= totalBonusMultiplier;
-                List<ConstructionJob> constructionJobs_newList = new List<ConstructionJob>();
-                foreach (ConstructionJob job in constructionJobs)
+                var type = StaticDataManager.StaticDataStore.Installations[job.Type];
+                float constructiononthisjob = constructionPoints * job.PriorityPercent.Percent;
+                float pointsUsed = Math.Min(job.ItemsRemaining, constructiononthisjob);
+
+                int pointsPerThisInstallation = type.BuildPoints;
+                float percentBuilt = pointsUsed / pointsPerThisInstallation;
+
+                //this confusing block of code below checks if there's a fully constructed installation
+                //if so, it adds it to the employment list, which is used to check pop requrements etc. 
+                int fullColInstallations = (int)colonyInstallations.Installations[type];
+                colonyInstallations.Installations[type] += percentBuilt;
+                if ((int)colonyInstallations.Installations[type] > fullColInstallations)
                 {
-
-                    var type = StaticDataManager.StaticDataStore.Installations[job.Type];
-                    float constructiononthisjob = constructionPoints * job.PriorityPercent.Percent;
-                    float pointsUsed = Math.Min(job.ItemsRemaining, constructiononthisjob);
-
-                    int pointsPerThisInstallation = type.BuildPoints;
-                    float percentBuilt = pointsUsed / pointsPerThisInstallation;
-
-                    //this confusing block of code below checks if there's a fully constructed installation
-                    //if so, it adds it to the employment list, which is used to check pop requrements etc. 
-                    int fullColInstallations = (int)colonyInstallations.Installations[type];
-                    colonyInstallations.Installations[type] += percentBuilt;
-                    if ((int)colonyInstallations.Installations[type] > fullColInstallations)
-                    {
-                        colonyInstallations.EmploymentList.Add(new InstallationEmployment{Enabled = true,Type = type.ID});
-                    }
-                    constructionPoints -= pointsUsed;
-
-
-                    if (job.ItemsRemaining > 0) //if there's still itemsremaining...
-                    {
-                        //+becuase it's a struct, we have to re-create it.
-                        ConstructionJob newStruct = new ConstructionJob 
-                        {
-                            ItemsRemaining = job.ItemsRemaining - percentBuilt, 
-                            PriorityPercent = job.PriorityPercent, 
-                            Type = job.Type
-                        };
-                        constructionJobs_newList.Add(newStruct);//+then add it to the new list;
-                    }
-                    colonyInstallations.InstallationJobs = constructionJobs_newList; //+and finaly, replace the list.
+                    colonyInstallations.EmploymentList.Add(new InstallationEmployment{Enabled = true,Type = type.ID});
                 }
+                constructionPoints -= pointsUsed;
+
+
+                if (job.ItemsRemaining > 0) //if there's still itemsremaining...
+                {
+                    //+becuase it's a struct, we have to re-create it.
+                    ConstructionJob newStruct = new ConstructionJob 
+                    {
+                        ItemsRemaining = job.ItemsRemaining - percentBuilt, 
+                        PriorityPercent = job.PriorityPercent, 
+                        Type = job.Type
+                    };
+                    constructionJobs_newList.Add(newStruct);//+then add it to the new list;
+                }
+                colonyInstallations.InstallationJobs = constructionJobs_newList; //+and finaly, replace the list.
             }
+            
         }
 
         public static void ConstructionPriority(Entity colonyEntity, Message neworder)

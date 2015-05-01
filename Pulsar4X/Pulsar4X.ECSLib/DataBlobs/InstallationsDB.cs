@@ -8,6 +8,8 @@ namespace Pulsar4X.ECSLib
         public Guid Type;
         public float ItemsRemaining;
         public PercentValue PriorityPercent;
+        public JDictionary<Guid, int> RawMaterialsRemaining;
+        public int BuildPointsRemaining;
     }
 
     /// <summary>
@@ -36,7 +38,7 @@ namespace Pulsar4X.ECSLib
         public List<ConstructionJob> InstallationJobs { get; set; }
         public List<ConstructionJob> OrdnanceJobs { get; set; }
         public List<ConstructionJob> FigherJobs { get; set; }
-
+        public List<ConstructionJob> RefinaryJobs { get; set; }
         public InstallationsDB()
         {
             Installations = new JDictionary<InstallationSD, float>();

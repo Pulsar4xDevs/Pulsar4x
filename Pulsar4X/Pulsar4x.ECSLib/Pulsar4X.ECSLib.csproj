@@ -121,6 +121,7 @@
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
     <Compile Include="StaticData\InstallationSD.cs" />
     <Compile Include="StaticData\PlayerSD.cs" />
+    <Compile Include="StaticData\RefineingSD.cs" />
     <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
     <Compile Include="StaticData\MineralSD.cs" />
