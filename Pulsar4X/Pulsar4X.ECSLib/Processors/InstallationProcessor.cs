@@ -91,15 +91,14 @@ namespace Pulsar4X.ECSLib
                 {
                     Guid ingGuid = ingredientPair.Key;
                     
-
+                    //maximum rawMaterials needed or availible whichever is less
                     int maxIng = Math.Min(ingredientPair.Value, rawMaterials[ingGuid]);
                     
                     double maxPoint = pointsPerIngrediant * maxIng; //is this right?
 
-                    int ingUsed = Math.Min(maxIng, 123); //ikd...
                     double pointsUsed = Math.Min(maxPoint, pointsToUseThisJob); //I think;
-
-
+                    int ingUsed = (int)(pointsUsed / pointsPerIngrediant);//I think?
+                    //this is going to not work because ints.
                     job.RawMaterialsRemaining[ingGuid] -= ingUsed; //needs to be an int
                     rawMaterials[ingGuid] -= ingUsed; //needs to be an int
                     pointsUsedThisJob += pointsUsed;
