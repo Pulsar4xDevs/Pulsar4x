@@ -57,8 +57,8 @@ namespace Pulsar4X.Tests
             
             //wow holy shit, this is a pain. definatly need to add an "AddInstallation" to the InstallationProcessor. (and RemoveInstallation);
             Guid mineguidGuid = new Guid("406E22B5-65DB-4C7E-B956-B120B0466503");
-            InstallationSD mineSD = StaticDataManager.StaticDataStore.Installations[mineguidGuid];
-            installationsDB.Installations[mineSD] = 1f;
+            //InstallationSD mineSD = StaticDataManager.StaticDataStore.Installations[mineguidGuid];
+            installationsDB.Installations[mineguidGuid] = 1f;
             InstallationEmployment installationEmployment = new InstallationEmployment {Enabled = true, Type = mineguidGuid};
             installationsDB.EmploymentList.Add(installationEmployment);
 

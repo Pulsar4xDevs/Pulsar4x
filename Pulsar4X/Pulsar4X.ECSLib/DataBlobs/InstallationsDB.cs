@@ -28,7 +28,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// a dictionary of installationtype, and the number of that specific type including partial instalations.
         /// </summary>
-        public JDictionary<InstallationSD, float> Installations { get; set; }
+        public JDictionary<Guid, float> Installations { get; set; }
 
         public JDictionary<Guid,int> WorkingInstallations { get; set; }
 
@@ -42,7 +42,7 @@ namespace Pulsar4X.ECSLib
         public List<ConstructionJob> RefinaryJobs { get; set; }
         public InstallationsDB()
         {
-            Installations = new JDictionary<InstallationSD, float>();
+            Installations = new JDictionary<Guid, float>();
             WorkingInstallations = new JDictionary<Guid, int>();
             EmploymentList = new List<InstallationEmployment>();
             InstallationJobs = new List<ConstructionJob>();
@@ -52,7 +52,7 @@ namespace Pulsar4X.ECSLib
 
         public InstallationsDB(InstallationsDB db)
         {
-            Installations = new JDictionary<InstallationSD, float>(db.Installations);
+            Installations = new JDictionary<Guid, float>(db.Installations);
             WorkingInstallations = new JDictionary<Guid, int>(db.WorkingInstallations);
             EmploymentList = new List<InstallationEmployment>(db.EmploymentList);
             InstallationJobs = new List<ConstructionJob>(db.InstallationJobs);
