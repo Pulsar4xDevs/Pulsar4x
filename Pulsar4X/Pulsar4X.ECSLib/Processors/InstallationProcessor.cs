@@ -97,15 +97,15 @@ namespace Pulsar4X.ECSLib
                     
                     //maximum buildpoints I can use for this resource
                     //should I be using pointsPerResources or pointsPerThisResource?
-                    double maxPoint = pointsPerResourcees * maxResource; 
+                    double maxPoint = pointsPerResourcees * maxResource;
 
-                    double usedPoints = Math.Min(maxPoint, pointsToUseThisJob); 
+                    maxPoint = Math.Min(maxPoint, pointsToUseThisJob); 
 
                     //this little bit here needs a small rework, we're loosing accuracy due to int.
                     //we need to adjust the points used to the usedResource Int.
-                    int usedResource = (int)(usedPoints / pointsPerResourcees);
-                    
-                    
+                    int usedResource = (int)(maxPoint / pointsPerResourcees);
+
+                    double usedPoints = pointsPerResourcees * usedResource;
                     
                     job.RawMaterialsRemaining[resourceGuid] -= usedResource; //needs to be an int
                     rawMaterials[resourceGuid] -= usedResource; //needs to be an int
