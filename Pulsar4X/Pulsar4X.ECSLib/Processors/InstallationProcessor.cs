@@ -72,13 +72,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// an attempt at a more generic constructionProcessor.
         /// </summary>
-        /// <param name="factionEntity"></param>
-        /// <param name="colonyEntity"></param>
-        /// <param name="jobList"></param>
         /// <param name="ablityPointsThisColony"></param>
+        /// <param name="jobList"></param>
         /// <param name="rawMaterials"></param>
         /// <param name="stockpileOut"></param>
-        private static void ConstructionJobs(double ablityPointsThisColony, ref List<ConstructionJob> jobList, ref JDictionary<Guid,int> rawMaterials, ref JDictionary<Guid,int> stockpileOut)
+        public static void ConstructionJobs(double ablityPointsThisColony, ref List<ConstructionJob> jobList, ref JDictionary<Guid,int> rawMaterials, ref JDictionary<Guid,double> stockpileOut)
         {
             List<ConstructionJob> newJobList = new List<ConstructionJob>();
 
@@ -88,7 +86,7 @@ namespace Pulsar4X.ECSLib
                 double pointsUsedThisJob = 0;
                 //the points per requred resources.
                 double pointsPerResourcees = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
-                foreach (var resourcePair in job.RawMaterialsRemaining)
+                foreach (var resourcePair in new Dictionary<Guid,int>(job.RawMaterialsRemaining))
                 {
                     Guid resourceGuid = resourcePair.Key;
 
@@ -101,22 +99,23 @@ namespace Pulsar4X.ECSLib
                     //should I be using pointsPerResources or pointsPerThisResource?
                     double maxPoint = pointsPerResourcees * maxResource; //is this right?
 
-                    double usedPoints = Math.Min(maxPoint, pointsToUseThisJob); //I think;
-                    int usedResource = (int)(usedPoints / pointsPerResourcees);//I think?
+                    double usedPoints = Math.Min(maxPoint, pointsToUseThisJob); 
+                    int usedResource = (int)(usedPoints / pointsPerResourcees);
                     //this is going to not work because ints.
                     
                     job.RawMaterialsRemaining[resourceGuid] -= usedResource; //needs to be an int
                     rawMaterials[resourceGuid] -= usedResource; //needs to be an int
                     pointsUsedThisJob += usedPoints;
                     pointsToUseThisJob -= usedPoints;
-                    
-                                        
+                                                            
                 }
                 ablityPointsThisColony -= pointsUsedThisJob;
-                float itemsLeft = job.ItemsRemaining - ((float)job.BuildPointsRemaining / job.BuildPointsPerItem);
-                
-                //todo add to stockpileOut if I've crated a whole item.
-                //stockpileOut[job.Type] +=
+
+                double percentPerItem = (double)job.BuildPointsPerItem / 100; // 1
+                double percentthisjob = pointsUsedThisJob / 100; //0  0.5
+                double itemsCreated = percentPerItem * percentthisjob;
+                double itemsLeft = job.ItemsRemaining - itemsCreated;
+                stockpileOut[job.Type] += job.ItemsRemaining - itemsLeft;
 
                 if (itemsLeft > 0)
                 {
@@ -124,7 +123,7 @@ namespace Pulsar4X.ECSLib
                     ConstructionJob newJob = new ConstructionJob 
                     {
                         Type = job.Type, 
-                        ItemsRemaining = itemsLeft, 
+                        ItemsRemaining = (float)itemsLeft, 
                         PriorityPercent = job.PriorityPercent, 
                         RawMaterialsRemaining = job.RawMaterialsRemaining, //check this one. mutability?                    
                         BuildPointsRemaining = job.BuildPointsRemaining - (int)Math.Ceiling(pointsUsedThisJob),

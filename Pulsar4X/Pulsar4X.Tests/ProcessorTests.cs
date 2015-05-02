@@ -15,6 +15,8 @@ namespace Pulsar4X.Tests
         EntityManager _entityManager;
         private Entity _faction;
 
+        private MineralSD _duraniumSD;
+        private MineralSD _corundiumSD;
 
         [SetUp]
         public void Init()
@@ -24,6 +26,8 @@ namespace Pulsar4X.Tests
             _entityManager = new EntityManager();
             _faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terrian");
 
+            _duraniumSD = StaticDataManager.StaticDataStore.Minerals.Find(m => m.Name == "Duranium");
+            _corundiumSD = StaticDataManager.StaticDataStore.Minerals.Find(m => m.Name == "Corundium");
 
             //StarSystem starSystem = StarSystemFactory.CreateSystem("Sol", 1);
             //Entity planetEntity = SystemBodyFactory.CreateBaseBody(starSystem);
@@ -38,12 +42,12 @@ namespace Pulsar4X.Tests
             JDictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
             MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOrigionalAmount = 5000 };
-            MineralSD duranium = StaticDataManager.StaticDataStore.Minerals.Find(m => m.Name == "Duranium");
-            minerals.Add(duranium.ID, duraniumDeposit);
+            
+            minerals.Add(_duraniumSD.ID, duraniumDeposit);
 
             MineralDepositInfo corundiumDeposit = new MineralDepositInfo { Amount = 1000, Accessibility = 0.5, HalfOrigionalAmount = 500 };
-            MineralSD corundium = StaticDataManager.StaticDataStore.Minerals.Find(m => m.Name == "Corundium");
-            minerals.Add(corundium.ID, corundiumDeposit);
+            
+            minerals.Add(_corundiumSD.ID, corundiumDeposit);
 
             Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
 
@@ -84,6 +88,52 @@ namespace Pulsar4X.Tests
             InstallationProcessor.Mine(_faction, colonyEntity); //run mines
 
             Assert.AreNotEqual(mineralstockpile, mineralstockpilePreMined);
+
+        }
+
+        [Test]
+        public void TestConstruction()
+        {
+            Guid itemConstructing = new Guid();//just a random guid for now.
+            double ablityPointsThisColony = 100;
+            List<ConstructionJob> jobList = new List<ConstructionJob>();
+            JDictionary<Guid, int> rawMaterials = new JDictionary<Guid, int>();
+            JDictionary<Guid,double> stockpileOut = new JDictionary<Guid, double>();
+
+            PercentValue priority = new PercentValue {Percent = 1};
+            JDictionary<Guid,int> jobRawMaterials = new JDictionary<Guid, int>();
+            jobRawMaterials.Add(_duraniumSD.ID, 5000); //500 per item
+            jobRawMaterials.Add(_corundiumSD.ID, 70); //7 per item
+            ConstructionJob newJob = new ConstructionJob 
+            {
+                Type = itemConstructing,  
+                ItemsRemaining = 10, 
+                PriorityPercent = priority,
+                RawMaterialsRemaining = jobRawMaterials,
+                BuildPointsRemaining = 1000,
+                BuildPointsPerItem = 100
+            };
+            jobList.Add(newJob);
+            
+            rawMaterials.Add(_duraniumSD.ID, 2250); //not enough of this should get 4.5
+            rawMaterials.Add(_corundiumSD.ID, 100); //enough of this
+            stockpileOut.Add(itemConstructing,0);
+
+            //firstpass
+            InstallationProcessor.ConstructionJobs(0, ref jobList, ref rawMaterials, ref stockpileOut);
+            Assert.AreEqual(0, stockpileOut[itemConstructing]);
+
+            //secondPass
+            InstallationProcessor.ConstructionJobs(50, ref jobList, ref rawMaterials, ref stockpileOut);
+            Assert.AreEqual(0.5, stockpileOut[itemConstructing]);
+
+            //thirdPass
+            InstallationProcessor.ConstructionJobs(50, ref jobList, ref rawMaterials, ref stockpileOut);
+            Assert.AreEqual(stockpileOut[itemConstructing], 1);
+
+            //fourthPass
+            InstallationProcessor.ConstructionJobs(5000, ref jobList, ref rawMaterials, ref stockpileOut);
+            Assert.AreEqual(4.5, stockpileOut[itemConstructing]);
 
         }
     }
