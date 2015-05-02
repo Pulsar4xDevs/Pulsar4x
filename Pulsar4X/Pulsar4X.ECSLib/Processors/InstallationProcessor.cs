@@ -68,15 +68,35 @@ namespace Pulsar4X.ECSLib
             
         }
 
+        public static void Construction(Entity factionEntity, Entity colonyEntity)
+        {
+            ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
+            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
+            var rawMaterialsStockpile = colonyInfo.MineralStockpile;
+
+            var facilityJobs = installations.InstallationJobs;
+            float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, installations);
+            constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
+            var faciltiesList = new JDictionary<Guid, double>();
+
+            GenericConstructionJobs(constructionPoints, ref facilityJobs,ref rawMaterialsStockpile, ref faciltiesList);
+
+            var refinaryJobs = installations.RefinaryJobs;
+            var ordnanceJobs = installations.OrdnanceJobs;
+            var fighterJobs = installations.FigherJobs;
+
+            
+        }
 
         /// <summary>
         /// an attempt at a more generic constructionProcessor.
+        /// should maybe be private.
         /// </summary>
         /// <param name="ablityPointsThisColony"></param>
         /// <param name="jobList"></param>
         /// <param name="rawMaterials"></param>
         /// <param name="stockpileOut"></param>
-        public static void ConstructionJobs(double ablityPointsThisColony, ref List<ConstructionJob> jobList, ref JDictionary<Guid,int> rawMaterials, ref JDictionary<Guid,double> stockpileOut)
+        public static void GenericConstructionJobs(double ablityPointsThisColony, ref List<ConstructionJob> jobList, ref JDictionary<Guid,int> rawMaterials, ref JDictionary<Guid,double> stockpileOut)
         {
             List<ConstructionJob> newJobList = new List<ConstructionJob>();
 
@@ -101,10 +121,8 @@ namespace Pulsar4X.ECSLib
 
                     maxPoint = Math.Min(maxPoint, pointsToUseThisJob); 
 
-                    //this little bit here needs a small rework, we're loosing accuracy due to int.
-                    //we need to adjust the points used to the usedResource Int.
+                    
                     int usedResource = (int)(maxPoint / pointsPerResourcees);
-
                     double usedPoints = pointsPerResourcees * usedResource;
                     
                     job.RawMaterialsRemaining[resourceGuid] -= usedResource; //needs to be an int
@@ -213,6 +231,12 @@ namespace Pulsar4X.ECSLib
                 
                 throw;
             }
+        }
+
+        private static float BonusesForType(Entity factioEntity, Entity colonyEntity, InstallationAbilityType ability )
+        {
+            //todo link bonuses to type somehow 
+            return 1.0f;
         }
 
         private static int TotalAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)

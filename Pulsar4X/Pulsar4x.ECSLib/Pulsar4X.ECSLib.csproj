@@ -121,7 +121,7 @@
     <Compile Include="StaticData\CommanderNameThemeSD.cs" />
     <Compile Include="StaticData\InstallationSD.cs" />
     <Compile Include="StaticData\PlayerSD.cs" />
-    <Compile Include="StaticData\RefineingSD.cs" />
+    <Compile Include="StaticData\ConstructableObjects.cs" />
     <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
     <Compile Include="StaticData\MineralSD.cs" />
@@ -146,6 +146,7 @@
     <None Include="Data\Pulsar4x\Minerals.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Data\Pulsar4x\ConstructableObjData.json" />
     <None Include="Data\Pulsar4x\TechnologyData.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

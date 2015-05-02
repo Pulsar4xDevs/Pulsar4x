@@ -59,6 +59,15 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         private const string InstallationsTypeString = "Installations";
 
+        /// <summary>
+        /// Dictionary which stores all the Recipes.
+        /// </summary>
+        public JDictionary<Guid, ConstructableObjSD> ConstructableObjects = new JDictionary<Guid, ConstructableObjSD>();
+        [JsonIgnore]
+        public Type ConstructableObjType;
+        [JsonIgnore]
+        private const string ConstructableObjTypeString = "ConstructableObj";
+
 
         ///< @todo add a whole bunch more static data.
 
@@ -135,6 +144,18 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Stores ConstructableObj Static Data.
+        /// </summary>
+        public void Store(JDictionary<Guid, ConstructableObjSD> recipies)
+        {
+            if (recipies != null)
+            {
+                foreach (var recipe in recipies)
+                    ConstructableObjects[recipe.Key] = recipe.Value;
+            }
+        }
+
+        /// <summary>
         /// Returns a type custom string for a type of static data. This string is used to tell 
         /// what type of static data is being imported (and is thus exported as well). 
         /// </summary>
@@ -160,6 +181,10 @@ namespace Pulsar4X.ECSLib
             {
                 return InstallationsTypeString;
             }
+            else if (type == ConstructableObjType)
+            {
+                return ConstructableObjTypeString;
+            }
 
             return null;
         }
@@ -182,6 +207,8 @@ namespace Pulsar4X.ECSLib
                     return TechsType;
                 case InstallationsTypeString:
                     return InstallationsType;
+                case ConstructableObjTypeString:
+                    return ConstructableObjType;
                 default:
                     return null;
             }
