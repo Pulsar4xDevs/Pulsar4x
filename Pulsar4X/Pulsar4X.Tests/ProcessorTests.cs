@@ -135,6 +135,7 @@ namespace Pulsar4X.Tests
             InstallationProcessor.ConstructionJobs(5000, ref jobList, ref rawMaterials, ref stockpileOut);
             Assert.AreEqual(4.5, stockpileOut[itemConstructing]);
 
+            //todo there's probilby some edge cases to check.
         }
     }
 }

@@ -97,11 +97,15 @@ namespace Pulsar4X.ECSLib
                     
                     //maximum buildpoints I can use for this resource
                     //should I be using pointsPerResources or pointsPerThisResource?
-                    double maxPoint = pointsPerResourcees * maxResource; //is this right?
+                    double maxPoint = pointsPerResourcees * maxResource; 
 
                     double usedPoints = Math.Min(maxPoint, pointsToUseThisJob); 
+
+                    //this little bit here needs a small rework, we're loosing accuracy due to int.
+                    //we need to adjust the points used to the usedResource Int.
                     int usedResource = (int)(usedPoints / pointsPerResourcees);
-                    //this is going to not work because ints.
+                    
+                    
                     
                     job.RawMaterialsRemaining[resourceGuid] -= usedResource; //needs to be an int
                     rawMaterials[resourceGuid] -= usedResource; //needs to be an int
@@ -111,8 +115,8 @@ namespace Pulsar4X.ECSLib
                 }
                 ablityPointsThisColony -= pointsUsedThisJob;
 
-                double percentPerItem = (double)job.BuildPointsPerItem / 100; // 1
-                double percentthisjob = pointsUsedThisJob / 100; //0  0.5
+                double percentPerItem = (double)job.BuildPointsPerItem / 100; 
+                double percentthisjob = pointsUsedThisJob / 100; 
                 double itemsCreated = percentPerItem * percentthisjob;
                 double itemsLeft = job.ItemsRemaining - itemsCreated;
                 stockpileOut[job.Type] += job.ItemsRemaining - itemsLeft;
