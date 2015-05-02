@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -25,9 +26,14 @@ namespace Pulsar4X.WPFUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        double _customAdvSimValue;
+        double _customAdvSimValue = 5;
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        // Used by WPF during initialzation, hidden from ReSharper.
         public string CustomAdvSimValue
         {
+            // ReSharper disable once UnusedMember.Local
+            // Used by WPF during initialzation, hidden from ReSharper.
             get
             {
                 return _customAdvSimValue.ToString(CultureInfo.CurrentCulture);
@@ -44,6 +50,10 @@ namespace Pulsar4X.WPFUI
         public MainWindow()
         {
             InitializeComponent();
+            TBTB_AdvSim_Cust.DataContext = this;
+            MenuItem_Fullscreen.IsChecked = WindowState == WindowState.Maximized;
+            MenuItem_Boarderless.IsChecked = WindowStyle == WindowStyle.None;
+
             // Temporary so I can test layout without messing with UI/Engine comms.
             TBT_Toolbar.IsEnabled = true;
         }
@@ -58,6 +68,7 @@ namespace Pulsar4X.WPFUI
                 UIComms.Instance.HaltEngine();
             }
             UIComms.Instance.FireEngine();
+            e.Handled = true;
         }
 
         private void LoadGame_Click(object sender, RoutedEventArgs e)
@@ -69,6 +80,7 @@ namespace Pulsar4X.WPFUI
                 string pathToFile = fileDialog.FileName;
                 UIComms.Instance.SendMessage(new Message(Message.MessageType.Load, pathToFile));
             }
+            e.Handled = true;
         }
 
         private void SaveGame_Click(object sender, RoutedEventArgs e)
@@ -80,6 +92,7 @@ namespace Pulsar4X.WPFUI
                 string pathToFile = fileDialog.FileName;
                 UIComms.Instance.SendMessage(new Message(Message.MessageType.Save, pathToFile));
             }
+            e.Handled = true;
         }
 
         private void Exit_Click(object sender, RoutedEventArgs e)
@@ -139,7 +152,7 @@ namespace Pulsar4X.WPFUI
 
         private void About_Click(object sender, RoutedEventArgs e)
         {
-            var aboutWindow = new About();
+            About aboutWindow = new About();
             aboutWindow.Show();
             e.Handled = true;
         }
@@ -150,6 +163,9 @@ namespace Pulsar4X.WPFUI
         }
         #endregion
 
+        /// <summary>
+        /// Handles all clicks for the TaskBars.
+        /// </summary>
         private void TBB_Click(object sender, RoutedEventArgs e)
         {
             UserControl control;
@@ -207,60 +223,68 @@ namespace Pulsar4X.WPFUI
             e.Handled = true;
         }
 
-        #region AdvSim functions
+        #region AdvSim Menu Functions
+        /// <summary>
+        /// Handles all button clicks from AdvSim toolbar.
+        /// </summary>
         private void TBB_AdvSim_Click(object sender, RoutedEventArgs e)
         {
-            TimeSpan PulseLength = TimeSpan.Zero;
-            if (e.Source is Button)
+            TimeSpan pulseLength = TimeSpan.Zero;
+            Button button = e.Source as Button;
+            if (button != null)
             {
-                switch ((e.Source as Button).Name)
+                switch (button.Name)
                 {
                     case "TBB_AdvSim_5Sec":
-                        PulseLength = TimeSpan.FromSeconds(5);
+                        pulseLength = TimeSpan.FromSeconds(5);
                         break;
                     case "TBB_AdvSim_30Sec":
-                        PulseLength = TimeSpan.FromSeconds(30);
+                        pulseLength = TimeSpan.FromSeconds(30);
                         break;
                     case "TBB_AdvSim_2Min":
-                        PulseLength = TimeSpan.FromMinutes(2);
+                        pulseLength = TimeSpan.FromMinutes(2);
                         break;
                     case "TBB_AdvSim_5Min":
-                        PulseLength = TimeSpan.FromMinutes(5);
+                        pulseLength = TimeSpan.FromMinutes(5);
                         break;
                     case "TBB_AdvSim_1Hour":
-                        PulseLength = TimeSpan.FromHours(1);
+                        pulseLength = TimeSpan.FromHours(1);
                         break;
                     case "TBB_AdvSim_3Hour":
-                        PulseLength = TimeSpan.FromHours(3);
+                        pulseLength = TimeSpan.FromHours(3);
                         break;
                     case "TBB_AdvSim_8Hour":
-                        PulseLength = TimeSpan.FromHours(8);
+                        pulseLength = TimeSpan.FromHours(8);
                         break;
                     case "TBB_AdvSim_1Day":
-                        PulseLength = TimeSpan.FromDays(1);
+                        pulseLength = TimeSpan.FromDays(1);
                         break;
                     case "TBB_AdvSim_5Day":
-                        PulseLength = TimeSpan.FromDays(5);
+                        pulseLength = TimeSpan.FromDays(5);
                         break;
                     case "TBB_AdvSim_30Day":
-                        PulseLength = TimeSpan.FromDays(30);
+                        pulseLength = TimeSpan.FromDays(30);
                         break;
                     case "TBB_AdvSim_Cust":
-                        PulseLength = GetCustomPulseLength();
+                        pulseLength = GetCustomPulseLength();
                         break;
                 }
             }
             else
             {
-                PulseLength = GetCustomPulseLength();
+                pulseLength = GetCustomPulseLength();
             }
-            if (PulseLength != TimeSpan.Zero)
+            if (pulseLength != TimeSpan.Zero)
             {
                 // Message the lib to pulse.
                 e.Handled = true;
             }
         }
 
+        /// <summary>
+        /// Parses the pulse length from the custom pulse length selecter.
+        /// </summary>
+        /// <returns></returns>
         private TimeSpan GetCustomPulseLength()
         {
             TimeSpan pulseLength = TimeSpan.Zero;
@@ -297,11 +321,40 @@ namespace Pulsar4X.WPFUI
             return pulseLength;
         }
 
+        /// <summary>
+        /// Behavior to make pressing enter or return while focused on the
+        /// custom AdvSim input execute the time input.
+        /// </summary>
         private void TBTB_AdvSim_Cust_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Return || e.Key == Key.Enter)
             {
                 TBB_AdvSim_Click(TBTB_AdvSim_Cust, new RoutedEventArgs(Button.ClickEvent, this));
+            }
+        }
+
+        /// <summary>
+        /// Prevents non-numeric input to the AdvSim custom input.
+        /// </summary>
+        private void TBTB_AdvSim_Cust_OnPreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9.]"); //regex that matches Non-numeric input.
+            // Setting handled to true prevents the event from reaching the textbox.
+            // This prevents the textbox from updating.
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        /// <summary>
+        /// Highlights the AdvSim custom input on first click.
+        /// </summary>
+        private void TBTB_AdvSim_Cust_OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            TextBox tbSender = (TextBox)sender;
+            if (!tbSender.IsFocused)
+            {
+                tbSender.Focus();
+                tbSender.SelectAll();
+                e.Handled = true;
             }
         }
     #endregion

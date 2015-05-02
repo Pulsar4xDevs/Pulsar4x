@@ -88,7 +88,7 @@
                 <Button Name="TBB_AdvSim_30Day" Content="30 Days" Click="TBB_AdvSim_Click"></Button>
                 <Separator/>
                 <Label Content="Custom:"/>
-                <TextBox Name="TBTB_AdvSim_Cust" BorderThickness="1" BorderBrush="Black" Width="25" KeyDown="TBTB_AdvSim_Cust_KeyDown">
+                <TextBox Name="TBTB_AdvSim_Cust" BorderThickness="1" BorderBrush="Black" Width="50" PreviewMouseDown="TBTB_AdvSim_Cust_OnPreviewMouseDown" KeyDown="TBTB_AdvSim_Cust_KeyDown" PreviewTextInput="TBTB_AdvSim_Cust_OnPreviewTextInput">
                     <TextBox.Text>
                         <Binding Path="CustomAdvSimValue">
                             <Binding.ValidationRules>

@@ -71,9 +71,7 @@ namespace Pulsar4X.WPFUI
                 return;
             if (_mainLoopThread != null)
             {
-                if (_mainLoopThread.ThreadState == ThreadState.Stopped) //we can safely abort it to make sure everything is ok
-                    _mainLoopThread.Abort();
-                else
+                if (_mainLoopThread.ThreadState != ThreadState.Stopped)
                 {
                     SendMessage(new Message(Message.MessageType.Quit, null));
                     Thread.Sleep(100);
