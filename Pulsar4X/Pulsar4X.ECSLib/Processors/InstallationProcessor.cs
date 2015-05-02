@@ -6,6 +6,19 @@ namespace Pulsar4X.ECSLib
 {
     public static class InstallationProcessor
     {
+        /// <summary>
+        /// this should be the main entry point for doing stuff.
+        /// </summary>
+        /// <param name="colonyEntity"></param>
+        /// <param name="factionEntity"></param>
+        public static void PerEconTic(Entity colonyEntity, Entity factionEntity)
+        {
+            
+            Employment(colonyEntity); //check if installations still work
+            Mine(factionEntity, colonyEntity); //mine new materials.
+            Construction(factionEntity, colonyEntity); //construct, refine, etc. 
+            
+        }
 
         /// <summary>
         /// should be called when new facilitys are added, 
@@ -49,7 +62,7 @@ namespace Pulsar4X.ECSLib
             Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
             JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            int installationMineingAbility = TotalAbilityofType(InstallationAbilityType.Mine, colonyEntity.GetDataBlob<InstallationsDB>());
+            int installationMineingAbility = InstallationAbilityofType(InstallationAbilityType.Mine, colonyEntity.GetDataBlob<InstallationsDB>());
             JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
 
             foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
@@ -68,6 +81,11 @@ namespace Pulsar4X.ECSLib
             
         }
 
+        /// <summary>
+        /// runs each of the constructionJob lists.
+        /// </summary>
+        /// <param name="factionEntity"></param>
+        /// <param name="colonyEntity"></param>
         public static void Construction(Entity factionEntity, Entity colonyEntity)
         {
             ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
@@ -75,7 +93,7 @@ namespace Pulsar4X.ECSLib
             var rawMaterialsStockpile = colonyInfo.MineralStockpile;
 
             var facilityJobs = installations.InstallationJobs;
-            float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, installations);
+            float constructionPoints = InstallationAbilityofType(InstallationAbilityType.InstallationConstruction, installations);
             constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
             var faciltiesList = new JDictionary<Guid, double>();
 
@@ -94,10 +112,26 @@ namespace Pulsar4X.ECSLib
             }
 
             var refinaryJobs = installations.RefinaryJobs;
-            var ordnanceJobs = installations.OrdnanceJobs;
-            var fighterJobs = installations.FigherJobs;
-
+            float refinaryPoints = InstallationAbilityofType(InstallationAbilityType.FuelRefinery, installations);
+            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FuelRefinery);
+            var refinedList = new JDictionary<Guid, double>();
             
+            GenericConstructionJobs(refinaryPoints, ref refinaryJobs, ref rawMaterialsStockpile, ref refinedList);
+
+            var ordnanceJobs = installations.OrdnanceJobs;
+            float ordnancePoints = InstallationAbilityofType(InstallationAbilityType.OrdnanceConstruction, installations);
+            ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
+            var ordnanceList = new JDictionary<Guid, double>();
+            
+            GenericConstructionJobs(ordnancePoints, ref ordnanceJobs, ref rawMaterialsStockpile, ref ordnanceList);
+
+            var fighterJobs = installations.FigherJobs;
+            float fighterPoints = InstallationAbilityofType(InstallationAbilityType.FighterConstruction, installations);
+            fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
+            var fighterList = new JDictionary<Guid, double>();
+
+            GenericConstructionJobs(fighterPoints, ref fighterJobs, ref rawMaterialsStockpile, ref fighterList);
+               
         }
 
         /// <summary>
@@ -171,65 +205,11 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Can this be made more generic, and reused for 
-        /// ordnance and fighter production too?
-        /// 
+        /// for changeing the priority of the constructionJobs priorities.
+        /// not sure how this should work...
         /// </summary>
-        /// <param name="factionEntity"></param>
         /// <param name="colonyEntity"></param>
-        //public static void Construct(Entity factionEntity, Entity colonyEntity)
-        //{
-        //    float factionConstructionAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseConstructionBonus;
-        //    float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
-        //    float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
-        //    float totalBonusMultiplier = factionConstructionAbility * sectorGovenerAbility * planetGovenerAbility;
-
-        //    InstallationsDB colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
-        //    List<ConstructionJob> constructionJobs = colonyInstallations.InstallationJobs;
-        //    List<ConstructionJob> constructionJobs_newList = new List<ConstructionJob>();
-
-        //    JDictionary<Guid, int> resourceStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-
-        //    float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
-        //    constructionPoints *= totalBonusMultiplier;
-            
-        //    foreach (ConstructionJob job in constructionJobs)
-        //    {
-
-        //        var type = StaticDataManager.StaticDataStore.Installations[job.Type];
-        //        float constructiononthisjob = constructionPoints * job.PriorityPercent.Percent;
-        //        float pointsUsed = Math.Min(job.ItemsRemaining, constructiononthisjob);
-
-        //        int pointsPerThisInstallation = type.BuildPoints;
-        //        float percentBuilt = pointsUsed / pointsPerThisInstallation;
-
-        //        //this confusing block of code below checks if there's a fully constructed installation
-        //        //if so, it adds it to the employment list, which is used to check pop requrements etc. 
-        //        int fullColInstallations = (int)colonyInstallations.Installations[type];
-        //        colonyInstallations.Installations[type] += percentBuilt;
-        //        if ((int)colonyInstallations.Installations[type] > fullColInstallations)
-        //        {
-        //            colonyInstallations.EmploymentList.Add(new InstallationEmployment{Enabled = true,Type = type.ID});
-        //        }
-        //        constructionPoints -= pointsUsed;
-
-
-        //        if (job.ItemsRemaining > 0) //if there's still itemsremaining...
-        //        {
-        //            //+becuase it's a struct, we have to re-create it.
-        //            ConstructionJob newStruct = new ConstructionJob 
-        //            {
-        //                ItemsRemaining = job.ItemsRemaining - percentBuilt, 
-        //                PriorityPercent = job.PriorityPercent, 
-        //                Type = job.Type
-        //            };
-        //            constructionJobs_newList.Add(newStruct);//+then add it to the new list;
-        //        }
-        //        colonyInstallations.InstallationJobs = constructionJobs_newList; //+and finaly, replace the list.
-        //    }
-            
-        //}
-
+        /// <param name="neworder"></param>
         public static void ConstructionPriority(Entity colonyEntity, Message neworder)
         {
             //idk... needs to be something in the message about whether it's Construction, Ordnance or Fighers...  
@@ -245,16 +225,32 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+
+        /// <summary>
+        /// not shure if this should be a whole lot of if statements or if we can tidy it up somewhere else
+        /// </summary>
+        /// <param name="factioEntity"></param>
+        /// <param name="colonyEntity"></param>
+        /// <param name="ability"></param>
+        /// <returns></returns>
         private static float BonusesForType(Entity factioEntity, Entity colonyEntity, InstallationAbilityType ability )
         {
             //todo link bonuses to type somehow 
             return 1.0f;
         }
 
-        private static int TotalAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
+        /// <summary>
+        /// Returns the total InstallationAbilityPoints on an colony 
+        /// it's important that the Employment function is run prior to this,
+        /// if any changes have been made to the numer of Installatioins, pop etc etc.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="installationsDB"></param>
+        /// <returns></returns>
+        private static int InstallationAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
         {            
             int totalAbilityValue = 0;
-            foreach (KeyValuePair<Guid, int> kvp in installationsDB.WorkingInstallations)//.Where(item => item.Key.BaseAbilityAmounts.ContainsKey(type)))
+            foreach (KeyValuePair<Guid, int> kvp in installationsDB.WorkingInstallations)
             {
                 InstallationSD facility = StaticDataManager.StaticDataStore.Installations[kvp.Key];
                 if(facility.BaseAbilityAmounts.ContainsKey(type))
