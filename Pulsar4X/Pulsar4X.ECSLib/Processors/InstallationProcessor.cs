@@ -183,8 +183,8 @@ namespace Pulsar4X.ECSLib
                 double percentthisjob = pointsUsedThisJob / 100; 
                 double itemsCreated = percentPerItem * percentthisjob;
                 double itemsLeft = job.ItemsRemaining - itemsCreated;
-                stockpileOut[job.Type] += job.ItemsRemaining - itemsLeft;
 
+                stockpileOut.SafeAdd<Guid, double>(job.Type, job.ItemsRemaining - itemsLeft);
                 if (itemsLeft > 0)
                 {
                     //recreate constructionJob because it's a struct.

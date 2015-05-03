@@ -145,5 +145,19 @@ namespace Pulsar4X.Tests
                 StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist");
             });
         }
+
+        //for want of a better place to put it.
+        [Test]
+        public void TestJdicExtension() 
+        {
+            JDictionary<int, int> dict = new JDictionary<int, int>();
+            dict.Add(1,1);
+            dict.SafeValueAdd<int, int>(1, 2); //add to exsisting
+            dict.SafeValueAdd<int, int>(2, 5); //add to non exsisting.
+
+            Assert.AreEqual(dict[1], 3);
+            Assert.AreEqual(dict[2], 5);
+        }
+
     }
 }
