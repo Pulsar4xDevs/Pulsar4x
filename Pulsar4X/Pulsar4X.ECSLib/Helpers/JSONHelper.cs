@@ -52,6 +52,37 @@ namespace Pulsar4X.ECSLib
         }
     }
 
+    public static class JDictionaryExtension
+    {
+        public static void SafeValueAdd<TKey, TValue>(this JDictionary<TKey, int> jDict, TKey key, int toAdd)
+        {
+            if(!jDict.ContainsKey(key))
+                jDict.Add(key, toAdd);
+            else
+            {
+                jDict[key] += toAdd;
+            }
+        }
+        public static void SafeAdd<TKey, TValue>(this JDictionary<TKey, float> jDict, TKey key, float toAdd)
+        {
+            if (!jDict.ContainsKey(key))
+                jDict.Add(key, toAdd);
+            else
+            {
+                jDict[key] += toAdd;
+            }
+        }
+        public static void SafeAdd<TKey, TValue>(this JDictionary<TKey, double> jDict, TKey key, double toAdd)
+        {
+            if (!jDict.ContainsKey(key))
+                jDict.Add(key, toAdd);
+            else
+            {
+                jDict[key] += toAdd;
+            }
+        }
+    }
+
     /// <summary>
     /// This class can be used by a Json.net serializer to get around the problem of it ignoreing ISerializable in favor of IEnumarble.
     /// </summary>
