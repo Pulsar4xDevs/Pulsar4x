@@ -1219,9 +1219,10 @@ namespace Pulsar4X.Entities
         #endregion
 
         #region Population damage due to combat
-        public bool OnDamaged(DamageTypeTN Type, ushort Value, ShipTN FiringShip)
+        public bool OnDamaged(DamageTypeTN TypeOfDamage, ushort Value, ShipTN FiringShip, int RadLevel = 0)
         {
             /// <summary>
+            /// Check damage type to see if atmosphere blocks it.
             /// Populations are damaged in several ways.
             /// Civilian Population will die off, about 50k per point of damage.
             /// Atmospheric dust will be kicked into the atmosphere(regardless of whether or not there is an atmosphere) lowering temperature for a while.
@@ -1232,6 +1233,99 @@ namespace Pulsar4X.Entities
             /// Installations will have a chance at being destroyed. bigger installations should be more resilient to damage, but even infrastructure should have a chance to survive.
             /// Shipyards must be targetted in orbit around the colony. Special handling will be required for that.
             /// </summary>
+
+            ushort ActualDamage;
+            switch (TypeOfDamage)
+            {
+                /// <summary>
+                /// Neither missile nor meson damage is effected by atmospheric pressure.
+                /// </summary>
+                case DamageTypeTN.Missile:
+                case DamageTypeTN.Meson:
+                    ActualDamage = Value;
+                break;
+                /// <summary>
+                /// All other damage types must be adjusted by atmospheric pressure.
+                /// </summary>
+                default:
+                    ActualDamage = (ushort)Math.Round((float)Value * Planet.Atmosphere.Pressure);
+                break;
+            }
+
+            /// <summary>
+            /// No damage was done. either all damage was absorbed by the atmosphere or the missile had no warhead. Missiles with no warhead should "probably" be sensor missiles that loiter in orbit
+            /// until their fuel is gone.
+            /// </summary>
+            if (ActualDamage == 0)
+            {
+                return false;
+            }
+
+            /// <summary>
+            /// Each point of damage kills off 50,000 people, or 0.05f as 1.0f = 1M people.
+            /// </summary>
+            float PopulationDamage = 0.05f * ActualDamage;
+            CivilianPopulation = CivilianPopulation - PopulationDamage;
+
+            /// <summary>
+            /// Increase the atmospheric dust and radiation of the planet.
+            /// </summary>
+            Planet.AtmosphericDust = Planet.AtmosphericDust + ActualDamage;
+            Planet.RadiationLevel = Planet.RadiationLevel + RadLevel;
+
+            if (GameState.Instance.DamagedPlanets.Contains(Planet) == false)
+                GameState.Instance.DamagedPlanets.Add(Planet);
+
+            String IndustrialDamage = "Industrial Damage:";
+            while (ActualDamage > 0)
+            {
+                ActualDamage = (ushort)(ActualDamage - 5);
+                /// <summary>
+                /// Installation destruction will be naive. pick an installation at random.
+                /// </summary>
+                int Inst = GameState.RNG.Next(0, (int)Installation.InstallationType.InstallationCount);
+                if (Inst == (int)Installation.InstallationType.CommercialShipyard || Inst == (int)Installation.InstallationType.NavalShipyardComplex)
+                {
+                    /// <summary>
+                    /// Damage was done, but installations escaped unharmed. Shipyards must be damaged from orbit.
+                    /// </summary>
+                    continue;
+                }
+                else if (Inst >= (int)Installation.InstallationType.ConvertCIToConstructionFactory && Inst <= (int)Installation.InstallationType.ConvertMineToAutomated)
+                {
+                    /// <summary>
+                    /// These "installations" can't be damaged, so again, lucky planet.
+                    /// </summary>
+                    continue;
+                }
+                else
+                {
+                    int InstCount = (int)Math.Floor(Installations[Inst].Number);
+
+                    /// <summary>
+                    /// Luckily for the planet it had none of the installations that just got targetted.
+                    /// </summary>
+                    if (InstCount == 0)
+                    {
+                        continue;
+                    }
+
+                    /// <summary>
+                    /// Installation destroyed.
+                    /// </summary>
+                    Installations[Inst].Number = Installations[Inst].Number - 1.0f;
+
+#warning Industry damage should be reworked to have differing resilience ratings, and logging should compress industrial damage.
+                    IndustrialDamage = String.Format("{0} {1}: {2}", IndustrialDamage, Installations[Inst].Name, 1);
+                }
+            }
+
+            String Entry = String.Format("{0} hit by {1} points of damage. Casualties: {2}{3}Environment Update: Atmospheric Dust:{4}, Radiation:{5}", Name,ActualDamage,PopulationDamage,
+                                         IndustrialDamage,Planet.AtmosphericDust, Planet.RadiationLevel);
+            MessageEntry NMsg = new MessageEntry(MessageEntry.MessageType.PopulationDamage, Planet.Position.System, Contact,
+            GameState.Instance.GameDateTime, GameState.Instance.LastTimestep, Entry);
+            Faction.MessageLog.Add(NMsg);
+
             return false;
         }
         #endregion

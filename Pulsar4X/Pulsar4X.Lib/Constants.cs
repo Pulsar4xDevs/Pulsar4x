@@ -552,6 +552,16 @@ namespace Pulsar4X
             /// YearsOfProduction here being greater than 5K means that this project will essentially never finish under current conditions. so don't bother printing an estimated completion date.
             /// </summary>
             public const int TimerYearMax = 5000;
+
+            /// <summary>
+            /// About 1 point per 5 days. experimentation shows it varies between 1 and 2.
+            /// </summary>
+            public const int RadiationDecayPerYear = 72;
+
+            /// <summary>
+            /// About 3 points per 5 days. experimentation shows it varies between 3 and 4.
+            /// </summary>
+            public const int AtmosphericDustDecayPerYear = 216;
         }
 
         public static class ShipyardInfo

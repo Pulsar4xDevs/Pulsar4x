@@ -358,6 +358,7 @@ namespace Pulsar4X.Entities.Components
         /// <summary>
         /// Armor represents the chance that a missile won't die to a particular weaponstrike. works the same as HTK.
         /// </summary>
+#warning Missile Armour is not yet implemented.
         private float Armor;
         public float armor
         {
@@ -1520,6 +1521,8 @@ namespace Pulsar4X.Entities.Components
                         Contact.Position.X = MissileTarget.wp.Position.X;
                         Contact.Position.Y = MissileTarget.wp.Position.Y;
 
+#warning there may be a requirement for special waypoint handling for secondary release submunitions here such as geosurvey buoys or mines.
+
                         if (Missiles[0].onOwnSensors == true)
                             SearchForNewTarget();
                         break;
@@ -1966,7 +1969,7 @@ namespace Pulsar4X.Entities.Components
                     ///PopDamaged is also currently unused.
                     ///</summary>
 #warning Implement Missile Laser damage here
-                    bool PopDamaged = Missiles[loop].target.pop.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, Missiles[loop].firingShip);
+                    bool PopDamaged = Missiles[loop].target.pop.OnDamaged(DamageTypeTN.Missile, (ushort)Missiles[loop].missileDef.warhead, Missiles[loop].firingShip, Missiles[loop].missileDef.radValue);
 
                 }
             }

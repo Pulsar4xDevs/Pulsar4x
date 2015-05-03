@@ -46,6 +46,7 @@ namespace Pulsar4X.Entities
             OrdersCompleted,
             OrdersNotCompleted,
 
+            PopulationDamage,
             PotentialFleetInterception,
 
             ShieldRecharge,

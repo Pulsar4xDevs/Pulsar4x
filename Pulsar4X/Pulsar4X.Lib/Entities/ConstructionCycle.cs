@@ -467,6 +467,39 @@ namespace Pulsar4X.Entities
         }
 
         /// <summary>
+        /// Reduce radiation and atmospheric dust on planets that have been hit with weapon strikes.
+        /// </summary>
+        public static void CleanUpPlanets()
+        {
+            BindingList<SystemBody> CleanupList = new BindingList<SystemBody>();
+            foreach (SystemBody DmgPlanet in GameState.Instance.DamagedPlanets)
+            {
+                float RadReduction = Constants.Colony.RadiationDecayPerYear * Constants.Colony.ConstructionCycleFraction;
+                float DustReduction = Constants.Colony.AtmosphericDustDecayPerYear * Constants.Colony.ConstructionCycleFraction;
+
+                DmgPlanet.RadiationLevel = DmgPlanet.RadiationLevel - RadReduction;
+                DmgPlanet.AtmosphericDust = DmgPlanet.AtmosphericDust - DustReduction;
+
+                if (DmgPlanet.RadiationLevel < 0.0f)
+                    DmgPlanet.RadiationLevel = 0.0f;
+                if (DmgPlanet.AtmosphericDust < 0.0f)
+                    DmgPlanet.AtmosphericDust = 0.0f;
+
+                if (DmgPlanet.RadiationLevel == 0.0f && DmgPlanet.AtmosphericDust == 0.0f)
+                    CleanupList.Add(DmgPlanet);
+            }
+
+            if (CleanupList.Count != 0)
+            {
+                foreach (SystemBody CleanPlanet in CleanupList)
+                {
+                    GameState.Instance.DamagedPlanets.Remove(CleanPlanet);
+                }
+            }
+        }
+
+        #region Private Methods related to shipyard work.
+        /// <summary>
         /// Do all of the tasks that this shipyard has assigned to it.
         /// </summary>
         /// <param name="CurrentFaction">Faction both the population and the shipyard belong to.</param>
@@ -846,5 +879,6 @@ namespace Pulsar4X.Entities
                 }
             }
         }
+        #endregion
     }
 }

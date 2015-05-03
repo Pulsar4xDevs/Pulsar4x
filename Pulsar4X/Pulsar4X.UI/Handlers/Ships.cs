@@ -1106,7 +1106,7 @@ namespace Pulsar4X.UI.Handlers
                     }
 
                     /// <summary>
-                    /// Remove the BFC from the taskgroup point defense list.
+                    /// Remove the MFC from the taskgroup point defense list.
                     /// </summary>
                     if (_CurrnetShip.ShipsTaskGroup.TaskGroupPDL.PointDefenseFC.ContainsKey(_CurrnetShip.ShipMFC[_CurrnetFC.componentIndex]) == true)
                     {
