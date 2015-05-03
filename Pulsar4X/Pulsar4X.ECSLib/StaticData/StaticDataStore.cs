@@ -111,7 +111,7 @@ namespace Pulsar4X.ECSLib
                 foreach (var min in minerals)
                 {
                     int i = Minerals.FindIndex(x => x.ID == min.ID);
-                    if (i > 0) // found existing element!
+                    if (i >= 0) // found existing element!
                         Minerals[i] = min;
                     else
                         Minerals.Add(min);
@@ -120,7 +120,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Stores Technology Static Data. Will overwrite any existing Techs.
+        /// Stores Technology Static Data. Will overwrite any existing Techs with the same ID.
         /// </summary>
         public void Store(JDictionary<Guid, TechSD> techs)
         {
@@ -132,7 +132,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Stores Installation Static Data.
+        /// Stores Installation Static Data. Will overwrite any existing Installations with the same ID.
         /// </summary>
         public void Store(JDictionary<Guid, InstallationSD> installations)
         {
@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Stores ConstructableObj Static Data.
+        /// Stores ConstructableObj Static Data. Will overwrite any existing ConstructableObjs with the same ID.
         /// </summary>
         public void Store(JDictionary<Guid, ConstructableObjSD> recipies)
         {
