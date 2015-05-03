@@ -213,5 +213,30 @@ namespace Pulsar4X.ECSLib
                     return null;
             }
         }
+
+        /// <summary>
+        /// This functin goes through each Static Data type in the store looking for one that has an ID that
+        /// matches the one provided.
+        /// Returns null if the id is not found.
+        /// </summary>
+        public object FindDataObjectUsingID(Guid id)
+        {
+            foreach (var m in Minerals)
+            {
+                if (m.ID == id)
+                    return m;
+            }
+
+            if (Techs.ContainsKey(id))
+                return Techs[id];
+
+            if (Installations.ContainsKey(id))
+                return Installations[id];
+
+            if (ConstructableObjects.ContainsKey(id))
+                return ConstructableObjects[id];
+
+            return null;
+        }
     }
 }

@@ -261,4 +261,24 @@ namespace Pulsar4X.ECSLib
             : base(info, context)
         { }
     }
+
+    /// <summary>
+    /// This is a simple attribute that should be attached to Static Data structs. It assists reflection in finding 
+    /// Static data and dealing with it. It has two peroperties, HasID and IDPropertyName, that are used to 
+    /// signel that this peice of static data has a unique guid that repesents it.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    public class StaticDataAttribute : Attribute
+    {
+        public bool HasID { get; set; }
+
+        public string IDPropertyName { get; set; }
+
+        public StaticDataAttribute(bool hasID)
+        {
+            HasID = hasID;
+        }
+    }
+
+
 }

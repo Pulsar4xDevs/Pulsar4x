@@ -1,5 +1,6 @@
 ﻿namespace Pulsar4X.ECSLib
 {
+    [StaticDataAttribute(false)]
     public struct CommanderNameSD
     {
         public string First;

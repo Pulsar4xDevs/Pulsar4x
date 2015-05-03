@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
 
@@ -156,6 +157,40 @@ namespace Pulsar4X.Tests
             {
                 StaticDataManager.LoadFromDirectory("./TestData/DoesNotExist");
             });
+        }
+
+        [Test]
+        public void TestIDLookup()
+        {
+            // make sure the store is clear:
+            StaticDataManager.ClearAllData();
+
+            // test when the store is empty:
+            object testNullObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(Guid.NewGuid());
+            Assert.IsNull(testNullObj);
+
+            // Load the default static data to test against:
+            StaticDataManager.LoadFromDefaultDataDirectory();
+
+            // test with a guid that is not in the store:
+            object testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(Guid.Empty);  // empty guid should never be in the store.
+            Assert.IsNull(testObj);
+
+            // noew lets test for values that are in the store:
+            Guid testID = StaticDataManager.StaticDataStore.Minerals[0].ID;
+            testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
+            Assert.IsNotNull(testObj);
+            Assert.AreEqual(testID, ((MineralSD)testObj).ID);
+
+            testID = StaticDataManager.StaticDataStore.Installations.First().Key;
+            testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
+            Assert.IsNotNull(testObj);
+            Assert.AreEqual(testID, ((InstallationSD)testObj).ID);
+
+            testID = StaticDataManager.StaticDataStore.Techs.First().Key;
+            testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
+            Assert.IsNotNull(testObj);
+            Assert.AreEqual(testID, ((TechSD)testObj).Id);
         }
     }
 }

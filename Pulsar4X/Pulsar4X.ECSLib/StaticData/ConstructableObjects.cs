@@ -2,6 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
+    [StaticDataAttribute(true, IDPropertyName = "ID")]
     public struct ConstructableObjSD
     {
         public Guid ID;

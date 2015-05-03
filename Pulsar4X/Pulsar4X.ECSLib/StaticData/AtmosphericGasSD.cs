@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 
 namespace Pulsar4X.ECSLib
 {
+    [StaticDataAttribute(false)]
     public struct AtmosphericGasSD
     {
         public string Name;

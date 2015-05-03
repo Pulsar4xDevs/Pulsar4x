@@ -21,11 +21,13 @@ namespace Pulsar4X.ECSLib
 
     }
 
+    [StaticDataAttribute(true, IDPropertyName = "ID")]
     public struct InstallationSD
     {
         public string Name;
         public string Description;
         public Guid ID;
+
         /// <summary>
         /// the amount of pop required for this installation to operate.
         /// </summary>
