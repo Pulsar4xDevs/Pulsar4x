@@ -64,6 +64,15 @@ namespace Pulsar4X.Tests
 
         }
 
+        [TearDown]
+        public void Cleanup()
+        {
+            _game = null;
+            _entityManager = null;
+            _faction = null;
+            StaticDataManager.ClearAllData();
+        }
+
         [Test]
         public void TestMineing()
         {

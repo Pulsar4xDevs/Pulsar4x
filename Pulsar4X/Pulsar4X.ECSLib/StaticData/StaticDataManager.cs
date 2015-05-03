@@ -51,6 +51,16 @@ namespace Pulsar4X.ECSLib
         };
 
         /// <summary>
+        /// Small function that clears any static data currently loaded. 
+        /// It should be used before loading or starting a new game to make 
+        /// sure the static data is starting from a blank slate.
+        /// </summary>
+        public static void ClearAllData()
+        {
+            StaticDataStore = new StaticDataStore();
+        }
+
+        /// <summary>
         /// Loads all dtat from the default static data directory.
         /// Used when initilising a new game.
         /// </summary>
