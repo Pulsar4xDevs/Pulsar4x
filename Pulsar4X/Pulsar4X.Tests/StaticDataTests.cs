@@ -120,19 +120,31 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestLoadDefaultData()
         {
-            int mineralsNum;
             StaticDataManager.LoadFromDefaultDataDirectory();
-            mineralsNum = StaticDataManager.StaticDataStore.Minerals.Count;
+
+            // store counts for later:
+            int mineralsNum = StaticDataManager.StaticDataStore.Minerals.Count;  
+            int techNum = StaticDataManager.StaticDataStore.Techs.Count;
+            int installationsNum = StaticDataManager.StaticDataStore.Installations.Count;
+            int constructableObjectsNum = StaticDataManager.StaticDataStore.ConstructableObjects.Count;
+
+            // check that data was loaded:
+            Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.AtmosphericGases);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.CommanderNameThemes);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Minerals);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Techs);
             Assert.IsNotEmpty(StaticDataManager.StaticDataStore.Installations);
 
+            // now lets re-load the same data, to test that duplicates don't occure as required:
+            StaticDataManager.LoadFromDefaultDataDirectory();
 
-
-
+            // now check that overwriting occured and that there were no duplicates:
             Assert.AreEqual(mineralsNum, StaticDataManager.StaticDataStore.Minerals.Count);
+            Assert.AreEqual(techNum, StaticDataManager.StaticDataStore.Techs.Count);
+            Assert.AreEqual(installationsNum, StaticDataManager.StaticDataStore.Installations.Count);
+            Assert.AreEqual(constructableObjectsNum, StaticDataManager.StaticDataStore.ConstructableObjects.Count);
+
             // now lets test some malformed data folders.
             Assert.Catch(typeof(StaticDataLoadException), () =>
             {
