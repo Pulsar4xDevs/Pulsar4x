@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
@@ -11,7 +12,7 @@ namespace Pulsar4X.ECSLib
             NameDB name = new NameDB();
             FactionDB factionDB = new FactionDB();
             FactionAbilitiesDB factionAbilitiesDB = new FactionAbilitiesDB();
-            TechDB techDB = new TechDB();
+            TechDB techDB = new TechDB(StaticDataManager.StaticDataStore.Techs.Values.ToList());
             blobs.Add(name);
             blobs.Add(factionDB);
             blobs.Add(factionAbilitiesDB);

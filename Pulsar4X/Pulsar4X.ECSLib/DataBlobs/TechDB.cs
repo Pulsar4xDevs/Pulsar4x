@@ -23,7 +23,9 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// a list of techs not yet meeting the reqirements to research
         /// </summary>
-        public List<TechSD> UnavailableTechs { get; set; } 
+        public List<TechSD> UnavailableTechs { get; set; }
+
+        public int ReserchPoints { get; set; }
 
         /// <summary>
         /// Constructor for datablob, this should only be used when a new faction is created.
@@ -34,6 +36,7 @@ namespace Pulsar4X.ECSLib
             UnavailableTechs = alltechs.ToList();
             ResearchedTechs = new List<Guid>();
             ResearchableTechs = new Dictionary<TechSD, int>();
+            ReserchPoints = 0;
         }
 
         public TechDB(TechDB techDB)
@@ -41,6 +44,7 @@ namespace Pulsar4X.ECSLib
             UnavailableTechs = techDB.UnavailableTechs.ToList();
             ResearchedTechs = techDB.ResearchedTechs.ToList();
             ResearchableTechs = new Dictionary<TechSD, int>(techDB.ResearchableTechs);
+            ReserchPoints = techDB.ReserchPoints;
         }
 
         public TechDB()
@@ -48,6 +52,7 @@ namespace Pulsar4X.ECSLib
             UnavailableTechs = new List<TechSD>();
             ResearchedTechs = new List<Guid>();
             ResearchableTechs = new Dictionary<TechSD, int>();
+            ReserchPoints = 0;
         }
 
         public override object Clone()

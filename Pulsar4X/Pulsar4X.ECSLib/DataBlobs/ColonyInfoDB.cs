@@ -17,6 +17,7 @@ namespace Pulsar4X.ECSLib
 
         public Entity PlanetEntity { get; set; }
 
+        public List<Entity> Scientists; 
 
         public ColonyInfoDB()
         {

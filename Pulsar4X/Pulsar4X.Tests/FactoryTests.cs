@@ -144,6 +144,7 @@ namespace Pulsar4X.Tests
 
         private static bool HasAllRequiredDatablobs(Entity toCheck, List<Type> datablobTypes)
         {
+            var entityDataBlobs = toCheck.GetAllDataBlobs();
             foreach (BaseDataBlob datablob in toCheck.GetAllDataBlobs())
                 if (!datablobTypes.Contains(datablob.GetType()))
                     return false;

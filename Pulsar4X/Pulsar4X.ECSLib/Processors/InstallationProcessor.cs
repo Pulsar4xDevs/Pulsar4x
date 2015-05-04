@@ -13,11 +13,13 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionEntity"></param>
         public static void PerEconTic(Entity colonyEntity, Entity factionEntity)
         {
-            
+            FactionAbilitiesDB factionAbilites = factionEntity.GetDataBlob<FactionAbilitiesDB>();
+            TechDB factionTech = factionEntity.GetDataBlob<TechDB>();
             Employment(colonyEntity); //check if installations still work
             Mine(factionEntity, colonyEntity); //mine new materials.
-            Construction(factionEntity, colonyEntity); //construct, refine, etc. 
-            
+            Construction(factionEntity, colonyEntity); //construct, refine, etc.
+
+            DoResearch(colonyEntity, factionAbilites, factionTech);
         }
 
         /// <summary>
@@ -62,7 +64,7 @@ namespace Pulsar4X.ECSLib
             Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
             JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            int installationMineingAbility = InstallationAbilityofType(InstallationAbilityType.Mine, colonyEntity.GetDataBlob<InstallationsDB>());
+            int installationMineingAbility = InstallationAbilityofType(colonyEntity.GetDataBlob<InstallationsDB>(),InstallationAbilityType.Mine);
             JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
 
             foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
@@ -93,7 +95,7 @@ namespace Pulsar4X.ECSLib
             var rawMaterialsStockpile = colonyInfo.MineralStockpile;
 
             var facilityJobs = installations.InstallationJobs;
-            float constructionPoints = InstallationAbilityofType(InstallationAbilityType.InstallationConstruction, installations);
+            float constructionPoints = InstallationAbilityofType(installations, InstallationAbilityType.InstallationConstruction);
             constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
             var faciltiesList = new JDictionary<Guid, double>();
 
@@ -112,21 +114,21 @@ namespace Pulsar4X.ECSLib
             }
 
             var refinaryJobs = installations.RefinaryJobs;
-            float refinaryPoints = InstallationAbilityofType(InstallationAbilityType.FuelRefinery, installations);
+            float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.FuelRefinery);
             refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FuelRefinery);
             var refinedList = new JDictionary<Guid, double>();
             
             GenericConstructionJobs(refinaryPoints, ref refinaryJobs, ref rawMaterialsStockpile, ref refinedList);
 
             var ordnanceJobs = installations.OrdnanceJobs;
-            float ordnancePoints = InstallationAbilityofType(InstallationAbilityType.OrdnanceConstruction, installations);
+            float ordnancePoints = InstallationAbilityofType(installations, InstallationAbilityType.FuelRefinery);
             ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
             var ordnanceList = new JDictionary<Guid, double>();
             
             GenericConstructionJobs(ordnancePoints, ref ordnanceJobs, ref rawMaterialsStockpile, ref ordnanceList);
 
             var fighterJobs = installations.FigherJobs;
-            float fighterPoints = InstallationAbilityofType(InstallationAbilityType.FighterConstruction, installations);
+            float fighterPoints = InstallationAbilityofType(installations, InstallationAbilityType.FuelRefinery);
             fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
             var fighterList = new JDictionary<Guid, double>();
 
@@ -205,6 +207,53 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// adds research points to a scientists project for a given change in time. 
+        /// </summary>
+        /// <param name="factionAbilities"></param>
+        /// <param name="scientist"></param>
+        /// <param name="factionTechs"></param>
+        /// <param name="deltaTime">the time since last this was run may need rethinking</param>
+        internal static void DoResearch(Entity colonEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
+        {
+            InstallationsDB installations = colonEntity.GetDataBlob<InstallationsDB>();
+            Dictionary<InstallationSD,int> labs = InstallationsWithAbility(installations, InstallationAbilityType.Research);
+            int labsused = 0;
+
+            foreach (var scientist in colonEntity.GetDataBlob<ColonyInfoDB>().Scientists)
+            {
+                TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
+                int numProjectLabs = scientist.GetDataBlob<TeamsDB>().Teamsize;
+                float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];
+                //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
+                int researchmax = research.Cost;
+
+                int researchPoints = 0;             
+                foreach (var kvp in labs)
+                { 
+                    while (numProjectLabs > 0)
+                    {
+                        for(int i = 0; i < kvp.Value; i++)
+                        {                         
+                            researchPoints += kvp.Key.BaseAbilityAmounts[InstallationAbilityType.Research];
+                            numProjectLabs --;
+                        }
+                    }
+                }
+                researchPoints = (int)(researchPoints * bonus);
+                if (factionTechs.ResearchableTechs.ContainsKey(research))
+                {
+                    factionTechs.ResearchableTechs[research] += researchPoints;
+                    if (factionTechs.ResearchableTechs[research] >= researchmax)
+                    {
+                        TechProcessor.ApplyTech(factionAbilities, factionTechs, research); //apply effects from tech, and add it to researched techs
+                        scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
+                    }
+                }
+            }
+        }
+
+
+        /// <summary>
         /// for changeing the priority of the constructionJobs priorities.
         /// not sure how this should work...
         /// </summary>
@@ -241,22 +290,40 @@ namespace Pulsar4X.ECSLib
 
         /// <summary>
         /// Returns the total InstallationAbilityPoints on an colony 
-        /// it's important that the Employment function is run prior to this,
+        /// Employment function should be run prior to this (ie should be run at the begining of econ tic)
         /// if any changes have been made to the numer of Installatioins, pop etc etc.
         /// </summary>
         /// <param name="type"></param>
         /// <param name="installationsDB"></param>
         /// <returns></returns>
-        private static int InstallationAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
+        private static int InstallationAbilityofType(InstallationsDB installationsDB, InstallationAbilityType type)
         {            
             int totalAbilityValue = 0;
-            foreach (KeyValuePair<Guid, int> kvp in installationsDB.WorkingInstallations)
+            foreach(var facility in InstallationsWithAbility(installationsDB, type))             
             {
-                InstallationSD facility = StaticDataManager.StaticDataStore.Installations[kvp.Key];
-                if(facility.BaseAbilityAmounts.ContainsKey(type))
-                    totalAbilityValue += facility.BaseAbilityAmounts[type] * kvp.Value;  
+
+                totalAbilityValue += facility.Key.BaseAbilityAmounts[type] * facility.Value;  
             }
             return totalAbilityValue;           
+        }
+
+        /// <summary>
+        /// working installations that have ability
+        /// Employment function should be run prior to this (ie should be run at the begining of econ tic)
+        /// </summary>
+        /// <param name="installations">colony installations</param>
+        /// <param name="type">ability Type</param>
+        /// <returns>a dictionary with key InstallationSD and the number of this type of installation</returns>
+        private static Dictionary<InstallationSD,int> InstallationsWithAbility(InstallationsDB installations, InstallationAbilityType type)
+        {
+            Dictionary<InstallationSD, int> facilities = new Dictionary<InstallationSD, int>();
+            foreach (var kvp in installations.WorkingInstallations)
+            {
+                InstallationSD facility = StaticDataManager.StaticDataStore.Installations[kvp.Key];
+                if (facility.BaseAbilityAmounts.ContainsKey(type))
+                facilities.Add(facility,kvp.Value);
+            }
+            return facilities;
         }
     }
 }
