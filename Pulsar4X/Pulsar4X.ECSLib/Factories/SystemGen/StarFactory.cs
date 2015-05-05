@@ -168,17 +168,18 @@ namespace Pulsar4X.ECSLib
 
             StarInfoDB starData = new StarInfoDB
             {
+                // for star age we will make it propertional to the inverse of the stars mass ratio (for that type of star).
+                // while this will produce the same age for the same mass/type of star the chances of getting the same
+                // mass/type are tiny. Tho there will still be the obivious inverse relationship here.
                 Age = (1 - starMVDB.Mass / GalaxyFactory.Settings.StarMassBySpectralType[spectralType].Max) * maxStarAge,
                 SpectralType = spectralType,
                 Temperature = (uint)Math.Round(GMath.SelectFromRange(GalaxyFactory.Settings.StarTemperatureBySpectralType[spectralType], randomSelection)),
                 Luminosity = (float)GMath.SelectFromRange(GalaxyFactory.Settings.StarLuminosityBySpectralType[spectralType], randomSelection)
             };
 
-            // note the fiddly math at the start here is to make more massive stars younger.
-
             // Generate a string specifing the full spectral class form a star.
             // start by getting the sub-division, which is based on temp.
-            double sub = starData.Temperature / GalaxyFactory.Settings.StarTemperatureBySpectralType[starData.SpectralType].Max;  // temp rang from 0 to 1.
+            double sub = starData.Temperature / GalaxyFactory.Settings.StarTemperatureBySpectralType[starData.SpectralType].Max;  // temp range from 0 to 1.
             starData.SpectralSubDivision = (ushort)Math.Round((1 - sub) * 10);  // invert temp range as 0 is hottest, 9 is coolest.
 
             // now get the luminosity class

@@ -498,7 +498,6 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-
                 bodyInfo.Tectonics = GenerateTectonicActivity(system, starInfo, bodyMVDB);
             }
 
