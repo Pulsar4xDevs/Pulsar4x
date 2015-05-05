@@ -112,7 +112,7 @@ namespace Pulsar4X.Tests
             double ablityPointsThisColony = 100;
             List<ConstructionJob> jobList = new List<ConstructionJob>();
             JDictionary<Guid, int> rawMaterials = new JDictionary<Guid, int>();
-            JDictionary<Guid,double> stockpileOut = new JDictionary<Guid, double>();
+            JDictionary<Guid,float> stockpileOut = new JDictionary<Guid, float>();
 
             PercentValue priority = new PercentValue {Percent = 1};
             JDictionary<Guid,int> jobRawMaterials = new JDictionary<Guid, int>();

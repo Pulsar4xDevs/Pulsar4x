@@ -99,28 +99,21 @@ namespace Pulsar4X.ECSLib
             ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
             InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
             
-            var rawMaterialsStockpile = colonyInfo.MineralStockpile;
             
 
             //Refine stuff.
             var refinaryJobs = installations.RefinaryJobs;
             float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Refinery);
-            var refinedList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(refinaryPoints, refinaryJobs, colonyInfo, refinedList);
-            foreach (var material in refinedList)
-            {
-                colonyInfo.RefinedStockpile.SafeValueAdd<Guid, float>(material.Key, (float)material.Value);
-            }
+            GenericConstructionJobs(refinaryPoints, refinaryJobs, colonyInfo, colonyInfo.RefinedStockpile);
 
-            var resources = new JDictionary<Guid, int>();
 
             //Build facilities.
             var facilityJobs = installations.InstallationJobs;
             float constructionPoints = InstallationAbilityofType(installations, InstallationAbilityType.InstallationConstruction);
             constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
-            var faciltiesList = new JDictionary<Guid, double>();
+            var faciltiesList = new JDictionary<Guid, float>();
 
             GenericConstructionJobs(constructionPoints, facilityJobs, colonyInfo, faciltiesList);
 
@@ -142,15 +135,14 @@ namespace Pulsar4X.ECSLib
             var ordnanceJobs = installations.OrdnanceJobs;
             float ordnancePoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
-            var ordnanceList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, ordnanceList);
+            GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, colonyInfo.OrdananceStockpile);
 
             //Build Fighters
             var fighterJobs = installations.FigherJobs;
             float fighterPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
-            var fighterList = new JDictionary<Guid, double>();
+            var fighterList = new JDictionary<Guid, float>();
 
             GenericConstructionJobs(fighterPoints, fighterJobs, colonyInfo, fighterList);
                
@@ -176,8 +168,9 @@ namespace Pulsar4X.ECSLib
         /// <param name="ablityPointsThisColony"></param>
         /// <param name="jobList"></param>
         /// <param name="rawMaterials"></param>
+        /// <param name="colonyInfo"></param>
         /// <param name="stockpileOut"></param>
-        public static void GenericConstructionJobs(double ablityPointsThisColony, List<ConstructionJob> jobList, ColonyInfoDB colonyInfo, JDictionary<Guid,double> stockpileOut)
+        public static void GenericConstructionJobs(double ablityPointsThisColony, List<ConstructionJob> jobList, ColonyInfoDB colonyInfo, JDictionary<Guid,float> stockpileOut)
         {
             List<ConstructionJob> newJobList = new List<ConstructionJob>();
 
@@ -221,7 +214,8 @@ namespace Pulsar4X.ECSLib
                 double itemsCreated = percentPerItem * percentthisjob;
                 double itemsLeft = job.ItemsRemaining - itemsCreated;
 
-                stockpileOut.SafeValueAdd<Guid, double>(job.Type, job.ItemsRemaining - itemsLeft);
+                stockpileOut.SafeValueAdd<Guid, float>(job.Type, (float)(job.ItemsRemaining - itemsLeft));             
+                
                 if (itemsLeft > 0)
                 {
                     //recreate constructionJob because it's a struct.
