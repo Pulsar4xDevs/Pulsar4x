@@ -125,7 +125,7 @@ namespace Pulsar4X.ECSLib
 
             if (value == 1)
             {
-                SetBits.Add(index);
+                SetBits.Add(index + (backingIndex * BitsPerValue));
             }
             else
             {
