@@ -180,16 +180,16 @@ namespace Pulsar4X.ECSLib
                 double pointsUsedThisJob = 0;
                 //the points per requred resources.
                 double pointsPerResourcees = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
-                foreach (var resourcePair in new Dictionary<Guid,int>(job.RawMaterialsRemaining))
+                foreach (var jobResourcePair in new Dictionary<Guid,int>(job.RawMaterialsRemaining))
                 {
-                    Guid resourceGuid = resourcePair.Key;
+                    Guid resourceGuid = jobResourcePair.Key;
                     Dictionary<Guid, float> rawMaterials = FindResource(colonyInfo, resourceGuid);
                     if (rawMaterials == null)
                         break;
-                    double pointsPerThisResource = (double)job.BuildPointsRemaining / resourcePair.Value;
+                    double pointsPerThisResource = (double)job.BuildPointsRemaining / jobResourcePair.Value;
 
                     //maximum rawMaterials needed or availible whichever is less
-                    int maxResource = (int)Math.Min(resourcePair.Value, rawMaterials[resourceGuid]);
+                    int maxResource = (int)Math.Min(jobResourcePair.Value, rawMaterials[resourceGuid]);
                     
                     //maximum buildpoints I can use for this resource
                     //should I be using pointsPerResources or pointsPerThisResource?
@@ -208,6 +208,8 @@ namespace Pulsar4X.ECSLib
                                                             
                 }
                 ablityPointsThisColony -= pointsUsedThisJob;
+                //pointsUsedThisJob = Math.Round(pointsUsedThisJob);
+                
 
                 double percentPerItem = (double)job.BuildPointsPerItem / 100; 
                 double percentthisjob = pointsUsedThisJob / 100; 
@@ -236,7 +238,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// adds research points to a scientists project for a given change in time. 
+        /// adds research points to a scientists project.
         /// </summary>
         /// <param name="colonyEntity"></param>
         /// <param name="factionAbilities"></param>

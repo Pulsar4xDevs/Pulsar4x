@@ -101,7 +101,7 @@ namespace Pulsar4X.Tests
 
             Assert.AreNotEqual(mineralstockpile[_corundiumSD.ID], 10);
             Assert.AreNotEqual(mineralstockpile[_duraniumSD.ID], 5);
-
+            
         }
 
         [Test]
@@ -111,7 +111,7 @@ namespace Pulsar4X.Tests
             Guid itemConstructing = new Guid();//just a random guid for now.
             double ablityPointsThisColony = 100;
             List<ConstructionJob> jobList = new List<ConstructionJob>();
-            JDictionary<Guid, int> rawMaterials = new JDictionary<Guid, int>();
+            
             JDictionary<Guid,float> stockpileOut = new JDictionary<Guid, float>();
 
             PercentValue priority = new PercentValue {Percent = 1};
@@ -129,27 +129,29 @@ namespace Pulsar4X.Tests
             };
             jobList.Add(newJob);
             
-            rawMaterials.Add(_duraniumSD.ID, 2250); //not enough of this should get 4.5
-            rawMaterials.Add(_corundiumSD.ID, 100); //enough of this
+            colonyInfo.MineralStockpile.Add(_duraniumSD.ID, 2250); //not enough of this should get 4.5  total installations. 
+            colonyInfo.MineralStockpile.Add(_corundiumSD.ID, 100); //enough of this
             stockpileOut.Add(itemConstructing,0);
 
             
             //firstpass 
             InstallationProcessor.GenericConstructionJobs(0, jobList, colonyInfo, stockpileOut);
-            Assert.AreEqual(0, stockpileOut[itemConstructing]);
+            Assert.AreEqual(0, stockpileOut[itemConstructing], "Should not have constructed anything due to no buildpoints");
+            Assert.AreEqual(2250, colonyInfo.MineralStockpile[_duraniumSD.ID], "Mineral Usage Incorrect");
+            Assert.AreEqual(100, colonyInfo.MineralStockpile[_corundiumSD.ID], "Mineral Usage Incorrect");
+            
+            //todo: fix floating point math.
 
-            //these all have floating point errors.
             //secondPass
-            //InstallationProcessor.GenericConstructionJobs(50, ref jobList, ref rawMaterials, ref stockpileOut);
-            //Assert.AreEqual(0.5, stockpileOut[itemConstructing]);
+            InstallationProcessor.GenericConstructionJobs(100, jobList, colonyInfo, stockpileOut);
+            Assert.AreEqual(1, stockpileOut[itemConstructing]);
 
             //thirdPass
-            //InstallationProcessor.GenericConstructionJobs(50, ref jobList, ref rawMaterials, ref stockpileOut);
-            //Assert.AreEqual(stockpileOut[itemConstructing], 1);
-
-            //this one has a significant error. needs looking at closer.
+            //InstallationProcessor.GenericConstructionJobs(50, jobList, colonyInfo, stockpileOut);
+            //Assert.AreEqual(1.5, stockpileOut[itemConstructing]);            
+            
             //fourthPass
-            //InstallationProcessor.GenericConstructionJobs(5000, ref jobList, ref rawMaterials, ref stockpileOut);
+            //InstallationProcessor.GenericConstructionJobs(5000, jobList, colonyInfo, stockpileOut);
             //Assert.AreEqual(4.5, stockpileOut[itemConstructing]);
 
             //todo there's probilby some edge cases to check.

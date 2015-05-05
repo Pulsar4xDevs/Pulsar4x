@@ -1,5 +1,8 @@
 ﻿namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// See also the Installation Processors for DoResearch
+    /// </summary>
     internal static class TechProcessor
     {
         /// <summary>
