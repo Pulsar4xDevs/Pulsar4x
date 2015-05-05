@@ -174,8 +174,8 @@ namespace Pulsar4X.WPFUI
                 case "TBB_SystemMap":
                     control = new SystemMap();
                     break;
-                case "TBB_SystemView":
-                    control = new SystemView();
+                case "TBB_SystemInfo":
+                    control = new SystemInfo();
                     break;
                 case "TBB_GalaticMap":
                     control = new GalaticMap();

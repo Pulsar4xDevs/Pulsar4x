@@ -118,8 +118,8 @@
     <Compile Include="UserControls\Ships.xaml.cs">
       <DependentUpon>Ships.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UserControls\SystemView.xaml.cs">
-      <DependentUpon>SystemView.xaml</DependentUpon>
+    <Compile Include="UserControls\SystemInfo.xaml.cs">
+      <DependentUpon>SystemInfo.xaml</DependentUpon>
     </Compile>
     <Compile Include="UserControls\SystemMap.xaml.cs">
       <DependentUpon>SystemMap.xaml</DependentUpon>
@@ -172,7 +172,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UserControls\SystemView.xaml">
+    <Page Include="UserControls\SystemInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

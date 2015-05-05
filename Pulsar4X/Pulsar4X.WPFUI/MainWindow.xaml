@@ -38,7 +38,7 @@
             <ToolBar Band="1">
                 <Button Name="TBB_SystemMap" Content="System Map" Click="TBB_Click"></Button>
                 <Separator/>
-                <Button Name="TBB_SystemView" Content="System View" Click="TBB_Click"></Button>
+                <Button Name="TBB_SystemInfo" Content="System Information" Click="TBB_Click"></Button>
                 <Separator/>
                 <Button Name="TBB_GalaticMap" Content="Galatic Map" Click="TBB_Click"></Button>
                 <Separator/>
