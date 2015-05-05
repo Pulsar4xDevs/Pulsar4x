@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 
 namespace Pulsar4X.ECSLib
 {
     public static class InstallationProcessor
     {
+        #region automaticEachTickStuff
+
         /// <summary>
         /// this should be the main entry point for doing stuff.
         /// </summary>
@@ -83,6 +86,8 @@ namespace Pulsar4X.ECSLib
             
         }
 
+
+
         /// <summary>
         /// runs each of the constructionJob lists.
         /// </summary>
@@ -92,14 +97,31 @@ namespace Pulsar4X.ECSLib
         {
             ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
             InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
+            
             var rawMaterialsStockpile = colonyInfo.MineralStockpile;
+            
 
+            //Refine stuff.
+            var refinaryJobs = installations.RefinaryJobs;
+            float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
+            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Refinery);
+            var refinedList = new JDictionary<Guid, double>();
+
+            GenericConstructionJobs(refinaryPoints, ref refinaryJobs, ref rawMaterialsStockpile, ref refinedList);
+            foreach (var material in refinedList)
+            {
+                colonyInfo.RefinedStockpile.SafeValueAdd<Guid, int>(material.Key, (int)material.Value);
+            }
+
+            var resources = new JDictionary<Guid, int>();
+
+            //Build facilities.
             var facilityJobs = installations.InstallationJobs;
             float constructionPoints = InstallationAbilityofType(installations, InstallationAbilityType.InstallationConstruction);
             constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
             var faciltiesList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(constructionPoints, ref facilityJobs,ref rawMaterialsStockpile, ref faciltiesList);
+            GenericConstructionJobs(constructionPoints, ref facilityJobs, ref resources, ref faciltiesList);
 
             foreach (var facilityPair in faciltiesList)
             {
@@ -115,26 +137,21 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
-            var refinaryJobs = installations.RefinaryJobs;
-            float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
-            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Refinery);
-            var refinedList = new JDictionary<Guid, double>();
-            
-            GenericConstructionJobs(refinaryPoints, ref refinaryJobs, ref rawMaterialsStockpile, ref refinedList);
-
+            //Build Ordnance
             var ordnanceJobs = installations.OrdnanceJobs;
             float ordnancePoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
             var ordnanceList = new JDictionary<Guid, double>();
-            
-            GenericConstructionJobs(ordnancePoints, ref ordnanceJobs, ref rawMaterialsStockpile, ref ordnanceList);
 
+            GenericConstructionJobs(ordnancePoints, ref ordnanceJobs, ref resources, ref ordnanceList);
+
+            //Build Fighters
             var fighterJobs = installations.FigherJobs;
             float fighterPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
             var fighterList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(fighterPoints, ref fighterJobs, ref rawMaterialsStockpile, ref fighterList);
+            GenericConstructionJobs(fighterPoints, ref fighterJobs, ref resources, ref fighterList);
                
         }
 
@@ -211,17 +228,16 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// adds research points to a scientists project for a given change in time. 
         /// </summary>
+        /// <param name="colonyEntity"></param>
         /// <param name="factionAbilities"></param>
-        /// <param name="scientist"></param>
         /// <param name="factionTechs"></param>
-        /// <param name="deltaTime">the time since last this was run may need rethinking</param>
-        public static void DoResearch(Entity colonEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
+        public static void DoResearch(Entity colonyEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
         {
-            InstallationsDB installations = colonEntity.GetDataBlob<InstallationsDB>();
+            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
             Dictionary<InstallationSD,int> labs = InstallationsWithAbility(installations, InstallationAbilityType.Research);
             int labsused = 0;
 
-            foreach (var scientist in colonEntity.GetDataBlob<ColonyInfoDB>().Scientists)
+            foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
             {
                 TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
                 int numProjectLabs = scientist.GetDataBlob<TeamsDB>().Teamsize;
@@ -254,6 +270,9 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        #endregion
+
+        #region InteractsWithPlayer
 
         /// <summary>
         /// for changeing the priority of the constructionJobs priorities.
@@ -275,8 +294,10 @@ namespace Pulsar4X.ECSLib
                 throw;
             }
         }
+        
+        #endregion
 
-
+        #region PrivateMethods
         /// <summary>
         /// not shure if this should be a whole lot of if statements or if we can tidy it up somewhere else
         /// </summary>
@@ -327,5 +348,6 @@ namespace Pulsar4X.ECSLib
             }
             return facilities;
         }
+        #endregion
     }
 }

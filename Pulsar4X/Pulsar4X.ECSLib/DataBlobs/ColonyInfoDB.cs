@@ -8,12 +8,26 @@ namespace Pulsar4X.ECSLib
     {
         public JDictionary<Entity, double> Population { get; set; }
 
-        public JDictionary<Guid, int> MineralStockpile { get; set; }
-
-        public JDictionary<Guid, int> ShipComponentStockpile { get; set; }
-        public JDictionary<Guid, int> OrdananceStockpile { get; set; }
-        public JDictionary<Guid, int> FighterStockpile { get; set; }
-        public JDictionary<Guid, int> PDC_ComponentsStockpile { get; set; }
+        /// <summary>
+        /// Raw Mined minerals. Mines push here, Refinary pulls from here, Construction pulls from here.
+        /// </summary>
+        public JDictionary<Guid, int> MineralStockpile { get; set; } 
+        /// <summary>
+        /// Refinary pushes here, Construction pulls from here.
+        /// </summary>
+        public JDictionary<Guid, int> RefinedStockpile { get; set; } //refined Fuel, or refined minerals if the modder so desires.
+        /// <summary>
+        /// Construction pulls and pushes from here.
+        /// </summary>
+        public JDictionary<Guid, float> ComponentStockpile { get; set; } //constructed parts stockpile.
+        /// <summary>
+        /// Construction pushes here.
+        /// </summary>
+        public JDictionary<Guid, float> OrdananceStockpile { get; set; }
+        /// <summary>
+        /// Construction *adds* to this list. damaged and partialy constructed fighters will go here too, but shouldnt launch.
+        /// </summary>
+        public List<Entity> FighterStockpile { get; set; }
 
         public Entity PlanetEntity { get; set; }
 
