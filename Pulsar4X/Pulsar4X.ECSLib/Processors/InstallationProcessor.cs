@@ -103,9 +103,11 @@ namespace Pulsar4X.ECSLib
 
             foreach (var facilityPair in faciltiesList)
             {
-                
-                int fullColInstallations = (int)installations.Installations[facilityPair.Key];
-                installations.Installations[facilityPair.Key] += (float)facilityPair.Value;
+                //check how many complete installations we have by turning a float into an int;
+                int fullColInstallations = (int)installations.Installations[facilityPair.Key]; 
+                //add to the installations
+                installations.Installations.SafeAdd<Guid, float>(facilityPair.Key, (float)facilityPair.Value);
+                //compare how many complete we had then, vs now.
                 if ((int)installations.Installations[facilityPair.Key] > fullColInstallations)
                 {
                     installations.EmploymentList.Add(new InstallationEmployment 
@@ -114,21 +116,21 @@ namespace Pulsar4X.ECSLib
             }
 
             var refinaryJobs = installations.RefinaryJobs;
-            float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.FuelRefinery);
-            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FuelRefinery);
+            float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
+            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Refinery);
             var refinedList = new JDictionary<Guid, double>();
             
             GenericConstructionJobs(refinaryPoints, ref refinaryJobs, ref rawMaterialsStockpile, ref refinedList);
 
             var ordnanceJobs = installations.OrdnanceJobs;
-            float ordnancePoints = InstallationAbilityofType(installations, InstallationAbilityType.FuelRefinery);
+            float ordnancePoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
             var ordnanceList = new JDictionary<Guid, double>();
             
             GenericConstructionJobs(ordnancePoints, ref ordnanceJobs, ref rawMaterialsStockpile, ref ordnanceList);
 
             var fighterJobs = installations.FigherJobs;
-            float fighterPoints = InstallationAbilityofType(installations, InstallationAbilityType.FuelRefinery);
+            float fighterPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
             fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
             var fighterList = new JDictionary<Guid, double>();
 
@@ -213,7 +215,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="scientist"></param>
         /// <param name="factionTechs"></param>
         /// <param name="deltaTime">the time since last this was run may need rethinking</param>
-        internal static void DoResearch(Entity colonEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
+        public static void DoResearch(Entity colonEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
         {
             InstallationsDB installations = colonEntity.GetDataBlob<InstallationsDB>();
             Dictionary<InstallationSD,int> labs = InstallationsWithAbility(installations, InstallationAbilityType.Research);

@@ -10,10 +10,10 @@ namespace Pulsar4X.ECSLib
 
         public JDictionary<Guid, int> MineralStockpile { get; set; }
 
-        // JDictionary ShipComponentStockpile
-        // JDictionary OrdananceStockpile
-        // JDictionary FighterStockpile
-        // JDictionary PDC_ComponentsStockpile
+        public JDictionary<Guid, int> ShipComponentStockpile { get; set; }
+        public JDictionary<Guid, int> OrdananceStockpile { get; set; }
+        public JDictionary<Guid, int> FighterStockpile { get; set; }
+        public JDictionary<Guid, int> PDC_ComponentsStockpile { get; set; }
 
         public Entity PlanetEntity { get; set; }
 
