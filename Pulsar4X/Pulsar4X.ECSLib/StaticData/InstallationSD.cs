@@ -50,7 +50,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// research ID Requirements to build.
         /// </summary>
-        public List<Guid> Requirements;
+        public List<Guid> TechRequirements;
 
         /// <summary>
         /// The resources requred to build this facility

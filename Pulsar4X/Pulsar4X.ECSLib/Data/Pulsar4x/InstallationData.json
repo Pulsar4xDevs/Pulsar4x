@@ -18,7 +18,7 @@
                             }
                         ]
                     },
-                    "Requirements": [
+                    "TechRequirements": [
                         "68543934-467f-401a-9945-ca558437f969"
                     ],
                     "ResourceCosts": {
@@ -53,7 +53,7 @@
                             }
                         ]
                     },
-                    "Requirements": [
+                    "TechRequirements": [
                         "68543934-467f-401a-9945-ca558437f969"
                     ],
                     "ResourceCosts": {
@@ -83,12 +83,12 @@
                     "BaseAbilityAmounts": {
                         "List": [
                             {
-                                "Key": "FuelRefinery",
+                                "Key": "Refinery",
                                 "Value": 20000
                             }
                         ]
                     },
-                    "Requirements": [
+                    "TechRequirements": [
                         "68543934-467f-401a-9945-ca558437f969"
                     ],
                     "ResourceCosts": {

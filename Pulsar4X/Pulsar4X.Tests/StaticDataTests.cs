@@ -106,8 +106,8 @@ namespace Pulsar4X.Tests
             install.CargoSize = 1;
             install.BaseAbilityAmounts = new JDictionary<InstallationAbilityType, int>();
             install.BaseAbilityAmounts.Add(InstallationAbilityType.Mine, 1);
-            install.Requirements = new List<Guid>();
-            install.Requirements.Add(tech1.Id); //use trans-newtonian techology you just added to the tech list
+            install.TechRequirements = new List<Guid>();
+            install.TechRequirements.Add(tech1.Id); //use trans-newtonian techology you just added to the tech list
             install.ResourceCosts = new JDictionary<Guid, int>();
             install.ResourceCosts.Add(min.ID,60); //use Sorium that you just added to the mineral list
             install.WealthCost = 120;
