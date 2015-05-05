@@ -36,7 +36,7 @@ namespace Pulsar4X.ECSLib
         public static void Employment(Entity colonyEntity)
         {
             var employablePopulationlist = colonyEntity.GetDataBlob<ColonyInfoDB>().Population.Values;
-            long employable = (long)(employablePopulationlist.Sum() * 1000000); //because it's in millions I think...maybe we should change.
+            long employable = employablePopulationlist.Sum();
             InstallationsDB installationsDB = colonyEntity.GetDataBlob<InstallationsDB>();
             //int totalReq = 0;
             JDictionary<Guid,int> workingInstallations  = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Installations.Keys.ToDictionary(key => key, val => 0));

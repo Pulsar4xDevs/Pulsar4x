@@ -92,7 +92,7 @@ namespace Pulsar4X.Tests
 
 
             ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
-            JDictionary<Entity, double> pop = colonyInfo.Population;
+            JDictionary<Entity, long> pop = colonyInfo.Population;
             var species = pop.Keys.ToList();
             colonyInfo.Population[species[0]] = 5; //5mil pop
 

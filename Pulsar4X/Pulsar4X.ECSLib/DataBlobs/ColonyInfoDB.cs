@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
 {
     public class ColonyInfoDB : BaseDataBlob
     {
-        public JDictionary<Entity, double> Population { get; set; }
+        public JDictionary<Entity, long> Population { get; set; }
 
         /// <summary>
         /// Raw Mined minerals. Mines push here, Refinary pulls from here, Construction pulls from here.
@@ -40,11 +40,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="popSize">Species and population number(in Million?)</param>
+        /// <param name="popCount">Species and population number</param>
         /// <param name="planet"> the planet entity this colony is on</param>
-        public ColonyInfoDB(JDictionary<Entity, double> popSize, Entity planet)
+        public ColonyInfoDB(JDictionary<Entity, long> popCount, Entity planet)
         {
-            Population = popSize;
+            Population = popCount;
             PlanetEntity = planet;
             
             MineralStockpile =  new JDictionary<Guid, float>();
@@ -54,8 +54,8 @@ namespace Pulsar4X.ECSLib
             FighterStockpile = new List<Entity>();
         }
 
-        public ColonyInfoDB(Entity species, double populationInMillions, Entity planet):this(
-            new JDictionary<Entity, double> {{species, populationInMillions}},
+        public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
+            new JDictionary<Entity, long> {{species, populationCount}},
             planet
             )
         {
@@ -63,7 +63,7 @@ namespace Pulsar4X.ECSLib
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
-            Population = new JDictionary<Entity, double>(colonyInfoDB.Population);
+            Population = new JDictionary<Entity, long>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
             MineralStockpile = new JDictionary<Guid, float>(colonyInfoDB.MineralStockpile);
             RefinedStockpile = new JDictionary<Guid, float>(colonyInfoDB.RefinedStockpile);
