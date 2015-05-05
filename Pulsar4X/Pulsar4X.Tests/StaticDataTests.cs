@@ -104,8 +104,8 @@ namespace Pulsar4X.Tests
             install.Description = "Employs population to mine transnewtonian resources.";
             install.PopulationRequired = 1;
             install.CargoSize = 1;
-            install.BaseAbilityAmounts = new JDictionary<InstallationAbilityType, int>();
-            install.BaseAbilityAmounts.Add(InstallationAbilityType.Mine, 1);
+            install.BaseAbilityAmounts = new JDictionary<AbilityType, int>();
+            install.BaseAbilityAmounts.Add(AbilityType.Mine, 1);
             install.TechRequirements = new List<Guid>();
             install.TechRequirements.Add(tech1.Id); //use trans-newtonian techology you just added to the tech list
             install.ResourceCosts = new JDictionary<Guid, int>();

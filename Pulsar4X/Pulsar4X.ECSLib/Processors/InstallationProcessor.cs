@@ -60,15 +60,13 @@ namespace Pulsar4X.ECSLib
         /// <param name="factionEntity"></param>
         public static void Mine(Entity factionEntity, Entity colonyEntity)
         {
-            float factionMineingAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseMiningBonus;
-            float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
-            float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
-            float totalBonusMultiplier = factionMineingAbility * sectorGovenerAbility * planetGovenerAbility;
-
+            int installationMineingAbility = InstallationAbilityofType(colonyEntity.GetDataBlob<InstallationsDB>(), AbilityType.Mine);
+            float factionMineingBonus = BonusesForType(factionEntity, colonyEntity, AbilityType.Mine);
+            float totalMineingAbility = installationMineingAbility * factionMineingBonus;
             Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
             JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            int installationMineingAbility = InstallationAbilityofType(colonyEntity.GetDataBlob<InstallationsDB>(),InstallationAbilityType.Mine);
+            
             JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
 
             foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
@@ -76,7 +74,7 @@ namespace Pulsar4X.ECSLib
                 Guid mineralGuid = depositKeyValuePair.Key;
                 int amountOnPlanet = depositKeyValuePair.Value.Amount;
                 double accessibility = depositKeyValuePair.Value.Accessibility;
-                double abilitiestoMine = installationMineingAbility * totalBonusMultiplier * accessibility;
+                double abilitiestoMine = totalMineingAbility * accessibility;
                 int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
                 colonyMineralStockpile.SafeValueAdd<Guid, float>(mineralGuid, amounttomine);             
                 MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
@@ -103,16 +101,16 @@ namespace Pulsar4X.ECSLib
 
             //Refine stuff.
             var refinaryJobs = installations.RefinaryJobs;
-            float refinaryPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
-            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Refinery);
+            float refinaryPoints = InstallationAbilityofType(installations, AbilityType.Refinery);
+            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.Refinery);
 
             GenericConstructionJobs(refinaryPoints, refinaryJobs, colonyInfo, colonyInfo.RefinedStockpile);
 
 
             //Build facilities.
             var facilityJobs = installations.InstallationJobs;
-            float constructionPoints = InstallationAbilityofType(installations, InstallationAbilityType.InstallationConstruction);
-            constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
+            float constructionPoints = InstallationAbilityofType(installations, AbilityType.GenericConstruction);
+            constructionPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.GenericConstruction);
             var faciltiesList = new JDictionary<Guid, float>();
 
             GenericConstructionJobs(constructionPoints, facilityJobs, colonyInfo, faciltiesList);
@@ -133,15 +131,15 @@ namespace Pulsar4X.ECSLib
 
             //Build Ordnance
             var ordnanceJobs = installations.OrdnanceJobs;
-            float ordnancePoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
-            ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
+            float ordnancePoints = InstallationAbilityofType(installations, AbilityType.Refinery);
+            ordnancePoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.OrdnanceConstruction);
 
             GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, colonyInfo.OrdananceStockpile);
 
             //Build Fighters
             var fighterJobs = installations.FigherJobs;
-            float fighterPoints = InstallationAbilityofType(installations, InstallationAbilityType.Refinery);
-            fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
+            float fighterPoints = InstallationAbilityofType(installations, AbilityType.Refinery);
+            fighterPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.FighterConstruction);
             var fighterList = new JDictionary<Guid, float>();
 
             GenericConstructionJobs(fighterPoints, fighterJobs, colonyInfo, fighterList);
@@ -246,7 +244,7 @@ namespace Pulsar4X.ECSLib
         public static void DoResearch(Entity colonyEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
         {
             InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
-            Dictionary<InstallationSD,int> labs = InstallationsWithAbility(installations, InstallationAbilityType.Research);
+            Dictionary<InstallationSD,int> labs = InstallationsWithAbility(installations, AbilityType.Research);
             int labsused = 0;
 
             foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
@@ -264,7 +262,7 @@ namespace Pulsar4X.ECSLib
                     {
                         for(int i = 0; i < kvp.Value; i++)
                         {                         
-                            researchPoints += kvp.Key.BaseAbilityAmounts[InstallationAbilityType.Research];
+                            researchPoints += kvp.Key.BaseAbilityAmounts[AbilityType.Research];
                             numProjectLabs --;
                         }
                     }
@@ -320,10 +318,20 @@ namespace Pulsar4X.ECSLib
         /// <param name="colonyEntity"></param>
         /// <param name="ability"></param>
         /// <returns></returns>
-        private static float BonusesForType(Entity factioEntity, Entity colonyEntity, InstallationAbilityType ability )
+        private static float BonusesForType(Entity factioEntity, Entity colonyEntity, AbilityType ability )
         {
-            //todo link bonuses to type somehow 
-            return 1.0f;
+
+            FactionAbilitiesDB factionAbilities = factioEntity.GetDataBlob<FactionAbilitiesDB>();
+
+            float totalBonus = 1.0f;
+            totalBonus += factionAbilities.AbilityBonuses[ability];
+            totalBonus += 1.0f; // colonyAbilityes.AbilityBonus[ability]; 
+            /*todo: hell why not just ask the colony to get all bonuses for [ability] and have it return all of them? 
+             * Should it be in the processor and the processor look up each time, 
+             * or should the faction hold the dictionary and the processor update the dictionary, 
+             * either on something changeing, or at a designated tic.          
+             */
+            return totalBonus;
         }
 
         /// <summary>
@@ -334,7 +342,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="type"></param>
         /// <param name="installationsDB"></param>
         /// <returns></returns>
-        private static int InstallationAbilityofType(InstallationsDB installationsDB, InstallationAbilityType type)
+        private static int InstallationAbilityofType(InstallationsDB installationsDB, AbilityType type)
         {            
             int totalAbilityValue = 0;
             foreach(var facility in InstallationsWithAbility(installationsDB, type))             
@@ -352,7 +360,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="installations">colony installations</param>
         /// <param name="type">ability Type</param>
         /// <returns>a dictionary with key InstallationSD and the number of this type of installation</returns>
-        private static Dictionary<InstallationSD,int> InstallationsWithAbility(InstallationsDB installations, InstallationAbilityType type)
+        private static Dictionary<InstallationSD,int> InstallationsWithAbility(InstallationsDB installations, AbilityType type)
         {
             Dictionary<InstallationSD, int> facilities = new Dictionary<InstallationSD, int>();
             foreach (var kvp in installations.WorkingInstallations)
