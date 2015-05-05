@@ -11,11 +11,11 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Raw Mined minerals. Mines push here, Refinary pulls from here, Construction pulls from here.
         /// </summary>
-        public JDictionary<Guid, int> MineralStockpile { get; set; } 
+        public JDictionary<Guid, float> MineralStockpile { get; set; } 
         /// <summary>
         /// Refinary pushes here, Construction pulls from here.
         /// </summary>
-        public JDictionary<Guid, int> RefinedStockpile { get; set; } //refined Fuel, or refined minerals if the modder so desires.
+        public JDictionary<Guid, float> RefinedStockpile { get; set; } //refined Fuel, or refined minerals if the modder so desires.
         /// <summary>
         /// Construction pulls and pushes from here.
         /// </summary>
@@ -47,27 +47,29 @@ namespace Pulsar4X.ECSLib
             Population = popSize;
             PlanetEntity = planet;
             
-            MineralStockpile =  new JDictionary<Guid, int>();
-            foreach (var mineral in StaticDataManager.StaticDataStore.Minerals)
-            {
-                MineralStockpile.Add(mineral.ID,0);
-            }
-            //MineralStockpile = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Minerals.ToDictionary(key => key.ID, val => 0));
-            
+            MineralStockpile =  new JDictionary<Guid, float>();
+            RefinedStockpile = new JDictionary<Guid, float>();
+            ComponentStockpile = new JDictionary<Guid, float>();
+            OrdananceStockpile = new JDictionary<Guid, float>();
+            FighterStockpile = new List<Entity>();
         }
 
-        public ColonyInfoDB(Entity species, double populationInMillions, Entity planet)
+        public ColonyInfoDB(Entity species, double populationInMillions, Entity planet):this(
+            new JDictionary<Entity, double> {{species, populationInMillions}},
+            planet
+            )
         {
-            Population = new JDictionary<Entity, double> {{species, populationInMillions}};
-            PlanetEntity = planet;
-            MineralStockpile = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Minerals.ToDictionary(key => key.ID, val => 0));
         }
 
         public ColonyInfoDB(ColonyInfoDB colonyInfoDB)
         {
             Population = new JDictionary<Entity, double>(colonyInfoDB.Population);
             PlanetEntity = colonyInfoDB.PlanetEntity;
-            MineralStockpile = new JDictionary<Guid, int>(colonyInfoDB.MineralStockpile);
+            MineralStockpile = new JDictionary<Guid, float>(colonyInfoDB.MineralStockpile);
+            RefinedStockpile = new JDictionary<Guid, float>(colonyInfoDB.RefinedStockpile);
+            ComponentStockpile = new JDictionary<Guid, float>(colonyInfoDB.ComponentStockpile);
+            OrdananceStockpile = new JDictionary<Guid, float>(colonyInfoDB.OrdananceStockpile);
+            FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);
         }
 
         public override object Clone()

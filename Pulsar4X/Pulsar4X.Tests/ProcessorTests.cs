@@ -14,7 +14,7 @@ namespace Pulsar4X.Tests
         private Game _game;
         EntityManager _entityManager;
         private Entity _faction;
-
+        private Entity _colonyEntity;
         private MineralSD _duraniumSD;
         private MineralSD _corundiumSD;
 
@@ -51,9 +51,9 @@ namespace Pulsar4X.Tests
 
             Entity species = SpeciesFactory.CreateSpeciesHuman(_faction, _entityManager);
 
-            Entity colony = ColonyFactory.CreateColony(_faction, species, planetEntity);
+            _colonyEntity = ColonyFactory.CreateColony(_faction, species, planetEntity);
 
-            InstallationsDB installationsDB = colony.GetDataBlob<InstallationsDB>();
+            InstallationsDB installationsDB = _colonyEntity.GetDataBlob<InstallationsDB>();
             
             //wow holy shit, this is a pain. definatly need to add an "AddInstallation" to the InstallationProcessor. (and RemoveInstallation);
             Guid mineguidGuid = new Guid("406E22B5-65DB-4C7E-B956-B120B0466503");
@@ -70,6 +70,7 @@ namespace Pulsar4X.Tests
             _game = null;
             _entityManager = null;
             _faction = null;
+            _colonyEntity = null;
             StaticDataManager.ClearAllData();
         }
 
@@ -79,14 +80,16 @@ namespace Pulsar4X.Tests
             //first with no population;
             Entity colonyEntity = _faction.GetDataBlob<FactionDB>().Colonies[0];
             InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
-            JDictionary<Guid, int> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-            JDictionary<Guid, int> mineralstockpilePreMined = new JDictionary<Guid, int>(mineralstockpile);
+            JDictionary<Guid, float> mineralstockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            JDictionary<Guid, float> mineralstockpilePreMined = new JDictionary<Guid, float>(mineralstockpile);
             
             
             InstallationProcessor.Employment(colonyEntity); //do employment check;
             InstallationProcessor.Mine(_faction, colonyEntity); //run mines
             
-            Assert.AreEqual(mineralstockpile, mineralstockpilePreMined);
+            Assert.AreEqual(mineralstockpile[_corundiumSD.ID], 0);
+            Assert.AreEqual(mineralstockpile[_duraniumSD.ID], 0);
+
 
             ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
             JDictionary<Entity, double> pop = colonyInfo.Population;
@@ -96,13 +99,15 @@ namespace Pulsar4X.Tests
             InstallationProcessor.Employment(colonyEntity); //do employment check;
             InstallationProcessor.Mine(_faction, colonyEntity); //run mines
 
-            Assert.AreNotEqual(mineralstockpile, mineralstockpilePreMined);
+            Assert.AreNotEqual(mineralstockpile[_corundiumSD.ID], 10);
+            Assert.AreNotEqual(mineralstockpile[_duraniumSD.ID], 5);
 
         }
 
         [Test]
         public void TestConstruction()
         {
+            ColonyInfoDB colonyInfo = _colonyEntity.GetDataBlob<ColonyInfoDB>();
             Guid itemConstructing = new Guid();//just a random guid for now.
             double ablityPointsThisColony = 100;
             List<ConstructionJob> jobList = new List<ConstructionJob>();
@@ -130,7 +135,7 @@ namespace Pulsar4X.Tests
 
             
             //firstpass 
-            InstallationProcessor.GenericConstructionJobs(0, ref jobList, ref rawMaterials, ref stockpileOut);
+            InstallationProcessor.GenericConstructionJobs(0, jobList, colonyInfo, stockpileOut);
             Assert.AreEqual(0, stockpileOut[itemConstructing]);
 
             //these all have floating point errors.

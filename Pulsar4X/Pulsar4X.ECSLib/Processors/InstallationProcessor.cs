@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Security.AccessControl;
 
@@ -66,7 +67,7 @@ namespace Pulsar4X.ECSLib
 
             Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
             SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
-            JDictionary<Guid, int> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
             int installationMineingAbility = InstallationAbilityofType(colonyEntity.GetDataBlob<InstallationsDB>(),InstallationAbilityType.Mine);
             JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
 
@@ -77,7 +78,7 @@ namespace Pulsar4X.ECSLib
                 double accessibility = depositKeyValuePair.Value.Accessibility;
                 double abilitiestoMine = installationMineingAbility * totalBonusMultiplier * accessibility;
                 int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
-                colonyMineralStockpile[mineralGuid] += amounttomine;
+                colonyMineralStockpile.SafeValueAdd<Guid, float>(mineralGuid, amounttomine);             
                 MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
                 mineralDeposit.Amount -= amounttomine;
                 double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 3) * mineralDeposit.Accessibility;
@@ -107,10 +108,10 @@ namespace Pulsar4X.ECSLib
             refinaryPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Refinery);
             var refinedList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(refinaryPoints, ref refinaryJobs, ref rawMaterialsStockpile, ref refinedList);
+            GenericConstructionJobs(refinaryPoints, refinaryJobs, colonyInfo, refinedList);
             foreach (var material in refinedList)
             {
-                colonyInfo.RefinedStockpile.SafeValueAdd<Guid, int>(material.Key, (int)material.Value);
+                colonyInfo.RefinedStockpile.SafeValueAdd<Guid, float>(material.Key, (float)material.Value);
             }
 
             var resources = new JDictionary<Guid, int>();
@@ -121,14 +122,14 @@ namespace Pulsar4X.ECSLib
             constructionPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.InstallationConstruction);
             var faciltiesList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(constructionPoints, ref facilityJobs, ref resources, ref faciltiesList);
+            GenericConstructionJobs(constructionPoints, facilityJobs, colonyInfo, faciltiesList);
 
             foreach (var facilityPair in faciltiesList)
             {
                 //check how many complete installations we have by turning a float into an int;
                 int fullColInstallations = (int)installations.Installations[facilityPair.Key]; 
                 //add to the installations
-                installations.Installations.SafeAdd<Guid, float>(facilityPair.Key, (float)facilityPair.Value);
+                installations.Installations.SafeValueAdd<Guid, float>(facilityPair.Key, (float)facilityPair.Value);
                 //compare how many complete we had then, vs now.
                 if ((int)installations.Installations[facilityPair.Key] > fullColInstallations)
                 {
@@ -143,7 +144,7 @@ namespace Pulsar4X.ECSLib
             ordnancePoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.OrdnanceConstruction);
             var ordnanceList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(ordnancePoints, ref ordnanceJobs, ref resources, ref ordnanceList);
+            GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, ordnanceList);
 
             //Build Fighters
             var fighterJobs = installations.FigherJobs;
@@ -151,8 +152,21 @@ namespace Pulsar4X.ECSLib
             fighterPoints *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.FighterConstruction);
             var fighterList = new JDictionary<Guid, double>();
 
-            GenericConstructionJobs(fighterPoints, ref fighterJobs, ref resources, ref fighterList);
+            GenericConstructionJobs(fighterPoints, fighterJobs, colonyInfo, fighterList);
                
+        }
+
+
+        private static JDictionary<Guid,float> FindResource(ColonyInfoDB colony, Guid key)
+        {
+            JDictionary<Guid, float> resourceDictionary = null;
+            if (colony.MineralStockpile.ContainsKey(key))
+                resourceDictionary = colony.MineralStockpile;
+            else if (colony.RefinedStockpile.ContainsKey(key))
+                resourceDictionary = colony.RefinedStockpile;
+            else if (colony.ComponentStockpile.ContainsKey(key))
+                resourceDictionary = colony.ComponentStockpile;
+            return resourceDictionary;
         }
 
         /// <summary>
@@ -163,7 +177,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="jobList"></param>
         /// <param name="rawMaterials"></param>
         /// <param name="stockpileOut"></param>
-        public static void GenericConstructionJobs(double ablityPointsThisColony, ref List<ConstructionJob> jobList, ref JDictionary<Guid,int> rawMaterials, ref JDictionary<Guid,double> stockpileOut)
+        public static void GenericConstructionJobs(double ablityPointsThisColony, List<ConstructionJob> jobList, ColonyInfoDB colonyInfo, JDictionary<Guid,double> stockpileOut)
         {
             List<ConstructionJob> newJobList = new List<ConstructionJob>();
 
@@ -176,11 +190,13 @@ namespace Pulsar4X.ECSLib
                 foreach (var resourcePair in new Dictionary<Guid,int>(job.RawMaterialsRemaining))
                 {
                     Guid resourceGuid = resourcePair.Key;
-
+                    Dictionary<Guid, float> rawMaterials = FindResource(colonyInfo, resourceGuid);
+                    if (rawMaterials == null)
+                        break;
                     double pointsPerThisResource = (double)job.BuildPointsRemaining / resourcePair.Value;
 
                     //maximum rawMaterials needed or availible whichever is less
-                    int maxResource = Math.Min(resourcePair.Value, rawMaterials[resourceGuid]);
+                    int maxResource = (int)Math.Min(resourcePair.Value, rawMaterials[resourceGuid]);
                     
                     //maximum buildpoints I can use for this resource
                     //should I be using pointsPerResources or pointsPerThisResource?
@@ -205,7 +221,7 @@ namespace Pulsar4X.ECSLib
                 double itemsCreated = percentPerItem * percentthisjob;
                 double itemsLeft = job.ItemsRemaining - itemsCreated;
 
-                stockpileOut.SafeAdd<Guid, double>(job.Type, job.ItemsRemaining - itemsLeft);
+                stockpileOut.SafeValueAdd<Guid, double>(job.Type, job.ItemsRemaining - itemsLeft);
                 if (itemsLeft > 0)
                 {
                     //recreate constructionJob because it's a struct.
@@ -298,8 +314,11 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         #region PrivateMethods
+
+       
+
         /// <summary>
-        /// not shure if this should be a whole lot of if statements or if we can tidy it up somewhere else
+        /// not sure if this should be a whole lot of if statements or if we can tidy it up somewhere else
         /// </summary>
         /// <param name="factioEntity"></param>
         /// <param name="colonyEntity"></param>
