@@ -135,13 +135,6 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(shipNameDB.Name[faction] == shipName);
         }
 
-        [Test]
-        [Description("SystemBodyFactory tests")]
-        public void CreateAndFillStarSystem()
-        {
-            StarSystemFactory.CreateSystem("Argon Prime"); // Keeping with the X3 theme :P
-        }
-
         private static bool HasAllRequiredDatablobs(Entity toCheck, List<Type> datablobTypes)
         {
             var entityDataBlobs = toCheck.GetAllDataBlobs();
