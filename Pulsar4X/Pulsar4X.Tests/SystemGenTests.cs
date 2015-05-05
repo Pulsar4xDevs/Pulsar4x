@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
+using Pulsar4X.Entities;
 
 namespace Pulsar4X.Tests
 {
@@ -25,16 +26,18 @@ namespace Pulsar4X.Tests
 
             if (stars.Count > 1)
             {
-                double highestMass = stars[1].GetDataBlob<MassVolumeDB>().Mass;
-                for (int i = 2; i < stars.Count; i++)
+                Entity rootStar = stars[0].GetDataBlob<OrbitDB>().Root;
+                double highestMass = rootStar.GetDataBlob<MassVolumeDB>().Mass;
+                Entity highestMassStar = rootStar;
+                foreach (Entity star in stars)
                 {
-                    var massDB = stars[i].GetDataBlob<MassVolumeDB>();
+                    var massDB = star.GetDataBlob<MassVolumeDB>();
                     if (massDB.Mass > highestMass)
-                        highestMass = massDB.Mass;
+                        highestMassStar = star;
                 }
 
-                // the first star in the system should have the hiogst mass:
-                Assert.IsTrue(stars[0].GetDataBlob<MassVolumeDB>().Mass > highestMass);
+                // the first star in the system should have the highest mass:
+                Assert.AreSame(rootStar, highestMassStar);
             }
         }
 
@@ -62,6 +65,37 @@ namespace Pulsar4X.Tests
 
             // note that because we do 1000 systems total time taken as miliseconds is the time for a single sysmte, on average.
             string output = String.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB.", 
+                totalTime.ToString("N4"), (totalTime).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / 1000).ToString("N2"));
+
+            // print results:
+            Console.WriteLine(output);
+            Assert.Pass(output);
+        }
+
+        [Test]
+        [Description("generates 1000 test systems to test performance of the run.")]
+        public void OldSystemGenPerformanceTest()
+        {
+            // use a stop watch to get more accurate time.
+            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+
+            // lets get our memory before starting:
+            long startMemory = GC.GetTotalMemory(true);
+
+            timer.Start();
+            for (int i = 0; i < 1000; i++)
+            {
+                SystemGen.CreateSystem("Performance Test No " + i.ToString());
+            }
+
+            timer.Stop();
+            double totalTime = timer.Elapsed.TotalSeconds;
+
+            long endMemory = GC.GetTotalMemory(true);
+            double totalMemory = (endMemory - startMemory) / 1024.0;  // in KB
+
+            // note that because we do 1000 systems total time taken as miliseconds is the time for a single sysmte, on average.
+            string output = String.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB.",
                 totalTime.ToString("N4"), (totalTime).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / 1000).ToString("N2"));
 
             // print results:
