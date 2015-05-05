@@ -257,6 +257,14 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
+        /// Selects a number from a range based on the selection percentage provided.
+        /// </summary>
+        public static double SelectFromRange(double min, double max, double selection)
+        {
+            return min + selection * (max - min);
+        }
+
+        /// <summary>
         /// Calculates where the value falls inside the MinMaxStruct.
         /// </summary>
         /// <returns>Value's percent in the MinMaxStruct (Ranged from 0.0 to 1.0)</returns>
@@ -278,19 +286,6 @@ namespace Pulsar4X.ECSLib
             double adjustedMax = max - min;
             double adjustedValue = value - min;
             return adjustedValue / adjustedMax;
-        }
-
-        /// <summary>
-        /// Returns the next Double from m_RNG adjusted to be between the min and max range.
-        /// </summary>
-        public static double RNG_NextDoubleRange(Random rng, double min, double max)
-        {
-            return (min + rng.NextDouble() * (max - min));
-        }
-
-        public static double RNG_NextDoubleRange(Random rng, MinMaxStruct minMaxStruct)
-        {
-            return RNG_NextDoubleRange(rng, minMaxStruct.Min, minMaxStruct.Max);
         }
 
         /// <summary>

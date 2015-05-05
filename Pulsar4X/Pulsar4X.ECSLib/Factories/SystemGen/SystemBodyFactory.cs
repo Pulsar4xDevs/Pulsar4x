@@ -5,6 +5,9 @@ namespace Pulsar4X.ECSLib
 {
     public static class SystemBodyFactory
     {
+        /// <summary>
+        /// Creates an uninitialized body in the specified system.
+        /// </summary>
         public static Entity CreateBaseBody(StarSystem system)
         {
             var position = new PositionDB(0, 0, 0);
@@ -26,6 +29,9 @@ namespace Pulsar4X.ECSLib
             return newPlanet;
         }
 
+        /// <summary>
+        /// Calculates the number of bodies this star will have.
+        /// </summary>
         private static int CalcNumBodiesForStar(StarSystem system, MassVolumeDB starMassInfo, StarInfoDB starInfo)
         {
             if (system.RNG.NextDouble() > GalaxyFactory.Settings.PlanetGenerationChance)
@@ -48,6 +54,9 @@ namespace Pulsar4X.ECSLib
             return (int)Math.Round(percentOfMax * GalaxyFactory.Settings.MaxNoOfPlanets);
         }
 
+        /// <summary>
+        /// Generate all bodies for the specified star.
+        /// </summary>
         internal static void GenerateSystemBodiesForStar(StarSystem system, Entity star)
         {
             // Get required info from the star.
@@ -125,96 +134,201 @@ namespace Pulsar4X.ECSLib
                 FinalizeBodies(system, body, bodyCount);
                 bodyCount++;
             }
+
+            // Finally, comets!
+            GenerateComets(system, star);
         }
 
+        /// <summary>
+        /// Generates a random number of comets for a given star. The number of gererated will 
+        /// be at least GalaxyGen.MiniumCometsPerSystem and never more then GalaxyGen.MaxNoOfComets.
+        /// </summary>
+        private static void GenerateComets(StarSystem system, Entity star)
+        {
+            // first lets get a random number between our minium nad maximum number of comets:
+            int min = GalaxyFactory.Settings.MiniumCometsPerSystem;
+            if (min > GalaxyFactory.Settings.MaxNoOfComets)
+                min = GalaxyFactory.Settings.MaxNoOfComets;
+
+            int noOfComets = system.RNG.Next(min, GalaxyFactory.Settings.MaxNoOfComets + 1);
+
+            // now lets create the comets:
+            for (int i = 0; i < noOfComets; ++i)
+            {
+                NameDB starName = star.GetDataBlob<NameDB>();
+
+                Entity newComet = CreateBaseBody(system);
+                NameDB cometName = newComet.GetDataBlob<NameDB>();
+                cometName.Name[Entity.GetInvalidEntity()] = starName.Name[Entity.GetInvalidEntity()] + " - Comet " + (i + 1);
+
+                SystemBodyDB cometBodyDB = newComet.GetDataBlob<SystemBodyDB>();
+                cometBodyDB.Type = BodyType.Comet;
+
+                MassVolumeDB cometMVDB = newComet.GetDataBlob<MassVolumeDB>();
+                cometMVDB.Mass = GMath.SelectFromRange(GalaxyFactory.Settings.SystemBodyMassByType[BodyType.Comet], system.RNG.NextDouble());
+                cometMVDB.Volume = GMath.SelectFromRange(GalaxyFactory.Settings.SystemBodyDensityByType[BodyType.Comet], system.RNG.NextDouble());
+
+                GenerateCometOrbit(system, star, newComet);
+
+                FinalizeSystemBodyDB(system, newComet);
+            }
+        }
+
+        /// <summary>
+        /// Generates a very random orbit for comets. Doesn't care about other bodies.
+        /// </summary>
+        private static void GenerateCometOrbit(StarSystem system, Entity star, Entity comet)
+        {
+            StarInfoDB starInfo = star.GetDataBlob<StarInfoDB>();
+            double semiMajorAxis = GMath.SelectFromRange(GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType], system.RNG.NextDouble());
+            double eccentricity = GMath.SelectFromRange(GalaxyFactory.Settings.BodyEccentricityByType[BodyType.Comet], system.RNG.NextDouble());
+            double inclination = system.RNG.NextDouble() * GalaxyFactory.Settings.MaxBodyInclination;
+            double longitudeOfAscendingNode = system.RNG.NextDouble() * 360;
+            double argumentOfPeriapsis = system.RNG.NextDouble() * 360;
+            double meanAnomaly = system.RNG.NextDouble() * 360;
+
+            comet.SetDataBlob(new OrbitDB(star, star.GetDataBlob<MassVolumeDB>(), comet.GetDataBlob<MassVolumeDB>(), semiMajorAxis,
+                                            eccentricity, inclination, longitudeOfAscendingNode, argumentOfPeriapsis, meanAnomaly, Game.Instance.CurrentDateTime));
+        }
+
+        /// <summary>
+        /// Generates the bodies for the specified SystemBand.
+        /// This allows us to tweak how many habitable/inner/outer bodies there are.
+        /// </summary>
+        /// <param name="system">System we're working with.</param>
+        /// <param name="star">Star we're generating for.</param>
+        /// <param name="systemBand">Enum specifying which band we're working in.</param>
+        /// <param name="bandLimits">MinMax structure representing the distance this band represents.</param>
+        /// <param name="numBodies">Number of bodies to try to generate in this band.</param>
+        /// <param name="systemBodies">List of systemBodies already present. Required for Orbit generation.</param>
         private static List<Entity> GenerateBodiesForBand(StarSystem system, Entity star, SystemBand systemBand, MinMaxStruct bandLimits, int numBodies, List<Entity> systemBodies)
         {
             var bodies = new List<Entity>(numBodies);
 
+            int numAsteroidBelts = 0;
+
+            // Generate basic bodies with types and masses.
             while (numBodies > 0)
             {
                 Entity newBody = CreateBaseBody(system);
 
                 MassVolumeDB newBodyMVDB = newBody.GetDataBlob<MassVolumeDB>();
+                newBodyMVDB.Mass = 1; // Later we do some multiplication.
                 SystemBodyDB newBodyBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
                 newBodyBodyDB.Type = GalaxyFactory.Settings.BandBodyTypeWeight[systemBand].Select(system.RNG.NextDouble());
-                newBodyMVDB.Mass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[newBodyBodyDB.Type]);
 
                 if (newBodyBodyDB.Type == BodyType.Asteroid)
                 {
-                    // We calculate the entire mass of the asteroid belt here.
-                    // Note, this "numOfAsteroids" is not the final number. When we 
-                    // finalize this asteroid belt, we'll generate asteroids until we run out of mass.
-                    double noOfAsteroids = system.RNG.NextDouble() * GalaxyFactory.Settings.MaxNoOfAsteroidsPerBelt;
-                    newBodyMVDB.Mass *= noOfAsteroids;
+                    if (numAsteroidBelts == GalaxyFactory.Settings.MaxNoOfAsteroidBelts)
+                    {
+                        // Max number of belts reach. Reroll until we've got... not an asteroid belt.
+                        while (newBodyBodyDB.Type == BodyType.Asteroid)
+                        {
+                            newBodyBodyDB.Type = GalaxyFactory.Settings.BandBodyTypeWeight[systemBand].Select(system.RNG.NextDouble());
+                        }
+                    }
+                    else
+                    {
+                        // We calculate the entire mass of the asteroid belt here.
+                        // Note, this "numOfAsteroids" is not the final number. When we 
+                        // finalize this asteroid belt, we'll generate asteroids until we run out of mass.
+                        double noOfAsteroids = system.RNG.NextDouble() * GalaxyFactory.Settings.MaxNoOfAsteroidsPerBelt;
+                        newBodyMVDB.Mass = noOfAsteroids;
+                    }
                 }
+
+                // Mass multiplication here. This allows us to set the mass to the correct value for both asteroid belts and other bodies.
+                newBodyMVDB.Mass *= GMath.SelectFromRange(GalaxyFactory.Settings.SystemBodyMassByType[newBodyBodyDB.Type], system.RNG.NextDouble());
 
                 bodies.Add(newBody);
                 numBodies--;
             }
 
-            GenerateOrbitsForBodies(system, star, bodies, bandLimits, systemBodies);
+            // Generate the orbits for the bodies.
+            // bodies list may be modified.
+            // If a body cannot be put into a sane orbit, it is removed.
+            GenerateOrbitsForBodies(system, star, ref bodies, bandLimits, systemBodies);
 
             return bodies;
         }
 
-        private static void GenerateOrbitsForBodies(StarSystem system, Entity star, List<Entity> bodies, MinMaxStruct bandLimits, List<Entity> systemBodies)
+        /// <summary>
+        /// Places passed bodies into a sane orbit around the parent.
+        /// </summary>
+        /// <param name="system">System we're working with.</param>
+        /// <param name="parent">Parent entity we're working with.</param>
+        /// <param name="bodies">List of bodies to place into orbit. May be modified if bodies cannot be placed in a sane orbit.</param>
+        /// <param name="bandLimits">MinMax structure representing the distance limits for the orbit.</param>
+        /// <param name="systemBodies">List of bodies already orbiting this parent. We work around these.</param>
+        private static void GenerateOrbitsForBodies(StarSystem system, Entity parent, ref List<Entity> bodies, MinMaxStruct bandLimits, List<Entity> systemBodies)
         {
             double totalBandMass = 0;
 
+            // Calculate the total mass of bodies we must place into orbit.
             foreach (Entity body in bodies)
             {
                 MassVolumeDB bodyMVDB = body.GetDataBlob<MassVolumeDB>();
-
                 totalBandMass += bodyMVDB.Mass;
             }
 
+            // Prepare the loop variables.
             double remainingBandMass = totalBandMass;
 
-            double minDistance = bandLimits.Min;
-            double remainingDistance = bandLimits.Max - minDistance;
+            double minDistance = bandLimits.Min; // The minimum distance we can place a body.
+            double remainingDistance = bandLimits.Max - minDistance; // distance remaining that we can place bodies into.
 
-            double insideApoapsis = double.MinValue;
-            double outsidePeriapsis = double.MaxValue;
-            double insideMass = 0;
-            double outsideMass = 0;
+            double insideApoapsis = double.MinValue; // Apoapsis of the orbit that is inside of the next body.
+            double outsidePeriapsis = double.MaxValue; // Periapsis of the orbit that is outside of the next body.
+            double insideMass = 0; // Mass of the object that is inside of the next body.
+            double outsideMass = 0; // Mass of the object that is outside of the next body.
 
+            // Find the inside and outside bodies.
             foreach (Entity systemBody in systemBodies)
             {
                 OrbitDB bodyOrbit = systemBody.GetDataBlob<OrbitDB>();
                 MassVolumeDB bodyMass = systemBody.GetDataBlob<MassVolumeDB>();
 
-                if (bodyOrbit.Apoapsis > insideApoapsis && bodyOrbit.Apoapsis <= bandLimits.Min)
+                // Find if the current systemBody is within the bandLimit
+                // and is in a higher orbit than the previous insideOrbit.
+                if (bodyOrbit.Apoapsis <= bandLimits.Min && bodyOrbit.Apoapsis > insideApoapsis)
                 {
                     insideApoapsis = bodyOrbit.Apoapsis;
                     insideMass = bodyMass.Mass;
                 }
-                else if (bodyOrbit.Periapsis < outsidePeriapsis && bodyOrbit.Periapsis >= bandLimits.Max)
+                // Otherwise, find if the current systemBody is within the bandLimit
+                // and is in a lower orbit than the previous outsideOrbit.
+                else if (bodyOrbit.Periapsis >= bandLimits.Max && bodyOrbit.Periapsis < outsidePeriapsis)
                 {
                     outsidePeriapsis = bodyOrbit.Periapsis;
                     outsideMass = bodyMass.Mass;
                 }
+                // Note, we build our insideOrbit and outsideOrbits, then we try to build orbits between insideOrbit and outsideOrbit.
+                // If there's only one body, but it's right INSIDE the bandLimits, then our insideOrbit will be very close to our bandLimit,
+                // and we likely wont be able to find a sane orbit, even if there's plenty of room on the inside side.
             }
 
+            // for loop because we might modify bodies.
             for (int i = 0; i < bodies.Count; i++)
             {
                 Entity currentBody = bodies[i];
 
                 MassVolumeDB currentMVDB = currentBody.GetDataBlob<MassVolumeDB>();
 
+                // Limit the orbit to the ratio of object mass and remaining distance.
                 double massRatio = currentMVDB.Mass / remainingBandMass;
                 double maxDistance = remainingDistance * massRatio + minDistance;
-
-                OrbitDB currentOrbit = FindClearOrbit(system, star, currentMVDB, insideApoapsis, outsidePeriapsis, insideMass, outsideMass, minDistance, maxDistance);
-
+                // We'll either find this orbit, or eject it, so this body is no longer part of remaining mass.
                 remainingBandMass -= currentMVDB.Mass;
+
+                // Do the heavy math to find the orbit.
+                OrbitDB currentOrbit = FindClearOrbit(system, parent, currentBody, insideApoapsis, outsidePeriapsis, insideMass, outsideMass, minDistance, maxDistance);
 
                 if (currentOrbit == null)
                 {
                     // Failed to find a clear orbit. This body is "ejected."
                     bodies.RemoveAt(i);
-                    i--;
+                    i--; // Keep i at the right spot.
                     continue;
                 }
                 currentBody.SetDataBlob(currentOrbit);
@@ -224,10 +338,15 @@ namespace Pulsar4X.ECSLib
             }
         }
 
-        private static OrbitDB FindClearOrbit(StarSystem system, Entity parent, MassVolumeDB myMVDB, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance)
+        /// <summary>
+        /// Finds a gravitationally stable orbit between the insideApoapsis and the outsidePeriapsis for a body.
+        /// </summary>
+        private static OrbitDB FindClearOrbit(StarSystem system, Entity parent, Entity body, double insideApoapsis, double outsidePeriapsis, double insideMass, double outsideMass, double minDistance, double maxDistance)
         {
             MassVolumeDB parentMVDB = parent.GetDataBlob<MassVolumeDB>();
             double parentMass = parentMVDB.Mass;
+
+            MassVolumeDB myMVDB = body.GetDataBlob<MassVolumeDB>();
 
             // Adjust minDistance
             double gravAttractionInsiderNumerator = GameSettings.Science.GravitationalConstant * myMVDB.Mass * insideMass;
@@ -256,7 +375,7 @@ namespace Pulsar4X.ECSLib
                 return null;
             }
 
-            double sma = GMath.RNG_NextDoubleRange(system.RNG, minDistance, maxDistance);
+            double sma = GMath.SelectFromRange(minDistance, maxDistance, system.RNG.NextDouble());
 
             // Calculate max eccentricity.
             // First calc max eccentricity for the apoapsis.
@@ -270,11 +389,23 @@ namespace Pulsar4X.ECSLib
                 // We use maxApoEccentricity in next calc.
                 maxApoEccentricity = minPeriEccentricity;
             }
+            
+            // Enforce GalaxyFactory settings.
+            MinMaxStruct eccentricityMinMax = GalaxyFactory.Settings.BodyEccentricityByType[body.GetDataBlob<SystemBodyDB>().Type];
+            if (eccentricityMinMax.Max > maxApoEccentricity)
+            {
+                eccentricityMinMax.Max = maxApoEccentricity;
+            }
+            // GalaxyFactory settings disallow this orbit. Eject.
+            if (eccentricityMinMax.Min > eccentricityMinMax.Max)
+            {
+                return null;
+            }
 
-            // Now scale down eccentricity by a random factor.
-            double eccentricity = system.RNG.NextDouble() * maxApoEccentricity;
+            // Now select a random eccentricity within the limits.
+            double eccentricity = GMath.SelectFromRange(eccentricityMinMax, system.RNG.NextDouble());
 
-            return new OrbitDB(parent, parentMVDB, myMVDB, sma, eccentricity, system.RNG.NextDouble() * GalaxyFactory.Settings.MaxPlanetInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, Game.Instance.CurrentDateTime);
+            return new OrbitDB(parent, parentMVDB, myMVDB, sma, eccentricity, system.RNG.NextDouble() * GalaxyFactory.Settings.MaxBodyInclination, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, system.RNG.NextDouble() * 360, Game.Instance.CurrentDateTime);
         }
 
         private static void FinalizeBodies(StarSystem system, Entity body, int bodyCount)
@@ -317,7 +448,7 @@ namespace Pulsar4X.ECSLib
             SystemBodyDB systemBodyDB = body.GetDataBlob<SystemBodyDB>();
 
             // Fill the MVDB.Volume property by solving from a density selection.
-            massVolumeDB.Volume = MassVolumeDB.GetVolume(massVolumeDB.Mass, GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyDensityByType[systemBodyDB.Type]));
+            massVolumeDB.Volume = MassVolumeDB.GetVolume(massVolumeDB.Mass, GMath.SelectFromRange(GalaxyFactory.Settings.SystemBodyDensityByType[systemBodyDB.Type], system.RNG.NextDouble()));
         }
 
         private static void GenerateMoons(StarSystem system, Entity parent)
@@ -354,7 +485,16 @@ namespace Pulsar4X.ECSLib
                 SystemBodyDB newMoonBodyDB = newMoon.GetDataBlob<SystemBodyDB>();
 
                 newMoonBodyDB.Type = BodyType.Moon;
-                newMoonMVDB.Mass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[newMoonBodyDB.Type]);
+                
+                // Enforce GalaxyFactory mass limits.
+                MinMaxStruct moonMassMinMax = GalaxyFactory.Settings.SystemBodyMassByType[newMoonBodyDB.Type];
+                double maxRelativeMass = parentMVDB.Mass * GalaxyFactory.Settings.MaxMoonMassRelativeToParentBody;
+                if (maxRelativeMass > moonMassMinMax.Max)
+                {
+                    moonMassMinMax.Max = maxRelativeMass;
+                }
+
+                newMoonMVDB.Mass = GMath.SelectFromRange(moonMassMinMax, system.RNG.NextDouble());
 
                 moons.Add(newMoon);
                 numMoons--;
@@ -363,7 +503,7 @@ namespace Pulsar4X.ECSLib
             double minMoonOrbitDist = parentMVDB.Radius * GalaxyFactory.Settings.MinMoonOrbitMultiplier;
             double maxMoonDistance = GalaxyFactory.Settings.MaxMoonOrbitDistanceByPlanetType[parentBodyDB.Type] * massRatioOfParent;
 
-            GenerateOrbitsForBodies(system, parent, moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<Entity>());
+            GenerateOrbitsForBodies(system, parent, ref moons, new MinMaxStruct(minMoonOrbitDist, maxMoonDistance), new List<Entity>());
         }
 
         private static void FinalizeAsteroidBelt(StarSystem system, Entity body, int bodyCount)
@@ -387,7 +527,7 @@ namespace Pulsar4X.ECSLib
 
                 MassVolumeDB newBodyMVDB = newBody.GetDataBlob<MassVolumeDB>();
 
-                newBodyMVDB.Mass = GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.SystemBodyMassByType[newBodyDB.Type]);
+                newBodyMVDB.Mass = GMath.SelectFromRange(GalaxyFactory.Settings.SystemBodyMassByType[newBodyDB.Type], system.RNG.NextDouble());
 
                 FinalizeAsteroidOrbit(system, newBody, referenceOrbit);
                 FinalizeSystemBodyDB(system, newBody);
@@ -409,27 +549,27 @@ namespace Pulsar4X.ECSLib
             double deviation = referenceOrbit.SemiMajorAxis * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             double min = referenceOrbit.SemiMajorAxis - deviation;
             double max = referenceOrbit.SemiMajorAxis + deviation;
-            double semiMajorAxis = GMath.RNG_NextDoubleRange(system.RNG, min, max);  // dont need to raise to power, reference orbit already did that.
+            double semiMajorAxis = GMath.SelectFromRange(min, max, system.RNG.NextDouble());  // dont need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyFactory.Settings.MaxAsteroidOrbitDeviation, 2);
             min = referenceOrbit.Eccentricity - deviation;
             max = referenceOrbit.Eccentricity + deviation;
-            double eccentricity = GMath.RNG_NextDoubleRange(system.RNG, min, max); // get random eccentricity needs better distrubution.
+            double eccentricity = GMath.SelectFromRange(min, max, system.RNG.NextDouble()); // get random eccentricity needs better distrubution.
 
             deviation = referenceOrbit.Inclination * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.Inclination - deviation;
             max = referenceOrbit.Inclination + deviation;
-            double inclination = GMath.RNG_NextDoubleRange(system.RNG, min, max); // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double inclination = GMath.SelectFromRange(min, max, system.RNG.NextDouble()); // doesn't do much at the moment but may as well be there. Neet better Dist.
 
             deviation = referenceOrbit.ArgumentOfPeriapsis * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.ArgumentOfPeriapsis - deviation;
             max = referenceOrbit.ArgumentOfPeriapsis + deviation;
-            double argumentOfPeriapsis = GMath.RNG_NextDoubleRange(system.RNG, min, max);
+            double argumentOfPeriapsis = GMath.SelectFromRange(min, max, system.RNG.NextDouble());
 
             deviation = referenceOrbit.LongitudeOfAscendingNode * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.LongitudeOfAscendingNode - deviation;
             max = referenceOrbit.LongitudeOfAscendingNode + deviation;
-            double longitudeOfAscendingNode = GMath.RNG_NextDoubleRange(system.RNG, min, max);
+            double longitudeOfAscendingNode = GMath.SelectFromRange(min, max, system.RNG.NextDouble());
 
             // Keep the starting point of the orbit completly random.
             double meanAnomaly = system.RNG.NextDouble() * 360;
@@ -479,11 +619,11 @@ namespace Pulsar4X.ECSLib
             }
 
             // Create some of the basic stats:
-            bodyInfo.AxialTilt = (float)(system.RNG.NextDouble() * GalaxyFactory.Settings.MaxPlanetInclination);
+            bodyInfo.AxialTilt = (float)(system.RNG.NextDouble() * GalaxyFactory.Settings.MaxBodyInclination);
 
             // generate the planets day length:
             //< @todo Should we do Tidaly Locked bodies??? iirc bodies trend toward being tidaly locked over time...
-            bodyInfo.LengthOfDay = new TimeSpan((int)Math.Round(GMath.RNG_NextDoubleRange(system.RNG, 0, bodyOrbit.OrbitalPeriod.TotalDays)), system.RNG.Next(0, 24), system.RNG.Next(0, 60), 0);
+            bodyInfo.LengthOfDay = new TimeSpan((int)Math.Round(GMath.SelectFromRange(0, bodyOrbit.OrbitalPeriod.TotalDays, system.RNG.NextDouble())), system.RNG.Next(0, 24), system.RNG.Next(0, 60), 0);
             // just a basic sainty check to make sure we dont end up with a planet rotating once every 3 minutes, It'd pull itself apart!!
             if (bodyInfo.LengthOfDay < TimeSpan.FromHours(GalaxyFactory.Settings.MiniumPossibleDayLength))
                 bodyInfo.LengthOfDay += TimeSpan.FromHours(GalaxyFactory.Settings.MiniumPossibleDayLength);
@@ -502,7 +642,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // Generate Magnetic field:
-            bodyInfo.MagneticFeild = (float)GMath.RNG_NextDoubleRange(system.RNG, GalaxyFactory.Settings.PlanetMagneticFieldByType[bodyInfo.Type]);
+            bodyInfo.MagneticFeild = (float)GMath.SelectFromRange(GalaxyFactory.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
                 bodyInfo.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
 

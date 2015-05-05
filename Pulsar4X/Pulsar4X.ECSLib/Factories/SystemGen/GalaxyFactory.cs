@@ -335,7 +335,7 @@ namespace Pulsar4X.ECSLib
             /// The maximum SystemBody orbit Inclination. Also used as the maximum orbital tilt.
             /// Angle in degrees.
             /// </summary>
-            public const double MaxPlanetInclination = 45; // degrees. used for orbits and axial tilt.
+            public const double MaxBodyInclination = 45; // degrees. used for orbits and axial tilt.
 
             /// <summary>
             /// This controls the maximum moon mass relative to the parent body.
@@ -355,11 +355,6 @@ namespace Pulsar4X.ECSLib
             public const double TerrestrialBodyTectonicActiviyChance = 0.5;
 
             /// <summary>
-            /// Epoch used when generating orbits. There should be no reason to change this.
-            /// </summary>
-            public static DateTime J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
-
-            /// <summary>
             /// The maximum temperture of a planet which can have Ice Moons, in Kelvin
             /// This is used to work out the change of an Ice moon around a planet, the 
             /// lower the plante's temp below this the moor likly an ice moon is.
@@ -375,18 +370,6 @@ namespace Pulsar4X.ECSLib
             /// Is timesd by the total radius of the moon and its parent to come up with a minium orbit distance for that body.
             /// </summary>
             public const double MinMoonOrbitMultiplier = 2.5;
-
-            /// <summary>
-            /// This is the Absolute maximum orbit of moons, in AU.
-            /// @note The maximum may be RelativeMaxMoonOrbitDistance instead, but will never be more then this.
-            /// </summary>
-            public const double AbsoluteMaxMoonOrbitDistance = 60581692 / GameSettings.Units.KmPerAu;
-
-            /// <summary>
-            /// This is the relative maximum orbit of moons, in AU. it is times by the parents semiMajorAxis.
-            /// @note The maximum may be AbsoluteMaxMoonOrbitDistance instead, but will never be more then this.
-            /// </summary>
-            public const double RelativeMaxMoonOrbitDistance = 0.25;
 
             /// <summary>
             /// Controls how much the type of a star affects the generation of planets.
@@ -545,10 +528,57 @@ namespace Pulsar4X.ECSLib
             };
 
             /// <summary>
+            /// Possible ranges for eccentricity by body type.
+            /// </summary>
+            public static Dictionary<BodyType, MinMaxStruct> BodyEccentricityByType = new Dictionary<BodyType, MinMaxStruct>
+            {
+                {BodyType.Asteroid, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }},
+                {BodyType.Comet, new MinMaxStruct
+                {
+                    Min = 0.6,
+                    Max = 0.8
+                }},
+                {BodyType.DwarfPlanet, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }},
+                {BodyType.GasDwarf, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }},
+                {BodyType.GasGiant, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }},
+                {BodyType.IceGiant, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }},
+                {BodyType.Moon, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }},
+                {BodyType.Terrestrial, new MinMaxStruct
+                {
+                    Min = 0,
+                    Max = 0.5
+                }}
+            };
+
+            /// <summary>
             /// The possible ranges for albedo for various planet types.
             /// @note These are WAGs roughly based on the albedo of bodies in our solar system. They couild be tweak for gameplay.
             /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> PlanetAlbedoByType = new Dictionary<BodyType, MinMaxStruct>()
+            public static Dictionary<BodyType, MinMaxStruct> PlanetAlbedoByType = new Dictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
@@ -597,7 +627,7 @@ namespace Pulsar4X.ECSLib
             /// In microtesla (uT).
             /// @note @note These are WAGs roughly based on the Magnetosphere of bodies in our solar system. They couild be tweak for gameplay.
             /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> PlanetMagneticFieldByType = new Dictionary<BodyType, MinMaxStruct>()
+            public static Dictionary<BodyType, MinMaxStruct> PlanetMagneticFieldByType = new Dictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
@@ -645,7 +675,7 @@ namespace Pulsar4X.ECSLib
             /// This value is multiplied by (SystemBody Mass / Max Mass for SystemBody Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
             /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
             /// </summary>
-            public static Dictionary<BodyType, double> AtmosphereGenerationModifier = new Dictionary<BodyType, double>()
+            public static Dictionary<BodyType, double> AtmosphereGenerationModifier = new Dictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 100000000},
                 {BodyType.IceGiant, 100000000},
@@ -661,7 +691,7 @@ namespace Pulsar4X.ECSLib
             /// This value is used to determin if a planet gets moons. if a random number between 0 and 1 is less then this number then the planet geets moons.
             /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
             /// </summary>
-            public static Dictionary<BodyType, double> MoonGenerationChanceByPlanetType = new Dictionary<BodyType, double>()
+            public static Dictionary<BodyType, double> MoonGenerationChanceByPlanetType = new Dictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 0.99999999},
                 {BodyType.IceGiant, 0.99999999},
@@ -671,7 +701,7 @@ namespace Pulsar4X.ECSLib
                 {BodyType.Moon, -1},
             };
 
-            public static Dictionary<BodyType, double> MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>()
+            public static Dictionary<BodyType, double> MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 60581692 / GameSettings.Units.KmPerAu}, // twice higest jupiter moon orbit
                 {BodyType.IceGiant, 49285000 / GameSettings.Units.KmPerAu}, // twice Neptunes highest moon orbit
@@ -685,7 +715,7 @@ namespace Pulsar4X.ECSLib
             /// The bigger the planets the more moons it can have and the closer it will get to having the maximum number.
             /// @note Given the way the calculation for max moons is done it is unlikly that any planet will ever have the maximum number of moon, so pad as desired.
             /// </summary>
-            public static Dictionary<BodyType, double> MaxNoOfMoonsByPlanetType = new Dictionary<BodyType, double>()
+            public static Dictionary<BodyType, double> MaxNoOfMoonsByPlanetType = new Dictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 20},
                 {BodyType.IceGiant, 15},
@@ -700,7 +730,7 @@ namespace Pulsar4X.ECSLib
             /// Earth has a tectonic activity of 0.217 by this calculation.
             /// So if the tectonic activing number is < the threshold of Earth like but greater than Minor then it will be Earth like.
             /// </summary>
-            public static Dictionary<TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<TectonicActivity, double>()
+            public static Dictionary<TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<TectonicActivity, double>
             {
                 {TectonicActivity.Dead, 0.01},
                 {TectonicActivity.Minor, 0.2},
@@ -708,7 +738,7 @@ namespace Pulsar4X.ECSLib
                 {TectonicActivity.Major, 1} // Not used, just here for completness.
             };
 
-            public static WeightedList<SystemBand> BandBodyWeight = new WeightedList<SystemBand>()
+            public static WeightedList<SystemBand> BandBodyWeight = new WeightedList<SystemBand>
             {
                 {0.3, SystemBand.InnerBand},
                 {0.1, SystemBand.HabitableBand},
@@ -724,7 +754,7 @@ namespace Pulsar4X.ECSLib
                 {50, BodyType.Terrestrial},
             };
 
-            private static WeightedList<BodyType> habitableBandTypeWeights = new WeightedList<BodyType>()
+            private static WeightedList<BodyType> habitableBandTypeWeights = new WeightedList<BodyType>
             {
                 {25, BodyType.Asteroid},
                 {10, BodyType.GasDwarf},
@@ -733,7 +763,7 @@ namespace Pulsar4X.ECSLib
                 {60, BodyType.Terrestrial},
             };
 
-            private static WeightedList<BodyType> outerBandTypeWeights = new WeightedList<BodyType>()
+            private static WeightedList<BodyType> outerBandTypeWeights = new WeightedList<BodyType>
             {
                 {15, BodyType.Asteroid},
                 {20, BodyType.GasDwarf},
@@ -742,7 +772,7 @@ namespace Pulsar4X.ECSLib
                 {10, BodyType.Terrestrial},
             };
 
-            public static Dictionary<SystemBand, WeightedList<BodyType>> BandBodyTypeWeight = new Dictionary<SystemBand, WeightedList<BodyType>>()
+            public static Dictionary<SystemBand, WeightedList<BodyType>> BandBodyTypeWeight = new Dictionary<SystemBand, WeightedList<BodyType>>
             {
                 {SystemBand.InnerBand, innerBandTypeWeights},
                 {SystemBand.HabitableBand, habitableBandTypeWeights},
