@@ -129,7 +129,7 @@ namespace Pulsar4X.ECSLib
             }
             else
             {
-                SetBits.Remove(index);
+                SetBits.Remove(index + (backingIndex * BitsPerValue));
             }
         }
 
