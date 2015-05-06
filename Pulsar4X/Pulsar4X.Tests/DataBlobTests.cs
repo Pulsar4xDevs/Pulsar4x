@@ -85,9 +85,6 @@ namespace Pulsar4X.Tests
         [Test]
         public void TreeHierarchyTest()
         {
-            Type entityManagerType = typeof(EntityManager);
-
-
             // Create the "Root" entity.
             Entity rootNode = CreateNode(null);
             ConcreteTreeHierarchyDB rootDB = rootNode.GetDataBlob<ConcreteTreeHierarchyDB>();
@@ -135,8 +132,8 @@ namespace Pulsar4X.Tests
             var Parent2_children = new List<ConcreteTreeHierarchyDB> { Parent2_child1DB, Parent2_child2DB };
 
             // Ensure listed child entities concur with our child list.
-            Assert.AreEqual(Parent1DB.Children, Parent1_childEntitys);
-            Assert.AreEqual(Parent2DB.Children, Parent2_childEntitys);
+            Assert.AreEqual(Parent1_childEntitys, Parent1DB.Children);
+            Assert.AreEqual(Parent2_childEntitys, Parent2DB.Children);
 
             // Ensure listen child DBs concur with our stored list.
             Assert.AreEqual(Parent1_children, Parent1DB.ChildrenDBs);
@@ -154,6 +151,7 @@ namespace Pulsar4X.Tests
             // Make sure P2's children list updated.
             Parent2_childEntitys.Remove(Parent2_child1);
             Assert.AreEqual(Parent2_childEntitys, Parent2DB.Children);
+
 
             // Create a new root.
             Entity root2Node = CreateNode(null);

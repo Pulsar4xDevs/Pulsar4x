@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -7,23 +8,22 @@ namespace Pulsar4X.ECSLib
 {
     public abstract class TreeHierarchyDB : BaseDataBlob
     {
+        [CanBeNull]
         public Entity Parent
         {
             get { return _parent; }
             set
             {
-                if (OwningEntity == null)
+                if (Equals(value, _parent))
                 {
-                    _parent = value;
                     return;
                 }
 
-                if (Parent != null)
-                {
-                    ParentDB.RemoveChild(OwningEntity);
-                }
                 _parent = value;
-                if (Parent != null)
+
+                OnPropertyChanged();
+
+                if (Parent != null && OwningEntity != null)
                 {
                     ParentDB.AddChild(OwningEntity);
                 }
@@ -32,6 +32,7 @@ namespace Pulsar4X.ECSLib
         private Entity _parent;
 
         [JsonIgnore]
+        [CanBeNull]
         public TreeHierarchyDB ParentDB
         {
             get
@@ -43,6 +44,7 @@ namespace Pulsar4X.ECSLib
             }
         }
 
+        [NotNull]
         public Entity Root
         {
             get
@@ -57,19 +59,23 @@ namespace Pulsar4X.ECSLib
         }
 
         [JsonIgnore]
+        [NotNull]
         public TreeHierarchyDB RootDB
         {
             get { return GetSameTypeDB(Root); }
         }
 
+        [NotNull]
         public List<Entity> Children { get; private set; }
 
         [JsonIgnore]
+        [NotNull]
         public List<TreeHierarchyDB> ChildrenDBs
         {
             get { return Children.Select(GetSameTypeDB).ToList(); }
         }
 
+        [CanBeNull]
         public override Entity OwningEntity
         {
             get { return _owningEntity; }
@@ -90,7 +96,7 @@ namespace Pulsar4X.ECSLib
         }
         private Entity _owningEntity;
 
-        public TreeHierarchyDB(Entity parent)
+        protected TreeHierarchyDB(Entity parent)
         {
             Parent = parent;
             Children = new List<Entity>();
@@ -99,11 +105,33 @@ namespace Pulsar4X.ECSLib
         private void AddChild(Entity child)
         {
             Children.Add(child);
+            GetSameTypeDB(child).PropertyChanged += OnPropertyChanged;
+            OnPropertyChanged("Children");
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            if (propertyChangedEventArgs.PropertyName == "Parent")
+            {
+                RemoveChild(((TreeHierarchyDB)sender).OwningEntity);
+            }
         }
 
         private bool RemoveChild(Entity child)
         {
-            return Children.Remove(child);
+            bool removed = Children.Remove(child);
+            if (!removed)
+            {
+                return false;
+            }
+
+            // Unsubscribe from the event.
+            GetSameTypeDB(child).PropertyChanged -= OnPropertyChanged;
+
+            // Fire our property changed event.
+            OnPropertyChanged("Children");
+
+            return true;
         }
 
         private TreeHierarchyDB GetSameTypeDB(Entity entity)
