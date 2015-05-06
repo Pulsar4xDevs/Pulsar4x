@@ -14,60 +14,47 @@ namespace Pulsar4X.ECSLib
     public class StaticDataStore
     {
         /// <summary>
+        /// Easily convert string to Type
+        /// </summary>
+        [JsonIgnore]
+        private readonly Dictionary<string, Type> StringsToTypes;
+
+        /// <summary>
+        /// Reverse dictionary of the above.
+        /// </summary>
+        [JsonIgnore]
+        private readonly Dictionary<Type, string> TypesToStrings; 
+
+        /// <summary>
         /// List which stores all the atmospheric gases.
         /// </summary>
         public WeightedList<AtmosphericGasSD> AtmosphericGases = new WeightedList<AtmosphericGasSD>();
-        [JsonIgnore]
-        public Type AtmosphericGasesType;
-        [JsonIgnore]
-        private const string AtmosphericGasesTypeString = "AtmosphericGases";
 
         /// <summary>
         /// List which stores all the Commander Name themes.
         /// </summary>
         public List<CommanderNameThemeSD> CommanderNameThemes = new List<CommanderNameThemeSD>();
-        [JsonIgnore]
-        public Type CommanderNameThemesType;
-        [JsonIgnore]
-        private const string CommanderNameThemesTypeString = "CommanderNameThemes";
 
         /// <summary>
         /// List which stores all the Minerals.
         /// </summary>
         public List<MineralSD> Minerals = new List<MineralSD>();
-        [JsonIgnore]
-        public Type MineralsType;
-        [JsonIgnore]
-        private const string MineralsTypeString = "Minerals";
 
         /// <summary>
         /// Dictionary which stores all the Technologies.
         /// stored in a dictionary to allow fast lookup of a specifc Technology based on its guid.
         /// </summary>
         public JDictionary<Guid, TechSD> Techs = new JDictionary<Guid, TechSD>();
-        [JsonIgnore]
-        public Type TechsType;
-        [JsonIgnore]
-        private const string TechsTypeString = "Techs";
 
         /// <summary>
         /// List which stores all of the installations
         /// </summary>
         public JDictionary<Guid, InstallationSD> Installations = new JDictionary<Guid, InstallationSD>();
-        [JsonIgnore]
-        public Type InstallationsType;
-        [JsonIgnore]
-        private const string InstallationsTypeString = "Installations";
 
         /// <summary>
         /// Dictionary which stores all the Recipes.
         /// </summary>
         public JDictionary<Guid, ConstructableObjSD> ConstructableObjects = new JDictionary<Guid, ConstructableObjSD>();
-        [JsonIgnore]
-        public Type ConstructableObjType;
-        [JsonIgnore]
-        private const string ConstructableObjTypeString = "ConstructableObj";
-
 
         ///< @todo add a whole bunch more static data.
 
@@ -76,11 +63,16 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public StaticDataStore()
         {
-            AtmosphericGasesType = AtmosphericGases.GetType();
-            CommanderNameThemesType = CommanderNameThemes.GetType();
-            MineralsType = Minerals.GetType();
-            TechsType = Techs.GetType();
-            InstallationsType = Installations.GetType();
+            StringsToTypes = new Dictionary<string, Type>()
+            {
+                {"AtmosphericGases", AtmosphericGases.GetType()},
+                {"CommanderNameThemes", CommanderNameThemes.GetType()},
+                {"Minerals", Minerals.GetType()},
+                {"Techs", Techs.GetType()},
+                {"Installations", Installations.GetType()},
+                {"ConstrutableObj", ConstructableObjects.GetType()}
+            };
+            TypesToStrings = StringsToTypes.ToDictionary(x => x.Value, x => x.Key);
         }
 
         /// <summary>
@@ -161,57 +153,18 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public string GetTypeString(Type type)
         {
-            if (type == AtmosphericGasesType)
-            {
-                return AtmosphericGasesTypeString;
-            }
-            else if (type == CommanderNameThemesType)
-            {
-                return CommanderNameThemesTypeString;
-            }
-            else if (type == MineralsType)
-            {
-                return MineralsTypeString;
-            }
-            else if (type == TechsType)
-            {
-                return TechsTypeString;
-            }
-            else if (type == InstallationsType)
-            {
-                return InstallationsTypeString;
-            }
-            else if (type == ConstructableObjType)
-            {
-                return ConstructableObjTypeString;
-            }
-
-            return null;
+            string s;
+            TypesToStrings.TryGetValue(type, out s);
+            return s;
         }
 
         /// <summary>
-        /// Gets the matching type for a type string. Used when importing previousle exported 
-        /// static data to knopw what type to import it as.
+        /// Gets the matching type for a type string. Used when importing previously exported 
+        /// static data to know what type to import it as.
         /// </summary>
         public Type GetType(string typeString)
         {
-            switch (typeString)
-            {
-                case AtmosphericGasesTypeString:
-                    return AtmosphericGasesType;
-                case CommanderNameThemesTypeString:
-                    return CommanderNameThemesType;
-                case  MineralsTypeString:
-                    return MineralsType;
-                case TechsTypeString:
-                    return TechsType;
-                case InstallationsTypeString:
-                    return InstallationsType;
-                case ConstructableObjTypeString:
-                    return ConstructableObjType;
-                default:
-                    return null;
-            }
+            return StringsToTypes[typeString];
         }
 
         /// <summary>

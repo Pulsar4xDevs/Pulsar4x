@@ -158,28 +158,7 @@ namespace Pulsar4X.ECSLib
             // that supports that type.
             dynamic data = obj["Data"].ToObject(type, _serializer);
 
-            if (type == StaticDataStore.AtmosphericGasesType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.CommanderNameThemesType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.MineralsType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.TechsType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.InstallationsType)
-            {
-                StaticDataStore.Store(data);
-            }
-
-            // ... more here.
+            StaticDataStore.Store(data);
         }
 
         /// <summary>
