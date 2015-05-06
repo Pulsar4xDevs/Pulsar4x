@@ -216,7 +216,7 @@ namespace Pulsar4X.ECSLib
                 newBodyMVDB.Mass = 1; // Later we do some multiplication.
                 SystemBodyDB newBodyBodyDB = newBody.GetDataBlob<SystemBodyDB>();
 
-                newBodyBodyDB.Type = GalaxyFactory.Settings.BandBodyTypeWeight[systemBand].Select(system.RNG.NextDouble());
+                newBodyBodyDB.Type = GalaxyFactory.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNG.NextDouble());
 
                 if (newBodyBodyDB.Type == BodyType.Asteroid)
                 {
@@ -225,7 +225,7 @@ namespace Pulsar4X.ECSLib
                         // Max number of belts reach. Reroll until we've got... not an asteroid belt.
                         while (newBodyBodyDB.Type == BodyType.Asteroid)
                         {
-                            newBodyBodyDB.Type = GalaxyFactory.Settings.BandBodyTypeWeight[systemBand].Select(system.RNG.NextDouble());
+                            newBodyBodyDB.Type = GalaxyFactory.Settings.GetBandBodyTypeWeight(systemBand).Select(system.RNG.NextDouble());
                         }
                     }
                     else
@@ -468,12 +468,6 @@ namespace Pulsar4X.ECSLib
             double moonGenChance = massRatioOfParent * system.RNG.NextDouble() * GalaxyFactory.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.Type];
             moonGenChance = GMath.Clamp(moonGenChance, 1, GalaxyFactory.Settings.MaxNoOfMoonsByPlanetType[parentBodyDB.Type]);
             int numMoons = (int)Math.Round(moonGenChance);
-
-            // now we need to work out the moon type
-            // we will do this by looking at the base temp of the parent.
-            // if the base temp of the planet / 150K is  > 1 then it will always be terrestrial.
-            // i.e. a planet hotter then GalaxyFactory.Settings.IceMoonMaximumParentTemperature will always have PlanetType.Moon.
-            double tempRatio = Temperature.ToKelvin(parentBodyDB.BaseTemperature) / GalaxyFactory.Settings.IceMoonMaximumParentTemperature;
 
             // first pass to gen mass etc:
             var moons = new List<Entity>(numMoons);

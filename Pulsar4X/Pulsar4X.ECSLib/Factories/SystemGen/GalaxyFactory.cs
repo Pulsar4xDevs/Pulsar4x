@@ -14,31 +14,24 @@ namespace Pulsar4X.ECSLib
     {
         public static Random SeedRNG = new Random();
 
-        public static class Settings
-        {
-            /// <summary>
-            /// Indicates weither We shoudl generate a Real Star System or a more gamey one.
-            /// </summary>
-            public static bool RealStarSystems = false;
+        public static SystemGenSettingsSD Settings;
 
-            /// <summary>
-            /// The chance of a Non-player Race being generated on a suitable planet.
-            /// </summary>
-            public static double NPRGenerationChance = 0.3333;
+        /// <summary>
+        /// This function initilises the Static Data struct Settings to some sane default values.
+        /// </summary>
+        public static void InitToDefaultSettings()
+        {
+            Settings.RealStarSystems = false;
+
+            Settings.NPRGenerationChance = 0.3333;
 
             #region Advanced Star Generation Parameters
 
             // Note that the data is this section is largly based on scientific fact
             // See: http://en.wikipedia.org/wiki/Stellar_classification
-            // these values SHOULD NOT be Modified if you weant sane star generation.
-            // Also note that thile these are constants they were not added to the 
-            // constants file because they are only used for star gen.
+            // These values SHOULD NOT be Modified if you want sane star generation.
 
-            /// <summary>
-            /// Distribution of differnt stra spectral types. This is based on actuall numbers in real life.
-            /// See: http://en.wikipedia.org/wiki/Stellar_classification
-            /// </summary>
-            public static WeightedList<SpectralType> StarTypeDistributionForRealStars = new WeightedList<SpectralType>
+            Settings.StarTypeDistributionForRealStars = new WeightedList<SpectralType>
             {
                 {0.00003, SpectralType.O},
                 {0.13, SpectralType.B},
@@ -50,10 +43,7 @@ namespace Pulsar4X.ECSLib
                 {0.11997, SpectralType.M} // reserved for more exotic star types
             };
 
-            /// <summary>
-            /// Distribution of differnt star spectral types. These numbers are made up and can be tweaked for game balance.
-            /// </summary>
-            public static WeightedList<SpectralType> StarTypeDistributionForFakeStars = new WeightedList<SpectralType>
+            Settings.StarTypeDistributionForFakeStars = new WeightedList<SpectralType>
             {
                 {0, SpectralType.O},
                 {0, SpectralType.B},
@@ -65,11 +55,8 @@ namespace Pulsar4X.ECSLib
                 {5, SpectralType.M} // reserved for more exotic star types
             };
 
-            /// <summary>
-            /// This Dictionary holds the minium and maximum radius values (in AU) for a Star given its spectral type.
-            /// @note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
-            /// </summary>
-            public static Dictionary<SpectralType, MinMaxStruct> StarRadiusBySpectralType = new Dictionary<SpectralType, MinMaxStruct>
+            // note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
+            Settings.StarRadiusBySpectralType = new JDictionary<SpectralType, MinMaxStruct>
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -108,11 +95,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// This Dictionary holds the minium and maximum Temperature (in degrees celsius) values for a Star given its spectral type.
-            /// @note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
-            /// </summary>
-            public static Dictionary<SpectralType, MinMaxStruct> StarTemperatureBySpectralType = new Dictionary<SpectralType, MinMaxStruct>
+            // note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
+            Settings.StarTemperatureBySpectralType = new JDictionary<SpectralType, MinMaxStruct>
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -151,11 +135,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// This Dictionary holds the minium and maximum Luminosity (in Solar luminosity, i.e. Sol = 1). values for a Star given its spectral type.
-            /// @note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
-            /// </summary>
-            public static Dictionary<SpectralType, MinMaxStruct> StarLuminosityBySpectralType = new Dictionary<SpectralType, MinMaxStruct>
+            // note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
+            Settings.StarLuminosityBySpectralType = new JDictionary<SpectralType, MinMaxStruct>
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -194,11 +175,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// This Dictionary holds the minium and maximum mass values (in Kg) for a Star given its spectral type.
-            /// @note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
-            /// </summary>
-            public static Dictionary<SpectralType, MinMaxStruct> StarMassBySpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+            // note Do Not Modify these values as they are based on SCIENCE!!! See: http://en.wikipedia.org/wiki/Stellar_classification
+            Settings.StarMassBySpectralType = new JDictionary<SpectralType, MinMaxStruct>()
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -237,13 +215,7 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// This Dictionary holds the minium and maximum Age values (in years) for a Star given its spectral type.
-            /// @note Max age of a star in the Milky Way is 13.2 billion years, the age of the milky way. A star could be older 
-            /// (like 100 billion years older if not for the fact that the universion is only about 14 billion years old) but then it wouldn't be in the milky way.
-            /// This is used for both K and M type stars both of which can easly be older than the milky way).
-            /// </summary>
-            public static Dictionary<SpectralType, MinMaxStruct> StarAgeBySpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+            Settings.StarAgeBySpectralType = new JDictionary<SpectralType, MinMaxStruct>()
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -286,97 +258,39 @@ namespace Pulsar4X.ECSLib
 
             #region Advanced SystemBody and other Body Generation Parameters
 
-            /// <summary>
-            /// The chance Planets will be generated around a given star. A number between 0 and 1 (e.g. a 33% chance would be 0.33).
-            /// </summary>
-            public const double PlanetGenerationChance = 0.8;
+            Settings.PlanetGenerationChance = 0.8;
 
-            /// <summary>
-            /// The maximum number -1 of planets which will be generated.
-            /// </summary>
-            public const int MaxNoOfPlanets = 25;
+            // Note that the actual maximum number of planets will be one less then this number.
+            Settings.MaxNoOfPlanets = 25;
 
-            /// <summary>
-            /// Asteriods are generate in belts, this controls the max number per belt. It cannot be larger than MaxNoOfAsteroids.
-            /// </summary>
-            public const int MaxNoOfAsteroidsPerBelt = 150;
+            Settings.MaxNoOfAsteroidsPerBelt = 150;
 
-            /// <summary>
-            /// Asteriods are generated in belts. this controls the maximum number of belts.
-            /// </summary>
-            public const int MaxNoOfAsteroidBelts = 3;
+            Settings.MaxNoOfAsteroidBelts = 3;
 
-            /// <summary>
-            /// Used to compute the number of dwarf planets in a given steriod belt.
-            /// The formular used is: NoOfAsteriodsInBelt / NumberOfAsteroidsPerDwarfPlanet = NoOfDwarfPlanets;
-            /// Dwarf planets are always generated along with their asteriod belt. its the whole "hasn't cleard its orbit" thing.
-            /// </summary>
-            public const int NumberOfAsteroidsPerDwarfPlanet = 20;
+            Settings.NumberOfAsteroidsPerDwarfPlanet = 20;
 
-            /// <summary>
-            /// Minium number of comets each system will have. All systems will be guaranteed to have a least this many comets.
-            /// </summary>
-            public static int MiniumCometsPerSystem = 0;
+            Settings.MiniumCometsPerSystem = 0;
 
-            /// <summary>
-            /// The Maximum number of comets per system. note that if MiniumCometsPerSystem > MaxNoOfComets then MiniumCometsPerSystem = MaxNoOfComets.
-            /// </summary>
-            public const int MaxNoOfComets = 25;
+            Settings.MaxNoOfComets = 25;
 
-            /// <summary>
-            /// Asteroids and Dwarf planets are generated in belts. To do this a single orbit is first generate as the 
-            /// basis for the whole belt. Asteroids then apply a small gitter of + or - a percentage of the original orbit 
-            /// (except MeanAnomaly, which is the starting point on the orbit. that is random). 
-            /// The value is a percentage as a number between 0 and 1, tho typically it should be less than 10% (or 0.1).
-            /// </summary>
-            public const double MaxAsteroidOrbitDeviation = 0.03;
+            // The value is a percentage as a number between 0 and 1, tho typically it should be less than 10% (or 0.1).
+            Settings.MaxAsteroidOrbitDeviation = 0.03;
 
-            /// <summary>
-            /// The maximum SystemBody orbit Inclination. Also used as the maximum orbital tilt.
-            /// Angle in degrees.
-            /// </summary>
-            public const double MaxBodyInclination = 45; // degrees. used for orbits and axial tilt.
+            Settings.MaxBodyInclination = 45; // degrees. used for orbits and axial tilt.
 
-            /// <summary>
-            /// This controls the maximum moon mass relative to the parent body.
-            /// </summary>
-            public const double MaxMoonMassRelativeToParentBody = 0.4;
+            Settings.MaxMoonMassRelativeToParentBody = 0.4;
 
-            /// <summary>
-            /// We must be OrbitGravityFactor less attracted to any other object ot be "cleared".
-            /// <@ todo: Is this comment completely confusing?
-            /// </summary>
-            public const double OrbitGravityFactor = 20;
+            Settings.OrbitGravityFactor = 20;
 
-            /// <summary>
-            /// The chance a Terrestrial body will have some form of Tectonic activity.
-            /// Note that very small/low mass bodies will still end up dead.
-            /// </summary>
-            public const double TerrestrialBodyTectonicActiviyChance = 0.5;
+            Settings.TerrestrialBodyTectonicActiviyChance = 0.5;
 
-            /// <summary>
-            /// The maximum temperture of a planet which can have Ice Moons, in Kelvin
-            /// This is used to work out the change of an Ice moon around a planet, the 
-            /// lower the plante's temp below this the moor likly an ice moon is.
-            /// </summary>
-            public const double IceMoonMaximumParentTemperature = 150;
+            Settings.MiniumPossibleDayLength = 6;
 
-            /// <summary>
-            /// The minium possible length of a day for any system body.
-            /// </summary>
-            public const int MiniumPossibleDayLength = 6;
+            Settings.MinMoonOrbitMultiplier = 2.5;
 
-            /// <summary>
-            /// Is timesd by the total radius of the moon and its parent to come up with a minium orbit distance for that body.
-            /// </summary>
-            public const double MinMoonOrbitMultiplier = 2.5;
-
-            /// <summary>
-            /// Controls how much the type of a star affects the generation of planets.
-            /// @note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.
-            /// @note Other factors such as the stars lumosoty and mass are also taken into account. So these numbers may not make a whole lot of sense on the surface.
-            /// </summary>
-            public static Dictionary<SpectralType, double> StarSpecralTypePlanetGenerationRatio = new Dictionary<SpectralType, double>()
+            // note These numbers can be tweaked as desired for gameplay. They affect the number of planets generated for a given star type.
+            // note Other factors such as the stars lumosoty and mass are also taken into account. So these numbers may not make a whole lot of sense on the surface.
+            Settings.StarSpecralTypePlanetGenerationRatio = new JDictionary<SpectralType, double>()
             {
                 {SpectralType.O, 0.6},
                 {SpectralType.B, 0.7},
@@ -387,11 +301,8 @@ namespace Pulsar4X.ECSLib
                 {SpectralType.M, 1.8},
             };
 
-            /// <summary>
-            /// Limits of SystemBody masses based on type. Units are Kg.
-            /// @note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
-            /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> SystemBodyMassByType = new Dictionary<BodyType, MinMaxStruct>()
+            // note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
+            Settings.SystemBodyMassByType = new JDictionary<BodyType, MinMaxStruct>()
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
@@ -435,11 +346,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// Limits of a Planets density based on its type, in g/cm3
-            /// @note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
-            /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> SystemBodyDensityByType = new Dictionary<BodyType, MinMaxStruct>()
+            // note That these values are based on bodies in our solar system and discovered Exoplanets. Some adjustment can be made for game play.
+            Settings.SystemBodyDensityByType = new JDictionary<BodyType, MinMaxStruct>()
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
@@ -483,12 +391,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// Orbital distance restrictions (i.e. SemiMajorAxis restrictions) for a planet based upon the type of star it is orbiting.
-            /// Units are AU.
-            /// @note These numbers, with the exception of G class stars, are based on habital zone calculations. They could be tweaked for gameplay.
-            /// </summary>
-            public static Dictionary<SpectralType, MinMaxStruct> OrbitalDistanceByStarSpectralType = new Dictionary<SpectralType, MinMaxStruct>()
+            // note These numbers, with the exception of G class stars, are based on habital zone calculations. They could be tweaked for gameplay.
+            Settings.OrbitalDistanceByStarSpectralType = new JDictionary<SpectralType, MinMaxStruct>()
             {
                 {SpectralType.O, new MinMaxStruct
                 {
@@ -527,10 +431,7 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// Possible ranges for eccentricity by body type.
-            /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> BodyEccentricityByType = new Dictionary<BodyType, MinMaxStruct>
+            Settings.BodyEccentricityByType = new JDictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.Asteroid, new MinMaxStruct
                 {
@@ -574,11 +475,8 @@ namespace Pulsar4X.ECSLib
                 }}
             };
 
-            /// <summary>
-            /// The possible ranges for albedo for various planet types.
-            /// @note These are WAGs roughly based on the albedo of bodies in our solar system. They couild be tweak for gameplay.
-            /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> PlanetAlbedoByType = new Dictionary<BodyType, MinMaxStruct>
+            // note These are WAGs roughly based on the albedo of bodies in our solar system. They couild be tweak for gameplay.
+            Settings.PlanetAlbedoByType = new JDictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
@@ -622,12 +520,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// The possible range of values for different the magnetic field (aka Magnetosphere) of different planet types.
-            /// In microtesla (uT).
-            /// @note @note These are WAGs roughly based on the Magnetosphere of bodies in our solar system. They couild be tweak for gameplay.
-            /// </summary>
-            public static Dictionary<BodyType, MinMaxStruct> PlanetMagneticFieldByType = new Dictionary<BodyType, MinMaxStruct>
+            // note These are WAGs roughly based on the Magnetosphere of bodies in our solar system. They couild be tweak for gameplay.
+            Settings.PlanetMagneticFieldByType = new JDictionary<BodyType, MinMaxStruct>
             {
                 {BodyType.GasGiant, new MinMaxStruct
                 {
@@ -671,11 +565,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// This value is multiplied by (SystemBody Mass / Max Mass for SystemBody Type) i.e. a mass ratio, to get the chance of an atmosphere for this planet.
-            /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
-            /// </summary>
-            public static Dictionary<BodyType, double> AtmosphereGenerationModifier = new Dictionary<BodyType, double>
+            // note These numbers can be tweaked as desired for gameplay. They effect the chances of atmosphere generation.
+            Settings.AtmosphereGenerationModifier = new JDictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 100000000},
                 {BodyType.IceGiant, 100000000},
@@ -687,11 +578,8 @@ namespace Pulsar4X.ECSLib
                 {BodyType.Comet, 0},
             };
 
-            /// <summary>
-            /// This value is used to determin if a planet gets moons. if a random number between 0 and 1 is less then this number then the planet geets moons.
-            /// @note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
-            /// </summary>
-            public static Dictionary<BodyType, double> MoonGenerationChanceByPlanetType = new Dictionary<BodyType, double>
+            // note These numbers can be tweaked as desired for gameplay. They effect the chances of a planet having moons.
+            Settings.MoonGenerationChanceByPlanetType = new JDictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 0.99999999},
                 {BodyType.IceGiant, 0.99999999},
@@ -701,7 +589,7 @@ namespace Pulsar4X.ECSLib
                 {BodyType.Moon, -1},
             };
 
-            public static Dictionary<BodyType, double> MaxMoonOrbitDistanceByPlanetType = new Dictionary<BodyType, double>
+            Settings.MaxMoonOrbitDistanceByPlanetType = new JDictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 60581692 / GameSettings.Units.KmPerAu}, // twice higest jupiter moon orbit
                 {BodyType.IceGiant, 49285000 / GameSettings.Units.KmPerAu}, // twice Neptunes highest moon orbit
@@ -710,12 +598,8 @@ namespace Pulsar4X.ECSLib
                 {BodyType.DwarfPlanet, 25000 / GameSettings.Units.KmPerAu}, // WAG
             };
 
-            /// <summary>
-            /// The maximum number of moons a planet of a given type can have. 
-            /// The bigger the planets the more moons it can have and the closer it will get to having the maximum number.
-            /// @note Given the way the calculation for max moons is done it is unlikly that any planet will ever have the maximum number of moon, so pad as desired.
-            /// </summary>
-            public static Dictionary<BodyType, double> MaxNoOfMoonsByPlanetType = new Dictionary<BodyType, double>
+            // note Given the way the calculation for max moons is done it is unlikly that any planet will ever have the maximum number of moon, so pad as desired.
+            Settings.MaxNoOfMoonsByPlanetType = new JDictionary<BodyType, double>
             {
                 {BodyType.GasGiant, 20},
                 {BodyType.IceGiant, 15},
@@ -724,13 +608,7 @@ namespace Pulsar4X.ECSLib
                 {BodyType.DwarfPlanet, 1},
             };
 
-            /// <summary>
-            /// These are the maxinum thresholds fore each type of tectonic activity a planet can have.
-            /// Tectonic activity is calculated by Mass (in earth masses) / Star Age. 
-            /// Earth has a tectonic activity of 0.217 by this calculation.
-            /// So if the tectonic activing number is < the threshold of Earth like but greater than Minor then it will be Earth like.
-            /// </summary>
-            public static Dictionary<TectonicActivity, double> BodyTectonicsThresholds = new Dictionary<TectonicActivity, double>
+            Settings.BodyTectonicsThresholds = new JDictionary<TectonicActivity, double>
             {
                 {TectonicActivity.Dead, 0.01},
                 {TectonicActivity.Minor, 0.2},
@@ -738,14 +616,14 @@ namespace Pulsar4X.ECSLib
                 {TectonicActivity.Major, 1} // Not used, just here for completness.
             };
 
-            public static WeightedList<SystemBand> BandBodyWeight = new WeightedList<SystemBand>
+            Settings.BandBodyWeight = new WeightedList<SystemBand>
             {
                 {0.3, SystemBand.InnerBand},
                 {0.1, SystemBand.HabitableBand},
                 {0.6, SystemBand.OuterBand},
             };
 
-            private static WeightedList<BodyType> innerBandTypeWeights = new WeightedList<BodyType>()
+            Settings.InnerBandTypeWeights = new WeightedList<BodyType>()
             {
                 {35, BodyType.Asteroid},
                 {10, BodyType.GasDwarf},
@@ -754,7 +632,7 @@ namespace Pulsar4X.ECSLib
                 {50, BodyType.Terrestrial},
             };
 
-            private static WeightedList<BodyType> habitableBandTypeWeights = new WeightedList<BodyType>
+            Settings.HabitableBandTypeWeights = new WeightedList<BodyType>
             {
                 {25, BodyType.Asteroid},
                 {10, BodyType.GasDwarf},
@@ -763,7 +641,7 @@ namespace Pulsar4X.ECSLib
                 {60, BodyType.Terrestrial},
             };
 
-            private static WeightedList<BodyType> outerBandTypeWeights = new WeightedList<BodyType>
+            Settings.OuterBandTypeWeights = new WeightedList<BodyType>
             {
                 {15, BodyType.Asteroid},
                 {20, BodyType.GasDwarf},
@@ -772,28 +650,15 @@ namespace Pulsar4X.ECSLib
                 {10, BodyType.Terrestrial},
             };
 
-            public static Dictionary<SystemBand, WeightedList<BodyType>> BandBodyTypeWeight = new Dictionary<SystemBand, WeightedList<BodyType>>
-            {
-                {SystemBand.InnerBand, innerBandTypeWeights},
-                {SystemBand.HabitableBand, habitableBandTypeWeights},
-                {SystemBand.OuterBand, outerBandTypeWeights}
-            };
-
             #endregion
 
             #region Ruins Generation
 
-            /// <summary>
-            /// The chance that ruins will be generated on a suitable planet or moon.
-            /// @note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm. 
-            /// </summary>
-            public const double RuinsGenerationChance = 0.5;
+            // note A suitable planet/moon includes an atmosphere between 2.5 and 0.01 atm. 
+            Settings.RuinsGenerationChance = 0.5;
 
-            /// <summary>
-            /// The chance of any given ruins size being generated.
-            /// @note These values can be tweaked as desired for game play.
-            /// </summary>
-            public static WeightedList<RuinsDB.RSize> RuinsSizeDisrubution = new WeightedList<RuinsDB.RSize>()
+            // note These values can be tweaked as desired for game play.
+            Settings.RuinsSizeDisrubution = new WeightedList<RuinsDB.RSize>()
             {
                 {40, RuinsDB.RSize.Outpost},
                 {30, RuinsDB.RSize.Settlement},
@@ -801,12 +666,9 @@ namespace Pulsar4X.ECSLib
                 {10, RuinsDB.RSize.City}
             };
 
-            /// <summary>
-            /// The chance of any given ruins quility being generated. 
-            /// @note There is some special adiyional logic for RuinsDB.RQuality.MultipleIntact.
-            /// @note These values can be tweaked as desired for game play.
-            /// </summary>
-            public static WeightedList<RuinsDB.RQuality> RuinsQuilityDisrubution = new WeightedList<RuinsDB.RQuality>()
+            // note There is some special adiyional logic for RuinsDB.RQuality.MultipleIntact.
+            // note These values can be tweaked as desired for game play.
+            Settings.RuinsQuilityDisrubution = new WeightedList<RuinsDB.RQuality>()
             {
                 {40, RuinsDB.RQuality.Destroyed},
                 {30, RuinsDB.RQuality.Ruined},
@@ -814,11 +676,8 @@ namespace Pulsar4X.ECSLib
                 {15, RuinsDB.RQuality.Intact}
             };
 
-            /// <summary>
-            /// The ranges for the Ruins Count, by Ruins Size.
-            /// @note These values can be tweaked as desired for game play.
-            /// </summary>
-            public static Dictionary<RuinsDB.RSize, MinMaxStruct> RuinsCountRangeBySize = new Dictionary<RuinsDB.RSize, MinMaxStruct>()
+            // note These values can be tweaked as desired for game play.
+            Settings.RuinsCountRangeBySize = new JDictionary<RuinsDB.RSize, MinMaxStruct>()
             {
                 {RuinsDB.RSize.Outpost, new MinMaxStruct
                 {
@@ -842,11 +701,8 @@ namespace Pulsar4X.ECSLib
                 }},
             };
 
-            /// <summary>
-            /// The Quility modifiers. Final Ruins count is determined by RuinsCount * QuilityModifier.
-            /// @note These values can be tweaked as desired for game play.
-            /// </summary>
-            public static Dictionary<RuinsDB.RQuality, double> RuinsQuilityAdjustment = new Dictionary<RuinsDB.RQuality, double>()
+            // note These values can be tweaked as desired for game play.
+            Settings.RuinsQuilityAdjustment = new JDictionary<RuinsDB.RQuality, double>()
             {
                 {RuinsDB.RQuality.Destroyed, 1.25},
                 {RuinsDB.RQuality.Ruined, 1.5},

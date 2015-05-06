@@ -125,6 +125,7 @@
     <Compile Include="StaticData\StaticDataManager.cs" />
     <Compile Include="StaticData\StaticDataStore.cs" />
     <Compile Include="StaticData\MineralSD.cs" />
+    <Compile Include="StaticData\SystemGenSettingsSD.cs" />
     <Compile Include="StaticData\TechSD.cs" />
   </ItemGroup>
   <ItemGroup>

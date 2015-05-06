@@ -12,6 +12,7 @@ namespace Pulsar4X.Tests
         public void GlobalInit()
         {
             var game = new Game(); // init the game class as we will need it for these tests.
+            GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
         }
 
         [Test]
@@ -74,6 +75,7 @@ namespace Pulsar4X.Tests
 
         [Test]
         [Description("generates 1000 test systems to test performance of the run.")]
+        [Ignore]
         public void OldSystemGenPerformanceTest()
         {
             // use a stop watch to get more accurate time.
