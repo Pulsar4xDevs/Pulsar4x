@@ -15,6 +15,8 @@ namespace Pulsar4X.ECSLib
             var planetInfo = new SystemBodyDB();
             var name = new NameDB();
             var orbit = new OrbitDB();
+            var atmo = new AtmosphereDB();
+            var ruins = new RuinsDB();
 
             var planetDBs = new List<BaseDataBlob>
             {
@@ -23,6 +25,8 @@ namespace Pulsar4X.ECSLib
                 planetInfo,
                 name,
                 orbit,
+                atmo,
+                ruins
             };
             Entity newPlanet = Entity.Create(system.SystemManager, planetDBs);
 
@@ -642,6 +646,9 @@ namespace Pulsar4X.ECSLib
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;
+
+            // generate ruins:
+            GenerateRuins(system, body);
         }
 
         /// <summary>
@@ -686,6 +693,46 @@ namespace Pulsar4X.ECSLib
             double temp = Temperature.ToKelvin(starInfo.Temperature);
             temp = temp * Math.Sqrt(starMVDB.Radius / (2 * distanceFromStar));
             return Temperature.ToCelsius(temp);
+        }
+
+
+        /// <summary>
+        /// This function generate ruins for the specified system Body.
+        /// @todo Make Ruins Generation take star age/type into consideration??
+        /// </summary>
+        private static void GenerateRuins(StarSystem system, Entity body)
+        {
+            // cache some DBs:
+            var atmo = body.GetDataBlob<AtmosphereDB>();
+            var bodyType = body.GetDataBlob<SystemBodyDB>().Type;
+            var ruins = body.GetDataBlob<RuinsDB>();
+
+            // first we will check that this body type can have ruins on it:
+            if (bodyType != BodyType.Terrestrial
+                || bodyType != BodyType.Moon)
+            {
+                return; // wrong type.
+            }
+            else if (atmo.Exists == false && (atmo.Pressure > 2.5 || atmo.Pressure < 0.01))
+            {
+                return; // no valid atmosphere!
+            }
+            else if (system.RNG.NextDouble() > 0.5)
+            {
+                return; // thats right... lucked out on this one.
+            }
+
+            // now if we have survived the guantlet lets gen some Ruins!!
+            ruins.RuinSize = GalaxyFactory.Settings.RuinsSizeDisrubution.Select(system.RNG.Next(0, 100));
+
+            int quality = system.RNG.Next(0, 100);
+            ruins.RuinQuality = GalaxyFactory.Settings.RuinsQuilityDisrubution.Select(quality);
+            if (ruins.RuinSize == RuinsDB.RSize.City && quality >= 95)
+                ruins.RuinQuality = RuinsDB.RQuality.MultipleIntact;  // special case!!
+
+            // Ruins count:
+            ruins.RuinCount = (uint)GMath.SelectFromRange(GalaxyFactory.Settings.RuinsCountRangeBySize[ruins.RuinSize], system.RNG.NextDouble());
+            ruins.RuinCount = (uint)Math.Round(GalaxyFactory.Settings.RuinsQuilityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
         }
     }
 }
