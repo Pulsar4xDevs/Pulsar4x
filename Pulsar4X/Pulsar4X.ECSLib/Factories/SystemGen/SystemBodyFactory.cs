@@ -717,7 +717,7 @@ namespace Pulsar4X.ECSLib
             {
                 return; // no valid atmosphere!
             }
-            else if (system.RNG.NextDouble() > 0.5)
+            else if (system.RNG.NextDouble() > GalaxyFactory.Settings.RuinsGenerationChance)
             {
                 return; // thats right... lucked out on this one.
             }
