@@ -12,11 +12,16 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class MainWindow : Form
     {
+        private const int BorderWidth = 20;
+        private const int BorderHeight = 40;
+
         public MainWindow()
         {
             InitializeComponent();
-            UserControl techs = new TechesWindow();
+            UserControl techs = new TechnologiesWindow();
             Controls.Add(techs);
+            Width = techs.Width + BorderWidth;
+            Height = techs.Height + BorderHeight;
         }
     }
 }

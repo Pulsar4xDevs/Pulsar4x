@@ -1,6 +1,6 @@
 ﻿namespace ModdingTools.JsonDataEditor
 {
-    partial class TechesWindow
+    partial class TechnologiesWindow
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,8 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.loadButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
             this.availibleTechs = new System.Windows.Forms.ListBox();
             this.searchBox = new System.Windows.Forms.TextBox();
             this.techName = new System.Windows.Forms.Label();
@@ -51,42 +49,23 @@
             this.guidLabel = new System.Windows.Forms.Label();
             this.guidDataLabel = new System.Windows.Forms.Label();
             this.costTextBox = new System.Windows.Forms.TextBox();
+            this.selectedFileComboBox = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
-            // 
-            // loadButton
-            // 
-            this.loadButton.Location = new System.Drawing.Point(5, 434);
-            this.loadButton.Name = "loadButton";
-            this.loadButton.Size = new System.Drawing.Size(75, 23);
-            this.loadButton.TabIndex = 0;
-            this.loadButton.Text = "Load";
-            this.loadButton.UseVisualStyleBackColor = true;
-            this.loadButton.Click += new System.EventHandler(this.loadButton_Click);
-            // 
-            // saveButton
-            // 
-            this.saveButton.Location = new System.Drawing.Point(86, 434);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(75, 23);
-            this.saveButton.TabIndex = 1;
-            this.saveButton.Text = "Save";
-            this.saveButton.UseVisualStyleBackColor = true;
-            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
             // 
             // availibleTechs
             // 
             this.availibleTechs.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.availibleTechs.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.availibleTechs.FormattingEnabled = true;
-            this.availibleTechs.Location = new System.Drawing.Point(356, 69);
+            this.availibleTechs.Location = new System.Drawing.Point(356, 108);
             this.availibleTechs.Name = "availibleTechs";
-            this.availibleTechs.Size = new System.Drawing.Size(241, 379);
+            this.availibleTechs.Size = new System.Drawing.Size(241, 340);
             this.availibleTechs.TabIndex = 2;
             // 
             // searchBox
             // 
             this.searchBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.searchBox.Location = new System.Drawing.Point(400, 43);
+            this.searchBox.Location = new System.Drawing.Point(400, 82);
             this.searchBox.Name = "searchBox";
             this.searchBox.Size = new System.Drawing.Size(197, 20);
             this.searchBox.TabIndex = 3;
@@ -134,7 +113,7 @@
             // searchLabel
             // 
             this.searchLabel.AutoSize = true;
-            this.searchLabel.Location = new System.Drawing.Point(353, 46);
+            this.searchLabel.Location = new System.Drawing.Point(353, 85);
             this.searchLabel.Name = "searchLabel";
             this.searchLabel.Size = new System.Drawing.Size(41, 13);
             this.searchLabel.TabIndex = 8;
@@ -214,7 +193,7 @@
             // 
             // newTechButton
             // 
-            this.newTechButton.Location = new System.Drawing.Point(356, 3);
+            this.newTechButton.Location = new System.Drawing.Point(356, 42);
             this.newTechButton.Name = "newTechButton";
             this.newTechButton.Size = new System.Drawing.Size(71, 23);
             this.newTechButton.TabIndex = 17;
@@ -224,7 +203,7 @@
             // 
             // selectTechButton
             // 
-            this.selectTechButton.Location = new System.Drawing.Point(524, 3);
+            this.selectTechButton.Location = new System.Drawing.Point(524, 42);
             this.selectTechButton.Name = "selectTechButton";
             this.selectTechButton.Size = new System.Drawing.Size(73, 23);
             this.selectTechButton.TabIndex = 18;
@@ -234,7 +213,7 @@
             // 
             // removeTechButton
             // 
-            this.removeTechButton.Location = new System.Drawing.Point(433, 3);
+            this.removeTechButton.Location = new System.Drawing.Point(433, 42);
             this.removeTechButton.Name = "removeTechButton";
             this.removeTechButton.Size = new System.Drawing.Size(85, 23);
             this.removeTechButton.TabIndex = 19;
@@ -268,10 +247,21 @@
             this.costTextBox.TabIndex = 22;
             this.costTextBox.TextChanged += new System.EventHandler(this.costTextBox_TextChanged);
             // 
-            // TechesWindow
+            // selectedFileComboBox
+            // 
+            this.selectedFileComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.selectedFileComboBox.FormattingEnabled = true;
+            this.selectedFileComboBox.Location = new System.Drawing.Point(356, 4);
+            this.selectedFileComboBox.Name = "selectedFileComboBox";
+            this.selectedFileComboBox.Size = new System.Drawing.Size(241, 21);
+            this.selectedFileComboBox.TabIndex = 23;
+            this.selectedFileComboBox.SelectedIndexChanged += new System.EventHandler(this.selectedFileComboBox_SelectedIndexChanged);
+            // 
+            // TechnologiesWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.selectedFileComboBox);
             this.Controls.Add(this.costTextBox);
             this.Controls.Add(this.guidDataLabel);
             this.Controls.Add(this.guidLabel);
@@ -292,9 +282,7 @@
             this.Controls.Add(this.techName);
             this.Controls.Add(this.searchBox);
             this.Controls.Add(this.availibleTechs);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.loadButton);
-            this.Name = "TechesWindow";
+            this.Name = "TechnologiesWindow";
             this.Size = new System.Drawing.Size(600, 460);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -303,8 +291,6 @@
 
         #endregion
 
-        private System.Windows.Forms.Button loadButton;
-        private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.ListBox availibleTechs;
         private System.Windows.Forms.TextBox searchBox;
         private System.Windows.Forms.Label techName;
@@ -326,6 +312,7 @@
         private System.Windows.Forms.Label guidLabel;
         private System.Windows.Forms.Label guidDataLabel;
         private System.Windows.Forms.TextBox costTextBox;
+        private System.Windows.Forms.ComboBox selectedFileComboBox;
 
     }
 }

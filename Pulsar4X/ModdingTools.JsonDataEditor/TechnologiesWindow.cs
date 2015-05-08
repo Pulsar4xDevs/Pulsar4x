@@ -14,42 +14,44 @@ using Newtonsoft.Json.Linq;
 
 namespace ModdingTools.JsonDataEditor
 {
-    public partial class TechesWindow : UserControl
+    public partial class TechnologiesWindow : UserControl
     {
         private bool _isLoaded = false;
         private bool _updating = false;
         private string _fileName;
         private Guid _selectedItemGuid;
 
-        //stolen from StaticDataManager
-        private static JsonSerializer serializer = new JsonSerializer
-        {
-            NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
-        };
 
-        private JDictionary<Guid, TechSD> _allTechs = new JDictionary<Guid, TechSD>();
-        private Dictionary<Guid, TechDataHolder> _allDataHolders = new Dictionary<Guid, TechDataHolder>();
-
-        public TechesWindow()
+        public TechnologiesWindow()
         {
             InitializeComponent();
 
             foreach(ResearchCategories cat in Enum.GetValues(typeof(ResearchCategories)))
                 categoryComboBox.Items.Add(cat);
 
+            Data.TechListChanged += UpdateSearch;
+            Data.TechLoadedFilesListChanged += UpdateFileList;
+
             UpdateSelectedItem();
+        }
+
+        private void UpdateFileList()
+        {
+            selectedFileComboBox.Items.Clear();
+            foreach(string str in Data.GetLoadedFiles())
+            {
+                selectedFileComboBox.Items.Add(str);
+            }
         }
 
         private void UpdateSearch()
         {
-            //if(!_isLoaded)
-            //    return;
             string searchPattern = searchBox.Text;
 
             availibleTechs.BeginUpdate();
             availibleTechs.Items.Clear();
 
-            foreach (TechDataHolder tech in _allDataHolders.Values)
+            foreach (TechDataHolder tech in Data.GetTechDataHolders())
             {
                 if(string.IsNullOrWhiteSpace(searchPattern) || tech.Name.ToLower().Contains(searchPattern.ToLower()))
                     availibleTechs.Items.Add(tech);
@@ -66,7 +68,7 @@ namespace ModdingTools.JsonDataEditor
             if(_updating)
                 return;
 
-            TechSD newTechSD = _allTechs[_selectedItemGuid];
+            TechSD newTechSD = Data.GetTech(_selectedItemGuid);
 
             string newName = nameTextBox.Text;
             if(!string.IsNullOrWhiteSpace(newName))
@@ -95,10 +97,7 @@ namespace ModdingTools.JsonDataEditor
             List<TechDataHolder> requirements = requirementsListBox.Items.Cast<TechDataHolder>().ToList();
             newTechSD.Requirements = requirements.ConvertAll(entry => entry.Guid);
 
-            _allTechs[_selectedItemGuid] = newTechSD;
-            _allDataHolders[_selectedItemGuid].Name = newTechSD.Name;
-
-            UpdateSearch();
+            Data.UpdateTech(newTechSD);
         }
 
         private void UpdateSelectedItem()
@@ -109,7 +108,7 @@ namespace ModdingTools.JsonDataEditor
             if(_selectedItemGuid == Guid.Empty)
                 techSD = new TechSD {Name = "Name", Description = "Description", Category = ResearchCategories.BiologyGenetics, Id = Guid.Empty, Cost = 1000, Requirements = new List<Guid>()};
             else
-                techSD = _allTechs[_selectedItemGuid];
+                techSD = Data.GetTech(_selectedItemGuid);
 
             guidDataLabel.Text = techSD.Id.ToString();
             nameTextBox.Text = techSD.Name;
@@ -121,106 +120,16 @@ namespace ModdingTools.JsonDataEditor
             requirementsListBox.Items.Clear();
             foreach(Guid requirementGuid in techSD.Requirements)
             {
-                requirementsListBox.Items.Add(_allDataHolders[requirementGuid]);
+                requirementsListBox.Items.Add(Data.GetTechDataHolder(requirementGuid));
             }
             requirementsListBox.EndUpdate();
 
             _updating = false;
         }
 
-        private void TrySave(bool noButton = false)
-        {
-            if(_isLoaded)
-            {
-
-                DialogResult result = MessageBox.Show("Currently loaded file is " + _fileName + "\nDo you want to save file?", "Savefile", (noButton) ? MessageBoxButtons.YesNoCancel : MessageBoxButtons.OKCancel);
-                if(result == DialogResult.Cancel)
-                    return;
-
-                if(result == DialogResult.No)
-                {
-                    _isLoaded = false;
-                    _allTechs = new JDictionary<Guid, TechSD>();
-                    _allDataHolders = new Dictionary<Guid, TechDataHolder>();
-
-                }
-                else if(result == DialogResult.Yes || result == DialogResult.OK)
-                {
-                    if(SaveFile())
-                        MessageBox.Show("Saved");
-                }
-            }
-        }
-
-        private bool SaveFile()
-        {
-            if(string.IsNullOrWhiteSpace(_fileName))
-                return false;
-
-            DataExportContainer exportContainer = new DataExportContainer {Type = "Techs", Data = _allTechs};
-
-            using(StreamWriter streamWriter = new StreamWriter(_fileName))
-            using(JsonWriter writer = new JsonTextWriter(streamWriter))
-            {
-                serializer.Serialize(writer, exportContainer);
-            }
-            return true;
-        }
-
-        private void loadButton_Click(object sender, EventArgs e)
-        {
-            //MessageBox.Show("There is some troubles with reading TechnologyData.json even in unit tests.\nI'm sure it would be fixed in short time. Be patient.");
-            //return;
-
-            if(_isLoaded)
-                TrySave(true);
-
-            if(fileDialog.ShowDialog() == DialogResult.OK)
-            {
-                _fileName = fileDialog.FileName;
-
-                if(!_fileName.EndsWith(".json"))
-                    return;
-
-                JObject jobj;
-
-                using(StreamReader streamReader = new StreamReader(_fileName))
-                using(JsonReader reader = new JsonTextReader(streamReader))
-                {
-                    jobj = (JObject)serializer.Deserialize(reader);
-                }
-              
-                if (jobj["Type"].ToObject<string>(serializer) != "Techs")
-                {
-                    MessageBox.Show("Invalid file type");
-                    return;
-                }
-
-                JDictionary<Guid, TechSD> dict = jobj["Data"].ToObject < JDictionary<Guid, TechSD>>(serializer);
-
-                _allTechs.Clear();
-                _allDataHolders.Clear();
-
-                foreach(TechSD techSD in dict.Values)
-                {
-                    _allTechs[techSD.Id] = techSD;
-                    _allDataHolders[techSD.Id] = new TechDataHolder(techSD.Name, techSD.Id);
-                }
-
-                _isLoaded = true;
-
-                UpdateSearch();
-            }
-        }
-
-        private void saveButton_Click(object sender, EventArgs e)
-        {
-            TrySave();
-        }
-
         private void searchBox_TextChanged(object sender, EventArgs e)
         {
-            UpdateSearch();
+            UpdateSearch(); //Still here because we don't change tech list but hiding some of them
         }
 
         private void nameTextBox_TextChanged(object sender, EventArgs e)
@@ -267,11 +176,7 @@ namespace ModdingTools.JsonDataEditor
         private void newTechButton_Click(object sender, EventArgs e)
         {
             TechSD newTechSD = new TechSD() {Name = "New Tech", Description = "Description Here", Id = Guid.NewGuid(), Cost = 1000, Requirements = new List<Guid>()};
-            TechDataHolder newTechDataHolder = new TechDataHolder(newTechSD.Name, newTechSD.Id);
-            _allTechs[newTechSD.Id] = newTechSD;
-            _allDataHolders[newTechSD.Id] = newTechDataHolder;
-
-            UpdateSearch();
+            Data.UpdateTech(newTechSD);
         }
 
         private void selectTechButton_Click(object sender, EventArgs e)
@@ -289,28 +194,15 @@ namespace ModdingTools.JsonDataEditor
             TechDataHolder holder = (TechDataHolder)availibleTechs.SelectedItem;
             if(_selectedItemGuid == holder.Guid)
                 _selectedItemGuid = Guid.Empty;
-            _allDataHolders.Remove(holder.Guid);
-            _allTechs.Remove(holder.Guid);
+            Data.RemoveTech(holder.Guid);
 
-            UpdateSearch();
             UpdateSelectedItem();
         }
-    }
 
-    public class TechDataHolder
-    {
-        public string Name;
-        public Guid Guid;
-
-        public TechDataHolder(string name, Guid guid)
+        private void selectedFileComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Name = name;
-            Guid = guid;
-        }
-
-        public override string ToString()
-        {
-            return Name;
+            string filePath = (string)selectedFileComboBox.SelectedItem;
+            Data.SetSelectedTechFile(filePath);
         }
     }
 }
