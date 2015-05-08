@@ -135,10 +135,7 @@ namespace ModdingTools.JsonDataEditor
             //Load data using dynamic
             dynamic data = obj["Data"].ToObject(type, serializer);
 
-            if (type == StaticDataManager.StaticDataStore.TechsType)
-            {
-                LoadData(data, filePath);
-            }
+            LoadData(data, filePath);
 
             _loading = false;
             
