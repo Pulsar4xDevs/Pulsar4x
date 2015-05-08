@@ -23,6 +23,8 @@ namespace ModdingTools.JsonDataEditor
             Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
         };
 
+        public static MainWindow MainWindow; // T_T
+
         #region Technologies
 
         public static event Action TechListChanged;
@@ -60,6 +62,9 @@ namespace ModdingTools.JsonDataEditor
         {
             if (!_allTechDataHolders.ContainsKey(tech.Id))
             {
+                if (string.IsNullOrWhiteSpace(_selectedTechFile))
+                    return;
+
                 CreateTech(tech);
             }
             else

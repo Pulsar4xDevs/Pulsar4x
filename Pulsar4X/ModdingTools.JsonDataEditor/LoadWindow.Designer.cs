@@ -32,6 +32,8 @@
             this.saveAllButton = new System.Windows.Forms.Button();
             this.loadedFilesCount = new System.Windows.Forms.Label();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+            this.techButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // loadFileButton
@@ -67,10 +69,31 @@
             // 
             this.openFileDialog.FileName = "openFileDialog1";
             // 
+            // techButton
+            // 
+            this.techButton.Location = new System.Drawing.Point(3, 212);
+            this.techButton.Name = "techButton";
+            this.techButton.Size = new System.Drawing.Size(97, 23);
+            this.techButton.TabIndex = 3;
+            this.techButton.Text = "Technologies";
+            this.techButton.UseVisualStyleBackColor = true;
+            this.techButton.Click += new System.EventHandler(this.techButton_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(183, 143);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(319, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Label which fills horribly empty space which would be filled up later";
+            // 
             // LoadWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.techButton);
             this.Controls.Add(this.loadedFilesCount);
             this.Controls.Add(this.saveAllButton);
             this.Controls.Add(this.loadFileButton);
@@ -87,5 +110,7 @@
         private System.Windows.Forms.Button saveAllButton;
         private System.Windows.Forms.Label loadedFilesCount;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
+        private System.Windows.Forms.Button techButton;
+        private System.Windows.Forms.Label label1;
     }
 }

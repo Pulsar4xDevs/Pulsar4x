@@ -50,6 +50,7 @@
             this.guidDataLabel = new System.Windows.Forms.Label();
             this.costTextBox = new System.Windows.Forms.TextBox();
             this.selectedFileComboBox = new System.Windows.Forms.ComboBox();
+            this.mainMenuButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // availibleTechs
@@ -257,10 +258,21 @@
             this.selectedFileComboBox.TabIndex = 23;
             this.selectedFileComboBox.SelectedIndexChanged += new System.EventHandler(this.selectedFileComboBox_SelectedIndexChanged);
             // 
+            // mainMenuButton
+            // 
+            this.mainMenuButton.Location = new System.Drawing.Point(17, 424);
+            this.mainMenuButton.Name = "mainMenuButton";
+            this.mainMenuButton.Size = new System.Drawing.Size(75, 23);
+            this.mainMenuButton.TabIndex = 24;
+            this.mainMenuButton.Text = "Main Menu";
+            this.mainMenuButton.UseVisualStyleBackColor = true;
+            this.mainMenuButton.Click += new System.EventHandler(this.mainMenuButton_Click);
+            // 
             // TechnologiesWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.mainMenuButton);
             this.Controls.Add(this.selectedFileComboBox);
             this.Controls.Add(this.costTextBox);
             this.Controls.Add(this.guidDataLabel);
@@ -313,6 +325,7 @@
         private System.Windows.Forms.Label guidDataLabel;
         private System.Windows.Forms.TextBox costTextBox;
         private System.Windows.Forms.ComboBox selectedFileComboBox;
+        private System.Windows.Forms.Button mainMenuButton;
 
     }
 }

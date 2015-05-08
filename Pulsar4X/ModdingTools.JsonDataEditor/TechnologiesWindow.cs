@@ -16,11 +16,8 @@ namespace ModdingTools.JsonDataEditor
 {
     public partial class TechnologiesWindow : UserControl
     {
-        private bool _isLoaded = false;
         private bool _updating = false;
-        private string _fileName;
         private Guid _selectedItemGuid;
-
 
         public TechnologiesWindow()
         {
@@ -32,6 +29,7 @@ namespace ModdingTools.JsonDataEditor
             Data.TechListChanged += UpdateSearch;
             Data.TechLoadedFilesListChanged += UpdateFileList;
 
+            UpdateSearch();
             UpdateSelectedItem();
         }
 
@@ -203,6 +201,11 @@ namespace ModdingTools.JsonDataEditor
         {
             string filePath = (string)selectedFileComboBox.SelectedItem;
             Data.SetSelectedTechFile(filePath);
+        }
+
+        private void mainMenuButton_Click(object sender, EventArgs e)
+        {
+            Data.MainWindow.SetMode(WindowModes.LoadingWindow);
         }
     }
 }

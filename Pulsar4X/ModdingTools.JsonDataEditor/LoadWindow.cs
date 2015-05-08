@@ -32,5 +32,10 @@ namespace ModdingTools.JsonDataEditor
                 Data.LoadFile(openFileDialog.FileName);
             }
         }
+
+        private void techButton_Click(object sender, EventArgs e)
+        {
+            Data.MainWindow.SetMode(WindowModes.TechWindow);
+        }
     }
 }
