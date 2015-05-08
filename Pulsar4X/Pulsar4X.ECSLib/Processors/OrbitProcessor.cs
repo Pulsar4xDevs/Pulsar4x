@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Pulsar4X.ECSLib.Processors
+namespace Pulsar4X.ECSLib
 {
-    internal static class OrbitProcessor
+    public static class OrbitProcessor
     {
         private static int _orbitTypeIndex = -1;
         private static int _starInfoTypeIndex = -1;

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using Pulsar4X.ECSLib.DataBlobs;
+using System.Linq;
 
-
-namespace Pulsar4X.ECSLib.Factories
+namespace Pulsar4X.ECSLib
 {
     public static class FactionFactory
     {
@@ -13,7 +12,7 @@ namespace Pulsar4X.ECSLib.Factories
             NameDB name = new NameDB();
             FactionDB factionDB = new FactionDB();
             FactionAbilitiesDB factionAbilitiesDB = new FactionAbilitiesDB();
-            TechDB techDB = new TechDB();
+            TechDB techDB = new TechDB(StaticDataManager.StaticDataStore.Techs.Values.ToList());
             blobs.Add(name);
             blobs.Add(factionDB);
             blobs.Add(factionAbilitiesDB);

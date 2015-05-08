@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using Pulsar4X.ECSLib;
 using System.IO;
-using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -42,7 +40,7 @@ namespace Pulsar4X.Tests
             greyAlienSpecies.GetDataBlob<NameDB>().Name.Add(humanFaction, "Space bugs");
             
             // add a star system:
-            game.StarSystems.Add(new StarSystem());
+            game.StarSystems.Add(new StarSystem("Sol", -1));
         }
 
         [TearDown]

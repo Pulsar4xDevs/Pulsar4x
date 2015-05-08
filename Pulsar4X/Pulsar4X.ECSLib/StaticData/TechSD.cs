@@ -25,6 +25,7 @@ namespace Pulsar4X.ECSLib
         FromStaticData09,
     }
 
+    [StaticDataAttribute(true, IDPropertyName = "Id")]
     public struct TechSD
     {
         public string Name;

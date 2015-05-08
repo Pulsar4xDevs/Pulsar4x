@@ -299,6 +299,9 @@ namespace Pulsar4X.ECSLib
         /// Returns a list of entityID id's for entities that have datablob type T.
         /// <para></para>
         /// Returns a blank list if no DataBlobs of type T exist.
+        /// <para></para>
+        /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
+        /// List returned is in order by entityID, which is determined internally by the EntityManager
         /// </summary>
         /// <exception cref="KeyNotFoundException">Thrown when T is not derived from BaseDataBlob.</exception>
         public List<Entity> GetAllEntitiesWithDataBlob<T>() where T : BaseDataBlob
@@ -316,6 +319,9 @@ namespace Pulsar4X.ECSLib
         /// the dataBlobMask.
         /// <para></para>
         /// Returns a blank list if no entities have all needed DataBlobs
+        /// <para></para>
+        /// DO NOT ASSUME THE ORDER OF THE RETURNED LIST!
+        /// List returned is in order by entityID, which is determined internally by the EntityManager
         /// </summary>
         /// <exception cref="ArgumentException">Thrown when passed a malformed (incorrect length) dataBlobMask.</exception>
         /// <exception cref="NullReferenceException">Thrown when dataBlobMask is null.</exception>

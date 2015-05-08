@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Pulsar4X.ECSLib.DataBlobs;
 
-namespace Pulsar4X.ECSLib.Factories
+namespace Pulsar4X.ECSLib
 {
     public static class SpeciesFactory
     {
@@ -22,20 +19,20 @@ namespace Pulsar4X.ECSLib.Factories
 
         private static SpeciesDB CreateSpeciesDB_Human()
         {
-            double BaseGravity = 1.0;
-            double MinimumGravityConstraint = 0.1;
-            double MaximumGravityConstraint = 1.9;
-            double BasePressure = 1.0;
-            double MinimumPressureConstraint = 0.4;
-            double MaximumPressureConstraint = 4.0;
-            double BaseTemperature = 14.0;
-            double MinimumTemperatureConstraint = -15.0;
-            double MaximumTemperatureConstraint = 45.0;
-            SpeciesDB species = new SpeciesDB(BaseGravity, 
-                MinimumGravityConstraint, MaximumGravityConstraint, 
-                BasePressure, MinimumPressureConstraint,
-                MaximumPressureConstraint, BaseTemperature, 
-                MinimumTemperatureConstraint, MaximumTemperatureConstraint);
+            double baseGravity = 1.0;
+            double minimumGravityConstraint = 0.1;
+            double maximumGravityConstraint = 1.9;
+            double basePressure = 1.0;
+            double minimumPressureConstraint = 0.4;
+            double maximumPressureConstraint = 4.0;
+            double baseTemperature = 14.0;
+            double minimumTemperatureConstraint = -15.0;
+            double maximumTemperatureConstraint = 45.0;
+            SpeciesDB species = new SpeciesDB(baseGravity, 
+                minimumGravityConstraint, maximumGravityConstraint, 
+                basePressure, minimumPressureConstraint,
+                maximumPressureConstraint, baseTemperature, 
+                minimumTemperatureConstraint, maximumTemperatureConstraint);
 
             return species;
         }
@@ -67,20 +64,20 @@ namespace Pulsar4X.ECSLib.Factories
 
 
             //throw new NotImplementedException();
-            double BaseGravity = masvolinfo.SurfaceGravity;
-            double MinimumGravityConstraint = 0.1;//rnd.Next(planetInfo.SurfaceGravity, 0.1);
-            double MaximumGravityConstraint = 1.9;
-            double BasePressure = atmoinfo.Pressure;
-            double MinimumPressureConstraint = 0.4;
-            double MaximumPressureConstraint = 4.0;
-            double BaseTemperature = sysbodyinfo.BaseTemperature;
-            double MinimumTemperatureConstraint = -15.0;
-            double MaximumTemperatureConstraint = 45.0;
-            SpeciesDB species = new SpeciesDB(BaseGravity,
-                MinimumGravityConstraint, MaximumGravityConstraint,
-                BasePressure, MinimumPressureConstraint,
-                MaximumPressureConstraint, BaseTemperature,
-                MinimumTemperatureConstraint, MaximumTemperatureConstraint);
+            double baseGravity = masvolinfo.SurfaceGravity;
+            double minimumGravityConstraint = 0.1;//rnd.Next(planetInfo.SurfaceGravity, 0.1);
+            double maximumGravityConstraint = 1.9;
+            double basePressure = atmoinfo.Pressure;
+            double minimumPressureConstraint = 0.4;
+            double maximumPressureConstraint = 4.0;
+            double baseTemperature = sysbodyinfo.BaseTemperature;
+            double minimumTemperatureConstraint = -15.0;
+            double maximumTemperatureConstraint = 45.0;
+            SpeciesDB species = new SpeciesDB(baseGravity,
+                minimumGravityConstraint, maximumGravityConstraint,
+                basePressure, minimumPressureConstraint,
+                maximumPressureConstraint, baseTemperature,
+                minimumTemperatureConstraint, maximumTemperatureConstraint);
 
             return species;
         }

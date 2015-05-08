@@ -6,37 +6,25 @@ using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
-    public enum InstallationAbilityType
-    {
-        ShipMaintenance,
-        InstallationConstruction,
-        OrdnanceConstruction,
-        FighterConstruction,
-        FuelRefinery,
-        Mine,
-        AtmosphericModification,
-        Research,
-        Commercial, //ie aurora "Finance Center" 
-        MassDriver,
 
-    }
-
+    [StaticDataAttribute(true, IDPropertyName = "ID")]
     public struct InstallationSD
     {
         public string Name;
         public string Description;
         public Guid ID;
+
         /// <summary>
         /// the amount of pop required for this installation to operate.
         /// </summary>
         public int PopulationRequired;
         public int CargoSize;
-        public JDictionary<InstallationAbilityType, int> BaseAbilityAmounts;
+        public JDictionary<AbilityType, int> BaseAbilityAmounts;
         
         /// <summary>
         /// research ID Requirements to build.
         /// </summary>
-        public List<Guid> Requirements;
+        public List<Guid> TechRequirements;
 
         /// <summary>
         /// The resources requred to build this facility

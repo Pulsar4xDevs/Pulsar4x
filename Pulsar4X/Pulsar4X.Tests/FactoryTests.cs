@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.DataBlobs;
-using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -49,7 +47,7 @@ namespace Pulsar4X.Tests
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terran");
             Entity starSystem = Entity.Create(_game.GlobalManager);
             Entity planet = Entity.Create(starSystem.Manager, new List<BaseDataBlob>());
-
+            Entity species = SpeciesFactory.CreateSpeciesHuman(faction, _game.GlobalManager);
             var requiredDataBlobs = new List<Type>()
             {
                 typeof(ColonyInfoDB), 
@@ -59,7 +57,7 @@ namespace Pulsar4X.Tests
             };
 
             //Entity colony = ColonyFactory.CreateColony(faction, planet);
-            ColonyFactory.CreateColony(faction, planet);
+            ColonyFactory.CreateColony(faction, species, planet);
             Entity colony = faction.GetDataBlob<FactionDB>().Colonies[0];
             ColonyInfoDB colonyInfoDB = colony.GetDataBlob<ColonyInfoDB>();
             //NameDB nameDB = colony.GetDataBlob<NameDB>();
@@ -90,7 +88,7 @@ namespace Pulsar4X.Tests
         public void CreateClassAndShip()
         {
             Entity faction = FactionFactory.CreateFaction(_game.GlobalManager, "Terran");
-            StarSystem starSystem = new StarSystem();
+            StarSystem starSystem = new StarSystem("Sol", -1);
 
             string shipClassName = "M6 Corvette"; //X Universe ;3
             string shipName = "USC Winterblossom"; //Still X Universe
@@ -137,50 +135,9 @@ namespace Pulsar4X.Tests
             Assert.IsTrue(shipNameDB.Name[faction] == shipName);
         }
 
-        [Test]
-        [Description("SystemBodyFactory tests")]
-        public void CreateAndFillStarSystem()
-        {
-            StarSystem starSystem = new StarSystem();
-
-            var starDataBlobTypes = new List<Type>()
-            {
-                typeof(NameDB),
-                typeof(StarInfoDB),
-                typeof(MassVolumeDB),
-                typeof(OrbitDB)
-            };
-
-            var planetDataBlobTypes = new List<Type>()
-            {
-                typeof(NameDB),
-                typeof(SystemBodyDB),
-                typeof(MassVolumeDB),
-                typeof(OrbitDB),
-                typeof(AtmosphereDB)
-            };
-
-            Entity mainStar = SystemBodyFactory.CreateMainStar(starSystem.SystemManager, starSystem, "Sonra");
-            Entity subStar = SystemBodyFactory.CreateSubStar(starSystem.SystemManager, mainStar, "Another little star");
-            Entity planet = SystemBodyFactory.CreatePlanet(starSystem.SystemManager, mainStar, "Argon Prime");
-
-            Assert.IsTrue(HasAllRequiredDatablobs(mainStar, starDataBlobTypes), "Main Star doesn't contains all required datablobs");
-            Assert.IsTrue(HasAllRequiredDatablobs(subStar, starDataBlobTypes), "Sub Star doesn't contains all required datablobs");
-            Assert.IsTrue(HasAllRequiredDatablobs(planet, planetDataBlobTypes), "Planet doesn't contains all required datablobs");
-
-            OrbitDB mainStarOrbitDB = mainStar.GetDataBlob<OrbitDB>();
-            OrbitDB subStarOrbitDB = subStar.GetDataBlob<OrbitDB>();
-            OrbitDB planetOrbitDB = subStar.GetDataBlob<OrbitDB>();
-
-            Assert.IsTrue(mainStarOrbitDB.Parent == null);
-            Assert.IsTrue(subStarOrbitDB.Parent == mainStar);
-            Assert.IsTrue(planetOrbitDB.Parent == mainStar);
-
-
-        }
-
         private static bool HasAllRequiredDatablobs(Entity toCheck, List<Type> datablobTypes)
         {
+            var entityDataBlobs = toCheck.GetAllDataBlobs();
             foreach (BaseDataBlob datablob in toCheck.GetAllDataBlobs())
                 if (!datablobTypes.Contains(datablob.GetType()))
                     return false;

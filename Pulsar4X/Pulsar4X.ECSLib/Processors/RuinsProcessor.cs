@@ -1,4 +1,4 @@
-﻿namespace Pulsar4X.ECSLib.Processors
+﻿namespace Pulsar4X.ECSLib
 {
     internal static class RuinsProcessor
     {

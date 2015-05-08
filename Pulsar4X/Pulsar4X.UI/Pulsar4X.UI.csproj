@@ -71,12 +71,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Compile Include="ConfirmActivity.cs" />
+    <Compile Include="ConfirmActivity.designer.cs">
+      <DependentUpon>ConfirmActivity.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dialogs\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
+    <EmbeddedResource Include="ConfirmActivity.resx">
+      <DependentUpon>ConfirmActivity.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>

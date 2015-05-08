@@ -3,26 +3,42 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
+    public enum AbilityType
+    {
+        ShipMaintenance,
+        GenericConstruction, //ship parts, installations. 
+        OrdnanceConstruction,
+        FighterConstruction,
+        ShipAssembly,
+        Refinery,
+        Mine,
+        AtmosphericModification,
+        Research,
+        Commercial, //ie aurora "Finance Center" 
+        Industrial, //intend to use this later on for civ economy and creating random tradegoods.
+        Agrucultural, //as above.
+        MassDriver,
+        SpacePort, //loading/unloading speed;
+        GeneratesNavalOfficers,
+        GeneratesGroundOfficers,
+        GeneratesShipCrew,
+        GeneratesTroops, //not sure how we're going to do this yet.aurora kind of did toops and crew different.
+        GeneratesScientists,
+        GeneratesCivilianLeaders,
+        DetectionThermal, //radar
+        DetectionEM,    //radar
+        Teraforming,
+        BasicLiving //ie Auroras infrustructure will have this ability. 
+    }
+
     public class FactionAbilitiesDB : BaseDataBlob
     {
-
-        public float BaseConstructionBonus { get; set; }
-
-        public float BaseFighterBonus { get; set; }
-
-        public float BaseMiningBonus { get; set; }
-
-        public float BaseOrdnanceBonus { get; set; }
-
-        public float BaseResearchBonus { get; set; }
-
-        public float BaseShipBuildingBonus { get; set; }
-
-        public float BaseTerraformingBonus { get; set; }
 
         public int BasePlanetarySensorStrength { get; set; }
 
         public float BaseGroundUnitStrengthBonus { get; set; }
+
+        public JDictionary<AbilityType, float> AbilityBonuses { get; set; }
 
         /// <summary>
         /// To determine final colony costs, from the Colonization Cost Reduction X% techs.
@@ -38,38 +54,36 @@ namespace Pulsar4X.ECSLib
 
         }
 
-        public FactionAbilitiesDB(float baseConstructionBonus,
-            float baseFighterBonus,
-            float baseMiningBonus,
-            float baseOrdnanceBonus,
-            float baseResearchBonus,
-            float baseShipBuildingBonus,
-            float baseTerraformingBonus,
+        public FactionAbilitiesDB(float constructionBonus,
+            float fighterConstructionBonus,
+            float miningBonus,
+            float ordnanceConstructionBonus,
+            float researchBonus,
+            float shipAsseblyBonus,
+            float terraformingBonus,
             int basePlanetarySensorStrength,
-            float baseGroundUnitStrengthBonus,
+            float groundUnitStrengthBonus,
             float colonyCostMultiplier)
         {
-            BaseConstructionBonus = baseConstructionBonus;
-            BaseFighterBonus = baseFighterBonus;
-            BaseMiningBonus = baseMiningBonus;
-            BaseOrdnanceBonus = baseOrdnanceBonus;
-            BaseResearchBonus = baseResearchBonus;
-            BaseShipBuildingBonus = baseShipBuildingBonus;
-            BaseTerraformingBonus = baseTerraformingBonus;
+
             BasePlanetarySensorStrength = basePlanetarySensorStrength;
-            BaseGroundUnitStrengthBonus = baseGroundUnitStrengthBonus;
+            BaseGroundUnitStrengthBonus = groundUnitStrengthBonus;
             ColonyCostMultiplier = colonyCostMultiplier;
+
+            AbilityBonuses = new JDictionary<AbilityType, float>();
+            AbilityBonuses.Add(AbilityType.GenericConstruction, constructionBonus);
+            AbilityBonuses.Add(AbilityType.FighterConstruction, fighterConstructionBonus);
+            AbilityBonuses.Add(AbilityType.Mine, miningBonus);
+            AbilityBonuses.Add(AbilityType.OrdnanceConstruction, ordnanceConstructionBonus);
+            AbilityBonuses.Add(AbilityType.Research, researchBonus);
+            AbilityBonuses.Add(AbilityType.ShipAssembly, shipAsseblyBonus);
+            AbilityBonuses.Add(AbilityType.Teraforming, terraformingBonus);
+
         }
 
         public FactionAbilitiesDB(FactionAbilitiesDB db)
         {
-            BaseConstructionBonus = db.BaseConstructionBonus;
-            BaseFighterBonus = db.BaseFighterBonus;
-            BaseMiningBonus = db.BaseMiningBonus;
-            BaseOrdnanceBonus = db.BaseOrdnanceBonus;
-            BaseResearchBonus = db.BaseResearchBonus;
-            BaseShipBuildingBonus = db.BaseShipBuildingBonus;
-            BaseTerraformingBonus = db.BaseTerraformingBonus;
+            AbilityBonuses = new JDictionary<AbilityType, float>(db.AbilityBonuses);
             BasePlanetarySensorStrength = db.BasePlanetarySensorStrength;
             BaseGroundUnitStrengthBonus = db.BaseGroundUnitStrengthBonus;
             ColonyCostMultiplier = db.ColonyCostMultiplier;

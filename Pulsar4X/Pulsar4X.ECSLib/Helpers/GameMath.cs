@@ -78,7 +78,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public float Percent
         {
-            get {return _percent / 255f;} 
+            get { return _percent / 255f; }
             set { _percent = (byte)(value * 255); }
         }
     }
@@ -132,7 +132,7 @@ namespace Pulsar4X.ECSLib
     //[JsonObjectAttribute]
     public class WeightedList<T> : IEnumerable<WeightedValue<T>>, ISerializable
     {
-        private List<WeightedValue<T>> m_valueList;
+        private List<WeightedValue<T>> _valueList;
 
         /// <summary>
         /// Total weights of the list.
@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public WeightedList()
         {
-            m_valueList = new List<WeightedValue<T>>();
+            _valueList = new List<WeightedValue<T>>();
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace Pulsar4X.ECSLib
         public void Add(double weight, T value)
         {
             var listEntry = new WeightedValue<T> {Weight = weight, Value = value};
-            m_valueList.Add(listEntry);
+            _valueList.Add(listEntry);
             TotalWeight += weight;
         }
 
@@ -164,18 +164,18 @@ namespace Pulsar4X.ECSLib
         /// <param name="otherList">The list to add.</param>
         public void AddRange(WeightedList<T> otherList)
         {
-            m_valueList.AddRange(otherList.m_valueList);
+            _valueList.AddRange(otherList._valueList);
             TotalWeight += otherList.TotalWeight;
         }
 
         public IEnumerator<WeightedValue<T>> GetEnumerator() 
         {
-            return m_valueList.GetEnumerator();
+            return _valueList.GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return GetEnumerator();
         }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace Pulsar4X.ECSLib
         public T Select(double rngValue)
         {
             double cumulativeChance = 0;
-            foreach (WeightedValue<T> listEntry in m_valueList)
+            foreach (WeightedValue<T> listEntry in _valueList)
             {
                 double realChance = listEntry.Weight / TotalWeight;
                 cumulativeChance += realChance;
@@ -204,21 +204,21 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public T SelectAt(int index)
         {
-            return m_valueList[index].Value;
+            return _valueList[index].Value;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("Values", m_valueList);
+            info.AddValue("Values", _valueList);
         }
 
         public WeightedList(SerializationInfo info, StreamingContext context)
         {
-            m_valueList = (List<WeightedValue<T>>)info.GetValue("Values", typeof(List<WeightedValue<T>>));
+            _valueList = (List<WeightedValue<T>>)info.GetValue("Values", typeof(List<WeightedValue<T>>));
 
             // rebuild total weight:
             TotalWeight = 0;
-            foreach (var w in m_valueList)
+            foreach (var w in _valueList)
             {
                 TotalWeight += w.Weight;
             }
@@ -237,18 +237,93 @@ namespace Pulsar4X.ECSLib
         {
             if (value > max)
                 return max;
-            else if (value < min)
+            if (value < min)
                 return min;
 
             return value;
         }
 
-        /// <summary>
-        /// Clamps a number between 0 and 1.
-        /// </summary>
-        public static double Clamp01(double value)
+        public static double Clamp(double value, MinMaxStruct minMax)
         {
-            return Clamp(value, 0, 1);
+            return Clamp(value, minMax.Min, minMax.Max);
+        }
+
+        /// <summary>
+        /// Selects a number from a range based on the selection percentage provided.
+        /// </summary>
+        public static double SelectFromRange(MinMaxStruct minMax, double selection)
+        {
+            return minMax.Min + selection * (minMax.Max - minMax.Min);
+        }
+
+        /// <summary>
+        /// Selects a number from a range based on the selection percentage provided.
+        /// </summary>
+        public static double SelectFromRange(double min, double max, double selection)
+        {
+            return min + selection * (max - min);
+        }
+
+        /// <summary>
+        /// Calculates where the value falls inside the MinMaxStruct.
+        /// </summary>
+        /// <returns>Value's percent in the MinMaxStruct (Ranged from 0.0 to 1.0)</returns>
+        public static double GetPercentage(double value, MinMaxStruct minMax)
+        {
+            return GetPercentage(value, minMax.Min, minMax.Max);
+        }
+
+        /// <summary>
+        /// Calculates where the value falls between the min and max.
+        /// </summary>
+        /// <returns>Value's percent in the MinMaxStruct (Ranged from 0.0 to 1.0)</returns>
+        public static double GetPercentage(double value, double min, double max)
+        {
+            if (min >= max)
+            {
+                throw new ArgumentOutOfRangeException("min", "Min value must be less than Max value.");
+            }
+            double adjustedMax = max - min;
+            double adjustedValue = value - min;
+            return adjustedValue / adjustedMax;
+        }
+
+        /// <summary>
+        /// Returns the gravitational attraction between two masses.
+        /// </summary>
+        /// <param name="mass1">Mass of first body. (KG)</param>
+        /// <param name="mass2">Mass of second body. (KG)</param>
+        /// <param name="distance">Distance between bodies. (M)</param>
+        /// <returns>Force (Newtons)</returns>
+        public static double GetGravitationalAttraction(double mass1, double mass2, double distance)
+        {
+            // http://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation
+            return GameSettings.Science.GravitationalConstant * mass1 * mass2 / (distance * distance);
+        }
+
+        /// <summary>
+        /// Returns the gravitational attraction of a body at a specified distance.
+        /// </summary>
+        /// <param name="mass">Mass of the body. (KG)</param>
+        /// <param name="distance">Distance to the body. (M)</param>
+        /// <returns>Force (Newtons)</returns>
+        public static double GetStandardGravitationAttraction(double mass, double distance)
+        {
+            return GetGravitationalAttraction(mass, 1, distance);
+        }
+    }
+
+    /// <summary>
+    /// Small helper struct to make all these min/max dicts. nicer.
+    /// </summary>
+    public struct MinMaxStruct
+    {
+        public double Min, Max;
+
+        public MinMaxStruct(double min, double max)
+        {
+            Min = min;
+            Max = max;
         }
     }
 }

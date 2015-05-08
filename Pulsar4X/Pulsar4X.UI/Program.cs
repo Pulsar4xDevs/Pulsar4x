@@ -32,8 +32,8 @@ namespace Pulsar4X.UI
 
             Game game = new Game();
 
-            game.StarSystems.Add(new StarSystem());
-            game.StarSystems.Add(new StarSystem());
+            game.StarSystems.Add(new StarSystem("Sol", -1));
+            game.StarSystems.Add(new StarSystem("Sol", -1));
 
             // gen star system:
             Entities.StarSystem sol = SystemGen.CreateSol();
@@ -143,21 +143,18 @@ namespace Pulsar4X.UI
             oNewFaction.ShipDesigns[1].BuildClassSummary();
 
 
-            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0]);
-            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[0]);
-            oNewFaction.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[1]);
-            oNewFaction.TaskGroups[0].Ships[0].Refuel(1000000.0f);
-            oNewFaction.TaskGroups[0].Ships[1].Refuel(1000000.0f);
-            oNewFaction.TaskGroups[0].Ships[2].Refuel(1000000.0f);
+            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[0], "Warship");
+            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[0], "Backup Warship");
+            oNewFaction.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[1], "Hammer");
+            oNewFaction.TaskGroups.Last().Ships[0].Refuel(1000000.0f);
+            oNewFaction.TaskGroups.Last().Ships[1].Refuel(1000000.0f);
+            oNewFaction.TaskGroups.Last().Ships[2].Refuel(1000000.0f);
 
-            oNewFaction.TaskGroups[0].Ships[0].Name = "Warship";
-            oNewFaction.TaskGroups[0].Ships[1].Name = "Backup Warship";
-            oNewFaction.TaskGroups[0].Ships[2].Name = "Hammer";
             foreach (KeyValuePair<OrdnanceDefTN, int> pair in oNewFaction.ShipDesigns[1].ShipClassOrdnance)
             {
-                oNewFaction.TaskGroups[0].Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
+                oNewFaction.TaskGroups.Last().Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
             }
-            oNewFaction.TaskGroups[0].Ships[2].CurrentMagazineCapacity = oNewFaction.ShipDesigns[1].PreferredOrdnanceSize;
+            oNewFaction.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction.ShipDesigns[1].PreferredOrdnanceSize;
 
             oNewFaction2.AddNewShipDesign("Mace");
             CL = oNewFaction2.ComponentList;
@@ -203,21 +200,18 @@ namespace Pulsar4X.UI
             oNewFaction2.ShipDesigns[1].IsLocked = true;
             oNewFaction2.ShipDesigns[1].BuildClassSummary();
 
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0]);
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction2.ShipDesigns[0]);
-            oNewFaction2.TaskGroups[0].AddShip(oNewFaction.ShipDesigns[1]);
-            oNewFaction2.TaskGroups[0].Ships[0].Refuel(1000000.0f);
-            oNewFaction2.TaskGroups[0].Ships[1].Refuel(1000000.0f);
-            oNewFaction2.TaskGroups[0].Ships[2].Refuel(1000000.0f);
+            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction2.ShipDesigns[0], "Battleship");
+            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction2.ShipDesigns[0], "Backup Battleship");
+            oNewFaction2.TaskGroups.Last().AddShip(oNewFaction.ShipDesigns[1], "Crusher");
+            oNewFaction2.TaskGroups.Last().Ships[0].Refuel(1000000.0f);
+            oNewFaction2.TaskGroups.Last().Ships[1].Refuel(1000000.0f);
+            oNewFaction2.TaskGroups.Last().Ships[2].Refuel(1000000.0f);
 
-            oNewFaction2.TaskGroups[0].Ships[0].Name = "Battleship";
-            oNewFaction2.TaskGroups[0].Ships[1].Name = "Backup Battleship";
-            oNewFaction2.TaskGroups[0].Ships[2].Name = "Crusher";
             foreach (KeyValuePair<OrdnanceDefTN, int> pair in oNewFaction2.ShipDesigns[1].ShipClassOrdnance)
             {
-                oNewFaction2.TaskGroups[0].Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
+                oNewFaction2.TaskGroups.Last().Ships[2].ShipOrdnance.Add(pair.Key, pair.Value);
             }
-            oNewFaction2.TaskGroups[0].Ships[2].CurrentMagazineCapacity = oNewFaction2.ShipDesigns[1].PreferredOrdnanceSize;
+            oNewFaction2.TaskGroups.Last().Ships[2].CurrentMagazineCapacity = oNewFaction2.ShipDesigns[1].PreferredOrdnanceSize;
 
             oNewFaction.GiveAllTechs();
             oNewFaction2.GiveAllTechs();

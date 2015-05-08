@@ -54,6 +54,20 @@ namespace Pulsar4X.ECSLib
         public JDictionary<AtmosphericGasSD, float> Composition;
 
         /// <summary>
+        /// indicates if the body as a valid atmosphere.
+        /// </summary>
+        public bool Exists
+        {
+            get
+            {
+                if (Composition.Count == 0)
+                    return false;
+
+                return true;
+            }
+        }
+
+        /// <summary>
         /// Empty constructor for AtmosphereDataBlob.
         /// </summary>
         public AtmosphereDB()

@@ -445,9 +445,10 @@ namespace Pulsar4X.Entities
         /// </summary>
         /// <param name="ClassDefinition">Definition of the ship.</param>
         /// <param name="ShipIndex">Its index within the shiplist of the taskgroup.</param>
-        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact)
+        public ShipTN(ShipClassTN ClassDefinition, int ShipIndex, int CurrentTimeSlice, TaskGroupTN ShipTG, Faction ShipFact, String Title)
         {
             int index;
+            Name = Title;
 
             /// <summary>
             /// create these or else anything that relies on a unique global id will break.
@@ -1755,7 +1756,7 @@ namespace Pulsar4X.Entities
                     /// </summary>
                     if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.thermalOrEM == PassiveSensorType.EM)
                     {
-                        if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.rating == BestEMRating)
+                        if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.rating == ShipsTaskGroup.BestEM.pSensorDef.rating)
                         {
                             ShipsTaskGroup.BestEMCount--;
 
@@ -1786,7 +1787,7 @@ namespace Pulsar4X.Entities
                     }
                     else
                     {
-                        if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.rating == BestThermalRating)
+                        if (ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.rating == ShipsTaskGroup.BestThermal.pSensorDef.rating)
                         {
                             ShipsTaskGroup.BestThermalCount--;
 
@@ -2041,32 +2042,21 @@ namespace Pulsar4X.Entities
                         /// <summary>
                         /// Temporary key list, will be removing these from shipordnance when done.
                         /// </summary>
-                        BindingList<OrdnanceDefTN> TempKeyList = new BindingList<OrdnanceDefTN>();
+                        Dictionary<OrdnanceDefTN,int> TempKeyList = new Dictionary<OrdnanceDefTN,int>();
 
                         /// <summary>
                         /// loop through all ordnance and determine the loadbalanced count of missiles that would be in this magazine.
+                        /// if ShipOrdnance is empty, this does not run.
                         /// </summary>
                         foreach (KeyValuePair<OrdnanceDefTN, int> pair in ShipOrdnance)
                         {
                             int Total = (int)Math.Ceiling(pair.Key.size) * pair.Value;
                             int AmtInThisMag = (int)Math.Ceiling(ThisMagPercentage * Total);
                             TempCapTotal = TempCapTotal + AmtInThisMag;
-                            ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - AmtInThisMag;
+
+                            TempKeyList.Add(pair.Key, AmtInThisMag);
+
                             WarheadTotal = WarheadTotal + pair.Key.warhead;
-
-                            if (ShipOrdnance[pair.Key] == 0)
-                            {
-                                TempKeyList.Add(pair.Key);
-                            }
-                            else if (ShipOrdnance[pair.Key] < 0)
-                            {
-
-                                TempKeyList.Add(pair.Key);
-#if LOG4NET_ENABLED
-#warning faction messagelog this?
-                                logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction.");
-#endif
-                            }
 
                             /// <summary>
                             /// Some mags will have a little more than total cap, and some will have a little less than total cap because of how this could work out.
@@ -2076,13 +2066,26 @@ namespace Pulsar4X.Entities
                         }
 
                         /// <summary>
-                        /// Remove any keys that are empty.
+                        /// I have to subtract values elsewhere because it was giving me some crap about "Collection was modified; enumeration operation may not execute"
+                        /// Atleast I hope this fixes the issue.
                         /// </summary>
                         if (TempKeyList.Count != 0)
                         {
-                            foreach (OrdnanceDefTN key in TempKeyList)
+                            foreach (KeyValuePair<OrdnanceDefTN,int> pair in TempKeyList)
                             {
-                                ShipOrdnance.Remove(key);
+                                ShipOrdnance[pair.Key] = ShipOrdnance[pair.Key] - pair.Value;
+                                if (ShipOrdnance[pair.Key] <= 0)
+                                {
+                                    if (ShipOrdnance[pair.Key] < 0)
+                                    {
+#if LOG4NET_ENABLED
+#warning faction messagelog this?
+                                        logger.Debug("Ship ordnance key value inexplicably reduced below zero on magazine destruction.");
+#endif
+                                    }
+                                    ShipOrdnance.Remove(pair.Key);
+                                }
+                                
                             }
                         }
                     }
@@ -2332,6 +2335,103 @@ namespace Pulsar4X.Entities
                     break;
             }
         }
+
+        /// <summary>
+        /// This function returns the cost of repairing the specified component based on the data given to the damage control queue.
+        /// </summary>
+        /// <param name="ID">Id of component in general ship component list.</param>
+        /// <param name="CType">type of component.</param>
+        /// <returns>cost of said component.</returns>
+        public decimal GetDamagedComponentsRepairCost(int ID, ComponentTypeTN CType)
+        {
+            switch (CType)
+            {
+                case ComponentTypeTN.Crew:
+                       return CrewQuarters[ShipComponents[ID].componentIndex].genCompDef.cost;
+
+                case ComponentTypeTN.Fuel:
+                    return FuelTanks[ShipComponents[ID].componentIndex].genCompDef.cost;
+
+                case ComponentTypeTN.Engineering:
+                    return EngineeringBays[ShipComponents[ID].componentIndex].genCompDef.cost;
+
+                case ComponentTypeTN.Bridge:
+                case ComponentTypeTN.MaintenanceBay:
+                case ComponentTypeTN.FlagBridge:
+                case ComponentTypeTN.DamageControl:
+                case ComponentTypeTN.OrbitalHabitat:
+                case ComponentTypeTN.RecFacility:
+                    return OtherComponents[ShipComponents[ID].componentIndex].genCompDef.cost;
+
+                case ComponentTypeTN.Engine:
+                    /// <summary>
+                    /// All engines have to be the same, so engine 0 is used for these for convienience.
+                    /// </summary>
+                    return ShipEngine[0].engineDef.cost;
+
+                case ComponentTypeTN.PassiveSensor:
+                    return ShipPSensor[ShipComponents[ID].componentIndex].pSensorDef.cost;
+
+                case ComponentTypeTN.ActiveSensor:
+                    return ShipASensor[ShipComponents[ID].componentIndex].aSensorDef.cost;
+
+                case ComponentTypeTN.CargoHold:
+                    return ShipCargo[ShipComponents[ID].componentIndex].cargoDef.cost;
+
+                case ComponentTypeTN.CargoHandlingSystem:
+                    return ShipCHS[ShipComponents[ID].componentIndex].cargoHandleDef.cost;
+
+                case ComponentTypeTN.CryoStorage:
+                    return ShipColony[ShipComponents[ID].componentIndex].colonyDef.cost;
+
+                case ComponentTypeTN.BeamFireControl:
+                    return ShipBFC[ShipComponents[ID].componentIndex].beamFireControlDef.cost;
+
+                case ComponentTypeTN.Rail:
+                case ComponentTypeTN.Gauss:
+                case ComponentTypeTN.Plasma:
+                case ComponentTypeTN.Laser:
+                case ComponentTypeTN.Meson:
+                case ComponentTypeTN.Microwave:
+                case ComponentTypeTN.Particle:
+                case ComponentTypeTN.AdvRail:
+                case ComponentTypeTN.AdvLaser:
+                case ComponentTypeTN.AdvPlasma:
+                case ComponentTypeTN.AdvParticle:
+                    return ShipBeam[ShipComponents[ID].componentIndex].beamDef.cost;
+
+
+                case ComponentTypeTN.Reactor:
+                    return ShipReactor[ShipComponents[ID].componentIndex].reactorDef.cost;
+
+                case ComponentTypeTN.Shield:
+                    return ShipShield[ShipComponents[ID].componentIndex].shieldDef.cost;
+
+                case ComponentTypeTN.AbsorptionShield:
+                    return ShipShield[ShipComponents[ID].componentIndex].shieldDef.cost;
+
+                case ComponentTypeTN.MissileLauncher:
+                    return ShipMLaunchers[ShipComponents[ID].componentIndex].missileLauncherDef.cost;
+
+                case ComponentTypeTN.Magazine:
+                    return ShipMagazines[ShipComponents[ID].componentIndex].magazineDef.cost;
+
+                case ComponentTypeTN.MissileFireControl:
+                    return ShipMFC[ShipComponents[ID].componentIndex].mFCSensorDef.cost;
+
+                case ComponentTypeTN.CIWS:
+                    return ShipCIWS[ShipComponents[ID].componentIndex].cIWSDef.cost;
+
+                case ComponentTypeTN.Turret:
+                    return ShipTurret[ShipComponents[ID].componentIndex].turretDef.cost;
+
+                case ComponentTypeTN.JumpEngine:
+                    return ShipJumpEngine[ShipComponents[ID].componentIndex].jumpEngineDef.cost;
+            }
+
+            return 0.0m;
+        }
+
         /// <summary>
         /// Handle the consequences of a ship destruction in game mechanics. C# loses its cookies if I try to actually delete anything here.
         /// still many things need to be cleaned up when a ship is destroyed outright.

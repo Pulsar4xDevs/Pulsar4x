@@ -34,7 +34,7 @@ namespace Pulsar4X.ECSLib
         /// Default data directory, static data is stored in subfolders.
         /// @todo make this load from some sort of settings file.
         /// </summary>
-        private const string defaultDataDirectory = "./Data";
+        private const string DefaultDataDirectory = "./Data";
 
         /// <summary>
         /// the subdirectory of defaultDataDirectory that contains the offical game data.
@@ -42,13 +42,23 @@ namespace Pulsar4X.ECSLib
         /// @todo make this load from some sort of settings file.
         /// @todo make this more cross platform (currently windows only).
         /// </summary>
-        private const string officialDataDirectory = "\\Pulsar4x";
+        private const string OfficialDataDirectory = "\\Pulsar4x";
 
         // Serilizer, specifically configured for static data.
-        private static JsonSerializer serializer = new JsonSerializer
+        private static JsonSerializer _serializer = new JsonSerializer
         {
             NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.Indented, ContractResolver = new ForceUseISerializable(), Converters = { new Newtonsoft.Json.Converters.StringEnumConverter() }
         };
+
+        /// <summary>
+        /// Small function that clears any static data currently loaded. 
+        /// It should be used before loading or starting a new game to make 
+        /// sure the static data is starting from a blank slate.
+        /// </summary>
+        public static void ClearAllData()
+        {
+            StaticDataStore = new StaticDataStore();
+        }
 
         /// <summary>
         /// Loads all dtat from the default static data directory.
@@ -57,7 +67,7 @@ namespace Pulsar4X.ECSLib
         public static void LoadFromDefaultDataDirectory()
         {
             // get list of default sub-directories:
-            var dataDirs = Directory.GetDirectories(defaultDataDirectory);
+            var dataDirs = Directory.GetDirectories(DefaultDataDirectory);
 
             // safty check:
             if (dataDirs.GetLength(0) < 1)
@@ -66,7 +76,7 @@ namespace Pulsar4X.ECSLib
             }
 
             // lets make sure we load the official data first:
-            int i = Array.FindIndex(dataDirs, x => x == (defaultDataDirectory + officialDataDirectory));
+            int i = Array.FindIndex(dataDirs, x => x == (DefaultDataDirectory + OfficialDataDirectory));
             if (i < 0 || String.IsNullOrEmpty(dataDirs[i]))
                 return; // bad.
 
@@ -146,30 +156,9 @@ namespace Pulsar4X.ECSLib
             // we are alreading checking the types via StaticDataStore.*Type, so we 
             // can rely on there being an overload of StaticDataStore.Store
             // that supports that type.
-            dynamic data = obj["Data"].ToObject(type, serializer);
+            dynamic data = obj["Data"].ToObject(type, _serializer);
 
-            if (type == StaticDataStore.AtmosphericGasesType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.CommanderNameThemesType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.MineralsType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.TechsType)
-            {
-                StaticDataStore.Store(data);
-            }
-            else if (type == StaticDataStore.InstallationsType)
-            {
-                StaticDataStore.Store(data);
-            }
-
-            // ... more here.
+            StaticDataStore.Store(data);
         }
 
         /// <summary>
@@ -181,7 +170,7 @@ namespace Pulsar4X.ECSLib
             using (StreamReader sr = new StreamReader(file))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                obj = (JObject)serializer.Deserialize(reader);
+                obj = (JObject)_serializer.Deserialize(reader);
             }
 
             return obj;
@@ -196,7 +185,7 @@ namespace Pulsar4X.ECSLib
             using (StreamReader sr = new StreamReader(file))
             using (JsonReader reader = new JsonTextReader(sr))
             {
-                info = (VersionInfo)serializer.Deserialize(reader, typeof(VersionInfo));
+                info = (VersionInfo)_serializer.Deserialize(reader, typeof(VersionInfo));
             }
 
             return info;
@@ -222,7 +211,7 @@ namespace Pulsar4X.ECSLib
                 using (StreamWriter sw = new StreamWriter(file))
                 using (JsonWriter writer = new JsonTextWriter(sw))
                 {
-                    serializer.Serialize(writer, data);
+                    _serializer.Serialize(writer, data);
                 }
             }
         }
@@ -251,4 +240,24 @@ namespace Pulsar4X.ECSLib
             : base(info, context)
         { }
     }
+
+    /// <summary>
+    /// This is a simple attribute that should be attached to Static Data structs. It assists reflection in finding 
+    /// Static data and dealing with it. It has two peroperties, HasID and IDPropertyName, that are used to 
+    /// signel that this peice of static data has a unique guid that repesents it.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Struct, AllowMultiple = false)]
+    public class StaticDataAttribute : Attribute
+    {
+        public bool HasID { get; set; }
+
+        public string IDPropertyName { get; set; }
+
+        public StaticDataAttribute(bool hasID)
+        {
+            HasID = hasID;
+        }
+    }
+
+
 }

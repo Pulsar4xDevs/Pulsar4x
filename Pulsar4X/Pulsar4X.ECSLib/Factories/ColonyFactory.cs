@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Pulsar4X.ECSLib.DataBlobs;
+﻿using System.Collections.Generic;
 
-namespace Pulsar4X.ECSLib.Factories
+namespace Pulsar4X.ECSLib
 {
     public static class ColonyFactory
     {
@@ -12,7 +10,7 @@ namespace Pulsar4X.ECSLib.Factories
         /// <param name="systemEntityManager"></param>
         /// <param name="factionEntity"></param>
         /// <returns></returns>
-        public static Entity CreateColony(Entity factionEntity, Entity planetEntity)
+        public static Entity CreateColony(Entity factionEntity, Entity speciesEntity, Entity planetEntity)
         {
             List<BaseDataBlob> blobs = new List<BaseDataBlob>();
 

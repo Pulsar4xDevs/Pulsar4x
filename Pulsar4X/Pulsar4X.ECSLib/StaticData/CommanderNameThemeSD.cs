@@ -2,6 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
+    [StaticDataAttribute(false)]
     public struct CommanderNameThemeSD
     {
         public string ThemeName;

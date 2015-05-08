@@ -1,23 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Data;
 using System.Linq;
+using System.Security.AccessControl;
 
 namespace Pulsar4X.ECSLib
 {
-    internal static class InstallationProcessor
+    public static class InstallationProcessor
     {
+        #region automaticEachTickStuff
+
+        /// <summary>
+        /// this should be the main entry point for doing stuff.
+        /// </summary>
+        /// <param name="colonyEntity"></param>
+        /// <param name="factionEntity"></param>
+        public static void PerEconTic(Entity colonyEntity, Entity factionEntity)
+        {
+            FactionAbilitiesDB factionAbilites = factionEntity.GetDataBlob<FactionAbilitiesDB>();
+            TechDB factionTech = factionEntity.GetDataBlob<TechDB>();
+            Employment(colonyEntity); //check if installations still work
+            Mine(factionEntity, colonyEntity); //mine new materials.
+            Construction(factionEntity, colonyEntity); //construct, refine, etc.
+
+            DoResearch(colonyEntity, factionAbilites, factionTech);
+        }
 
         /// <summary>
         /// should be called when new facilitys are added, 
         /// facilies are enabled or disabled, 
         /// or if population changes significantly.
+        /// Or maybe just check at the beginning of every econ tick.
         /// </summary>
         /// <param name="colonyEntity"></param>
-        internal static void Employment(Entity colonyEntity)
+        public static void Employment(Entity colonyEntity)
         {
             var employablePopulationlist = colonyEntity.GetDataBlob<ColonyInfoDB>().Population.Values;
-            int employable = (int)(employablePopulationlist.Sum() * 1000000); //because it's in millions I think...maybe we should change.
+            long employable = employablePopulationlist.Sum();
             InstallationsDB installationsDB = colonyEntity.GetDataBlob<InstallationsDB>();
             //int totalReq = 0;
             JDictionary<Guid,int> workingInstallations  = new JDictionary<Guid, int>(StaticDataManager.StaticDataStore.Installations.Keys.ToDictionary(key => key, val => 0));
@@ -35,93 +54,243 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// run every ??? 
+        /// run every econ tic 
         /// extracts minerals from planet surface by mineing ability;
         /// </summary>
         /// <param name="factionEntity"></param>
-        internal static void Mine(Entity factionEntity)
+        public static void Mine(Entity factionEntity, Entity colonyEntity)
         {
-            float factionMineingAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseMiningBonus;
-            float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
-            float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
-            float totalBonusMultiplier = factionMineingAbility * sectorGovenerAbility * planetGovenerAbility;
+            int installationMineingAbility = InstallationAbilityofType(colonyEntity.GetDataBlob<InstallationsDB>(), AbilityType.Mine);
+            float factionMineingBonus = BonusesForType(factionEntity, colonyEntity, AbilityType.Mine);
+            float totalMineingAbility = installationMineingAbility * factionMineingBonus;
+            Entity planetEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
+            SystemBodyDB planetDB = planetEntity.GetDataBlob<SystemBodyDB>();
+            JDictionary<Guid, float> colonyMineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+            
+            JDictionary<Guid, MineralDepositInfo> planetRawMinerals = planetDB.Minerals;
 
-            foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
+            foreach (KeyValuePair<Guid, MineralDepositInfo> depositKeyValuePair in planetRawMinerals)
             {
-                Entity planet = colonyEntity.GetDataBlob<ColonyInfoDB>().PlanetEntity;
-                JDictionary<Guid, int> mineralStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
-                int installationMineingAbility = TotalAbilityofType(InstallationAbilityType.Mine, colonyEntity.GetDataBlob<InstallationsDB>());
-                SystemBodyDB systemBody = planet.GetDataBlob<SystemBodyDB>();
-                JDictionary<Guid, MineralDepositInfo> minerals = systemBody.Minerals;
-                foreach (KeyValuePair<Guid, MineralDepositInfo> kvp in minerals)
+                Guid mineralGuid = depositKeyValuePair.Key;
+                int amountOnPlanet = depositKeyValuePair.Value.Amount;
+                double accessibility = depositKeyValuePair.Value.Accessibility;
+                double abilitiestoMine = totalMineingAbility * accessibility;
+                int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
+                colonyMineralStockpile.SafeValueAdd<Guid, float>(mineralGuid, amounttomine);             
+                MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
+                mineralDeposit.Amount -= amounttomine;
+                double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 3) * mineralDeposit.Accessibility;
+                mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
+            }
+            
+        }
+
+
+
+        /// <summary>
+        /// runs each of the constructionJob lists.
+        /// </summary>
+        /// <param name="factionEntity"></param>
+        /// <param name="colonyEntity"></param>
+        public static void Construction(Entity factionEntity, Entity colonyEntity)
+        {
+            ColonyInfoDB colonyInfo = colonyEntity.GetDataBlob<ColonyInfoDB>();
+            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
+            
+            
+
+            //Refine stuff.
+            var refinaryJobs = installations.RefinaryJobs;
+            float refinaryPoints = InstallationAbilityofType(installations, AbilityType.Refinery);
+            refinaryPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.Refinery);
+
+            GenericConstructionJobs(refinaryPoints, refinaryJobs, colonyInfo, colonyInfo.RefinedStockpile);
+
+
+            //Build facilities.
+            var facilityJobs = installations.InstallationJobs;
+            float constructionPoints = InstallationAbilityofType(installations, AbilityType.GenericConstruction);
+            constructionPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.GenericConstruction);
+            var faciltiesList = new JDictionary<Guid, float>();
+
+            GenericConstructionJobs(constructionPoints, facilityJobs, colonyInfo, faciltiesList);
+
+            foreach (var facilityPair in faciltiesList)
+            {
+                //check how many complete installations we have by turning a float into an int;
+                int fullColInstallations = (int)installations.Installations[facilityPair.Key]; 
+                //add to the installations
+                installations.Installations.SafeValueAdd<Guid, float>(facilityPair.Key, (float)facilityPair.Value);
+                //compare how many complete we had then, vs now.
+                if ((int)installations.Installations[facilityPair.Key] > fullColInstallations)
                 {
-                    Guid mineralGuid = kvp.Key;
-                    int amountOnPlanet = kvp.Value.Amount;
-                    double accessibility = kvp.Value.Accessibility;
-                    double abilitiestoMine = installationMineingAbility * totalBonusMultiplier * accessibility;
-                    int amounttomine = (int)Math.Min(abilitiestoMine, amountOnPlanet);
-                    mineralStockpile[mineralGuid] += amounttomine;
-                    MineralDepositInfo mineralDeposit = kvp.Value;
-                    mineralDeposit.Amount -= amounttomine;
-                    double accecability = Math.Pow(mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 2) * mineralDeposit.Accessibility;
-                    mineralDeposit.Accessibility = Math.Max(accecability, 0.1);
+                    installations.EmploymentList.Add(new InstallationEmployment 
+                    {Enabled = true, Type = facilityPair.Key});
+                }
+            }
+
+            //Build Ordnance
+            var ordnanceJobs = installations.OrdnanceJobs;
+            float ordnancePoints = InstallationAbilityofType(installations, AbilityType.Refinery);
+            ordnancePoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.OrdnanceConstruction);
+
+            GenericConstructionJobs(ordnancePoints, ordnanceJobs, colonyInfo, colonyInfo.OrdananceStockpile);
+
+            //Build Fighters
+            var fighterJobs = installations.FigherJobs;
+            float fighterPoints = InstallationAbilityofType(installations, AbilityType.Refinery);
+            fighterPoints *= BonusesForType(factionEntity, colonyEntity, AbilityType.FighterConstruction);
+            var fighterList = new JDictionary<Guid, float>();
+
+            GenericConstructionJobs(fighterPoints, fighterJobs, colonyInfo, fighterList);
+               
+        }
+
+
+        private static JDictionary<Guid,float> FindResource(ColonyInfoDB colony, Guid key)
+        {
+            JDictionary<Guid, float> resourceDictionary = null;
+            if (colony.MineralStockpile.ContainsKey(key))
+                resourceDictionary = colony.MineralStockpile;
+            else if (colony.RefinedStockpile.ContainsKey(key))
+                resourceDictionary = colony.RefinedStockpile;
+            else if (colony.ComponentStockpile.ContainsKey(key))
+                resourceDictionary = colony.ComponentStockpile;
+            return resourceDictionary;
+        }
+
+        /// <summary>
+        /// an attempt at a more generic constructionProcessor.
+        /// should maybe be private.
+        /// </summary>
+        /// <param name="ablityPointsThisColony"></param>
+        /// <param name="jobList"></param>
+        /// <param name="rawMaterials"></param>
+        /// <param name="colonyInfo"></param>
+        /// <param name="stockpileOut"></param>
+        public static void GenericConstructionJobs(double ablityPointsThisColony, List<ConstructionJob> jobList, ColonyInfoDB colonyInfo, JDictionary<Guid,float> stockpileOut)
+        {
+            List<ConstructionJob> newJobList = new List<ConstructionJob>();
+
+            foreach (ConstructionJob job in jobList)
+            {
+                double pointsToUseThisJob = Math.Min(job.BuildPointsRemaining, (ablityPointsThisColony * job.PriorityPercent.Percent));
+                double pointsUsedThisJob = 0;
+                //the points per requred resources.
+                double pointsPerResourcees = (double)job.BuildPointsRemaining / job.RawMaterialsRemaining.Values.Sum();
+                foreach (var jobResourcePair in new Dictionary<Guid,int>(job.RawMaterialsRemaining))
+                {
+                    Guid resourceGuid = jobResourcePair.Key;
+                    Dictionary<Guid, float> rawMaterials = FindResource(colonyInfo, resourceGuid);
+                    if (rawMaterials == null)
+                        break;
+                    double pointsPerThisResource = (double)job.BuildPointsRemaining / jobResourcePair.Value;
+
+                    //maximum rawMaterials needed or availible whichever is less
+                    int maxResource = (int)Math.Min(jobResourcePair.Value, rawMaterials[resourceGuid]);
+                    
+                    //maximum buildpoints I can use for this resource
+                    //should I be using pointsPerResources or pointsPerThisResource?
+                    double maxPoint = pointsPerResourcees * maxResource;
+
+                    maxPoint = Math.Min(maxPoint, pointsToUseThisJob); 
+
+                    
+                    int usedResource = (int)(maxPoint / pointsPerResourcees);
+                    double usedPoints = pointsPerResourcees * usedResource;
+                    
+                    job.RawMaterialsRemaining[resourceGuid] -= usedResource; //needs to be an int
+                    rawMaterials[resourceGuid] -= usedResource; //needs to be an int
+                    pointsUsedThisJob += usedPoints;
+                    pointsToUseThisJob -= usedPoints;
+                                                            
+                }
+                ablityPointsThisColony -= pointsUsedThisJob;
+                //pointsUsedThisJob = Math.Round(pointsUsedThisJob);
+                
+
+                double percentPerItem = (double)job.BuildPointsPerItem / 100; 
+                double percentthisjob = pointsUsedThisJob / 100; 
+                double itemsCreated = percentPerItem * percentthisjob;
+                double itemsLeft = job.ItemsRemaining - itemsCreated;
+
+                stockpileOut.SafeValueAdd<Guid, float>(job.Type, (float)(job.ItemsRemaining - itemsLeft));             
+                
+                if (itemsLeft > 0)
+                {
+                    //recreate constructionJob because it's a struct.
+                    ConstructionJob newJob = new ConstructionJob 
+                    {
+                        Type = job.Type, 
+                        ItemsRemaining = (float)itemsLeft, 
+                        PriorityPercent = job.PriorityPercent, 
+                        RawMaterialsRemaining = job.RawMaterialsRemaining, //check this one. mutability?                    
+                        BuildPointsRemaining = job.BuildPointsRemaining - (int)Math.Ceiling(pointsUsedThisJob),
+                        BuildPointsPerItem = job.BuildPointsPerItem
+                    };
+                    newJobList.Add(newJob); //then add it to the new list
+                }
+
+            }
+            jobList = newJobList; //old list gets replaced with new
+        }
+
+        /// <summary>
+        /// adds research points to a scientists project.
+        /// </summary>
+        /// <param name="colonyEntity"></param>
+        /// <param name="factionAbilities"></param>
+        /// <param name="factionTechs"></param>
+        public static void DoResearch(Entity colonyEntity, FactionAbilitiesDB factionAbilities,  TechDB factionTechs)
+        {
+            InstallationsDB installations = colonyEntity.GetDataBlob<InstallationsDB>();
+            Dictionary<InstallationSD,int> labs = InstallationsWithAbility(installations, AbilityType.Research);
+            int labsused = 0;
+
+            foreach (var scientist in colonyEntity.GetDataBlob<ColonyInfoDB>().Scientists)
+            {
+                TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
+                int numProjectLabs = scientist.GetDataBlob<TeamsDB>().Teamsize;
+                float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];
+                //bonus *= BonusesForType(factionEntity, colonyEntity, InstallationAbilityType.Research);
+                int researchmax = research.Cost;
+
+                int researchPoints = 0;             
+                foreach (var kvp in labs)
+                { 
+                    while (numProjectLabs > 0)
+                    {
+                        for(int i = 0; i < kvp.Value; i++)
+                        {                         
+                            researchPoints += kvp.Key.BaseAbilityAmounts[AbilityType.Research];
+                            numProjectLabs --;
+                        }
+                    }
+                }
+                researchPoints = (int)(researchPoints * bonus);
+                if (factionTechs.ResearchableTechs.ContainsKey(research))
+                {
+                    factionTechs.ResearchableTechs[research] += researchPoints;
+                    if (factionTechs.ResearchableTechs[research] >= researchmax)
+                    {
+                        TechProcessor.ApplyTech(factionAbilities, factionTechs, research); //apply effects from tech, and add it to researched techs
+                        scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
+                    }
                 }
             }
         }
 
-        internal static void Construct(Entity factionEntity)
-        {
-            float factionConstructionAbility = factionEntity.GetDataBlob<FactionAbilitiesDB>().BaseConstructionBonus;
-            float sectorGovenerAbility = 1.0f; //todo these guys dont exsist yet
-            float planetGovenerAbility = 1.0f; //todo these guys dont exsist yet
-            float totalBonusMultiplier = factionConstructionAbility * sectorGovenerAbility * planetGovenerAbility;
-            foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
-            {
-                InstallationsDB colonyInstallations = colonyEntity.GetDataBlob<InstallationsDB>();
-                List<ConstructionJob> constructionJobs = colonyInstallations.InstallationJobs;
-                JDictionary<Guid, int> resourceStockpile = colonyEntity.GetDataBlob<ColonyInfoDB>().MineralStockpile;
+        #endregion
 
-                float constructionPoints = TotalAbilityofType(InstallationAbilityType.InstallationConstruction, colonyEntity.GetDataBlob<InstallationsDB>());
-                constructionPoints *= totalBonusMultiplier;
-                List<ConstructionJob> constructionJobs_newList = new List<ConstructionJob>();
-                foreach (ConstructionJob job in constructionJobs)
-                {
+        #region InteractsWithPlayer
 
-                    var type = StaticDataManager.StaticDataStore.Installations[job.Type];
-                    float constructiononthisjob = constructionPoints * job.PriorityPercent.Percent;
-                    float pointsUsed = Math.Min(job.ItemsRemaining, constructiononthisjob);
-
-                    int pointsPerThisInstallation = type.BuildPoints;
-                    float percentBuilt = pointsUsed / pointsPerThisInstallation;
-
-                    //this confusing block of code below checks if there's a fully constructed installation
-                    //if so, it adds it to the employment list, which is used to check pop requrements etc. 
-                    int fullColInstallations = (int)colonyInstallations.Installations[type];
-                    colonyInstallations.Installations[type] += percentBuilt;
-                    if ((int)colonyInstallations.Installations[type] > fullColInstallations)
-                    {
-                        colonyInstallations.EmploymentList.Add(new InstallationEmployment{Enabled = true,Type = type.ID});
-                    }
-                    constructionPoints -= pointsUsed;
-
-
-                    if (job.ItemsRemaining > 0) //if there's still itemsremaining...
-                    {
-                        //+becuase it's a struct, we have to re-create it.
-                        ConstructionJob newStruct = new ConstructionJob 
-                        {
-                            ItemsRemaining = job.ItemsRemaining - percentBuilt, 
-                            PriorityPercent = job.PriorityPercent, 
-                            Type = job.Type
-                        };
-                        constructionJobs_newList.Add(newStruct);//+then add it to the new list;
-                    }
-                    colonyInstallations.InstallationJobs = constructionJobs_newList; //+and finaly, replace the list.
-                }
-            }
-        }
-
-        internal static void ConstructionPriority(Entity colonyEntity, Message neworder)
+        /// <summary>
+        /// for changeing the priority of the constructionJobs priorities.
+        /// not sure how this should work...
+        /// </summary>
+        /// <param name="colonyEntity"></param>
+        /// <param name="neworder"></param>
+        public static void ConstructionPriority(Entity colonyEntity, Message neworder)
         {
             //idk... needs to be something in the message about whether it's Construction, Ordnance or Fighers...  
             //I think if it's a valid list we can just chuck it straight in.
@@ -135,17 +304,73 @@ namespace Pulsar4X.ECSLib
                 throw;
             }
         }
+        
+        #endregion
 
-        private static int TotalAbilityofType(InstallationAbilityType type, InstallationsDB installationsDB)
+        #region PrivateMethods
+
+       
+
+        /// <summary>
+        /// not sure if this should be a whole lot of if statements or if we can tidy it up somewhere else
+        /// </summary>
+        /// <param name="factioEntity"></param>
+        /// <param name="colonyEntity"></param>
+        /// <param name="ability"></param>
+        /// <returns></returns>
+        private static float BonusesForType(Entity factioEntity, Entity colonyEntity, AbilityType ability )
+        {
+
+            FactionAbilitiesDB factionAbilities = factioEntity.GetDataBlob<FactionAbilitiesDB>();
+
+            float totalBonus = 1.0f;
+            totalBonus += factionAbilities.AbilityBonuses[ability];
+            totalBonus += 1.0f; // colonyAbilityes.AbilityBonus[ability]; 
+            /*todo: hell why not just ask the colony to get all bonuses for [ability] and have it return all of them? 
+             * Should it be in the processor and the processor look up each time, 
+             * or should the faction hold the dictionary and the processor update the dictionary, 
+             * either on something changeing, or at a designated tic.          
+             */
+            return totalBonus;
+        }
+
+        /// <summary>
+        /// Returns the total InstallationAbilityPoints on an colony 
+        /// Employment function should be run prior to this (ie should be run at the begining of econ tic)
+        /// if any changes have been made to the numer of Installatioins, pop etc etc.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="installationsDB"></param>
+        /// <returns></returns>
+        private static int InstallationAbilityofType(InstallationsDB installationsDB, AbilityType type)
         {            
             int totalAbilityValue = 0;
-            foreach (KeyValuePair<Guid, int> kvp in installationsDB.WorkingInstallations)//.Where(item => item.Key.BaseAbilityAmounts.ContainsKey(type)))
+            foreach(var facility in InstallationsWithAbility(installationsDB, type))             
             {
-                InstallationSD facility = StaticDataManager.StaticDataStore.Installations[kvp.Key];
-                if(facility.BaseAbilityAmounts.ContainsKey(type))
-                    totalAbilityValue += facility.BaseAbilityAmounts[type] * kvp.Value;  
+
+                totalAbilityValue += facility.Key.BaseAbilityAmounts[type] * facility.Value;  
             }
             return totalAbilityValue;           
         }
+
+        /// <summary>
+        /// working installations that have ability
+        /// Employment function should be run prior to this (ie should be run at the begining of econ tic)
+        /// </summary>
+        /// <param name="installations">colony installations</param>
+        /// <param name="type">ability Type</param>
+        /// <returns>a dictionary with key InstallationSD and the number of this type of installation</returns>
+        private static Dictionary<InstallationSD,int> InstallationsWithAbility(InstallationsDB installations, AbilityType type)
+        {
+            Dictionary<InstallationSD, int> facilities = new Dictionary<InstallationSD, int>();
+            foreach (var kvp in installations.WorkingInstallations)
+            {
+                InstallationSD facility = StaticDataManager.StaticDataStore.Installations[kvp.Key];
+                if (facility.BaseAbilityAmounts.ContainsKey(type))
+                facilities.Add(facility,kvp.Value);
+            }
+            return facilities;
+        }
+        #endregion
     }
 }

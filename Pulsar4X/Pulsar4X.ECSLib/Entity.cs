@@ -173,6 +173,12 @@ namespace Pulsar4X.ECSLib
             return Guid.ToString();
         }
 #endif
+
+        public bool HasDataBlob<T>() where T : BaseDataBlob
+        {
+            int typeIndex = EntityManager.GetTypeIndex<T>();
+            return DataBlobMask[typeIndex];
+        }
     }
 
     public class EntityConverter : JsonConverter

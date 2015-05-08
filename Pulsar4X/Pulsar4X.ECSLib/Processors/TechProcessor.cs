@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Pulsar4X.ECSLib.DataBlobs;
-
-namespace Pulsar4X.ECSLib.Processors
+﻿namespace Pulsar4X.ECSLib
 {
+    /// <summary>
+    /// See also the Installation Processors for DoResearch
+    /// </summary>
     internal static class TechProcessor
     {
         /// <summary>
@@ -38,31 +34,6 @@ namespace Pulsar4X.ECSLib.Processors
             }
         }
 
-        /// <summary>
-        /// adds research points to a scientists project for a given change in time. 
-        /// </summary>
-        /// <param name="faction"></param>
-        /// <param name="scientist"></param>
-        /// <param name="factionTechs"></param>
-        /// <param name="deltaTime">the time since last this was run may need rethinking</param>
-        internal static void DoResearch(FactionAbilitiesDB factionAbilities, Entity scientist, TechDB factionTechs, int deltaTime)
-        {
-            TechSD research = (TechSD)scientist.GetDataBlob<TeamsDB>().TeamTask;
-            int numLabs = scientist.GetDataBlob<TeamsDB>().Teamsize;
-            float bonus = scientist.GetDataBlob<ScientistBonusDB>().Bonuses[research.Category];           
-            int researchmax = research.Cost;
-
-            int amountthisdelta = (int)(factionAbilities.BaseResearchBonus * numLabs * bonus * deltaTime);
-            if (factionTechs.ResearchableTechs.ContainsKey(research))
-            {
-                factionTechs.ResearchableTechs[research] += amountthisdelta;
-                if (factionTechs.ResearchableTechs[research] >= researchmax)
-                {
-                    ApplyTech(factionAbilities,factionTechs,research); //apply effects from tech, and add it to researched techs
-                    scientist.GetDataBlob<TeamsDB>().TeamTask = null; //team task is now nothing. 
-                }
-            }
-        }
 
         /// <summary>
         /// Applies the researched tech to the faction. Can be used when tech is gifted, stolen, researched...
@@ -71,7 +42,7 @@ namespace Pulsar4X.ECSLib.Processors
         /// <param name="factionAbilities"></param>
         /// <param name="factionTechs"></param>
         /// <param name="research"></param>
-        private static void ApplyTech(FactionAbilitiesDB factionAbilities, TechDB factionTechs, TechSD research)
+        public static void ApplyTech(FactionAbilitiesDB factionAbilities, TechDB factionTechs, TechSD research)
         {
             factionTechs.ResearchedTechs.Add(research.Id); //add the tech to researched list
             factionTechs.ResearchableTechs.Remove(research); //remove the tech from researchable dict

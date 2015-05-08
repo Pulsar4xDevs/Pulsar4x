@@ -53,7 +53,10 @@
         /// </summary>
         public RuinsDB()
         {
-            
+            RuinCount = 0;
+            RuinTechLevel = 0;
+            RuinSize = RSize.Count;
+            RuinQuality = RQuality.Count;
         }
 
         /// <summary>

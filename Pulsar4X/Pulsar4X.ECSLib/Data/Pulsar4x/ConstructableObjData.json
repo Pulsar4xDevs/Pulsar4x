@@ -1,0 +1,21 @@
+﻿{
+    "Type": "ConstructableObj",
+    "Data": [
+        {
+            "ID": "3B96039C-5D8B-4A03-B0CA-D06AF603791C",
+            "Name": "Fuel",
+            "Description": "Fuel for StarShips",
+            "Ingredients": {
+                "List": [
+                    {
+                        "Key": "08f15d35-ea1d-442f-a2e3-bde04c5c22e9",
+                        "Value": 1
+                    }
+                ]
+            },
+            "BuildPoints": 1,
+            "WealthCost": 0,
+            "ConstructionTypeRequirement" : "FuelRefinery"
+        }
+    ]
+}

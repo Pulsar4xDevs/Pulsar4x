@@ -4,7 +4,6 @@ using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
 using NUnit.Framework;
 using Pulsar4X.ECSLib;
-using Pulsar4X.ECSLib.Factories;
 
 namespace Pulsar4X.Tests
 {
@@ -13,8 +12,8 @@ namespace Pulsar4X.Tests
     {
         EntityManager _entityManager;
         private Entity _species1;
-        private JDictionary<Entity, double> _pop1;
-        private JDictionary<Entity, double> _pop2;
+        private JDictionary<Entity, long> _pop1;
+        private JDictionary<Entity, long> _pop2;
 
         [SetUp]
         public void Init()
@@ -23,8 +22,8 @@ namespace Pulsar4X.Tests
             //StaticDataManager.LoadFromDefaultDataDirectory();
             _entityManager = new EntityManager();           
             _species1 = Entity.Create(_entityManager, new List<BaseDataBlob> { new SpeciesDB(1, 0.1, 1.9, 1.0, 0.4, 4, 14, -15, 45) });
-            _pop1 = new JDictionary<Entity, double> { { _species1, 10 } };
-            _pop2 = new JDictionary<Entity, double> { { _species1, 5 } };
+            _pop1 = new JDictionary<Entity, long> { { _species1, 10 } };
+            _pop2 = new JDictionary<Entity, long> { { _species1, 5 } };
         }
 
         [TearDown]

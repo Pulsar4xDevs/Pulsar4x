@@ -190,6 +190,58 @@ namespace Pulsar4X.UI.Panels
             get { return m_oAllOrdersRadioButton; }
         }
 
+        #region Organization Tab
+
+        /// <summary>
+        /// Move a ship from the selected taskgroup to the current taskgroup
+        /// </summary>
+        public Button OrgMoveLeftButton
+        {
+            get { return m_oOrgMoveLeftButton; }
+        }
+
+        /// <summary>
+        /// Move a ship from the current taskgroup to the selected taskgroup.
+        /// </summary>
+        public Button OrgMoveRightButton
+        {
+            get { return m_oOrgMoveRightButton; }
+        }
+
+        /// <summary>
+        /// Which taskgroup has the user selected?
+        /// </summary>
+        public ComboBox OrgSelectedTGComboBox
+        {
+            get { return m_oOrgSelectedTGComboBox; }
+        }
+
+        /// <summary>
+        /// List of ships from the current TG.
+        /// </summary>
+        public ListBox OrgCurrentTGListBox
+        {
+            get { return m_oOrgCurrentTGListBox; }
+        }
+
+        /// <summary>
+        /// List of ships from the selected TG
+        /// </summary>
+        public ListBox OrgSelectedTGListBox
+        {
+            get { return m_oOrgSelectedTGListBox; }
+        }
+
+        /// <summary>
+        /// Name of the selected Taskgroup.
+        /// </summary>
+        public TextBox OrgCurrentTGTextBox
+        {
+            get { return m_oOrgCurrentTGTextBox; }
+        }
+        
+        #endregion 
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -223,6 +275,30 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupLabel = new System.Windows.Forms.Label();
             this.m_oTaskGroupTabControl = new System.Windows.Forms.TabControl();
             this.m_oTaskGroupOrdersTabPage = new System.Windows.Forms.TabPage();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.m_oReloadParaButton = new System.Windows.Forms.Button();
+            this.m_oLaunchParaButton = new System.Windows.Forms.Button();
+            this.m_oRecoverParaButton = new System.Windows.Forms.Button();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.m_oShieldsOnButton = new System.Windows.Forms.Button();
+            this.m_oShieldsOffButton = new System.Windows.Forms.Button();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.m_oHyperOnButton = new System.Windows.Forms.Button();
+            this.m_oHyperOffButton = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.m_oAssembleButton = new System.Windows.Forms.Button();
+            this.m_oSaveEscortsButton = new System.Windows.Forms.Button();
+            this.m_oDetachButton = new System.Windows.Forms.Button();
+            this.m_oRecallEscortsButton = new System.Windows.Forms.Button();
+            this.m_oEscortButton = new System.Windows.Forms.Button();
+            this.m_oDeployEscortsButton = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.m_oEqualizeMaintButton = new System.Windows.Forms.Button();
+            this.m_oEqualizeFuelButton = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.m_oMissileLaunchButton = new System.Windows.Forms.Button();
+            this.m_oNoDefaultButton = new System.Windows.Forms.Button();
+            this.m_oNoConditionsButton = new System.Windows.Forms.Button();
             this.m_oTaskGroupOrdersBox = new System.Windows.Forms.GroupBox();
             this.m_oRepeatOrdersTextBox = new System.Windows.Forms.TextBox();
             this.m_oRepeatOrderButton = new System.Windows.Forms.Button();
@@ -262,8 +338,48 @@ namespace Pulsar4X.UI.Panels
             this.m_oAsteroidsCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oMoonsCheckBox = new System.Windows.Forms.CheckBox();
             this.m_oSpecialOrdersTabPage = new System.Windows.Forms.TabPage();
+            this.m_oOrganizationTabPage = new System.Windows.Forms.TabPage();
+            this.m_oShipMoveToTGGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oOrgSelectedTGListBox = new System.Windows.Forms.ListBox();
+            this.m_oOrgCurrentTGListBox = new System.Windows.Forms.ListBox();
+            this.m_oOrgSMModeButton = new System.Windows.Forms.Button();
+            this.m_oOrgDivideTG = new System.Windows.Forms.Button();
+            this.m_oOrgSplitTGButton = new System.Windows.Forms.Button();
+            this.m_oOrgMoveLeftButton = new System.Windows.Forms.Button();
+            this.m_oOrgMoveRightButton = new System.Windows.Forms.Button();
+            this.m_oOrgSelectedTGComboBox = new System.Windows.Forms.ComboBox();
+            this.m_oOrgCurrentTGTextBox = new System.Windows.Forms.TextBox();
             this.m_oHistoryTabPage = new System.Windows.Forms.TabPage();
             this.m_oNavalOrgTabPage = new System.Windows.Forms.TabPage();
+            this.m_oTaskGroupInfoTabPage = new System.Windows.Forms.TabPage();
+            this.m_oCargoFightersTroopsGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oDefaultCondEscortOrdersGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oOOBGroupBox = new System.Windows.Forms.GroupBox();
+            this.m_oOrderTimeDistBox = new System.Windows.Forms.GroupBox();
+            this.m_oAllOrdersRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oCurrentTDRadioButton = new System.Windows.Forms.RadioButton();
+            this.m_oTimeDistTextBox = new System.Windows.Forms.TextBox();
+            this.m_oOfficerBox = new System.Windows.Forms.GroupBox();
+            this.m_oSeniorOfficerTextBox = new System.Windows.Forms.TextBox();
+            this.m_oInitiativeBox = new System.Windows.Forms.GroupBox();
+            this.m_oInitiativeButton = new System.Windows.Forms.Button();
+            this.m_oCurrentInitTextBox = new System.Windows.Forms.TextBox();
+            this.m_oCurrentInitLabel = new System.Windows.Forms.Label();
+            this.m_oMaxInitLabel = new System.Windows.Forms.Label();
+            this.m_oMaxInitTextBox = new System.Windows.Forms.TextBox();
+            this.m_oSurveyBox = new System.Windows.Forms.GroupBox();
+            this.m_oGeoTextBox = new System.Windows.Forms.TextBox();
+            this.m_oGeoLabel = new System.Windows.Forms.Label();
+            this.m_oGravLabel = new System.Windows.Forms.Label();
+            this.m_oGravTextBox = new System.Windows.Forms.TextBox();
+            this.m_oCenterShowGF = new System.Windows.Forms.GroupBox();
+            this.m_oShowGroundForces = new System.Windows.Forms.CheckBox();
+            this.m_oCenterMapCheckBox = new System.Windows.Forms.CheckBox();
+            this.m_oSpeedBox = new System.Windows.Forms.GroupBox();
+            this.m_oMaxSpeedButton = new System.Windows.Forms.Button();
+            this.m_oSetSpeedButton = new System.Windows.Forms.Button();
+            this.m_oMaxSpeedBox = new System.Windows.Forms.TextBox();
+            this.m_oCurSpeedBox = new System.Windows.Forms.TextBox();
             this.m_oButtonBox = new System.Windows.Forms.GroupBox();
             this.m_oDeleteTGButton = new System.Windows.Forms.Button();
             this.m_oOOBButton = new System.Windows.Forms.Button();
@@ -271,79 +387,28 @@ namespace Pulsar4X.UI.Panels
             this.m_oAddColonyButton = new System.Windows.Forms.Button();
             this.m_oSystemMapButton = new System.Windows.Forms.Button();
             this.m_oNewTGButton = new System.Windows.Forms.Button();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.m_oSpeedBox = new System.Windows.Forms.GroupBox();
-            this.m_oMaxSpeedButton = new System.Windows.Forms.Button();
-            this.m_oSetSpeedButton = new System.Windows.Forms.Button();
-            this.m_oMaxSpeedBox = new System.Windows.Forms.TextBox();
-            this.m_oCurSpeedBox = new System.Windows.Forms.TextBox();
-            this.m_oCenterShowGF = new System.Windows.Forms.GroupBox();
-            this.m_oShowGroundForces = new System.Windows.Forms.CheckBox();
-            this.m_oCenterMapCheckBox = new System.Windows.Forms.CheckBox();
-            this.m_oSurveyBox = new System.Windows.Forms.GroupBox();
-            this.m_oGeoTextBox = new System.Windows.Forms.TextBox();
-            this.m_oGeoLabel = new System.Windows.Forms.Label();
-            this.m_oGravLabel = new System.Windows.Forms.Label();
-            this.m_oGravTextBox = new System.Windows.Forms.TextBox();
-            this.m_oInitiativeBox = new System.Windows.Forms.GroupBox();
-            this.m_oInitiativeButton = new System.Windows.Forms.Button();
-            this.m_oCurrentInitTextBox = new System.Windows.Forms.TextBox();
-            this.m_oCurrentInitLabel = new System.Windows.Forms.Label();
-            this.m_oMaxInitLabel = new System.Windows.Forms.Label();
-            this.m_oMaxInitTextBox = new System.Windows.Forms.TextBox();
-            this.m_oOfficerBox = new System.Windows.Forms.GroupBox();
-            this.m_oSeniorOfficerTextBox = new System.Windows.Forms.TextBox();
-            this.m_oOrderTimeDistBox = new System.Windows.Forms.GroupBox();
-            this.m_oAllOrdersRadioButton = new System.Windows.Forms.RadioButton();
-            this.m_oCurrentTDRadioButton = new System.Windows.Forms.RadioButton();
-            this.m_oTimeDistTextBox = new System.Windows.Forms.TextBox();
-            this.m_oOOBGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oDefaultCondEscortOrdersGroupBox = new System.Windows.Forms.GroupBox();
-            this.m_oCargoFightersTroopsGroupBox = new System.Windows.Forms.GroupBox();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.m_oReloadParaButton = new System.Windows.Forms.Button();
-            this.m_oLaunchParaButton = new System.Windows.Forms.Button();
-            this.m_oRecoverParaButton = new System.Windows.Forms.Button();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.m_oShieldsOnButton = new System.Windows.Forms.Button();
-            this.m_oShieldsOffButton = new System.Windows.Forms.Button();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.m_oHyperOnButton = new System.Windows.Forms.Button();
-            this.m_oHyperOffButton = new System.Windows.Forms.Button();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.m_oAssembleButton = new System.Windows.Forms.Button();
-            this.m_oSaveEscortsButton = new System.Windows.Forms.Button();
-            this.m_oDetachButton = new System.Windows.Forms.Button();
-            this.m_oRecallEscortsButton = new System.Windows.Forms.Button();
-            this.m_oEscortButton = new System.Windows.Forms.Button();
-            this.m_oDeployEscortsButton = new System.Windows.Forms.Button();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.m_oEqualizeMaintButton = new System.Windows.Forms.Button();
-            this.m_oEqualizeFuelButton = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.m_oMissileLaunchButton = new System.Windows.Forms.Button();
-            this.m_oNoDefaultButton = new System.Windows.Forms.Button();
-            this.m_oNoConditionsButton = new System.Windows.Forms.Button();
             this.m_oGeneralTGDetailsBox.SuspendLayout();
             this.m_oTaskGroupTabControl.SuspendLayout();
             this.m_oTaskGroupOrdersTabPage.SuspendLayout();
-            this.m_oTaskGroupOrdersBox.SuspendLayout();
-            this.m_oCopyOrdersGroupBox.SuspendLayout();
-            this.m_oSystemDisplayOptionsBox.SuspendLayout();
-            this.m_oButtonBox.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.m_oSpeedBox.SuspendLayout();
-            this.m_oCenterShowGF.SuspendLayout();
-            this.m_oSurveyBox.SuspendLayout();
-            this.m_oInitiativeBox.SuspendLayout();
-            this.m_oOfficerBox.SuspendLayout();
-            this.m_oOrderTimeDistBox.SuspendLayout();
             this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.m_oTaskGroupOrdersBox.SuspendLayout();
+            this.m_oCopyOrdersGroupBox.SuspendLayout();
+            this.m_oSystemDisplayOptionsBox.SuspendLayout();
+            this.m_oOrganizationTabPage.SuspendLayout();
+            this.m_oShipMoveToTGGroupBox.SuspendLayout();
+            this.m_oTaskGroupInfoTabPage.SuspendLayout();
+            this.m_oOrderTimeDistBox.SuspendLayout();
+            this.m_oOfficerBox.SuspendLayout();
+            this.m_oInitiativeBox.SuspendLayout();
+            this.m_oSurveyBox.SuspendLayout();
+            this.m_oCenterShowGF.SuspendLayout();
+            this.m_oSpeedBox.SuspendLayout();
+            this.m_oButtonBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // m_oTaskGroupName
@@ -356,8 +421,8 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oShipsBox
             // 
-            this.m_oShipsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oShipsBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oShipsBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.m_oShipsBox.Location = new System.Drawing.Point(251, 3);
             this.m_oShipsBox.MaximumSize = new System.Drawing.Size(2000, 215);
@@ -451,14 +516,15 @@ namespace Pulsar4X.UI.Panels
             // 
             // m_oTaskGroupTabControl
             // 
-            this.m_oTaskGroupTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oTaskGroupTabControl.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oTaskGroupOrdersTabPage);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oSpecialOrdersTabPage);
+            this.m_oTaskGroupTabControl.Controls.Add(this.m_oOrganizationTabPage);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oHistoryTabPage);
             this.m_oTaskGroupTabControl.Controls.Add(this.m_oNavalOrgTabPage);
-            this.m_oTaskGroupTabControl.Controls.Add(this.tabPage1);
+            this.m_oTaskGroupTabControl.Controls.Add(this.m_oTaskGroupInfoTabPage);
             this.m_oTaskGroupTabControl.Location = new System.Drawing.Point(5, 224);
             this.m_oTaskGroupTabControl.MinimumSize = new System.Drawing.Size(600, 400);
             this.m_oTaskGroupTabControl.Name = "m_oTaskGroupTabControl";
@@ -484,902 +550,6 @@ namespace Pulsar4X.UI.Panels
             this.m_oTaskGroupOrdersTabPage.Size = new System.Drawing.Size(983, 429);
             this.m_oTaskGroupOrdersTabPage.TabIndex = 0;
             this.m_oTaskGroupOrdersTabPage.Text = "Task Group Orders";
-            // 
-            // m_oTaskGroupOrdersBox
-            // 
-            this.m_oTaskGroupOrdersBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oTaskGroupOrdersBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrdersTextBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrderButton);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oCycleMovesCheckBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrderDelayTextBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrderDelayLabel);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oAutoRouteCheckBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oLoadAmtTextBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrbitalDistanceTextBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oLoadLimitLabel);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrbitalDistanceLabel);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRemoveAllButton);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRemoveButton);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oAddMoveButton);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oPlottedMoveLabel);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oActionsAvailableLabel);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oSystemLocationsLabel);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oPlottedMoveListBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oActionsAvailableListBox);
-            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oSystemLocationsListBox);
-            this.m_oTaskGroupOrdersBox.Location = new System.Drawing.Point(165, 68);
-            this.m_oTaskGroupOrdersBox.MinimumSize = new System.Drawing.Size(800, 205);
-            this.m_oTaskGroupOrdersBox.Name = "m_oTaskGroupOrdersBox";
-            this.m_oTaskGroupOrdersBox.Size = new System.Drawing.Size(805, 355);
-            this.m_oTaskGroupOrdersBox.TabIndex = 33;
-            this.m_oTaskGroupOrdersBox.TabStop = false;
-            // 
-            // m_oRepeatOrdersTextBox
-            // 
-            this.m_oRepeatOrdersTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRepeatOrdersTextBox.Location = new System.Drawing.Point(765, 311);
-            this.m_oRepeatOrdersTextBox.Name = "m_oRepeatOrdersTextBox";
-            this.m_oRepeatOrdersTextBox.Size = new System.Drawing.Size(27, 20);
-            this.m_oRepeatOrdersTextBox.TabIndex = 44;
-            this.m_oRepeatOrdersTextBox.Text = "0";
-            this.m_oRepeatOrdersTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oRepeatOrderButton
-            // 
-            this.m_oRepeatOrderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRepeatOrderButton.Location = new System.Drawing.Point(690, 309);
-            this.m_oRepeatOrderButton.Name = "m_oRepeatOrderButton";
-            this.m_oRepeatOrderButton.Size = new System.Drawing.Size(61, 26);
-            this.m_oRepeatOrderButton.TabIndex = 43;
-            this.m_oRepeatOrderButton.Text = "Repeat";
-            this.m_oRepeatOrderButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oCycleMovesCheckBox
-            // 
-            this.m_oCycleMovesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oCycleMovesCheckBox.AutoSize = true;
-            this.m_oCycleMovesCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCycleMovesCheckBox.Location = new System.Drawing.Point(690, 279);
-            this.m_oCycleMovesCheckBox.MaximumSize = new System.Drawing.Size(102, 17);
-            this.m_oCycleMovesCheckBox.MinimumSize = new System.Drawing.Size(102, 17);
-            this.m_oCycleMovesCheckBox.Name = "m_oCycleMovesCheckBox";
-            this.m_oCycleMovesCheckBox.Size = new System.Drawing.Size(102, 17);
-            this.m_oCycleMovesCheckBox.TabIndex = 21;
-            this.m_oCycleMovesCheckBox.Text = "Cycle Moves";
-            this.m_oCycleMovesCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oOrderDelayTextBox
-            // 
-            this.m_oOrderDelayTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oOrderDelayTextBox.Location = new System.Drawing.Point(597, 312);
-            this.m_oOrderDelayTextBox.Name = "m_oOrderDelayTextBox";
-            this.m_oOrderDelayTextBox.Size = new System.Drawing.Size(77, 20);
-            this.m_oOrderDelayTextBox.TabIndex = 42;
-            this.m_oOrderDelayTextBox.Text = "0";
-            this.m_oOrderDelayTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oOrderDelayLabel
-            // 
-            this.m_oOrderDelayLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oOrderDelayLabel.AutoSize = true;
-            this.m_oOrderDelayLabel.Location = new System.Drawing.Point(528, 315);
-            this.m_oOrderDelayLabel.Name = "m_oOrderDelayLabel";
-            this.m_oOrderDelayLabel.Size = new System.Drawing.Size(63, 13);
-            this.m_oOrderDelayLabel.TabIndex = 41;
-            this.m_oOrderDelayLabel.Text = "Order Delay";
-            // 
-            // m_oAutoRouteCheckBox
-            // 
-            this.m_oAutoRouteCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oAutoRouteCheckBox.AutoSize = true;
-            this.m_oAutoRouteCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(519, 279);
-            this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(155, 17);
-            this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(155, 17);
-            this.m_oAutoRouteCheckBox.Name = "m_oAutoRouteCheckBox";
-            this.m_oAutoRouteCheckBox.Size = new System.Drawing.Size(155, 17);
-            this.m_oAutoRouteCheckBox.TabIndex = 21;
-            this.m_oAutoRouteCheckBox.Text = "No auto-route jump check";
-            this.m_oAutoRouteCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oLoadAmtTextBox
-            // 
-            this.m_oLoadAmtTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oLoadAmtTextBox.Enabled = false;
-            this.m_oLoadAmtTextBox.Location = new System.Drawing.Point(437, 315);
-            this.m_oLoadAmtTextBox.Name = "m_oLoadAmtTextBox";
-            this.m_oLoadAmtTextBox.Size = new System.Drawing.Size(56, 20);
-            this.m_oLoadAmtTextBox.TabIndex = 40;
-            this.m_oLoadAmtTextBox.Text = "0";
-            this.m_oLoadAmtTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oOrbitalDistanceTextBox
-            // 
-            this.m_oOrbitalDistanceTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oOrbitalDistanceTextBox.Location = new System.Drawing.Point(437, 286);
-            this.m_oOrbitalDistanceTextBox.Name = "m_oOrbitalDistanceTextBox";
-            this.m_oOrbitalDistanceTextBox.Size = new System.Drawing.Size(56, 20);
-            this.m_oOrbitalDistanceTextBox.TabIndex = 35;
-            this.m_oOrbitalDistanceTextBox.Text = "0";
-            this.m_oOrbitalDistanceTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oLoadLimitLabel
-            // 
-            this.m_oLoadLimitLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oLoadLimitLabel.AutoSize = true;
-            this.m_oLoadLimitLabel.Enabled = false;
-            this.m_oLoadLimitLabel.Location = new System.Drawing.Point(273, 318);
-            this.m_oLoadLimitLabel.Name = "m_oLoadLimitLabel";
-            this.m_oLoadLimitLabel.Size = new System.Drawing.Size(129, 13);
-            this.m_oLoadLimitLabel.TabIndex = 39;
-            this.m_oLoadLimitLabel.Text = "Maximum Amount to Load";
-            // 
-            // m_oOrbitalDistanceLabel
-            // 
-            this.m_oOrbitalDistanceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oOrbitalDistanceLabel.AutoSize = true;
-            this.m_oOrbitalDistanceLabel.Location = new System.Drawing.Point(273, 289);
-            this.m_oOrbitalDistanceLabel.Name = "m_oOrbitalDistanceLabel";
-            this.m_oOrbitalDistanceLabel.Size = new System.Drawing.Size(114, 13);
-            this.m_oOrbitalDistanceLabel.TabIndex = 38;
-            this.m_oOrbitalDistanceLabel.Text = "Orbital Distance (k km)";
-            // 
-            // m_oRemoveAllButton
-            // 
-            this.m_oRemoveAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRemoveAllButton.Location = new System.Drawing.Point(172, 303);
-            this.m_oRemoveAllButton.Name = "m_oRemoveAllButton";
-            this.m_oRemoveAllButton.Size = new System.Drawing.Size(82, 31);
-            this.m_oRemoveAllButton.TabIndex = 37;
-            this.m_oRemoveAllButton.Text = "Remove All";
-            this.m_oRemoveAllButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oRemoveButton
-            // 
-            this.m_oRemoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oRemoveButton.Location = new System.Drawing.Point(84, 303);
-            this.m_oRemoveButton.Name = "m_oRemoveButton";
-            this.m_oRemoveButton.Size = new System.Drawing.Size(82, 31);
-            this.m_oRemoveButton.TabIndex = 36;
-            this.m_oRemoveButton.Text = "Remove";
-            this.m_oRemoveButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oAddMoveButton
-            // 
-            this.m_oAddMoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.m_oAddMoveButton.Location = new System.Drawing.Point(1, 303);
-            this.m_oAddMoveButton.Name = "m_oAddMoveButton";
-            this.m_oAddMoveButton.Size = new System.Drawing.Size(78, 31);
-            this.m_oAddMoveButton.TabIndex = 35;
-            this.m_oAddMoveButton.Text = "Add Move";
-            this.m_oAddMoveButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oPlottedMoveLabel
-            // 
-            this.m_oPlottedMoveLabel.AutoSize = true;
-            this.m_oPlottedMoveLabel.Location = new System.Drawing.Point(514, 14);
-            this.m_oPlottedMoveLabel.Name = "m_oPlottedMoveLabel";
-            this.m_oPlottedMoveLabel.Size = new System.Drawing.Size(70, 13);
-            this.m_oPlottedMoveLabel.TabIndex = 31;
-            this.m_oPlottedMoveLabel.Text = "Plotted Move";
-            // 
-            // m_oActionsAvailableLabel
-            // 
-            this.m_oActionsAvailableLabel.AutoSize = true;
-            this.m_oActionsAvailableLabel.Location = new System.Drawing.Point(261, 14);
-            this.m_oActionsAvailableLabel.Name = "m_oActionsAvailableLabel";
-            this.m_oActionsAvailableLabel.Size = new System.Drawing.Size(88, 13);
-            this.m_oActionsAvailableLabel.TabIndex = 30;
-            this.m_oActionsAvailableLabel.Text = "Actions Available";
-            // 
-            // m_oSystemLocationsLabel
-            // 
-            this.m_oSystemLocationsLabel.AutoSize = true;
-            this.m_oSystemLocationsLabel.Location = new System.Drawing.Point(6, 14);
-            this.m_oSystemLocationsLabel.Name = "m_oSystemLocationsLabel";
-            this.m_oSystemLocationsLabel.Size = new System.Drawing.Size(136, 13);
-            this.m_oSystemLocationsLabel.TabIndex = 29;
-            this.m_oSystemLocationsLabel.Text = "System Locations Available";
-            // 
-            // m_oPlottedMoveListBox
-            // 
-            this.m_oPlottedMoveListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oPlottedMoveListBox.FormattingEnabled = true;
-            this.m_oPlottedMoveListBox.Location = new System.Drawing.Point(517, 32);
-            this.m_oPlottedMoveListBox.Name = "m_oPlottedMoveListBox";
-            this.m_oPlottedMoveListBox.Size = new System.Drawing.Size(276, 238);
-            this.m_oPlottedMoveListBox.TabIndex = 3;
-            // 
-            // m_oActionsAvailableListBox
-            // 
-            this.m_oActionsAvailableListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oActionsAvailableListBox.FormattingEnabled = true;
-            this.m_oActionsAvailableListBox.Location = new System.Drawing.Point(259, 32);
-            this.m_oActionsAvailableListBox.Name = "m_oActionsAvailableListBox";
-            this.m_oActionsAvailableListBox.Size = new System.Drawing.Size(245, 238);
-            this.m_oActionsAvailableListBox.TabIndex = 2;
-            // 
-            // m_oSystemLocationsListBox
-            // 
-            this.m_oSystemLocationsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oSystemLocationsListBox.FormattingEnabled = true;
-            this.m_oSystemLocationsListBox.Location = new System.Drawing.Point(4, 32);
-            this.m_oSystemLocationsListBox.Name = "m_oSystemLocationsListBox";
-            this.m_oSystemLocationsListBox.Size = new System.Drawing.Size(245, 264);
-            this.m_oSystemLocationsListBox.TabIndex = 1;
-            // 
-            // m_oCopyOrdersGroupBox
-            // 
-            this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncCondOrdersCheckBox);
-            this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncDefaultCheckBox);
-            this.m_oCopyOrdersGroupBox.Controls.Add(this.checkBox1);
-            this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oCopyOrdersButton);
-            this.m_oCopyOrdersGroupBox.Location = new System.Drawing.Point(751, 3);
-            this.m_oCopyOrdersGroupBox.MaximumSize = new System.Drawing.Size(219, 68);
-            this.m_oCopyOrdersGroupBox.MinimumSize = new System.Drawing.Size(219, 68);
-            this.m_oCopyOrdersGroupBox.Name = "m_oCopyOrdersGroupBox";
-            this.m_oCopyOrdersGroupBox.Size = new System.Drawing.Size(219, 68);
-            this.m_oCopyOrdersGroupBox.TabIndex = 33;
-            this.m_oCopyOrdersGroupBox.TabStop = false;
-            this.m_oCopyOrdersGroupBox.Text = "Copy Orders to Subordinate Formations";
-            // 
-            // m_oIncCondOrdersCheckBox
-            // 
-            this.m_oIncCondOrdersCheckBox.AutoSize = true;
-            this.m_oIncCondOrdersCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oIncCondOrdersCheckBox.Location = new System.Drawing.Point(132, 40);
-            this.m_oIncCondOrdersCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
-            this.m_oIncCondOrdersCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
-            this.m_oIncCondOrdersCheckBox.Name = "m_oIncCondOrdersCheckBox";
-            this.m_oIncCondOrdersCheckBox.Size = new System.Drawing.Size(82, 17);
-            this.m_oIncCondOrdersCheckBox.TabIndex = 34;
-            this.m_oIncCondOrdersCheckBox.Text = "Inc. Cond.";
-            this.m_oIncCondOrdersCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oIncDefaultCheckBox
-            // 
-            this.m_oIncDefaultCheckBox.AutoSize = true;
-            this.m_oIncDefaultCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oIncDefaultCheckBox.Location = new System.Drawing.Point(132, 19);
-            this.m_oIncDefaultCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
-            this.m_oIncDefaultCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
-            this.m_oIncDefaultCheckBox.Name = "m_oIncDefaultCheckBox";
-            this.m_oIncDefaultCheckBox.Size = new System.Drawing.Size(82, 17);
-            this.m_oIncDefaultCheckBox.TabIndex = 33;
-            this.m_oIncDefaultCheckBox.Text = "Inc. Default";
-            this.m_oIncDefaultCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.checkBox1.Location = new System.Drawing.Point(62, 22);
-            this.checkBox1.MaximumSize = new System.Drawing.Size(64, 35);
-            this.checkBox1.MinimumSize = new System.Drawing.Size(64, 35);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(64, 35);
-            this.checkBox1.TabIndex = 21;
-            this.checkBox1.Text = "Match Speeds";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // m_oCopyOrdersButton
-            // 
-            this.m_oCopyOrdersButton.Location = new System.Drawing.Point(6, 25);
-            this.m_oCopyOrdersButton.Name = "m_oCopyOrdersButton";
-            this.m_oCopyOrdersButton.Size = new System.Drawing.Size(50, 27);
-            this.m_oCopyOrdersButton.TabIndex = 32;
-            this.m_oCopyOrdersButton.Text = "Copy";
-            this.m_oCopyOrdersButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSystemDisplayOptionsBox
-            // 
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oShowAllPopsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oOrderFilteringCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oExcludeSurveyedCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oSurveyLocationsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oWrecksCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oLifePodsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oCometsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oContactsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oWaypointCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oTaskGroupsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oAsteroidsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oMoonsCheckBox);
-            this.m_oSystemDisplayOptionsBox.Location = new System.Drawing.Point(165, 3);
-            this.m_oSystemDisplayOptionsBox.MaximumSize = new System.Drawing.Size(585, 68);
-            this.m_oSystemDisplayOptionsBox.MinimumSize = new System.Drawing.Size(585, 68);
-            this.m_oSystemDisplayOptionsBox.Name = "m_oSystemDisplayOptionsBox";
-            this.m_oSystemDisplayOptionsBox.Size = new System.Drawing.Size(585, 68);
-            this.m_oSystemDisplayOptionsBox.TabIndex = 33;
-            this.m_oSystemDisplayOptionsBox.TabStop = false;
-            this.m_oSystemDisplayOptionsBox.Text = "System Location Display Options";
-            // 
-            // m_oShowAllPopsCheckBox
-            // 
-            this.m_oShowAllPopsCheckBox.AutoSize = true;
-            this.m_oShowAllPopsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oShowAllPopsCheckBox.Location = new System.Drawing.Point(456, 42);
-            this.m_oShowAllPopsCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
-            this.m_oShowAllPopsCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
-            this.m_oShowAllPopsCheckBox.Name = "m_oShowAllPopsCheckBox";
-            this.m_oShowAllPopsCheckBox.Size = new System.Drawing.Size(122, 17);
-            this.m_oShowAllPopsCheckBox.TabIndex = 20;
-            this.m_oShowAllPopsCheckBox.Text = "Show All Pops";
-            this.m_oShowAllPopsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oOrderFilteringCheckBox
-            // 
-            this.m_oOrderFilteringCheckBox.AutoSize = true;
-            this.m_oOrderFilteringCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oOrderFilteringCheckBox.Checked = true;
-            this.m_oOrderFilteringCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.m_oOrderFilteringCheckBox.Location = new System.Drawing.Point(456, 19);
-            this.m_oOrderFilteringCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
-            this.m_oOrderFilteringCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
-            this.m_oOrderFilteringCheckBox.Name = "m_oOrderFilteringCheckBox";
-            this.m_oOrderFilteringCheckBox.Size = new System.Drawing.Size(122, 17);
-            this.m_oOrderFilteringCheckBox.TabIndex = 19;
-            this.m_oOrderFilteringCheckBox.Text = "Order Filtering On";
-            this.m_oOrderFilteringCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oExcludeSurveyedCheckBox
-            // 
-            this.m_oExcludeSurveyedCheckBox.AutoSize = true;
-            this.m_oExcludeSurveyedCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oExcludeSurveyedCheckBox.Location = new System.Drawing.Point(328, 42);
-            this.m_oExcludeSurveyedCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
-            this.m_oExcludeSurveyedCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
-            this.m_oExcludeSurveyedCheckBox.Name = "m_oExcludeSurveyedCheckBox";
-            this.m_oExcludeSurveyedCheckBox.Size = new System.Drawing.Size(122, 17);
-            this.m_oExcludeSurveyedCheckBox.TabIndex = 18;
-            this.m_oExcludeSurveyedCheckBox.Text = "Exclude Surveyed";
-            this.m_oExcludeSurveyedCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oSurveyLocationsCheckBox
-            // 
-            this.m_oSurveyLocationsCheckBox.AutoSize = true;
-            this.m_oSurveyLocationsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oSurveyLocationsCheckBox.Location = new System.Drawing.Point(328, 19);
-            this.m_oSurveyLocationsCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
-            this.m_oSurveyLocationsCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
-            this.m_oSurveyLocationsCheckBox.Name = "m_oSurveyLocationsCheckBox";
-            this.m_oSurveyLocationsCheckBox.Size = new System.Drawing.Size(122, 17);
-            this.m_oSurveyLocationsCheckBox.TabIndex = 17;
-            this.m_oSurveyLocationsCheckBox.Text = "Survey Locations";
-            this.m_oSurveyLocationsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oWrecksCheckBox
-            // 
-            this.m_oWrecksCheckBox.AutoSize = true;
-            this.m_oWrecksCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oWrecksCheckBox.Location = new System.Drawing.Point(250, 42);
-            this.m_oWrecksCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
-            this.m_oWrecksCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
-            this.m_oWrecksCheckBox.Name = "m_oWrecksCheckBox";
-            this.m_oWrecksCheckBox.Size = new System.Drawing.Size(72, 17);
-            this.m_oWrecksCheckBox.TabIndex = 16;
-            this.m_oWrecksCheckBox.Text = "Wrecks";
-            this.m_oWrecksCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oLifePodsCheckBox
-            // 
-            this.m_oLifePodsCheckBox.AutoSize = true;
-            this.m_oLifePodsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oLifePodsCheckBox.Location = new System.Drawing.Point(250, 19);
-            this.m_oLifePodsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
-            this.m_oLifePodsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
-            this.m_oLifePodsCheckBox.Name = "m_oLifePodsCheckBox";
-            this.m_oLifePodsCheckBox.Size = new System.Drawing.Size(72, 17);
-            this.m_oLifePodsCheckBox.TabIndex = 15;
-            this.m_oLifePodsCheckBox.Text = "Lifepods";
-            this.m_oLifePodsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oCometsCheckBox
-            // 
-            this.m_oCometsCheckBox.AutoSize = true;
-            this.m_oCometsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCometsCheckBox.Location = new System.Drawing.Point(172, 42);
-            this.m_oCometsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
-            this.m_oCometsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
-            this.m_oCometsCheckBox.Name = "m_oCometsCheckBox";
-            this.m_oCometsCheckBox.Size = new System.Drawing.Size(72, 17);
-            this.m_oCometsCheckBox.TabIndex = 14;
-            this.m_oCometsCheckBox.Text = "Comets";
-            this.m_oCometsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oContactsCheckBox
-            // 
-            this.m_oContactsCheckBox.AutoSize = true;
-            this.m_oContactsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oContactsCheckBox.Location = new System.Drawing.Point(172, 19);
-            this.m_oContactsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
-            this.m_oContactsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
-            this.m_oContactsCheckBox.Name = "m_oContactsCheckBox";
-            this.m_oContactsCheckBox.Size = new System.Drawing.Size(72, 17);
-            this.m_oContactsCheckBox.TabIndex = 13;
-            this.m_oContactsCheckBox.Text = "Contacts";
-            this.m_oContactsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oWaypointCheckBox
-            // 
-            this.m_oWaypointCheckBox.AutoSize = true;
-            this.m_oWaypointCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oWaypointCheckBox.Location = new System.Drawing.Point(84, 42);
-            this.m_oWaypointCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
-            this.m_oWaypointCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
-            this.m_oWaypointCheckBox.Name = "m_oWaypointCheckBox";
-            this.m_oWaypointCheckBox.Size = new System.Drawing.Size(82, 17);
-            this.m_oWaypointCheckBox.TabIndex = 12;
-            this.m_oWaypointCheckBox.Text = "Waypoints";
-            this.m_oWaypointCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oTaskGroupsCheckBox
-            // 
-            this.m_oTaskGroupsCheckBox.AutoSize = true;
-            this.m_oTaskGroupsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oTaskGroupsCheckBox.Location = new System.Drawing.Point(84, 19);
-            this.m_oTaskGroupsCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
-            this.m_oTaskGroupsCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
-            this.m_oTaskGroupsCheckBox.Name = "m_oTaskGroupsCheckBox";
-            this.m_oTaskGroupsCheckBox.Size = new System.Drawing.Size(82, 17);
-            this.m_oTaskGroupsCheckBox.TabIndex = 11;
-            this.m_oTaskGroupsCheckBox.Text = "TaskGroups";
-            this.m_oTaskGroupsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oAsteroidsCheckBox
-            // 
-            this.m_oAsteroidsCheckBox.AutoSize = true;
-            this.m_oAsteroidsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oAsteroidsCheckBox.Location = new System.Drawing.Point(6, 42);
-            this.m_oAsteroidsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
-            this.m_oAsteroidsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
-            this.m_oAsteroidsCheckBox.Name = "m_oAsteroidsCheckBox";
-            this.m_oAsteroidsCheckBox.Size = new System.Drawing.Size(72, 17);
-            this.m_oAsteroidsCheckBox.TabIndex = 10;
-            this.m_oAsteroidsCheckBox.Text = "Asteroids";
-            this.m_oAsteroidsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oMoonsCheckBox
-            // 
-            this.m_oMoonsCheckBox.AutoSize = true;
-            this.m_oMoonsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oMoonsCheckBox.Location = new System.Drawing.Point(6, 19);
-            this.m_oMoonsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
-            this.m_oMoonsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
-            this.m_oMoonsCheckBox.Name = "m_oMoonsCheckBox";
-            this.m_oMoonsCheckBox.Size = new System.Drawing.Size(72, 17);
-            this.m_oMoonsCheckBox.TabIndex = 9;
-            this.m_oMoonsCheckBox.Text = "Moons";
-            this.m_oMoonsCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oSpecialOrdersTabPage
-            // 
-            this.m_oSpecialOrdersTabPage.Location = new System.Drawing.Point(4, 22);
-            this.m_oSpecialOrdersTabPage.Name = "m_oSpecialOrdersTabPage";
-            this.m_oSpecialOrdersTabPage.Padding = new System.Windows.Forms.Padding(3);
-            this.m_oSpecialOrdersTabPage.Size = new System.Drawing.Size(1170, 540);
-            this.m_oSpecialOrdersTabPage.TabIndex = 1;
-            this.m_oSpecialOrdersTabPage.Text = "Special Orders / Organization";
-            this.m_oSpecialOrdersTabPage.UseVisualStyleBackColor = true;
-            // 
-            // m_oHistoryTabPage
-            // 
-            this.m_oHistoryTabPage.Location = new System.Drawing.Point(4, 22);
-            this.m_oHistoryTabPage.Name = "m_oHistoryTabPage";
-            this.m_oHistoryTabPage.Size = new System.Drawing.Size(1170, 540);
-            this.m_oHistoryTabPage.TabIndex = 2;
-            this.m_oHistoryTabPage.Text = "History / Officers / Misc";
-            this.m_oHistoryTabPage.UseVisualStyleBackColor = true;
-            // 
-            // m_oNavalOrgTabPage
-            // 
-            this.m_oNavalOrgTabPage.Location = new System.Drawing.Point(4, 22);
-            this.m_oNavalOrgTabPage.Name = "m_oNavalOrgTabPage";
-            this.m_oNavalOrgTabPage.Size = new System.Drawing.Size(1170, 540);
-            this.m_oNavalOrgTabPage.TabIndex = 3;
-            this.m_oNavalOrgTabPage.Text = "Naval Organization";
-            this.m_oNavalOrgTabPage.UseVisualStyleBackColor = true;
-            // 
-            // m_oButtonBox
-            // 
-            this.m_oButtonBox.Controls.Add(this.m_oDeleteTGButton);
-            this.m_oButtonBox.Controls.Add(this.m_oOOBButton);
-            this.m_oButtonBox.Controls.Add(this.m_oRenameTGButton);
-            this.m_oButtonBox.Controls.Add(this.m_oAddColonyButton);
-            this.m_oButtonBox.Controls.Add(this.m_oSystemMapButton);
-            this.m_oButtonBox.Controls.Add(this.m_oNewTGButton);
-            this.m_oButtonBox.Location = new System.Drawing.Point(5, 141);
-            this.m_oButtonBox.MaximumSize = new System.Drawing.Size(240, 77);
-            this.m_oButtonBox.MinimumSize = new System.Drawing.Size(240, 77);
-            this.m_oButtonBox.Name = "m_oButtonBox";
-            this.m_oButtonBox.Size = new System.Drawing.Size(240, 77);
-            this.m_oButtonBox.TabIndex = 33;
-            this.m_oButtonBox.TabStop = false;
-            // 
-            // m_oDeleteTGButton
-            // 
-            this.m_oDeleteTGButton.Location = new System.Drawing.Point(151, 42);
-            this.m_oDeleteTGButton.Name = "m_oDeleteTGButton";
-            this.m_oDeleteTGButton.Size = new System.Drawing.Size(65, 28);
-            this.m_oDeleteTGButton.TabIndex = 50;
-            this.m_oDeleteTGButton.Text = "&Delete TG";
-            this.m_oDeleteTGButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oOOBButton
-            // 
-            this.m_oOOBButton.Location = new System.Drawing.Point(162, 8);
-            this.m_oOOBButton.Name = "m_oOOBButton";
-            this.m_oOOBButton.Size = new System.Drawing.Size(60, 28);
-            this.m_oOOBButton.TabIndex = 49;
-            this.m_oOOBButton.Text = "OOB";
-            this.m_oOOBButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oRenameTGButton
-            // 
-            this.m_oRenameTGButton.Location = new System.Drawing.Point(70, 43);
-            this.m_oRenameTGButton.Name = "m_oRenameTGButton";
-            this.m_oRenameTGButton.Size = new System.Drawing.Size(75, 28);
-            this.m_oRenameTGButton.TabIndex = 48;
-            this.m_oRenameTGButton.Text = "Rename TG";
-            this.m_oRenameTGButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oAddColonyButton
-            // 
-            this.m_oAddColonyButton.Enabled = false;
-            this.m_oAddColonyButton.Location = new System.Drawing.Point(85, 9);
-            this.m_oAddColonyButton.Name = "m_oAddColonyButton";
-            this.m_oAddColonyButton.Size = new System.Drawing.Size(70, 28);
-            this.m_oAddColonyButton.TabIndex = 47;
-            this.m_oAddColonyButton.Text = "Add Colony";
-            this.m_oAddColonyButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSystemMapButton
-            // 
-            this.m_oSystemMapButton.Location = new System.Drawing.Point(4, 9);
-            this.m_oSystemMapButton.Name = "m_oSystemMapButton";
-            this.m_oSystemMapButton.Size = new System.Drawing.Size(75, 28);
-            this.m_oSystemMapButton.TabIndex = 46;
-            this.m_oSystemMapButton.Text = "System Map";
-            this.m_oSystemMapButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oNewTGButton
-            // 
-            this.m_oNewTGButton.Location = new System.Drawing.Point(4, 43);
-            this.m_oNewTGButton.Name = "m_oNewTGButton";
-            this.m_oNewTGButton.Size = new System.Drawing.Size(60, 28);
-            this.m_oNewTGButton.TabIndex = 45;
-            this.m_oNewTGButton.Text = "&New TG";
-            this.m_oNewTGButton.UseVisualStyleBackColor = true;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.m_oCargoFightersTroopsGroupBox);
-            this.tabPage1.Controls.Add(this.m_oDefaultCondEscortOrdersGroupBox);
-            this.tabPage1.Controls.Add(this.m_oOOBGroupBox);
-            this.tabPage1.Controls.Add(this.m_oOrderTimeDistBox);
-            this.tabPage1.Controls.Add(this.m_oOfficerBox);
-            this.tabPage1.Controls.Add(this.m_oInitiativeBox);
-            this.tabPage1.Controls.Add(this.m_oSurveyBox);
-            this.tabPage1.Controls.Add(this.m_oCenterShowGF);
-            this.tabPage1.Controls.Add(this.m_oSpeedBox);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(983, 429);
-            this.tabPage1.TabIndex = 4;
-            this.tabPage1.Text = "Task Group Info";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // m_oSpeedBox
-            // 
-            this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedButton);
-            this.m_oSpeedBox.Controls.Add(this.m_oSetSpeedButton);
-            this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedBox);
-            this.m_oSpeedBox.Controls.Add(this.m_oCurSpeedBox);
-            this.m_oSpeedBox.Location = new System.Drawing.Point(9, 6);
-            this.m_oSpeedBox.MaximumSize = new System.Drawing.Size(116, 78);
-            this.m_oSpeedBox.MinimumSize = new System.Drawing.Size(116, 78);
-            this.m_oSpeedBox.Name = "m_oSpeedBox";
-            this.m_oSpeedBox.Size = new System.Drawing.Size(116, 78);
-            this.m_oSpeedBox.TabIndex = 4;
-            this.m_oSpeedBox.TabStop = false;
-            this.m_oSpeedBox.Text = "Cur / Max Speed";
-            // 
-            // m_oMaxSpeedButton
-            // 
-            this.m_oMaxSpeedButton.Location = new System.Drawing.Point(55, 49);
-            this.m_oMaxSpeedButton.Name = "m_oMaxSpeedButton";
-            this.m_oMaxSpeedButton.Size = new System.Drawing.Size(47, 23);
-            this.m_oMaxSpeedButton.TabIndex = 31;
-            this.m_oMaxSpeedButton.Text = "Max";
-            this.m_oMaxSpeedButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oSetSpeedButton
-            // 
-            this.m_oSetSpeedButton.Location = new System.Drawing.Point(55, 22);
-            this.m_oSetSpeedButton.Name = "m_oSetSpeedButton";
-            this.m_oSetSpeedButton.Size = new System.Drawing.Size(47, 23);
-            this.m_oSetSpeedButton.TabIndex = 4;
-            this.m_oSetSpeedButton.Text = "Set";
-            this.m_oSetSpeedButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oMaxSpeedBox
-            // 
-            this.m_oMaxSpeedBox.Enabled = false;
-            this.m_oMaxSpeedBox.Location = new System.Drawing.Point(6, 50);
-            this.m_oMaxSpeedBox.Name = "m_oMaxSpeedBox";
-            this.m_oMaxSpeedBox.Size = new System.Drawing.Size(43, 20);
-            this.m_oMaxSpeedBox.TabIndex = 30;
-            // 
-            // m_oCurSpeedBox
-            // 
-            this.m_oCurSpeedBox.Location = new System.Drawing.Point(6, 23);
-            this.m_oCurSpeedBox.Name = "m_oCurSpeedBox";
-            this.m_oCurSpeedBox.Size = new System.Drawing.Size(43, 20);
-            this.m_oCurSpeedBox.TabIndex = 29;
-            // 
-            // m_oCenterShowGF
-            // 
-            this.m_oCenterShowGF.Controls.Add(this.m_oShowGroundForces);
-            this.m_oCenterShowGF.Controls.Add(this.m_oCenterMapCheckBox);
-            this.m_oCenterShowGF.Location = new System.Drawing.Point(131, 10);
-            this.m_oCenterShowGF.MaximumSize = new System.Drawing.Size(116, 68);
-            this.m_oCenterShowGF.MinimumSize = new System.Drawing.Size(116, 68);
-            this.m_oCenterShowGF.Name = "m_oCenterShowGF";
-            this.m_oCenterShowGF.Size = new System.Drawing.Size(116, 68);
-            this.m_oCenterShowGF.TabIndex = 33;
-            this.m_oCenterShowGF.TabStop = false;
-            // 
-            // m_oShowGroundForces
-            // 
-            this.m_oShowGroundForces.AutoSize = true;
-            this.m_oShowGroundForces.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oShowGroundForces.Location = new System.Drawing.Point(6, 42);
-            this.m_oShowGroundForces.MaximumSize = new System.Drawing.Size(92, 17);
-            this.m_oShowGroundForces.MinimumSize = new System.Drawing.Size(92, 17);
-            this.m_oShowGroundForces.Name = "m_oShowGroundForces";
-            this.m_oShowGroundForces.Size = new System.Drawing.Size(92, 17);
-            this.m_oShowGroundForces.TabIndex = 10;
-            this.m_oShowGroundForces.Text = "Show Ground";
-            this.m_oShowGroundForces.UseVisualStyleBackColor = true;
-            // 
-            // m_oCenterMapCheckBox
-            // 
-            this.m_oCenterMapCheckBox.AutoSize = true;
-            this.m_oCenterMapCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCenterMapCheckBox.Location = new System.Drawing.Point(6, 19);
-            this.m_oCenterMapCheckBox.MaximumSize = new System.Drawing.Size(92, 17);
-            this.m_oCenterMapCheckBox.MinimumSize = new System.Drawing.Size(92, 17);
-            this.m_oCenterMapCheckBox.Name = "m_oCenterMapCheckBox";
-            this.m_oCenterMapCheckBox.Size = new System.Drawing.Size(92, 17);
-            this.m_oCenterMapCheckBox.TabIndex = 9;
-            this.m_oCenterMapCheckBox.Text = "Center Map";
-            this.m_oCenterMapCheckBox.UseVisualStyleBackColor = true;
-            // 
-            // m_oSurveyBox
-            // 
-            this.m_oSurveyBox.Controls.Add(this.m_oGeoTextBox);
-            this.m_oSurveyBox.Controls.Add(this.m_oGeoLabel);
-            this.m_oSurveyBox.Controls.Add(this.m_oGravLabel);
-            this.m_oSurveyBox.Controls.Add(this.m_oGravTextBox);
-            this.m_oSurveyBox.Location = new System.Drawing.Point(13, 90);
-            this.m_oSurveyBox.MaximumSize = new System.Drawing.Size(156, 37);
-            this.m_oSurveyBox.MinimumSize = new System.Drawing.Size(156, 37);
-            this.m_oSurveyBox.Name = "m_oSurveyBox";
-            this.m_oSurveyBox.Size = new System.Drawing.Size(156, 37);
-            this.m_oSurveyBox.TabIndex = 34;
-            this.m_oSurveyBox.TabStop = false;
-            this.m_oSurveyBox.Text = "Survey Points";
-            // 
-            // m_oGeoTextBox
-            // 
-            this.m_oGeoTextBox.Enabled = false;
-            this.m_oGeoTextBox.Location = new System.Drawing.Point(113, 13);
-            this.m_oGeoTextBox.Name = "m_oGeoTextBox";
-            this.m_oGeoTextBox.Size = new System.Drawing.Size(32, 20);
-            this.m_oGeoTextBox.TabIndex = 34;
-            this.m_oGeoTextBox.Text = "0.0";
-            this.m_oGeoTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oGeoLabel
-            // 
-            this.m_oGeoLabel.AutoSize = true;
-            this.m_oGeoLabel.Location = new System.Drawing.Point(80, 16);
-            this.m_oGeoLabel.Name = "m_oGeoLabel";
-            this.m_oGeoLabel.Size = new System.Drawing.Size(27, 13);
-            this.m_oGeoLabel.TabIndex = 33;
-            this.m_oGeoLabel.Text = "Geo";
-            // 
-            // m_oGravLabel
-            // 
-            this.m_oGravLabel.AutoSize = true;
-            this.m_oGravLabel.Location = new System.Drawing.Point(6, 16);
-            this.m_oGravLabel.Name = "m_oGravLabel";
-            this.m_oGravLabel.Size = new System.Drawing.Size(30, 13);
-            this.m_oGravLabel.TabIndex = 29;
-            this.m_oGravLabel.Text = "Grav";
-            // 
-            // m_oGravTextBox
-            // 
-            this.m_oGravTextBox.Enabled = false;
-            this.m_oGravTextBox.Location = new System.Drawing.Point(42, 13);
-            this.m_oGravTextBox.Name = "m_oGravTextBox";
-            this.m_oGravTextBox.Size = new System.Drawing.Size(32, 20);
-            this.m_oGravTextBox.TabIndex = 32;
-            this.m_oGravTextBox.Text = "0.0";
-            this.m_oGravTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            // 
-            // m_oInitiativeBox
-            // 
-            this.m_oInitiativeBox.Controls.Add(this.m_oInitiativeButton);
-            this.m_oInitiativeBox.Controls.Add(this.m_oCurrentInitTextBox);
-            this.m_oInitiativeBox.Controls.Add(this.m_oCurrentInitLabel);
-            this.m_oInitiativeBox.Controls.Add(this.m_oMaxInitLabel);
-            this.m_oInitiativeBox.Controls.Add(this.m_oMaxInitTextBox);
-            this.m_oInitiativeBox.Location = new System.Drawing.Point(13, 133);
-            this.m_oInitiativeBox.MaximumSize = new System.Drawing.Size(200, 37);
-            this.m_oInitiativeBox.MinimumSize = new System.Drawing.Size(200, 37);
-            this.m_oInitiativeBox.Name = "m_oInitiativeBox";
-            this.m_oInitiativeBox.Size = new System.Drawing.Size(200, 37);
-            this.m_oInitiativeBox.TabIndex = 36;
-            this.m_oInitiativeBox.TabStop = false;
-            this.m_oInitiativeBox.Text = "Initiative";
-            // 
-            // m_oInitiativeButton
-            // 
-            this.m_oInitiativeButton.Location = new System.Drawing.Point(162, 12);
-            this.m_oInitiativeButton.Name = "m_oInitiativeButton";
-            this.m_oInitiativeButton.Size = new System.Drawing.Size(32, 20);
-            this.m_oInitiativeButton.TabIndex = 32;
-            this.m_oInitiativeButton.Text = "Set";
-            this.m_oInitiativeButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oCurrentInitTextBox
-            // 
-            this.m_oCurrentInitTextBox.Location = new System.Drawing.Point(124, 13);
-            this.m_oCurrentInitTextBox.Name = "m_oCurrentInitTextBox";
-            this.m_oCurrentInitTextBox.Size = new System.Drawing.Size(32, 20);
-            this.m_oCurrentInitTextBox.TabIndex = 34;
-            // 
-            // m_oCurrentInitLabel
-            // 
-            this.m_oCurrentInitLabel.AutoSize = true;
-            this.m_oCurrentInitLabel.Location = new System.Drawing.Point(80, 16);
-            this.m_oCurrentInitLabel.Name = "m_oCurrentInitLabel";
-            this.m_oCurrentInitLabel.Size = new System.Drawing.Size(41, 13);
-            this.m_oCurrentInitLabel.TabIndex = 33;
-            this.m_oCurrentInitLabel.Text = "Current";
-            // 
-            // m_oMaxInitLabel
-            // 
-            this.m_oMaxInitLabel.AutoSize = true;
-            this.m_oMaxInitLabel.Location = new System.Drawing.Point(6, 16);
-            this.m_oMaxInitLabel.Name = "m_oMaxInitLabel";
-            this.m_oMaxInitLabel.Size = new System.Drawing.Size(27, 13);
-            this.m_oMaxInitLabel.TabIndex = 29;
-            this.m_oMaxInitLabel.Text = "Max";
-            // 
-            // m_oMaxInitTextBox
-            // 
-            this.m_oMaxInitTextBox.Enabled = false;
-            this.m_oMaxInitTextBox.Location = new System.Drawing.Point(42, 13);
-            this.m_oMaxInitTextBox.Name = "m_oMaxInitTextBox";
-            this.m_oMaxInitTextBox.Size = new System.Drawing.Size(32, 20);
-            this.m_oMaxInitTextBox.TabIndex = 32;
-            // 
-            // m_oOfficerBox
-            // 
-            this.m_oOfficerBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.m_oOfficerBox.Controls.Add(this.m_oSeniorOfficerTextBox);
-            this.m_oOfficerBox.Location = new System.Drawing.Point(15, 176);
-            this.m_oOfficerBox.MaximumSize = new System.Drawing.Size(362, 37);
-            this.m_oOfficerBox.MinimumSize = new System.Drawing.Size(362, 37);
-            this.m_oOfficerBox.Name = "m_oOfficerBox";
-            this.m_oOfficerBox.Size = new System.Drawing.Size(362, 37);
-            this.m_oOfficerBox.TabIndex = 37;
-            this.m_oOfficerBox.TabStop = false;
-            this.m_oOfficerBox.Text = "Senior Officer";
-            // 
-            // m_oSeniorOfficerTextBox
-            // 
-            this.m_oSeniorOfficerTextBox.Enabled = false;
-            this.m_oSeniorOfficerTextBox.Location = new System.Drawing.Point(6, 14);
-            this.m_oSeniorOfficerTextBox.Name = "m_oSeniorOfficerTextBox";
-            this.m_oSeniorOfficerTextBox.Size = new System.Drawing.Size(350, 20);
-            this.m_oSeniorOfficerTextBox.TabIndex = 32;
-            // 
-            // m_oOrderTimeDistBox
-            // 
-            this.m_oOrderTimeDistBox.Controls.Add(this.m_oAllOrdersRadioButton);
-            this.m_oOrderTimeDistBox.Controls.Add(this.m_oCurrentTDRadioButton);
-            this.m_oOrderTimeDistBox.Controls.Add(this.m_oTimeDistTextBox);
-            this.m_oOrderTimeDistBox.Location = new System.Drawing.Point(15, 219);
-            this.m_oOrderTimeDistBox.MaximumSize = new System.Drawing.Size(362, 60);
-            this.m_oOrderTimeDistBox.MinimumSize = new System.Drawing.Size(362, 60);
-            this.m_oOrderTimeDistBox.Name = "m_oOrderTimeDistBox";
-            this.m_oOrderTimeDistBox.Size = new System.Drawing.Size(362, 60);
-            this.m_oOrderTimeDistBox.TabIndex = 38;
-            this.m_oOrderTimeDistBox.TabStop = false;
-            this.m_oOrderTimeDistBox.Text = "Time And Distance";
-            // 
-            // m_oAllOrdersRadioButton
-            // 
-            this.m_oAllOrdersRadioButton.AutoSize = true;
-            this.m_oAllOrdersRadioButton.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oAllOrdersRadioButton.Location = new System.Drawing.Point(284, 37);
-            this.m_oAllOrdersRadioButton.MaximumSize = new System.Drawing.Size(74, 17);
-            this.m_oAllOrdersRadioButton.MinimumSize = new System.Drawing.Size(74, 17);
-            this.m_oAllOrdersRadioButton.Name = "m_oAllOrdersRadioButton";
-            this.m_oAllOrdersRadioButton.Size = new System.Drawing.Size(74, 17);
-            this.m_oAllOrdersRadioButton.TabIndex = 38;
-            this.m_oAllOrdersRadioButton.Text = "All Orders";
-            this.m_oAllOrdersRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oCurrentTDRadioButton
-            // 
-            this.m_oCurrentTDRadioButton.AutoSize = true;
-            this.m_oCurrentTDRadioButton.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.m_oCurrentTDRadioButton.Checked = true;
-            this.m_oCurrentTDRadioButton.Location = new System.Drawing.Point(284, 14);
-            this.m_oCurrentTDRadioButton.MaximumSize = new System.Drawing.Size(74, 17);
-            this.m_oCurrentTDRadioButton.MinimumSize = new System.Drawing.Size(74, 17);
-            this.m_oCurrentTDRadioButton.Name = "m_oCurrentTDRadioButton";
-            this.m_oCurrentTDRadioButton.Size = new System.Drawing.Size(74, 17);
-            this.m_oCurrentTDRadioButton.TabIndex = 37;
-            this.m_oCurrentTDRadioButton.TabStop = true;
-            this.m_oCurrentTDRadioButton.Text = "Current";
-            this.m_oCurrentTDRadioButton.UseVisualStyleBackColor = true;
-            // 
-            // m_oTimeDistTextBox
-            // 
-            this.m_oTimeDistTextBox.Enabled = false;
-            this.m_oTimeDistTextBox.Location = new System.Drawing.Point(6, 23);
-            this.m_oTimeDistTextBox.Name = "m_oTimeDistTextBox";
-            this.m_oTimeDistTextBox.Size = new System.Drawing.Size(266, 20);
-            this.m_oTimeDistTextBox.TabIndex = 32;
-            // 
-            // m_oOOBGroupBox
-            // 
-            this.m_oOOBGroupBox.Location = new System.Drawing.Point(408, 6);
-            this.m_oOOBGroupBox.MaximumSize = new System.Drawing.Size(348, 250);
-            this.m_oOOBGroupBox.MinimumSize = new System.Drawing.Size(348, 150);
-            this.m_oOOBGroupBox.Name = "m_oOOBGroupBox";
-            this.m_oOOBGroupBox.Size = new System.Drawing.Size(348, 150);
-            this.m_oOOBGroupBox.TabIndex = 39;
-            this.m_oOOBGroupBox.TabStop = false;
-            this.m_oOOBGroupBox.Text = "Order of Battle";
-            // 
-            // m_oDefaultCondEscortOrdersGroupBox
-            // 
-            this.m_oDefaultCondEscortOrdersGroupBox.Location = new System.Drawing.Point(408, 162);
-            this.m_oDefaultCondEscortOrdersGroupBox.MaximumSize = new System.Drawing.Size(348, 125);
-            this.m_oDefaultCondEscortOrdersGroupBox.MinimumSize = new System.Drawing.Size(348, 125);
-            this.m_oDefaultCondEscortOrdersGroupBox.Name = "m_oDefaultCondEscortOrdersGroupBox";
-            this.m_oDefaultCondEscortOrdersGroupBox.Size = new System.Drawing.Size(348, 125);
-            this.m_oDefaultCondEscortOrdersGroupBox.TabIndex = 40;
-            this.m_oDefaultCondEscortOrdersGroupBox.TabStop = false;
-            this.m_oDefaultCondEscortOrdersGroupBox.Text = "Default, Conditional or Escort Orders";
-            // 
-            // m_oCargoFightersTroopsGroupBox
-            // 
-            this.m_oCargoFightersTroopsGroupBox.Location = new System.Drawing.Point(408, 293);
-            this.m_oCargoFightersTroopsGroupBox.MaximumSize = new System.Drawing.Size(348, 125);
-            this.m_oCargoFightersTroopsGroupBox.MinimumSize = new System.Drawing.Size(348, 125);
-            this.m_oCargoFightersTroopsGroupBox.Name = "m_oCargoFightersTroopsGroupBox";
-            this.m_oCargoFightersTroopsGroupBox.Size = new System.Drawing.Size(348, 125);
-            this.m_oCargoFightersTroopsGroupBox.TabIndex = 41;
-            this.m_oCargoFightersTroopsGroupBox.TabStop = false;
-            this.m_oCargoFightersTroopsGroupBox.Text = "Fighters, Ground Units or Cargo carried by TaskGroup";
             // 
             // groupBox6
             // 
@@ -1653,6 +823,1007 @@ namespace Pulsar4X.UI.Panels
             this.m_oNoConditionsButton.Text = "No Conditions";
             this.m_oNoConditionsButton.UseVisualStyleBackColor = true;
             // 
+            // m_oTaskGroupOrdersBox
+            // 
+            this.m_oTaskGroupOrdersBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oTaskGroupOrdersBox.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrdersTextBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRepeatOrderButton);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oCycleMovesCheckBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrderDelayTextBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrderDelayLabel);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oAutoRouteCheckBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oLoadAmtTextBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrbitalDistanceTextBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oLoadLimitLabel);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oOrbitalDistanceLabel);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRemoveAllButton);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oRemoveButton);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oAddMoveButton);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oPlottedMoveLabel);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oActionsAvailableLabel);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oSystemLocationsLabel);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oPlottedMoveListBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oActionsAvailableListBox);
+            this.m_oTaskGroupOrdersBox.Controls.Add(this.m_oSystemLocationsListBox);
+            this.m_oTaskGroupOrdersBox.Location = new System.Drawing.Point(165, 68);
+            this.m_oTaskGroupOrdersBox.MinimumSize = new System.Drawing.Size(800, 205);
+            this.m_oTaskGroupOrdersBox.Name = "m_oTaskGroupOrdersBox";
+            this.m_oTaskGroupOrdersBox.Size = new System.Drawing.Size(805, 355);
+            this.m_oTaskGroupOrdersBox.TabIndex = 33;
+            this.m_oTaskGroupOrdersBox.TabStop = false;
+            // 
+            // m_oRepeatOrdersTextBox
+            // 
+            this.m_oRepeatOrdersTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oRepeatOrdersTextBox.Location = new System.Drawing.Point(765, 311);
+            this.m_oRepeatOrdersTextBox.Name = "m_oRepeatOrdersTextBox";
+            this.m_oRepeatOrdersTextBox.Size = new System.Drawing.Size(27, 20);
+            this.m_oRepeatOrdersTextBox.TabIndex = 44;
+            this.m_oRepeatOrdersTextBox.Text = "0";
+            this.m_oRepeatOrdersTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oRepeatOrderButton
+            // 
+            this.m_oRepeatOrderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oRepeatOrderButton.Location = new System.Drawing.Point(690, 309);
+            this.m_oRepeatOrderButton.Name = "m_oRepeatOrderButton";
+            this.m_oRepeatOrderButton.Size = new System.Drawing.Size(61, 26);
+            this.m_oRepeatOrderButton.TabIndex = 43;
+            this.m_oRepeatOrderButton.Text = "Repeat";
+            this.m_oRepeatOrderButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCycleMovesCheckBox
+            // 
+            this.m_oCycleMovesCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oCycleMovesCheckBox.AutoSize = true;
+            this.m_oCycleMovesCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCycleMovesCheckBox.Location = new System.Drawing.Point(690, 279);
+            this.m_oCycleMovesCheckBox.MaximumSize = new System.Drawing.Size(102, 17);
+            this.m_oCycleMovesCheckBox.MinimumSize = new System.Drawing.Size(102, 17);
+            this.m_oCycleMovesCheckBox.Name = "m_oCycleMovesCheckBox";
+            this.m_oCycleMovesCheckBox.Size = new System.Drawing.Size(102, 17);
+            this.m_oCycleMovesCheckBox.TabIndex = 21;
+            this.m_oCycleMovesCheckBox.Text = "Cycle Moves";
+            this.m_oCycleMovesCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrderDelayTextBox
+            // 
+            this.m_oOrderDelayTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oOrderDelayTextBox.Location = new System.Drawing.Point(597, 312);
+            this.m_oOrderDelayTextBox.Name = "m_oOrderDelayTextBox";
+            this.m_oOrderDelayTextBox.Size = new System.Drawing.Size(77, 20);
+            this.m_oOrderDelayTextBox.TabIndex = 42;
+            this.m_oOrderDelayTextBox.Text = "0";
+            this.m_oOrderDelayTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oOrderDelayLabel
+            // 
+            this.m_oOrderDelayLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oOrderDelayLabel.AutoSize = true;
+            this.m_oOrderDelayLabel.Location = new System.Drawing.Point(528, 315);
+            this.m_oOrderDelayLabel.Name = "m_oOrderDelayLabel";
+            this.m_oOrderDelayLabel.Size = new System.Drawing.Size(63, 13);
+            this.m_oOrderDelayLabel.TabIndex = 41;
+            this.m_oOrderDelayLabel.Text = "Order Delay";
+            // 
+            // m_oAutoRouteCheckBox
+            // 
+            this.m_oAutoRouteCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oAutoRouteCheckBox.AutoSize = true;
+            this.m_oAutoRouteCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oAutoRouteCheckBox.Location = new System.Drawing.Point(519, 279);
+            this.m_oAutoRouteCheckBox.MaximumSize = new System.Drawing.Size(155, 17);
+            this.m_oAutoRouteCheckBox.MinimumSize = new System.Drawing.Size(155, 17);
+            this.m_oAutoRouteCheckBox.Name = "m_oAutoRouteCheckBox";
+            this.m_oAutoRouteCheckBox.Size = new System.Drawing.Size(155, 17);
+            this.m_oAutoRouteCheckBox.TabIndex = 21;
+            this.m_oAutoRouteCheckBox.Text = "No auto-route jump check";
+            this.m_oAutoRouteCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oLoadAmtTextBox
+            // 
+            this.m_oLoadAmtTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oLoadAmtTextBox.Enabled = false;
+            this.m_oLoadAmtTextBox.Location = new System.Drawing.Point(437, 315);
+            this.m_oLoadAmtTextBox.Name = "m_oLoadAmtTextBox";
+            this.m_oLoadAmtTextBox.Size = new System.Drawing.Size(56, 20);
+            this.m_oLoadAmtTextBox.TabIndex = 40;
+            this.m_oLoadAmtTextBox.Text = "0";
+            this.m_oLoadAmtTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oOrbitalDistanceTextBox
+            // 
+            this.m_oOrbitalDistanceTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oOrbitalDistanceTextBox.Location = new System.Drawing.Point(437, 286);
+            this.m_oOrbitalDistanceTextBox.Name = "m_oOrbitalDistanceTextBox";
+            this.m_oOrbitalDistanceTextBox.Size = new System.Drawing.Size(56, 20);
+            this.m_oOrbitalDistanceTextBox.TabIndex = 35;
+            this.m_oOrbitalDistanceTextBox.Text = "0";
+            this.m_oOrbitalDistanceTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oLoadLimitLabel
+            // 
+            this.m_oLoadLimitLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oLoadLimitLabel.AutoSize = true;
+            this.m_oLoadLimitLabel.Enabled = false;
+            this.m_oLoadLimitLabel.Location = new System.Drawing.Point(273, 318);
+            this.m_oLoadLimitLabel.Name = "m_oLoadLimitLabel";
+            this.m_oLoadLimitLabel.Size = new System.Drawing.Size(129, 13);
+            this.m_oLoadLimitLabel.TabIndex = 39;
+            this.m_oLoadLimitLabel.Text = "Maximum Amount to Load";
+            // 
+            // m_oOrbitalDistanceLabel
+            // 
+            this.m_oOrbitalDistanceLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oOrbitalDistanceLabel.AutoSize = true;
+            this.m_oOrbitalDistanceLabel.Location = new System.Drawing.Point(273, 289);
+            this.m_oOrbitalDistanceLabel.Name = "m_oOrbitalDistanceLabel";
+            this.m_oOrbitalDistanceLabel.Size = new System.Drawing.Size(114, 13);
+            this.m_oOrbitalDistanceLabel.TabIndex = 38;
+            this.m_oOrbitalDistanceLabel.Text = "Orbital Distance (k km)";
+            // 
+            // m_oRemoveAllButton
+            // 
+            this.m_oRemoveAllButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oRemoveAllButton.Location = new System.Drawing.Point(172, 303);
+            this.m_oRemoveAllButton.Name = "m_oRemoveAllButton";
+            this.m_oRemoveAllButton.Size = new System.Drawing.Size(82, 31);
+            this.m_oRemoveAllButton.TabIndex = 37;
+            this.m_oRemoveAllButton.Text = "Remove All";
+            this.m_oRemoveAllButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oRemoveButton
+            // 
+            this.m_oRemoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oRemoveButton.Location = new System.Drawing.Point(84, 303);
+            this.m_oRemoveButton.Name = "m_oRemoveButton";
+            this.m_oRemoveButton.Size = new System.Drawing.Size(82, 31);
+            this.m_oRemoveButton.TabIndex = 36;
+            this.m_oRemoveButton.Text = "Remove";
+            this.m_oRemoveButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAddMoveButton
+            // 
+            this.m_oAddMoveButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.m_oAddMoveButton.Location = new System.Drawing.Point(1, 303);
+            this.m_oAddMoveButton.Name = "m_oAddMoveButton";
+            this.m_oAddMoveButton.Size = new System.Drawing.Size(78, 31);
+            this.m_oAddMoveButton.TabIndex = 35;
+            this.m_oAddMoveButton.Text = "Add Move";
+            this.m_oAddMoveButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oPlottedMoveLabel
+            // 
+            this.m_oPlottedMoveLabel.AutoSize = true;
+            this.m_oPlottedMoveLabel.Location = new System.Drawing.Point(514, 14);
+            this.m_oPlottedMoveLabel.Name = "m_oPlottedMoveLabel";
+            this.m_oPlottedMoveLabel.Size = new System.Drawing.Size(70, 13);
+            this.m_oPlottedMoveLabel.TabIndex = 31;
+            this.m_oPlottedMoveLabel.Text = "Plotted Move";
+            // 
+            // m_oActionsAvailableLabel
+            // 
+            this.m_oActionsAvailableLabel.AutoSize = true;
+            this.m_oActionsAvailableLabel.Location = new System.Drawing.Point(261, 14);
+            this.m_oActionsAvailableLabel.Name = "m_oActionsAvailableLabel";
+            this.m_oActionsAvailableLabel.Size = new System.Drawing.Size(88, 13);
+            this.m_oActionsAvailableLabel.TabIndex = 30;
+            this.m_oActionsAvailableLabel.Text = "Actions Available";
+            // 
+            // m_oSystemLocationsLabel
+            // 
+            this.m_oSystemLocationsLabel.AutoSize = true;
+            this.m_oSystemLocationsLabel.Location = new System.Drawing.Point(6, 14);
+            this.m_oSystemLocationsLabel.Name = "m_oSystemLocationsLabel";
+            this.m_oSystemLocationsLabel.Size = new System.Drawing.Size(136, 13);
+            this.m_oSystemLocationsLabel.TabIndex = 29;
+            this.m_oSystemLocationsLabel.Text = "System Locations Available";
+            // 
+            // m_oPlottedMoveListBox
+            // 
+            this.m_oPlottedMoveListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oPlottedMoveListBox.FormattingEnabled = true;
+            this.m_oPlottedMoveListBox.Location = new System.Drawing.Point(517, 32);
+            this.m_oPlottedMoveListBox.Name = "m_oPlottedMoveListBox";
+            this.m_oPlottedMoveListBox.Size = new System.Drawing.Size(276, 238);
+            this.m_oPlottedMoveListBox.TabIndex = 3;
+            // 
+            // m_oActionsAvailableListBox
+            // 
+            this.m_oActionsAvailableListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oActionsAvailableListBox.FormattingEnabled = true;
+            this.m_oActionsAvailableListBox.Location = new System.Drawing.Point(259, 32);
+            this.m_oActionsAvailableListBox.Name = "m_oActionsAvailableListBox";
+            this.m_oActionsAvailableListBox.Size = new System.Drawing.Size(245, 238);
+            this.m_oActionsAvailableListBox.TabIndex = 2;
+            // 
+            // m_oSystemLocationsListBox
+            // 
+            this.m_oSystemLocationsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oSystemLocationsListBox.FormattingEnabled = true;
+            this.m_oSystemLocationsListBox.Location = new System.Drawing.Point(4, 32);
+            this.m_oSystemLocationsListBox.Name = "m_oSystemLocationsListBox";
+            this.m_oSystemLocationsListBox.Size = new System.Drawing.Size(245, 264);
+            this.m_oSystemLocationsListBox.TabIndex = 1;
+            // 
+            // m_oCopyOrdersGroupBox
+            // 
+            this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncCondOrdersCheckBox);
+            this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oIncDefaultCheckBox);
+            this.m_oCopyOrdersGroupBox.Controls.Add(this.checkBox1);
+            this.m_oCopyOrdersGroupBox.Controls.Add(this.m_oCopyOrdersButton);
+            this.m_oCopyOrdersGroupBox.Location = new System.Drawing.Point(751, 3);
+            this.m_oCopyOrdersGroupBox.MaximumSize = new System.Drawing.Size(219, 68);
+            this.m_oCopyOrdersGroupBox.MinimumSize = new System.Drawing.Size(219, 68);
+            this.m_oCopyOrdersGroupBox.Name = "m_oCopyOrdersGroupBox";
+            this.m_oCopyOrdersGroupBox.Size = new System.Drawing.Size(219, 68);
+            this.m_oCopyOrdersGroupBox.TabIndex = 33;
+            this.m_oCopyOrdersGroupBox.TabStop = false;
+            this.m_oCopyOrdersGroupBox.Text = "Copy Orders to Subordinate Formations";
+            // 
+            // m_oIncCondOrdersCheckBox
+            // 
+            this.m_oIncCondOrdersCheckBox.AutoSize = true;
+            this.m_oIncCondOrdersCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oIncCondOrdersCheckBox.Location = new System.Drawing.Point(132, 40);
+            this.m_oIncCondOrdersCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
+            this.m_oIncCondOrdersCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
+            this.m_oIncCondOrdersCheckBox.Name = "m_oIncCondOrdersCheckBox";
+            this.m_oIncCondOrdersCheckBox.Size = new System.Drawing.Size(82, 17);
+            this.m_oIncCondOrdersCheckBox.TabIndex = 34;
+            this.m_oIncCondOrdersCheckBox.Text = "Inc. Cond.";
+            this.m_oIncCondOrdersCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oIncDefaultCheckBox
+            // 
+            this.m_oIncDefaultCheckBox.AutoSize = true;
+            this.m_oIncDefaultCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oIncDefaultCheckBox.Location = new System.Drawing.Point(132, 19);
+            this.m_oIncDefaultCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
+            this.m_oIncDefaultCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
+            this.m_oIncDefaultCheckBox.Name = "m_oIncDefaultCheckBox";
+            this.m_oIncDefaultCheckBox.Size = new System.Drawing.Size(82, 17);
+            this.m_oIncDefaultCheckBox.TabIndex = 33;
+            this.m_oIncDefaultCheckBox.Text = "Inc. Default";
+            this.m_oIncDefaultCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.checkBox1.Location = new System.Drawing.Point(62, 22);
+            this.checkBox1.MaximumSize = new System.Drawing.Size(64, 35);
+            this.checkBox1.MinimumSize = new System.Drawing.Size(64, 35);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(64, 35);
+            this.checkBox1.TabIndex = 21;
+            this.checkBox1.Text = "Match Speeds";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // m_oCopyOrdersButton
+            // 
+            this.m_oCopyOrdersButton.Location = new System.Drawing.Point(6, 25);
+            this.m_oCopyOrdersButton.Name = "m_oCopyOrdersButton";
+            this.m_oCopyOrdersButton.Size = new System.Drawing.Size(50, 27);
+            this.m_oCopyOrdersButton.TabIndex = 32;
+            this.m_oCopyOrdersButton.Text = "Copy";
+            this.m_oCopyOrdersButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSystemDisplayOptionsBox
+            // 
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oShowAllPopsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oOrderFilteringCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oExcludeSurveyedCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oSurveyLocationsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oWrecksCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oLifePodsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oCometsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oContactsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oWaypointCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oTaskGroupsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oAsteroidsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Controls.Add(this.m_oMoonsCheckBox);
+            this.m_oSystemDisplayOptionsBox.Location = new System.Drawing.Point(165, 3);
+            this.m_oSystemDisplayOptionsBox.MaximumSize = new System.Drawing.Size(585, 68);
+            this.m_oSystemDisplayOptionsBox.MinimumSize = new System.Drawing.Size(585, 68);
+            this.m_oSystemDisplayOptionsBox.Name = "m_oSystemDisplayOptionsBox";
+            this.m_oSystemDisplayOptionsBox.Size = new System.Drawing.Size(585, 68);
+            this.m_oSystemDisplayOptionsBox.TabIndex = 33;
+            this.m_oSystemDisplayOptionsBox.TabStop = false;
+            this.m_oSystemDisplayOptionsBox.Text = "System Location Display Options";
+            // 
+            // m_oShowAllPopsCheckBox
+            // 
+            this.m_oShowAllPopsCheckBox.AutoSize = true;
+            this.m_oShowAllPopsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oShowAllPopsCheckBox.Location = new System.Drawing.Point(456, 42);
+            this.m_oShowAllPopsCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
+            this.m_oShowAllPopsCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
+            this.m_oShowAllPopsCheckBox.Name = "m_oShowAllPopsCheckBox";
+            this.m_oShowAllPopsCheckBox.Size = new System.Drawing.Size(122, 17);
+            this.m_oShowAllPopsCheckBox.TabIndex = 20;
+            this.m_oShowAllPopsCheckBox.Text = "Show All Pops";
+            this.m_oShowAllPopsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrderFilteringCheckBox
+            // 
+            this.m_oOrderFilteringCheckBox.AutoSize = true;
+            this.m_oOrderFilteringCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oOrderFilteringCheckBox.Checked = true;
+            this.m_oOrderFilteringCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.m_oOrderFilteringCheckBox.Location = new System.Drawing.Point(456, 19);
+            this.m_oOrderFilteringCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
+            this.m_oOrderFilteringCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
+            this.m_oOrderFilteringCheckBox.Name = "m_oOrderFilteringCheckBox";
+            this.m_oOrderFilteringCheckBox.Size = new System.Drawing.Size(122, 17);
+            this.m_oOrderFilteringCheckBox.TabIndex = 19;
+            this.m_oOrderFilteringCheckBox.Text = "Order Filtering On";
+            this.m_oOrderFilteringCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oExcludeSurveyedCheckBox
+            // 
+            this.m_oExcludeSurveyedCheckBox.AutoSize = true;
+            this.m_oExcludeSurveyedCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oExcludeSurveyedCheckBox.Location = new System.Drawing.Point(328, 42);
+            this.m_oExcludeSurveyedCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
+            this.m_oExcludeSurveyedCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
+            this.m_oExcludeSurveyedCheckBox.Name = "m_oExcludeSurveyedCheckBox";
+            this.m_oExcludeSurveyedCheckBox.Size = new System.Drawing.Size(122, 17);
+            this.m_oExcludeSurveyedCheckBox.TabIndex = 18;
+            this.m_oExcludeSurveyedCheckBox.Text = "Exclude Surveyed";
+            this.m_oExcludeSurveyedCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oSurveyLocationsCheckBox
+            // 
+            this.m_oSurveyLocationsCheckBox.AutoSize = true;
+            this.m_oSurveyLocationsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oSurveyLocationsCheckBox.Location = new System.Drawing.Point(328, 19);
+            this.m_oSurveyLocationsCheckBox.MaximumSize = new System.Drawing.Size(122, 17);
+            this.m_oSurveyLocationsCheckBox.MinimumSize = new System.Drawing.Size(122, 17);
+            this.m_oSurveyLocationsCheckBox.Name = "m_oSurveyLocationsCheckBox";
+            this.m_oSurveyLocationsCheckBox.Size = new System.Drawing.Size(122, 17);
+            this.m_oSurveyLocationsCheckBox.TabIndex = 17;
+            this.m_oSurveyLocationsCheckBox.Text = "Survey Locations";
+            this.m_oSurveyLocationsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oWrecksCheckBox
+            // 
+            this.m_oWrecksCheckBox.AutoSize = true;
+            this.m_oWrecksCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oWrecksCheckBox.Location = new System.Drawing.Point(250, 42);
+            this.m_oWrecksCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
+            this.m_oWrecksCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
+            this.m_oWrecksCheckBox.Name = "m_oWrecksCheckBox";
+            this.m_oWrecksCheckBox.Size = new System.Drawing.Size(72, 17);
+            this.m_oWrecksCheckBox.TabIndex = 16;
+            this.m_oWrecksCheckBox.Text = "Wrecks";
+            this.m_oWrecksCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oLifePodsCheckBox
+            // 
+            this.m_oLifePodsCheckBox.AutoSize = true;
+            this.m_oLifePodsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oLifePodsCheckBox.Location = new System.Drawing.Point(250, 19);
+            this.m_oLifePodsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
+            this.m_oLifePodsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
+            this.m_oLifePodsCheckBox.Name = "m_oLifePodsCheckBox";
+            this.m_oLifePodsCheckBox.Size = new System.Drawing.Size(72, 17);
+            this.m_oLifePodsCheckBox.TabIndex = 15;
+            this.m_oLifePodsCheckBox.Text = "Lifepods";
+            this.m_oLifePodsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oCometsCheckBox
+            // 
+            this.m_oCometsCheckBox.AutoSize = true;
+            this.m_oCometsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCometsCheckBox.Location = new System.Drawing.Point(172, 42);
+            this.m_oCometsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
+            this.m_oCometsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
+            this.m_oCometsCheckBox.Name = "m_oCometsCheckBox";
+            this.m_oCometsCheckBox.Size = new System.Drawing.Size(72, 17);
+            this.m_oCometsCheckBox.TabIndex = 14;
+            this.m_oCometsCheckBox.Text = "Comets";
+            this.m_oCometsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oContactsCheckBox
+            // 
+            this.m_oContactsCheckBox.AutoSize = true;
+            this.m_oContactsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oContactsCheckBox.Location = new System.Drawing.Point(172, 19);
+            this.m_oContactsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
+            this.m_oContactsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
+            this.m_oContactsCheckBox.Name = "m_oContactsCheckBox";
+            this.m_oContactsCheckBox.Size = new System.Drawing.Size(72, 17);
+            this.m_oContactsCheckBox.TabIndex = 13;
+            this.m_oContactsCheckBox.Text = "Contacts";
+            this.m_oContactsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oWaypointCheckBox
+            // 
+            this.m_oWaypointCheckBox.AutoSize = true;
+            this.m_oWaypointCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oWaypointCheckBox.Location = new System.Drawing.Point(84, 42);
+            this.m_oWaypointCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
+            this.m_oWaypointCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
+            this.m_oWaypointCheckBox.Name = "m_oWaypointCheckBox";
+            this.m_oWaypointCheckBox.Size = new System.Drawing.Size(82, 17);
+            this.m_oWaypointCheckBox.TabIndex = 12;
+            this.m_oWaypointCheckBox.Text = "Waypoints";
+            this.m_oWaypointCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oTaskGroupsCheckBox
+            // 
+            this.m_oTaskGroupsCheckBox.AutoSize = true;
+            this.m_oTaskGroupsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oTaskGroupsCheckBox.Location = new System.Drawing.Point(84, 19);
+            this.m_oTaskGroupsCheckBox.MaximumSize = new System.Drawing.Size(82, 17);
+            this.m_oTaskGroupsCheckBox.MinimumSize = new System.Drawing.Size(82, 17);
+            this.m_oTaskGroupsCheckBox.Name = "m_oTaskGroupsCheckBox";
+            this.m_oTaskGroupsCheckBox.Size = new System.Drawing.Size(82, 17);
+            this.m_oTaskGroupsCheckBox.TabIndex = 11;
+            this.m_oTaskGroupsCheckBox.Text = "TaskGroups";
+            this.m_oTaskGroupsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oAsteroidsCheckBox
+            // 
+            this.m_oAsteroidsCheckBox.AutoSize = true;
+            this.m_oAsteroidsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oAsteroidsCheckBox.Location = new System.Drawing.Point(6, 42);
+            this.m_oAsteroidsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
+            this.m_oAsteroidsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
+            this.m_oAsteroidsCheckBox.Name = "m_oAsteroidsCheckBox";
+            this.m_oAsteroidsCheckBox.Size = new System.Drawing.Size(72, 17);
+            this.m_oAsteroidsCheckBox.TabIndex = 10;
+            this.m_oAsteroidsCheckBox.Text = "Asteroids";
+            this.m_oAsteroidsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oMoonsCheckBox
+            // 
+            this.m_oMoonsCheckBox.AutoSize = true;
+            this.m_oMoonsCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oMoonsCheckBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oMoonsCheckBox.MaximumSize = new System.Drawing.Size(72, 17);
+            this.m_oMoonsCheckBox.MinimumSize = new System.Drawing.Size(72, 17);
+            this.m_oMoonsCheckBox.Name = "m_oMoonsCheckBox";
+            this.m_oMoonsCheckBox.Size = new System.Drawing.Size(72, 17);
+            this.m_oMoonsCheckBox.TabIndex = 9;
+            this.m_oMoonsCheckBox.Text = "Moons";
+            this.m_oMoonsCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oSpecialOrdersTabPage
+            // 
+            this.m_oSpecialOrdersTabPage.Location = new System.Drawing.Point(4, 22);
+            this.m_oSpecialOrdersTabPage.Name = "m_oSpecialOrdersTabPage";
+            this.m_oSpecialOrdersTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.m_oSpecialOrdersTabPage.Size = new System.Drawing.Size(983, 429);
+            this.m_oSpecialOrdersTabPage.TabIndex = 1;
+            this.m_oSpecialOrdersTabPage.Text = "Special Orders";
+            this.m_oSpecialOrdersTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrganizationTabPage
+            // 
+            this.m_oOrganizationTabPage.Controls.Add(this.m_oShipMoveToTGGroupBox);
+            this.m_oOrganizationTabPage.Location = new System.Drawing.Point(4, 22);
+            this.m_oOrganizationTabPage.Name = "m_oOrganizationTabPage";
+            this.m_oOrganizationTabPage.Size = new System.Drawing.Size(983, 429);
+            this.m_oOrganizationTabPage.TabIndex = 5;
+            this.m_oOrganizationTabPage.Text = "Organization";
+            this.m_oOrganizationTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oShipMoveToTGGroupBox
+            // 
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgSelectedTGListBox);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgCurrentTGListBox);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgSMModeButton);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgDivideTG);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgSplitTGButton);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgMoveLeftButton);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgMoveRightButton);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgSelectedTGComboBox);
+            this.m_oShipMoveToTGGroupBox.Controls.Add(this.m_oOrgCurrentTGTextBox);
+            this.m_oShipMoveToTGGroupBox.Location = new System.Drawing.Point(4, 4);
+            this.m_oShipMoveToTGGroupBox.Name = "m_oShipMoveToTGGroupBox";
+            this.m_oShipMoveToTGGroupBox.Size = new System.Drawing.Size(573, 422);
+            this.m_oShipMoveToTGGroupBox.TabIndex = 0;
+            this.m_oShipMoveToTGGroupBox.TabStop = false;
+            this.m_oShipMoveToTGGroupBox.Text = "Move Ship Between Task Groups";
+            // 
+            // m_oOrgSelectedTGListBox
+            // 
+            this.m_oOrgSelectedTGListBox.FormattingEnabled = true;
+            this.m_oOrgSelectedTGListBox.Location = new System.Drawing.Point(269, 45);
+            this.m_oOrgSelectedTGListBox.Name = "m_oOrgSelectedTGListBox";
+            this.m_oOrgSelectedTGListBox.Size = new System.Drawing.Size(297, 342);
+            this.m_oOrgSelectedTGListBox.TabIndex = 8;
+            // 
+            // m_oOrgCurrentTGListBox
+            // 
+            this.m_oOrgCurrentTGListBox.FormattingEnabled = true;
+            this.m_oOrgCurrentTGListBox.Location = new System.Drawing.Point(6, 45);
+            this.m_oOrgCurrentTGListBox.Name = "m_oOrgCurrentTGListBox";
+            this.m_oOrgCurrentTGListBox.Size = new System.Drawing.Size(226, 342);
+            this.m_oOrgCurrentTGListBox.TabIndex = 7;
+            // 
+            // m_oOrgSMModeButton
+            // 
+            this.m_oOrgSMModeButton.Location = new System.Drawing.Point(491, 393);
+            this.m_oOrgSMModeButton.Name = "m_oOrgSMModeButton";
+            this.m_oOrgSMModeButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oOrgSMModeButton.TabIndex = 6;
+            this.m_oOrgSMModeButton.Text = "SM Mode";
+            this.m_oOrgSMModeButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrgDivideTG
+            // 
+            this.m_oOrgDivideTG.Location = new System.Drawing.Point(157, 393);
+            this.m_oOrgDivideTG.Name = "m_oOrgDivideTG";
+            this.m_oOrgDivideTG.Size = new System.Drawing.Size(75, 23);
+            this.m_oOrgDivideTG.TabIndex = 5;
+            this.m_oOrgDivideTG.Text = "Divide TG";
+            this.m_oOrgDivideTG.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrgSplitTGButton
+            // 
+            this.m_oOrgSplitTGButton.Location = new System.Drawing.Point(5, 393);
+            this.m_oOrgSplitTGButton.Name = "m_oOrgSplitTGButton";
+            this.m_oOrgSplitTGButton.Size = new System.Drawing.Size(75, 23);
+            this.m_oOrgSplitTGButton.TabIndex = 4;
+            this.m_oOrgSplitTGButton.Text = "Split TG";
+            this.m_oOrgSplitTGButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrgMoveLeftButton
+            // 
+            this.m_oOrgMoveLeftButton.Location = new System.Drawing.Point(238, 202);
+            this.m_oOrgMoveLeftButton.Name = "m_oOrgMoveLeftButton";
+            this.m_oOrgMoveLeftButton.Size = new System.Drawing.Size(25, 25);
+            this.m_oOrgMoveLeftButton.TabIndex = 3;
+            this.m_oOrgMoveLeftButton.Text = "<-";
+            this.m_oOrgMoveLeftButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrgMoveRightButton
+            // 
+            this.m_oOrgMoveRightButton.Location = new System.Drawing.Point(238, 170);
+            this.m_oOrgMoveRightButton.Name = "m_oOrgMoveRightButton";
+            this.m_oOrgMoveRightButton.Size = new System.Drawing.Size(25, 25);
+            this.m_oOrgMoveRightButton.TabIndex = 2;
+            this.m_oOrgMoveRightButton.Text = "->";
+            this.m_oOrgMoveRightButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOrgSelectedTGComboBox
+            // 
+            this.m_oOrgSelectedTGComboBox.FormattingEnabled = true;
+            this.m_oOrgSelectedTGComboBox.Location = new System.Drawing.Point(269, 19);
+            this.m_oOrgSelectedTGComboBox.Name = "m_oOrgSelectedTGComboBox";
+            this.m_oOrgSelectedTGComboBox.Size = new System.Drawing.Size(297, 21);
+            this.m_oOrgSelectedTGComboBox.TabIndex = 1;
+            // 
+            // m_oOrgCurrentTGTextBox
+            // 
+            this.m_oOrgCurrentTGTextBox.Enabled = false;
+            this.m_oOrgCurrentTGTextBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oOrgCurrentTGTextBox.Name = "m_oOrgCurrentTGTextBox";
+            this.m_oOrgCurrentTGTextBox.Size = new System.Drawing.Size(226, 20);
+            this.m_oOrgCurrentTGTextBox.TabIndex = 0;
+            // 
+            // m_oHistoryTabPage
+            // 
+            this.m_oHistoryTabPage.Location = new System.Drawing.Point(4, 22);
+            this.m_oHistoryTabPage.Name = "m_oHistoryTabPage";
+            this.m_oHistoryTabPage.Size = new System.Drawing.Size(983, 429);
+            this.m_oHistoryTabPage.TabIndex = 2;
+            this.m_oHistoryTabPage.Text = "History / Officers / Misc";
+            this.m_oHistoryTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oNavalOrgTabPage
+            // 
+            this.m_oNavalOrgTabPage.Location = new System.Drawing.Point(4, 22);
+            this.m_oNavalOrgTabPage.Name = "m_oNavalOrgTabPage";
+            this.m_oNavalOrgTabPage.Size = new System.Drawing.Size(983, 429);
+            this.m_oNavalOrgTabPage.TabIndex = 3;
+            this.m_oNavalOrgTabPage.Text = "Naval Organization";
+            this.m_oNavalOrgTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oTaskGroupInfoTabPage
+            // 
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oCargoFightersTroopsGroupBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oDefaultCondEscortOrdersGroupBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oOOBGroupBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oOrderTimeDistBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oOfficerBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oInitiativeBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oSurveyBox);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oCenterShowGF);
+            this.m_oTaskGroupInfoTabPage.Controls.Add(this.m_oSpeedBox);
+            this.m_oTaskGroupInfoTabPage.Location = new System.Drawing.Point(4, 22);
+            this.m_oTaskGroupInfoTabPage.Name = "m_oTaskGroupInfoTabPage";
+            this.m_oTaskGroupInfoTabPage.Padding = new System.Windows.Forms.Padding(3);
+            this.m_oTaskGroupInfoTabPage.Size = new System.Drawing.Size(983, 429);
+            this.m_oTaskGroupInfoTabPage.TabIndex = 4;
+            this.m_oTaskGroupInfoTabPage.Text = "Task Group Info";
+            this.m_oTaskGroupInfoTabPage.UseVisualStyleBackColor = true;
+            // 
+            // m_oCargoFightersTroopsGroupBox
+            // 
+            this.m_oCargoFightersTroopsGroupBox.Location = new System.Drawing.Point(408, 293);
+            this.m_oCargoFightersTroopsGroupBox.MaximumSize = new System.Drawing.Size(348, 125);
+            this.m_oCargoFightersTroopsGroupBox.MinimumSize = new System.Drawing.Size(348, 125);
+            this.m_oCargoFightersTroopsGroupBox.Name = "m_oCargoFightersTroopsGroupBox";
+            this.m_oCargoFightersTroopsGroupBox.Size = new System.Drawing.Size(348, 125);
+            this.m_oCargoFightersTroopsGroupBox.TabIndex = 41;
+            this.m_oCargoFightersTroopsGroupBox.TabStop = false;
+            this.m_oCargoFightersTroopsGroupBox.Text = "Fighters, Ground Units or Cargo carried by TaskGroup";
+            // 
+            // m_oDefaultCondEscortOrdersGroupBox
+            // 
+            this.m_oDefaultCondEscortOrdersGroupBox.Location = new System.Drawing.Point(408, 162);
+            this.m_oDefaultCondEscortOrdersGroupBox.MaximumSize = new System.Drawing.Size(348, 125);
+            this.m_oDefaultCondEscortOrdersGroupBox.MinimumSize = new System.Drawing.Size(348, 125);
+            this.m_oDefaultCondEscortOrdersGroupBox.Name = "m_oDefaultCondEscortOrdersGroupBox";
+            this.m_oDefaultCondEscortOrdersGroupBox.Size = new System.Drawing.Size(348, 125);
+            this.m_oDefaultCondEscortOrdersGroupBox.TabIndex = 40;
+            this.m_oDefaultCondEscortOrdersGroupBox.TabStop = false;
+            this.m_oDefaultCondEscortOrdersGroupBox.Text = "Default, Conditional or Escort Orders";
+            // 
+            // m_oOOBGroupBox
+            // 
+            this.m_oOOBGroupBox.Location = new System.Drawing.Point(408, 6);
+            this.m_oOOBGroupBox.MaximumSize = new System.Drawing.Size(348, 250);
+            this.m_oOOBGroupBox.MinimumSize = new System.Drawing.Size(348, 150);
+            this.m_oOOBGroupBox.Name = "m_oOOBGroupBox";
+            this.m_oOOBGroupBox.Size = new System.Drawing.Size(348, 150);
+            this.m_oOOBGroupBox.TabIndex = 39;
+            this.m_oOOBGroupBox.TabStop = false;
+            this.m_oOOBGroupBox.Text = "Order of Battle";
+            // 
+            // m_oOrderTimeDistBox
+            // 
+            this.m_oOrderTimeDistBox.Controls.Add(this.m_oAllOrdersRadioButton);
+            this.m_oOrderTimeDistBox.Controls.Add(this.m_oCurrentTDRadioButton);
+            this.m_oOrderTimeDistBox.Controls.Add(this.m_oTimeDistTextBox);
+            this.m_oOrderTimeDistBox.Location = new System.Drawing.Point(15, 219);
+            this.m_oOrderTimeDistBox.MaximumSize = new System.Drawing.Size(362, 60);
+            this.m_oOrderTimeDistBox.MinimumSize = new System.Drawing.Size(362, 60);
+            this.m_oOrderTimeDistBox.Name = "m_oOrderTimeDistBox";
+            this.m_oOrderTimeDistBox.Size = new System.Drawing.Size(362, 60);
+            this.m_oOrderTimeDistBox.TabIndex = 38;
+            this.m_oOrderTimeDistBox.TabStop = false;
+            this.m_oOrderTimeDistBox.Text = "Time And Distance";
+            // 
+            // m_oAllOrdersRadioButton
+            // 
+            this.m_oAllOrdersRadioButton.AutoSize = true;
+            this.m_oAllOrdersRadioButton.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oAllOrdersRadioButton.Location = new System.Drawing.Point(284, 37);
+            this.m_oAllOrdersRadioButton.MaximumSize = new System.Drawing.Size(74, 17);
+            this.m_oAllOrdersRadioButton.MinimumSize = new System.Drawing.Size(74, 17);
+            this.m_oAllOrdersRadioButton.Name = "m_oAllOrdersRadioButton";
+            this.m_oAllOrdersRadioButton.Size = new System.Drawing.Size(74, 17);
+            this.m_oAllOrdersRadioButton.TabIndex = 38;
+            this.m_oAllOrdersRadioButton.Text = "All Orders";
+            this.m_oAllOrdersRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCurrentTDRadioButton
+            // 
+            this.m_oCurrentTDRadioButton.AutoSize = true;
+            this.m_oCurrentTDRadioButton.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCurrentTDRadioButton.Checked = true;
+            this.m_oCurrentTDRadioButton.Location = new System.Drawing.Point(284, 14);
+            this.m_oCurrentTDRadioButton.MaximumSize = new System.Drawing.Size(74, 17);
+            this.m_oCurrentTDRadioButton.MinimumSize = new System.Drawing.Size(74, 17);
+            this.m_oCurrentTDRadioButton.Name = "m_oCurrentTDRadioButton";
+            this.m_oCurrentTDRadioButton.Size = new System.Drawing.Size(74, 17);
+            this.m_oCurrentTDRadioButton.TabIndex = 37;
+            this.m_oCurrentTDRadioButton.TabStop = true;
+            this.m_oCurrentTDRadioButton.Text = "Current";
+            this.m_oCurrentTDRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oTimeDistTextBox
+            // 
+            this.m_oTimeDistTextBox.Enabled = false;
+            this.m_oTimeDistTextBox.Location = new System.Drawing.Point(6, 23);
+            this.m_oTimeDistTextBox.Name = "m_oTimeDistTextBox";
+            this.m_oTimeDistTextBox.Size = new System.Drawing.Size(266, 20);
+            this.m_oTimeDistTextBox.TabIndex = 32;
+            // 
+            // m_oOfficerBox
+            // 
+            this.m_oOfficerBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.m_oOfficerBox.Controls.Add(this.m_oSeniorOfficerTextBox);
+            this.m_oOfficerBox.Location = new System.Drawing.Point(15, 176);
+            this.m_oOfficerBox.MaximumSize = new System.Drawing.Size(362, 37);
+            this.m_oOfficerBox.MinimumSize = new System.Drawing.Size(362, 37);
+            this.m_oOfficerBox.Name = "m_oOfficerBox";
+            this.m_oOfficerBox.Size = new System.Drawing.Size(362, 37);
+            this.m_oOfficerBox.TabIndex = 37;
+            this.m_oOfficerBox.TabStop = false;
+            this.m_oOfficerBox.Text = "Senior Officer";
+            // 
+            // m_oSeniorOfficerTextBox
+            // 
+            this.m_oSeniorOfficerTextBox.Enabled = false;
+            this.m_oSeniorOfficerTextBox.Location = new System.Drawing.Point(6, 14);
+            this.m_oSeniorOfficerTextBox.Name = "m_oSeniorOfficerTextBox";
+            this.m_oSeniorOfficerTextBox.Size = new System.Drawing.Size(350, 20);
+            this.m_oSeniorOfficerTextBox.TabIndex = 32;
+            // 
+            // m_oInitiativeBox
+            // 
+            this.m_oInitiativeBox.Controls.Add(this.m_oInitiativeButton);
+            this.m_oInitiativeBox.Controls.Add(this.m_oCurrentInitTextBox);
+            this.m_oInitiativeBox.Controls.Add(this.m_oCurrentInitLabel);
+            this.m_oInitiativeBox.Controls.Add(this.m_oMaxInitLabel);
+            this.m_oInitiativeBox.Controls.Add(this.m_oMaxInitTextBox);
+            this.m_oInitiativeBox.Location = new System.Drawing.Point(13, 133);
+            this.m_oInitiativeBox.MaximumSize = new System.Drawing.Size(200, 37);
+            this.m_oInitiativeBox.MinimumSize = new System.Drawing.Size(200, 37);
+            this.m_oInitiativeBox.Name = "m_oInitiativeBox";
+            this.m_oInitiativeBox.Size = new System.Drawing.Size(200, 37);
+            this.m_oInitiativeBox.TabIndex = 36;
+            this.m_oInitiativeBox.TabStop = false;
+            this.m_oInitiativeBox.Text = "Initiative";
+            // 
+            // m_oInitiativeButton
+            // 
+            this.m_oInitiativeButton.Location = new System.Drawing.Point(162, 12);
+            this.m_oInitiativeButton.Name = "m_oInitiativeButton";
+            this.m_oInitiativeButton.Size = new System.Drawing.Size(32, 20);
+            this.m_oInitiativeButton.TabIndex = 32;
+            this.m_oInitiativeButton.Text = "Set";
+            this.m_oInitiativeButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oCurrentInitTextBox
+            // 
+            this.m_oCurrentInitTextBox.Location = new System.Drawing.Point(124, 13);
+            this.m_oCurrentInitTextBox.Name = "m_oCurrentInitTextBox";
+            this.m_oCurrentInitTextBox.Size = new System.Drawing.Size(32, 20);
+            this.m_oCurrentInitTextBox.TabIndex = 34;
+            // 
+            // m_oCurrentInitLabel
+            // 
+            this.m_oCurrentInitLabel.AutoSize = true;
+            this.m_oCurrentInitLabel.Location = new System.Drawing.Point(80, 16);
+            this.m_oCurrentInitLabel.Name = "m_oCurrentInitLabel";
+            this.m_oCurrentInitLabel.Size = new System.Drawing.Size(41, 13);
+            this.m_oCurrentInitLabel.TabIndex = 33;
+            this.m_oCurrentInitLabel.Text = "Current";
+            // 
+            // m_oMaxInitLabel
+            // 
+            this.m_oMaxInitLabel.AutoSize = true;
+            this.m_oMaxInitLabel.Location = new System.Drawing.Point(6, 16);
+            this.m_oMaxInitLabel.Name = "m_oMaxInitLabel";
+            this.m_oMaxInitLabel.Size = new System.Drawing.Size(27, 13);
+            this.m_oMaxInitLabel.TabIndex = 29;
+            this.m_oMaxInitLabel.Text = "Max";
+            // 
+            // m_oMaxInitTextBox
+            // 
+            this.m_oMaxInitTextBox.Enabled = false;
+            this.m_oMaxInitTextBox.Location = new System.Drawing.Point(42, 13);
+            this.m_oMaxInitTextBox.Name = "m_oMaxInitTextBox";
+            this.m_oMaxInitTextBox.Size = new System.Drawing.Size(32, 20);
+            this.m_oMaxInitTextBox.TabIndex = 32;
+            // 
+            // m_oSurveyBox
+            // 
+            this.m_oSurveyBox.Controls.Add(this.m_oGeoTextBox);
+            this.m_oSurveyBox.Controls.Add(this.m_oGeoLabel);
+            this.m_oSurveyBox.Controls.Add(this.m_oGravLabel);
+            this.m_oSurveyBox.Controls.Add(this.m_oGravTextBox);
+            this.m_oSurveyBox.Location = new System.Drawing.Point(13, 90);
+            this.m_oSurveyBox.MaximumSize = new System.Drawing.Size(156, 37);
+            this.m_oSurveyBox.MinimumSize = new System.Drawing.Size(156, 37);
+            this.m_oSurveyBox.Name = "m_oSurveyBox";
+            this.m_oSurveyBox.Size = new System.Drawing.Size(156, 37);
+            this.m_oSurveyBox.TabIndex = 34;
+            this.m_oSurveyBox.TabStop = false;
+            this.m_oSurveyBox.Text = "Survey Points";
+            // 
+            // m_oGeoTextBox
+            // 
+            this.m_oGeoTextBox.Enabled = false;
+            this.m_oGeoTextBox.Location = new System.Drawing.Point(113, 13);
+            this.m_oGeoTextBox.Name = "m_oGeoTextBox";
+            this.m_oGeoTextBox.Size = new System.Drawing.Size(32, 20);
+            this.m_oGeoTextBox.TabIndex = 34;
+            this.m_oGeoTextBox.Text = "0.0";
+            this.m_oGeoTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oGeoLabel
+            // 
+            this.m_oGeoLabel.AutoSize = true;
+            this.m_oGeoLabel.Location = new System.Drawing.Point(80, 16);
+            this.m_oGeoLabel.Name = "m_oGeoLabel";
+            this.m_oGeoLabel.Size = new System.Drawing.Size(27, 13);
+            this.m_oGeoLabel.TabIndex = 33;
+            this.m_oGeoLabel.Text = "Geo";
+            // 
+            // m_oGravLabel
+            // 
+            this.m_oGravLabel.AutoSize = true;
+            this.m_oGravLabel.Location = new System.Drawing.Point(6, 16);
+            this.m_oGravLabel.Name = "m_oGravLabel";
+            this.m_oGravLabel.Size = new System.Drawing.Size(30, 13);
+            this.m_oGravLabel.TabIndex = 29;
+            this.m_oGravLabel.Text = "Grav";
+            // 
+            // m_oGravTextBox
+            // 
+            this.m_oGravTextBox.Enabled = false;
+            this.m_oGravTextBox.Location = new System.Drawing.Point(42, 13);
+            this.m_oGravTextBox.Name = "m_oGravTextBox";
+            this.m_oGravTextBox.Size = new System.Drawing.Size(32, 20);
+            this.m_oGravTextBox.TabIndex = 32;
+            this.m_oGravTextBox.Text = "0.0";
+            this.m_oGravTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            // 
+            // m_oCenterShowGF
+            // 
+            this.m_oCenterShowGF.Controls.Add(this.m_oShowGroundForces);
+            this.m_oCenterShowGF.Controls.Add(this.m_oCenterMapCheckBox);
+            this.m_oCenterShowGF.Location = new System.Drawing.Point(131, 10);
+            this.m_oCenterShowGF.MaximumSize = new System.Drawing.Size(116, 68);
+            this.m_oCenterShowGF.MinimumSize = new System.Drawing.Size(116, 68);
+            this.m_oCenterShowGF.Name = "m_oCenterShowGF";
+            this.m_oCenterShowGF.Size = new System.Drawing.Size(116, 68);
+            this.m_oCenterShowGF.TabIndex = 33;
+            this.m_oCenterShowGF.TabStop = false;
+            // 
+            // m_oShowGroundForces
+            // 
+            this.m_oShowGroundForces.AutoSize = true;
+            this.m_oShowGroundForces.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oShowGroundForces.Location = new System.Drawing.Point(6, 42);
+            this.m_oShowGroundForces.MaximumSize = new System.Drawing.Size(92, 17);
+            this.m_oShowGroundForces.MinimumSize = new System.Drawing.Size(92, 17);
+            this.m_oShowGroundForces.Name = "m_oShowGroundForces";
+            this.m_oShowGroundForces.Size = new System.Drawing.Size(92, 17);
+            this.m_oShowGroundForces.TabIndex = 10;
+            this.m_oShowGroundForces.Text = "Show Ground";
+            this.m_oShowGroundForces.UseVisualStyleBackColor = true;
+            // 
+            // m_oCenterMapCheckBox
+            // 
+            this.m_oCenterMapCheckBox.AutoSize = true;
+            this.m_oCenterMapCheckBox.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.m_oCenterMapCheckBox.Location = new System.Drawing.Point(6, 19);
+            this.m_oCenterMapCheckBox.MaximumSize = new System.Drawing.Size(92, 17);
+            this.m_oCenterMapCheckBox.MinimumSize = new System.Drawing.Size(92, 17);
+            this.m_oCenterMapCheckBox.Name = "m_oCenterMapCheckBox";
+            this.m_oCenterMapCheckBox.Size = new System.Drawing.Size(92, 17);
+            this.m_oCenterMapCheckBox.TabIndex = 9;
+            this.m_oCenterMapCheckBox.Text = "Center Map";
+            this.m_oCenterMapCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // m_oSpeedBox
+            // 
+            this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedButton);
+            this.m_oSpeedBox.Controls.Add(this.m_oSetSpeedButton);
+            this.m_oSpeedBox.Controls.Add(this.m_oMaxSpeedBox);
+            this.m_oSpeedBox.Controls.Add(this.m_oCurSpeedBox);
+            this.m_oSpeedBox.Location = new System.Drawing.Point(9, 6);
+            this.m_oSpeedBox.MaximumSize = new System.Drawing.Size(116, 78);
+            this.m_oSpeedBox.MinimumSize = new System.Drawing.Size(116, 78);
+            this.m_oSpeedBox.Name = "m_oSpeedBox";
+            this.m_oSpeedBox.Size = new System.Drawing.Size(116, 78);
+            this.m_oSpeedBox.TabIndex = 4;
+            this.m_oSpeedBox.TabStop = false;
+            this.m_oSpeedBox.Text = "Cur / Max Speed";
+            // 
+            // m_oMaxSpeedButton
+            // 
+            this.m_oMaxSpeedButton.Location = new System.Drawing.Point(55, 49);
+            this.m_oMaxSpeedButton.Name = "m_oMaxSpeedButton";
+            this.m_oMaxSpeedButton.Size = new System.Drawing.Size(47, 23);
+            this.m_oMaxSpeedButton.TabIndex = 31;
+            this.m_oMaxSpeedButton.Text = "Max";
+            this.m_oMaxSpeedButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSetSpeedButton
+            // 
+            this.m_oSetSpeedButton.Location = new System.Drawing.Point(55, 22);
+            this.m_oSetSpeedButton.Name = "m_oSetSpeedButton";
+            this.m_oSetSpeedButton.Size = new System.Drawing.Size(47, 23);
+            this.m_oSetSpeedButton.TabIndex = 4;
+            this.m_oSetSpeedButton.Text = "Set";
+            this.m_oSetSpeedButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oMaxSpeedBox
+            // 
+            this.m_oMaxSpeedBox.Enabled = false;
+            this.m_oMaxSpeedBox.Location = new System.Drawing.Point(6, 50);
+            this.m_oMaxSpeedBox.Name = "m_oMaxSpeedBox";
+            this.m_oMaxSpeedBox.Size = new System.Drawing.Size(43, 20);
+            this.m_oMaxSpeedBox.TabIndex = 30;
+            // 
+            // m_oCurSpeedBox
+            // 
+            this.m_oCurSpeedBox.Location = new System.Drawing.Point(6, 23);
+            this.m_oCurSpeedBox.Name = "m_oCurSpeedBox";
+            this.m_oCurSpeedBox.Size = new System.Drawing.Size(43, 20);
+            this.m_oCurSpeedBox.TabIndex = 29;
+            // 
+            // m_oButtonBox
+            // 
+            this.m_oButtonBox.Controls.Add(this.m_oDeleteTGButton);
+            this.m_oButtonBox.Controls.Add(this.m_oOOBButton);
+            this.m_oButtonBox.Controls.Add(this.m_oRenameTGButton);
+            this.m_oButtonBox.Controls.Add(this.m_oAddColonyButton);
+            this.m_oButtonBox.Controls.Add(this.m_oSystemMapButton);
+            this.m_oButtonBox.Controls.Add(this.m_oNewTGButton);
+            this.m_oButtonBox.Location = new System.Drawing.Point(5, 141);
+            this.m_oButtonBox.MaximumSize = new System.Drawing.Size(240, 77);
+            this.m_oButtonBox.MinimumSize = new System.Drawing.Size(240, 77);
+            this.m_oButtonBox.Name = "m_oButtonBox";
+            this.m_oButtonBox.Size = new System.Drawing.Size(240, 77);
+            this.m_oButtonBox.TabIndex = 33;
+            this.m_oButtonBox.TabStop = false;
+            // 
+            // m_oDeleteTGButton
+            // 
+            this.m_oDeleteTGButton.Location = new System.Drawing.Point(151, 42);
+            this.m_oDeleteTGButton.Name = "m_oDeleteTGButton";
+            this.m_oDeleteTGButton.Size = new System.Drawing.Size(65, 28);
+            this.m_oDeleteTGButton.TabIndex = 50;
+            this.m_oDeleteTGButton.Text = "&Delete TG";
+            this.m_oDeleteTGButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oOOBButton
+            // 
+            this.m_oOOBButton.Location = new System.Drawing.Point(162, 8);
+            this.m_oOOBButton.Name = "m_oOOBButton";
+            this.m_oOOBButton.Size = new System.Drawing.Size(60, 28);
+            this.m_oOOBButton.TabIndex = 49;
+            this.m_oOOBButton.Text = "OOB";
+            this.m_oOOBButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oRenameTGButton
+            // 
+            this.m_oRenameTGButton.Location = new System.Drawing.Point(70, 43);
+            this.m_oRenameTGButton.Name = "m_oRenameTGButton";
+            this.m_oRenameTGButton.Size = new System.Drawing.Size(75, 28);
+            this.m_oRenameTGButton.TabIndex = 48;
+            this.m_oRenameTGButton.Text = "Rename TG";
+            this.m_oRenameTGButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oAddColonyButton
+            // 
+            this.m_oAddColonyButton.Enabled = false;
+            this.m_oAddColonyButton.Location = new System.Drawing.Point(85, 9);
+            this.m_oAddColonyButton.Name = "m_oAddColonyButton";
+            this.m_oAddColonyButton.Size = new System.Drawing.Size(70, 28);
+            this.m_oAddColonyButton.TabIndex = 47;
+            this.m_oAddColonyButton.Text = "Add Colony";
+            this.m_oAddColonyButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oSystemMapButton
+            // 
+            this.m_oSystemMapButton.Location = new System.Drawing.Point(4, 9);
+            this.m_oSystemMapButton.Name = "m_oSystemMapButton";
+            this.m_oSystemMapButton.Size = new System.Drawing.Size(75, 28);
+            this.m_oSystemMapButton.TabIndex = 46;
+            this.m_oSystemMapButton.Text = "System Map";
+            this.m_oSystemMapButton.UseVisualStyleBackColor = true;
+            // 
+            // m_oNewTGButton
+            // 
+            this.m_oNewTGButton.Location = new System.Drawing.Point(4, 43);
+            this.m_oNewTGButton.Name = "m_oNewTGButton";
+            this.m_oNewTGButton.Size = new System.Drawing.Size(60, 28);
+            this.m_oNewTGButton.TabIndex = 45;
+            this.m_oNewTGButton.Text = "&New TG";
+            this.m_oNewTGButton.UseVisualStyleBackColor = true;
+            // 
             // TaskGroup_Panel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1672,32 +1843,35 @@ namespace Pulsar4X.UI.Panels
             this.m_oGeneralTGDetailsBox.PerformLayout();
             this.m_oTaskGroupTabControl.ResumeLayout(false);
             this.m_oTaskGroupOrdersTabPage.ResumeLayout(false);
-            this.m_oTaskGroupOrdersBox.ResumeLayout(false);
-            this.m_oTaskGroupOrdersBox.PerformLayout();
-            this.m_oCopyOrdersGroupBox.ResumeLayout(false);
-            this.m_oCopyOrdersGroupBox.PerformLayout();
-            this.m_oSystemDisplayOptionsBox.ResumeLayout(false);
-            this.m_oSystemDisplayOptionsBox.PerformLayout();
-            this.m_oButtonBox.ResumeLayout(false);
-            this.tabPage1.ResumeLayout(false);
-            this.m_oSpeedBox.ResumeLayout(false);
-            this.m_oSpeedBox.PerformLayout();
-            this.m_oCenterShowGF.ResumeLayout(false);
-            this.m_oCenterShowGF.PerformLayout();
-            this.m_oSurveyBox.ResumeLayout(false);
-            this.m_oSurveyBox.PerformLayout();
-            this.m_oInitiativeBox.ResumeLayout(false);
-            this.m_oInitiativeBox.PerformLayout();
-            this.m_oOfficerBox.ResumeLayout(false);
-            this.m_oOfficerBox.PerformLayout();
-            this.m_oOrderTimeDistBox.ResumeLayout(false);
-            this.m_oOrderTimeDistBox.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
+            this.m_oTaskGroupOrdersBox.ResumeLayout(false);
+            this.m_oTaskGroupOrdersBox.PerformLayout();
+            this.m_oCopyOrdersGroupBox.ResumeLayout(false);
+            this.m_oCopyOrdersGroupBox.PerformLayout();
+            this.m_oSystemDisplayOptionsBox.ResumeLayout(false);
+            this.m_oSystemDisplayOptionsBox.PerformLayout();
+            this.m_oOrganizationTabPage.ResumeLayout(false);
+            this.m_oShipMoveToTGGroupBox.ResumeLayout(false);
+            this.m_oShipMoveToTGGroupBox.PerformLayout();
+            this.m_oTaskGroupInfoTabPage.ResumeLayout(false);
+            this.m_oOrderTimeDistBox.ResumeLayout(false);
+            this.m_oOrderTimeDistBox.PerformLayout();
+            this.m_oOfficerBox.ResumeLayout(false);
+            this.m_oOfficerBox.PerformLayout();
+            this.m_oInitiativeBox.ResumeLayout(false);
+            this.m_oInitiativeBox.PerformLayout();
+            this.m_oSurveyBox.ResumeLayout(false);
+            this.m_oSurveyBox.PerformLayout();
+            this.m_oCenterShowGF.ResumeLayout(false);
+            this.m_oCenterShowGF.PerformLayout();
+            this.m_oSpeedBox.ResumeLayout(false);
+            this.m_oSpeedBox.PerformLayout();
+            this.m_oButtonBox.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1764,7 +1938,7 @@ namespace Pulsar4X.UI.Panels
         private Button m_oAddColonyButton;
         private Button m_oSystemMapButton;
         private Button m_oNewTGButton;
-        private TabPage tabPage1;
+        private TabPage m_oTaskGroupInfoTabPage;
         private GroupBox m_oCargoFightersTroopsGroupBox;
         private GroupBox m_oDefaultCondEscortOrdersGroupBox;
         private GroupBox m_oOOBGroupBox;
@@ -1817,5 +1991,16 @@ namespace Pulsar4X.UI.Panels
         private Button m_oMissileLaunchButton;
         private Button m_oNoDefaultButton;
         private Button m_oNoConditionsButton;
+        private TabPage m_oOrganizationTabPage;
+        private GroupBox m_oShipMoveToTGGroupBox;
+        private ListBox m_oOrgSelectedTGListBox;
+        private ListBox m_oOrgCurrentTGListBox;
+        private Button m_oOrgSMModeButton;
+        private Button m_oOrgDivideTG;
+        private Button m_oOrgSplitTGButton;
+        private Button m_oOrgMoveLeftButton;
+        private Button m_oOrgMoveRightButton;
+        private ComboBox m_oOrgSelectedTGComboBox;
+        private TextBox m_oOrgCurrentTGTextBox;
     }
 }

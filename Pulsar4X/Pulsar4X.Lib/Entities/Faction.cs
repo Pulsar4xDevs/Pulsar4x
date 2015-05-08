@@ -452,6 +452,7 @@ namespace Pulsar4X.Entities
             FactionTechLevel[(int)Faction.FactionTechnology.ECCM] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.DSTSSensorStrength] = 0;
             FactionTechLevel[(int)Faction.FactionTechnology.MinJumpEngineSize] = 0;
+            FactionTechLevel[(int)Faction.FactionTechnology.ShipProdRate] = 0;
 
             ShipBPTotal = Constants.GameSettings.FactionStartingShipBP;
             PDCBPTotal = Constants.GameSettings.FactionStartingPDCBP;
@@ -1587,7 +1588,12 @@ namespace Pulsar4X.Entities
 
                     if (inDict == true)
                     {
-                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, Missile.missileDef.aSD.gps,ac, (uint)GameState.Instance.CurrentSecond);
+                        int EMSig = 0;
+                        if (em == true)
+                        {
+                            EMSig = Missile.missileDef.aSD.gps;
+                        }
+                        DetectedContactLists[System].DetectedMissileContacts[Missile.missileGroup].updateFactionContact(this, th, em, EMSig, ac, (uint)GameState.Instance.CurrentSecond);
 
                         if (th == false && em == false && ac == false)
                         {
@@ -1669,6 +1675,25 @@ namespace Pulsar4X.Entities
             }
 #warning baseTracking is a magic number here.
             BaseTracking = 25000;
+
+            foreach (Population CurrentPopulation in Populations)
+            {
+                if (CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].Number >= 1.0f)
+                {
+                    foreach (Installation.ShipyardInformation SYInfo in CurrentPopulation.Installations[(int)Installation.InstallationType.CommercialShipyard].SYInfo)
+                    {
+                        SYInfo.UpdateModRate(this);
+                    }
+                }
+
+                if (CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].Number >= 1.0f)
+                {
+                    foreach (Installation.ShipyardInformation SYInfo in CurrentPopulation.Installations[(int)Installation.InstallationType.NavalShipyardComplex].SYInfo)
+                    {
+                        SYInfo.UpdateModRate(this);
+                    }
+                }
+            }
         }
 
         #region Detection Code
@@ -2046,7 +2071,6 @@ namespace Pulsar4X.Entities
                     sig = Constants.ShipTN.ResolutionMax - 1;
 
                 detection = CurrentTaskGroup.ActiveSensorQue[CurrentTaskGroup.TaskGroupLookUpST[sig]].aSensorDef.GetActiveDetectionRange(sig, -1);
-
 
                 bool det = LargeDetection(dist, detection);
 

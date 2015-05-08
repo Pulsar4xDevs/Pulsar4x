@@ -1,8 +1,6 @@
 ﻿using System;
-using System.CodeDom;
-using System.Linq;
 
-namespace Pulsar4X.ECSLib.Processors
+namespace Pulsar4X.ECSLib
 {
     internal static class SpeciesProcessor
     {

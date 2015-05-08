@@ -191,6 +191,11 @@ namespace Pulsar4X.Entities
         public PointDefenseList TaskGroupPDL { get; set; }
 
         /// <summary>
+        /// This taskgroup should not be allowed to move if it is in a shipyard.
+        /// </summary>
+        public bool IsInShipyard { get; set; }
+
+        /// <summary>
         /// Constructor for the taskgroup, sets name, faction, planet the TG starts in orbit of.
         /// </summary>
         /// <param name="Title">Name</param>
@@ -208,19 +213,18 @@ namespace Pulsar4X.Entities
 
             IsOrbiting = true;
             OrbitingBody = StartingBody;
+            (OrbitingBody as SystemBody).TaskGroupsInOrbit.Add(this);
 
             SSEntity = StarSystemEntityType.TaskGroup;
-
-            Contact = new SystemContact(TaskGroupFaction, this);
 
             Position.System = StartingSystem;
             Position.X = OrbitingBody.Position.X;
             Position.Y = OrbitingBody.Position.Y;
 
+            Contact = new SystemContact(TaskGroupFaction, this);
+
             Contact.LastPosition.X = Contact.Position.X;
             Contact.LastPosition.Y = Contact.Position.Y;
-
-            Contact.Position = Position;
 
             StartingSystem.SystemContactList.Add(Contact);
             DrawTravelLine = 3;
@@ -291,6 +295,8 @@ namespace Pulsar4X.Entities
             TaskGroupsOrdered = new BindingList<TaskGroupTN>();
 
             TaskGroupPDL = new PointDefenseList();
+
+            IsInShipyard = false;
 
             //add default legal order for targeting TGs.
             _legalOrders.Add(Constants.ShipTN.OrderType.Follow);
@@ -515,15 +521,14 @@ namespace Pulsar4X.Entities
         /// Adds a ship to a taskgroup, will call sorting and sensor handling.
         /// </summary>
         /// <param name="shipDef">definition of the ship to be added.</param>
-        public void AddShip(ShipClassTN shipDef)
+        public void AddShip(ShipClassTN shipDef, String Title)
         {
-            ShipTN ship = new ShipTN(shipDef, Ships.Count, GameState.Instance.CurrentSecond, this, TaskGroupFaction);
+            ShipTN ship = new ShipTN(shipDef, Ships.Count, GameState.Instance.CurrentSecond, this, TaskGroupFaction, Title);
             Ships.Add(ship);
 
             /// <summary>
             /// Refuel and ReCrew this ship here?
             /// </summary>
-
 
             if (Ships.Count == 1)
             {
@@ -550,7 +555,175 @@ namespace Pulsar4X.Entities
             UpdatePassiveSensors(ship);
 
             AddShipToSort(ship);
+        }
 
+        /// <summary>
+        /// Separate from AddShip, this will add an existing ship to this taskgroup.
+        /// </summary>
+        /// <param name="Ship">Ship to be added</param>
+        public void AddShipTo(ShipTN Ship)
+        {
+            Ships.Add(Ship);
+
+            if(Ships.Count == 1)
+            {
+                MaxSpeed = Ship.ShipClass.MaxSpeed;
+                CurrentSpeed = MaxSpeed;
+            }
+            else
+            {
+                if (CurrentSpeed == MaxSpeed)
+                {
+                    if (Ship.ShipClass.MaxSpeed < MaxSpeed)
+                    {
+                        MaxSpeed = Ship.ShipClass.MaxSpeed;
+                        CurrentSpeed = MaxSpeed;
+                    }
+                }
+                /// <summary>
+                /// Current Speed is lower than the maxspeed which means that the user has set current speed below max speed already.
+                /// </summary>
+                else
+                {
+                    /// <summary>
+                    /// Set the new max speed of the taskgroup if there is one.
+                    /// </summary>
+                    if (Ship.ShipClass.MaxSpeed < MaxSpeed)
+                    {
+                        MaxSpeed = Ship.ShipClass.MaxSpeed;
+                    }
+
+                    /// <summary>
+                    /// Max speed is less than the set current speed.
+                    /// </summary>
+                    if (MaxSpeed < CurrentSpeed)
+                    {
+                        CurrentSpeed = MaxSpeed;
+                    }
+                }
+            }
+
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                Ships[loop].SetSpeed(CurrentSpeed);
+            }
+
+            /// <summary>
+            /// Update the taskgroupwide statistics here, consider moving this to its own function should it grow beyond this.
+            /// </summary>
+            TotalCargoTonnage = TotalCargoTonnage + Ship.ShipClass.TotalCargoCapacity;
+            TotalCryoCapacity = TotalCryoCapacity + Ship.ShipClass.SpareCryoBerths;
+
+            /// <summary>
+            /// Add this ship to the sensor datagroups of this taskgroup
+            /// </summary>
+            UpdatePassiveSensors(Ship);
+            AddShipToSort(Ship);
+        }
+
+        /// <summary>
+        /// Remove ship will remove a ship from this taskgroup, typically in preparation for adding it to another taskgroup. ship destruction logic is handled elsewhere.
+        /// </summary>
+        /// <param name="Ship">Ship to be removed</param>
+        public void RemoveShipFrom(ShipTN Ship)
+        {
+            /// <summary>
+            /// Update taskgroup wide statistics here. eventually this may need to be its own function.
+            /// </summary>
+            TotalCargoTonnage = TotalCargoTonnage - Ship.ShipClass.TotalCargoCapacity;
+            TotalCryoCapacity = TotalCryoCapacity - Ship.ShipClass.SpareCryoBerths;
+
+            /// <summary>
+            /// This can return false. not sure what the implications of such a return would be. other then that this function handles removing this ship from the taskgroup's sensor
+            /// data structures.
+            /// </summary>
+            RemoveShipFromTaskGroup(Ship);
+
+            Ships.Remove(Ship);
+
+            if (Ships.Count == 0)
+            {
+                MaxSpeed = 1;
+                CurrentSpeed = 1;
+            }
+            else if (Ships.Count == 1)
+            {
+                if (CurrentSpeed == MaxSpeed)
+                {
+                    MaxSpeed = Ships[0].ShipClass.MaxSpeed;
+                    CurrentSpeed = MaxSpeed;
+                }
+                else
+                    MaxSpeed = Ships[0].ShipClass.MaxSpeed;
+            }
+            else
+            {
+                /// <summary>
+                /// Only set the speed to a new potentially higher max speed if there is one, and if the user has set this taskgroup to its max speed.
+                /// The assumption is that the user will want to keep his taskgroup at its maximum speed.
+                /// </summary>
+                int lowestMax = Ships[0].ShipClass.MaxSpeed;
+                for (int loop = 1; loop < Ships.Count; loop++)
+                {
+                    if (Ships[loop].ShipClass.MaxSpeed < lowestMax)
+                    {
+                        lowestMax = Ships[loop].ShipClass.MaxSpeed;
+                    }
+                }
+                if (CurrentSpeed == MaxSpeed)
+                {
+                    MaxSpeed = lowestMax;
+                    CurrentSpeed = MaxSpeed;
+                }
+                else
+                    MaxSpeed = lowestMax;
+            }
+
+            for (int loop = 0; loop < Ships.Count; loop++)
+            {
+                Ships[loop].SetSpeed(CurrentSpeed);
+            }
+        }
+
+        /// <summary>
+        /// Given a ship in this taskgroup, transfer said ship to TaskGroupTo
+        /// </summary>
+        /// <param name="Ship">Ship present in this taskgroup that should be transfered</param>
+        /// <param name="TaskGroupTo">Taskgroup that will receive this ship</param>
+        public void TransferShipToTaskGroup(ShipTN Ship, TaskGroupTN TaskGroupTo)
+        {
+            /// <summary>
+            /// This ship is not in the taskgroup so return immediately.
+            /// </summary>
+            if (Ships.Contains(Ship) == false)
+                return;
+
+            BindingList<int> activeSensorIndices = new BindingList<int>();
+            for (int activeIterator = 0; activeIterator < Ship.ShipASensor.Count; activeIterator++)
+            {
+                /// <summary>
+                /// This active sensor is both active and intact, so preserve its index, and set isActive to false(the sensor will be reactivated in its new TG.
+                /// Destroyed sensors can keep their isActive state, as when they are repaired the repair function should handle reactivating them.
+                /// </summary>
+                if (Ship.ShipASensor[activeIterator].isActive == true && Ship.ShipASensor[activeIterator].isDestroyed == false)
+                {
+                    activeSensorIndices.Add(activeIterator);
+                    Ship.ShipASensor[activeIterator].isActive = false;
+                }
+            }
+
+            /// <summary>
+            /// Move the ship between the two.
+            /// </summary>
+            RemoveShipFrom(Ship);
+            TaskGroupTo.AddShipTo(Ship);
+
+            /// <summary>
+            /// reactivate any sensors that were active in the previous taskgroup.
+            /// </summary>
+            int ShipIndex = TaskGroupTo.Ships.IndexOf(Ship);
+            foreach(int activeIndex in activeSensorIndices)
+               TaskGroupTo.SetActiveSensor(ShipIndex, activeIndex, true);
         }
 
         /// <summary>
@@ -1126,6 +1299,88 @@ namespace Pulsar4X.Entities
         /// <returns>Were nodes removed from the various linkedLists?</returns>
         public bool RemoveShipFromTaskGroup(ShipTN Ship)
         {
+            /// <summary>
+            /// Both active and passive sensors need to be updated to reflect that this ship is no longer part of the taskgroup.
+            /// </summary>
+            for(int activeIterator = 0; activeIterator < Ship.ShipASensor.Count; activeIterator++)
+            {
+                SetActiveSensor(Ships.IndexOf(Ship), activeIterator, false);
+            }
+
+            for (int passiveIterator = 0; passiveIterator < Ship.ShipPSensor.Count; passiveIterator++)
+            {
+                PassiveSensorTN PassiveS = Ship.ShipPSensor[passiveIterator];
+                /// <summary>
+                /// Performance could be improved here by storing a sorted linked list of all passive sensors if need be.
+                /// I don't believe that sensor destruction events will be common enough to necessitate that however.
+                /// </summary>
+                if (PassiveS.pSensorDef.thermalOrEM == PassiveSensorType.EM)
+                {
+                    if (PassiveS.pSensorDef.rating == BestEM.pSensorDef.rating)
+                    {
+                        BestEMCount--;
+
+                        if (BestEMCount == 0)
+                        {
+                            for (int loop = 0; loop < Ships.Count; loop++)
+                            {
+                                for (int loop2 = 0; loop2 < Ships[loop].ShipPSensor.Count; loop2++)
+                                {
+                                    if (Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.EM &&
+                                        Ships[loop].ShipPSensor[loop2].isDestroyed == false)
+                                    {
+                                        if (BestEMCount == 0 || Ships[loop].ShipPSensor[loop2].pSensorDef.rating > BestEM.pSensorDef.rating)
+                                        {
+                                            BestEM = Ships[loop].ShipPSensor[loop2];
+                                            BestEMCount = 1;
+                                        }
+                                        else if (Ships[loop].ShipPSensor[loop2].pSensorDef.rating == BestEM.pSensorDef.rating)
+                                        {
+                                            BestEMCount++;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (PassiveS.pSensorDef.rating == BestThermal.pSensorDef.rating)
+                    {
+                        BestThermalCount--;
+
+                        if (BestThermalCount == 0)
+                        {
+                            for (int loop = 0; loop < Ships.Count; loop++)
+                            {
+                                for (int loop2 = 0; loop2 < Ships[loop].ShipPSensor.Count; loop2++)
+                                {
+                                    if (Ships[loop].ShipPSensor[loop2].pSensorDef.thermalOrEM == PassiveSensorType.Thermal &&
+                                        Ships[loop].ShipPSensor[loop2].isDestroyed == false)
+                                    {
+                                        if (BestThermalCount == 0 || Ships[loop].ShipPSensor[loop2].pSensorDef.rating > BestThermal.pSensorDef.rating)
+                                        {
+                                            BestThermal = Ships[loop].ShipPSensor[loop2];
+                                            BestThermalCount = 1;
+                                        }
+                                        else if (Ships[loop].ShipPSensor[loop2].pSensorDef.rating == BestThermal.pSensorDef.rating)
+                                        {
+                                            BestThermalCount++;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Now on to the detection linked lists. Ship must be removed, and the lists must be altered to reflect the fact that ship is gone.
+            /// </summary>
             ThermalSortList.Remove(Ship.ThermalList);
             EMSortList.Remove(Ship.EMList);
             ActiveSortList.Remove(Ship.ActiveList);
@@ -1212,8 +1467,11 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// Classic: I commented this out to make secondary star orbits work, but left the rest of the adjustments in.
             /// In 0.3 I changed how planets store their position to use only their data, not their primary's data.
+            /// </summary>
             Contact.Position.X = OrbitingBody.Position.X;
             Contact.Position.Y = OrbitingBody.Position.Y;
+            Position.X = Contact.Position.X;
+            Position.Y = Contact.Position.Y;
         }
 
         /// <summary>
@@ -1258,8 +1516,8 @@ namespace Pulsar4X.Entities
                         dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
                         break;
                     case StarSystemEntityType.Population:
-                        dX = Contact.Position.X - TaskGroupOrders[0].target.Position.X;
-                        dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
+                        dX = Contact.Position.X - TaskGroupOrders[0].pop.Planet.Position.X;
+                        dY = Contact.Position.Y - TaskGroupOrders[0].pop.Planet.Position.Y;
                         break;
                     case StarSystemEntityType.Invalid:
                         throw new InvalidOperationException("SSEntity Invalid");
@@ -1296,8 +1554,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Contact.Position.X - TaskGroupOrders[0].target.Position.X;
-                    dY = Contact.Position.Y - TaskGroupOrders[0].target.Position.Y;
+                    dX = Contact.Position.X - TaskGroupOrders[0].pop.Planet.Position.X;
+                    dY = Contact.Position.Y - TaskGroupOrders[0].pop.Planet.Position.Y;
                 }
                 else
                 {
@@ -1344,8 +1602,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(TaskGroupOrders[0].target.Position.X  - Contact.Position.X);
-                    dY = Math.Abs(TaskGroupOrders[0].target.Position.Y  - Contact.Position.Y);
+                    dX = Math.Abs(TaskGroupOrders[0].pop.Planet.Position.X  - Contact.Position.X);
+                    dY = Math.Abs(TaskGroupOrders[0].pop.Planet.Position.Y - Contact.Position.Y);
                 }
                 else
                 {
@@ -1482,8 +1740,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(TaskGroupOrders[OrderCount].target.Position.X - Contact.Position.X);
-                    dY = Math.Abs(TaskGroupOrders[OrderCount].target.Position.Y - Contact.Position.Y);
+                    dX = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.X - Contact.Position.X);
+                    dY = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.Y - Contact.Position.Y);
                 }
                 else
                 {
@@ -1509,8 +1767,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(TaskGroupOrders[OrderCount].target.Position.X  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.X);
-                    dY = Math.Abs(TaskGroupOrders[OrderCount].target.Position.Y  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.Y);
+                    dX = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.X  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.X);
+                    dY = Math.Abs(TaskGroupOrders[OrderCount].pop.Planet.Position.Y  - TaskGroupOrders[OrderCount - 1].jumpPoint.Connect.Position.Y);
                 }
                 else
                 {
@@ -1534,8 +1792,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = TaskGroupOrders[OrderCount].target.Position.X;
-                    dY = TaskGroupOrders[OrderCount].target.Position.Y;
+                    dX = TaskGroupOrders[OrderCount].pop.Planet.Position.X;
+                    dY = TaskGroupOrders[OrderCount].pop.Planet.Position.Y;
                 }
                 else
                 {
@@ -1550,8 +1808,8 @@ namespace Pulsar4X.Entities
                 }
                 else if (TaskGroupOrders[OrderCount - 1].target.SSEntity == StarSystemEntityType.Population)
                 {
-                    dX = Math.Abs(dX - TaskGroupOrders[OrderCount - 1].target.Position.X);
-                    dY = Math.Abs(dY - TaskGroupOrders[OrderCount - 1].target.Position.Y);
+                    dX = Math.Abs(dX - TaskGroupOrders[OrderCount - 1].pop.Planet.Position.X);
+                    dY = Math.Abs(dY - TaskGroupOrders[OrderCount - 1].pop.Planet.Position.Y);
                 }
                 else
                 {
@@ -1605,8 +1863,8 @@ namespace Pulsar4X.Entities
                     }
                     else if (TaskGroupOrders[0].target.SSEntity == StarSystemEntityType.Population)
                     {
-                        dX = TaskGroupOrders[0].target.Position.X;
-                        dY = TaskGroupOrders[0].target.Position.Y;
+                        dX = TaskGroupOrders[0].pop.Planet.Position.X;
+                        dY = TaskGroupOrders[0].pop.Planet.Position.Y;
                     }
                     else
                     {
@@ -2106,7 +2364,7 @@ namespace Pulsar4X.Entities
                         currentOrder.orderTimeRequirement = 0;
                         FuelPlace = 0;
 
-                        TaskGroupTN targetTG = currentOrder.target as TaskGroupTN;
+                        TaskGroupTN targetTG = currentOrder.taskGroup as TaskGroupTN;
 
                         foreach(ShipTN tankerShip in targetTG.Ships)
                         {

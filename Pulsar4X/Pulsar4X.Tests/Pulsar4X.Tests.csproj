@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="FactoryTests.cs" />
+    <Compile Include="ProcessorTests.cs" />
     <Compile Include="ShipTests.cs" />
     <Compile Include="EngineCommsTests.cs" />
     <Compile Include="EntityManagerTests.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="SaveGameTests.cs" />
     <Compile Include="StaticDataTests.cs" />
     <Compile Include="StorageTests.cs" />
+    <Compile Include="SystemGenTests.cs" />
     <Compile Include="UnitHelperTests.cs" />
     <Compile Include="Vector4Tests.cs" />
   </ItemGroup>

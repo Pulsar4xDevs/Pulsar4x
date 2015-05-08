@@ -200,13 +200,8 @@ namespace Pulsar4X.UI.Handlers
                         /// <summary>
                         /// Make the ship and subtract the appropriate amount from the faction Ship PB total.
                         /// </summary>
-                        m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass);
+                        m_oCurrnetTaskGroup.AddShip(m_oCurrnetShipClass, (m_oCurrnetShipClass.Name + " " + (m_oCurrnetShipClass.ShipsInClass.Count).ToString()));
                         m_oCurrnetFaction.ShipBPTotal = m_oCurrnetFaction.ShipBPTotal - m_oCurrnetShipClass.BuildPointCost;
-
-                        /// <summary>
-                        /// Name the ship properly
-                        /// </summary>
-                        m_oCurrnetTaskGroup.Ships[m_oCurrnetTaskGroup.Ships.Count - 1].Name = m_oCurrnetShipClass.Name + " " + (m_oCurrnetShipClass.ShipsInClass.Count).ToString();
 
                         /// <summary>
                         /// Ship specific information that SMed ships will want to have, fuel, ordnance,etc.
