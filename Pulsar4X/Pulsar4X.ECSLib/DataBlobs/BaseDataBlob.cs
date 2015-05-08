@@ -6,8 +6,9 @@ using Newtonsoft.Json;
 namespace Pulsar4X.ECSLib
 {
     [JsonObject(MemberSerialization.OptOut)]
-    public abstract class BaseDataBlob : ICloneable, INotifyPropertyChanged
+    public abstract class BaseDataBlob : ICloneable
     {
+        [CanBeNull]
         public virtual Entity OwningEntity
         {
             get { return _owningEntity; }
@@ -26,17 +27,18 @@ namespace Pulsar4X.ECSLib
         [JsonIgnore]
         public readonly object LockObject = new object();
 
+        // Partial implementation of INotifyPropertyChanged.
+        // Note, derived datablobs are NOT fully required to implement.
         public event PropertyChangedEventHandler PropertyChanged;
 
         public abstract object Clone();
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
+            if (PropertyChanged != null)
             {
-                handler(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

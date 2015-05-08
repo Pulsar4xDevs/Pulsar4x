@@ -75,46 +75,18 @@ namespace Pulsar4X.ECSLib
             get { return Children.Select(GetSameTypeDB).ToList(); }
         }
 
-        [CanBeNull]
-        public override Entity OwningEntity
-        {
-            get { return _owningEntity; }
-            set
-            {
-                if (_owningEntity != null && Parent != null)
-                {
-                    ParentDB.RemoveChild(_owningEntity);
-                }
-
-                _owningEntity = value;
-
-                if (Parent != null)
-                {
-                    ParentDB.AddChild(_owningEntity);
-                }
-            }
-        }
-        private Entity _owningEntity;
-
         protected TreeHierarchyDB(Entity parent)
         {
             Parent = parent;
             Children = new List<Entity>();
+
+            PropertyChanged += OnPropertyChanged;
         }
 
         private void AddChild(Entity child)
         {
             Children.Add(child);
             GetSameTypeDB(child).PropertyChanged += OnPropertyChanged;
-            OnPropertyChanged("Children");
-        }
-
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
-        {
-            if (propertyChangedEventArgs.PropertyName == "Parent")
-            {
-                RemoveChild(((TreeHierarchyDB)sender).OwningEntity);
-            }
         }
 
         private bool RemoveChild(Entity child)
@@ -128,10 +100,22 @@ namespace Pulsar4X.ECSLib
             // Unsubscribe from the event.
             GetSameTypeDB(child).PropertyChanged -= OnPropertyChanged;
 
-            // Fire our property changed event.
-            OnPropertyChanged("Children");
-
             return true;
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            if (propertyChangedEventArgs.PropertyName == "Parent")
+            {
+                RemoveChild(((TreeHierarchyDB)sender).OwningEntity);
+            }
+            else if (propertyChangedEventArgs.PropertyName == "OwningEntity")
+            {
+                if (Parent != null)
+                {
+                    ParentDB.AddChild(OwningEntity);
+                }
+            }
         }
 
         private TreeHierarchyDB GetSameTypeDB(Entity entity)

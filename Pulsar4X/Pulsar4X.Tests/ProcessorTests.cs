@@ -163,9 +163,10 @@ namespace Pulsar4X.Tests
         {
             var game = new Game(); // init the game class as we will need it for these tests.
             GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
-            List<StarSystem> systems = new List<StarSystem>(1000);
+            const int numSystems = 1000;
+            List<StarSystem> systems = new List<StarSystem>(numSystems);
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < numSystems; i++)
             {
                 systems.Add(StarSystemFactory.CreateSystem("Stress System " + i));
             }
