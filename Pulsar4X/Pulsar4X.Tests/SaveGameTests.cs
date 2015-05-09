@@ -40,7 +40,8 @@ namespace Pulsar4X.Tests
             greyAlienSpecies.GetDataBlob<NameDB>().Name.Add(humanFaction, "Space bugs");
             
             // add a star system:
-            game.StarSystems.Add(new StarSystem("Sol", -1));
+            GalaxyFactory.InitToDefaultSettings();
+            StarSystemFactory.CreateSystem("Argon Prime");
         }
 
         [TearDown]

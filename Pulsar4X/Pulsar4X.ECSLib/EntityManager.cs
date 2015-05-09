@@ -711,7 +711,19 @@ namespace Pulsar4X.ECSLib
                 else
                 {
                     // First time this Guid has been encountered.
-                    CreateEntity(new Entity(guid, this), null);
+                    lock (_guidLock)
+                    {
+                        _guidLock.EnterWriteLock();
+                        try
+                        {
+                            _globalGuidDictionary.Add(guid, this);
+                        }
+                        finally
+                        {
+                            _guidLock.ExitWriteLock();
+                        }
+                        CreateEntity(new Entity(guid, this), null);
+                    }
                 }
             }
 
@@ -751,6 +763,7 @@ namespace Pulsar4X.ECSLib
                 // Set the dataBlobs to their proper entity using a local Guid lookup.
                 foreach (dynamic dataBlob in dataBlobs)
                 {
+
                     dataBlob.OwningEntity.SetDataBlob(dataBlob);
                 }
             }
@@ -780,12 +793,12 @@ namespace Pulsar4X.ECSLib
                 }
             }
             // Serialize Entities
-            List<Guid> defraggedEntites = (from entity in _entities
+            List<Guid> defraggedEntities = (from entity in _entities
                                     where entity != null
                                     select entity.Guid).ToList();
 
 
-            info.AddValue("Entities", defraggedEntites);
+            info.AddValue("Entities", defraggedEntities);
         }
 
         #endregion
