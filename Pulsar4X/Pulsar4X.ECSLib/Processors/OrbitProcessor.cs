@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
@@ -21,8 +22,10 @@ namespace Pulsar4X.ECSLib
         {
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
-            foreach (StarSystem system in systems)
+            Parallel.ForEach(systems, system =>
+            //foreach (StarSystem system in systems)
             {
+
                 EntityManager currentManager = system.SystemManager;
 
                 // Find the first orbital entity.
@@ -31,7 +34,8 @@ namespace Pulsar4X.ECSLib
                 if (!firstOrbital.IsValid)
                 {
                     // No orbitals in this manager.
-                    continue;
+                    return;
+                    //break;
                 }
 
                 Entity root = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).Root;
@@ -39,7 +43,7 @@ namespace Pulsar4X.ECSLib
 
                 // Call recursive function to update every orbit in this system.
                 UpdateOrbit(root, rootPositionDB, currentTime);
-            }
+            });
         }
 
         private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime)
@@ -134,17 +138,19 @@ namespace Pulsar4X.ECSLib
         private static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
-            var e = new List<double>();
+            const int numIterations = 100;
+            var e = new double[numIterations];
             const double epsilon = 1E-12; // Plenty of accuracy.
+            int i = 0;
+
             if (orbit.Eccentricity > 0.8)
             {
-                e.Add(Math.PI);
+                e[i] = Math.PI;
             }
             else
             {
-                e.Add(currentMeanAnomaly);
+                e[i] = currentMeanAnomaly;
             }
-            int i = 0;
 
             do
             {
@@ -156,11 +162,11 @@ namespace Pulsar4X.ECSLib
                  * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
                  * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
                 */
-                e.Add(e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]))));
+                e[i + 1] = e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i])));
                 i++;
-            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i < 1000);
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
 
-            if (i > 1000)
+            if (i + 1 >= numIterations)
             {
                 // <? todo: Flag an error about non-convergence of Newton's method.
             }
