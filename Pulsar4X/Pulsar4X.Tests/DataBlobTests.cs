@@ -18,6 +18,7 @@ namespace Pulsar4X.Tests
         [SetUp]
         public void Init()
         {
+            Game game = new Game();
             _manager = new EntityManager();
         }
 

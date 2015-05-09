@@ -116,20 +116,9 @@ namespace Pulsar4X.ECSLib
     public interface IPostLoad
     {
         /// <summary>
-        /// This function should be added to all of an implimenters constructors.
-        /// To implement this function simply add the lines
-        /// <code>
-        /// if(!Game.Instance.IsLoaded)
-        ///     Game.Instance.PostLoad += new EventHandler(PostLoad);
-        /// </code>
-        /// to the method body.
-        /// </summary>
-        void RegisterPostLoad();
-
-        /// <summary>
         /// This function is called after the game has been loaded/Deserialized.
-        /// Make sure you unsubscribe from the post Load event at the end of this function by using the following:
-        /// <code>Game.Instance.PostLoad -= PostLoad;</code>
+        /// Make sure you subscribe to the post Load event in your dataBlob constructor using the following:
+        /// <code>Game.Instance.PostLoad += PostLoad;</code>
         /// </summary>
         void PostLoad(object sender, EventArgs e);
     }

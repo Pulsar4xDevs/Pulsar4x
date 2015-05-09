@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
-    public abstract class TreeHierarchyDB : BaseDataBlob
+    public abstract class TreeHierarchyDB : BaseDataBlob, IPostLoad
     {
         [CanBeNull]
         public Entity Parent
@@ -23,7 +23,7 @@ namespace Pulsar4X.ECSLib
 
                 OnPropertyChanged();
 
-                if (Parent != null && OwningEntity != null)
+                if (ParentDB != null && OwningEntity != null)
                 {
                     ParentDB.AddChild(OwningEntity);
                 }
@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
         {
             get
             {
-                if (Parent == null)
+                if (ParentDB == null)
                 {
                     return OwningEntity;
                 }
@@ -81,6 +81,7 @@ namespace Pulsar4X.ECSLib
             Children = new List<Entity>();
 
             PropertyChanged += OnPropertyChanged;
+            Game.Instance.PostLoad += PostLoad;
         }
 
         private void AddChild(Entity child)
@@ -111,7 +112,7 @@ namespace Pulsar4X.ECSLib
             }
             else if (propertyChangedEventArgs.PropertyName == "OwningEntity")
             {
-                if (Parent != null)
+                if (ParentDB != null)
                 {
                     ParentDB.AddChild(OwningEntity);
                 }
@@ -129,6 +130,16 @@ namespace Pulsar4X.ECSLib
             EntityManager.TryGetTypeIndex(GetType(), out typeIndex);
 
             return entity.GetDataBlob<TreeHierarchyDB>(typeIndex);
+        }
+
+        public void PostLoad(object sender, EventArgs e)
+        {
+            Game.Instance.PostLoad -= PostLoad;
+
+            if (Parent != null && ParentDB != null && OwningEntity != null)
+            {
+                ParentDB.AddChild(OwningEntity);
+            }
         }
     }
 
