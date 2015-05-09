@@ -42,6 +42,8 @@ namespace Pulsar4X.ECSLib
         private static EntityManager _invalidManager;
         private static Entity _invalidEntity;
 
+        private static object lockObj = new object();
+
 
         internal Entity(Guid guid, EntityManager currentManager)
         {
@@ -161,10 +163,12 @@ namespace Pulsar4X.ECSLib
 
         public static Entity GetInvalidEntity()
         {
-
-            if (_invalidEntity == null)
-                _invalidEntity = new Entity(Guid.Empty, _invalidManager);
-            return _invalidEntity;
+            lock (lockObj)
+            {
+                if (_invalidEntity == null)
+                    _invalidEntity = new Entity(Guid.Empty, _invalidManager);
+                return _invalidEntity;
+            }
         }
 
 #if DEBUG
