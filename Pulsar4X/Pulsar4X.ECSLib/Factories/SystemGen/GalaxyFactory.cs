@@ -284,6 +284,9 @@ namespace Pulsar4X.ECSLib
 
             Settings.TerrestrialBodyTectonicActiviyChance = 0.5;
 
+            // Epoch used when generating orbits for sol. There should be no reason to change this.
+            Settings.J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+
             Settings.MiniumPossibleDayLength = 6;
 
             Settings.MinMoonOrbitMultiplier = 2.5;

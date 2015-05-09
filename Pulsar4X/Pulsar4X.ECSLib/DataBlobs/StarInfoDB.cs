@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
     {
         public double Age { get; set; }
         public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
-        public float Luminosity { get; set; }
+        public double Luminosity { get; set; }
         public string Class { get; set; }
 
         /// <summary>

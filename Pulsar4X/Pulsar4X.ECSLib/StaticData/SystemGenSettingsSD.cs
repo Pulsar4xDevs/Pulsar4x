@@ -1,4 +1,6 @@
-﻿namespace Pulsar4X.ECSLib
+﻿using System;
+
+namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// This static data struct holds all the modder tweakable setting used
@@ -250,6 +252,11 @@
         /// Determins the chane of a given planet type being generated in the outer orbital band.
         /// </summary>
         public WeightedList<BodyType> OuterBandTypeWeights;
+
+        /// <summary>
+        /// Epoch used when generating orbits. There should be no reason to change this from default.
+        /// </summary>
+        public DateTime J2000;
 
         /// <summary>
         /// This is a small helper function which will return the weighted list for body type chances for a given orbital band.

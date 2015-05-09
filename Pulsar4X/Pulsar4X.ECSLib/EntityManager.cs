@@ -460,11 +460,11 @@ namespace Pulsar4X.ECSLib
             _guidLock.EnterWriteLock();
             try
             {
-                while (_globalGuidDictionary.ContainsKey(entityGuid))
+                do
                 {
-                    // Good luck testing this.
                     entityGuid = Guid.NewGuid();
-                }
+                } while (_globalGuidDictionary.ContainsKey(entityGuid));
+
                 _globalGuidDictionary.Add(entityGuid, this);
             }
             finally
@@ -573,7 +573,7 @@ namespace Pulsar4X.ECSLib
 
                 if (!manager._localEntityDictionary.TryGetValue(entityGuid, out entity))
                 {
-                    // Can only be reached if memory corruption or somehow the _guidLock thread syncronization fails.
+                    // Can only be reached if memory corruption or somehow the _guidLock thread synchronization fails.
                     // Entity must be removed from the local manager, but not the global list. Should not be possible.
                     throw new GuidNotFoundException();
                 }

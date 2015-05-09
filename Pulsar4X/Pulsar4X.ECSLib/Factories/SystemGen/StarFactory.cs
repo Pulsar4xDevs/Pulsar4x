@@ -6,6 +6,34 @@ namespace Pulsar4X.ECSLib
     public static class StarFactory
     {
         /// <summary>
+        /// Creates a star entity in the system.
+        /// Does not initialize an orbit.
+        /// </summary>
+        public static Entity CreateStar(StarSystem system, double mass, double radius, double age, string starClass, double temperature, float luminosity, SpectralType spectralType, string starName = null)
+        {
+            double tempRange = temperature / GalaxyFactory.Settings.StarTemperatureBySpectralType[spectralType].Max; // temp range from 0 to 1.
+            ushort subDivision = (ushort)Math.Round((1 - tempRange) * 10);
+            LuminosityClass luminosityClass = LuminosityClass.V;
+
+            if (starName == null)
+            {
+                starName = system.NameDB.Name[Entity.GetInvalidEntity()];
+            }
+
+            int starIndex = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
+
+            starName += " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass);
+
+            MassVolumeDB starMassVolumeDB = new MassVolumeDB(mass, MassVolumeDB.GetVolumeFromRadius(radius));
+            StarInfoDB starInfoDB = new StarInfoDB {Age = age, Class = starClass, Luminosity = luminosity, SpectralType = spectralType, Temperature = temperature, LuminosityClass = luminosityClass, SpectralSubDivision = subDivision};
+            PositionDB starPositionDB = new PositionDB();
+            NameDB starNameDB = new NameDB(Entity.GetInvalidEntity(), starName);
+            OrbitDB starOrbitDB = new OrbitDB();
+
+            return Entity.Create(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB});
+        }
+
+        /// <summary>
         /// Generates an entire group of stars for a starSystem.
         /// </summary>
         /// <remarks>

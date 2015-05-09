@@ -7,46 +7,76 @@ namespace Pulsar4X.ECSLib
 {
     public static class OrbitProcessor
     {
+        /// <summary>
+        /// TypeIndexes for several dataBlobs used frequently by this processor.
+        /// </summary>
         private static int _orbitTypeIndex = -1;
         private static int _positionTypeIndex = -1;
         private static int _starInfoTypeIndex = -1;
+
+        /// <summary>
+        /// Number of orbits updated last time the processor was run.
+        /// </summary>
         public static int OrbitsUpdatedLastProcess = -1;
 
+        /// <summary>
+        /// Determines if this processor should use multithreading.
+        /// </summary>
+        private static bool UseMultiThread = true;
+
+        /// <summary>
+        /// Initializes this Processor.
+        /// </summary>
         public static void Initialize()
         {
+            // Resolve TypeIndexes.
             _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
             _positionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
             _starInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
         }
 
+        /// <summary>
+        /// Function called by Game.AdvanceTime to run this processor.
+        /// </summary>
+        /// <param name="systems"></param>
+        /// <param name="deltaSeconds"></param>
         public static void Process(List<StarSystem> systems, int deltaSeconds)
         {
             OrbitsUpdatedLastProcess = 0;
 
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
-            Parallel.ForEach(systems, system =>
-            //foreach (StarSystem system in systems)
+            if (UseMultiThread)
             {
-
-                EntityManager currentManager = system.SystemManager;
-
-                // Find the first orbital entity.
-                Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
-
-                if (!firstOrbital.IsValid)
+                Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime));
+            }
+            else
+            {
+                foreach (StarSystem system in systems)
                 {
-                    // No orbitals in this manager.
-                    return;
-                    //break;
+                    UpdateSystemOrbits(system, currentTime);
                 }
+            }
+        }
 
-                Entity root = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).Root;
-                PositionDB rootPositionDB = root.GetDataBlob<PositionDB>(_positionTypeIndex);
+        private static void UpdateSystemOrbits(StarSystem system, DateTime currentTime)
+        {
+            EntityManager currentManager = system.SystemManager;
 
-                // Call recursive function to update every orbit in this system.
-                UpdateOrbit(root, rootPositionDB, currentTime);
-            });
+            // Find the first orbital entity.
+            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
+
+            if (!firstOrbital.IsValid)
+            {
+                // No orbitals in this manager.
+                return;
+            }
+
+            Entity root = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).Root;
+            PositionDB rootPositionDB = root.GetDataBlob<PositionDB>(_positionTypeIndex);
+
+            // Call recursive function to update every orbit in this system.
+            UpdateOrbit(root, rootPositionDB, currentTime);
         }
 
         private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime)
