@@ -17,14 +17,14 @@ namespace Pulsar4X.ECSLib
         public double Eccentricity;
 
         /// <summary>
-        /// Angle between the orbit and the flat referance plane.
+        /// Angle between the orbit and the flat reference plane.
         /// Stored in degrees.
         /// </summary>
         public double Inclination;
 
         /// <summary>
         /// Horizontal orientation of the point where the orbit crosses
-        /// the referance frame stored in degrees.
+        /// the reference frame stored in degrees.
         /// </summary>
         public double LongitudeOfAscendingNode;
 
@@ -34,14 +34,14 @@ namespace Pulsar4X.ECSLib
         public double ArgumentOfPeriapsis;
 
         /// <summary>
-        /// Definition of the position of the body in the orbit at the referance time
-        /// epoch. Mathematically convienant angle does not correspond to a real angle.
+        /// Definition of the position of the body in the orbit at the reference time
+        /// epoch. Mathematically convenient angle does not correspond to a real angle.
         /// Stored in degrees.
         /// </summary>
         public double MeanAnomaly;
 
         /// <summary>
-        /// Referance time. Orbital parameters are stored relative to this referance.
+        /// reference time. Orbital parameters are stored relative to this reference.
         /// </summary>
         public DateTime Epoch;
 
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="longitudeOfAscendingNode">Longitude of ascending node in degrees.</param>
         /// <param name="longitudeOfPeriapsis">Longitude of periapsis in degrees.</param>
         /// <param name="meanLongitude">Longitude of object at epoch in degrees.</param>
-        /// <param name="epoch">Referance time for these orbital elements.</param>
+        /// <param name="epoch">reference time for these orbital elements.</param>
         public static OrbitDB FromMajorPlanetFormat(Entity parent, MassVolumeDB parentMVDB, MassVolumeDB myMVDB, double semiMajorAxis, double eccentricity, double inclination,
                                                     double longitudeOfAscendingNode, double longitudeOfPeriapsis, double meanLongitude, DateTime epoch)
         {
@@ -106,7 +106,7 @@ namespace Pulsar4X.ECSLib
         /// <param name="longitudeOfAscendingNode">Longitude of ascending node in degrees.</param>
         /// <param name="argumentOfPeriapsis">Argument of periapsis in degrees.</param>
         /// <param name="meanAnomaly">Mean Anomaly in degrees.</param>
-        /// <param name="epoch">Referance time for these orbital elements.</param>
+        /// <param name="epoch">reference time for these orbital elements.</param>
         public static OrbitDB FromAsteroidFormat(Entity parent, MassVolumeDB parentMVDB, MassVolumeDB myMVDB, double semiMajorAxis, double eccentricity, double inclination,
                                                 double longitudeOfAscendingNode, double argumentOfPeriapsis, double meanAnomaly, DateTime epoch)
         {

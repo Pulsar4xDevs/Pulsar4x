@@ -10,6 +10,7 @@ namespace Pulsar4X.ECSLib
         private static int _orbitTypeIndex = -1;
         private static int _positionTypeIndex = -1;
         private static int _starInfoTypeIndex = -1;
+        public static int OrbitsUpdatedLastProcess = -1;
 
         public static void Initialize()
         {
@@ -20,6 +21,8 @@ namespace Pulsar4X.ECSLib
 
         public static void Process(List<StarSystem> systems, int deltaSeconds)
         {
+            OrbitsUpdatedLastProcess = 0;
+
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
             Parallel.ForEach(systems, system =>
@@ -48,6 +51,7 @@ namespace Pulsar4X.ECSLib
 
         private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime)
         {
+            OrbitsUpdatedLastProcess++;
             OrbitDB entityOrbitDB = entity.GetDataBlob<OrbitDB>(_orbitTypeIndex);
             PositionDB entityPosition = entity.GetDataBlob<PositionDB>(_positionTypeIndex);
 

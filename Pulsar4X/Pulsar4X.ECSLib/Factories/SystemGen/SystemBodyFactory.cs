@@ -640,9 +640,9 @@ namespace Pulsar4X.ECSLib
             }
 
             // Generate Magnetic field:
-            bodyInfo.MagneticFeild = (float)GMath.SelectFromRange(GalaxyFactory.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
+            bodyInfo.MagneticField = (float)GMath.SelectFromRange(GalaxyFactory.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
-                bodyInfo.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
+                bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;

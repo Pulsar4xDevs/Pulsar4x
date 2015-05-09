@@ -41,11 +41,11 @@ namespace Pulsar4X.Tests
 
             JDictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
-            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOrigionalAmount = 5000 };
+            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOriginalAmount = 5000 };
             
             minerals.Add(_duraniumSD.ID, duraniumDeposit);
 
-            MineralDepositInfo corundiumDeposit = new MineralDepositInfo { Amount = 1000, Accessibility = 0.5, HalfOrigionalAmount = 500 };
+            MineralDepositInfo corundiumDeposit = new MineralDepositInfo { Amount = 1000, Accessibility = 0.5, HalfOriginalAmount = 500 };
             
             minerals.Add(_corundiumSD.ID, corundiumDeposit);
 

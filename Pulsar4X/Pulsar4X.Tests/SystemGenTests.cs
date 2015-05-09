@@ -94,8 +94,8 @@ namespace Pulsar4X.Tests
             double totalMemory = (endMemory - startMemory) / 1024.0;  // in KB
 
             // note that because we do 1000 systems total time taken as miliseconds is the time for a single sysmte, on average.
-            string output = String.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB. Total Entities: {4}, per system: {5}", 
-                totalTime.ToString("N4"), ((totalTime/numSystems) * 1000).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / numSystems).ToString("N2"), totalEntitys, totalEntitys / (float)numSystems);
+            string output = String.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB. Total Entities: {4}, per system: {5}. Memory per entity: {6}KB", 
+                totalTime.ToString("N4"), ((totalTime/numSystems) * 1000).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / numSystems).ToString("N2"), totalEntitys, totalEntitys / (float)numSystems, (totalMemory / totalEntitys).ToString("N2"));
 
             // print results:
             Console.WriteLine(output);

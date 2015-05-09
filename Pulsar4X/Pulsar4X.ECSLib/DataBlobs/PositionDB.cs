@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         public Vector4 Position;
 
         /// <summary>
-        /// System X coordinante in AU
+        /// System X coordinate in AU
         /// </summary>
         [JsonIgnore]
         public double X
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// System Y coordinante in AU
+        /// System Y coordinate in AU
         /// </summary>
         [JsonIgnore]
         public double Y
@@ -85,7 +85,7 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         /// <summary>
-        /// Initilized constructor.
+        /// Initialized constructor.
         /// </summary>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>

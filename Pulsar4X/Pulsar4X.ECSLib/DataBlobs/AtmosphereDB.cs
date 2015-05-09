@@ -6,7 +6,7 @@ namespace Pulsar4X.ECSLib
     public class AtmosphereDB : BaseDataBlob
     {
         /// <summary>
-        /// Atmospheric Presure
+        /// Atmospheric Pressure
         /// In Earth Atmospheres (atm).
         /// </summary>
         public float Pressure;
@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
         public float Albedo;
 
         /// <summary>
-        /// Temperature of the planet AFTER greenhouse effects are taken into considuration. 
+        /// Temperature of the planet AFTER greenhouse effects are taken into consideration. 
         /// This is a factor of the base temp and Green House effects.
         /// In Degrees C.
         /// </summary>

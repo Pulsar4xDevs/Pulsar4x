@@ -5,7 +5,7 @@
         /// <summary>
         /// Ruins size descriptors
         /// </summary>
-        public enum RSize
+        public enum RSize : byte
         {
             NoRuins,
             Outpost,
@@ -18,7 +18,7 @@
         /// <summary>
         /// Ruins Quality descriptors
         /// </summary>
-        public enum RQuality
+        public enum RQuality : byte
         {
             Destroyed,
             Ruined,

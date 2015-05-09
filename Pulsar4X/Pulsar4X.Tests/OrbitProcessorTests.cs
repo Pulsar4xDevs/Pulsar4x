@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,27 +15,13 @@ namespace Pulsar4X.Tests
     class OrbitProcessorTests
     {
         private List<StarSystem> _systems;
-        private const int _numSystems = 1000;
+        private const int NumSystems = 1000;
         
         [SetUp]
         public void Init()
         {
-            var game = new Game(); // init the game class as we will need it for these tests.
+            Game game = new Game(); // init the game class as we will need it for these tests.
             GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
-            _systems = new List<StarSystem>(_numSystems);
-            var seeds = new int[_numSystems];
-
-            for (int i = 0; i  < _numSystems; i ++)
-            {
-                // Pregenerate seeds so we get the same systems
-                // in the same order each time.
-                seeds[i] = GalaxyFactory.SeedRNG.Next();
-            }
-
-            Parallel.For(0, _numSystems, i =>
-            {
-                _systems.Add(StarSystemFactory.CreateSystem("Performance Test No " + i.ToString(), seeds[i]));
-            });
 
             OrbitProcessor.Initialize();
         }
@@ -43,14 +30,30 @@ namespace Pulsar4X.Tests
         [Test]
         public void OrbitStressTest()
         {
-            // use a stop watch to get more accurate time.
-            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+            // Setup systems to stress test.
+            _systems = new List<StarSystem>(NumSystems);
+            var seeds = new int[NumSystems];
 
-            // lets get our memory before starting:
+            for (int i = 0; i < NumSystems; i++)
+            {
+                // Pre-generate seeds so we get the same systems
+                // in the same order each time.
+                seeds[i] = GalaxyFactory.SeedRNG.Next();
+            }
+
+            Parallel.For(0, NumSystems, i =>
+            {
+                _systems.Add(StarSystemFactory.CreateSystem("Performance Test No " + i.ToString(), seeds[i]));
+            });
+
+            // use a stop watch to get more accurate time.
+            Stopwatch timer = new Stopwatch();
+
+            // Declare variables before usage to keep memory usage constant.
             long startMemory;
             long endMemory;
-            double totalTime;
 
+            // lets get our memory before starting:
             GC.Collect();
             MemoryCheckPoint memoryCheckPoint = dotMemory.Check();
             startMemory = GC.GetTotalMemory(true);
@@ -61,13 +64,12 @@ namespace Pulsar4X.Tests
 
             timer.Stop();
 
-            totalTime = timer.Elapsed.TotalSeconds;
-
             // Check memory afterwords.
             // Note: dotMemory.Check doesn't work unless run with dotMemory unit.
             GC.Collect();
             endMemory = GC.GetTotalMemory(true);
 
+            // Check for leaked objects using dotMemory.
             dotMemory.Check(memory =>
             {
                 Assert.That(memory.GetDifference(memoryCheckPoint)
@@ -80,13 +82,13 @@ namespace Pulsar4X.Tests
                     .ObjectsCount));
             }); 
             
+            // Check total memory usage.
             long totalMemory = endMemory - startMemory;
+            Assert.LessOrEqual(0, totalMemory); // Might be negative if GC cleans something up before.
 
-            Assert.LessOrEqual(0, totalMemory);
-
-            // note that because we do 1000 systems total time taken as miliseconds is the time for a single sysmte, on average.
-            string output = string.Format("Total run time: {0}s, per system: {1}ms.",
-                totalTime.ToString("N4"), ((totalTime / _numSystems ) * 1000).ToString("N4"));
+            // note that because we do 1000 systems total time taken as milliseconds is the time for a single system, on average.
+            string output = string.Format("Total run time: {0}s, per system: {1}ms. Totals orbits processed: {2}. Time required per orbit: {3}ns.",
+                timer.Elapsed.TotalSeconds.ToString("N4"), (timer.Elapsed.TotalMilliseconds / NumSystems).ToString("N4"), OrbitProcessor.OrbitsUpdatedLastProcess, ((timer.ElapsedMilliseconds * 1000000.0) / OrbitProcessor.OrbitsUpdatedLastProcess).ToString("N2"));
 
             // print results:
             Console.WriteLine(output);
