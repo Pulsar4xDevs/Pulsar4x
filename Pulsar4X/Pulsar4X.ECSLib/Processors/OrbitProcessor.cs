@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// Determines if this processor should use multithreading.
         /// </summary>
-        private static bool UseMultiThread = true;
+        private const bool UseMultiThread = true;
 
         /// <summary>
         /// Initializes this Processor.

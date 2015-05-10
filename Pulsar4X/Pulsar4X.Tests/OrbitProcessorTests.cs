@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.dotMemoryUnit;
 using JetBrains.dotMemoryUnit.Kernel;
@@ -32,18 +33,10 @@ namespace Pulsar4X.Tests
         {
             // Setup systems to stress test.
             _systems = new List<StarSystem>(NumSystems);
-            var seeds = new int[NumSystems];
-
-            for (int i = 0; i < NumSystems; i++)
-            {
-                // Pre-generate seeds so we get the same systems
-                // in the same order each time.
-                seeds[i] = GalaxyFactory.SeedRNG.Next();
-            }
 
             Parallel.For(0, NumSystems, i =>
             {
-                _systems.Add(StarSystemFactory.CreateSystem("Performance Test No " + i.ToString(), seeds[i]));
+                _systems.Add(StarSystemFactory.CreateSystem("Performance Test No " + i.ToString(), i));
             });
 
             // use a stop watch to get more accurate time.

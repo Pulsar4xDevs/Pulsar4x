@@ -56,22 +56,13 @@ namespace Pulsar4X.Tests
 
             const int numSystems = 1000;
 
-            var seeds = new int[numSystems];
-
-            for (int i = 0; i < numSystems; i++)
-            {
-                // Pregenerate seeds so we get the same systems
-                // in the same order each time.
-                seeds[i] = GalaxyFactory.SeedRNG.Next();
-            }
-
             // lets get our memory before starting:
             long startMemory = GC.GetTotalMemory(true); 
             timer.Start();
 
             for (int i = 0; i < numSystems; i++)
             {
-                StarSystemFactory.CreateSystem("Performance Test No " + i, seeds[i]);
+                StarSystemFactory.CreateSystem("Performance Test No " + i, i);
             }
 
             timer.Stop();
