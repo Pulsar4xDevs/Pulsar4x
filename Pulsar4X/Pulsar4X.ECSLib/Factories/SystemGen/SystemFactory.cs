@@ -167,11 +167,11 @@ namespace Pulsar4X.ECSLib
 
             // Clean up cached RNG:
             m_RNG = null;
-
             GameState.Instance.StarSystems.Add(Sol);
             GameState.Instance.StarSystemCurrentIndex++;
-            return Sol;
-             */
+            */
+
+            return sol;
         }
 
 

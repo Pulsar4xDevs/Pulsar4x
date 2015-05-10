@@ -22,7 +22,7 @@ namespace Pulsar4X.ECSLib
 
             int starIndex = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
 
-            starName += " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass);
+            starName += " " + (char)('A' + starIndex) + " " + spectralType + subDivision + luminosityClass;
 
             MassVolumeDB starMassVolumeDB = new MassVolumeDB(mass, MassVolumeDB.GetVolumeFromRadius(radius));
             StarInfoDB starInfoDB = new StarInfoDB {Age = age, Class = starClass, Luminosity = luminosity, SpectralType = spectralType, Temperature = temperature, LuminosityClass = luminosityClass, SpectralSubDivision = subDivision};
