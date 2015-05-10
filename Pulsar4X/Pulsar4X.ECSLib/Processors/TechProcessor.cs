@@ -44,7 +44,7 @@
         /// <param name="research"></param>
         public static void ApplyTech(FactionAbilitiesDB factionAbilities, TechDB factionTechs, TechSD research)
         {
-            factionTechs.ResearchedTechs.Add(research.Id); //add the tech to researched list
+            factionTechs.ResearchedTechs.Add(research.ID); //add the tech to researched list
             factionTechs.ResearchableTechs.Remove(research); //remove the tech from researchable dict
             MakeResearchable(factionTechs);//check for new researchable techs
 

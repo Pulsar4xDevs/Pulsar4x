@@ -13,6 +13,7 @@ namespace ModdingTools.JsonDataEditor
     static class Data
     {
         private static bool _loading;
+        public static DataHolderAndEvents<TechSD> TechData = new DataHolderAndEvents<TechSD>("Techs");
 
         //stolen from StaticDataManager
         private static JsonSerializer serializer = new JsonSerializer
@@ -25,96 +26,12 @@ namespace ModdingTools.JsonDataEditor
 
         public static MainWindow MainWindow; // T_T
 
-        #region Technologies
-
-        public static event Action TechListChanged;
-        public static event Action TechLoadedFilesListChanged;
-
-        private static JDictionary<Guid, TechSD> _allTechs = new JDictionary<Guid, TechSD>();
-        private static Dictionary<Guid, TechDataHolder> _allTechDataHolders = new Dictionary<Guid, TechDataHolder>();
-
-        //New tech instances would be written in this file
-        private static string _selectedTechFile = ""; 
-        private static List<string> _loadedTechFiles = new List<string>();
-
-        public static TechDataHolder GetTechDataHolder(Guid guid)
-        {
-            TechDataHolder dataHolder;
-            if(_allTechDataHolders.TryGetValue(guid, out dataHolder))
-                return dataHolder;
-            throw new Exception("Guid not found");
-        }
-
-        public static IEnumerable<TechDataHolder> GetTechDataHolders()
-        {
-            return _allTechDataHolders.Values.AsEnumerable();
-        }
-
-        public static TechSD GetTech(Guid guid)
-        {
-            TechSD techSD;
-            if(_allTechs.TryGetValue(guid, out techSD))
-                return techSD;
-            throw new Exception("Guid not found");
-        }
-
-        public static void UpdateTech(TechSD tech)
-        {
-            if (!_allTechDataHolders.ContainsKey(tech.Id))
-            {
-                if (string.IsNullOrWhiteSpace(_selectedTechFile))
-                    return;
-
-                CreateTech(tech);
-            }
-            else
-            {
-                _allTechs[tech.Id] = tech;
-                _allTechDataHolders[tech.Id].Name = tech.Name;
-            }
-
-            if(!_loading && TechListChanged != null)
-                TechListChanged.Invoke();
-        }
-
-        private static void CreateTech(TechSD tech)
-        {
-            _allTechs[tech.Id] = tech;
-            _allTechDataHolders[tech.Id] = new TechDataHolder(tech.Name, _selectedTechFile, tech.Id);
-        }
-
-        public static void RemoveTech(Guid guid)
-        {
-            _allTechs.Remove(guid);
-            _allTechDataHolders.Remove(guid);
-
-            if (!_loading && TechListChanged != null)
-                TechListChanged.Invoke();
-        }
-
-        public static List<string> GetLoadedFiles()
-        {
-            return _loadedTechFiles.ToList();
-        }
-
-        public static void SetSelectedTechFile(string path)
-        {
-            if(!_loadedTechFiles.Contains(path))
-                return;
-            _selectedTechFile = path;
-
-            if (TechLoadedFilesListChanged != null)
-                TechLoadedFilesListChanged.Invoke();
-        }
-        #endregion
-
         #region Save/Load stuff
 
+        //clear all data holders and events objects
         public static void Clear()
         {
-            _allTechs = new JDictionary<Guid, TechSD>();
-            _allTechDataHolders = new Dictionary<Guid, TechDataHolder>();
-            
+            TechData.Clear();
         }
 
         public static void LoadFile(string filePath)
@@ -140,62 +57,172 @@ namespace ModdingTools.JsonDataEditor
             _loading = false;
             
             //Send message to all subscribers
-            if(TechListChanged != null)
-                TechListChanged.Invoke();
-
-            _loadedTechFiles.Add(filePath);
-            if (String.IsNullOrWhiteSpace(_selectedTechFile))
-                _selectedTechFile = filePath;
-
-            if (TechLoadedFilesListChanged != null)
-                TechLoadedFilesListChanged.Invoke();
-            
+            TechData.OnListChangeEvent(filePath);
         }
 
         private static void LoadData(JDictionary<Guid, TechSD> dict, string filePath)
         {
-            foreach (TechSD techSD in dict.Values)
-            {
-                _allTechs[techSD.Id] = techSD;
-                _allTechDataHolders[techSD.Id] = new TechDataHolder(techSD.Name, filePath, techSD.Id);
-            }
+            TechData.Load(dict, filePath);
         }
 
         public static bool SaveData()
         {
-            //Save tech data
-            Dictionary<string, JDictionary<Guid, TechSD>> sortedData = new Dictionary<string, JDictionary<Guid, TechSD>>();
-            foreach(TechDataHolder techDataHolder in _allTechDataHolders.Values)
-            {
-                if (!sortedData.ContainsKey(techDataHolder.File))
-                    sortedData[techDataHolder.File] = new JDictionary<Guid, TechSD>();
-                sortedData[techDataHolder.File][techDataHolder.Guid] = _allTechs[techDataHolder.Guid];
-            }
-
-            foreach (string path in sortedData.Keys)
-            {
-                DataExportContainer exportContainer = new DataExportContainer { Type = "Techs", Data = sortedData[path] };
-
-                using (StreamWriter streamWriter = new StreamWriter(path))
-                using (JsonWriter writer = new JsonTextWriter(streamWriter))
-                {
-                    serializer.Serialize(writer, exportContainer);
-                }
-            }
-
-            return true;
+            return TechData.Save();
         }
 
         #endregion
+
+        public class DataHolderAndEvents<T>
+        {
+            public event Action ListChanged;
+            public event Action LoadedFilesListChanged;
+
+            private string _typeString;
+
+            private JDictionary<Guid, T> _allSDs = new JDictionary<Guid, T>();
+            private Dictionary<Guid, DataHolder> _allDataHolders = new Dictionary<Guid, DataHolder>();
+
+            //New tech instances would be written in this file
+            private string _selectedFile = "";
+            private List<string> _loadedFiles = new List<string>();
+
+            public DataHolderAndEvents(string type)
+            {
+                _typeString = type;
+            } 
+
+            public DataHolder GetDataHolder(Guid guid)
+            {
+                DataHolder dataHolder;
+                if (_allDataHolders.TryGetValue(guid, out dataHolder))
+                    return dataHolder;
+                throw new Exception("Guid not found");
+            }
+
+            public IEnumerable<DataHolder> GetDataHolders()
+            {
+                return _allDataHolders.Values.AsEnumerable();
+            }
+
+            public void Load(JDictionary<Guid, T> dict, string filePath)
+            {
+                foreach (dynamic sd in dict.Values)
+                {
+                    _allSDs[sd.ID] = sd;
+                    _allDataHolders[sd.ID] = new DataHolder(sd.Name, filePath, sd.ID);
+                }
+            }
+
+            public bool Save()
+            {
+                //Save tech data
+                Dictionary<string, JDictionary<Guid, T>> sortedData = new Dictionary<string, JDictionary<Guid, T>>();
+                foreach (DataHolder dataHolder in _allDataHolders.Values)
+                {
+                    if (!sortedData.ContainsKey(dataHolder.File))
+                        sortedData[dataHolder.File] = new JDictionary<Guid, T>();
+                    sortedData[dataHolder.File][dataHolder.Guid] = _allSDs[dataHolder.Guid];
+                }
+
+                foreach (string path in sortedData.Keys)
+                {
+                    DataExportContainer exportContainer = new DataExportContainer { Type = _typeString, Data = sortedData[path] };
+
+                    using (StreamWriter streamWriter = new StreamWriter(path))
+                    using (JsonWriter writer = new JsonTextWriter(streamWriter))
+                    {
+                        serializer.Serialize(writer, exportContainer);
+                    }
+                }
+
+                return true;
+            }
+
+            public T Get(Guid guid)
+            {
+                T sd;
+                if (_allSDs.TryGetValue(guid, out sd))
+                    return sd;
+                throw new Exception("Guid not found");
+            }
+
+            public void Update(dynamic sd)
+            {
+                if (!_allDataHolders.ContainsKey(sd.ID))
+                {
+                    if (string.IsNullOrWhiteSpace(_selectedFile))
+                        return;
+
+                    Create(sd);
+                }
+                else
+                {
+                    _allSDs[sd.ID] = sd;
+                    _allDataHolders[sd.ID].Name = sd.Name;
+                }
+                
+                if (!_loading && ListChanged != null)
+                    ListChanged.Invoke();
+            }
+
+            private void Create(dynamic sd)
+            {
+                _allSDs[sd.ID] = sd;
+                _allDataHolders[sd.ID] = new DataHolder(sd.Name, _selectedFile, sd.ID);
+            }
+
+            public void Remove(Guid guid)
+            {
+                _allSDs.Remove(guid);
+                _allDataHolders.Remove(guid);
+
+                if (!_loading && ListChanged != null)
+                    ListChanged.Invoke();
+            }
+
+            public List<string> GetLoadedFiles()
+            {
+                return _loadedFiles.ToList();
+            }
+
+            public void SetSelectedFile(string path)
+            {
+                if (!_loadedFiles.Contains(path))
+                    return;
+                _selectedFile = path;
+
+                if (LoadedFilesListChanged != null)
+                    LoadedFilesListChanged.Invoke();
+            }
+
+            public void Clear()
+            {
+                _allSDs = new JDictionary<Guid, T>();
+                _allDataHolders = new Dictionary<Guid, DataHolder>();
+            }
+
+            public void OnListChangeEvent(string filePath)
+            {
+                if (ListChanged != null)
+                    ListChanged.Invoke();
+
+                _loadedFiles.Add(filePath);
+                if (String.IsNullOrWhiteSpace(_selectedFile))
+                    _selectedFile = filePath;
+
+                if (LoadedFilesListChanged != null)
+                    LoadedFilesListChanged.Invoke();
+            }
+        }
     }
     
-    public class TechDataHolder
+    public class DataHolder
     {
         public string Name { get; set; }
         public string File { get; private set; }
         public Guid Guid { get; private set; }
 
-        public TechDataHolder(string name, string file, Guid guid)
+        public DataHolder(string name, string file, Guid guid)
         {
             Name = name;
             File = file;

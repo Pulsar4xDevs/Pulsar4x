@@ -82,19 +82,19 @@ namespace Pulsar4X.Tests
             tech1.Description = "Unlocks almost all other technology.";
             tech1.Cost = 1000;
             tech1.Category = ResearchCategories.ConstructionProduction;
-            tech1.Id = Guid.NewGuid();
+            tech1.ID = Guid.NewGuid();
 
             TechSD tech2 = new TechSD();
             tech2.Name = "Construction Rate";
             tech2.Requirements = new List<Guid>();
-            tech2.Requirements.Add(tech1.Id);
+            tech2.Requirements.Add(tech1.ID);
             tech2.Description = "Boosts Construction Rate by 12 BP";
             tech2.Cost = 3000;
             tech2.Category = ResearchCategories.ConstructionProduction;
-            tech2.Id = Guid.NewGuid();
+            tech2.ID = Guid.NewGuid();
 
-            techs.Add(tech1.Id, tech1);
-            techs.Add(tech2.Id, tech2);
+            techs.Add(tech1.ID, tech1);
+            techs.Add(tech2.ID, tech2);
 
             StaticDataManager.ExportStaticData(techs, "./TechnologyDataExportTest.json");
 
@@ -107,7 +107,7 @@ namespace Pulsar4X.Tests
             install.BaseAbilityAmounts = new JDictionary<AbilityType, int>();
             install.BaseAbilityAmounts.Add(AbilityType.Mine, 1);
             install.TechRequirements = new List<Guid>();
-            install.TechRequirements.Add(tech1.Id); //use trans-newtonian techology you just added to the tech list
+            install.TechRequirements.Add(tech1.ID); //use trans-newtonian techology you just added to the tech list
             install.ResourceCosts = new JDictionary<Guid, int>();
             install.ResourceCosts.Add(min.ID,60); //use Sorium that you just added to the mineral list
             install.WealthCost = 120;
@@ -190,7 +190,7 @@ namespace Pulsar4X.Tests
             testID = StaticDataManager.StaticDataStore.Techs.First().Key;
             testObj = StaticDataManager.StaticDataStore.FindDataObjectUsingID(testID);
             Assert.IsNotNull(testObj);
-            Assert.AreEqual(testID, ((TechSD)testObj).Id);
+            Assert.AreEqual(testID, ((TechSD)testObj).ID);
         }
 
         //for want of a better place to put it.

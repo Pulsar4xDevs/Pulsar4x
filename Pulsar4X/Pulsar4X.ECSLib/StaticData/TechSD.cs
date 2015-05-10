@@ -25,13 +25,13 @@ namespace Pulsar4X.ECSLib
         FromStaticData09,
     }
 
-    [StaticDataAttribute(true, IDPropertyName = "Id")]
+    [StaticDataAttribute(true, IDPropertyName = "ID")]
     public struct TechSD
     {
         public string Name;
         public string Description;
         public ResearchCategories Category;
-        public Guid Id;
+        public Guid ID;
         public List<Guid> Requirements;
         public int Cost;
     }

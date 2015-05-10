@@ -26,8 +26,8 @@ namespace ModdingTools.JsonDataEditor
             foreach(ResearchCategories cat in Enum.GetValues(typeof(ResearchCategories)))
                 categoryComboBox.Items.Add(cat);
 
-            Data.TechListChanged += UpdateSearch;
-            Data.TechLoadedFilesListChanged += UpdateFileList;
+            Data.TechData.ListChanged += UpdateSearch;
+            Data.TechData.LoadedFilesListChanged += UpdateFileList;
 
             UpdateSearch();
             UpdateSelectedItem();
@@ -36,7 +36,7 @@ namespace ModdingTools.JsonDataEditor
         private void UpdateFileList()
         {
             selectedFileComboBox.Items.Clear();
-            foreach(string str in Data.GetLoadedFiles())
+            foreach(string str in Data.TechData.GetLoadedFiles())
             {
                 selectedFileComboBox.Items.Add(str);
             }
@@ -49,7 +49,7 @@ namespace ModdingTools.JsonDataEditor
             availibleTechs.BeginUpdate();
             availibleTechs.Items.Clear();
 
-            foreach (TechDataHolder tech in Data.GetTechDataHolders())
+            foreach (DataHolder tech in Data.TechData.GetDataHolders())
             {
                 if(string.IsNullOrWhiteSpace(searchPattern) || tech.Name.ToLower().Contains(searchPattern.ToLower()))
                     availibleTechs.Items.Add(tech);
@@ -66,7 +66,7 @@ namespace ModdingTools.JsonDataEditor
             if(_updating)
                 return;
 
-            TechSD newTechSD = Data.GetTech(_selectedItemGuid);
+            TechSD newTechSD = Data.TechData.Get(_selectedItemGuid);
 
             string newName = nameTextBox.Text;
             if(!string.IsNullOrWhiteSpace(newName))
@@ -92,10 +92,10 @@ namespace ModdingTools.JsonDataEditor
             else
                 costTextBox.BackColor = Color.Red;
 
-            List<TechDataHolder> requirements = requirementsListBox.Items.Cast<TechDataHolder>().ToList();
+            List<DataHolder> requirements = requirementsListBox.Items.Cast<DataHolder>().ToList();
             newTechSD.Requirements = requirements.ConvertAll(entry => entry.Guid);
 
-            Data.UpdateTech(newTechSD);
+            Data.TechData.Update(newTechSD);
         }
 
         private void UpdateSelectedItem()
@@ -104,11 +104,11 @@ namespace ModdingTools.JsonDataEditor
 
             TechSD techSD;
             if(_selectedItemGuid == Guid.Empty)
-                techSD = new TechSD {Name = "Name", Description = "Description", Category = ResearchCategories.BiologyGenetics, Id = Guid.Empty, Cost = 1000, Requirements = new List<Guid>()};
+                techSD = new TechSD {Name = "Name", Description = "Description", Category = ResearchCategories.BiologyGenetics, ID = Guid.Empty, Cost = 1000, Requirements = new List<Guid>()};
             else
-                techSD = Data.GetTech(_selectedItemGuid);
+                techSD = Data.TechData.Get(_selectedItemGuid);
 
-            guidDataLabel.Text = techSD.Id.ToString();
+            guidDataLabel.Text = techSD.ID.ToString();
             nameTextBox.Text = techSD.Name;
             descTextBox.Text = techSD.Description;
             categoryComboBox.SelectedItem = techSD.Category;
@@ -118,7 +118,7 @@ namespace ModdingTools.JsonDataEditor
             requirementsListBox.Items.Clear();
             foreach(Guid requirementGuid in techSD.Requirements)
             {
-                requirementsListBox.Items.Add(Data.GetTechDataHolder(requirementGuid));
+                requirementsListBox.Items.Add(Data.TechData.GetDataHolder(requirementGuid));
             }
             requirementsListBox.EndUpdate();
 
@@ -159,7 +159,7 @@ namespace ModdingTools.JsonDataEditor
         {
             if(availibleTechs.SelectedItem == null)
                 return;
-            if(requirementsListBox.Items.Cast<TechDataHolder>().Any(dataHolder => dataHolder.Guid == ((TechDataHolder)availibleTechs.SelectedItem).Guid))
+            if(requirementsListBox.Items.Cast<DataHolder>().Any(dataHolder => dataHolder.Guid == ((DataHolder)availibleTechs.SelectedItem).Guid))
                 return;
             requirementsListBox.Items.Add(availibleTechs.SelectedItem);
         }
@@ -173,15 +173,15 @@ namespace ModdingTools.JsonDataEditor
 
         private void newTechButton_Click(object sender, EventArgs e)
         {
-            TechSD newTechSD = new TechSD() {Name = "New Tech", Description = "Description Here", Id = Guid.NewGuid(), Cost = 1000, Requirements = new List<Guid>()};
-            Data.UpdateTech(newTechSD);
+            TechSD newTechSD = new TechSD() {Name = "New Tech", Description = "Description Here", ID = Guid.NewGuid(), Cost = 1000, Requirements = new List<Guid>()};
+            Data.TechData.Update(newTechSD);
         }
 
         private void selectTechButton_Click(object sender, EventArgs e)
         {
             if(availibleTechs.SelectedItem == null)
                 return;
-            _selectedItemGuid = ((TechDataHolder)availibleTechs.SelectedItem).Guid;
+            _selectedItemGuid = ((DataHolder)availibleTechs.SelectedItem).Guid;
             UpdateSelectedItem();
         }
 
@@ -189,10 +189,10 @@ namespace ModdingTools.JsonDataEditor
         {
             if(availibleTechs.SelectedItem == null)
                 return;
-            TechDataHolder holder = (TechDataHolder)availibleTechs.SelectedItem;
+            DataHolder holder = (DataHolder)availibleTechs.SelectedItem;
             if(_selectedItemGuid == holder.Guid)
                 _selectedItemGuid = Guid.Empty;
-            Data.RemoveTech(holder.Guid);
+            Data.TechData.Remove(holder.Guid);
 
             UpdateSelectedItem();
         }
@@ -200,7 +200,7 @@ namespace ModdingTools.JsonDataEditor
         private void selectedFileComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             string filePath = (string)selectedFileComboBox.SelectedItem;
-            Data.SetSelectedTechFile(filePath);
+            Data.TechData.SetSelectedFile(filePath);
         }
 
         private void mainMenuButton_Click(object sender, EventArgs e)
