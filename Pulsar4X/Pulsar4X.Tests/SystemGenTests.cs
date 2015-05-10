@@ -68,18 +68,12 @@ namespace Pulsar4X.Tests
             // lets get our memory before starting:
             long startMemory = GC.GetTotalMemory(true); 
             timer.Start();
-            //
-            Parallel.For(0, numSystems, i =>
-            {
-                StarSystemFactory.CreateSystem("Performance Test No " + i, seeds[i]);
-            });
-            //
-            /*
+
             for (int i = 0; i < numSystems; i++)
             {
                 StarSystemFactory.CreateSystem("Performance Test No " + i, seeds[i]);
             }
-            */
+
             timer.Stop();
             double totalTime = timer.Elapsed.TotalSeconds;
 
@@ -95,7 +89,12 @@ namespace Pulsar4X.Tests
 
             // note that because we do 1000 systems total time taken as miliseconds is the time for a single sysmte, on average.
             string output = String.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB. Total Entities: {4}, per system: {5}. Memory per entity: {6}KB", 
-                totalTime.ToString("N4"), ((totalTime/numSystems) * 1000).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / numSystems).ToString("N2"), totalEntitys, totalEntitys / (float)numSystems, (totalMemory / totalEntitys).ToString("N2"));
+                totalTime.ToString("N4"), 
+                ((totalTime/numSystems) * 1000).ToString("N2"), 
+                (totalMemory / 1024.0).ToString("N2"),
+                (totalMemory / numSystems).ToString("N2"), 
+                totalEntitys, totalEntitys / (float)numSystems, 
+                (totalMemory / totalEntitys).ToString("N2"));
 
             // print results:
             Console.WriteLine(output);
