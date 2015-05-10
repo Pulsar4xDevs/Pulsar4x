@@ -16,5 +16,10 @@ namespace ModdingTools.JsonDataEditor
         {
             InitializeComponent();
         }
+
+        private void mainMenuButton_Click(object sender, EventArgs e)
+        {
+            Data.MainWindow.SetMode(WindowModes.LoadingWindow);
+        }
     }
 }

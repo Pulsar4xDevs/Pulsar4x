@@ -34,6 +34,7 @@
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.techButton = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.installationsButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // loadFileButton
@@ -88,10 +89,21 @@
             this.label1.TabIndex = 4;
             this.label1.Text = "Label which fills horribly empty space which would be filled up later";
             // 
+            // installationsButton
+            // 
+            this.installationsButton.Location = new System.Drawing.Point(3, 183);
+            this.installationsButton.Name = "installationsButton";
+            this.installationsButton.Size = new System.Drawing.Size(97, 23);
+            this.installationsButton.TabIndex = 5;
+            this.installationsButton.Text = "Installations";
+            this.installationsButton.UseVisualStyleBackColor = true;
+            this.installationsButton.Click += new System.EventHandler(this.installationsButton_Click);
+            // 
             // LoadWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.installationsButton);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.techButton);
             this.Controls.Add(this.loadedFilesCount);
@@ -112,5 +124,6 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.Button techButton;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button installationsButton;
     }
 }
