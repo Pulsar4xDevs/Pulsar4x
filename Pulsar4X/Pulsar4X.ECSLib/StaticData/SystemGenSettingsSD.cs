@@ -313,5 +313,61 @@ namespace Pulsar4X.ECSLib
         public JDictionary<RuinsDB.RQuality, double> RuinsQuilityAdjustment;
 
         #endregion
+
+        #region Mineral Generation
+
+        /// <summary>
+        /// This is the minium Accessibility of generated minerals.
+        /// This value is added onto the generated accessibility to make sure that 
+        /// the accessibility is never too low.
+        /// @note These values can be tweaked as desired for game play.
+        /// @note Should be a value between 0 and 1.
+        /// </summary>
+        public double MinMineralAccessibility;
+
+        /// <summary>
+        /// This is the minium Accessibility of generated minerals for a player/NPR homeworld..
+        /// This value is added onto the generated accessibility to make sure that 
+        /// the accessibility is never too low.
+        /// @note These values can be tweaked as desired for game play.
+        /// @note Should be a value between 0 and 1.
+        /// </summary>
+        public double MinHomeworldMineralAccessibility;
+
+        /// <summary>
+        /// This is the minium ammount of generated minerals for a player/NPR homeworld.
+        /// This value is added onto the generated ammount to make sure that 
+        /// the accessibility is never too low.
+        /// @note This value can be tweaked as desired for game play.
+        /// </summary>
+        public double MinHomeworldMineralAmmount;
+
+        /// <summary>
+        /// This value is multiplied to a generation chance for that mineral (mineral abundence * random number)
+        /// to decide how much over the minium amount there should be for a given mineral.
+        /// This value only applies to player/NPR homeworlds.
+        /// @note This value can be tweaked as desired for game play.
+        /// </summary>
+        public double HomeworldMineralAmmount; 
+
+        /// <summary>
+        /// Defines the chance of a body generating minerals, if a generate chance value is higher 
+        /// then these then the body will have minerals. 
+        /// These values are used both for an initial check to see if any minerals will be on this body
+        /// (This check is adjusted by mass, so larger bodies are more likly to succeded and have minerals).
+        /// In addition these values are used for a check for the presence of each mineral (this check is
+        /// adjusted by the bodies mass as well as the mineral abundence).
+        /// @note These values can be tweaked as desired for game play.
+        /// @note Should be a value between 0 and 1.
+        /// </summary>
+        public JDictionary<BodyType, double> MineralGenerationChanceByBodyType;
+
+        /// <summary>
+        /// Defines the maximum ammount of a mineral a given body type can support.
+        /// @note These values can be tweaked as desired for game play.
+        /// </summary>
+        public JDictionary<BodyType, int> MaxMineralAmmountByBodyType;
+
+        #endregion
     }
 }

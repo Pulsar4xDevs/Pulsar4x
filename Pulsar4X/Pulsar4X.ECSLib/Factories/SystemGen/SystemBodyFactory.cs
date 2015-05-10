@@ -647,6 +647,9 @@ namespace Pulsar4X.ECSLib
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;
 
+            // generat Minerals:
+            MineralGeneration(system, body);
+
             // generate ruins:
             GenerateRuins(system, body);
         }
@@ -734,5 +737,77 @@ namespace Pulsar4X.ECSLib
             ruins.RuinCount = (uint)GMath.SelectFromRange(GalaxyFactory.Settings.RuinsCountRangeBySize[ruins.RuinSize], system.RNG.NextDouble());
             ruins.RuinCount = (uint)Math.Round(GalaxyFactory.Settings.RuinsQuilityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
         }
+
+        /// <summary>
+        /// This function ranomly generats minerals for a given system body. 
+        /// Generation take into consideration the abundence of the mineral 
+        /// and the bodies ratio of mass vs earth.
+        /// </summary>
+        public static void MineralGeneration(StarSystem system, Entity body)
+        {
+            var bodyInfo = body.GetDataBlob<SystemBodyDB>();
+            var bodyMass = body.GetDataBlob<MassVolumeDB>();
+
+            // get the mass ratio for this body to earth:
+            double massRatio = bodyMass.Mass / GameSettings.Units.EarthMassInKG;
+            double genChance = massRatio * system.RNG.NextDouble();
+            double genChanceThreshold = GalaxyFactory.Settings.MineralGenerationChanceByBodyType[bodyInfo.Type];
+
+            // now lets see if this body has minerals
+            if (BodyType.Comet != bodyInfo.Type // comets always have minerals.
+                && genChance < genChanceThreshold)
+            {
+                // check faild return:
+                return;
+            }
+
+            // create some temp vars:
+            double abundance;
+
+            // this body has at least some minerals, lets generate them:
+            foreach (var min in StaticDataManager.StaticDataStore.Minerals)
+            {
+                // create a MineralDepositInfo
+                MineralDepositInfo mdi = new MineralDepositInfo();
+
+                // get a genChance:
+                abundance = min.Abundance[bodyInfo.Type];
+                genChance = massRatio * system.RNG.NextDouble() * abundance;
+
+                if (genChance >= genChanceThreshold)
+                {
+                    mdi.Accessibility = GMath.Clamp(GalaxyFactory.Settings.MinMineralAccessibility + genChance, 0, 1);
+                    mdi.Amount = (int)Math.Round(GalaxyFactory.Settings.MaxMineralAmmountByBodyType[bodyInfo.Type] * genChance);
+                    mdi.HalfOriginalAmount = mdi.Amount / 2;
+
+                    bodyInfo.Minerals.Add(min.ID, mdi);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This generates the rich assortment of all minerals for a homeworld. 
+        /// This function should be used when creating homewoerlds for the player race(s) or NPR Races.
+        /// This function can also be used by the Space Master (not directly, but it is public for this reason).
+        /// This function ensures that there is at least 50000 of every mineral and that every mineral has 
+        /// an accissibility of at least 0.5.
+        /// </summary>
+        public static void HomeworldMineralGeneration(StarSystem system, Entity body)
+        {
+            var bodyInfo = body.GetDataBlob<SystemBodyDB>();
+            bodyInfo.Minerals.Clear();  // because this function can be called on exisiting bodies we need to clear any existing minerals.
+
+            foreach (var min in StaticDataManager.StaticDataStore.Minerals)
+            {
+                // create a MineralDepositInfo
+                MineralDepositInfo mdi = new MineralDepositInfo();
+                mdi.Accessibility = GMath.Clamp(GalaxyFactory.Settings.MinHomeworldMineralAccessibility + system.RNG.NextDouble() * min.Abundance[bodyInfo.Type], 0, 1);
+                mdi.Amount = (int)Math.Round(GalaxyFactory.Settings.MinHomeworldMineralAmmount + GalaxyFactory.Settings.HomeworldMineralAmmount * system.RNG.NextDouble() * min.Abundance[bodyInfo.Type]);
+                mdi.HalfOriginalAmount = mdi.Amount / 2;
+
+                bodyInfo.Minerals.Add(min.ID, mdi);
+            }
+        }
+
     }
 }

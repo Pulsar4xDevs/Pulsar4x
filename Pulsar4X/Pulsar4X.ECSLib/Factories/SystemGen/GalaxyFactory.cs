@@ -714,6 +714,39 @@ namespace Pulsar4X.ECSLib
                 {RuinsDB.RQuality.MultipleIntact, 3.0}
             };
 
+
+            Settings.MinMineralAccessibility = 0.1;
+
+            Settings.MinHomeworldMineralAccessibility = 0.5;
+
+            Settings.MinHomeworldMineralAmmount = 50000;
+
+            Settings.HomeworldMineralAmmount = 100000;
+
+            Settings.MineralGenerationChanceByBodyType = new JDictionary<BodyType, double>()
+            {
+                {BodyType.GasGiant, 0.4},
+                {BodyType.IceGiant, 0.33},
+                {BodyType.GasDwarf, 0.3},
+                {BodyType.Terrestrial, 0.5},
+                {BodyType.Moon, 0.15},
+                {BodyType.DwarfPlanet, 0.15},
+                {BodyType.Comet, 1},
+                {BodyType.Asteroid, 0.1},
+            };
+
+            Settings.MaxMineralAmmountByBodyType = new JDictionary<BodyType, int>()
+            {
+                {BodyType.GasGiant, 100000000},
+                {BodyType.IceGiant, 50000000},
+                {BodyType.GasDwarf, 10000000},
+                {BodyType.Terrestrial, 5000000},
+                {BodyType.Moon, 1000000},
+                {BodyType.DwarfPlanet, 500000},
+                {BodyType.Comet, 100000},
+                {BodyType.Asteroid, 50000},
+            };
+
             #endregion
         }
     }
