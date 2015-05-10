@@ -8,6 +8,7 @@ using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
 using Pulsar4X.Entities.Components;
+using System.ComponentModel;
 
 namespace Pulsar4X.UI.SceenGraph
 {
@@ -85,10 +86,27 @@ namespace Pulsar4X.UI.SceenGraph
         /// </summary>
         private TravelLine m_oTravelLine { get; set; }
 
+        /// <summary>
+        /// What was the last tick this contact element checked its sensors? lib should store the tick when sensors are modified.
+        /// </summary>
+        private uint _LastSensorUpdateTick { get; set; }
+
+        /// <summary>
+        /// List of sensor contact elements.
+        /// </summary>
+        private BindingList<SensorElement> _SensorContactElements { get; set; }
+
+        /// <summary>
+        /// Contact Element's copy of default effect.
+        /// </summary>
+        GLEffect _DefaultEffect { get; set; }
+
+
         public ContactElement()
             : base()
         {
-
+            _SensorContactElements = new BindingList<SensorElement>();
+            _DefaultEffect = null;
         }
 
         public ContactElement(GLEffect a_oDefaultEffect, SystemContact a_oContact)
@@ -97,13 +115,58 @@ namespace Pulsar4X.UI.SceenGraph
             // Create travel Line element:
             m_oTravelLine = new TravelLine(a_oDefaultEffect, a_oContact.faction.FactionColor);
             this.Children.Add(m_oTravelLine);
+
+            _LastSensorUpdateTick = 0;
+            _SensorContactElements = new BindingList<SensorElement>();
+            _DefaultEffect = a_oDefaultEffect;
         }
 
         public override void Render()
         {
+            switch (m_oSystemContect.SSEntity)
+            {
+                case StarSystemEntityType.TaskGroup:
+                    TaskGroupTN TaskGroup = m_oSystemContect.Entity as TaskGroupTN;
+                    /// <summary>
+                    /// Update this contact's sensor elements.
+                    /// </summary>
+                    if (TaskGroup.SensorUpdateTick != _LastSensorUpdateTick)
+                    {
+                        if (_SensorContactElements.Count == 0)
+                        {
+                            foreach (ActiveSensorTN Sensor in TaskGroup.ActiveSensorQue)
+                            {
+                                ActiveSensorDefTN SensorDef = Sensor.aSensorDef;
+
+                                double factor = Constants.Units.KmPerAu / 10000.0;
+                                double AURadius = (double)SensorDef.maxRange / factor;
+
+                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+
+                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Yellow, Sensor.Name , Sensor, ParentSceen);
+                                _SensorContactElements.Add(NSE);
+                            }
+                        }
+                        else
+                        {
+                        }
+                    }
+                    break;
+                case StarSystemEntityType.Population:
+                    break;
+                case StarSystemEntityType.Missile:
+                    break;
+            }
+
+
             foreach (GLPrimitive oPrimitive in m_lPrimitives)
             {
                 oPrimitive.Render();
+            }
+
+            foreach (SensorElement sElement in _SensorContactElements)
+            {
+                sElement.Render();
             }
 
             if (RenderChildren == true)
@@ -222,6 +285,17 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
             }
 
+            if (_SensorContactElements.Count != 0)
+            {
+                /// <summary>
+                /// Update the positions of the sensors. pos should already be calculated by the above.
+                /// </summary>
+                foreach( SensorElement SElement in _SensorContactElements)
+                {
+                    SElement.SetActualPosition(pos);
+                }
+            }
+
 
 
 
@@ -236,6 +310,11 @@ namespace Pulsar4X.UI.SceenGraph
                 case StarSystemEntityType.TaskGroup:
                     Lable.Text = m_oSystemContect.Entity.Name;
                     break;
+            }
+
+            foreach (SensorElement sElement in _SensorContactElements)
+            {
+                sElement.Refresh(a_fZoomScaler);
             }
 
             // loop through any children:
