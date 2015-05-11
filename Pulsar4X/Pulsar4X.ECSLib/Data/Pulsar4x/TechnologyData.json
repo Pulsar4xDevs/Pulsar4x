@@ -822,7 +822,7 @@
         "Key": "e2573b2b-f530-417f-925b-ac8fbb53e10c",
         "Value": {
           "Name": "Asteroid Mining Module",
-          "Description": "",
+          "Description": "A ship component that allows a ship to perform the same task as an automated mine when it is in orbit of an asteroid or comet.",
           "Category": "ConstructionProduction",
           "ID": "e2573b2b-f530-417f-925b-ac8fbb53e10c",
           "Requirements": [
@@ -835,7 +835,7 @@
         "Key": "1b4593b8-19b7-4838-99e1-7fd582a18e45",
         "Value": {
           "Name": "Construction Rate 12 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "1b4593b8-19b7-4838-99e1-7fd582a18e45",
           "Requirements": [
@@ -848,7 +848,7 @@
         "Key": "fa8eb063-5485-4087-ba20-ded7dedb636d",
         "Value": {
           "Name": "Construction Rate 14 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "fa8eb063-5485-4087-ba20-ded7dedb636d",
           "Requirements": [
@@ -861,7 +861,7 @@
         "Key": "f412f4b8-21f0-4a5d-90cc-063d245c3ad8",
         "Value": {
           "Name": "Construction Rate 16 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "f412f4b8-21f0-4a5d-90cc-063d245c3ad8",
           "Requirements": [
@@ -874,7 +874,7 @@
         "Key": "2ac8ede9-0082-442f-86ee-1793cb0bf1b4",
         "Value": {
           "Name": "Construction Rate 20 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "2ac8ede9-0082-442f-86ee-1793cb0bf1b4",
           "Requirements": [
@@ -887,7 +887,7 @@
         "Key": "6ca10c0c-418e-4b3c-bc17-ce84ad38c486",
         "Value": {
           "Name": "Construction Rate 25 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "6ca10c0c-418e-4b3c-bc17-ce84ad38c486",
           "Requirements": [
@@ -900,7 +900,7 @@
         "Key": "80850451-4e71-449b-a811-314c5a54c172",
         "Value": {
           "Name": "Construction Rate 30 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "80850451-4e71-449b-a811-314c5a54c172",
           "Requirements": [
@@ -913,7 +913,7 @@
         "Key": "b647ff25-5507-4c3d-a0ac-b7766a0e36c7",
         "Value": {
           "Name": "Construction Rate 36 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "b647ff25-5507-4c3d-a0ac-b7766a0e36c7",
           "Requirements": [
@@ -926,7 +926,7 @@
         "Key": "a552222d-5f1d-443b-ab1a-ec5adfb4fc13",
         "Value": {
           "Name": "Construction Rate 42 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "a552222d-5f1d-443b-ab1a-ec5adfb4fc13",
           "Requirements": [
@@ -939,7 +939,7 @@
         "Key": "450440c0-aa35-4904-a795-04d746b3350e",
         "Value": {
           "Name": "Construction Rate 50 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "450440c0-aa35-4904-a795-04d746b3350e",
           "Requirements": [
@@ -952,7 +952,7 @@
         "Key": "efbdf479-cda2-4e2c-bb56-36c6f9edf662",
         "Value": {
           "Name": "Construction Rate 60 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "efbdf479-cda2-4e2c-bb56-36c6f9edf662",
           "Requirements": [
@@ -965,7 +965,7 @@
         "Key": "83ac81d1-c4a7-4ff2-976c-5523c7bddf1f",
         "Value": {
           "Name": "Construction Rate 70 BP",
-          "Description": "",
+          "Description": "Annual construction rate for one unit of Industrial Capacity.",
           "Category": "ConstructionProduction",
           "ID": "83ac81d1-c4a7-4ff2-976c-5523c7bddf1f",
           "Requirements": [
@@ -977,8 +977,8 @@
       {
         "Key": "142ce4ee-79b8-4821-b9cb-aef7f14da7b9",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% III",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 73%.",
           "Category": "ConstructionProduction",
           "ID": "142ce4ee-79b8-4821-b9cb-aef7f14da7b9",
           "Requirements": [],
@@ -988,8 +988,8 @@
       {
         "Key": "db0a3051-e0c6-42c2-a443-a118df201076",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% VII",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 358%.",
           "Category": "ConstructionProduction",
           "ID": "db0a3051-e0c6-42c2-a443-a118df201076",
           "Requirements": [
@@ -1001,8 +1001,8 @@
       {
         "Key": "606eebde-e2a7-47f5-9d12-5fd6e25477c8",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% I",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade.",
           "Category": "ConstructionProduction",
           "ID": "606eebde-e2a7-47f5-9d12-5fd6e25477c8",
           "Requirements": [
@@ -1014,8 +1014,8 @@
       {
         "Key": "f9d8fb45-b97c-440f-aa3c-d531039718bb",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% II",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 44%.",
           "Category": "ConstructionProduction",
           "ID": "f9d8fb45-b97c-440f-aa3c-d531039718bb",
           "Requirements": [
@@ -1027,8 +1027,8 @@
       {
         "Key": "68342934-578d-440f-83a3-6bb5f841082c",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% IV",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 107%.",
           "Category": "ConstructionProduction",
           "ID": "68342934-578d-440f-83a3-6bb5f841082c",
           "Requirements": [
@@ -1040,8 +1040,8 @@
       {
         "Key": "a591cc0f-6f07-431f-a6a7-639118bbae37",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% VI",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 299%.",
           "Category": "ConstructionProduction",
           "ID": "a591cc0f-6f07-431f-a6a7-639118bbae37",
           "Requirements": [
@@ -1053,8 +1053,8 @@
       {
         "Key": "d0af3b03-6d44-44b6-a91c-6693c716ae12",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% VIII",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 430%.",
           "Category": "ConstructionProduction",
           "ID": "d0af3b03-6d44-44b6-a91c-6693c716ae12",
           "Requirements": [
@@ -1066,8 +1066,8 @@
       {
         "Key": "b5561d8f-bdf6-4a8a-85cc-dcacafe480d5",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% IX",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 516%.",
           "Category": "ConstructionProduction",
           "ID": "b5561d8f-bdf6-4a8a-85cc-dcacafe480d5",
           "Requirements": [
@@ -1079,8 +1079,8 @@
       {
         "Key": "5580948c-177b-4867-892c-c9125760513f",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% X",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 619%.",
           "Category": "ConstructionProduction",
           "ID": "5580948c-177b-4867-892c-c9125760513f",
           "Requirements": [
@@ -1092,8 +1092,8 @@
       {
         "Key": "59e235eb-e860-4058-9e5e-8f239af0abe8",
         "Value": {
-          "Name": "Expand Civilian Economy by 20%",
-          "Description": "",
+          "Name": "Expand Civilian Economy by 20% V",
+          "Description": "Expands the civilian economy, increasing the wealth gained from income and corporate taxes and expanding trade. Effects are cumulative, resulting in 149%.",
           "Category": "ConstructionProduction",
           "ID": "59e235eb-e860-4058-9e5e-8f239af0abe8",
           "Requirements": [
@@ -2041,7 +2041,7 @@
         "Key": "bd4c91b7-5554-4e5a-a9b3-29305ba23ebc",
         "Value": {
           "Name": "Swarm Extraction Module",
-          "Description": "",
+          "Description": "Allows a swarm worker to create nests for the Queen.",
           "Category": "ConstructionProduction",
           "ID": "bd4c91b7-5554-4e5a-a9b3-29305ba23ebc",
           "Requirements": [
@@ -2065,7 +2065,7 @@
         "Key": "95ca7330-4ec9-43db-ac5e-eae7fbb025cb",
         "Value": {
           "Name": "Underground Excavation",
-          "Description": "",
+          "Description": "Allow construction of underground infrastructure.",
           "Category": "ConstructionProduction",
           "ID": "95ca7330-4ec9-43db-ac5e-eae7fbb025cb",
           "Requirements": [],
