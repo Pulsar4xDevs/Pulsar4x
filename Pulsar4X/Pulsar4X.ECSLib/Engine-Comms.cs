@@ -8,7 +8,7 @@ namespace Pulsar4X.ECSLib
 {
     /// <summary>
     /// Engine side of the Lib-UI communications. 
-    /// engine needs to create one of these when instantiated, and then AddFactions as factions are added to the game.
+    /// There is a default, faction independent, message queue at Guid.Empty, this queue will always exist.
     /// </summary>
     public class EngineComms
     {
@@ -143,7 +143,7 @@ namespace Pulsar4X.ECSLib
 
 
     /// <summary>
-    /// 
+    /// A small helper class that wraps the in and out queues relating to a faction.
     /// </summary>
     public class MessageBook
     {
