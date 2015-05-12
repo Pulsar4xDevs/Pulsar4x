@@ -13,14 +13,16 @@ namespace Pulsar4X.Tests
     {
         Game _game;
         MessageBook _messageBook;
-        readonly Entity _fakeFaction = Entity.GetInvalidEntity();
+        Entity _fakeFaction = Entity.GetInvalidEntity();
 
         [SetUp]
         public void Init()
         {
             _game = new Game();
-            _game.EngineComms.AddFaction(_fakeFaction);
-            _messageBook = _game.EngineComms.RequestMessagebook(_fakeFaction);
+
+            _fakeFaction = FactionFactory.CreateFaction(_game.GlobalManager, "Fake Faction");
+            _game.EngineComms.AddFaction(_fakeFaction.Guid);
+            _messageBook = _game.EngineComms.RequestMessagebook(_fakeFaction.Guid);
         }
 
         [TearDown]
@@ -33,10 +35,10 @@ namespace Pulsar4X.Tests
         [Test]
         public void TestMessageBook()
         {
-            Assert.AreEqual(_fakeFaction, _messageBook.Faction);
+            Assert.AreEqual(_fakeFaction.Guid, _messageBook.Faction);
 
 
-            _messageBook.InMessageQueue.Enqueue(new Message(Message.MessageType.Echo, 42));
+            _messageBook.InMessageQueue.Enqueue(new Message(MessageType.Echo, 42));
             Assert.AreEqual(1, _messageBook.InMessageQueue.Count);
 
             Message message = null;
