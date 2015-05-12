@@ -11,7 +11,7 @@ namespace Pulsar4X.ECSLib
         public Vector4 Position;
 
         /// <summary>
-        /// System X coordinante in AU
+        /// System X coordinate in AU
         /// </summary>
         [JsonIgnore]
         public double X
@@ -21,7 +21,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// System Y coordinante in AU
+        /// System Y coordinate in AU
         /// </summary>
         [JsonIgnore]
         public double Y
@@ -85,11 +85,11 @@ namespace Pulsar4X.ECSLib
         #endregion
 
         /// <summary>
-        /// Initilized constructor.
+        /// Initialized constructor.
         /// </summary>
-        /// <param name="system">StarSystem value.</param>
         /// <param name="x">X value.</param>
         /// <param name="y">Y value.</param>
+        /// <param name="z">Z value.</param>
         public PositionDB(double x, double y, double z)
         {
             Position = new Vector4(x, y, z, 0);
@@ -143,15 +143,24 @@ namespace Pulsar4X.ECSLib
             return GetDistanceBetweenSqrd(this, otherPos);
         }
 
-        /// <summary>
-        /// Adds two PositionDBs together.
-        /// </summary>
-        /// <param name="posA"></param>
-        /// <param name="posB"></param>
-        /// <returns></returns>
         public static PositionDB operator +(PositionDB posA, PositionDB posB)
         {
-            return new PositionDB(posA.Position + posB.Position);
+            throw new NotSupportedException("Do not add two PositionDBs. See comments in PositonDB.cs");
+
+            /* Operator not supported as it can lead to unintended consequences,
+             * especially when trying to do "posA += posB;"
+             * Instead of posA += posB, do "posA.Position += posB.Position;"
+             * 
+             * Datablobs are stored in an entity manager, and contain important metadata.
+             * posA += posB evaluates to posA = posA + posB;
+             * This operator has to return a "new" datablob. This new datablob is not the
+             * one current stored in the EntityManager. Further requests to get the positionDB
+             * will return the old positionDB after a += operation.
+             * 
+             * Ask a senior developer for further clarification if required.
+             * 
+             * Explicitly thrown to prevent new developers from adding this.
+            */
         }
 
         public override object Clone()

@@ -1,60 +1,101 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Pulsar4X.ECSLib
 {
     public static class OrbitProcessor
     {
+        /// <summary>
+        /// TypeIndexes for several dataBlobs used frequently by this processor.
+        /// </summary>
         private static int _orbitTypeIndex = -1;
+        private static int _positionTypeIndex = -1;
         private static int _starInfoTypeIndex = -1;
 
+        /// <summary>
+        /// Number of orbits updated last time the processor was run.
+        /// </summary>
+        public static int OrbitsUpdatedLastProcess = -1;
+
+        /// <summary>
+        /// Determines if this processor should use multithreading.
+        /// </summary>
+        private const bool UseMultiThread = true;
+
+        /// <summary>
+        /// Initializes this Processor.
+        /// </summary>
         public static void Initialize()
         {
+            // Resolve TypeIndexes.
             _orbitTypeIndex = EntityManager.GetTypeIndex<OrbitDB>();
+            _positionTypeIndex = EntityManager.GetTypeIndex<PositionDB>();
             _starInfoTypeIndex = EntityManager.GetTypeIndex<StarInfoDB>();
         }
 
+        /// <summary>
+        /// Function called by Game.AdvanceTime to run this processor.
+        /// </summary>
+        /// <param name="systems"></param>
+        /// <param name="deltaSeconds"></param>
         public static void Process(List<StarSystem> systems, int deltaSeconds)
         {
+            OrbitsUpdatedLastProcess = 0;
+
             DateTime currentTime = Game.Instance.CurrentDateTime;
 
-            foreach (StarSystem system in systems)
+            if (UseMultiThread)
             {
-                EntityManager currentManager = system.SystemManager;
-
-                // Find the first orbital entity.
-                Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
-
-                if (!firstOrbital.IsValid)
+                Parallel.ForEach(systems, system => UpdateSystemOrbits(system, currentTime));
+            }
+            else
+            {
+                foreach (StarSystem system in systems)
                 {
-                    // No orbitals in this manager.
-                    continue;
+                    UpdateSystemOrbits(system, currentTime);
                 }
-
-                OrbitDB rootOrbit = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).RootDB as OrbitDB;
-
-                // Call recursive function to update every orbit in this system.
-                UpdateOrbit(rootOrbit, new PositionDB(0, 0, 0), currentTime);
             }
         }
 
-        private static void UpdateOrbit(OrbitDB orbit, PositionDB parentPosition, DateTime currentTime)
+        private static void UpdateSystemOrbits(StarSystem system, DateTime currentTime)
         {
+            EntityManager currentManager = system.SystemManager;
+
+            // Find the first orbital entity.
+            Entity firstOrbital = currentManager.GetFirstEntityWithDataBlob(_starInfoTypeIndex);
+
+            if (!firstOrbital.IsValid)
+            {
+                // No orbitals in this manager.
+                return;
+            }
+
+            Entity root = firstOrbital.GetDataBlob<OrbitDB>(_orbitTypeIndex).Root;
+            PositionDB rootPositionDB = root.GetDataBlob<PositionDB>(_positionTypeIndex);
+
+            // Call recursive function to update every orbit in this system.
+            UpdateOrbit(root, rootPositionDB, currentTime);
+        }
+
+        private static void UpdateOrbit(Entity entity, PositionDB parentPositionDB, DateTime currentTime)
+        {
+            OrbitsUpdatedLastProcess++;
+            OrbitDB entityOrbitDB = entity.GetDataBlob<OrbitDB>(_orbitTypeIndex);
+            PositionDB entityPosition = entity.GetDataBlob<PositionDB>(_positionTypeIndex);
+
             // Get our Parent-Relative coordinates.
-            PositionDB newPosition = GetPosition(orbit, currentTime);
+            Vector4 newPosition = GetPosition(entityOrbitDB, currentTime);
 
             // Get our Absolute coordinates.
-            newPosition += parentPosition;
-
-            // Set our absolute coordinates.
-            orbit.OwningEntity.SetDataBlob(newPosition);
+            entityPosition.Position = parentPositionDB.Position + newPosition;
 
             // Update our children.
-            foreach (OrbitDB childOrbit in orbit.ChildrenDBs.Cast<OrbitDB>())
+            foreach (Entity child in entityOrbitDB.Children)
             {
                 // RECURSION!
-                UpdateOrbit(childOrbit, newPosition, currentTime);
+                UpdateOrbit(child, entityPosition, currentTime);
             }
         }
 
@@ -65,11 +106,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="time">Time position desired from.</param>
-        public static PositionDB GetPosition(OrbitDB orbit, DateTime time)
+        public static Vector4 GetPosition(OrbitDB orbit, DateTime time)
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(0, 0, 0);
+                return new Vector4(0, 0, 0, 0);
             }
 
             TimeSpan timeSinceEpoch = time - orbit.Epoch;
@@ -100,11 +141,11 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         /// <param name="orbit">OrbitDB to calculate position from.</param>
         /// <param name="trueAnomaly">Angle in Radians.</param>
-        public static PositionDB GetPosition(OrbitDB orbit, double trueAnomaly)
+        public static Vector4 GetPosition(OrbitDB orbit, double trueAnomaly)
         {
             if (orbit.IsStationary)
             {
-                return new PositionDB(0, 0, 0);
+                return new Vector4(0, 0, 0, 0);
             }
 
             // http://en.wikipedia.org/wiki/True_anomaly#Radius_from_true_anomaly
@@ -122,7 +163,7 @@ namespace Pulsar4X.ECSLib
             double y = radius * Math.Sin(inclination) * Math.Sin(trueAnomaly);
             double z = radius * Math.Cos(inclination);
 
-            return new PositionDB(x, y, z);
+            return new Vector4(x, y, z, 0);
         }
 
         /// <summary>
@@ -131,16 +172,19 @@ namespace Pulsar4X.ECSLib
         private static double GetEccentricAnomaly(OrbitDB orbit, double currentMeanAnomaly)
         {
             //Kepler's Equation
-            var e = new List<double>();
+            const int numIterations = 100;
+            var e = new double[numIterations];
             const double epsilon = 1E-12; // Plenty of accuracy.
+            int i = 0;
+
             if (orbit.Eccentricity > 0.8)
             {
-                e.Add(Math.PI);
-            } else
-            {
-                e.Add(currentMeanAnomaly);
+                e[i] = Math.PI;
             }
-            int i = 0;
+            else
+            {
+                e[i] = currentMeanAnomaly;
+            }
 
             do
             {
@@ -152,11 +196,11 @@ namespace Pulsar4X.ECSLib
                  * E == EccentricAnomaly, e == Eccentricity, M == MeanAnomaly.
                  * http://en.wikipedia.org/wiki/Eccentric_anomaly#From_the_mean_anomaly
                 */
-                e.Add(e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i]))));
+                e[i + 1] = e[i] - ((e[i] - orbit.Eccentricity * Math.Sin(e[i]) - currentMeanAnomaly) / (1 - orbit.Eccentricity * Math.Cos(e[i])));
                 i++;
-            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i < 1000);
+            } while (Math.Abs(e[i] - e[i - 1]) > epsilon && i + 1 < numIterations);
 
-            if (i > 1000)
+            if (i + 1 >= numIterations)
             {
                 // <? todo: Flag an error about non-convergence of Newton's method.
             }

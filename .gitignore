@@ -1,6 +1,7 @@
 # Pulsar Specific Folders
 Pulsar4X/*/bin
 Pulsar4X/*/obj
+Pulsar4X/packages/*
 
 #C# Temp Files:
 *.db

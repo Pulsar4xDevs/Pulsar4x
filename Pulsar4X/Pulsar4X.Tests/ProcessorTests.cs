@@ -41,11 +41,11 @@ namespace Pulsar4X.Tests
 
             JDictionary<Guid, MineralDepositInfo> minerals = planetDB.Minerals;
 
-            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOrigionalAmount = 5000 };
+            MineralDepositInfo duraniumDeposit = new MineralDepositInfo { Amount = 10000, Accessibility = 1, HalfOriginalAmount = 5000 };
             
             minerals.Add(_duraniumSD.ID, duraniumDeposit);
 
-            MineralDepositInfo corundiumDeposit = new MineralDepositInfo { Amount = 1000, Accessibility = 0.5, HalfOrigionalAmount = 500 };
+            MineralDepositInfo corundiumDeposit = new MineralDepositInfo { Amount = 1000, Accessibility = 0.5, HalfOriginalAmount = 500 };
             
             minerals.Add(_corundiumSD.ID, corundiumDeposit);
 
@@ -155,45 +155,6 @@ namespace Pulsar4X.Tests
             //Assert.AreEqual(4.5, stockpileOut[itemConstructing]);
 
             //todo there's probilby some edge cases to check.
-        }
-
-        [Test]
-        //[Ignore("Long running stress test.")]
-        public void OrbitStressTest()
-        {
-            var game = new Game(); // init the game class as we will need it for these tests.
-            GalaxyFactory.InitToDefaultSettings(); // make sure default settings are loaded.
-            List<StarSystem> systems = new List<StarSystem>(1000);
-
-            for (int i = 0; i < 1000; i++)
-            {
-                systems.Add(StarSystemFactory.CreateSystem("Stress System " + i));
-            }
-
-            OrbitProcessor.Initialize();
-            // use a stop watch to get more accurate time.
-            System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
-
-            // lets get our memory before starting:
-            long startMemory = GC.GetTotalMemory(true);
-
-            timer.Start();
-
-            OrbitProcessor.Process(systems, 60);
-
-            timer.Stop();
-            double totalTime = timer.Elapsed.TotalSeconds;
-
-            long endMemory = GC.GetTotalMemory(true);
-            double totalMemory = (endMemory - startMemory) / 1024.0;  // in KB
-
-            // note that because we do 1000 systems total time taken as miliseconds is the time for a single sysmte, on average.
-            string output = String.Format("Total run time: {0}s, per system: {1}ms. total memory used: {2} MB, per system: {3} KB.",
-                totalTime.ToString("N4"), (totalTime).ToString("N2"), (totalMemory / 1024.0).ToString("N2"), (totalMemory / 1000).ToString("N2"));
-
-            // print results:
-            Console.WriteLine(output);
-            Assert.Pass(output);
         }
     }
 }

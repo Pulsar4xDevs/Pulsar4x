@@ -2,7 +2,7 @@
 
 namespace Pulsar4X.ECSLib
 {
-    public enum SpectralType
+    public enum SpectralType : byte
     {
         O,
         B,
@@ -15,12 +15,12 @@ namespace Pulsar4X.ECSLib
         C
     }
 
-    public enum LuminosityClass
+    public enum LuminosityClass : byte
     {
         O,          // Hypergiants
         Ia,         // Luminous Supergiants
         Iab,        // Intermediate Supergiants
-        Ib,         // Less Luminos Supergiants
+        Ib,         // Less Luminous Supergiants
         II,         // Bright Giants
         III,        // Giants
         IV,         // Subgiants
@@ -33,7 +33,7 @@ namespace Pulsar4X.ECSLib
     {
         public double Age { get; set; }
         public double Temperature { get; set; } // Effective ("Photosphere") temperature in Degrees C.
-        public float Luminosity { get; set; }
+        public double Luminosity { get; set; }
         public string Class { get; set; }
 
         /// <summary>

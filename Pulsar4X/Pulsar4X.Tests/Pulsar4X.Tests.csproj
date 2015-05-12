@@ -44,6 +44,9 @@
       <Project>{E716FA06-ECDF-B446-96B4-B790AAB5713B}</Project>
       <Name>Pulsar4X.ECSLib</Name>
     </ProjectReference>
+    <Reference Include="dotMemory.Unit">
+      <HintPath>..\packages\JetBrains.DotMemoryUnit.1.0.20150408.170258\Lib\dotMemory.Unit.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\deps\Newtonsoft.Json\Net40\Newtonsoft.Json.dll</HintPath>
@@ -60,6 +63,7 @@
   <ItemGroup>
     <Compile Include="DataBlobTests.cs" />
     <Compile Include="FactoryTests.cs" />
+    <Compile Include="OrbitProcessorTests.cs" />
     <Compile Include="ProcessorTests.cs" />
     <Compile Include="ShipTests.cs" />
     <Compile Include="EngineCommsTests.cs" />
@@ -78,6 +82,7 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="TestData\MalformedData\CommanderNameTheme.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace Pulsar4X.ECSLib
 {
@@ -17,6 +18,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The density of the body in kg/cm^3
         /// </summary> 
+        [JsonIgnore]
         public double Density
         {
             get { return GetDensity(Mass, Volume); }
@@ -25,6 +27,7 @@ namespace Pulsar4X.ECSLib
         /// <summary>
         /// The Average Radius
         /// </summary>
+        [JsonIgnore]
         public double Radius
         {
             get { return GetRadius(Volume); }
@@ -34,6 +37,7 @@ namespace Pulsar4X.ECSLib
         /// Measure on the gravity of a planet at its surface.
         /// In Earth Gravities (Gs).
         /// </summary>
+        [JsonIgnore]
         public double SurfaceGravity
         {
             get { return GMath.GetStandardGravitationAttraction(Mass, Radius); }
@@ -69,6 +73,11 @@ namespace Pulsar4X.ECSLib
             return mass / density;
         }
 
+        public static double GetVolumeFromRadius(double radius)
+        {
+            return (4.0 / 3.0) * Math.PI * Math.Pow(radius, 3);
+        }
+
         public static double GetDensity(double mass, double volume)
         {
             return mass / volume;
@@ -76,7 +85,6 @@ namespace Pulsar4X.ECSLib
 
         public static double GetRadius(double volume)
         {
-            // v = (4pi r^3)/3
             // v = 4/3pi * r^3
             // r^3 = V / (4/3pi)
             // r = (V / (4/3pi)) ^ (1/3)

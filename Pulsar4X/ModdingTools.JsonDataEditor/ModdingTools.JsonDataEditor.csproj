@@ -49,6 +49,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data.cs" />
+    <Compile Include="InstallationsWindow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="InstallationsWindow.Designer.cs">
+      <DependentUpon>InstallationsWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoadWindow.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LoadWindow.Designer.cs">
+      <DependentUpon>LoadWindow.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -57,12 +70,18 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TechesWindow.cs">
+    <Compile Include="TechnologiesWindow.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="TechesWindow.Designer.cs">
-      <DependentUpon>TechesWindow.cs</DependentUpon>
+    <Compile Include="TechnologiesWindow.Designer.cs">
+      <DependentUpon>TechnologiesWindow.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="InstallationsWindow.resx">
+      <DependentUpon>InstallationsWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoadWindow.resx">
+      <DependentUpon>LoadWindow.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainWindow.resx">
       <DependentUpon>MainWindow.cs</DependentUpon>
     </EmbeddedResource>
@@ -75,8 +94,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="TechesWindow.resx">
-      <DependentUpon>TechesWindow.cs</DependentUpon>
+    <EmbeddedResource Include="TechnologiesWindow.resx">
+      <DependentUpon>TechnologiesWindow.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

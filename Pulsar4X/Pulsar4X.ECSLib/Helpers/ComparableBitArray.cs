@@ -123,13 +123,17 @@ namespace Pulsar4X.ECSLib
             backingValue ^= (-value ^ backingValue) & (1 << index);
             _backingValues[backingIndex] = backingValue;
 
+            int bitIndex = index + (backingIndex * BitsPerValue);
+
             if (value == 1)
             {
-                SetBits.Add(index + (backingIndex * BitsPerValue));
+                if (!SetBits.Contains(index))
+                    SetBits.Add(bitIndex);
             }
             else
             {
-                SetBits.Remove(index + (backingIndex * BitsPerValue));
+                if (SetBits.Contains(bitIndex))
+                    SetBits.Remove(bitIndex);
             }
         }
 

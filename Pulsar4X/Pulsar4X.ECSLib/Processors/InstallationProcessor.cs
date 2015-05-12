@@ -79,7 +79,7 @@ namespace Pulsar4X.ECSLib
                 colonyMineralStockpile.SafeValueAdd<Guid, float>(mineralGuid, amounttomine);             
                 MineralDepositInfo mineralDeposit = depositKeyValuePair.Value;
                 mineralDeposit.Amount -= amounttomine;
-                double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOrigionalAmount, 3) * mineralDeposit.Accessibility;
+                double accecability = Math.Pow((float)mineralDeposit.Amount / mineralDeposit.HalfOriginalAmount, 3) * mineralDeposit.Accessibility;
                 mineralDeposit.Accessibility = GMath.Clamp(accecability, 0.1, mineralDeposit.Accessibility);
             }
             

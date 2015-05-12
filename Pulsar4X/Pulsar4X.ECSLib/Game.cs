@@ -264,6 +264,9 @@ namespace Pulsar4X.ECSLib
             if (PostLoad != null)
                 PostLoad(this, EventArgs.Empty);
 
+            // Post load event completed. Drop all handlers.
+            PostLoad = null;
+
             // set isLoaded to true:
             IsLoaded = true;
         }

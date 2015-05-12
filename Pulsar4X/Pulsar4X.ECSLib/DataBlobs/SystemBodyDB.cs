@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Pulsar4X.ECSLib
 {
-    public enum BodyType
+    public enum BodyType : byte
     {
         Terrestrial,    // Like Earth/Mars/Venus/etc.
         GasGiant,       // Like Jupiter/Saturn
@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
         Comet
     }
 
-    public enum TectonicActivity
+    public enum TectonicActivity : byte
     {
         Dead,
         Minor,
@@ -32,7 +32,7 @@ namespace Pulsar4X.ECSLib
     public struct MineralDepositInfo
     {
         public int Amount;
-        public int HalfOrigionalAmount;
+        public int HalfOriginalAmount;
         public double Accessibility;
     }
 
@@ -41,7 +41,7 @@ namespace Pulsar4X.ECSLib
         public BodyType Type;
 
         /// Plate techtonics. Ammount of activity depends on age vs mass.
-        /// Influences magnitic feild. maybe this should be in the processor?
+        /// Influences magnitic field. maybe this should be in the processor?
         /// </summary>
         public TectonicActivity Tectonics;
 
@@ -52,10 +52,10 @@ namespace Pulsar4X.ECSLib
         public float AxialTilt;
 
         /// <summary>
-        /// Magnetic feild of the body. It is important as it affects how much atmosphere a body will have.
+        /// Magnetic field of the body. It is important as it affects how much atmosphere a body will have.
         /// In Microtesla (uT)
         /// </summary>
-        public float MagneticFeild;
+        public float MagneticField;
 
         /// <summary>
         /// Temperature of the planet BEFORE greenhouse effects are taken into considuration. 
@@ -73,7 +73,7 @@ namespace Pulsar4X.ECSLib
         public float AtmosphericDust;
 
         /// <summary>
-        /// Indicates weither the system body supports populations and can be settled by Players/NPRs..
+        /// Indicates if the system body supports populations and can be settled by Players/NPRs..
         /// </summary>
         public bool SupportsPopulations { get; set; }
 
@@ -95,7 +95,7 @@ namespace Pulsar4X.ECSLib
             Type = systemBodyDB.Type;
             Tectonics = systemBodyDB.Tectonics;
             AxialTilt = systemBodyDB.AxialTilt;
-            MagneticFeild = systemBodyDB.MagneticFeild;
+            MagneticField = systemBodyDB.MagneticField;
             BaseTemperature = systemBodyDB.BaseTemperature;
             RadiationLevel = systemBodyDB.RadiationLevel;
             AtmosphericDust = systemBodyDB.AtmosphericDust;

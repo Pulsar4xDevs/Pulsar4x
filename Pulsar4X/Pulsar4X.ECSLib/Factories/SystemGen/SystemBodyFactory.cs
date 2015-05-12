@@ -81,7 +81,7 @@ namespace Pulsar4X.ECSLib
             if (starInfo.MinHabitableRadius > GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max ||
                 starInfo.MaxHabitableRadius < GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min)
             {
-                // Habital zone either too close or too far from star.
+                // Habitable zone either too close or too far from star.
                 // Only generating inner and outer zones.
                 skipHabitableZone = true;
                 innerZone = new MinMaxStruct (GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Min, GalaxyFactory.Settings.OrbitalDistanceByStarSpectralType[starInfo.SpectralType].Max * 0.5);
@@ -144,7 +144,7 @@ namespace Pulsar4X.ECSLib
         }
 
         /// <summary>
-        /// Generates a random number of comets for a given star. The number of gererated will 
+        /// Generates a random number of comets for a given star. The number of generated will 
         /// be at least GalaxyGen.MiniumCometsPerSystem and never more then GalaxyGen.MaxNoOfComets.
         /// </summary>
         private static void GenerateComets(StarSystem system, Entity star)
@@ -357,23 +357,23 @@ namespace Pulsar4X.ECSLib
             double gravAttractionOutsideNumerator = GameSettings.Science.GravitationalConstant * myMVDB.Mass * outsideMass;
             double gravAttractionParentNumerator = GameSettings.Science.GravitationalConstant * myMVDB.Mass * parentMass;
             double gravAttractionToInsideOrbit = gravAttractionInsiderNumerator / ((minDistance - insideApoapsis) * (minDistance - insideApoapsis));
-            double gravAttractionToOutisdeOrbit = gravAttractionOutsideNumerator / ((outsidePeriapsis - maxDistance) * (outsidePeriapsis - maxDistance));
+            double gravAttractionToOutsideOrbit = gravAttractionOutsideNumerator / ((outsidePeriapsis - maxDistance) * (outsidePeriapsis - maxDistance));
             double gravAttractionToParent = gravAttractionParentNumerator / (minDistance * minDistance);
 
             // Make sure we're 20x more attracted to our Parent, then our inside neighbor.
             while (gravAttractionToInsideOrbit * GalaxyFactory.Settings.OrbitGravityFactor > gravAttractionToParent)
             {
                 // We're too attracted to our inside neighbor, increase minDistance by 1%.
-                // Assuming our parent is more massive than our inside neightbor, then this will "tip" us to be more attracted to parent.
+                // Assuming our parent is more massive than our inside neighbor, then this will "tip" us to be more attracted to parent.
                 minDistance += minDistance * 0.01;
 
                 // Reevaluate our gravitational attractions with new minDistance.
                 gravAttractionToInsideOrbit = gravAttractionInsiderNumerator / ((minDistance - insideApoapsis) * (minDistance - insideApoapsis));
-                gravAttractionToOutisdeOrbit = gravAttractionOutsideNumerator / ((outsidePeriapsis - maxDistance) * (outsidePeriapsis - maxDistance));
+                gravAttractionToOutsideOrbit = gravAttractionOutsideNumerator / ((outsidePeriapsis - maxDistance) * (outsidePeriapsis - maxDistance));
                 gravAttractionToParent = gravAttractionParentNumerator / (minDistance * minDistance);
             }
 
-            if (gravAttractionToOutisdeOrbit * GalaxyFactory.Settings.OrbitGravityFactor > gravAttractionToParent || minDistance > maxDistance)
+            if (gravAttractionToOutsideOrbit * GalaxyFactory.Settings.OrbitGravityFactor > gravAttractionToParent || minDistance > maxDistance)
             {
                 // Unable to find suitable orbit. This body is rejected.
                 return null;
@@ -430,11 +430,11 @@ namespace Pulsar4X.ECSLib
             GenerateMoons(system, body);
 
             // Recursive call to finalize children.
-            int recusiveBodyCount = 1;
+            int recursiveBodyCount = 1;
             foreach (Entity child in bodyOrbit.Children)
             {
-                FinalizeBodies(system, child, recusiveBodyCount);
-                recusiveBodyCount++;
+                FinalizeBodies(system, child, recursiveBodyCount);
+                recursiveBodyCount++;
             }
         }
 
@@ -541,23 +541,23 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         private static void FinalizeAsteroidOrbit(StarSystem system, Entity newBody, OrbitDB referenceOrbit)
         {
-            // we will use the reference orbit + MaxAsteriodOrbitDeviation to constrain the orbit values:
+            // we will use the reference orbit + MaxAsteroidOrbitDeviation to constrain the orbit values:
 
-            // Create smeiMajorAxis:
+            // Create semiMajorAxis:
             double deviation = referenceOrbit.SemiMajorAxis * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             double min = referenceOrbit.SemiMajorAxis - deviation;
             double max = referenceOrbit.SemiMajorAxis + deviation;
-            double semiMajorAxis = GMath.SelectFromRange(min, max, system.RNG.NextDouble());  // dont need to raise to power, reference orbit already did that.
+            double semiMajorAxis = GMath.SelectFromRange(min, max, system.RNG.NextDouble());  // don't need to raise to power, reference orbit already did that.
 
             deviation = referenceOrbit.Eccentricity * Math.Pow(GalaxyFactory.Settings.MaxAsteroidOrbitDeviation, 2);
             min = referenceOrbit.Eccentricity - deviation;
             max = referenceOrbit.Eccentricity + deviation;
-            double eccentricity = GMath.SelectFromRange(min, max, system.RNG.NextDouble()); // get random eccentricity needs better distrubution.
+            double eccentricity = GMath.SelectFromRange(min, max, system.RNG.NextDouble()); // get random eccentricity needs better distribution.
 
             deviation = referenceOrbit.Inclination * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.Inclination - deviation;
             max = referenceOrbit.Inclination + deviation;
-            double inclination = GMath.SelectFromRange(min, max, system.RNG.NextDouble()); // doesn't do much at the moment but may as well be there. Neet better Dist.
+            double inclination = GMath.SelectFromRange(min, max, system.RNG.NextDouble()); // doesn't do much at the moment but may as well be there. Need better Dist.
 
             deviation = referenceOrbit.ArgumentOfPeriapsis * GalaxyFactory.Settings.MaxAsteroidOrbitDeviation;
             min = referenceOrbit.ArgumentOfPeriapsis - deviation;
@@ -569,7 +569,7 @@ namespace Pulsar4X.ECSLib
             max = referenceOrbit.LongitudeOfAscendingNode + deviation;
             double longitudeOfAscendingNode = GMath.SelectFromRange(min, max, system.RNG.NextDouble());
 
-            // Keep the starting point of the orbit completly random.
+            // Keep the starting point of the orbit completely random.
             double meanAnomaly = system.RNG.NextDouble() * 360;
 
             // now Create the orbit:
@@ -640,12 +640,15 @@ namespace Pulsar4X.ECSLib
             }
 
             // Generate Magnetic field:
-            bodyInfo.MagneticFeild = (float)GMath.SelectFromRange(GalaxyFactory.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
+            bodyInfo.MagneticField = (float)GMath.SelectFromRange(GalaxyFactory.Settings.PlanetMagneticFieldByType[bodyInfo.Type], system.RNG.NextDouble());
             if (bodyInfo.Tectonics == TectonicActivity.Dead)
-                bodyInfo.MagneticFeild *= 0.1F; // reduce magnetic field of a dead world.
+                bodyInfo.MagneticField *= 0.1F; // reduce magnetic field of a dead world.
 
             // No radiation by default.
             bodyInfo.RadiationLevel = 0;
+
+            // generat Minerals:
+            MineralGeneration(system, body);
 
             // generate ruins:
             GenerateRuins(system, body);
@@ -663,7 +666,7 @@ namespace Pulsar4X.ECSLib
 
             // this planet has some plate tectonics:
             // the following should give us a number between 0 and 1 for most bodies. Earth has a number of 0.217...
-            // we conver age in billion years instead of years (otherwise we get tiny numbers).
+            // we converge in billion years instead of years (otherwise we get tiny numbers).
             double tectonicsChance = bodyMass.Mass / GameSettings.Units.EarthMassInKG / starInfo.Age * 100000000;
             tectonicsChance = GMath.Clamp(tectonicsChance, 0, 1);
 
@@ -719,10 +722,10 @@ namespace Pulsar4X.ECSLib
             }
             else if (system.RNG.NextDouble() > GalaxyFactory.Settings.RuinsGenerationChance)
             {
-                return; // thats right... lucked out on this one.
+                return; // that's right... lucked out on this one.
             }
 
-            // now if we have survived the guantlet lets gen some Ruins!!
+            // now if we have survived the gauntlet lets gen some Ruins!!
             ruins.RuinSize = GalaxyFactory.Settings.RuinsSizeDisrubution.Select(system.RNG.Next(0, 100));
 
             int quality = system.RNG.Next(0, 100);
@@ -734,5 +737,77 @@ namespace Pulsar4X.ECSLib
             ruins.RuinCount = (uint)GMath.SelectFromRange(GalaxyFactory.Settings.RuinsCountRangeBySize[ruins.RuinSize], system.RNG.NextDouble());
             ruins.RuinCount = (uint)Math.Round(GalaxyFactory.Settings.RuinsQuilityAdjustment[ruins.RuinQuality] * ruins.RuinCount);
         }
+
+        /// <summary>
+        /// This function ranomly generats minerals for a given system body. 
+        /// Generation take into consideration the abundence of the mineral 
+        /// and the bodies ratio of mass vs earth.
+        /// </summary>
+        public static void MineralGeneration(StarSystem system, Entity body)
+        {
+            var bodyInfo = body.GetDataBlob<SystemBodyDB>();
+            var bodyMass = body.GetDataBlob<MassVolumeDB>();
+
+            // get the mass ratio for this body to earth:
+            double massRatio = bodyMass.Mass / GameSettings.Units.EarthMassInKG;
+            double genChance = massRatio * system.RNG.NextDouble();
+            double genChanceThreshold = GalaxyFactory.Settings.MineralGenerationChanceByBodyType[bodyInfo.Type];
+
+            // now lets see if this body has minerals
+            if (BodyType.Comet != bodyInfo.Type // comets always have minerals.
+                && genChance < genChanceThreshold)
+            {
+                // check faild return:
+                return;
+            }
+
+            // create some temp vars:
+            double abundance;
+
+            // this body has at least some minerals, lets generate them:
+            foreach (var min in StaticDataManager.StaticDataStore.Minerals)
+            {
+                // create a MineralDepositInfo
+                MineralDepositInfo mdi = new MineralDepositInfo();
+
+                // get a genChance:
+                abundance = min.Abundance[bodyInfo.Type];
+                genChance = massRatio * system.RNG.NextDouble() * abundance;
+
+                if (genChance >= genChanceThreshold)
+                {
+                    mdi.Accessibility = GMath.Clamp(GalaxyFactory.Settings.MinMineralAccessibility + genChance, 0, 1);
+                    mdi.Amount = (int)Math.Round(GalaxyFactory.Settings.MaxMineralAmmountByBodyType[bodyInfo.Type] * genChance);
+                    mdi.HalfOriginalAmount = mdi.Amount / 2;
+
+                    bodyInfo.Minerals.Add(min.ID, mdi);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This generates the rich assortment of all minerals for a homeworld. 
+        /// This function should be used when creating homewoerlds for the player race(s) or NPR Races.
+        /// This function can also be used by the Space Master (not directly, but it is public for this reason).
+        /// This function ensures that there is at least 50000 of every mineral and that every mineral has 
+        /// an accissibility of at least 0.5.
+        /// </summary>
+        public static void HomeworldMineralGeneration(StarSystem system, Entity body)
+        {
+            var bodyInfo = body.GetDataBlob<SystemBodyDB>();
+            bodyInfo.Minerals.Clear();  // because this function can be called on exisiting bodies we need to clear any existing minerals.
+
+            foreach (var min in StaticDataManager.StaticDataStore.Minerals)
+            {
+                // create a MineralDepositInfo
+                MineralDepositInfo mdi = new MineralDepositInfo();
+                mdi.Accessibility = GMath.Clamp(GalaxyFactory.Settings.MinHomeworldMineralAccessibility + system.RNG.NextDouble() * min.Abundance[bodyInfo.Type], 0, 1);
+                mdi.Amount = (int)Math.Round(GalaxyFactory.Settings.MinHomeworldMineralAmmount + GalaxyFactory.Settings.HomeworldMineralAmmount * system.RNG.NextDouble() * min.Abundance[bodyInfo.Type]);
+                mdi.HalfOriginalAmount = mdi.Amount / 2;
+
+                bodyInfo.Minerals.Add(min.ID, mdi);
+            }
+        }
+
     }
 }

@@ -284,6 +284,9 @@ namespace Pulsar4X.ECSLib
 
             Settings.TerrestrialBodyTectonicActiviyChance = 0.5;
 
+            // Epoch used when generating orbits for sol. There should be no reason to change this.
+            Settings.J2000 = new DateTime(2000, 1, 1, 12, 0, 0);
+
             Settings.MiniumPossibleDayLength = 6;
 
             Settings.MinMoonOrbitMultiplier = 2.5;
@@ -709,6 +712,39 @@ namespace Pulsar4X.ECSLib
                 {RuinsDB.RQuality.PartiallyIntact, 1.75},
                 {RuinsDB.RQuality.Intact, 2.0},
                 {RuinsDB.RQuality.MultipleIntact, 3.0}
+            };
+
+
+            Settings.MinMineralAccessibility = 0.1;
+
+            Settings.MinHomeworldMineralAccessibility = 0.5;
+
+            Settings.MinHomeworldMineralAmmount = 50000;
+
+            Settings.HomeworldMineralAmmount = 100000;
+
+            Settings.MineralGenerationChanceByBodyType = new JDictionary<BodyType, double>()
+            {
+                {BodyType.GasGiant, 0.4},
+                {BodyType.IceGiant, 0.33},
+                {BodyType.GasDwarf, 0.3},
+                {BodyType.Terrestrial, 0.5},
+                {BodyType.Moon, 0.15},
+                {BodyType.DwarfPlanet, 0.15},
+                {BodyType.Comet, 1},
+                {BodyType.Asteroid, 0.1},
+            };
+
+            Settings.MaxMineralAmmountByBodyType = new JDictionary<BodyType, int>()
+            {
+                {BodyType.GasGiant, 100000000},
+                {BodyType.IceGiant, 50000000},
+                {BodyType.GasDwarf, 10000000},
+                {BodyType.Terrestrial, 5000000},
+                {BodyType.Moon, 1000000},
+                {BodyType.DwarfPlanet, 500000},
+                {BodyType.Comet, 100000},
+                {BodyType.Asteroid, 50000},
             };
 
             #endregion
