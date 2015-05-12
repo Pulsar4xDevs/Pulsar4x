@@ -158,7 +158,7 @@ namespace Pulsar4X.Tests
         }
 
         [Test]
-        [Ignore("Long running stress test.")]
+        //[Ignore("Long running stress test.")]
         public void OrbitStressTest()
         {
             var game = new Game(); // init the game class as we will need it for these tests.

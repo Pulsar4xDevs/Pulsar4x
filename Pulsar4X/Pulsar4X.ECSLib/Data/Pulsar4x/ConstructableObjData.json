@@ -15,7 +15,7 @@
             },
             "BuildPoints": 1,
             "WealthCost": 0,
-            "ConstructionTypeRequirement" : "FuelRefinery"
+            "ConstructionTypeRequirement" : "Refinery"
         }
     ]
 }

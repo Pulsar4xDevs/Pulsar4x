@@ -38,6 +38,7 @@ namespace Pulsar4X.ECSLib
         /// </summary>
         public List<ConstructionJob> InstallationJobs { get; set; }
         public List<ConstructionJob> OrdnanceJobs { get; set; }
+        public List<ConstructionJob> ComponentJobs { get; set; }
         public List<ConstructionJob> FigherJobs { get; set; }
         public List<ConstructionJob> RefinaryJobs { get; set; }
         public InstallationsDB()
@@ -46,6 +47,7 @@ namespace Pulsar4X.ECSLib
             WorkingInstallations = new JDictionary<Guid, int>();
             EmploymentList = new List<InstallationEmployment>();
             InstallationJobs = new List<ConstructionJob>();
+            ComponentJobs = new List<ConstructionJob>(); 
             OrdnanceJobs = new List<ConstructionJob>();
             FigherJobs = new List<ConstructionJob>();
         }
@@ -56,6 +58,7 @@ namespace Pulsar4X.ECSLib
             WorkingInstallations = new JDictionary<Guid, int>(db.WorkingInstallations);
             EmploymentList = new List<InstallationEmployment>(db.EmploymentList);
             InstallationJobs = new List<ConstructionJob>(db.InstallationJobs);
+            ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);
             OrdnanceJobs = new List<ConstructionJob>(db.OrdnanceJobs);
             FigherJobs = new List<ConstructionJob>(db.FigherJobs);
         }

@@ -129,6 +129,10 @@ namespace Pulsar4X.ECSLib
                 }
             }
 
+            //build components. this uses the same ability as installation construction tho...
+            var componentJobs = installations.ComponentJobs;
+           
+
             //Build Ordnance
             var ordnanceJobs = installations.OrdnanceJobs;
             float ordnancePoints = InstallationAbilityofType(installations, AbilityType.Refinery);
