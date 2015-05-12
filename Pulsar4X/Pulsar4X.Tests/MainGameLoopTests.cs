@@ -20,19 +20,19 @@ namespace Pulsar4X.Tests
             game = new Game();
 
             Entity faction = FactionFactory.CreateFaction(game.GlobalManager, "1");
-            game.EngineComms.AddFaction(faction);
+            game.EngineComms.AddFaction(faction.Guid);
 
             faction = FactionFactory.CreateFaction(game.GlobalManager, "2");
-            game.EngineComms.AddFaction(faction);
+            game.EngineComms.AddFaction(faction.Guid);
 
             faction = FactionFactory.CreateFaction(game.GlobalManager, "3");
-            game.EngineComms.AddFaction(faction);
+            game.EngineComms.AddFaction(faction.Guid);
 
             faction = FactionFactory.CreateFaction(game.GlobalManager, "4");
-            game.EngineComms.AddFaction(faction);
+            game.EngineComms.AddFaction(faction.Guid);
 
             faction = FactionFactory.CreateFaction(game.GlobalManager, "5");
-            game.EngineComms.AddFaction(faction);
+            game.EngineComms.AddFaction(faction.Guid);
         }
 
         [TearDown]

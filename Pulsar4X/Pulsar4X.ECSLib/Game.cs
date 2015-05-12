@@ -83,6 +83,9 @@ namespace Pulsar4X.ECSLib
 
             EngineComms = new EngineComms();
 
+            // make sure we have defalt galaxy settings:
+            GalaxyFactory.InitToDefaultSettings();
+
             // Setup processors.
             InitializeProcessors();
         }
@@ -119,16 +122,28 @@ namespace Pulsar4X.ECSLib
                     continue; // go back and check again.
                 }
 
+                // start by checking the default queue, this queue always exisits and is used 
+                // for init and important, faction neutral, messages.
+                Message message;
+                if (EngineComms.LibPeekFactionInQueue(Guid.Empty, out message) && IsMessageValid(message))
+                {
+                    // we have a valid message we had better take it out of the queue:
+                    message = EngineComms.LibReadFactionInQueue(Guid.Empty);
+
+                    // process it:
+                    ProcessMessage(null, message, ref quit);
+                    messageProcessed = true;
+                }
+
                 // loop through all the incoming queues looking for a new message:
                 List<Entity> factions = GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>();
                 foreach (Entity faction in factions)
                 {
                     // lets just take a peek first:
-                    Message message;
-                    if (EngineComms.LibPeekFactionInQueue(faction, out message) && IsMessageValid(message))
+                    if (EngineComms.LibPeekFactionInQueue(faction.Guid, out message) && IsMessageValid(message))
                     {
                         // we have a valid message we had better take it out of the queue:
-                        message = EngineComms.LibReadFactionInQueue(faction);
+                        message = EngineComms.LibReadFactionInQueue(faction.Guid);
 
                         // process it:
                         ProcessMessage(faction, message, ref quit);
@@ -156,6 +171,9 @@ namespace Pulsar4X.ECSLib
             return true; // we will do this until we have messages that can be invalid!!
         }
 
+        /// <summary>
+        /// Process messages. Note that Faction can be null if the message cam in through the default queue.
+        /// </summary>
         private void ProcessMessage(Entity faction, Message message, ref bool quit)
         {
             if (message == null)
@@ -185,7 +203,10 @@ namespace Pulsar4X.ECSLib
                     EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(Message.MessageType.GameStatusUpdate, "Loaded from " + loadPath));
                     break;
                 case Message.MessageType.Echo:
-                    EngineComms.LibWriteOutQueue(faction, message);     // echo chamber ;)
+                    if (faction == null)
+                        EngineComms.LibWriteOutQueue(Guid.Empty, message);     // echo chamber ;)
+                    else
+                        EngineComms.LibWriteOutQueue(faction.Guid, message);     // echo chamber ;)
                     break;
                 default:
                     throw new System.Exception("Message of type: " + message.Type.ToString() + ", Went unprocessed.");
