@@ -38,7 +38,7 @@ namespace Pulsar4X.Tests
             Assert.AreEqual(_fakeFaction.Guid, _messageBook.Faction);
 
 
-            _messageBook.InMessageQueue.Enqueue(new Message(Message.MessageType.Echo, 42));
+            _messageBook.InMessageQueue.Enqueue(new Message(MessageType.Echo, 42));
             Assert.AreEqual(1, _messageBook.InMessageQueue.Count);
 
             Message message = null;

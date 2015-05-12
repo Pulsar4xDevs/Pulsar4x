@@ -183,26 +183,26 @@ namespace Pulsar4X.ECSLib
 
             switch (message.Type)
             {
-                case Message.MessageType.Quit:
+                case MessageType.Quit:
                     quit = true;                                        // cause the game to quit!
                     break;
-                case Message.MessageType.Save:
+                case MessageType.Save:
                     string savePath = message.Data as string;
                     if(string.IsNullOrWhiteSpace(savePath))
                         break;
                     SaveGame saveGame = new SaveGame(savePath);
                     saveGame.Save();
-                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(Message.MessageType.GameStatusUpdate, "Saved to " + savePath));
+                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(MessageType.GameStatusUpdate, "Saved to " + savePath));
                     break;
-                case Message.MessageType.Load:
+                case MessageType.Load:
                     string loadPath = message.Data as string;
                     if(string.IsNullOrWhiteSpace(loadPath))
                         break;
                     SaveGame loadGame = new SaveGame(loadPath);
                     loadGame.Load(loadPath);
-                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(Message.MessageType.GameStatusUpdate, "Loaded from " + loadPath));
+                    EngineComms.FirstOrDefault().OutMessageQueue.Enqueue(new Message(MessageType.GameStatusUpdate, "Loaded from " + loadPath));
                     break;
-                case Message.MessageType.Echo:
+                case MessageType.Echo:
                     if (faction == null)
                         EngineComms.LibWriteOutQueue(Guid.Empty, message);     // echo chamber ;)
                     else
