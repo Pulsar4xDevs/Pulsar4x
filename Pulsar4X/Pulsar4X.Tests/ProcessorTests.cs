@@ -156,5 +156,13 @@ namespace Pulsar4X.Tests
 
             //todo there's probilby some edge cases to check.
         }
+
+        [Test]
+        public void TestEconTick()
+        {
+            Game.Instance.AdvanceTime(68300);
+            Game.Instance.AdvanceTime(100);
+            Game.Instance.AdvanceTime(68400);
+        }
     }
 }

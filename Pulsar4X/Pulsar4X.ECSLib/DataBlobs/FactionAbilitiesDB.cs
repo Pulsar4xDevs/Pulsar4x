@@ -49,7 +49,7 @@ namespace Pulsar4X.ECSLib
         /// Default faction abilities constructor.
         /// </summary>
         public FactionAbilitiesDB()
-            : this(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.001f, 250, 1.0f, 1.0f)
+            : this(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.001f, 250, 1.0f, 1.0f)
         {
 
         }
@@ -57,6 +57,7 @@ namespace Pulsar4X.ECSLib
         public FactionAbilitiesDB(float constructionBonus,
             float fighterConstructionBonus,
             float miningBonus,
+            float refiningBonus,
             float ordnanceConstructionBonus,
             float researchBonus,
             float shipAsseblyBonus,
@@ -74,6 +75,7 @@ namespace Pulsar4X.ECSLib
             AbilityBonuses.Add(AbilityType.GenericConstruction, constructionBonus);
             AbilityBonuses.Add(AbilityType.FighterConstruction, fighterConstructionBonus);
             AbilityBonuses.Add(AbilityType.Mine, miningBonus);
+            AbilityBonuses.Add(AbilityType.Refinery, refiningBonus);
             AbilityBonuses.Add(AbilityType.OrdnanceConstruction, ordnanceConstructionBonus);
             AbilityBonuses.Add(AbilityType.Research, researchBonus);
             AbilityBonuses.Add(AbilityType.ShipAssembly, shipAsseblyBonus);

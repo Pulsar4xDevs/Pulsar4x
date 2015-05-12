@@ -52,6 +52,7 @@ namespace Pulsar4X.ECSLib
             ComponentStockpile = new JDictionary<Guid, float>();
             OrdananceStockpile = new JDictionary<Guid, float>();
             FighterStockpile = new List<Entity>();
+            Scientists = new List<Entity>();
         }
 
         public ColonyInfoDB(Entity species, long populationCount, Entity planet):this(
@@ -70,6 +71,7 @@ namespace Pulsar4X.ECSLib
             ComponentStockpile = new JDictionary<Guid, float>(colonyInfoDB.ComponentStockpile);
             OrdananceStockpile = new JDictionary<Guid, float>(colonyInfoDB.OrdananceStockpile);
             FighterStockpile = new List<Entity>(colonyInfoDB.FighterStockpile);
+            Scientists = new List<Entity>(colonyInfoDB.Scientists);
         }
 
         public override object Clone()

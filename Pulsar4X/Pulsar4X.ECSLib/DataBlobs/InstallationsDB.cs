@@ -50,6 +50,7 @@ namespace Pulsar4X.ECSLib
             ComponentJobs = new List<ConstructionJob>(); 
             OrdnanceJobs = new List<ConstructionJob>();
             FigherJobs = new List<ConstructionJob>();
+            RefinaryJobs = new List<ConstructionJob>();
         }
 
         public InstallationsDB(InstallationsDB db)
@@ -61,6 +62,7 @@ namespace Pulsar4X.ECSLib
             ComponentJobs = new List<ConstructionJob>(db.ComponentJobs);
             OrdnanceJobs = new List<ConstructionJob>(db.OrdnanceJobs);
             FigherJobs = new List<ConstructionJob>(db.FigherJobs);
+            RefinaryJobs = new List<ConstructionJob>(db.RefinaryJobs);
         }
 
         public override object Clone()

@@ -93,11 +93,12 @@ namespace Pulsar4X.ECSLib
         private static void InitializeProcessors()
         {
             OrbitProcessor.Initialize();
-
+            InstallationProcessor.Initialize();
             _processors = new List<ProcessorFunction>
             {
                 // Defines the order that processors are run.
-                OrbitProcessor.Process
+                OrbitProcessor.Process,
+                InstallationProcessor.Process
             };
         }
 
