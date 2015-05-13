@@ -162,6 +162,7 @@ namespace ModdingTools.JsonDataEditor
             if(requirementsListBox.Items.Cast<DataHolder>().Any(dataHolder => dataHolder.Guid == ((DataHolder)availibleTechs.SelectedItem).Guid))
                 return;
             requirementsListBox.Items.Add(availibleTechs.SelectedItem);
+            GatherAndUpdateData();
         }
 
         private void removeRequirementButton_Click(object sender, EventArgs e)
@@ -169,6 +170,7 @@ namespace ModdingTools.JsonDataEditor
             if(requirementsListBox.SelectedItem == null)
                 return;
             requirementsListBox.Items.RemoveAt(requirementsListBox.SelectedIndex);
+            GatherAndUpdateData();
         }
 
         private void newTechButton_Click(object sender, EventArgs e)
@@ -206,6 +208,14 @@ namespace ModdingTools.JsonDataEditor
         private void mainMenuButton_Click(object sender, EventArgs e)
         {
             Data.MainWindow.SetMode(WindowModes.LoadingWindow);
+        }
+
+        private void availibleTechs_MouseDoubleClick(object sender, EventArgs e)
+        {
+            if (availibleTechs.SelectedItem == null)
+                return;
+            _selectedItemGuid = ((DataHolder)availibleTechs.SelectedItem).Guid;
+            UpdateSelectedItem();
         }
     }
 }

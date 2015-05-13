@@ -148,7 +148,7 @@
       {
         "Key": "5d6de2ac-a75a-42de-b819-154b149a1852",
         "Value": {
-          "Name": "Genome Seauence: Base Oxygen Level +10%",
+          "Name": "Genome Sequence: Base Oxygen Level +10%",
           "Description": "The amount by which the new midpoint of the oxygen tolerance differs from that of the base species.",
           "Category": "BiologyGenetics",
           "ID": "5d6de2ac-a75a-42de-b819-154b149a1852",
@@ -1106,7 +1106,7 @@
         "Key": "49b04abc-98e8-4222-b83b-526725567960",
         "Value": {
           "Name": "Fighter Production Rate 12 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "49b04abc-98e8-4222-b83b-526725567960",
           "Requirements": [
@@ -1119,7 +1119,7 @@
         "Key": "a01bc82a-b618-4bb6-9331-abae815fa1eb",
         "Value": {
           "Name": "Fighter Production Rate 14 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "a01bc82a-b618-4bb6-9331-abae815fa1eb",
           "Requirements": [
@@ -1132,7 +1132,7 @@
         "Key": "237a3cdd-3e9c-484f-b4eb-95d3fde34cfe",
         "Value": {
           "Name": "Fighter Production Rate 16 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "237a3cdd-3e9c-484f-b4eb-95d3fde34cfe",
           "Requirements": [
@@ -1145,7 +1145,7 @@
         "Key": "d777d8c8-6a26-49d9-b13e-24817243cf7f",
         "Value": {
           "Name": "Fighter Production Rate 20 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "d777d8c8-6a26-49d9-b13e-24817243cf7f",
           "Requirements": [
@@ -1158,7 +1158,7 @@
         "Key": "83fa8939-4b35-4753-a82c-07e40d370c0b",
         "Value": {
           "Name": "Fighter Production Rate 25 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "83fa8939-4b35-4753-a82c-07e40d370c0b",
           "Requirements": [
@@ -1171,7 +1171,7 @@
         "Key": "7829840e-c52e-452f-9731-af7c5f89d654",
         "Value": {
           "Name": "Fighter Production Rate 30 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "7829840e-c52e-452f-9731-af7c5f89d654",
           "Requirements": [
@@ -1184,7 +1184,7 @@
         "Key": "4cced64f-26b6-416d-9523-8f901684e438",
         "Value": {
           "Name": "Fighter Production Rate 35 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "4cced64f-26b6-416d-9523-8f901684e438",
           "Requirements": [
@@ -1197,7 +1197,7 @@
         "Key": "0d8f028c-c0aa-4f64-b9c6-70de6aec57e4",
         "Value": {
           "Name": "Fighter Production Rate 40 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "0d8f028c-c0aa-4f64-b9c6-70de6aec57e4",
           "Requirements": [
@@ -1210,7 +1210,7 @@
         "Key": "4dc059c9-181b-4cba-b247-2c7ed151f420",
         "Value": {
           "Name": "Fighter Production Rate 50 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "4dc059c9-181b-4cba-b247-2c7ed151f420",
           "Requirements": [
@@ -1223,7 +1223,7 @@
         "Key": "6e1ee67d-2a98-4b71-bc53-db066441f44a",
         "Value": {
           "Name": "Fighter Production Rate 60 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "6e1ee67d-2a98-4b71-bc53-db066441f44a",
           "Requirements": [
@@ -1236,7 +1236,7 @@
         "Key": "c1066ce4-0c7f-4721-ab47-2ec469f8231b",
         "Value": {
           "Name": "Fighter Production Rate 70 BP",
-          "Description": "",
+          "Description": "Annual production rate for a Fighter Factory",
           "Category": "ConstructionProduction",
           "ID": "c1066ce4-0c7f-4721-ab47-2ec469f8231b",
           "Requirements": [
@@ -1249,7 +1249,7 @@
         "Key": "f29ff239-fe68-4fd4-a7ac-877c991d5312",
         "Value": {
           "Name": "Fuel Production 24000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "f29ff239-fe68-4fd4-a7ac-877c991d5312",
           "Requirements": [
@@ -1262,7 +1262,7 @@
         "Key": "02ba91c4-481f-4da0-bafa-eb7df3e616a9",
         "Value": {
           "Name": "Fuel Production 28000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "02ba91c4-481f-4da0-bafa-eb7df3e616a9",
           "Requirements": [
@@ -1275,7 +1275,7 @@
         "Key": "ee369ee3-8770-4d42-a56c-3844f06434b7",
         "Value": {
           "Name": "Fuel Production 32000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "ee369ee3-8770-4d42-a56c-3844f06434b7",
           "Requirements": [
@@ -1288,7 +1288,7 @@
         "Key": "de92e7c9-6b48-4e92-b238-3814c5a98a05",
         "Value": {
           "Name": "Fuel Production 40000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "de92e7c9-6b48-4e92-b238-3814c5a98a05",
           "Requirements": [
@@ -1301,7 +1301,7 @@
         "Key": "70861369-23e0-481c-923f-4c63bb11412f",
         "Value": {
           "Name": "Fuel Production 50000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "70861369-23e0-481c-923f-4c63bb11412f",
           "Requirements": [
@@ -1314,7 +1314,7 @@
         "Key": "ea9e7985-e587-4ab3-8b3a-bdbdaa92e551",
         "Value": {
           "Name": "Fuel Production 60000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "ea9e7985-e587-4ab3-8b3a-bdbdaa92e551",
           "Requirements": [
@@ -1327,7 +1327,7 @@
         "Key": "9cb63b1b-e2f2-4fed-9b19-3eb92d48e18b",
         "Value": {
           "Name": "Fuel Production 72000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "9cb63b1b-e2f2-4fed-9b19-3eb92d48e18b",
           "Requirements": [
@@ -1340,7 +1340,7 @@
         "Key": "b6c522d6-288f-4895-b356-2596c0b8e331",
         "Value": {
           "Name": "Fuel Production 84000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "b6c522d6-288f-4895-b356-2596c0b8e331",
           "Requirements": [
@@ -1353,7 +1353,7 @@
         "Key": "5b3731ec-5dbb-4b9e-9529-4a1eb86ea9d9",
         "Value": {
           "Name": "Fuel Production 100000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "5b3731ec-5dbb-4b9e-9529-4a1eb86ea9d9",
           "Requirements": [
@@ -1366,7 +1366,7 @@
         "Key": "b665e3f3-d507-4c88-8ff4-bcadc6dd0b76",
         "Value": {
           "Name": "Fuel Production 120000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "b665e3f3-d507-4c88-8ff4-bcadc6dd0b76",
           "Requirements": [
@@ -1379,7 +1379,7 @@
         "Key": "68a172d8-f269-4cce-8599-1559041aa03b",
         "Value": {
           "Name": "Fuel Production 140000 Litres",
-          "Description": "",
+          "Description": "The annual fuel production for each Fuel Refinery.",
           "Category": "ConstructionProduction",
           "ID": "68a172d8-f269-4cce-8599-1559041aa03b",
           "Requirements": [
@@ -1392,7 +1392,7 @@
         "Key": "9fdc5b1a-49cf-4c0c-a8ee-9362b399557d",
         "Value": {
           "Name": "Small Jump Gate Construction Module",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 360 days.",
           "Category": "ConstructionProduction",
           "ID": "9fdc5b1a-49cf-4c0c-a8ee-9362b399557d",
           "Requirements": [
@@ -1405,7 +1405,7 @@
         "Key": "6059a43f-515d-4f53-878d-f584fc034a58",
         "Value": {
           "Name": "Jump Gate Construction Module 180",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 180 days.",
           "Category": "ConstructionProduction",
           "ID": "6059a43f-515d-4f53-878d-f584fc034a58",
           "Requirements": [
@@ -1418,7 +1418,7 @@
         "Key": "67a101ce-2f06-4ca7-9efd-5d41db0b854c",
         "Value": {
           "Name": "Jump Gate Construction Module 150",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 150 days.",
           "Category": "ConstructionProduction",
           "ID": "67a101ce-2f06-4ca7-9efd-5d41db0b854c",
           "Requirements": [
@@ -1431,7 +1431,7 @@
         "Key": "2a25225f-f79d-40dc-a6c4-2300a503e2cf",
         "Value": {
           "Name": "Jump Gate Construction Module 120",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 120 days.",
           "Category": "ConstructionProduction",
           "ID": "2a25225f-f79d-40dc-a6c4-2300a503e2cf",
           "Requirements": [
@@ -1444,7 +1444,7 @@
         "Key": "790fa9b9-4329-464f-8374-21547e421209",
         "Value": {
           "Name": "Jump Gate Construction Module 90",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 90 days.",
           "Category": "ConstructionProduction",
           "ID": "790fa9b9-4329-464f-8374-21547e421209",
           "Requirements": [
@@ -1457,7 +1457,7 @@
         "Key": "9f905b0c-5f70-429c-bc13-435ec8c6ff1a",
         "Value": {
           "Name": "Jump Gate Construction Module 60",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 60 days.",
           "Category": "ConstructionProduction",
           "ID": "9f905b0c-5f70-429c-bc13-435ec8c6ff1a",
           "Requirements": [
@@ -1470,7 +1470,7 @@
         "Key": "e6aa23d3-c6b4-4c9d-bc14-84629ba2d085",
         "Value": {
           "Name": "Jump Gate Construction Module 45",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 45 days.",
           "Category": "ConstructionProduction",
           "ID": "e6aa23d3-c6b4-4c9d-bc14-84629ba2d085",
           "Requirements": [
@@ -1483,7 +1483,7 @@
         "Key": "ac7f1482-5bac-4efd-8d79-d2435bd91011",
         "Value": {
           "Name": "Jump Gate Construction Module 30",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 30 days.",
           "Category": "ConstructionProduction",
           "ID": "ac7f1482-5bac-4efd-8d79-d2435bd91011",
           "Requirements": [
@@ -1496,7 +1496,7 @@
         "Key": "d5db7176-ff93-471d-b06e-6e25bb88c314",
         "Value": {
           "Name": "Jump Gate Construction Module 20",
-          "Description": "",
+          "Description": "A ship equipped with this module can construct a jump gate in 20 days.",
           "Category": "ConstructionProduction",
           "ID": "d5db7176-ff93-471d-b06e-6e25bb88c314",
           "Requirements": [
@@ -1509,7 +1509,7 @@
         "Key": "9be1305f-f206-46dd-8901-af4ae55c5429",
         "Value": {
           "Name": "Mining Production 12 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "9be1305f-f206-46dd-8901-af4ae55c5429",
           "Requirements": [
@@ -1522,7 +1522,7 @@
         "Key": "72c3316e-80ae-479f-adf4-2aed4117fc9d",
         "Value": {
           "Name": "Mining Production 14 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "72c3316e-80ae-479f-adf4-2aed4117fc9d",
           "Requirements": [
@@ -1535,7 +1535,7 @@
         "Key": "c9f70fcc-f74f-4486-9b4a-feec7c8cd9a3",
         "Value": {
           "Name": "Mining Production 16 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "c9f70fcc-f74f-4486-9b4a-feec7c8cd9a3",
           "Requirements": [
@@ -1548,7 +1548,7 @@
         "Key": "3b2a21b2-9b95-4ba7-8d8a-8bf30c71c8ef",
         "Value": {
           "Name": "Mining Production 20 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "3b2a21b2-9b95-4ba7-8d8a-8bf30c71c8ef",
           "Requirements": [
@@ -1561,7 +1561,7 @@
         "Key": "8f256392-c356-41af-8b0c-0e6af52b806d",
         "Value": {
           "Name": "Mining Production 25 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "8f256392-c356-41af-8b0c-0e6af52b806d",
           "Requirements": [
@@ -1574,7 +1574,7 @@
         "Key": "fad887c2-bfcb-43ef-a6d5-3f667ec77418",
         "Value": {
           "Name": "Mining Production 30 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "fad887c2-bfcb-43ef-a6d5-3f667ec77418",
           "Requirements": [
@@ -1587,7 +1587,7 @@
         "Key": "b171f995-856d-4472-8b0f-bd422d2afef4",
         "Value": {
           "Name": "Mining Production 36 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "b171f995-856d-4472-8b0f-bd422d2afef4",
           "Requirements": [
@@ -1600,7 +1600,7 @@
         "Key": "85404693-d418-413b-b53e-b7c1f74bf09f",
         "Value": {
           "Name": "Mining Production 42 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "85404693-d418-413b-b53e-b7c1f74bf09f",
           "Requirements": [
@@ -1613,7 +1613,7 @@
         "Key": "2969e497-6aa3-425c-82c7-a4cc3debbd2a",
         "Value": {
           "Name": "Mining Production 50 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "2969e497-6aa3-425c-82c7-a4cc3debbd2a",
           "Requirements": [
@@ -1626,7 +1626,7 @@
         "Key": "a2797472-9be7-4d68-a213-7548f8921e4c",
         "Value": {
           "Name": "Mining Production 60 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "a2797472-9be7-4d68-a213-7548f8921e4c",
           "Requirements": [
@@ -1639,7 +1639,7 @@
         "Key": "f384d5c7-55d9-400c-94f1-49d50633c275",
         "Value": {
           "Name": "Mining Production 70 tons",
-          "Description": "",
+          "Description": "Annual production of accessibility 1.0 minerals for each mine or automated mine. Small amounts of lower accessibility minerals will be produced; half annual rate for 0.5 accesssibility, one tenth annual rate for 0.1 accessibility, etc.",
           "Category": "ConstructionProduction",
           "ID": "f384d5c7-55d9-400c-94f1-49d50633c275",
           "Requirements": [
@@ -1652,7 +1652,7 @@
         "Key": "ef05c4a7-bc53-42fe-8e09-6e6290a31bc4",
         "Value": {
           "Name": "Normal Shipyard Operations",
-          "Description": "",
+          "Description": "The ability to make changes to shipyards, such as adding slipways and capacity or retooling for different classes.",
           "Category": "ConstructionProduction",
           "ID": "ef05c4a7-bc53-42fe-8e09-6e6290a31bc4",
           "Requirements": [],
@@ -1663,7 +1663,7 @@
         "Key": "def1f60c-6895-43e5-8f25-54690d550385",
         "Value": {
           "Name": "Research Rate 240 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "def1f60c-6895-43e5-8f25-54690d550385",
           "Requirements": [
@@ -1676,7 +1676,7 @@
         "Key": "0c520beb-9216-45d2-94ac-b055b294c7a0",
         "Value": {
           "Name": "Research Rate 280 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "0c520beb-9216-45d2-94ac-b055b294c7a0",
           "Requirements": [
@@ -1689,7 +1689,7 @@
         "Key": "c02d2734-962a-4692-b5bb-b7017f973fe7",
         "Value": {
           "Name": "Research Rate 320 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "c02d2734-962a-4692-b5bb-b7017f973fe7",
           "Requirements": [
@@ -1702,7 +1702,7 @@
         "Key": "4497f489-f16d-495c-ba76-a9293791f544",
         "Value": {
           "Name": "Research Rate 400 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "4497f489-f16d-495c-ba76-a9293791f544",
           "Requirements": [
@@ -1715,7 +1715,7 @@
         "Key": "cd9063fd-7f39-41e1-8d34-f016d6bc573a",
         "Value": {
           "Name": "Research Rate 500 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "cd9063fd-7f39-41e1-8d34-f016d6bc573a",
           "Requirements": [
@@ -1728,7 +1728,7 @@
         "Key": "1dae0747-c841-4fdb-a6f4-5f70ebd700f0",
         "Value": {
           "Name": "Research Rate 600 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "1dae0747-c841-4fdb-a6f4-5f70ebd700f0",
           "Requirements": [
@@ -1741,7 +1741,7 @@
         "Key": "9d980849-918b-4707-997d-d644231db923",
         "Value": {
           "Name": "Research Rate 720 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "9d980849-918b-4707-997d-d644231db923",
           "Requirements": [
@@ -1754,7 +1754,7 @@
         "Key": "443ad774-5454-45a5-9f1d-d0849858d904",
         "Value": {
           "Name": "Research Rate 840 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "443ad774-5454-45a5-9f1d-d0849858d904",
           "Requirements": [
@@ -1767,7 +1767,7 @@
         "Key": "cf4dcaae-01d1-412e-a05c-01909ec8c6e7",
         "Value": {
           "Name": "Research Rate 1000 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "cf4dcaae-01d1-412e-a05c-01909ec8c6e7",
           "Requirements": [
@@ -1780,7 +1780,7 @@
         "Key": "b636421d-abff-48c8-8721-f83112273e46",
         "Value": {
           "Name": "Research Rate 1200 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "b636421d-abff-48c8-8721-f83112273e46",
           "Requirements": [
@@ -1793,7 +1793,7 @@
         "Key": "2cab12a7-a595-4161-8524-b747c91ef322",
         "Value": {
           "Name": "Research Rate 1500 RP",
-          "Description": "",
+          "Description": "The basic number of research points produced by each Research Facility per year. This can be increased by the research bonus of the scientist leading the project.",
           "Category": "ConstructionProduction",
           "ID": "2cab12a7-a595-4161-8524-b747c91ef322",
           "Requirements": [
@@ -1806,7 +1806,7 @@
         "Key": "4247cc6c-7827-4f43-ab79-076a79d209d8",
         "Value": {
           "Name": "Shipbuilding Rate 560 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "4247cc6c-7827-4f43-ab79-076a79d209d8",
           "Requirements": [
@@ -1819,7 +1819,7 @@
         "Key": "c9ae8a30-18b6-4ad3-b2e0-d161ca0c4d4d",
         "Value": {
           "Name": "Shipbuilding Rate 750 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "c9ae8a30-18b6-4ad3-b2e0-d161ca0c4d4d",
           "Requirements": [
@@ -1832,7 +1832,7 @@
         "Key": "370d7765-c39d-410b-b0f6-32e2d42ac2dd",
         "Value": {
           "Name": "Shipbuilding Rate 1000 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "370d7765-c39d-410b-b0f6-32e2d42ac2dd",
           "Requirements": [
@@ -1845,7 +1845,7 @@
         "Key": "b0e4337f-c148-4838-90ce-ea354221626f",
         "Value": {
           "Name": "Shipbuilding Rate 1300 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "b0e4337f-c148-4838-90ce-ea354221626f",
           "Requirements": [
@@ -1858,7 +1858,7 @@
         "Key": "f453e876-07ed-4e98-a9bb-c3f82c5c28c2",
         "Value": {
           "Name": "Shipbuilding Rate 1600 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "f453e876-07ed-4e98-a9bb-c3f82c5c28c2",
           "Requirements": [
@@ -1871,7 +1871,7 @@
         "Key": "f5d8e3c8-eabf-4a65-9078-955295bdf26b",
         "Value": {
           "Name": "Shipbuilding Rate 2100 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "f5d8e3c8-eabf-4a65-9078-955295bdf26b",
           "Requirements": [
@@ -1884,7 +1884,7 @@
         "Key": "f150308f-fa2d-4d4e-8eb8-4e132eef5ad0",
         "Value": {
           "Name": "Shipbuilding Rate 2750 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "f150308f-fa2d-4d4e-8eb8-4e132eef5ad0",
           "Requirements": [
@@ -1897,7 +1897,7 @@
         "Key": "c2f669f8-3b2d-47f2-9e0c-e0fcf7a86a1b",
         "Value": {
           "Name": "Shipbuilding Rate 3500 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "c2f669f8-3b2d-47f2-9e0c-e0fcf7a86a1b",
           "Requirements": [
@@ -1910,7 +1910,7 @@
         "Key": "b8ca16ce-766b-42e1-8261-53a3f354c278",
         "Value": {
           "Name": "Shipbuilding Rate 4600 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "b8ca16ce-766b-42e1-8261-53a3f354c278",
           "Requirements": [
@@ -1923,7 +1923,7 @@
         "Key": "a83754ba-e6bc-4346-8fea-f9e1986725ae",
         "Value": {
           "Name": "Shipbuilding Rate 6000 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "a83754ba-e6bc-4346-8fea-f9e1986725ae",
           "Requirements": [
@@ -1936,7 +1936,7 @@
         "Key": "2fccc20d-f796-4756-9056-898cb4b8df86",
         "Value": {
           "Name": "Shipbuilding Rate 8000 BP",
-          "Description": "",
+          "Description": "The number of build points produced by each Shipyard per year. This can be increased by the Shipbuilding bonus of the planetary governor.",
           "Category": "ConstructionProduction",
           "ID": "2fccc20d-f796-4756-9056-898cb4b8df86",
           "Requirements": [
@@ -1949,7 +1949,7 @@
         "Key": "271d4904-61dd-4239-8cbd-8c9b6aa54c07",
         "Value": {
           "Name": "Shipyard Operations: 5% Time/Cost Saving",
-          "Description": "",
+          "Description": "Making changes to shipyards, such as adding slipways and capacity or retooling for different classes requires 5% less time than normal.",
           "Category": "ConstructionProduction",
           "ID": "271d4904-61dd-4239-8cbd-8c9b6aa54c07",
           "Requirements": [
@@ -1963,7 +1963,7 @@
         "Key": "28faf3bf-5bac-443a-a5ca-ee3f97dc9d19",
         "Value": {
           "Name": "Shipyard Operations: 10% Time/Cost Saving",
-          "Description": "",
+          "Description": "Making changes to shipyards, such as adding slipways and capacity or retooling for different classes requires 10% less time than normal.",
           "Category": "ConstructionProduction",
           "ID": "28faf3bf-5bac-443a-a5ca-ee3f97dc9d19",
           "Requirements": [
@@ -1976,7 +1976,7 @@
         "Key": "f40ca629-cdf6-47d2-a9e6-1ee3e09fb7fc",
         "Value": {
           "Name": "Shipyard Operations: 20% Time/Cost Saving",
-          "Description": "",
+          "Description": "Making changes to shipyards, such as adding slipways and capacity or retooling for different classes requires 20% less time than normal.",
           "Category": "ConstructionProduction",
           "ID": "f40ca629-cdf6-47d2-a9e6-1ee3e09fb7fc",
           "Requirements": [
@@ -1989,7 +1989,7 @@
         "Key": "6ff7b2c5-f67c-41a9-8795-706536796686",
         "Value": {
           "Name": "Shipyard Operations: 30% Time/Cost Saving",
-          "Description": "",
+          "Description": "Making changes to shipyards, such as adding slipways and capacity or retooling for different classes requires 30% less time than normal.",
           "Category": "ConstructionProduction",
           "ID": "6ff7b2c5-f67c-41a9-8795-706536796686",
           "Requirements": [
@@ -2002,7 +2002,7 @@
         "Key": "3cf3d129-6c51-487a-a57f-6a0da1d472e3",
         "Value": {
           "Name": "Shipyard Operations: 40% Time/Cost Saving",
-          "Description": "",
+          "Description": "Making changes to shipyards, such as adding slipways and capacity or retooling for different classes requires 40% less time than normal.",
           "Category": "ConstructionProduction",
           "ID": "3cf3d129-6c51-487a-a57f-6a0da1d472e3",
           "Requirements": [
@@ -2015,7 +2015,7 @@
         "Key": "960ec49a-e7b8-48c7-b705-5214e0b5a71c",
         "Value": {
           "Name": "Shipyard Operations: 50% Time/Cost Saving",
-          "Description": "",
+          "Description": "Making changes to shipyards, such as adding slipways and capacity or retooling for different classes requires 50% less time than normal.",
           "Category": "ConstructionProduction",
           "ID": "960ec49a-e7b8-48c7-b705-5214e0b5a71c",
           "Requirements": [
@@ -2028,7 +2028,7 @@
         "Key": "30c576c7-5f68-485b-8572-73f1f2191439",
         "Value": {
           "Name": "Sorium Harvester",
-          "Description": "",
+          "Description": "A ship module that allows a ship to extract sorium from a gas giant and convert it into fuel. This works automatically if the ship is in orbit of a gas giant.",
           "Category": "ConstructionProduction",
           "ID": "30c576c7-5f68-485b-8572-73f1f2191439",
           "Requirements": [
@@ -2076,7 +2076,7 @@
         "Key": "92940bfd-c18a-45a9-b51e-eb08a1349058",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 3",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "92940bfd-c18a-45a9-b51e-eb08a1349058",
           "Requirements": [
@@ -2089,7 +2089,7 @@
         "Key": "0a80c4ce-d5fa-42fd-b176-5fcfd7c66af1",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 4.5",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "0a80c4ce-d5fa-42fd-b176-5fcfd7c66af1",
           "Requirements": [
@@ -2102,7 +2102,7 @@
         "Key": "3d0f9897-da8b-4b82-82a0-a94e4e2c1059",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 6",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "3d0f9897-da8b-4b82-82a0-a94e4e2c1059",
           "Requirements": [
@@ -2115,7 +2115,7 @@
         "Key": "b5dcc83a-5559-4341-8e87-0551e4e8aa68",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 7.5",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "b5dcc83a-5559-4341-8e87-0551e4e8aa68",
           "Requirements": [
@@ -2128,7 +2128,7 @@
         "Key": "03c273e7-a7e9-41f6-a929-3654930636b5",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 9",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "03c273e7-a7e9-41f6-a929-3654930636b5",
           "Requirements": [
@@ -2141,7 +2141,7 @@
         "Key": "8d8cbc05-156b-4168-8dbb-00e6ef3406ca",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 12",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "8d8cbc05-156b-4168-8dbb-00e6ef3406ca",
           "Requirements": [
@@ -2154,7 +2154,7 @@
         "Key": "f037057d-b2f5-4948-9e61-91fedab043d5",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 15",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "f037057d-b2f5-4948-9e61-91fedab043d5",
           "Requirements": [
@@ -2167,7 +2167,7 @@
         "Key": "a15ec555-ef45-4017-963d-cbe1172e89d6",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 18",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "a15ec555-ef45-4017-963d-cbe1172e89d6",
           "Requirements": [
@@ -2180,7 +2180,7 @@
         "Key": "6891dd4d-dd5c-47b8-8b69-3a124b3befe9",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 24",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "6891dd4d-dd5c-47b8-8b69-3a124b3befe9",
           "Requirements": [
@@ -2193,7 +2193,7 @@
         "Key": "1f8a6d99-53ce-406a-b8da-d43dae275575",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 30",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "1f8a6d99-53ce-406a-b8da-d43dae275575",
           "Requirements": [
@@ -2206,7 +2206,7 @@
         "Key": "cbfec68f-3959-460b-acda-f5274435dea9",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 36",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "cbfec68f-3959-460b-acda-f5274435dea9",
           "Requirements": [
@@ -2219,7 +2219,7 @@
         "Key": "f6bb552f-3b89-48be-a07f-75facb1d88ee",
         "Value": {
           "Name": "Absorption Shield Strength per HS: 45",
-          "Description": "",
+          "Description": "The strength per HS of absorption shield technology.",
           "Category": "DefensiveSystems",
           "ID": "f6bb552f-3b89-48be-a07f-75facb1d88ee",
           "Requirements": [
@@ -2232,7 +2232,7 @@
         "Key": "9b7dfe6c-042c-40d2-af98-ad15c7d50e90",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 0.5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "9b7dfe6c-042c-40d2-af98-ad15c7d50e90",
           "Requirements": [
@@ -2245,7 +2245,7 @@
         "Key": "880a3d0e-5905-4057-9a1a-75769c2347be",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 0.75",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "880a3d0e-5905-4057-9a1a-75769c2347be",
           "Requirements": [
@@ -2258,7 +2258,7 @@
         "Key": "5f29d405-d94e-4110-82c3-52e6d15d2392",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 1.0",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "5f29d405-d94e-4110-82c3-52e6d15d2392",
           "Requirements": [
@@ -2271,7 +2271,7 @@
         "Key": "cf79a96a-7c67-40a1-8a4c-97ed7a02ee53",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 1.25",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "cf79a96a-7c67-40a1-8a4c-97ed7a02ee53",
           "Requirements": [
@@ -2284,7 +2284,7 @@
         "Key": "2d187da9-8406-41cc-b58a-76266bc83096",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 1.5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "2d187da9-8406-41cc-b58a-76266bc83096",
           "Requirements": [
@@ -2297,7 +2297,7 @@
         "Key": "d613879b-b456-47df-8388-157716068512",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 2.0",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "d613879b-b456-47df-8388-157716068512",
           "Requirements": [
@@ -2310,7 +2310,7 @@
         "Key": "75597a0e-7454-4759-97f9-066c1f3f63a0",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 2.5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "75597a0e-7454-4759-97f9-066c1f3f63a0",
           "Requirements": [
@@ -2323,7 +2323,7 @@
         "Key": "ddd2bd93-bdb8-44f5-8b6b-95c9bfdefbc4",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 3.0",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "ddd2bd93-bdb8-44f5-8b6b-95c9bfdefbc4",
           "Requirements": [
@@ -2336,7 +2336,7 @@
         "Key": "a89eca54-29ea-4d2f-83d6-c12eeee242f7",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 4.0",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "a89eca54-29ea-4d2f-83d6-c12eeee242f7",
           "Requirements": [
@@ -2349,7 +2349,7 @@
         "Key": "5931895c-077e-4180-9ba4-c701b84c9126",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 4.8",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "5931895c-077e-4180-9ba4-c701b84c9126",
           "Requirements": [
@@ -2362,7 +2362,7 @@
         "Key": "cffb93a4-a17f-4d53-afd1-2226506c1ce7",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 6.0",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "cffb93a4-a17f-4d53-afd1-2226506c1ce7",
           "Requirements": [
@@ -2375,7 +2375,7 @@
         "Key": "a7558ce1-3fb3-40b4-9245-ccacd07a3078",
         "Value": {
           "Name": "AS Radiation Rate per HS per Minute: 7.5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "a7558ce1-3fb3-40b4-9245-ccacd07a3078",
           "Requirements": [
@@ -2388,7 +2388,7 @@
         "Key": "26413df2-75b7-4919-80df-7839b8ce0816",
         "Value": {
           "Name": "Cloaking Theory",
-          "Description": "",
+          "Description": "Basis of various cloaking technologies.",
           "Category": "DefensiveSystems",
           "ID": "26413df2-75b7-4919-80df-7839b8ce0816",
           "Requirements": [
@@ -2401,7 +2401,7 @@
         "Key": "63bfa05e-ecc7-4588-82dc-e8f94c7159ab",
         "Value": {
           "Name": "Cloak Sensor Reduction 75%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "63bfa05e-ecc7-4588-82dc-e8f94c7159ab",
           "Requirements": [
@@ -2414,7 +2414,7 @@
         "Key": "42315bce-6f13-4e9f-8289-eb7683db971d",
         "Value": {
           "Name": "Cloak Sensor Reduction 80%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "42315bce-6f13-4e9f-8289-eb7683db971d",
           "Requirements": [
@@ -2427,7 +2427,7 @@
         "Key": "9b0f4a91-085c-4374-b3bb-33eb18fd6536",
         "Value": {
           "Name": "Cloak Sensor Reduction 85%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "9b0f4a91-085c-4374-b3bb-33eb18fd6536",
           "Requirements": [
@@ -2440,7 +2440,7 @@
         "Key": "abd19697-7460-4ebe-86f5-1b4c9c327942",
         "Value": {
           "Name": "Cloak Sensor Reduction 90%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "abd19697-7460-4ebe-86f5-1b4c9c327942",
           "Requirements": [
@@ -2453,7 +2453,7 @@
         "Key": "27cdcb18-3e04-406a-b4ba-68fc22565aac",
         "Value": {
           "Name": "Cloak Sensor Reduction 93%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "27cdcb18-3e04-406a-b4ba-68fc22565aac",
           "Requirements": [
@@ -2466,7 +2466,7 @@
         "Key": "4293d5a1-71e5-4029-ba15-9d6fcef51a72",
         "Value": {
           "Name": "Cloak Sensor Reduction 95%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "4293d5a1-71e5-4029-ba15-9d6fcef51a72",
           "Requirements": [
@@ -2479,7 +2479,7 @@
         "Key": "ebe3857a-2bc4-4441-ad6a-e2c3689b4698",
         "Value": {
           "Name": "Cloak Sensor Reduction 97%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "ebe3857a-2bc4-4441-ad6a-e2c3689b4698",
           "Requirements": [
@@ -2492,7 +2492,7 @@
         "Key": "aa5862af-e8a8-45fa-b9cb-71f71e6de624",
         "Value": {
           "Name": "Cloak Sensor Reduction 98%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "aa5862af-e8a8-45fa-b9cb-71f71e6de624",
           "Requirements": [
@@ -2505,7 +2505,7 @@
         "Key": "c5676f91-e804-4953-99e1-2d72698e451e",
         "Value": {
           "Name": "Cloak Sensor Reduction 99%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "c5676f91-e804-4953-99e1-2d72698e451e",
           "Requirements": [
@@ -2518,7 +2518,7 @@
         "Key": "d66b36de-432d-4a71-8c85-5133b004f18e",
         "Value": {
           "Name": "Cloak Sensor Reduction 99.5%",
-          "Description": "",
+          "Description": "The reduction in range of hostile sensors when trying to detect a ship equipped with this type of cloak.",
           "Category": "DefensiveSystems",
           "ID": "d66b36de-432d-4a71-8c85-5133b004f18e",
           "Requirements": [
@@ -2531,7 +2531,7 @@
         "Key": "4f717fdc-c7e0-4a0d-9db7-3a33decc1ad6",
         "Value": {
           "Name": "Cloaking Efficiency 3",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "4f717fdc-c7e0-4a0d-9db7-3a33decc1ad6",
           "Requirements": [
@@ -2544,7 +2544,7 @@
         "Key": "bba17cba-199d-4e40-b32d-e9df8cdc795b",
         "Value": {
           "Name": "Cloaking Efficiency 4",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "bba17cba-199d-4e40-b32d-e9df8cdc795b",
           "Requirements": [
@@ -2557,7 +2557,7 @@
         "Key": "94fe39f3-8c56-4075-9758-35aa3ee42d4c",
         "Value": {
           "Name": "Cloaking Efficiency 5",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "94fe39f3-8c56-4075-9758-35aa3ee42d4c",
           "Requirements": [
@@ -2570,7 +2570,7 @@
         "Key": "7be96f3a-593d-4bc0-8c7e-c794c20d8b56",
         "Value": {
           "Name": "Cloaking Efficiency 6",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "7be96f3a-593d-4bc0-8c7e-c794c20d8b56",
           "Requirements": [
@@ -2583,7 +2583,7 @@
         "Key": "d3f69ef6-ffc2-41fd-af6b-21587d4681ac",
         "Value": {
           "Name": "Cloaking Efficiency 8",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "d3f69ef6-ffc2-41fd-af6b-21587d4681ac",
           "Requirements": [
@@ -2596,7 +2596,7 @@
         "Key": "58feaf41-a51e-4560-bdee-0e04ab891f8c",
         "Value": {
           "Name": "Cloaking Efficiency 10",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "58feaf41-a51e-4560-bdee-0e04ab891f8c",
           "Requirements": [
@@ -2609,7 +2609,7 @@
         "Key": "cac1c91e-fd09-4b0d-b412-8aa04ea6c175",
         "Value": {
           "Name": "Cloaking Efficiency 12",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "cac1c91e-fd09-4b0d-b412-8aa04ea6c175",
           "Requirements": [
@@ -2622,7 +2622,7 @@
         "Key": "b48bb8d1-d837-46ad-9114-4a2b31546b9b",
         "Value": {
           "Name": "Cloaking Efficiency 15",
-          "Description": "",
+          "Description": "Cloaking efficiency is similar to jump drive efficiency. The higher the efficiency, the larger the ship to which a device of a given size can be fitted.",
           "Category": "DefensiveSystems",
           "ID": "b48bb8d1-d837-46ad-9114-4a2b31546b9b",
           "Requirements": [
@@ -2635,7 +2635,7 @@
         "Key": "21695c89-5f71-4fba-a5aa-0d091fe620fa",
         "Value": {
           "Name": "Minimum Cloak Size 25",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "21695c89-5f71-4fba-a5aa-0d091fe620fa",
           "Requirements": [
@@ -2648,7 +2648,7 @@
         "Key": "225f0768-d4f3-4ddc-a321-1466ad958323",
         "Value": {
           "Name": "Minimum Cloak Size 20",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "225f0768-d4f3-4ddc-a321-1466ad958323",
           "Requirements": [
@@ -2661,7 +2661,7 @@
         "Key": "9a9a7ea0-2bcd-4c28-9f90-697a342ce358",
         "Value": {
           "Name": "Minimum Cloak Size 15",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "9a9a7ea0-2bcd-4c28-9f90-697a342ce358",
           "Requirements": [
@@ -2674,7 +2674,7 @@
         "Key": "eac52867-7702-4fdb-bb7f-60b1572bf0bd",
         "Value": {
           "Name": "Minimum Cloak Size 12",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "eac52867-7702-4fdb-bb7f-60b1572bf0bd",
           "Requirements": [
@@ -2687,7 +2687,7 @@
         "Key": "56ded644-cf6b-4103-82de-d671b65f5c40",
         "Value": {
           "Name": "Minimum Cloak Size 10",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "56ded644-cf6b-4103-82de-d671b65f5c40",
           "Requirements": [
@@ -2700,7 +2700,7 @@
         "Key": "ee2ac46d-e84b-4453-9961-a30f3f82ed30",
         "Value": {
           "Name": "Minimum Cloak Size 8",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "ee2ac46d-e84b-4453-9961-a30f3f82ed30",
           "Requirements": [
@@ -2713,7 +2713,7 @@
         "Key": "5b975679-8e4c-45e3-a8cf-8dd966bb834d",
         "Value": {
           "Name": "Minimum Cloak Size 6",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "5b975679-8e4c-45e3-a8cf-8dd966bb834d",
           "Requirements": [
@@ -2726,7 +2726,7 @@
         "Key": "2f823dbc-66d1-4d03-8262-6793472f449c",
         "Value": {
           "Name": "Minimum Cloak Size 4",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "2f823dbc-66d1-4d03-8262-6793472f449c",
           "Requirements": [
@@ -2739,7 +2739,7 @@
         "Key": "f8b704ea-cca8-4a8a-b229-cf355d386900",
         "Value": {
           "Name": "Minimum Cloak Size 3",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "f8b704ea-cca8-4a8a-b229-cf355d386900",
           "Requirements": [
@@ -2752,7 +2752,7 @@
         "Key": "bb740017-70e8-45dd-be2f-501bd3075c21",
         "Value": {
           "Name": "Minimum Cloak Size 2",
-          "Description": "",
+          "Description": "The smallest cloak that can be created in HS.",
           "Category": "DefensiveSystems",
           "ID": "bb740017-70e8-45dd-be2f-501bd3075c21",
           "Requirements": [
@@ -2765,7 +2765,7 @@
         "Key": "f29295a8-1144-4d7b-8e9c-babbe948ebb6",
         "Value": {
           "Name": "Shield Regeneration Rate 1",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "f29295a8-1144-4d7b-8e9c-babbe948ebb6",
           "Requirements": [
@@ -2778,7 +2778,7 @@
         "Key": "5cbc346d-dba5-4a20-b1f0-5439a9b560fa",
         "Value": {
           "Name": "Shield Regeneration Rate 1.5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "5cbc346d-dba5-4a20-b1f0-5439a9b560fa",
           "Requirements": [
@@ -2791,7 +2791,7 @@
         "Key": "e321a0cd-aedc-410f-8386-8744b04a45aa",
         "Value": {
           "Name": "Shield Regeneration Rate 2",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "e321a0cd-aedc-410f-8386-8744b04a45aa",
           "Requirements": [
@@ -2804,7 +2804,7 @@
         "Key": "538457d4-307e-47ce-b646-267c758e33a5",
         "Value": {
           "Name": "Shield Regeneration Rate 2.5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "538457d4-307e-47ce-b646-267c758e33a5",
           "Requirements": [
@@ -2817,7 +2817,7 @@
         "Key": "71d50a77-d715-4dc2-a64f-878d1592a452",
         "Value": {
           "Name": "Shield Regeneration Rate 3",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "71d50a77-d715-4dc2-a64f-878d1592a452",
           "Requirements": [
@@ -2830,7 +2830,7 @@
         "Key": "4946b531-0aae-4e3c-8574-220cbc437de2",
         "Value": {
           "Name": "Shield Regeneration Rate 4",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "4946b531-0aae-4e3c-8574-220cbc437de2",
           "Requirements": [
@@ -2843,7 +2843,7 @@
         "Key": "dfccfc0a-0d18-459a-b9b8-2f2cc1bf33db",
         "Value": {
           "Name": "Shield Regeneration Rate 5",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "dfccfc0a-0d18-459a-b9b8-2f2cc1bf33db",
           "Requirements": [
@@ -2856,7 +2856,7 @@
         "Key": "3eadb87b-5221-4078-91a2-6931abceb77d",
         "Value": {
           "Name": "Shield Regeneration Rate 6",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "3eadb87b-5221-4078-91a2-6931abceb77d",
           "Requirements": [
@@ -2869,7 +2869,7 @@
         "Key": "b6e5c8e5-596b-475b-8a54-5dd60e01b6c5",
         "Value": {
           "Name": "Shield Regeneration Rate 8",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "b6e5c8e5-596b-475b-8a54-5dd60e01b6c5",
           "Requirements": [
@@ -2882,7 +2882,7 @@
         "Key": "74d81c48-2ed9-4737-83e8-847df14a927e",
         "Value": {
           "Name": "Shield Regeneration Rate 10",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "74d81c48-2ed9-4737-83e8-847df14a927e",
           "Requirements": [
@@ -2895,7 +2895,7 @@
         "Key": "9c998044-9d40-4896-9383-be6307689265",
         "Value": {
           "Name": "Shield Regeneration Rate 12",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "9c998044-9d40-4896-9383-be6307689265",
           "Requirements": [
@@ -2908,7 +2908,7 @@
         "Key": "d9256dca-fea6-4460-bcd2-0f07d1ab4e67",
         "Value": {
           "Name": "Shield Regeneration Rate 15",
-          "Description": "",
+          "Description": "The amount of power that a shield generator with this technology will regenerate over a 300 second period.",
           "Category": "DefensiveSystems",
           "ID": "d9256dca-fea6-4460-bcd2-0f07d1ab4e67",
           "Requirements": [
@@ -2921,7 +2921,7 @@
         "Key": "3cbd9b8f-dfcc-446c-b320-46da9d3a20e3",
         "Value": {
           "Name": "Thermal Reduction: Signature 100% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "3cbd9b8f-dfcc-446c-b320-46da9d3a20e3",
           "Requirements": [],
@@ -2932,7 +2932,7 @@
         "Key": "c10cfe61-bb04-4193-abe1-b34fbe996724",
         "Value": {
           "Name": "Thermal Reduction: Signature 75% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "c10cfe61-bb04-4193-abe1-b34fbe996724",
           "Requirements": [
@@ -2946,7 +2946,7 @@
         "Key": "7d3e6d81-76ef-4a74-9548-c8d3befe3509",
         "Value": {
           "Name": "Thermal Reduction: Signature 50% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "7d3e6d81-76ef-4a74-9548-c8d3befe3509",
           "Requirements": [
@@ -2959,7 +2959,7 @@
         "Key": "10332477-991a-48a9-a3c0-425e2097fd79",
         "Value": {
           "Name": "Thermal Reduction: Signature 35% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "10332477-991a-48a9-a3c0-425e2097fd79",
           "Requirements": [
@@ -2972,7 +2972,7 @@
         "Key": "cd8402b3-af5a-4f43-a776-af0633384cfe",
         "Value": {
           "Name": "Thermal Reduction: Signature 25% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "cd8402b3-af5a-4f43-a776-af0633384cfe",
           "Requirements": [
@@ -2985,7 +2985,7 @@
         "Key": "98d9d22f-24b2-484a-a56e-09b6fa2a8230",
         "Value": {
           "Name": "Thermal Reduction: Signature 16% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "98d9d22f-24b2-484a-a56e-09b6fa2a8230",
           "Requirements": [
@@ -2998,7 +2998,7 @@
         "Key": "50fbc681-7984-4aea-bcda-74796e142f10",
         "Value": {
           "Name": "Thermal Reduction: Signature 12% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "50fbc681-7984-4aea-bcda-74796e142f10",
           "Requirements": [
@@ -3011,7 +3011,7 @@
         "Key": "06310a4d-1a44-4261-bc38-444cd3b57846",
         "Value": {
           "Name": "Thermal Reduction: Signature 8% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "06310a4d-1a44-4261-bc38-444cd3b57846",
           "Requirements": [
@@ -3024,7 +3024,7 @@
         "Key": "37a07b63-b6a7-4e3c-99dd-13756392f27b",
         "Value": {
           "Name": "Thermal Reduction: Signature 6% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "37a07b63-b6a7-4e3c-99dd-13756392f27b",
           "Requirements": [
@@ -3037,7 +3037,7 @@
         "Key": "0c9159e7-fcd8-4c30-84d9-a509fc834334",
         "Value": {
           "Name": "Thermal Reduction: Signature 4% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "0c9159e7-fcd8-4c30-84d9-a509fc834334",
           "Requirements": [
@@ -3050,7 +3050,7 @@
         "Key": "4dd116cc-2386-4ad5-81d6-b5d15b666317",
         "Value": {
           "Name": "Thermal Reduction: Signature 3% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "4dd116cc-2386-4ad5-81d6-b5d15b666317",
           "Requirements": [
@@ -3063,7 +3063,7 @@
         "Key": "22db2aa8-be67-4f2d-973d-c74364282d78",
         "Value": {
           "Name": "Thermal Reduction: Signature 2% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "22db2aa8-be67-4f2d-973d-c74364282d78",
           "Requirements": [
@@ -3076,7 +3076,7 @@
         "Key": "cf1523b5-fb02-4b42-9465-fe5cced936c8",
         "Value": {
           "Name": "Thermal Reduction: Signature 1% Normal",
-          "Description": "",
+          "Description": "Reduces the thermal output of engines, making them harder for thermal sensors to detect.",
           "Category": "DefensiveSystems",
           "ID": "cf1523b5-fb02-4b42-9465-fe5cced936c8",
           "Requirements": [
@@ -3089,7 +3089,7 @@
         "Key": "5eafb3fe-38bf-4432-9267-5814ae2c927b",
         "Value": {
           "Name": "Alpha Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "5eafb3fe-38bf-4432-9267-5814ae2c927b",
           "Requirements": [
@@ -3102,7 +3102,7 @@
         "Key": "15f3b4fa-9eca-4f95-9554-a28d955ea358",
         "Value": {
           "Name": "Beta Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "15f3b4fa-9eca-4f95-9554-a28d955ea358",
           "Requirements": [
@@ -3115,7 +3115,7 @@
         "Key": "d37e473f-df70-441d-85ba-dee9462beede",
         "Value": {
           "Name": "Gamma Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "d37e473f-df70-441d-85ba-dee9462beede",
           "Requirements": [
@@ -3128,7 +3128,7 @@
         "Key": "a46f0731-3ef8-4dff-a420-89e264355870",
         "Value": {
           "Name": "Delta Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "a46f0731-3ef8-4dff-a420-89e264355870",
           "Requirements": [
@@ -3141,7 +3141,7 @@
         "Key": "a8d8fc20-23aa-496e-b962-a0c020dbdf69",
         "Value": {
           "Name": "Epsilon Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "a8d8fc20-23aa-496e-b962-a0c020dbdf69",
           "Requirements": [
@@ -3154,7 +3154,7 @@
         "Key": "1edd1f30-1395-49cd-bc3f-79a8080f22d1",
         "Value": {
           "Name": "Theta Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "1edd1f30-1395-49cd-bc3f-79a8080f22d1",
           "Requirements": [
@@ -3167,7 +3167,7 @@
         "Key": "2115f4f8-ca22-480c-a240-1ac56c7e0817",
         "Value": {
           "Name": "Xi Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "2115f4f8-ca22-480c-a240-1ac56c7e0817",
           "Requirements": [
@@ -3180,7 +3180,7 @@
         "Key": "1691511c-6c93-4538-becc-af5018dd6650",
         "Value": {
           "Name": "Omicron Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "1691511c-6c93-4538-becc-af5018dd6650",
           "Requirements": [
@@ -3193,7 +3193,7 @@
         "Key": "1c7d729d-3ec8-4a67-99dc-8f6c5cc9934a",
         "Value": {
           "Name": "Sigma Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "1c7d729d-3ec8-4a67-99dc-8f6c5cc9934a",
           "Requirements": [
@@ -3206,7 +3206,7 @@
         "Key": "21262194-db61-4b56-9b18-316cb3c4c72f",
         "Value": {
           "Name": "Tau Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "21262194-db61-4b56-9b18-316cb3c4c72f",
           "Requirements": [
@@ -3219,7 +3219,7 @@
         "Key": "b54e055d-27cd-4a91-8b1a-04db0d9dca5b",
         "Value": {
           "Name": "Psi Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "b54e055d-27cd-4a91-8b1a-04db0d9dca5b",
           "Requirements": [
@@ -3232,7 +3232,7 @@
         "Key": "e2f789dd-8a38-421e-b948-c30ab4fc1d91",
         "Value": {
           "Name": "Omega Shields",
-          "Description": "",
+          "Description": "The level of shield technology. Higher level shields provide more protection for the same size shield generator. Shields regenerate over time.",
           "Category": "DefensiveSystems",
           "ID": "e2f789dd-8a38-421e-b948-c30ab4fc1d91",
           "Requirements": [
@@ -3245,7 +3245,7 @@
         "Key": "caf6215e-c4d2-4d75-9917-7c62a40ab747",
         "Value": {
           "Name": "Conventional Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "caf6215e-c4d2-4d75-9917-7c62a40ab747",
           "Requirements": [
@@ -3258,7 +3258,7 @@
         "Key": "62df667b-ef28-4580-8632-f833f0f3dea8",
         "Value": {
           "Name": "Duranium Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "62df667b-ef28-4580-8632-f833f0f3dea8",
           "Requirements": [
@@ -3271,7 +3271,7 @@
         "Key": "e01518d6-51e8-4280-8d9e-3ad832824c78",
         "Value": {
           "Name": "High Density Duranium Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "e01518d6-51e8-4280-8d9e-3ad832824c78",
           "Requirements": [
@@ -3284,7 +3284,7 @@
         "Key": "a960bcb0-2360-42b1-900c-cb384ac76e69",
         "Value": {
           "Name": "Composite Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "a960bcb0-2360-42b1-900c-cb384ac76e69",
           "Requirements": [
@@ -3297,7 +3297,7 @@
         "Key": "f77db417-4e61-4360-a957-b9595f688b1a",
         "Value": {
           "Name": "Ceramic Composite Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "f77db417-4e61-4360-a957-b9595f688b1a",
           "Requirements": [
@@ -3310,7 +3310,7 @@
         "Key": "5787c536-9b73-4337-857a-95dc7002e54a",
         "Value": {
           "Name": "Improved Damage Control",
-          "Description": "",
+          "Description": "A system that allows ship to carry out emergency damage repairs without the need for a shipyard.",
           "Category": "DefensiveSystems",
           "ID": "5787c536-9b73-4337-857a-95dc7002e54a",
           "Requirements": [
@@ -3323,11 +3323,11 @@
         "Key": "13c30978-ae28-4f64-a08f-4e109d751394",
         "Value": {
           "Name": "Laminate Composite Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "13c30978-ae28-4f64-a08f-4e109d751394",
           "Requirements": [
-            "5787c536-9b73-4337-857a-95dc7002e54a"
+            "f77db417-4e61-4360-a957-b9595f688b1a"
           ],
           "Cost": 20000
         }
@@ -3336,7 +3336,7 @@
         "Key": "7049491b-2d10-45de-88fb-80ef6cc8803d",
         "Value": {
           "Name": "Compressed Carbon Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "7049491b-2d10-45de-88fb-80ef6cc8803d",
           "Requirements": [
@@ -3349,7 +3349,7 @@
         "Key": "c7801c45-69e0-4450-936d-2581bce52481",
         "Value": {
           "Name": "Biphase Carbide Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "c7801c45-69e0-4450-936d-2581bce52481",
           "Requirements": [
@@ -3362,7 +3362,7 @@
         "Key": "4469aece-c926-4b70-9029-35135437e6ee",
         "Value": {
           "Name": "Crystalline Composite Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "4469aece-c926-4b70-9029-35135437e6ee",
           "Requirements": [
@@ -3375,7 +3375,7 @@
         "Key": "1ee28a28-6aa4-4365-8b1b-0330c6e34c8a",
         "Value": {
           "Name": "Superdense Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "1ee28a28-6aa4-4365-8b1b-0330c6e34c8a",
           "Requirements": [
@@ -3388,7 +3388,7 @@
         "Key": "b0148ae3-16fe-478f-99d4-0e21f08258a8",
         "Value": {
           "Name": "Bonded Superdense Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "b0148ae3-16fe-478f-99d4-0e21f08258a8",
           "Requirements": [
@@ -3401,7 +3401,7 @@
         "Key": "1899056c-60c4-43ec-86ed-2d00ec1a4f1d",
         "Value": {
           "Name": "Coherent Superdense Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "1899056c-60c4-43ec-86ed-2d00ec1a4f1d",
           "Requirements": [
@@ -3414,7 +3414,7 @@
         "Key": "fa8b95d2-04c0-4413-96a5-1423315fc886",
         "Value": {
           "Name": "Collapsium Armour",
-          "Description": "",
+          "Description": "Armour is used for the hull of all ships.",
           "Category": "DefensiveSystems",
           "ID": "fa8b95d2-04c0-4413-96a5-1423315fc886",
           "Requirements": [
@@ -3427,7 +3427,7 @@
         "Key": "89e698c3-7d07-4793-afad-2ac8923be187",
         "Value": {
           "Name": "Damage Control",
-          "Description": "",
+          "Description": "A system that allows ship to carry out emergency damage repairs without the need for a shipyard.",
           "Category": "DefensiveSystems",
           "ID": "89e698c3-7d07-4793-afad-2ac8923be187",
           "Requirements": [
@@ -3441,7 +3441,7 @@
         "Key": "eb8109f4-a037-4c9f-a380-4937aef5bfe5",
         "Value": {
           "Name": "Advanced Damage Control",
-          "Description": "",
+          "Description": "A system that allows ship to carry out emergency damage repairs without the need for a shipyard.",
           "Category": "DefensiveSystems",
           "ID": "eb8109f4-a037-4c9f-a380-4937aef5bfe5",
           "Requirements": [
@@ -3454,7 +3454,7 @@
         "Key": "4b036870-df4a-49bc-8327-3606ef4e84bf",
         "Value": {
           "Name": "10cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 10cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "4b036870-df4a-49bc-8327-3606ef4e84bf",
           "Requirements": [
@@ -3467,7 +3467,7 @@
         "Key": "899e0d3b-2708-4ae9-ac4b-55f5550930ca",
         "Value": {
           "Name": "10cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 10cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "899e0d3b-2708-4ae9-ac4b-55f5550930ca",
           "Requirements": [
@@ -3480,7 +3480,7 @@
         "Key": "68841096-b4ea-49f2-94f3-d9fea0c83b0c",
         "Value": {
           "Name": "10cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 10cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "68841096-b4ea-49f2-94f3-d9fea0c83b0c",
           "Requirements": [
@@ -3493,7 +3493,7 @@
         "Key": "7066247c-cfff-4de1-9225-bd610382a194",
         "Value": {
           "Name": "15cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "7066247c-cfff-4de1-9225-bd610382a194",
           "Requirements": [],
@@ -3504,7 +3504,7 @@
         "Key": "b26f5a23-4ee7-41a6-9823-de78ce4f9539",
         "Value": {
           "Name": "15cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "b26f5a23-4ee7-41a6-9823-de78ce4f9539",
           "Requirements": [
@@ -3517,7 +3517,7 @@
         "Key": "b69f434c-bb30-4d8a-a403-5807f506bbdf",
         "Value": {
           "Name": "10cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 10cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "b69f434c-bb30-4d8a-a403-5807f506bbdf",
           "Requirements": [],
@@ -3528,7 +3528,7 @@
         "Key": "ee3f9aa0-a7c8-4c37-8849-7f562fafbc23",
         "Value": {
           "Name": "12cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 12cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "ee3f9aa0-a7c8-4c37-8849-7f562fafbc23",
           "Requirements": [
@@ -3541,7 +3541,7 @@
         "Key": "2bff7147-fce2-4c6a-ab9b-7f2d10986f66",
         "Value": {
           "Name": "12cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 12cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "2bff7147-fce2-4c6a-ab9b-7f2d10986f66",
           "Requirements": [
@@ -3554,7 +3554,7 @@
         "Key": "876e02a7-c709-44fb-8117-bdbf2e28c352",
         "Value": {
           "Name": "12cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 12cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "876e02a7-c709-44fb-8117-bdbf2e28c352",
           "Requirements": [
@@ -3567,7 +3567,7 @@
         "Key": "8f47ce85-d7d7-44e9-8dc4-6fa8d8cdcc6a",
         "Value": {
           "Name": "20cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "8f47ce85-d7d7-44e9-8dc4-6fa8d8cdcc6a",
           "Requirements": [
@@ -3580,7 +3580,7 @@
         "Key": "dec8f88b-a54b-4ce8-97ea-3e5861ecee1a",
         "Value": {
           "Name": "20cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "dec8f88b-a54b-4ce8-97ea-3e5861ecee1a",
           "Requirements": [
@@ -3593,7 +3593,7 @@
         "Key": "b2ecab99-cd8e-4973-a0ac-69c1c22454c2",
         "Value": {
           "Name": "12cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 12cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "b2ecab99-cd8e-4973-a0ac-69c1c22454c2",
           "Requirements": [
@@ -3606,7 +3606,7 @@
         "Key": "f1e5ed6d-69f5-48d3-b920-9b00566ee8e5",
         "Value": {
           "Name": "15cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 15cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "f1e5ed6d-69f5-48d3-b920-9b00566ee8e5",
           "Requirements": [
@@ -3619,7 +3619,7 @@
         "Key": "7400713a-7f42-48d8-a378-1b5c495176d1",
         "Value": {
           "Name": "15cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 15cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "7400713a-7f42-48d8-a378-1b5c495176d1",
           "Requirements": [
@@ -3632,7 +3632,7 @@
         "Key": "8a80a024-5f49-4b8f-8e00-7af3d17d268e",
         "Value": {
           "Name": "15cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 15cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "8a80a024-5f49-4b8f-8e00-7af3d17d268e",
           "Requirements": [
@@ -3645,7 +3645,7 @@
         "Key": "8651927e-c4aa-49d3-9d38-2aba2a9671a6",
         "Value": {
           "Name": "25cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "8651927e-c4aa-49d3-9d38-2aba2a9671a6",
           "Requirements": [
@@ -3658,7 +3658,7 @@
         "Key": "629de8b1-8d08-4fa0-b98b-19f0bda0c211",
         "Value": {
           "Name": "25cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "629de8b1-8d08-4fa0-b98b-19f0bda0c211",
           "Requirements": [
@@ -3671,7 +3671,7 @@
         "Key": "0305e30b-dc45-4a35-987f-afeb50585e63",
         "Value": {
           "Name": "15cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 15cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "0305e30b-dc45-4a35-987f-afeb50585e63",
           "Requirements": [
@@ -3684,7 +3684,7 @@
         "Key": "13ec15bb-5f26-4563-9b2b-047200a5e700",
         "Value": {
           "Name": "20cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 20cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "13ec15bb-5f26-4563-9b2b-047200a5e700",
           "Requirements": [
@@ -3697,7 +3697,7 @@
         "Key": "4fcc9598-4e44-4f09-b27c-354f9e1cbc60",
         "Value": {
           "Name": "20cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 20cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "4fcc9598-4e44-4f09-b27c-354f9e1cbc60",
           "Requirements": [
@@ -3710,7 +3710,7 @@
         "Key": "3f2c8280-f749-4cb2-ab5c-cc48dbdfcb7b",
         "Value": {
           "Name": "20cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 20cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "3f2c8280-f749-4cb2-ab5c-cc48dbdfcb7b",
           "Requirements": [
@@ -3723,7 +3723,7 @@
         "Key": "619cd55a-6d35-436c-9036-b803ee02e1e0",
         "Value": {
           "Name": "30cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "619cd55a-6d35-436c-9036-b803ee02e1e0",
           "Requirements": [
@@ -3736,7 +3736,7 @@
         "Key": "70723b9b-0d3e-4159-8ebd-3e1cd037295c",
         "Value": {
           "Name": "30cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "70723b9b-0d3e-4159-8ebd-3e1cd037295c",
           "Requirements": [
@@ -3749,7 +3749,7 @@
         "Key": "7e9b9be2-b129-4182-a374-dd246993b1d1",
         "Value": {
           "Name": "20cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 20cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "7e9b9be2-b129-4182-a374-dd246993b1d1",
           "Requirements": [
@@ -3762,7 +3762,7 @@
         "Key": "ea571b6a-2114-4004-9168-0e6e583f63fa",
         "Value": {
           "Name": "25cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 25cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "ea571b6a-2114-4004-9168-0e6e583f63fa",
           "Requirements": [
@@ -3775,7 +3775,7 @@
         "Key": "1587884c-a384-45aa-bb0f-5e6b0d9b74f1",
         "Value": {
           "Name": "25cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 25cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "1587884c-a384-45aa-bb0f-5e6b0d9b74f1",
           "Requirements": [
@@ -3788,7 +3788,7 @@
         "Key": "bf70ca54-5018-4d88-be8b-9bbea27d3860",
         "Value": {
           "Name": "25cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 25cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "bf70ca54-5018-4d88-be8b-9bbea27d3860",
           "Requirements": [
@@ -3801,7 +3801,7 @@
         "Key": "244b3dd4-1120-400f-81fa-448fc05a50dd",
         "Value": {
           "Name": "35cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "244b3dd4-1120-400f-81fa-448fc05a50dd",
           "Requirements": [
@@ -3814,7 +3814,7 @@
         "Key": "c6f18d4f-4ab7-4635-b3db-f02a01f24943",
         "Value": {
           "Name": "35cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "c6f18d4f-4ab7-4635-b3db-f02a01f24943",
           "Requirements": [
@@ -3827,7 +3827,7 @@
         "Key": "e3cf893d-3ee0-4795-b5aa-9d462c53bfff",
         "Value": {
           "Name": "25cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 25cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "e3cf893d-3ee0-4795-b5aa-9d462c53bfff",
           "Requirements": [
@@ -3840,7 +3840,7 @@
         "Key": "ba25a5ec-6b16-4568-b9a6-4a544556d17f",
         "Value": {
           "Name": "30cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 30cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "ba25a5ec-6b16-4568-b9a6-4a544556d17f",
           "Requirements": [
@@ -3853,7 +3853,7 @@
         "Key": "363cc2c1-41fc-4ac3-b37b-70d555d53535",
         "Value": {
           "Name": "30cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 30cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "363cc2c1-41fc-4ac3-b37b-70d555d53535",
           "Requirements": [
@@ -3866,7 +3866,7 @@
         "Key": "e9192b05-9518-4591-bc59-17d74d979d57",
         "Value": {
           "Name": "30cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 30cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "e9192b05-9518-4591-bc59-17d74d979d57",
           "Requirements": [
@@ -3879,7 +3879,7 @@
         "Key": "7de2ba78-9457-49b2-ae42-1182eb0c5bc9",
         "Value": {
           "Name": "40cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "7de2ba78-9457-49b2-ae42-1182eb0c5bc9",
           "Requirements": [
@@ -3892,7 +3892,7 @@
         "Key": "deb8fff6-a120-4d47-9192-5253c3233cf9",
         "Value": {
           "Name": "40cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "deb8fff6-a120-4d47-9192-5253c3233cf9",
           "Requirements": [
@@ -3905,7 +3905,7 @@
         "Key": "8d7c6287-7280-4cc8-8280-f765f826137c",
         "Value": {
           "Name": "30cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 30cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "8d7c6287-7280-4cc8-8280-f765f826137c",
           "Requirements": [
@@ -3918,7 +3918,7 @@
         "Key": "90f1a57e-2459-4920-9d4b-ec428eaec350",
         "Value": {
           "Name": "35cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 35cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "90f1a57e-2459-4920-9d4b-ec428eaec350",
           "Requirements": [
@@ -3931,7 +3931,7 @@
         "Key": "0d463fc6-5d55-4f65-aeed-b58930e8d4c9",
         "Value": {
           "Name": "35cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 35cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "0d463fc6-5d55-4f65-aeed-b58930e8d4c9",
           "Requirements": [
@@ -3944,7 +3944,7 @@
         "Key": "2aa52f7d-47ec-4d16-9569-5be1ee0d810f",
         "Value": {
           "Name": "35cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 35cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "2aa52f7d-47ec-4d16-9569-5be1ee0d810f",
           "Requirements": [
@@ -3957,7 +3957,7 @@
         "Key": "cd095a39-7ae1-4e42-ac56-2fcf946c77a4",
         "Value": {
           "Name": "50cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "cd095a39-7ae1-4e42-ac56-2fcf946c77a4",
           "Requirements": [
@@ -3970,7 +3970,7 @@
         "Key": "dfca3604-2fe0-47e9-8228-220f5c3520b7",
         "Value": {
           "Name": "50cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "dfca3604-2fe0-47e9-8228-220f5c3520b7",
           "Requirements": [
@@ -3983,7 +3983,7 @@
         "Key": "b980bb02-4d1f-4e4b-a499-cb7574a776d5",
         "Value": {
           "Name": "35cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 35cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "b980bb02-4d1f-4e4b-a499-cb7574a776d5",
           "Requirements": [
@@ -3996,7 +3996,7 @@
         "Key": "678d1f3a-5cd2-437d-9d7a-75165b584896",
         "Value": {
           "Name": "40cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 40cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "678d1f3a-5cd2-437d-9d7a-75165b584896",
           "Requirements": [
@@ -4009,7 +4009,7 @@
         "Key": "9b144948-695f-4283-a7f0-26af98733d08",
         "Value": {
           "Name": "40cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 40cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "9b144948-695f-4283-a7f0-26af98733d08",
           "Requirements": [
@@ -4022,7 +4022,7 @@
         "Key": "fc1e3fe6-7814-45d5-9771-af315888cca2",
         "Value": {
           "Name": "40cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 40cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "fc1e3fe6-7814-45d5-9771-af315888cca2",
           "Requirements": [
@@ -4035,7 +4035,7 @@
         "Key": "14a675d5-5e46-4dbe-b9f8-23026db9d808",
         "Value": {
           "Name": "60cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "14a675d5-5e46-4dbe-b9f8-23026db9d808",
           "Requirements": [
@@ -4048,7 +4048,7 @@
         "Key": "1daaa184-af65-4d97-84a1-a88fee673704",
         "Value": {
           "Name": "60cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "1daaa184-af65-4d97-84a1-a88fee673704",
           "Requirements": [
@@ -4061,7 +4061,7 @@
         "Key": "36d3d320-db2a-42f7-8dd3-d438d09ccfcf",
         "Value": {
           "Name": "40cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 40cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "36d3d320-db2a-42f7-8dd3-d438d09ccfcf",
           "Requirements": [
@@ -4074,7 +4074,7 @@
         "Key": "d0c8186e-9ca9-42e6-8f8d-6dcdd64517c7",
         "Value": {
           "Name": "50cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 50cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "d0c8186e-9ca9-42e6-8f8d-6dcdd64517c7",
           "Requirements": [
@@ -4087,7 +4087,7 @@
         "Key": "8f4381d8-b51a-4b17-a2d4-a05660fb7583",
         "Value": {
           "Name": "50cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 50cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "8f4381d8-b51a-4b17-a2d4-a05660fb7583",
           "Requirements": [
@@ -4100,7 +4100,7 @@
         "Key": "1581402f-8607-4d91-a0cb-2d4361c04c1d",
         "Value": {
           "Name": "50cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 50cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "1581402f-8607-4d91-a0cb-2d4361c04c1d",
           "Requirements": [
@@ -4113,7 +4113,7 @@
         "Key": "ce22e20e-7ff9-420e-81af-ed02bf046625",
         "Value": {
           "Name": "70cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "ce22e20e-7ff9-420e-81af-ed02bf046625",
           "Requirements": [
@@ -4126,7 +4126,7 @@
         "Key": "3c05ad9a-1ef4-4352-85d8-ac3bc2e503e4",
         "Value": {
           "Name": "70cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "3c05ad9a-1ef4-4352-85d8-ac3bc2e503e4",
           "Requirements": [
@@ -4139,7 +4139,7 @@
         "Key": "a9a8eecb-1259-4b2f-a812-7958fb61cb58",
         "Value": {
           "Name": "50cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 50cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "a9a8eecb-1259-4b2f-a812-7958fb61cb58",
           "Requirements": [
@@ -4152,7 +4152,7 @@
         "Key": "20683561-569b-48fd-9d34-e21f8c61e92b",
         "Value": {
           "Name": "60cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 60cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "20683561-569b-48fd-9d34-e21f8c61e92b",
           "Requirements": [
@@ -4165,7 +4165,7 @@
         "Key": "1eaf7257-6474-41f1-b418-8ee059325c7a",
         "Value": {
           "Name": "60cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 60cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "1eaf7257-6474-41f1-b418-8ee059325c7a",
           "Requirements": [
@@ -4178,7 +4178,7 @@
         "Key": "83d785cf-d659-48e5-a054-05b6f9c2ce91",
         "Value": {
           "Name": "60cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 60cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "83d785cf-d659-48e5-a054-05b6f9c2ce91",
           "Requirements": [
@@ -4191,7 +4191,7 @@
         "Key": "89958e95-27a0-4152-a3d0-74f96b272da3",
         "Value": {
           "Name": "80cm Advanced Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Advanced Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "89958e95-27a0-4152-a3d0-74f96b272da3",
           "Requirements": [
@@ -4204,7 +4204,7 @@
         "Key": "884c8f2b-c256-4817-9f24-a2accdb9e0ae",
         "Value": {
           "Name": "80cm Carronade",
-          "Description": "",
+          "Description": "The maximum calibre of Plasma Carronades.",
           "Category": "EnergyWeapons",
           "ID": "884c8f2b-c256-4817-9f24-a2accdb9e0ae",
           "Requirements": [
@@ -4217,7 +4217,7 @@
         "Key": "fbe6cb20-58c4-48b0-ba8e-01f0e7810dc6",
         "Value": {
           "Name": "60cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 60cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "fbe6cb20-58c4-48b0-ba8e-01f0e7810dc6",
           "Requirements": [
@@ -4230,7 +4230,7 @@
         "Key": "48d89a0b-bde5-4359-81d7-22d961865f75",
         "Value": {
           "Name": "70cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 70cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "48d89a0b-bde5-4359-81d7-22d961865f75",
           "Requirements": [
@@ -4243,7 +4243,7 @@
         "Key": "a8645034-04a5-47a3-94ac-f015aba8be0b",
         "Value": {
           "Name": "70cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 70cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "a8645034-04a5-47a3-94ac-f015aba8be0b",
           "Requirements": [
@@ -4256,7 +4256,7 @@
         "Key": "bd333aeb-06d8-4107-8caa-1d5a15c3c1d8",
         "Value": {
           "Name": "70cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 70cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "bd333aeb-06d8-4107-8caa-1d5a15c3c1d8",
           "Requirements": [
@@ -4269,7 +4269,7 @@
         "Key": "428b4667-9ed7-496f-94bf-1a660d2b73b7",
         "Value": {
           "Name": "70cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 70cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "428b4667-9ed7-496f-94bf-1a660d2b73b7",
           "Requirements": [
@@ -4282,7 +4282,7 @@
         "Key": "62959d40-f269-43fb-8393-870c9eca2471",
         "Value": {
           "Name": "80cm Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of lasers with a 80cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "62959d40-f269-43fb-8393-870c9eca2471",
           "Requirements": [
@@ -4295,7 +4295,7 @@
         "Key": "fc053311-4786-4b2d-85d1-fe92c32a411a",
         "Value": {
           "Name": "80cm Meson Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of meson cannon with a 80cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "fc053311-4786-4b2d-85d1-fe92c32a411a",
           "Requirements": [
@@ -4308,7 +4308,7 @@
         "Key": "b84fa1b6-0579-477e-a227-09079b214b27",
         "Value": {
           "Name": "80cm Microwave Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of high power microwaves with a 80cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "b84fa1b6-0579-477e-a227-09079b214b27",
           "Requirements": [
@@ -4321,7 +4321,7 @@
         "Key": "f1fee416-520e-4bee-9d00-12a881d5151c",
         "Value": {
           "Name": "80cm Advanced Laser Focal Size",
-          "Description": "",
+          "Description": "Allows the creation of advanced lasers with a 80cm Focal Size (or calibre).",
           "Category": "EnergyWeapons",
           "ID": "f1fee416-520e-4bee-9d00-12a881d5151c",
           "Requirements": [
@@ -4334,7 +4334,7 @@
         "Key": "fe85b8ef-7320-4db1-83ad-933cc0b2811e",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 3",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "fe85b8ef-7320-4db1-83ad-933cc0b2811e",
           "Requirements": [],
@@ -4345,7 +4345,7 @@
         "Key": "9e3c49af-47c4-4769-a28f-1346a4e0378d",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 4",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "9e3c49af-47c4-4769-a28f-1346a4e0378d",
           "Requirements": [
@@ -4358,7 +4358,7 @@
         "Key": "b4916671-8c14-4289-a25f-4b520ddb84b4",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 5",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "b4916671-8c14-4289-a25f-4b520ddb84b4",
           "Requirements": [
@@ -4371,7 +4371,7 @@
         "Key": "85e93951-4fd2-4b49-9b50-f62f5c5e2f8f",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 8",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "85e93951-4fd2-4b49-9b50-f62f5c5e2f8f",
           "Requirements": [
@@ -4384,7 +4384,7 @@
         "Key": "d7fab2cb-9747-409d-970b-ad8c9c36f552",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 11",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "d7fab2cb-9747-409d-970b-ad8c9c36f552",
           "Requirements": [
@@ -4397,7 +4397,7 @@
         "Key": "e5dc1533-76aa-4c34-aa24-023b5751c193",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 15",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "e5dc1533-76aa-4c34-aa24-023b5751c193",
           "Requirements": [
@@ -4410,7 +4410,7 @@
         "Key": "67db089f-c687-4018-a795-54f3f438798f",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 20",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "67db089f-c687-4018-a795-54f3f438798f",
           "Requirements": [
@@ -4423,7 +4423,7 @@
         "Key": "62038667-8dad-48d5-9c76-5a74ff99bbfe",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 25",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "62038667-8dad-48d5-9c76-5a74ff99bbfe",
           "Requirements": [
@@ -4436,7 +4436,7 @@
         "Key": "15e6aa42-f95c-4145-9dad-de5e7cd761e8",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 32",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "15e6aa42-f95c-4145-9dad-de5e7cd761e8",
           "Requirements": [
@@ -4449,7 +4449,7 @@
         "Key": "3c2edd9a-9368-42d4-b407-b5fc0902b35d",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 45",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "3c2edd9a-9368-42d4-b407-b5fc0902b35d",
           "Requirements": [
@@ -4462,7 +4462,7 @@
         "Key": "428c1ae7-886b-4b3e-8979-0bd579ae8846",
         "Value": {
           "Name": "Advanced Particle Beam Warhead 64",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "428c1ae7-886b-4b3e-8979-0bd579ae8846",
           "Requirements": [
@@ -4475,7 +4475,7 @@
         "Key": "fc2a814d-57c9-4a7c-a417-067a7ccf5ee6",
         "Value": {
           "Name": "Meson Focusing Technology 1",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "fc2a814d-57c9-4a7c-a417-067a7ccf5ee6",
           "Requirements": [
@@ -4488,7 +4488,7 @@
         "Key": "423ac992-57ae-44c2-9689-0ae41fa893de",
         "Value": {
           "Name": "Meson Focusing Technology 2",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "423ac992-57ae-44c2-9689-0ae41fa893de",
           "Requirements": [
@@ -4501,7 +4501,7 @@
         "Key": "4356ed4a-9882-43ee-a3f3-90abbde6bb2a",
         "Value": {
           "Name": "Meson Focusing Technology 3",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "4356ed4a-9882-43ee-a3f3-90abbde6bb2a",
           "Requirements": [
@@ -4514,7 +4514,7 @@
         "Key": "cdb64f3c-3a5b-4715-8d6f-9b210f838236",
         "Value": {
           "Name": "Meson Focusing Technology 4",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "cdb64f3c-3a5b-4715-8d6f-9b210f838236",
           "Requirements": [
@@ -4527,7 +4527,7 @@
         "Key": "6360ff3b-f173-4036-bcc8-64613dcd99a5",
         "Value": {
           "Name": "Meson Focusing Technology 5",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "6360ff3b-f173-4036-bcc8-64613dcd99a5",
           "Requirements": [
@@ -4540,7 +4540,7 @@
         "Key": "b6939260-4569-4c6d-83d0-707940ebfab4",
         "Value": {
           "Name": "Meson Focusing Technology 6",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "b6939260-4569-4c6d-83d0-707940ebfab4",
           "Requirements": [
@@ -4553,7 +4553,7 @@
         "Key": "943968cc-4a38-497f-bcd6-d3fddf697f39",
         "Value": {
           "Name": "Meson Focusing Technology 7",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "943968cc-4a38-497f-bcd6-d3fddf697f39",
           "Requirements": [
@@ -4566,7 +4566,7 @@
         "Key": "01cf3824-5aae-4094-bd42-f74b31a6d70f",
         "Value": {
           "Name": "Meson Focusing Technology 8",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "01cf3824-5aae-4094-bd42-f74b31a6d70f",
           "Requirements": [
@@ -4579,7 +4579,7 @@
         "Key": "6a130eff-2f04-461c-b8c9-39566b11e26e",
         "Value": {
           "Name": "Meson Focusing Technology 9",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "6a130eff-2f04-461c-b8c9-39566b11e26e",
           "Requirements": [
@@ -4592,7 +4592,7 @@
         "Key": "2c88070e-0581-4a71-9397-720f07f3e4b9",
         "Value": {
           "Name": "Meson Focusing Technology 10",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "2c88070e-0581-4a71-9397-720f07f3e4b9",
           "Requirements": [
@@ -4605,7 +4605,7 @@
         "Key": "164f09b6-f6a3-45cd-85a1-653cda76577e",
         "Value": {
           "Name": "Meson Focusing Technology 11",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "164f09b6-f6a3-45cd-85a1-653cda76577e",
           "Requirements": [
@@ -4618,7 +4618,7 @@
         "Key": "8499576e-5598-4957-9538-e516bbfa7c86",
         "Value": {
           "Name": "Meson Focusing Technology 12",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of meson cannons.",
           "Category": "EnergyWeapons",
           "ID": "8499576e-5598-4957-9538-e516bbfa7c86",
           "Requirements": [
@@ -4631,7 +4631,7 @@
         "Key": "7ea2acaa-2fad-4e81-9659-b568f2512a39",
         "Value": {
           "Name": "Microwave Focusing Technology 1",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "7ea2acaa-2fad-4e81-9659-b568f2512a39",
           "Requirements": [
@@ -4644,7 +4644,7 @@
         "Key": "5296d13d-1382-4c87-a98d-797335b6aaf3",
         "Value": {
           "Name": "Microwave Focusing Technology 2",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "5296d13d-1382-4c87-a98d-797335b6aaf3",
           "Requirements": [
@@ -4657,7 +4657,7 @@
         "Key": "821bffe4-4191-4992-87fa-c57c02c8e02a",
         "Value": {
           "Name": "Microwave Focusing Technology 3",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "821bffe4-4191-4992-87fa-c57c02c8e02a",
           "Requirements": [
@@ -4670,7 +4670,7 @@
         "Key": "053feff3-8d3c-4314-bd41-c45b64ee6fa7",
         "Value": {
           "Name": "Microwave Focusing Technology 4",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "053feff3-8d3c-4314-bd41-c45b64ee6fa7",
           "Requirements": [
@@ -4683,7 +4683,7 @@
         "Key": "e3c88e9d-27b0-4563-859c-82aca27dfa1f",
         "Value": {
           "Name": "Microwave Focusing Technology 5",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "e3c88e9d-27b0-4563-859c-82aca27dfa1f",
           "Requirements": [
@@ -4696,7 +4696,7 @@
         "Key": "a55f52d4-4641-4bf7-840d-44ff7c0898f7",
         "Value": {
           "Name": "Microwave Focusing Technology 6",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "a55f52d4-4641-4bf7-840d-44ff7c0898f7",
           "Requirements": [
@@ -4709,7 +4709,7 @@
         "Key": "5937076a-33ec-4684-9187-fc2b4b1a5a31",
         "Value": {
           "Name": "Microwave Focusing Technology 7",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "5937076a-33ec-4684-9187-fc2b4b1a5a31",
           "Requirements": [
@@ -4722,7 +4722,7 @@
         "Key": "aff23c1a-594c-49eb-bd65-6b30f69eaf6e",
         "Value": {
           "Name": "Microwave Focusing Technology 8",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "aff23c1a-594c-49eb-bd65-6b30f69eaf6e",
           "Requirements": [
@@ -4735,7 +4735,7 @@
         "Key": "c835a62a-4d88-480d-92da-9bbcf422232c",
         "Value": {
           "Name": "Microwave Focusing Technology 9",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "c835a62a-4d88-480d-92da-9bbcf422232c",
           "Requirements": [
@@ -4748,7 +4748,7 @@
         "Key": "08626d6f-d58b-40c2-8237-85293b310817",
         "Value": {
           "Name": "Microwave Focusing Technology 10",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "08626d6f-d58b-40c2-8237-85293b310817",
           "Requirements": [
@@ -4761,7 +4761,7 @@
         "Key": "3deb05af-dfb5-4c66-91b0-80d5909151ce",
         "Value": {
           "Name": "Microwave Focusing Technology 11",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "3deb05af-dfb5-4c66-91b0-80d5909151ce",
           "Requirements": [
@@ -4774,7 +4774,7 @@
         "Key": "623be9f2-e85d-437d-9780-ca4bc8a3d04b",
         "Value": {
           "Name": "Microwave Focusing Technology 12",
-          "Description": "",
+          "Description": "Improved focusing technology increases the range of high power microwaves.",
           "Category": "EnergyWeapons",
           "ID": "623be9f2-e85d-437d-9780-ca4bc8a3d04b",
           "Requirements": [
@@ -4787,7 +4787,7 @@
         "Key": "25b17b73-dae2-4690-90af-c82720a917c1",
         "Value": {
           "Name": "Particle Beam Range 60000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "25b17b73-dae2-4690-90af-c82720a917c1",
           "Requirements": [
@@ -4800,7 +4800,7 @@
         "Key": "fef67271-5c7e-41b2-bc24-9b598dfab1c5",
         "Value": {
           "Name": "Particle Beam Range 100000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "fef67271-5c7e-41b2-bc24-9b598dfab1c5",
           "Requirements": [
@@ -4813,7 +4813,7 @@
         "Key": "a0f3ebf5-e941-41df-b8ac-233b393a25ed",
         "Value": {
           "Name": "Particle Beam Range 150000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "a0f3ebf5-e941-41df-b8ac-233b393a25ed",
           "Requirements": [
@@ -4826,7 +4826,7 @@
         "Key": "31454ff3-585b-473b-8692-dcbaaaa435e1",
         "Value": {
           "Name": "Particle Beam Range 200000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "31454ff3-585b-473b-8692-dcbaaaa435e1",
           "Requirements": [
@@ -4839,7 +4839,7 @@
         "Key": "c18448ab-b95d-4f53-a446-314ccd7b2cc7",
         "Value": {
           "Name": "Particle Beam Range 240000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "c18448ab-b95d-4f53-a446-314ccd7b2cc7",
           "Requirements": [
@@ -4852,7 +4852,7 @@
         "Key": "ec249a49-909f-4318-9cf4-3e32f5ab3768",
         "Value": {
           "Name": "Particle Beam Range 320000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "ec249a49-909f-4318-9cf4-3e32f5ab3768",
           "Requirements": [
@@ -4865,7 +4865,7 @@
         "Key": "09673aa1-8274-4753-8af4-0d724a863fa0",
         "Value": {
           "Name": "Particle Beam Range 400000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "09673aa1-8274-4753-8af4-0d724a863fa0",
           "Requirements": [
@@ -4878,7 +4878,7 @@
         "Key": "27f95599-a7cb-4f3b-a0a3-1f79a4881900",
         "Value": {
           "Name": "Particle Beam Range 500000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "27f95599-a7cb-4f3b-a0a3-1f79a4881900",
           "Requirements": [
@@ -4891,7 +4891,7 @@
         "Key": "fe2c0549-5dd5-4bcf-b7a7-d90e87a7f476",
         "Value": {
           "Name": "Particle Beam Range 640000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "fe2c0549-5dd5-4bcf-b7a7-d90e87a7f476",
           "Requirements": [
@@ -4904,7 +4904,7 @@
         "Key": "cce1aafa-6bf9-44c1-995f-40c0d04b7178",
         "Value": {
           "Name": "Particle Beam Range 800000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "cce1aafa-6bf9-44c1-995f-40c0d04b7178",
           "Requirements": [
@@ -4917,7 +4917,7 @@
         "Key": "453490f2-4a43-4c29-9226-7a5f0e5c3381",
         "Value": {
           "Name": "Particle Beam Range 1000000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "453490f2-4a43-4c29-9226-7a5f0e5c3381",
           "Requirements": [
@@ -4930,7 +4930,7 @@
         "Key": "102c0705-54be-4481-a3ac-3ee0a2d609aa",
         "Value": {
           "Name": "Particle Beam Range 1200000 km",
-          "Description": "",
+          "Description": "The maximum range of all torpedo types.",
           "Category": "EnergyWeapons",
           "ID": "102c0705-54be-4481-a3ac-3ee0a2d609aa",
           "Requirements": [
@@ -4943,7 +4943,7 @@
         "Key": "3ddfd3c7-9098-4cee-87d2-8919ee8a5234",
         "Value": {
           "Name": "Particle Beam Strength 2",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "3ddfd3c7-9098-4cee-87d2-8919ee8a5234",
           "Requirements": [
@@ -4956,7 +4956,7 @@
         "Key": "91157741-a6c6-4516-9411-1d607ecca13a",
         "Value": {
           "Name": "Particle Beam Strength 3",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "91157741-a6c6-4516-9411-1d607ecca13a",
           "Requirements": [
@@ -4969,7 +4969,7 @@
         "Key": "3fb44154-4ee7-4867-8996-018b21f24dd5",
         "Value": {
           "Name": "Particle Beam Strength 4",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "3fb44154-4ee7-4867-8996-018b21f24dd5",
           "Requirements": [
@@ -4982,7 +4982,7 @@
         "Key": "1623fd85-0237-47af-841d-499b6ab3e0f3",
         "Value": {
           "Name": "Particle Beam Strength 6",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "1623fd85-0237-47af-841d-499b6ab3e0f3",
           "Requirements": [
@@ -4995,7 +4995,7 @@
         "Key": "33976214-e6ac-494e-aa28-2c1277a53fe7",
         "Value": {
           "Name": "Particle Beam Strength 9",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "33976214-e6ac-494e-aa28-2c1277a53fe7",
           "Requirements": [
@@ -5008,7 +5008,7 @@
         "Key": "7a802914-3b3e-42fa-82df-8374d5f7d975",
         "Value": {
           "Name": "Particle Beam Strength 12",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "7a802914-3b3e-42fa-82df-8374d5f7d975",
           "Requirements": [
@@ -5021,7 +5021,7 @@
         "Key": "14958086-94f0-4cbd-a48c-11b355a5fd7d",
         "Value": {
           "Name": "Particle Beam Strength 16",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "14958086-94f0-4cbd-a48c-11b355a5fd7d",
           "Requirements": [
@@ -5034,7 +5034,7 @@
         "Key": "018934b9-46e7-434f-b408-f6a4421265e3",
         "Value": {
           "Name": "Particle Beam Strength 20",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "018934b9-46e7-434f-b408-f6a4421265e3",
           "Requirements": [
@@ -5047,7 +5047,7 @@
         "Key": "4a3ccf7e-d51b-403b-9c7c-8ea259ba892d",
         "Value": {
           "Name": "Particle Beam Strength 25",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "4a3ccf7e-d51b-403b-9c7c-8ea259ba892d",
           "Requirements": [
@@ -5060,7 +5060,7 @@
         "Key": "95299383-1f47-49a3-ba0f-9efd6d7e85ba",
         "Value": {
           "Name": "Particle Beam Strength 36",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "95299383-1f47-49a3-ba0f-9efd6d7e85ba",
           "Requirements": [
@@ -5073,7 +5073,7 @@
         "Key": "2d5fa440-53a8-4e83-b83c-0dfc4dd8b25e",
         "Value": {
           "Name": "Particle Beam Strength 50",
-          "Description": "",
+          "Description": "Technology for torpedoes. Affects warhead strength, size of launcher and power required.",
           "Category": "EnergyWeapons",
           "ID": "2d5fa440-53a8-4e83-b83c-0dfc4dd8b25e",
           "Requirements": [
@@ -5086,7 +5086,7 @@
         "Key": "5f82515b-e1d3-47a9-9558-ab5326b04fcc",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 1",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "5f82515b-e1d3-47a9-9558-ab5326b04fcc",
           "Requirements": [
@@ -5099,7 +5099,7 @@
         "Key": "ce46ce41-163e-4594-8bd0-1d81dbf1e866",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 2",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "ce46ce41-163e-4594-8bd0-1d81dbf1e866",
           "Requirements": [
@@ -5112,7 +5112,7 @@
         "Key": "bf14a50a-a87e-470d-8415-3db9c60ff3be",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 3",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "bf14a50a-a87e-470d-8415-3db9c60ff3be",
           "Requirements": [
@@ -5125,7 +5125,7 @@
         "Key": "4252d548-5ba9-494e-be41-f93074102cbb",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 4",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "4252d548-5ba9-494e-be41-f93074102cbb",
           "Requirements": [
@@ -5138,7 +5138,7 @@
         "Key": "801ccae0-48a8-4224-b45f-9ca487f1061e",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 5",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "801ccae0-48a8-4224-b45f-9ca487f1061e",
           "Requirements": [
@@ -5151,7 +5151,7 @@
         "Key": "b89f98e4-dee7-4f8a-bb5d-06fdb91542aa",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 6",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "b89f98e4-dee7-4f8a-bb5d-06fdb91542aa",
           "Requirements": [
@@ -5164,7 +5164,7 @@
         "Key": "3280e033-0417-4b66-b96a-4d4a0f66d159",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 7",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "3280e033-0417-4b66-b96a-4d4a0f66d159",
           "Requirements": [
@@ -5177,7 +5177,7 @@
         "Key": "88c3e028-08af-4e33-a4ed-14f2c4d7dddf",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 8",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "88c3e028-08af-4e33-a4ed-14f2c4d7dddf",
           "Requirements": [
@@ -5190,7 +5190,7 @@
         "Key": "7c499fe2-2fa5-4f09-8b15-e9019d69e1d0",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 9",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "7c499fe2-2fa5-4f09-8b15-e9019d69e1d0",
           "Requirements": [
@@ -5203,7 +5203,7 @@
         "Key": "d81df03b-f0cf-49f9-b522-ed5027c00144",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 10",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "d81df03b-f0cf-49f9-b522-ed5027c00144",
           "Requirements": [
@@ -5216,7 +5216,7 @@
         "Key": "861780b2-30b5-40ca-9be0-13cf37f54e8f",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 11",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "861780b2-30b5-40ca-9be0-13cf37f54e8f",
           "Requirements": [
@@ -5229,7 +5229,7 @@
         "Key": "7fec0810-fbc8-48a7-9274-7c7bbe04ebd0",
         "Value": {
           "Name": "Plasma Torpedo Integrity Rating 12",
-          "Description": "",
+          "Description": "Plasma torpedo warheads are reduced by 1 every (100,000 km x Integrity Rating).",
           "Category": "EnergyWeapons",
           "ID": "7fec0810-fbc8-48a7-9274-7c7bbe04ebd0",
           "Requirements": [
@@ -5242,7 +5242,7 @@
         "Key": "ae6935bb-8dcb-4202-a66c-0b86a24fa540",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 4",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "ae6935bb-8dcb-4202-a66c-0b86a24fa540",
           "Requirements": [
@@ -5255,7 +5255,7 @@
         "Key": "0408cc96-2053-44dc-9581-a32b21d26eba",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 6",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "0408cc96-2053-44dc-9581-a32b21d26eba",
           "Requirements": [
@@ -5268,7 +5268,7 @@
         "Key": "edd5fbe5-6600-4f61-bcf1-eeaeb259ce18",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 8",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "edd5fbe5-6600-4f61-bcf1-eeaeb259ce18",
           "Requirements": [
@@ -5281,7 +5281,7 @@
         "Key": "ce45ace4-c471-4e9f-a98b-9d1f99cf89a3",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 12",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "ce45ace4-c471-4e9f-a98b-9d1f99cf89a3",
           "Requirements": [
@@ -5294,7 +5294,7 @@
         "Key": "b711710d-1f3a-42f7-9b9c-2b67910243e5",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 16",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "b711710d-1f3a-42f7-9b9c-2b67910243e5",
           "Requirements": [
@@ -5307,7 +5307,7 @@
         "Key": "66bcc84a-9e4e-418a-838c-c21b2be1f2bd",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 24",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "66bcc84a-9e4e-418a-838c-c21b2be1f2bd",
           "Requirements": [
@@ -5320,7 +5320,7 @@
         "Key": "58992339-2ff2-4020-be3d-7b85e0c6f725",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 32",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "58992339-2ff2-4020-be3d-7b85e0c6f725",
           "Requirements": [
@@ -5333,7 +5333,7 @@
         "Key": "f9854c53-8692-42e4-a634-5e60ceb27ee1",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 40",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "f9854c53-8692-42e4-a634-5e60ceb27ee1",
           "Requirements": [
@@ -5346,7 +5346,7 @@
         "Key": "7434fbe2-d338-4a8a-8199-641c4256a238",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 50",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "7434fbe2-d338-4a8a-8199-641c4256a238",
           "Requirements": [
@@ -5359,7 +5359,7 @@
         "Key": "6fc8b952-11e4-4492-ab78-8154efb2f78d",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 60",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "6fc8b952-11e4-4492-ab78-8154efb2f78d",
           "Requirements": [
@@ -5372,7 +5372,7 @@
         "Key": "c63ea804-ecb1-4299-840e-d9c519066fac",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 75",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "c63ea804-ecb1-4299-840e-d9c519066fac",
           "Requirements": [
@@ -5385,7 +5385,7 @@
         "Key": "98ce8b0a-c0f4-402e-ae8a-e6f8b71b4d3d",
         "Value": {
           "Name": "Plasma Torpedo Warhead Strength 90",
-          "Description": "",
+          "Description": "The size of the plasma torpedo warhead at launch.",
           "Category": "EnergyWeapons",
           "ID": "98ce8b0a-c0f4-402e-ae8a-e6f8b71b4d3d",
           "Requirements": [
@@ -5398,7 +5398,7 @@
         "Key": "d53f2f73-2edf-4252-b3e6-6d73e7dde435",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 1250 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "d53f2f73-2edf-4252-b3e6-6d73e7dde435",
           "Requirements": [],
@@ -5409,7 +5409,7 @@
         "Key": "32f19b25-77b3-4948-9ec5-3b5bcb635333",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 2000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "32f19b25-77b3-4948-9ec5-3b5bcb635333",
           "Requirements": [
@@ -5423,7 +5423,7 @@
         "Key": "ea9ad98a-8a1f-4d8d-af8c-84de4571284e",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 3000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "ea9ad98a-8a1f-4d8d-af8c-84de4571284e",
           "Requirements": [
@@ -5436,7 +5436,7 @@
         "Key": "91f4283e-fd70-46c6-9e2a-6c08baaa8a07",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 4000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "91f4283e-fd70-46c6-9e2a-6c08baaa8a07",
           "Requirements": [
@@ -5449,7 +5449,7 @@
         "Key": "22cce7ca-2a53-4f85-8d77-9c6f35348cbf",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 5000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "22cce7ca-2a53-4f85-8d77-9c6f35348cbf",
           "Requirements": [
@@ -5462,7 +5462,7 @@
         "Key": "b526db1b-6c76-418d-9133-d15ad94a7646",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 6250 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "b526db1b-6c76-418d-9133-d15ad94a7646",
           "Requirements": [
@@ -5475,7 +5475,7 @@
         "Key": "ca919728-e8a4-492d-9f14-392d24a3e3b2",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 8000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "ca919728-e8a4-492d-9f14-392d24a3e3b2",
           "Requirements": [
@@ -5488,7 +5488,7 @@
         "Key": "daed4acb-4812-4f3f-ab8c-dfbc3f2fa085",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 10000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "daed4acb-4812-4f3f-ab8c-dfbc3f2fa085",
           "Requirements": [
@@ -5501,7 +5501,7 @@
         "Key": "093ac2cd-e2a8-48f9-9ba1-2f776248fcf7",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 12500 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "093ac2cd-e2a8-48f9-9ba1-2f776248fcf7",
           "Requirements": [
@@ -5514,7 +5514,7 @@
         "Key": "7c8408c9-f521-412c-b153-cd324de7cab6",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 16000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "7c8408c9-f521-412c-b153-cd324de7cab6",
           "Requirements": [
@@ -5527,7 +5527,7 @@
         "Key": "7ee5fab0-4d7b-4db7-87a3-151576c7077c",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 20000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "7ee5fab0-4d7b-4db7-87a3-151576c7077c",
           "Requirements": [
@@ -5540,7 +5540,7 @@
         "Key": "241ef38f-5acc-4755-ac1e-2f6d2411439d",
         "Value": {
           "Name": "Turret Tracking Speed (10% Gear) 25000 km/s",
-          "Description": "",
+          "Description": "Speed of target that a turret can track using rotational gear equal to 10% of the weapon mass. 2x gear = 2x tracking speed, 3x gear = 3x tracking, etc.",
           "Category": "EnergyWeapons",
           "ID": "241ef38f-5acc-4755-ac1e-2f6d2411439d",
           "Requirements": [
@@ -5553,7 +5553,7 @@
         "Key": "b01a0940-7695-45d9-9b16-2761f216e404",
         "Value": {
           "Name": "Standard Laser Size and Recharge Rate",
-          "Description": "",
+          "Description": "A modification to missile launchers that reduces their size by removing part of the reloading mechanism, dramatically reducing the reload time.",
           "Category": "EnergyWeapons",
           "ID": "b01a0940-7695-45d9-9b16-2761f216e404",
           "Requirements": [],
@@ -5564,7 +5564,7 @@
         "Key": "16ad1cde-a67f-4407-b583-358ee80f010c",
         "Value": {
           "Name": "Reduced-size Laser 0.75 Size / 4x Recharge",
-          "Description": "",
+          "Description": "A modification to lasers that reduces their size by removing part of the recharging mechanism, dramatically increasing the recharge time.",
           "Category": "EnergyWeapons",
           "ID": "16ad1cde-a67f-4407-b583-358ee80f010c",
           "Requirements": [
@@ -5578,7 +5578,7 @@
         "Key": "da0f1bd6-e36d-4625-883a-e592923eb328",
         "Value": {
           "Name": "Reduced-size Laser 0.5 Size / 20x Recharge",
-          "Description": "",
+          "Description": "A modification to lasers that reduces their size by removing part of the recharging mechanism, dramatically increasing the recharge time.",
           "Category": "EnergyWeapons",
           "ID": "da0f1bd6-e36d-4625-883a-e592923eb328",
           "Requirements": [
@@ -5591,7 +5591,7 @@
         "Key": "fe7f7ad6-3cbf-404f-bdb1-9de85d5ef05a",
         "Value": {
           "Name": "Standard Mount",
-          "Description": "",
+          "Description": "A normal energy weapon mount.",
           "Category": "EnergyWeapons",
           "ID": "fe7f7ad6-3cbf-404f-bdb1-9de85d5ef05a",
           "Requirements": [],
@@ -5602,7 +5602,7 @@
         "Key": "154549c0-6fa2-4661-8ffa-eb9fb45d0cc1",
         "Value": {
           "Name": "Spinal Mount",
-          "Description": "",
+          "Description": "One energy weapon per ship may be designated as a spinal mount. This can be up to two sizes larger than the normal maximum size for the energy weapon when used by that race.",
           "Category": "EnergyWeapons",
           "ID": "154549c0-6fa2-4661-8ffa-eb9fb45d0cc1",
           "Requirements": [
@@ -5615,7 +5615,7 @@
         "Key": "ac56f1b2-5927-46a0-a5a0-12123669cd1e",
         "Value": {
           "Name": "Advanced Spinal Mount",
-          "Description": "",
+          "Description": "One energy weapon per ship may be designated as an advanced spinal mount. This can be up to three sizes larger than the normal maximum size for the energy weapon when used by that race.",
           "Category": "EnergyWeapons",
           "ID": "ac56f1b2-5927-46a0-a5a0-12123669cd1e",
           "Requirements": [
@@ -5628,7 +5628,7 @@
         "Key": "edba92f3-9299-4a7e-b90f-f3914437c963",
         "Value": {
           "Name": "Infrared Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "edba92f3-9299-4a7e-b90f-f3914437c963",
           "Requirements": [
@@ -5641,7 +5641,7 @@
         "Key": "05b890db-0b3e-4e1e-b2bc-83564ff8b5bd",
         "Value": {
           "Name": "Visible Light Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "05b890db-0b3e-4e1e-b2bc-83564ff8b5bd",
           "Requirements": [
@@ -5654,7 +5654,7 @@
         "Key": "cf3951d0-e3de-4b14-abbd-3d83abd9d9c3",
         "Value": {
           "Name": "Near Ultraviolet Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "cf3951d0-e3de-4b14-abbd-3d83abd9d9c3",
           "Requirements": [
@@ -5667,7 +5667,7 @@
         "Key": "eece93f9-0245-489e-8412-bbee3fb818db",
         "Value": {
           "Name": "Ultraviolet Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "eece93f9-0245-489e-8412-bbee3fb818db",
           "Requirements": [
@@ -5680,7 +5680,7 @@
         "Key": "3e66e550-dc8e-4d6d-8752-d7bf26f324d4",
         "Value": {
           "Name": "Far Ultraviolet Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "3e66e550-dc8e-4d6d-8752-d7bf26f324d4",
           "Requirements": [
@@ -5693,7 +5693,7 @@
         "Key": "239c8e9a-5d23-425b-b819-feb8874b9353",
         "Value": {
           "Name": "Soft X-ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "239c8e9a-5d23-425b-b819-feb8874b9353",
           "Requirements": [
@@ -5706,7 +5706,7 @@
         "Key": "1db99a4a-1678-4c05-9d32-93913c760f47",
         "Value": {
           "Name": "X-Ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "1db99a4a-1678-4c05-9d32-93913c760f47",
           "Requirements": [
@@ -5719,7 +5719,7 @@
         "Key": "ba0124e8-10fa-4c42-8fb7-f4fd51c7b813",
         "Value": {
           "Name": "Far X-Ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "ba0124e8-10fa-4c42-8fb7-f4fd51c7b813",
           "Requirements": [
@@ -5732,7 +5732,7 @@
         "Key": "9108fe34-f3ba-4386-9c1c-e137ee422448",
         "Value": {
           "Name": "Extreme X-ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "9108fe34-f3ba-4386-9c1c-e137ee422448",
           "Requirements": [
@@ -5745,7 +5745,7 @@
         "Key": "d7482acf-67bf-404f-bf86-476bf6cd619e",
         "Value": {
           "Name": "Near Gamma Ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "d7482acf-67bf-404f-bf86-476bf6cd619e",
           "Requirements": [
@@ -5758,7 +5758,7 @@
         "Key": "fe7880c1-6af6-460c-8101-432716f7edfc",
         "Value": {
           "Name": "Gamma Ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "fe7880c1-6af6-460c-8101-432716f7edfc",
           "Requirements": [
@@ -5771,7 +5771,7 @@
         "Key": "4860b9c6-004b-473b-9385-a2c24e7b6c96",
         "Value": {
           "Name": "Far Gamma Ray Laser",
-          "Description": "",
+          "Description": "Laser wavelength technology. The higher a laser wavelength, the less the laser loses power with range. Therefore, higher wavelength lasers will cause more damage at longer range than lower wavelength lasers of the same focal size.",
           "Category": "EnergyWeapons",
           "ID": "4860b9c6-004b-473b-9385-a2c24e7b6c96",
           "Requirements": [
@@ -5784,7 +5784,7 @@
         "Key": "e7cef315-9e8a-4ce4-a4b9-cd18292d9fe7",
         "Value": {
           "Name": "Soft Xray Laser Warhead",
-          "Description": "",
+          "Description": "Allows Laser Warheads on Missiles.",
           "Category": "EnergyWeapons",
           "ID": "e7cef315-9e8a-4ce4-a4b9-cd18292d9fe7",
           "Requirements": [
@@ -5797,7 +5797,7 @@
         "Key": "e1474742-25c8-4374-956d-519f519b5333",
         "Value": {
           "Name": "X-Ray Laser Warhead",
-          "Description": "",
+          "Description": "Allows Laser Warheads on Missiles.",
           "Category": "EnergyWeapons",
           "ID": "e1474742-25c8-4374-956d-519f519b5333",
           "Requirements": [
@@ -5811,7 +5811,7 @@
         "Key": "e5a9ebcc-5c5b-4e37-bad2-05964cc44677",
         "Value": {
           "Name": "Far X-Ray Laser Warhead",
-          "Description": "",
+          "Description": "Allows Laser Warheads on Missiles.",
           "Category": "EnergyWeapons",
           "ID": "e5a9ebcc-5c5b-4e37-bad2-05964cc44677",
           "Requirements": [
@@ -5825,7 +5825,7 @@
         "Key": "59bc5b67-94d8-4c3e-b308-89a9e70774b8",
         "Value": {
           "Name": "Extreme X-Ray Laser Warhead",
-          "Description": "",
+          "Description": "Allows Laser Warheads on Missiles.",
           "Category": "EnergyWeapons",
           "ID": "59bc5b67-94d8-4c3e-b308-89a9e70774b8",
           "Requirements": [
@@ -6189,7 +6189,7 @@
         "Key": "f823022e-9a6f-47fd-98fc-ced9f6e782cb",
         "Value": {
           "Name": "Boat Bay",
-          "Description": "",
+          "Description": "Allows a fighter or ship of up to 250 tons to dock within the mothership.",
           "Category": "LogisticsGroundCombat",
           "ID": "f823022e-9a6f-47fd-98fc-ced9f6e782cb",
           "Requirements": [
@@ -6578,7 +6578,7 @@
         "Key": "ede46ce9-91f1-4ac7-96c3-4276e1195507",
         "Value": {
           "Name": "Additional Maintenance Storage",
-          "Description": "",
+          "Description": "Allows a ship to carry additional maintenance supplies.",
           "Category": "LogisticsGroundCombat",
           "ID": "ede46ce9-91f1-4ac7-96c3-4276e1195507",
           "Requirements": [
@@ -6617,7 +6617,7 @@
         "Key": "f605ee32-65da-4eb5-883b-8ff8fb203b4a",
         "Value": {
           "Name": "Advanced Cargo Handling System",
-          "Description": "",
+          "Description": "Used by cargo ships, colony ships and troop ships to enable faster cargo loading or unloading. Increase in load speed is calculated by dividing total load time by tractor strength. Each beam of this type adds 20 to tractor strength.",
           "Category": "LogisticsGroundCombat",
           "ID": "f605ee32-65da-4eb5-883b-8ff8fb203b4a",
           "Requirements": [
@@ -6669,7 +6669,7 @@
         "Key": "cd11d8f2-b73c-4100-90c2-83738653b5f7",
         "Value": {
           "Name": "Assault Infantry Battalion",
-          "Description": "",
+          "Description": "Ground Unit",
           "Category": "LogisticsGroundCombat",
           "ID": "cd11d8f2-b73c-4100-90c2-83738653b5f7",
           "Requirements": [

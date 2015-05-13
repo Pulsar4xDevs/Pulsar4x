@@ -62,6 +62,7 @@
             this.availibleTechs.Name = "availibleTechs";
             this.availibleTechs.Size = new System.Drawing.Size(241, 340);
             this.availibleTechs.TabIndex = 2;
+            this.availibleTechs.DoubleClick += new System.EventHandler(this.availibleTechs_MouseDoubleClick);
             // 
             // searchBox
             // 
@@ -76,7 +77,7 @@
             // 
             this.techName.AutoSize = true;
             this.techName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.techName.Location = new System.Drawing.Point(28, 35);
+            this.techName.Location = new System.Drawing.Point(43, 29);
             this.techName.Name = "techName";
             this.techName.Size = new System.Drawing.Size(35, 13);
             this.techName.TabIndex = 4;
@@ -85,7 +86,7 @@
             // nameTextBox
             // 
             this.nameTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.nameTextBox.Location = new System.Drawing.Point(72, 33);
+            this.nameTextBox.Location = new System.Drawing.Point(87, 27);
             this.nameTextBox.Name = "nameTextBox";
             this.nameTextBox.Size = new System.Drawing.Size(247, 20);
             this.nameTextBox.TabIndex = 5;
@@ -94,7 +95,7 @@
             // descTextBox
             // 
             this.descTextBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.descTextBox.Location = new System.Drawing.Point(72, 59);
+            this.descTextBox.Location = new System.Drawing.Point(87, 53);
             this.descTextBox.Multiline = true;
             this.descTextBox.Name = "descTextBox";
             this.descTextBox.Size = new System.Drawing.Size(247, 121);
@@ -105,7 +106,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.label1.Location = new System.Drawing.Point(31, 59);
+            this.label1.Location = new System.Drawing.Point(46, 53);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(32, 13);
             this.label1.TabIndex = 7;
@@ -125,7 +126,7 @@
             this.categoryComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.categoryComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.categoryComboBox.FormattingEnabled = true;
-            this.categoryComboBox.Location = new System.Drawing.Point(72, 187);
+            this.categoryComboBox.Location = new System.Drawing.Point(87, 181);
             this.categoryComboBox.Name = "categoryComboBox";
             this.categoryComboBox.Size = new System.Drawing.Size(247, 21);
             this.categoryComboBox.TabIndex = 9;
@@ -134,7 +135,7 @@
             // categoryLabel
             // 
             this.categoryLabel.AutoSize = true;
-            this.categoryLabel.Location = new System.Drawing.Point(14, 190);
+            this.categoryLabel.Location = new System.Drawing.Point(29, 184);
             this.categoryLabel.Name = "categoryLabel";
             this.categoryLabel.Size = new System.Drawing.Size(49, 13);
             this.categoryLabel.TabIndex = 10;
@@ -143,7 +144,7 @@
             // costLabel
             // 
             this.costLabel.AutoSize = true;
-            this.costLabel.Location = new System.Drawing.Point(35, 217);
+            this.costLabel.Location = new System.Drawing.Point(50, 211);
             this.costLabel.Name = "costLabel";
             this.costLabel.Size = new System.Drawing.Size(28, 13);
             this.costLabel.TabIndex = 12;
@@ -152,7 +153,7 @@
             // requirementsListBox
             // 
             this.requirementsListBox.FormattingEnabled = true;
-            this.requirementsListBox.Location = new System.Drawing.Point(72, 241);
+            this.requirementsListBox.Location = new System.Drawing.Point(87, 235);
             this.requirementsListBox.Name = "requirementsListBox";
             this.requirementsListBox.Size = new System.Drawing.Size(247, 121);
             this.requirementsListBox.TabIndex = 13;
@@ -161,7 +162,7 @@
             // requirementsLabel
             // 
             this.requirementsLabel.AutoSize = true;
-            this.requirementsLabel.Location = new System.Drawing.Point(-3, 241);
+            this.requirementsLabel.Location = new System.Drawing.Point(12, 235);
             this.requirementsLabel.Name = "requirementsLabel";
             this.requirementsLabel.Size = new System.Drawing.Size(72, 13);
             this.requirementsLabel.TabIndex = 14;
@@ -174,7 +175,7 @@
             // 
             // addRequirementButton
             // 
-            this.addRequirementButton.Location = new System.Drawing.Point(72, 368);
+            this.addRequirementButton.Location = new System.Drawing.Point(87, 362);
             this.addRequirementButton.Name = "addRequirementButton";
             this.addRequirementButton.Size = new System.Drawing.Size(108, 23);
             this.addRequirementButton.TabIndex = 15;
@@ -184,7 +185,7 @@
             // 
             // removeRequirementButton
             // 
-            this.removeRequirementButton.Location = new System.Drawing.Point(186, 368);
+            this.removeRequirementButton.Location = new System.Drawing.Point(201, 362);
             this.removeRequirementButton.Name = "removeRequirementButton";
             this.removeRequirementButton.Size = new System.Drawing.Size(133, 23);
             this.removeRequirementButton.TabIndex = 16;
@@ -225,7 +226,7 @@
             // guidLabel
             // 
             this.guidLabel.AutoSize = true;
-            this.guidLabel.Location = new System.Drawing.Point(34, 13);
+            this.guidLabel.Location = new System.Drawing.Point(49, 7);
             this.guidLabel.Name = "guidLabel";
             this.guidLabel.Size = new System.Drawing.Size(29, 13);
             this.guidLabel.TabIndex = 20;
@@ -234,7 +235,7 @@
             // guidDataLabel
             // 
             this.guidDataLabel.AutoSize = true;
-            this.guidDataLabel.Location = new System.Drawing.Point(69, 13);
+            this.guidDataLabel.Location = new System.Drawing.Point(84, 7);
             this.guidDataLabel.Name = "guidDataLabel";
             this.guidDataLabel.Size = new System.Drawing.Size(31, 13);
             this.guidDataLabel.TabIndex = 21;
@@ -242,7 +243,7 @@
             // 
             // costTextBox
             // 
-            this.costTextBox.Location = new System.Drawing.Point(72, 214);
+            this.costTextBox.Location = new System.Drawing.Point(87, 208);
             this.costTextBox.Name = "costTextBox";
             this.costTextBox.Size = new System.Drawing.Size(247, 20);
             this.costTextBox.TabIndex = 22;
