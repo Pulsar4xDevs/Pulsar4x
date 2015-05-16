@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Pulsar4X.ECSLib
@@ -31,12 +32,39 @@ namespace Pulsar4X.ECSLib
         BasicLiving //ie Auroras infrustructure will have this ability. 
     }
 
-    public class FactionAbilitiesDB : BaseDataBlob
+    public class FactionAbilitiesDB : BaseDataBlob, INotifyPropertyChanged
     {
+        public int BasePlanetarySensorStrength
+        {
+            get { return _basePlanetarySensorStrength; }
+            set
+            {
+                if (value == _basePlanetarySensorStrength)
+                {
+                    return;
+                }
+                _basePlanetarySensorStrength = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public int BasePlanetarySensorStrength { get; set; }
+        private int _basePlanetarySensorStrength;
 
-        public float BaseGroundUnitStrengthBonus { get; set; }
+        public float BaseGroundUnitStrengthBonus
+        {
+            get { return _baseGroundUnitStrengthBonus; }
+            set
+            {
+                if (value == _baseGroundUnitStrengthBonus)
+                {
+                    return;
+                }
+                _baseGroundUnitStrengthBonus = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private float _baseGroundUnitStrengthBonus;
 
         public JDictionary<AbilityType, float> AbilityBonuses { get; set; }
 

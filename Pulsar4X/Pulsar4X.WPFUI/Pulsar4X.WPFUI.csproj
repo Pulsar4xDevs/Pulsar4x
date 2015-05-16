@@ -112,6 +112,9 @@
     <Compile Include="UserControls\Populations.xaml.cs">
       <DependentUpon>Populations.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UserControls\Races.xaml.cs">
+      <DependentUpon>Races.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UserControls\ShipDesign.xaml.cs">
       <DependentUpon>ShipDesign.xaml</DependentUpon>
     </Compile>
@@ -161,6 +164,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UserControls\Populations.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControls\Races.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

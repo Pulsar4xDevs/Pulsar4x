@@ -61,6 +61,8 @@
                 <Button Name="TBB_ShipDesign" Content="Ship Design" Click="TBB_Click"></Button>
                 <Separator/>
                 <Button Name="TBB_Intelligence" Content="Intelligence" Click="TBB_Click"></Button>
+                <Separator/>
+                <Button Name="TBB_Races" Content="Races" Click="TBB_Click"></Button>
             </ToolBar>
             <ToolBar Band="1" BandIndex="4">
                 <Button Name="TBB_DebugLog" Content="Debug Log" Click="TBB_Click"></Button>

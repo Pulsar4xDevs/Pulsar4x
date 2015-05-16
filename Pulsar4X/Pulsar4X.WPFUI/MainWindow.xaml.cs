@@ -207,6 +207,9 @@ namespace Pulsar4X.WPFUI
                 case "TBB_Intelligence":
                     control = new Intelligence();
                     break;
+                case "TBB_Races":
+                    control = new Races();
+                    break;
                 case "TBB_DebugLog":
                     control = new DebugLog();
                     break;
