@@ -78,7 +78,7 @@ namespace Pulsar4X.WPFUI
             if(fileDialog.ShowDialog() == true)
             {
                 string pathToFile = fileDialog.FileName;
-                UIComms.Instance.SendMessage(new Message(Message.MessageType.Load, pathToFile));
+                UIComms.Instance.SendMessage(new Message(MessageType.Load, pathToFile));
             }
             e.Handled = true;
         }
@@ -90,7 +90,7 @@ namespace Pulsar4X.WPFUI
             if(fileDialog.ShowDialog() == true)
             {
                 string pathToFile = fileDialog.FileName;
-                UIComms.Instance.SendMessage(new Message(Message.MessageType.Save, pathToFile));
+                UIComms.Instance.SendMessage(new Message(MessageType.Save, pathToFile));
             }
             e.Handled = true;
         }

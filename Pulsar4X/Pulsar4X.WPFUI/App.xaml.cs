@@ -38,11 +38,14 @@ namespace Pulsar4X.WPFUI
         {
             /* Stuff to replace */
             Game game = new Game();
-            Entity playerFaction = game.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>();
-            if (playerFaction == Entity.GetInvalidEntity())
-                playerFaction = FactionFactory.CreateFaction(game.GlobalManager, "playerFaction");
+            Guid playerFaction = game.GlobalManager.GetFirstEntityWithDataBlob<FactionDB>().Guid;
+            Entity factionEntity;
+            if (!game.GlobalManager.TryGetEntityByGuid(playerFaction, out factionEntity))
+            {
+                factionEntity = FactionFactory.CreateFaction(game.GlobalManager, "playerFaction");
+            }
             game.EngineComms.AddFaction(playerFaction);
-            Entity faction = game.EngineComms.FirstOrDefault().Faction; //just get the first one for now, till we've got ui to select.
+            Guid faction = game.EngineComms.FirstOrDefault().Faction; //just get the first one for now, till we've got ui to select.
             /* Stuff to replace */
 
             UIComms uicomms = new UIComms(game.EngineComms, faction);

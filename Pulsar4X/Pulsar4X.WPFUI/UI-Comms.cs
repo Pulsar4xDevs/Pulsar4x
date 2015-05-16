@@ -17,7 +17,7 @@ namespace Pulsar4X.WPFUI
         private Thread _mainLoopThread;
         private MessageBook _messageQueue;
 
-        public UIComms(EngineComms engineComms, Entity faction)
+        public UIComms(EngineComms engineComms, Guid faction)
         {
             Instance = this;
             _messageQueue = engineComms.RequestMessagebook(faction);
@@ -35,7 +35,7 @@ namespace Pulsar4X.WPFUI
 
                 switch(message.Type)
                 {
-                    case (Message.MessageType.GameStatusUpdate):
+                    case (MessageType.GameStatusUpdate):
                         break;
                 }
 
@@ -73,7 +73,7 @@ namespace Pulsar4X.WPFUI
             {
                 if (_mainLoopThread.ThreadState != ThreadState.Stopped)
                 {
-                    SendMessage(new Message(Message.MessageType.Quit, null));
+                    SendMessage(new Message(MessageType.Quit, null));
                     Thread.Sleep(100);
                     if (_mainLoopThread.ThreadState == ThreadState.Stopped)
                         _mainLoopThread.Abort();

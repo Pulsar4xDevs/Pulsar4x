@@ -77,7 +77,7 @@ namespace Pulsar4X.Tests
             
             // Check total memory usage.
             long totalMemory = endMemory - startMemory;
-            Assert.LessOrEqual(0, totalMemory); // Might be negative if GC cleans something up before.
+            Assert.LessOrEqual(totalMemory, 0); // Might be negative if GC cleans something up before.
 
             // note that because we do 1000 systems total time taken as milliseconds is the time for a single system, on average.
             string output = string.Format("Total run time: {0}s, per system: {1}ms. Totals orbits processed: {2}. Time required per orbit: {3}ns.",
