@@ -40,6 +40,18 @@ namespace Pulsar4X.ECSLib
         public event EntityManagerChangeEvent ChangedManagers;
 
         private static EntityManager _invalidManager;
+        public static Entity InvalidEntity
+        {
+            get
+            {
+                lock (lockObj)
+                {
+                    if (_invalidEntity == null)
+                        _invalidEntity = new Entity(Guid.Empty, _invalidManager);
+                    return _invalidEntity;
+                }
+            }
+        }
         private static Entity _invalidEntity;
 
         private static object lockObj = new object();
@@ -161,16 +173,6 @@ namespace Pulsar4X.ECSLib
             return manager.CreateEntity(dataBlobs);
         }
 
-        public static Entity GetInvalidEntity()
-        {
-            lock (lockObj)
-            {
-                if (_invalidEntity == null)
-                    _invalidEntity = new Entity(Guid.Empty, _invalidManager);
-                return _invalidEntity;
-            }
-        }
-
 #if DEBUG
         public override string ToString()
         {
@@ -197,7 +199,7 @@ namespace Pulsar4X.ECSLib
             Entity entity;
             Guid entityGuid = Guid.Parse(reader.Value.ToString());
             if (entityGuid == Guid.Empty)
-                return Entity.GetInvalidEntity();
+                return Entity.InvalidEntity;
             if (EntityManager.FindEntityByGuid(entityGuid, out entity))
                 return entity;
 

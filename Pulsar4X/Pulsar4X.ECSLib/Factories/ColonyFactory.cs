@@ -16,7 +16,7 @@ namespace Pulsar4X.ECSLib
 
             NameDB name = new NameDB(factionEntity, "somestring");
             blobs.Add(name);
-            ColonyInfoDB colonyInfoDB = new ColonyInfoDB(Entity.GetInvalidEntity(), 0, planetEntity);
+            ColonyInfoDB colonyInfoDB = new ColonyInfoDB(Entity.InvalidEntity, 0, planetEntity);
             blobs.Add(colonyInfoDB);
             InstallationsDB colonyInstalationsDB = new InstallationsDB();
             blobs.Add(colonyInstalationsDB);

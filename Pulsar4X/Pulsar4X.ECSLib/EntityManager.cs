@@ -364,7 +364,7 @@ namespace Pulsar4X.ECSLib
             lock (_entityLock)
             {
                 return _entities.Where((entity, i) => dataBlobType[i] != null)
-                                .DefaultIfEmpty(Entity.GetInvalidEntity())
+                                .DefaultIfEmpty(Entity.InvalidEntity)
                                 .FirstOrDefault();
             }
         }
@@ -567,7 +567,7 @@ namespace Pulsar4X.ECSLib
                 EntityManager manager;
                 if (!_globalGuidDictionary.TryGetValue(entityGuid, out manager))
                 {
-                    entity = Entity.GetInvalidEntity();
+                    entity = Entity.InvalidEntity;
                     return false;
                 }
 
@@ -602,7 +602,7 @@ namespace Pulsar4X.ECSLib
                     {
                         return true;
                     }
-                    entity = Entity.GetInvalidEntity();
+                    entity = Entity.InvalidEntity;
                     return false;
                 }
                 finally
@@ -618,7 +618,7 @@ namespace Pulsar4X.ECSLib
         /// <returns>True if entityID exists in this manager.</returns>
         public bool TryGetEntityByID(int entityID, out Entity entity)
         {
-            entity = Entity.GetInvalidEntity();
+            entity = Entity.InvalidEntity;
 
             lock (_entityLock)
             {
