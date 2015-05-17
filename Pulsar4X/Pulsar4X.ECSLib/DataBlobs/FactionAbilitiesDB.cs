@@ -29,7 +29,16 @@ namespace Pulsar4X.ECSLib
         DetectionThermal, //radar
         DetectionEM,    //radar
         Teraforming,
-        BasicLiving //ie Auroras infrustructure will have this ability. 
+        BasicLiving, //ie Auroras infrustructure will have this ability. 
+        //shipcomponent
+        ReducedSize,
+        LaunchMissileSize,
+        ReloadRateFromMag,
+        ReloadRateFromHanger,
+        MissileMagazine,
+
+
+
     }
 
     public class FactionAbilitiesDB : BaseDataBlob, INotifyPropertyChanged
