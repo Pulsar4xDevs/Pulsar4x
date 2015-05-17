@@ -184,7 +184,7 @@ namespace Pulsar4X.UI.SceenGraph
                                 _SensorContactElements.Remove(SCE);
                         }
 
-                        if (_SensorContactElements.ContainsKey(TaskGroup.BestEM.Id) == false)
+                        if (_SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false)
                         {
                             PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
 #warning all of these 10000.0's are related to the fact that distance is done by 10k km in Aurora.
@@ -194,10 +194,10 @@ namespace Pulsar4X.UI.SceenGraph
                             Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
                             SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Blue, TaskGroup.BestEM.Name, TaskGroup.BestEM, TaskGroup.BestEM.pSensorDef.componentType, ParentSceen);
-                            _SensorContactElements.Add(TaskGroup.BestEM.Id, NSE);
+                            _SensorContactElements.Add(TaskGroup.BestEM.pSensorDef.Id, NSE);
                         }
 
-                        if (_SensorContactElements.ContainsKey(TaskGroup.BestThermal.Id) == false)
+                        if (_SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false)
                         {
                             PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
                             double factor = Constants.Units.KmPerAu / 10000.0;
@@ -206,7 +206,7 @@ namespace Pulsar4X.UI.SceenGraph
                             Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
                             SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Red, TaskGroup.BestThermal.Name, TaskGroup.BestThermal, TaskGroup.BestThermal.pSensorDef.componentType, ParentSceen);
-                            _SensorContactElements.Add(TaskGroup.BestThermal.Id, NSE);
+                            _SensorContactElements.Add(TaskGroup.BestThermal.pSensorDef.Id, NSE);
                         }
 
 
@@ -218,7 +218,7 @@ namespace Pulsar4X.UI.SceenGraph
                             /// <summary>
                             /// This sensor survived the above cleanup, and is in the sensor contact element list, so don't re check whether it should be here.
                             /// </summary>
-                            if (_SensorContactElements.ContainsKey(Sensor.Id) == true)
+                            if (_SensorContactElements.ContainsKey(Sensor.aSensorDef.Id) == true)
                                 continue;
 
                             ActiveSensorDefTN SensorDef = Sensor.aSensorDef;
@@ -229,7 +229,7 @@ namespace Pulsar4X.UI.SceenGraph
                             Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
                             SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Turquoise, Sensor.Name, Sensor, Sensor.aSensorDef.componentType, ParentSceen);
-                            _SensorContactElements.Add(Sensor.Id, NSE);
+                            _SensorContactElements.Add(SensorDef.Id, NSE);
                         }
 
                         _LastSensorUpdateAck = TaskGroup.SensorUpdateAck;
