@@ -488,7 +488,7 @@ namespace Pulsar4X.UI.Handlers
                     /// </summary>
                     var entity = selected.Entity;
                     var etype = selected.EntityType;
-
+#warning handle secondary,tertiary, and order delays. also handle taskgroup split condition for move to contact orders if not already done so.
                     switch (etype)
                     {
 
@@ -505,7 +505,10 @@ namespace Pulsar4X.UI.Handlers
                             JumpPoint jp = (JumpPoint)entity;
                             NewOrder = new Order(selected_ordertype, -1, -1, 0, jp);
                             break;
-
+                        case SystemListObject.ListEntityType.Colonies:
+                            Population popTargetOfOrder = (Population)entity;
+                            NewOrder = new Order(selected_ordertype, -1, -1, 0, popTargetOfOrder);
+                            break;
                         case SystemListObject.ListEntityType.TaskGroups:
                             TaskGroupTN TargetOfOrder = (TaskGroupTN)entity;
                             NewOrder = new Order(selected_ordertype, -1, -1, 0, TargetOfOrder);
@@ -1063,6 +1066,11 @@ namespace Pulsar4X.UI.Handlers
             }
         }
 
+        /// <summary>
+        /// Add jump points to the available locations list.
+        /// </summary>
+        /// <param name="starsystem"></param>
+#warning check to see if jump point is detected eventually when grav survey is implemented
         private void AddJumpPointsToList(StarSystem starsystem)
         {
             foreach (JumpPoint jp in starsystem.JumpPoints)

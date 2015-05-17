@@ -95,7 +95,6 @@ namespace Pulsar4X.Entities
             /// <summary>
             /// YearsOfProduction here being greater than 5475852 means that it will take more than 2 Billion days, or around the 32 bit limit. so don't bother calculating time in that case.
             /// </summary>
-#warning magic number here.
             if (m_BuildCapcity != 0.0f && YearsOfProduction < Constants.Colony.TimerYearMax)
             {
                 DateTime EstTime = GameState.Instance.GameDateTime;
@@ -501,6 +500,16 @@ namespace Pulsar4X.Entities
         /// </summary>
         public BindingList<OrdnanceGroupTN> MissilesInFlight { get; set; }
 
+        /// <summary>
+        /// Has this population changes its sensor coverage? Building/moving(getting and taking)/destroying DSTS will cause this to increment. This is totally handled here in this function.
+        /// </summary>
+        private uint _SensorUpdateAck;
+        public uint _sensorUpdateAck
+        { 
+            get { return _SensorUpdateAck; }
+            set { _SensorUpdateAck = value; }
+        }
+
         #endregion
 
         /// <summary>
@@ -610,6 +619,8 @@ namespace Pulsar4X.Entities
 
             ShipsTargetting = new BindingList<ShipTN>();
             MissilesInFlight = new BindingList<OrdnanceGroupTN>();
+
+            _SensorUpdateAck = 0;
         }
 
         public override List<Constants.ShipTN.OrderType> LegalOrders(Faction faction)
@@ -674,6 +685,11 @@ namespace Pulsar4X.Entities
             CivilianPopulation = 500.0f;
 
             IsRefining = true;
+
+            /// <summary>
+            /// A DSTS was given to this population, so tell the UI to display it.
+            /// </summary>
+            _SensorUpdateAck++; 
         }
 
         /// <summary>
@@ -804,8 +820,52 @@ namespace Pulsar4X.Entities
                         Adjustment = Adjustment - 1.0f;
                     }
                     break;
+                case Installation.InstallationType.DeepSpaceTrackingStation:
+                    /// <summary>
+                    /// A DSTS was given to this population, so tell the UI to display it.
+                    /// </summary>
+                    _SensorUpdateAck++; 
+                    break;
             }
             Installations[Index].Number = Installations[Index].Number + increment;
+        }
+
+        /// <summary>
+        /// On loading an installation decrement the installation[].number, and handle other conditions such as potential sensor UI updates.
+        /// </summary>
+        /// <param name="iType">Type of installation/</param>
+        /// <param name="massToLoad">Total mass of the installation of type iType to take from the planet.</param>
+        public void LoadInstallation(Installation.InstallationType iType, int massToLoad)
+        {
+            Installations[(int)iType].Number =Installations[(int)iType].Number - (float)(massToLoad / Faction.InstallationTypes[(int)iType].Mass);
+            switch (iType)
+            {
+                case Installation.InstallationType.DeepSpaceTrackingStation:
+                    /// <summary>
+                    /// A DSTS was given to this population, so tell the UI to display it.
+                    /// </summary>
+                    _SensorUpdateAck++;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// When an installation is unloaded to this population run this function to handle incremented installation[].number and other conditions.
+        /// </summary>
+        /// <param name="iType">Type of installation</param>
+        /// <param name="massToUnload">Total mass of said installation to unload. this can result in fractional changes to installation[].number</param>
+        public void UnloadInstallation(Installation.InstallationType iType, int massToUnload)
+        {
+            Installations[(int)iType].Number = Installations[(int)iType].Number + (float)(massToUnload / Faction.InstallationTypes[(int)iType].Mass);
+            switch(iType)
+            {
+                case Installation.InstallationType.DeepSpaceTrackingStation:
+                    /// <summary>
+                    /// A DSTS was given to this population, so tell the UI to display it.
+                    /// </summary>
+                    _SensorUpdateAck++;
+                break;
+            }
         }
 
         /// <summary>
@@ -1308,6 +1368,16 @@ namespace Pulsar4X.Entities
                     if (InstCount == 0)
                     {
                         continue;
+                    }
+
+                    switch ((Installation.InstallationType)Inst)
+                    {
+                        case Installation.InstallationType.DeepSpaceTrackingStation:
+                            /// <summary>
+                            /// A DSTS was destroyed at this population, inform the UI to update the display.
+                            /// </summary>
+                            _SensorUpdateAck++; 
+                            break;
                     }
 
                     /// <summary>

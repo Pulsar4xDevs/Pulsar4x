@@ -1205,6 +1205,16 @@ namespace Pulsar4X.Entities.Components
         }
 
         /// <summary>
+        /// Ordnance groups never change their sensor status, but the check for this will need to be run once regardless.
+        /// </summary>
+        private uint _SensorUpdateAck;
+        public uint _sensorUpdateAck
+        {
+            get { return _SensorUpdateAck; }
+            set { _SensorUpdateAck = value; }
+        }
+
+        /// <summary>
         /// Constructor for missile groups.
         /// </summary>
         /// <param name="LaunchedFrom">TG this launched from. additional missiles may be added this tick but afterwards no more.</param>
@@ -1258,6 +1268,11 @@ namespace Pulsar4X.Entities.Components
             MissilesDestroyed = 0;
 
             OrdGroupsTargetting = new BindingList<OrdnanceGroupTN>();
+
+            /// <summary>
+            /// Tell the sensor contact element to determine what if any sensors should be displayed.
+            /// </summary>
+            _SensorUpdateAck = 1;
         }
 
         /// <summary>

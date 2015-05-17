@@ -7,6 +7,7 @@ using Pulsar4X.UI;
 using Pulsar4X.UI.GLUtilities;
 using OpenTK;
 using Pulsar4X.Entities;
+using Pulsar4X.Entities.Components;
 
 namespace Pulsar4X.UI.SceenGraph
 {
@@ -29,17 +30,29 @@ namespace Pulsar4X.UI.SceenGraph
         }
 
         /// <summary>
+        /// What type of sensor is this sensor element displaying?
+        /// </summary>
+        private ComponentTypeTN _SensorType;
+        public ComponentTypeTN _sensorType
+        {
+            get { return _SensorType; }
+            set { _SensorType = value; }
+        }
+
+        /// <summary>
         /// What sceen does this sensor element belong to?
         /// </summary>
-        private Sceen ParentSceen { get; set; }
+        private Sceen _ParentSceen { get; set; }
 
         //have to add new entry for GL Circle to draw sensor bubbles around taskgroups/populations/missile contacts
         //CircleElement has the circle in it already, but that might be inappropriate for what I want
         //SceenElement has the lable properly done.
 
-        public SensorElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, float a_fRadius, System.Drawing.Color a_oColor, String LabelText, GameEntity Ent, Sceen ParentSceenArg)
+        public SensorElement(GLEffect a_oDefaultEffect, Vector3 a_oPosition, float a_fRadius, System.Drawing.Color a_oColor, String LabelText, GameEntity Ent,  ComponentTypeTN SType, Sceen ParentSceenArg)
             : base()
         {
+            _ParentSceen = ParentSceenArg;
+
             _DisplayRadius = a_fRadius;
 
             m_oPrimaryPrimitive = new GLCircle(a_oDefaultEffect,
@@ -50,13 +63,17 @@ namespace Pulsar4X.UI.SceenGraph
 
             m_lPrimitives.Add(m_oPrimaryPrimitive);
 
-            
-            Vector3 LPos = new Vector3(0.0f, a_fRadius, 0.0f);
+            int LabelMid = LabelText.Length / 4;
+            float xAdjust = -LabelMid * (UIConstants.DEFAULT_TEXT_SIZE.X / _ParentSceen.ZoomSclaer);
+            float yAdjust = 10.0f / ParentSceenArg.ZoomSclaer;
+            Vector3 LPos = new Vector3(xAdjust, (a_fRadius + yAdjust), 0.0f);
             LPos = LPos + a_oPosition;
             Lable = new GLUtilities.GLFont(a_oDefaultEffect, LPos, UIConstants.DEFAULT_TEXT_SIZE, a_oColor, UIConstants.Textures.DEFAULT_GLFONT2, LabelText);
             Lable.Size = UIConstants.DEFAULT_TEXT_SIZE / ParentSceenArg.ZoomSclaer;
+            SetActualPosition(a_oPosition);
 
             SceenEntity = Ent;
+            _SensorType = SType;
         }
 
         public override void Render()
@@ -118,7 +135,10 @@ namespace Pulsar4X.UI.SceenGraph
             if (temp != null)
             {
                 temp.Position = a_v3Pos;
-                Vector3 LPos = new Vector3(0.0f, _DisplayRadius, 0.0f);
+                int LabelMid = Lable.Text.Length/4;
+                float xAdjust = -LabelMid * (UIConstants.DEFAULT_TEXT_SIZE.X / _ParentSceen.ZoomSclaer);
+                float yAdjust = 10.0f / _ParentSceen.ZoomSclaer;
+                Vector3 LPos = new Vector3(xAdjust, (_DisplayRadius + yAdjust), 0.0f);
                 Lable.Position = temp.Position + LPos;
 
                 /// <summary>
