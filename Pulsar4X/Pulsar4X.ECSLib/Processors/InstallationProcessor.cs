@@ -9,39 +9,36 @@ namespace Pulsar4X.ECSLib
     public static class InstallationProcessor
     {
         #region automaticEachTickStuff
-        private static int _timeSinceLastRun;
         private const int _timeBetweenRuns = 68400; //one terran day.
 
         public static void Initialize()
         {
-            _timeSinceLastRun = 0; 
         }
 
         public static void Process(List<StarSystem> systems, int deltaSeconds)
         {
-            _timeSinceLastRun += deltaSeconds;
-            if (_timeSinceLastRun >= _timeBetweenRuns)
+            foreach (var system in systems)
             {
-                foreach (Entity factionEntity in Game.Instance.GlobalManager.GetAllEntitiesWithDataBlob<FactionDB>())
+                system.EconLastTickRun += deltaSeconds;
+                if (system.EconLastTickRun >= _timeBetweenRuns)
                 {
-                    foreach (Entity colonyEntity in factionEntity.GetDataBlob<FactionDB>().Colonies)
+                    foreach (Entity colonyEntity in system.SystemManager.GetAllEntitiesWithDataBlob<ColonyInfoDB>())
                     {
-                        PerEconTic(colonyEntity, factionEntity);
+                        PerEconTic(colonyEntity);
                     }
+                    system.EconLastTickRun -= _timeBetweenRuns;
                 }
-                _timeSinceLastRun -= _timeBetweenRuns; 
             }
-
         }
 
         /// <summary>
-        /// this should be the main entry point for doing stuff.
+        /// 
         /// </summary>
         /// <param name="colonyEntity"></param>
         /// <param name="factionEntity"></param>
-        public static void PerEconTic(Entity colonyEntity, Entity factionEntity)
+        public static void PerEconTic(Entity colonyEntity)
         {
-            
+            Entity factionEntity = colonyEntity.GetDataBlob<ColonyInfoDB>().OwningEntity; 
             FactionAbilitiesDB factionAbilites = factionEntity.GetDataBlob<FactionAbilitiesDB>();
             TechDB factionTech = factionEntity.GetDataBlob<TechDB>();
             Employment(colonyEntity); //check if installations still work
