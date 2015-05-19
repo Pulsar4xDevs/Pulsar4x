@@ -13,7 +13,7 @@ namespace Pulsar4X.Tests
     {
         Game _game;
         MessageBook _messageBook;
-        Entity _fakeFaction = Entity.GetInvalidEntity();
+        Entity _fakeFaction = Entity.InvalidEntity;
 
         [SetUp]
         public void Init()

@@ -17,7 +17,7 @@ namespace Pulsar4X.ECSLib
 
             if (starName == null)
             {
-                starName = system.NameDB.Name[Entity.GetInvalidEntity()];
+                starName = system.NameDB.Name[Entity.InvalidEntity];
             }
 
             int starIndex = system.SystemManager.GetAllEntitiesWithDataBlob<StarInfoDB>().Count;
@@ -27,7 +27,7 @@ namespace Pulsar4X.ECSLib
             MassVolumeDB starMassVolumeDB = new MassVolumeDB(mass, MassVolumeDB.GetVolumeFromRadius(radius));
             StarInfoDB starInfoDB = new StarInfoDB {Age = age, Class = starClass, Luminosity = luminosity, SpectralType = spectralType, Temperature = temperature, LuminosityClass = luminosityClass, SpectralSubDivision = subDivision};
             PositionDB starPositionDB = new PositionDB();
-            NameDB starNameDB = new NameDB(Entity.GetInvalidEntity(), starName);
+            NameDB starNameDB = new NameDB(Entity.InvalidEntity, starName);
             OrbitDB starOrbitDB = new OrbitDB();
 
             return Entity.Create(system.SystemManager, new List<BaseDataBlob> {starOrbitDB, starMassVolumeDB, starInfoDB, starNameDB, starPositionDB});
@@ -123,7 +123,7 @@ namespace Pulsar4X.ECSLib
             foreach (Entity currentStar in stars)
             {
                 StarInfoDB currentStarInfo = currentStar.GetDataBlob<StarInfoDB>();
-                NameDB currentStarNameDB = new NameDB(Entity.GetInvalidEntity(), system.NameDB.Name[Entity.GetInvalidEntity()] + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
+                NameDB currentStarNameDB = new NameDB(Entity.InvalidEntity, system.NameDB.Name[Entity.InvalidEntity] + " " + (char)('A' + starIndex) + " " + currentStarInfo.SpectralType + currentStarInfo.SpectralSubDivision + currentStarInfo.LuminosityClass);
                 currentStar.SetDataBlob(currentStarNameDB);
 
                 if (previousStar == currentStar)

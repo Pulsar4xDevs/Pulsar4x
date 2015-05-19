@@ -163,7 +163,7 @@ namespace Pulsar4X.ECSLib
 
                 Entity newComet = CreateBaseBody(system);
                 NameDB cometName = newComet.GetDataBlob<NameDB>();
-                cometName.Name[Entity.GetInvalidEntity()] = starName.Name[Entity.GetInvalidEntity()] + " - Comet " + (i + 1);
+                cometName.Name[Entity.InvalidEntity] = starName.Name[Entity.InvalidEntity] + " - Comet " + (i + 1);
 
                 SystemBodyDB cometBodyDB = newComet.GetDataBlob<SystemBodyDB>();
                 cometBodyDB.Type = BodyType.Comet;
@@ -441,9 +441,9 @@ namespace Pulsar4X.ECSLib
         private static void FinalizeNameDB(StarSystem system, Entity body, Entity parent, int bodyCount)
         {
             // Set this body's name.
-            string parentName = parent.GetDataBlob<NameDB>().Name[Entity.GetInvalidEntity()];
+            string parentName = parent.GetDataBlob<NameDB>().Name[Entity.InvalidEntity];
             string bodyName = parentName + " - " + bodyCount;
-            body.GetDataBlob<NameDB>().Name.Add(Entity.GetInvalidEntity(), bodyName);
+            body.GetDataBlob<NameDB>().Name.Add(Entity.InvalidEntity, bodyName);
         }
 
         private static void FinalizeMassVolumeDB(StarSystem system, Entity body)
