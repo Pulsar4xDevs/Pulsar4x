@@ -170,6 +170,16 @@ namespace Pulsar4X.UI.SceenGraph
         public GLEffect SceenDefaultEffect { get; set; }
 
         /// <summary>
+        /// Should Active Sensors be shown in the display.
+        /// </summary>
+        public bool ShowActives { get; set; }
+
+        /// <summary>
+        /// Should Passive Sensors be shown in the display.
+        /// </summary>
+        public bool ShowPassives { get; set; }
+
+        /// <summary>
         /// Default Constructor.
         /// </summary>
         public Sceen(Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -178,6 +188,9 @@ namespace Pulsar4X.UI.SceenGraph
             m_v3ViewOffset = Vector3.Zero;
 
             ParentSystemMap = ParentSM;
+
+            ShowActives = true;
+            ShowPassives = true;
         }
 
         public Sceen(StarSystem a_oStarSystem, GLEffect a_oDefaultEffect, Pulsar4X.UI.Handlers.SystemMap ParentSM)
@@ -188,6 +201,9 @@ namespace Pulsar4X.UI.SceenGraph
 
             ParentSystemMap = ParentSM;
             SceenDefaultEffect = a_oDefaultEffect;
+
+            ShowActives = true;
+            ShowPassives = true;
 
             // Set Sceen Vars:
             m_oSceenEntity = a_oStarSystem;
@@ -621,6 +637,36 @@ namespace Pulsar4X.UI.SceenGraph
                 }
             }
 
+        }
+
+        /// <summary>
+        /// Public member for setting whether active sensors should be displayed.
+        /// </summary>
+        /// <param name="show">true or false</param>
+        public void SetShowActives(bool show)
+        {
+            ShowActives = show;
+            foreach (SceenElement oElement in m_lElements)
+            {
+                ContactElement cElement = oElement as ContactElement;
+                if (cElement != null)
+                    cElement.ForceSensorUpdate();
+            }
+        }
+
+        /// <summary>
+        /// Public member for setting whether passive sensors should be displayed.
+        /// </summary>
+        /// <param name="show">true or false</param>
+        public void SetShowPassives(bool show)
+        {
+            ShowPassives = show;
+            foreach (SceenElement oElement in m_lElements)
+            {
+                ContactElement cElement = oElement as ContactElement;
+                if (cElement != null)
+                    cElement.ForceSensorUpdate();
+            }
         }
 
         /// <summary>

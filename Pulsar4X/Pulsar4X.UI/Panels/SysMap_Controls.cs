@@ -108,6 +108,7 @@ namespace Pulsar4X.UI.Panels
             }
         }
 
+        #region Waypoint Tab
         /// <summary>
         /// Create a new map marker button.
         /// </summary>
@@ -140,6 +141,66 @@ namespace Pulsar4X.UI.Panels
                 return m_oMapMarkersListBox;
             }
         }
+        #endregion
+
+        #region Sensors Tab
+
+        /// <summary>
+        /// Attempt to increment time by specified increment.
+        /// </summary>
+        public Button PlayerIncrementButton
+        {
+            get { return m_oPlayerIncrementButton; }
+        }
+
+        /// <summary>
+        /// Show thermal detection ranges for currently emitted thermal signatures?
+        /// </summary>
+        public CheckBox ThermalSignatureDetectionCheckBox
+        {
+            get { return m_oThermalSignatureDetectionCheckBox; }
+        }
+
+        /// <summary>
+        /// Show Passive sensors?
+        /// </summary>
+        public CheckBox ShowPassiveSensorsCheckBox
+        {
+            get { return m_oShowPassiveSensorsCheckBox; }
+        }
+
+        /// <summary>
+        /// Show Active Sensors?
+        /// </summary>
+        public CheckBox ShowActiveSensorsCheckBox
+        {
+            get { return m_oShowActiveSensorsCheckBox; }
+        }
+
+        /// <summary>
+        /// What signature should the display show passive detection for?
+        /// </summary>
+        public TextBox DetectSignatureTextBox
+        {
+            get { return m_oDetectSignatureTextBox; }
+        }
+
+        /// <summary>
+        /// What thermal signature detection strength should be used for currently emitted thermal signatures(ships with engines).
+        /// </summary>
+        public TextBox ThermalSignatureTextBox
+        {
+            get { return m_oThermalSignatureTextBox; }
+        }
+
+        /// <summary>
+        /// What time increment should Pulsar attempt to run?
+        /// </summary>
+        public TextBox UserIncrementTextBox
+        {
+            get { return m_oUserIncrementTextBox; }
+        }
+        #endregion
 
         private ToolTip m_oToolTip;
 

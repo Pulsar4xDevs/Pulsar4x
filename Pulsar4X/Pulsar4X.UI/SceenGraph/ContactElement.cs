@@ -122,6 +122,14 @@ namespace Pulsar4X.UI.SceenGraph
             _DefaultEffect = a_oDefaultEffect;
         }
 
+        /// <summary>
+        /// Force the Sensor update for this contact.
+        /// </summary>
+        public void ForceSensorUpdate()
+        {
+            _LastSensorUpdateAck = 0;
+        }
+
         public override void Render()
         {
             switch (m_oSystemContect.SSEntity)
@@ -144,7 +152,7 @@ namespace Pulsar4X.UI.SceenGraph
                             {
                                 case ComponentTypeTN.ActiveSensor:
                                     ActiveSensorTN aSensor = (SCE.Value.SceenEntity as ActiveSensorTN);
-                                    if (aSensor.isActive == false || aSensor.isDestroyed == true)
+                                    if (aSensor.isActive == false || aSensor.isDestroyed == true || ParentSceen.ShowActives == false)
                                     {
                                         SensorRemoveList.Add(SCE.Key);
                                     }
@@ -154,7 +162,7 @@ namespace Pulsar4X.UI.SceenGraph
                                     /// <summary>
                                     /// Remove this sensor if it is destroyed, or if it isn't the current best thermal/em sensor. if a sensor is destroyed it should be replaced as the best em/thermal.
                                     /// </summary>
-                                    if (pSensor.isDestroyed == true)
+                                if (pSensor.isDestroyed == true || ParentSceen.ShowPassives == false)
                                     {
                                         SensorRemoveList.Add(SCE.Key);
                                     }
@@ -184,7 +192,7 @@ namespace Pulsar4X.UI.SceenGraph
                                 _SensorContactElements.Remove(SCE);
                         }
 
-                        if (_SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false)
+                        if (_SensorContactElements.ContainsKey(TaskGroup.BestEM.pSensorDef.Id) == false && ParentSceen.ShowPassives == true)
                         {
                             PassiveSensorDefTN pSensorDef = TaskGroup.BestEM.pSensorDef;
 #warning all of these 10000.0's are related to the fact that distance is done by 10k km in Aurora.
@@ -197,7 +205,7 @@ namespace Pulsar4X.UI.SceenGraph
                             _SensorContactElements.Add(TaskGroup.BestEM.pSensorDef.Id, NSE);
                         }
 
-                        if (_SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false)
+                        if (_SensorContactElements.ContainsKey(TaskGroup.BestThermal.pSensorDef.Id) == false && ParentSceen.ShowPassives == true)
                         {
                             PassiveSensorDefTN pSensorDef = TaskGroup.BestThermal.pSensorDef;
                             double factor = Constants.Units.KmPerAu / 10000.0;
@@ -213,23 +221,26 @@ namespace Pulsar4X.UI.SceenGraph
                         /// <summary>
                         /// Check for newly activated sensors.
                         /// </summary>
-                        foreach (ActiveSensorTN Sensor in TaskGroup.ActiveSensorQue)
+                        if (ParentSceen.ShowActives == true)
                         {
-                            /// <summary>
-                            /// This sensor survived the above cleanup, and is in the sensor contact element list, so don't re check whether it should be here.
-                            /// </summary>
-                            if (_SensorContactElements.ContainsKey(Sensor.aSensorDef.Id) == true)
-                                continue;
+                            foreach (ActiveSensorTN Sensor in TaskGroup.ActiveSensorQue)
+                            {
+                                /// <summary>
+                                /// This sensor survived the above cleanup, and is in the sensor contact element list, so don't re check whether it should be here.
+                                /// </summary>
+                                if (_SensorContactElements.ContainsKey(Sensor.aSensorDef.Id) == true)
+                                    continue;
 
-                            ActiveSensorDefTN SensorDef = Sensor.aSensorDef;
+                                ActiveSensorDefTN SensorDef = Sensor.aSensorDef;
 
-                            double factor = Constants.Units.KmPerAu / 10000.0;
-                            double AURadius = (double)SensorDef.maxRange / factor;
+                                double factor = Constants.Units.KmPerAu / 10000.0;
+                                double AURadius = (double)SensorDef.maxRange / factor;
 
-                            Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
+                                Vector3 TGPos = new Vector3((float)TaskGroup.Contact.Position.X, (float)TaskGroup.Contact.Position.Y, 0.0f);
 
-                            SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Turquoise, Sensor.Name, Sensor, Sensor.aSensorDef.componentType, ParentSceen);
-                            _SensorContactElements.Add(SensorDef.Id, NSE);
+                                SensorElement NSE = new SensorElement(_DefaultEffect, TGPos, (float)AURadius, System.Drawing.Color.Turquoise, Sensor.Name, Sensor, Sensor.aSensorDef.componentType, ParentSceen);
+                                _SensorContactElements.Add(SensorDef.Id, NSE);
+                            }
                         }
 
                         _LastSensorUpdateAck = TaskGroup.SensorUpdateAck;
@@ -237,12 +248,12 @@ namespace Pulsar4X.UI.SceenGraph
                     break;
                 case StarSystemEntityType.Population:
                     Population CurrentPop = (m_oSystemContect.Entity as Population);
-                    if (CurrentPop._sensorUpdateAck != _LastSensorUpdateAck)
+                    /// <summary>
+                    /// Populations only have one sensor element.
+                    /// </summary>
+                    _SensorContactElements.Clear();
+                    if (CurrentPop._sensorUpdateAck != _LastSensorUpdateAck && ParentSceen.ShowPassives == true)
                     {
-                        /// <summary>
-                        /// Populations only have one sensor element.
-                        _SensorContactElements.Clear();
-
                         /// <summary>
                         /// This calculates the default detection distance for strength 1000 signatures.
                         /// </summary>
@@ -268,13 +279,15 @@ namespace Pulsar4X.UI.SceenGraph
                 case StarSystemEntityType.Missile:
                     OrdnanceGroupTN MissileGroup = (m_oSystemContect.Entity as OrdnanceGroupTN);
                     /// <summary>
-                    /// This ordnance group was just created, so check whether or not any sensors need to be displayed.
+                    /// This ordnance group was just created, so check whether or not any sensors need to be displayed. Or the display could request that passives or actives not be displayed.
                     /// </summary>
                     if (_LastSensorUpdateAck != MissileGroup._sensorUpdateAck)
                     {
+                        _SensorContactElements.Clear();
+
                         OrdnanceDefTN OrdDef = MissileGroup.missiles[0].missileDef;
 
-                        if (OrdDef.aSD != null)
+                        if (OrdDef.aSD != null && ParentSceen.ShowActives == true)
                         {
                             double factor = Constants.Units.KmPerAu / 10000.0;
                             double AURadius = (double)OrdDef.aSD.maxRange / factor;
@@ -283,10 +296,10 @@ namespace Pulsar4X.UI.SceenGraph
 
                              SensorElement NSE = new SensorElement(_DefaultEffect, MGPos, (float)AURadius, System.Drawing.Color.Turquoise, 
                                                                    MissileGroup.missiles[0].missileDef.Name + " Active Sensor", MissileGroup, ComponentTypeTN.TypeCount, ParentSceen);
-                            _SensorContactElements.Add(MissileGroup.Id, NSE);
+                             _SensorContactElements.Add(OrdDef.aSD.Id, NSE);
                         }
 
-                        if (OrdDef.tHD != null)
+                        if (OrdDef.tHD != null && ParentSceen.ShowPassives == true)
                         {
                             double factor = Constants.Units.KmPerAu / 10000.0;
                             double AURadius = (double)OrdDef.tHD.range / factor;
@@ -295,10 +308,10 @@ namespace Pulsar4X.UI.SceenGraph
 
                             SensorElement NSE = new SensorElement(_DefaultEffect, MGPos, (float)AURadius, System.Drawing.Color.Red,
                                                                   MissileGroup.missiles[0].missileDef.Name + " Thermal Sensor", MissileGroup, ComponentTypeTN.TypeCount, ParentSceen);
-                            _SensorContactElements.Add(MissileGroup.Id, NSE);
+                            _SensorContactElements.Add(OrdDef.tHD.Id, NSE);
                         }
 
-                        if (OrdDef.eMD != null)
+                        if (OrdDef.eMD != null && ParentSceen.ShowPassives == true)
                         {
                             double factor = Constants.Units.KmPerAu / 10000.0;
                             double AURadius = (double)OrdDef.eMD.range / factor;
@@ -307,7 +320,7 @@ namespace Pulsar4X.UI.SceenGraph
 
                             SensorElement NSE = new SensorElement(_DefaultEffect, MGPos, (float)AURadius, System.Drawing.Color.Blue,
                                                                   MissileGroup.missiles[0].missileDef.Name + " EM Sensor", MissileGroup, ComponentTypeTN.TypeCount, ParentSceen);
-                            _SensorContactElements.Add(MissileGroup.Id, NSE);
+                            _SensorContactElements.Add(OrdDef.eMD.Id, NSE);
                         }
 
                         _LastSensorUpdateAck = MissileGroup._sensorUpdateAck;
